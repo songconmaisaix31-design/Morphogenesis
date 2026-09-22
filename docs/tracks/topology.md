@@ -8,9 +8,11 @@ exercise real calls to this local implementation, but do not prove a model,
 remote interface, or task run is live.
 
 The update rule is the project heuristic
-`D = (1 - lambda) * D + alpha * Q * s`, where `s` is `+1` for success and `-1`
-for failure.  It makes no claim of convergence, optimality, or automatic
-topology growth.
+`D = (1 - lambda) * D + alpha * Q * s`, where `s` is the observed binary
+success signal (`1` for success, `0` for failure). A failure therefore lowers
+a positive weight by the same decay term; it is not a hidden negative-reward
+variant of the formula. It makes no claim of convergence, optimality, or
+automatic topology growth.
 
 ## T2 API and call order
 
@@ -51,16 +53,26 @@ both duplicate dimensions do not reward twice.
 
 Only explicitly configured directed `Connection(src: AgentId, dst: AgentId)`
 objects can be selected or updated.  `candidate_connections(targets)` merely
-returns currently missing, distinct-target candidates in caller order;
+returns currently missing, distinct-target candidates in caller order,
+deduplicated by target instance;
 `add_connection(candidate)` is the separate, explicit admission step.  Thus
 updating an existing edge never claims to create a new edge.
 
 Finite updates do not imply a link becomes zero or disappears.  `prune()`
 requires all of: weight below `prune_threshold`, at least
-`low_activity_window` explicit `advance_idle_window()` calls, and preservation
-of `min_active_outgoing`; `required=True` links (including required review
-dependencies) are never pruned for low weight.
+`low_activity_window` explicit `advance_idle_window()` calls (each decays an
+active edge once by `1 - lambda`), and preservation of `min_active_outgoing`;
+`required=True` links (including required review dependencies) are never
+pruned for low weight.
 
 All policy and connection numeric fields use frozen Pydantic contracts with
 `allow_inf_nan=False` plus nonnegative/positive field bounds.  No graph
 framework, persistence, scheduler, mock, or metabolism behavior is introduced.
+
+## Lifecycle boundary
+
+An engine instance is per run and intentionally in-memory. Its duplicate sets
+are only valid for that process lifetime: a resumed T2 run must rebuild the
+engine from its durable event/result history and replay already handled
+feedback before accepting new feedback. This module does not claim cross-
+process idempotence or persistence.

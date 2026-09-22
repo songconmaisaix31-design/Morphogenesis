@@ -1,8 +1,11 @@
 """A deliberately small in-memory implementation of the topology contract.
 
 The update ``D = (1 - lambda) * D + alpha * Q * s`` is a routing heuristic,
-not a convergence or optimality claim.  In particular, it only updates an
-existing connection; it never creates a connection from feedback.
+not a convergence or optimality claim.  ``s`` is the observed binary success
+signal (one for success, zero for failure); failures lower a positive weight
+through the same decay term rather than through an undocumented penalty term.
+In particular, an update only affects an existing connection and never creates
+one from feedback.
 """
 
 from __future__ import annotations
@@ -145,10 +148,16 @@ class TopologyEngine:
         return changed
 
     def advance_idle_window(self) -> None:
-        """Advance the explicit low-activity window; this does not prune."""
+        """Advance the explicit low-activity window and decay each active link.
+
+        This is deliberately separate from :meth:`prune`, so finite inactivity
+        never silently removes a connection.  A caller decides when an idle
+        window has elapsed, then explicitly invokes pruning if appropriate.
+        """
 
         for edge in self._edges.values():
             if edge.active:
+                edge.weight *= 1.0 - self.policy.decay_lambda
                 edge.idle_windows += 1
 
     def prune(self) -> list[Connection]:
@@ -184,11 +193,17 @@ class TopologyEngine:
         an existing connection never creates candidate or live connections.
         """
 
-        return [
-            Connection(src=self.source, dst=target, weight=self.policy.candidate_weight)
-            for target in targets
-            if target != self.source and target not in self._edges
-        ]
+        candidates: list[Connection] = []
+        seen_targets: set[AgentId] = set()
+        for target in targets:
+            if target in seen_targets:
+                continue
+            seen_targets.add(target)
+            if target != self.source and target not in self._edges:
+                candidates.append(
+                    Connection(src=self.source, dst=target, weight=self.policy.candidate_weight)
+                )
+        return candidates
 
     def add_connection(self, connection: Connection) -> None:
         """Explicitly install a candidate after the caller's policy decision."""
@@ -212,7 +227,7 @@ class TopologyEngine:
             raise ValueError("feedback target has no configured connection")
         if not edge.active:
             raise ValueError("feedback target connection is inactive")
-        signal = 1.0 if success else -1.0
+        signal = 1.0 if success else 0.0
         edge.weight = max(
             0.0,
             (1.0 - self.policy.decay_lambda) * edge.weight
