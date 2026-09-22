@@ -49,6 +49,28 @@ function stateCards(acceptance) {
   });
 }
 
+/* Big-number fade: a 300ms CSS animation, only when the tracked value truly
+   changes between polls. First render and steady 1s polling never animate;
+   prefers-reduced-motion skips it. Displayed values are never altered. */
+const bigNumberValues = new Map();
+function flashNumber(element) {
+  element.classList.remove("num-changed");
+  void element.offsetWidth;
+  element.classList.add("num-changed");
+}
+function bigNumberChanged(id, next) {
+  const value = String(next);
+  const prev = bigNumberValues.get(id);
+  bigNumberValues.set(id, value);
+  return prev !== undefined && prev !== value;
+}
+function setBigNumber(id, next) {
+  const element = byId(id);
+  const value = String(next);
+  if (bigNumberChanged(id, value) && !reducedMotion()) flashNumber(element);
+  if (element.textContent !== value) element.textContent = value;
+}
+
 function matchingPipe(pipes, current) {
   return pipes.find((pipe) => pipe.src?.role === current.src?.role && pipe.src?.instance === current.src?.instance && pipe.dst?.role === current.dst?.role && pipe.dst?.instance === current.dst?.instance);
 }
@@ -108,7 +130,7 @@ function geneFacts(current, prior) {
   const geneList = byId("story-genes"); clear("story-genes");
   const genes = current.genes ?? [];
   const activeCount = genes.filter((gene) => gene.archived_at === null || gene.archived_at === undefined).length;
-  text("story-gene-count", genes.length ? activeCount : (current.genes ? 0 : "未知"));
+  setBigNumber("story-gene-count", genes.length ? activeCount : (current.genes ? 0 : "未知"));
   if (!genes.length) { append(geneList, "p", "尚无 GeneView 快照"); return; }
   const priorGenes = new Map((prior?.genes ?? []).map((gene) => [`${gene.ref?.gene_id}@${gene.ref?.version ?? 1}`, gene]));
   genes.forEach((gene) => {
@@ -149,8 +171,9 @@ function rehearsalBoard(rehearsal) {
   if (!rehearsal) {
     text("rehearsal-mode", "尚未加载彩排快照；不展示预设通过结果。");
     text("header-members", "未知"); text("header-round", "未知");
-    text("metric-tokens", "未知"); text("story-gene-count", "未知");
+    setBigNumber("metric-tokens", "未知"); setBigNumber("story-gene-count", "未知");
     text("story-question", "未加载"); text("story-question-detail", "等待实际题目、已知失败点与来源。");
+    if (bigNumberChanged("story-checkpoint-rate", "未加载") && !reducedMotion()) flashNumber(byId("story-checkpoint-rate"));
     text("story-checkpoint-rate", "未加载"); clear("story-checkpoints"); append(byId("story-checkpoints"), "li", "尚无独立 checkpoint 快照");
     clear("story-pipes"); append(byId("story-pipes"), "p", "尚无管道快照"); showEmpty("story-pipe-chart", "story-pipe-empty", "尚无管道快照");
     text("story-offline-member", "未发生 / 未加载"); text("story-offline-reason", "下线原因和恢复 checkpoint 均须来自实际快照。");
@@ -172,7 +195,7 @@ function rehearsalBoard(rehearsal) {
   text("header-round", taskId.startsWith("recovery-") ? "2 · 恢复" : taskId.startsWith("repair-") ? "1 · 修复" : "未知");
   const taskResult = (current.results ?? []).find((result) => result.task_id === current.task_id);
   const tokens = taskResult?.usage?.tokens;
-  text("metric-tokens", Number.isFinite(tokens) ? tokens : "未知");
+  setBigNumber("metric-tokens", Number.isFinite(tokens) ? tokens : "未知");
 
   const recoveryTask = taskId.startsWith("recovery-");
   text("story-question", recoveryTask ? "恢复任务（新样例）" : "首次修复任务"); byId("story-question").title = taskId;
@@ -181,9 +204,12 @@ function rehearsalBoard(rehearsal) {
   const checkpointList = byId("story-checkpoints"); clear("story-checkpoints");
   const rateElement = byId("story-checkpoint-rate");
   if (!current.checkpoints) {
+    if (bigNumberChanged("story-checkpoint-rate", "未判定") && !reducedMotion()) flashNumber(rateElement);
     text("story-checkpoint-rate", "未判定"); append(checkpointList, "li", "尚无独立 checkpoint 快照");
   } else {
     const checks = current.checkpoints;
+    const rateValue = `${checks.passed_count}/${checks.total} · ${(checks.ratio * 100).toFixed(0)}%`;
+    const rateChanged = bigNumberChanged("story-checkpoint-rate", rateValue);
     // Giant mono number stays "passed/total"; the percentage follows in small
     // type so the mandated clamp size never wraps inside the Board.
     const big = document.createElement("span"); big.textContent = `${checks.passed_count}/${checks.total}`;
@@ -194,6 +220,7 @@ function rehearsalBoard(rehearsal) {
       if (board && !reducedMotion()) { board.classList.add("checkpoint-pulse"); window.setTimeout(() => board.classList.remove("checkpoint-pulse"), 1000); }
     }
     rateElement.replaceChildren(big, pct);
+    if (rateChanged && !reducedMotion()) flashNumber(rateElement);
     checks.checks.forEach((check) => append(checkpointList, "li", `${check.name}：${check.passed === true ? "通过" : check.passed === false ? "失败" : "待判定"}`, `check-${String(check.passed)}`));
   }
 

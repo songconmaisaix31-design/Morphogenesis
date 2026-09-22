@@ -132,3 +132,10 @@
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; }
 }
+
+/* Big-number fade on real value changes only (300ms, native CSS animation). */
+@keyframes morph-num-change { from { opacity: 0.35; } to { opacity: 1; } }
+.num-changed { animation: morph-num-change 0.3s ease-out 1; }
+@media (prefers-reduced-motion: reduce) {
+  .num-changed { animation: none; }
+}
