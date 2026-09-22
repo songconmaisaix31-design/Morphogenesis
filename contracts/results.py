@@ -57,6 +57,8 @@ class TaskResult(Contract):
             raise ValueError("result and acceptance provenance must match")
         if self.provenance == "replay" and not self.original_run_uri:
             raise ValueError("replay requires original_run_uri")
+        if self.provenance == "replay" and self.original_run_uri != self.acceptance.original_run_uri:
+            raise ValueError("result and acceptance original_run_uri must match")
         if self.verdict.passed is True and self.verdict.reviewer == self.attempt.agent:
             raise ValueError("executor cannot independently verify its own work")
         if self.status == "succeeded" and (

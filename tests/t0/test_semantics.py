@@ -144,3 +144,21 @@ def test_runtime_cost_rejects_nonfinite(amount: float) -> None:
         RunConfig(run_id="r", workspace="work", writable_paths=["sample.py"], max_cost_usd=amount)
     with pytest.raises(ValidationError):
         Usage(cost_usd=amount)
+
+
+def test_replay_result_and_acceptance_bind_same_original_run(tmp_path: Path) -> None:
+    acceptance = Acceptance(provenance="replay", original_run_uri="file:///original-a")
+    fields = {
+        "run_id": "replay-run", "task_id": "repair", "attempt": ATTEMPT,
+        "status": "pending_review", "provenance": "replay", "acceptance": acceptance,
+        "original_run_uri": "file:///original-a",
+    }
+    result = TaskResult.model_validate(fields)
+    with pytest.raises(ValidationError, match="original_run_uri"):
+        TaskResult.model_validate(fields | {"original_run_uri": "file:///original-b"})
+    store = SQLiteStore(tmp_path / "replay.db")
+    store.save_result(result)
+    assert store.get_result("replay-run", ATTEMPT) == result
+    with pytest.raises(ValidationError, match="original_run_uri"):
+        store.save_result(result.model_copy(update={"original_run_uri": "file:///original-b"}))
+    store.close()
