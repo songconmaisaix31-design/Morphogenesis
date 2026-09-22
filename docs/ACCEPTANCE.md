@@ -1,5 +1,24 @@
 # 验收矩阵
 
+## Kimi Stack 前端重塑与 7527 交接（2026-09-22）
+
+Kimi F 分支 `morph-frontend-stack` / `29c5e3de79da0d7bf27f4fb0847e2902b590730e` 完成产品实现与返修；独立 I 分支 `morph-frontend-stack-integration` / `4f9fb0b6476a97ff80a30f6a782f3ce9e4723463` 普通合并并验收，均已推送并核对远端。主线以 fast-forward 接收。复用 Hugo Theme Stack v4.0.3 / `3e123a30b79b5d52a3a8e88a9dd678fcfd28e418`，GPL-3.0-only、Tabler Icons / hamburgers MIT 文本及来源随源码和 wheel 分发；参考站精确部署版本未知，未迁入其个人内容。
+
+| 验证 | 结果 |
+|---|---|
+| `PY -m pytest tests/t5 -q` | 11 passed |
+| `node --test tests/integration/test_browser_options.cjs tests/integration/test_observer_control.cjs tests/integration/test_operator_enter.cjs` | 31 passed |
+| `check_stack_layout.cjs` / `check_stack_behavior.cjs` | 1366×768、1920×1080、390×844 明暗、导航、键盘、主题持久化、轮询、503/空态复原、拓扑边界通过；0 JS pageerror、0 外部请求 |
+| `check_rehearsal_stages.cjs` | 明确 mock 的 19 阶段 × 双桌面，38 帧通过，桌面 Gene 台账首屏约束保留 |
+| `PY -m build` / `tools/check_distribution.py --site-dir ... --check-node` | sdist/wheel、11 个安装包、资源、独立验证器和 Node 桥通过；CSS 与许可证入包字节一致 |
+| 第五轮原证据只读审计 | 29 个文件的 SHA-256、大小、纳秒 mtime 与文件集合不变 |
+
+完整命令、环境变量和截图路径见 [I 集成报告](tracks/frontend-stack-integration.md)，实现说明见 [F 报告](tracks/frontend-stack.md)。协调者核验 7527 原为空闲后，以已验收 I 源码启动 `python -u -m viz.server --port 7527 --rehearsal C:/Users/DW/AppData/Local/Temp/morph-rehearsal-40f04885b37e489fa3ea1a04f61a984d/rehearsal.json --replay`。HTTP API 返回 replay 和 `passed / not_run / not_run`，已在 Orca 打开本机入口；不承诺跨宿主退出常驻。
+
+协调者对实际 7527 入口追加 `check_rehearsal_layout.cjs` 双桌面检查并亲看 1366 截图：3 节点 / 3 标签，无裁切、相交或溢出；产物在 I worktree 的 `.runtime/stack-handoff-final-ready/`。初次调用漏设脚本要求的 `MORPH_PLAYWRIGHT`，在页面检查前报 `ERR_INVALID_ARG_TYPE`；补齐既有 Playwright / Chromium 路径后检查通过，没有修改产品代码。
+
+本轮为 contract_local、明确 mock 与只读 replay，没有新增 task_live、付费网关彩排或 Hub 发布。未重跑 Python 全仓测试或 CI，未新增其它平台字体验收；Node 桥安装验证依赖本地 npm 依赖，wheel 不包含 node_modules。物理投影按用户要求不再是本机单屏的前置条件。
+
 ## EvoMap 首次绑定与免费 Gene 实取审查（2026-09-22）
 
 用户明确首次注册并完成网页绑定后，单次 authenticated heartbeat 返回 HTTP 200、claimed=true、owner 存在；首次 Agent，Free / Lv0 / 0 credits。按用户对具体资产的确认，于服务端响应时间 **2026-09-22 19:09:17 +08:00** 通过官方直接 A2A 路径执行一次 `POST https://evomap.ai/a2a/fetch`，payload 仅含批准的 asset_ids，没有自动重试。返回 HTTP 200、mode=targeted、count=1、credits_deducted=0。这是**真实 Hub 定向获取**证据，区别于上一节插件 stub 测试；并非通过 Evolver Proxy，也不代表项目 HubClient 已完成生产接入。

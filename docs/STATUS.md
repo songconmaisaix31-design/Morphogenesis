@@ -1,10 +1,12 @@
 # 开发状态
 
-## 当前开发：Kimi 实现 Stack 前端重塑（2026-09-22）
+## 最新完成：Kimi Stack 前端已集成并启动 7527（2026-09-22）
 
-用户明确保留拓扑，外围采用 `davidwang.space` 的 Hugo 模板。计划提交 `0fe307a32032993386afe876b27a3b74cf5aa52e` 已推送；Orca Run `run_982e98c53b9f`，协调 terminal `term_f835f335-f1c6-424b-b119-bb299acaa555`。F 在独立 worktree `morph-frontend-stack` / 同名分支，由 Kimi Code 0.43.1、实际 K3 thinking high 实现，session `session_b4a6ad0c-3fc4-4df3-8ef9-3f3f725da760`，terminal `term_19fbd0f3-6bee-4499-9394-ea2b0fb97f57`；Task `task_a4a10e35bff2` / Dispatch `ctx_5a1d0dd53ba3`。
+用户要求保留拓扑，外围采用 `davidwang.space` 的 Hugo 模板。F 由 Kimi Code 0.43.1 / K3 thinking high 完成，分支 `morph-frontend-stack`，最终 `29c5e3de79da0d7bf27f4fb0847e2902b590730e`；独立 I 分支 `morph-frontend-stack-integration` 最终 `4f9fb0b6476a97ff80a30f6a782f3ce9e4723463`。两分支已推送并核对远端，主线 fast-forward 接收 I。复用 Hugo Theme Stack v4.0.3，保留完整来源和许可证；导航、明暗主题、手机菜单与三栏卡片布局已实现，拓扑节点、权重和下线语义保留。主 Agent 只维护治理和验收，领域返修均由原 Kimi 完成。
 
-首次 worker-start 在新目录信任页被 agent_unconfigured 拒绝，Task/Dispatch 均未创建；核对目录无项目 MCP 配置并完成该目录信任后，原 terminal 被识别为 kimi，第二次派发 ready / input_accepted，后续终端已观察到 Kimi 实际读取需求和源码。Orca 的 Kimi 提交检测返回 provider unsupported，未把 input_accepted 当完成。参考站截图与布局数据在 `%TEMP%/morph-stack-reference-qqnJgo/`，显示 Stack 浅色三栏卡片；个人图像不迁入。领域验收/提交尚在执行，随后独立集成；未将新版记为完成。
+T5 11 项、Node 集成 31 项、明确 mock 的 19 阶段 × 双视口 38 帧、三视口明暗及交互/错误/空态、构建与 wheel 安装检查通过；历史第五轮 29 个文件字节和时间戳不变。完整命令和产物见 [独立集成报告](tracks/frontend-stack-integration.md)。[7527 前端](http://127.0.0.1:7527/) 已启动并在 Orca 打开，当前为第五轮只读 replay，`contract_local=passed / interface_live=not_run / task_live=not_run`，没有新增网关彩排或 Hub 发布；服务不承诺跨宿主退出常驻。
+
+Orca Run `run_982e98c53b9f`：运行时重启后原 F dispatch `ctx_5a1d0dd53ba3` 明确失败为 terminal_missing，恢复同一 Kimi session `session_b4a6ad0c-3fc4-4df3-8ef9-3f3f725da760` 和原分支，`ctx_ab399600bab9` 成功交付；I `ctx_6ce1418d7f4d` 成功交付。两者已执行 worker-release，当前没有 reclaimable worker；F 恢复终端为非 owned resource，未手动关闭用户终端。
 
 ## 最新结果：真实 EvoMap 免费 Gene 获取与审查完成（2026-09-22）
 

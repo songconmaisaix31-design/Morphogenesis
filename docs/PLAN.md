@@ -2,6 +2,8 @@
 
 ## 前端重塑：保留拓扑，复用 Stack 模板（2026-09-22）
 
+已完成：Kimi F `29c5e3de79da0d7bf27f4fb0847e2902b590730e` 经独立 I `4f9fb0b6476a97ff80a30f6a782f3ce9e4723463` 验收并推送，主线已接收，7527 已启动新版只读回放。固定复用 Hugo Theme Stack v4.0.3；参考站实际部署版本未知。拓扑、真实状态与 API 契约保留，三视口交互、38 帧 mock 阶段、适用测试和构建通过，详见 [验收记录](ACCEPTANCE.md) 与 [集成报告](tracks/frontend-stack-integration.md)。以下保留本阶段范围及所有权。
+
 用户明确要求由 Kimi 实现，保留拓扑，其余采用 `https://davidwang.space/` 的 Hugo 模板风格。现场 HTML 的 StackColorScheme 与布局标记指向 Hugo Theme Stack；实现轨须进一步核对页面、官方来源、版本与许可证，复用实际可用样式并保留来源署名。保留现有 Python 静态服务、ECharts、API 和真实数据契约，使用侧边导航、浅色卡片及内容栏重排任务、checkpoint、Gene 池与运行详情；不为外观引入新的应用框架或改变后端。
 
 本阶段前端文件耦合，采用一个 Kimi 实现轨 F，完成后一个独立集成轨 I，顺序执行，不拆多人共同编辑 CSS。每轨独立 Orca worktree / branch；F 负责所有领域返修，主 Agent 只维护计划、状态、决策和验收。
