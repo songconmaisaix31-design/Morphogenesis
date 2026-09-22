@@ -9,9 +9,9 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from socketserver import BaseServer
-from typing import Any
+from typing import Any, Callable
 
-from viz.adapter import DashboardInputError, empty_dashboard, load_dashboard, load_runtime_export
+from viz.adapter import DashboardData, DashboardInputError, empty_dashboard, load_dashboard, load_rehearsal, load_runtime_export
 
 
 def echarts_asset_path(project_root: Path) -> Path:
@@ -22,9 +22,15 @@ def echarts_asset_path(project_root: Path) -> Path:
     return asset
 
 
-class DashboardHandler(SimpleHTTPRequestHandler):
-    dashboard: dict[str, object]
+def rehearsal_loader(path: Path, *, replay: bool = False) -> DashboardData:
+    """Keep the page available before R writes its first atomic stage snapshot."""
+    try:
+        return load_rehearsal(path, replay=replay)
+    except DashboardInputError as error:
+        return empty_dashboard(f"彩排快照尚未可读：{error}")
 
+
+class DashboardHandler(SimpleHTTPRequestHandler):
     def __init__(
         self,
         request: socket.socket | tuple[bytes, socket.socket],
@@ -32,17 +38,20 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         server: BaseServer,
         *,
         directory: str,
-        dashboard: dict[str, object],
+        dashboard_loader: Callable[[], DashboardData],
         echarts_asset: Path,
         **kwargs: Any,
     ) -> None:
-        self.dashboard = dashboard
+        self.dashboard_loader = dashboard_loader
         self.echarts_asset = echarts_asset
         super().__init__(request, client_address, server, directory=directory, **kwargs)
 
     def do_GET(self) -> None:  # noqa: N802
         if self.path == "/api/dashboard":
-            body = json.dumps(self.dashboard, ensure_ascii=False).encode("utf-8")
+            # Re-read the one named rehearsal.json on each request so the local
+            # page follows R's real stage snapshots. Browser input never reaches
+            # this loader and no request path is interpreted as a filesystem path.
+            body = json.dumps(self.dashboard_loader().as_dict(), ensure_ascii=False).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
@@ -72,18 +81,32 @@ def main() -> None:
     source = parser.add_mutually_exclusive_group()
     source.add_argument("--input", type=Path, help="Allowlisted mock document or Envelope JSONL")
     source.add_argument("--t2-root", type=Path, help="T2 named evidence root with fixed sidecars")
+    source.add_argument("--rehearsal", type=Path, help="R's explicit fixed-rehearsal rehearsal.json")
+    parser.add_argument("--replay", action="store_true", help="Read the named rehearsal evidence as a downgraded replay")
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("port must be between 1 and 65535")
+    if args.replay and not args.rehearsal:
+        parser.error("--replay requires --rehearsal")
 
     root = Path(__file__).resolve().parent.parent
+    load_data: Callable[[], DashboardData]
     try:
-        data = load_runtime_export(args.t2_root, root) if args.t2_root else load_dashboard(args.input, root) if args.input else empty_dashboard()
+        if args.rehearsal:
+            load_data = lambda: rehearsal_loader(args.rehearsal, replay=args.replay)
+        elif args.t2_root:
+            load_data = lambda: load_runtime_export(args.t2_root, root)
+        elif args.input:
+            load_data = lambda: load_dashboard(args.input, root)
+        else:
+            load_data = empty_dashboard
+        if not args.rehearsal:
+            load_data()
         asset = echarts_asset_path(root)
     except DashboardInputError as error:
-        data = empty_dashboard(f"输入未加载：{error}")
+        load_data = lambda: empty_dashboard(f"输入未加载：{error}")
         asset = root / "viz" / "static" / "missing-echarts.js"
-    handler = partial(DashboardHandler, directory=str(root / "viz" / "static"), dashboard=data.as_dict(), echarts_asset=asset)
+    handler = partial(DashboardHandler, directory=str(root / "viz" / "static"), dashboard_loader=load_data, echarts_asset=asset)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler)
     print(f"Morphogenesis T5 dashboard: http://127.0.0.1:{args.port}")
     server.serve_forever()

@@ -9,10 +9,12 @@ from contracts.messages import Envelope, MsgType
 from contracts.protocols import EventStore
 from contracts.provenance import Acceptance
 from contracts.resolution import GeneRef
+from contracts.protocols import PipeState
 from contracts.results import TaskResult, Verification
 from metabolism import GeneView, UseRecord
 from orchestration.events import export_events
-from viz.adapter import DashboardInputError, empty_dashboard, load_dashboard, load_runtime_export
+from orchestration.rehearsal_models import MemberAvailability, RehearsalDocument, RehearsalSnapshot, RoutingFact
+from viz.adapter import DashboardInputError, empty_dashboard, load_dashboard, load_rehearsal, load_runtime_export
 
 
 class DashboardAdapterTests(unittest.TestCase):
@@ -80,6 +82,34 @@ class DashboardAdapterTests(unittest.TestCase):
         self.assertEqual("not_run", dashboard.acceptance["task_live"])
         self.assertIn("待发布", dashboard.hub_status)
 
+    def test_typed_rehearsal_snapshot_is_consumed_without_local_contract_copy(self) -> None:
+        agent = AgentId(role="builder", instance=0)
+        snapshot = RehearsalSnapshot(
+            sequence=0, stage="task_ready", at=1.0, task_id="task-rehearsal", task_description="fix known bug",
+            provenance="live", acceptance=Acceptance(), checkpoints=None,
+            members=[MemberAvailability(agent=agent, changed_at=1.0)],
+            pipes=[PipeState(src=AgentId(role="planner", instance=0), dst=agent, weight=1.5, flow=1.0)],
+            routing=RoutingFact(task_id="task-rehearsal", eligible_members=[agent]),
+            tau_seconds=10.0, archive_threshold=0.2, model_calls_started=0,
+        )
+        document = RehearsalDocument(rehearsal_id="rehearsal-1", mode="live", current=snapshot, history=[snapshot])
+        path = self.root / "runtime_exports" / "rehearsal.json"
+        path.write_text(document.model_dump_json(), encoding="utf-8")
+        dashboard = load_rehearsal(path)
+        self.assertEqual("live", dashboard.provenance)
+        self.assertEqual("task_ready", dashboard.rehearsal["current"]["stage"] if dashboard.rehearsal else None)
+        self.assertEqual("固定彩排 rehearsal.json（现场快照）", dashboard.source_label)
+        replay = load_rehearsal(path, replay=True)
+        self.assertEqual("replay", replay.provenance)
+        self.assertEqual("not_run", replay.acceptance["task_live"])
+        self.assertEqual("固定彩排 rehearsal.json（回放视图）", replay.source_label)
+
+    def test_rehearsal_requires_r_canonical_filename(self) -> None:
+        other = self.root / "runtime_exports" / "other.json"
+        other.write_text("{}", encoding="utf-8")
+        with self.assertRaisesRegex(DashboardInputError, "rehearsal.json"):
+            load_rehearsal(other)
+
     def test_t2_runtime_sidecars_are_validated_without_payload_inference(self) -> None:
         root = self.root / "runtime_exports" / "run-1"
         root.mkdir()
@@ -129,5 +159,5 @@ class DashboardAdapterTests(unittest.TestCase):
 
     def test_echarts_tooltips_use_rich_text_without_html_breaks(self) -> None:
         source = (Path(__file__).parents[2] / "viz" / "static" / "app.js").read_text(encoding="utf-8")
-        self.assertEqual(3, source.count('renderMode: "richText"'))
+        self.assertEqual(4, source.count('renderMode: "richText"'))
         self.assertNotIn("<br>", source)

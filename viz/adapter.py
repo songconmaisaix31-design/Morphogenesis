@@ -11,12 +11,14 @@ import json
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from contracts.messages import Envelope
 from contracts.resolution import Gene
 from contracts.results import TaskResult
 from metabolism import GeneView, UseRecord
+from orchestration.rehearsal import read_rehearsal
+from orchestration.rehearsal_models import RehearsalDocument
 
 MAX_INPUT_BYTES = 2 * 1024 * 1024
 ALLOWED_SUFFIXES = {".json", ".jsonl"}
@@ -40,6 +42,7 @@ class DashboardData:
     hub_status: str
     source_label: str
     notes: list[str]
+    rehearsal: dict[str, Any] | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -53,6 +56,7 @@ class DashboardData:
             "hub_status": self.hub_status,
             "source_label": self.source_label,
             "notes": self.notes,
+            "rehearsal": self.rehearsal,
         }
 
 
@@ -72,6 +76,43 @@ def empty_dashboard(note: str = "尚未加载运行事件导出。") -> Dashboar
         hub_status="待发布（未配置 Hub 沙箱）",
         source_label="未加载导出",
         notes=[note],
+    )
+
+
+def load_rehearsal(path: Path, *, replay: bool = False) -> DashboardData:
+    """Load R's one typed, local fixed-rehearsal snapshot without adapting it."""
+    resolved = path.resolve()
+    if resolved.name != "rehearsal.json" or resolved.suffix.lower() != ".json":
+        raise DashboardInputError("彩排输入必须是 R 输出的 rehearsal.json")
+    if not resolved.is_file():
+        raise DashboardInputError("彩排快照不存在")
+    if resolved.stat().st_size > MAX_INPUT_BYTES:
+        raise DashboardInputError("彩排快照超过 2 MiB 限制")
+    try:
+        # R owns the replay downgrade: V never rewrites a TaskResult merely to
+        # make an old history look like a live run.
+        document: RehearsalDocument = read_rehearsal(resolved, replay=replay)
+    except Exception as error:
+        raise DashboardInputError(f"彩排快照不符合 R 的共享类型: {error}") from error
+
+    current = document.current
+    mode_label = {"live": "现场快照", "replay": "回放视图", "mock": "模拟快照"}[document.mode]
+    return DashboardData(
+        provenance=document.mode,
+        acceptance=current.acceptance.model_dump(mode="json"),
+        events=[],
+        genes=[gene.model_dump(mode="json") for gene in current.genes],
+        adoptions=[adoption.model_dump(mode="json") for adoption in current.adoptions],
+        metrics=[],
+        result=current.results[-1].model_dump(mode="json") if current.results else None,
+        hub_status="待发布（未配置 Hub 沙箱）",
+        source_label=f"固定彩排 rehearsal.json（{mode_label}）",
+        notes=[
+            f"{mode_label}：第 {current.sequence} 个快照。",
+            "成员移除只发生在两项任务之间；不表示终止在途模型进程后恢复。",
+            "费用为未知时保留未知，不显示为零。",
+        ],
+        rehearsal=document.model_dump(mode="json"),
     )
 
 
@@ -108,7 +149,7 @@ def _validate_envelope(item: Any) -> dict[str, Any]:
     try:
         # T2 serializes this exact shared model. Revalidate instead of keeping a
         # local approximation of identities, seq, lineage, or provenance rules.
-        return Envelope.model_validate(item).model_dump(mode="json")
+        return cast(dict[str, Any], Envelope.model_validate(item).model_dump(mode="json"))
     except Exception as error:
         raise DashboardInputError(f"Envelope 不符合 T0 共享契约: {error}") from error
 
@@ -117,7 +158,7 @@ def _validate_gene(item: Any) -> dict[str, Any]:
     if not isinstance(item, dict):
         raise DashboardInputError("Gene 必须是对象")
     try:
-        return Gene.model_validate(item).model_dump(mode="json")
+        return cast(dict[str, Any], Gene.model_validate(item).model_dump(mode="json"))
     except Exception as error:
         raise DashboardInputError(f"Gene 不符合共享契约: {error}") from error
 
