@@ -20,6 +20,7 @@ Stage = Literal[
     "awaiting_offline", "member_offline", "recovery_ready", "recovery_selected",
     "recovery_reviewed", "gene_adopted", "decaying", "archived", "completed", "failed",
 ]
+ExecutorKind = Literal["codex", "evomap"]
 
 
 class Checkpoint(Contract):
@@ -76,6 +77,8 @@ class RoutingFact(Contract):
 
 
 class RehearsalSnapshot(Contract):
+    executor: ExecutorKind = "codex"
+    model: str | None = None
     sequence: int = Field(ge=0)
     stage: Stage
     at: float = Field(ge=0, description="Actual Unix wall-clock seconds")

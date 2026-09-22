@@ -1,5 +1,6 @@
 """Real subprocess verification and LangGraph; fixture proposals are mock only."""
 
+import math
 from pathlib import Path
 import time
 
@@ -12,7 +13,7 @@ from contracts.results import TaskResult
 from contracts.runtime import RunConfig
 from orchestration.codex import CodexExecutor
 from orchestration.rehearsal import Rehearsal, RehearsalOptions, read_rehearsal
-from orchestration.rehearsal_models import RehearsalDocument, RehearsalSnapshot
+from orchestration.rehearsal_models import RehearsalDocument, RehearsalSnapshot, Stage
 from tests.t2.test_codex import fake_cli
 
 
@@ -41,7 +42,10 @@ def options(tmp_path: Path, **changes: object) -> RehearsalOptions:
                                             "tau_seconds": 0.1, "tick_seconds": 0.025, **changes})
 
 
-def test_complete_rehearsal_routes_actual_second_execution_and_metabolizes(tmp_path: Path) -> None:
+@pytest.mark.parametrize("adoption_snapshot_delay", [0.0, 0.2], ids=["normal", "slow-adoption-snapshot"])
+def test_complete_rehearsal_routes_actual_second_execution_and_metabolizes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, adoption_snapshot_delay: float,
+) -> None:
     attempts: list[AttemptId] = []
     seen: list[RehearsalDocument] = []
     entered: list[str] = []
@@ -56,6 +60,16 @@ def test_complete_rehearsal_routes_actual_second_execution_and_metabolizes(tmp_p
     app = Rehearsal(options(tmp_path, mode="manual"), provenance="mock",
                     executor_factory=lambda evidence, _: FixtureExecutor(evidence, attempts),
                     on_snapshot=seen.append, wait_for_offline=offline)
+    emit = app._emit
+
+    def delayed_emit(stage: Stage, message: str = "", failure: str | None = None) -> RehearsalDocument:
+        if stage == "gene_adopted":
+            # Delay observation AFTER mark_used, without faking either clock.
+            # With tau=0.1, 0.2 seconds also exercises decay past the old >0.5 assertion.
+            time.sleep(adoption_snapshot_delay)
+        return emit(stage, message, failure)
+
+    monkeypatch.setattr(app, "_emit", delayed_emit)
     original_topology = app.topology.snapshot()
     started = time.time()
     document = app.run()
@@ -77,9 +91,18 @@ def test_complete_rehearsal_routes_actual_second_execution_and_metabolizes(tmp_p
     assert len(document.current.genes) == 2
     assert {gene.source_attempt for gene in document.current.genes} == set(attempts)
     adopted = next(s for s in document.history if s.stage == "gene_adopted")
-    assert adopted.genes[0].use_count == 1
-    assert adopted.genes[0].weight > 0.5
-    assert adopted.adoptions[0].attempt == attempts[1]
+    adoption = next(record for record in adopted.adoptions if record.attempt == attempts[1])
+    adopted_gene = next(gene for gene in adopted.genes if gene.ref == adoption.ref)
+    assert adopted_gene.source_attempt == attempts[0]
+    assert adopted_gene.use_count == 1
+    assert adopted_gene.last_used_at is not None
+    assert adopted_gene.last_used_at == adoption.used_at
+    assert adopted_gene.created_at < adopted_gene.last_used_at <= adopted_gene.evaluated_at
+    assert adopted_gene.tau_seconds == app.options.tau_seconds
+    # Refresh anchors at adoption, not at the later snapshot; arbitrary elapsed
+    # wall time is valid, including a slow observer that sees weight below 0.5.
+    elapsed = adopted_gene.evaluated_at - adopted_gene.last_used_at
+    assert adopted_gene.weight == pytest.approx(math.exp(-elapsed / adopted_gene.tau_seconds))
     assert document.current.retrievable_gene_ids == []
     assert all(gene.archived_at is not None for gene in document.current.genes)
     assert all(started <= s.at <= time.time() for s in document.history)
