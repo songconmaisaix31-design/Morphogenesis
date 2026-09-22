@@ -32,5 +32,8 @@ license texts were removed with it (see git history).
      - tdesign-react 1.18.3    Copyright (c) TDesign         — LICENSE-tdesign-react.MIT.txt
      - tdesign-icons-react 0.6.11 Copyright (c) TDesign      — LICENSE-tdesign-icons-react.MIT.txt
      - dayjs 1.11.10           Copyright (c) iamkun          — LICENSE-dayjs.MIT.txt
+     - lodash-es 4.18.1        Copyright OpenJS Foundation and other
+                               contributors; based on Underscore.js,
+                               copyright Jeremy Ashkenas — LICENSE-lodash-es.MIT.txt
    Build-only tools (vite, @vitejs/plugin-react, less) are not bundled and
    their licenses are therefore not duplicated here.
