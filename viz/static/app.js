@@ -21,15 +21,16 @@ function stateCards(acceptance) {
 function geneGraph(genes, adoptions) {
   if (!genes.length) return showEmpty("gene-chart", "gene-empty", "未导出 T3M GeneView；不能从消息、候选或结果反推谱系。");
   const nodeName = (gene) => `${gene.ref.gene_id}@v${gene.ref.version ?? 1}`;
-  const nodes = genes.map((gene) => ({ name: nodeName(gene), value: `${nodeName(gene)}\n采用 ${gene.use_count ?? 0} 次`, symbolSize: 46 }));
+  const shortGeneLabel = (gene) => `Gene ${String(gene.ref.gene_id).slice(0, 10)}${String(gene.ref.gene_id).length > 10 ? "…" : ""} v${gene.ref.version ?? 1}`;
+  const nodes = genes.map((gene) => ({ name: nodeName(gene), shortLabel: shortGeneLabel(gene), value: `${nodeName(gene)}\n采用 ${gene.use_count ?? 0} 次`, symbolSize: 46 }));
   // The shared model has no Gene parent field. Edges show only an explicit
   // source_attempt or precise UseRecord, never an inferred genetic parent.
   const byGeneId = new Map();
   genes.forEach((gene) => { const key = gene.ref.gene_id; byGeneId.set(key, [...(byGeneId.get(key) ?? []), gene]); });
   const edges = [...byGeneId.values()].flatMap((versions) => versions.sort((a, b) => (a.ref.version ?? 1) - (b.ref.version ?? 1)).slice(1).map((gene, index) => ({ source: nodeName(versions[index]), target: nodeName(gene), value: "版本" })));
-  genes.forEach((gene) => { if (gene.source_attempt) { const source = `来源 ${agentLabel(gene.source_attempt.agent)}`; nodes.push({ name: source, value: source, symbolSize: 32, itemStyle: { color: "#7956d9" } }); edges.push({ source, target: nodeName(gene), value: "source_attempt" }); } });
-  adoptions.forEach((use) => { const source = nodeName(use); const target = `采用 ${agentLabel(use.attempt?.agent)}`; if (genes.some((gene) => nodeName(gene) === source)) { nodes.push({ name: target, value: target, symbolSize: 30, itemStyle: { color: "#55d6a7" } }); edges.push({ source, target, value: "采用" }); } });
-  echarts.init(byId("gene-chart")).setOption({ backgroundColor: "transparent", tooltip: { renderMode: "richText", formatter: (p) => p.data.value || p.name }, series: [{ type: "graph", layout: "force", roam: true, label: { show: true, color: "#ecf5ff" }, force: { repulsion: 180 }, lineStyle: { color: "#56b7e9" }, data: nodes, links: edges }] });
+  genes.forEach((gene) => { if (gene.source_attempt) { const source = `来源 ${agentLabel(gene.source_attempt.agent)}`; nodes.push({ name: source, shortLabel: source, value: source, symbolSize: 32, itemStyle: { color: "#7956d9" } }); edges.push({ source, target: nodeName(gene), value: "source_attempt" }); } });
+  adoptions.forEach((use) => { const source = nodeName(use); const target = `采用 ${agentLabel(use.attempt?.agent)}`; if (genes.some((gene) => nodeName(gene) === source)) { nodes.push({ name: target, shortLabel: target, value: target, symbolSize: 30, itemStyle: { color: "#55d6a7" } }); edges.push({ source, target, value: "采用" }); } });
+  echarts.init(byId("gene-chart")).setOption({ backgroundColor: "transparent", tooltip: { renderMode: "richText", formatter: (p) => p.data.value || p.name }, series: [{ type: "graph", layout: "force", roam: true, label: { show: true, position: "bottom", distance: 8, color: "#ecf5ff", formatter: (p) => p.data.shortLabel ?? p.name }, force: { repulsion: 280, edgeLength: [110, 165], gravity: .08 }, lineStyle: { color: "#56b7e9" }, data: nodes, links: edges }] });
 }
 
 function messageGraph(events) {
