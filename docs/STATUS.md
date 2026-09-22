@@ -6,7 +6,13 @@
 
 R 已通过本轨私有 TEMP/TMP 与独立 pytest basetemp 运行时间竞态测试：7 passed；网关定向测试 33 passed，相关 11 文件与全包 53 文件 strict 通过。T2/固定验证器/拓扑回归为 69 passed / 2 failed：旧 Codex 停止测试的 taskkill 被受限沙箱拒绝，最小自有子进程诊断亦为 exit 1 / Access denied，不能记整体通过。未因此修改旧业务停止策略。
 
-原 I 的同一 Orca 二进制绝对路径访问也返回 Access denied，旧草稿任务尚未结算，正式集成尚未开始。已向用户询问本项目必要命令权限，尚未收到明确答复；没有保存前缀允许规则或修改全局权限、账号配置。第四轮新增真实请求仍为 0，尚未运行，不能用旧三轮或 MockTransport 测试替代。
+原 I 的同一 Orca 二进制绝对路径访问也返回 Access denied，正式集成尚未开始。已向用户询问本项目必要命令权限，尚未收到明确答复；没有保存前缀允许规则或修改全局权限、账号配置。第四轮新增真实请求仍为 0，尚未运行，不能用旧三轮或 MockTransport 测试替代。
+
+R 正常 `git add` 也被拒绝创建 `.git/worktrees/morph-rehearsal-runtime/index.lock`，退出 1 / Permission denied。六文件候选尚未暂存、提交或推送；原 R 分支仍指向 `652e3199d626f60b414b70ee523b5f9703d1e539`，这不是网关候选 SHA。代码、测试和精确命令结果保留在原 worktree 的 [R 报告](../../workspaces/Morphogenesis/morph-rehearsal-runtime/docs/tracks/rehearsal-runtime.md)。
+
+I 旧任务的提权请求由协调者以 Escape 取消，未批准，不代表用户拒绝授权。终端与 transcript 均确认该回合已 interrupted 且未发送 worker_done；随后公开 `worker-abandon ctx_44c3b8728ee5` 返回 abandoned / processAction=none，保留原会话、分支与报告草稿。没有按陈旧状态强关进程，也未把无法结算的旧任务报告为成功。后续获准后仍使用原 R/I 所有者。
+
+R 于北京时间约 15:24 以 `worker_done / failed` 如实结算 `ctx_71b6412cc572`；协调者验明六文件候选与报告后执行 worker-release，返回 retained / external_terminal / processAction=none。消息已处理后 ACK，reclaimable 查询为空。R 会话与未提交文件保留，不把未交付候选或关闭的派发当作项目完成；后续仍需有限项目命令权限、原所有者提交/推送、原 I 集成复验及第四轮真实软件彩排。
 
 ## 本轮结果：三次完整软件彩排已通过
 
