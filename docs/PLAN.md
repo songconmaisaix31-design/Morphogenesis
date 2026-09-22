@@ -17,6 +17,19 @@
 
 网关凭据只由协调者在运行时注入专用子进程环境，不进入 Worker prompt、Git、日志、页面数据或进程参数。不修改全局 CLI/账号/权限设置；受限环境测试优先使用本轨允许的私有 TEMP，不能完成的步骤如实保留错误。三轮旧证据只读；第四轮单列，物理投影、生产 Hub 发布和在途进程强杀仍不纳入本轮软件证据。
 
+### 并行开发的 EvoMap 备选模型池
+
+下表是初始任务分配建议，不是性能、价格或工具兼容性排名。每个候选仍须满足该轨的真实测试与验收；保持 1 Agent / 1 worktree / 1 branch / 互斥 write_paths。当前 R/I 延续原 Astra 会话，备用配置采用已安装的 OpenCode 1.18.31（MIT）及其官方 [OpenAI-compatible provider](https://opencode.ai/docs/providers/#custom-provider)，通过 [OPENCODE_CONFIG 与环境变量引用](https://opencode.ai/docs/config/) 显式启用，不修改全局账号。
+
+| 任务难度/用途 | 备选模型 ID |
+|---|---|
+| 边界明确的小改动、测试或文档 | `evomap-gpt-5.6-luna`、`evomap-deepseek-v4-flash` |
+| 常规模块开发与返修 | `evomap-glm-5.1`、`evomap-glm-5.2`、`evomap-gpt-5.6-terra`（网关目录额外提供） |
+| 复杂契约、跨模块推理与审查 | `evomap-gpt-5.6-sol`、`evomap-gemini-3.1-pro-preview` |
+| 图像素材，独立于代码 Worker | `evomap-gemini-2.5-flash-image`、`evomap-gemini-3-pro-image`、`evomap-gemini-3.1-flash-image` |
+
+目前目录十项已核验；Luna 的非流式 Chat Completions 已有短文本 HTTP 200，第四轮另行验证修复链。OpenCode 配置解析/模型枚举、真实工具调用与各模型端到端开发验收分列，不把模型目录可见或固定修复 API 成功等同于所有模型可承担自主开发。只保留代码模型在备选配置，图片模型不进入编码任务派发；本轮不为加入备选逐个追加模型调用。
+
 ## 当前阶段：三次完整软件彩排已通过（2026-09-22）
 
 收尾返修：候选 Windows CI 暴露测试以 `weight > 0.5` 假设快照耗时小于 69ms 的竞态，即使下一次 CI 偶然通过也需修复。恢复原 R 会话、原 worktree/branch，仅改 `tests/t2/test_rehearsal.py` 与本轨报告，按真实采样时间验证衰减语义；恢复原 I 会话做普通合并及适用检查，并纠正回放进程交接。协调者重建只读回放服务并维护验收记录；不新增演示模型调用，不改业务运行时。
