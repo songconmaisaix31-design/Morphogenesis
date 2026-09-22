@@ -1,5 +1,18 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 前端重塑：保留拓扑，复用 Stack 模板（2026-09-22）
+
+用户明确要求由 Kimi 实现，保留拓扑，其余采用 `https://davidwang.space/` 的 Hugo 模板风格。现场 HTML 的 StackColorScheme 与布局标记指向 Hugo Theme Stack；实现轨须进一步核对页面、官方来源、版本与许可证，复用实际可用样式并保留来源署名。保留现有 Python 静态服务、ECharts、API 和真实数据契约，使用侧边导航、浅色卡片及内容栏重排任务、checkpoint、Gene 池与运行详情；不为外观引入新的应用框架或改变后端。
+
+本阶段前端文件耦合，采用一个 Kimi 实现轨 F，完成后一个独立集成轨 I，顺序执行，不拆多人共同编辑 CSS。每轨独立 Orca worktree / branch；F 负责所有领域返修，主 Agent 只维护计划、状态、决策和验收。
+
+| 轨 | write_paths | 验收 |
+|---|---|---|
+| F / Kimi | `viz/static/**`, `tests/t5/**`, `demo/README.md`, `THIRD_PARTY_NOTICES.md`, `docs/tracks/frontend-stack.md` | 保留拓扑节点/权重/下线语义及核心 DOM 契约；模板来源/版本/许可证可追溯；导航/明暗主题/移动布局可用；适用测试、真实浏览器截图通过；commit + push |
+| I / 独立集成 | 普通合并、`tests/integration/**`, `docs/tracks/frontend-stack-integration.md` 与少量导入/配置胶水 | 核对原始证据只读、mock/replay/live 三态、真实数据刷新、拓扑几何及桌面/窄屏布局，必要测试/构建通过后交付；领域问题回 F；commit + push |
+
+基线为当前主线 `2785b08c7bcfdfda6d02a1b16b29a8a72d7c0905` 加本计划。显示验证复用第五轮保留证据，不自动新增网关付费请求；Hub 仍显示实际发布状态。新前端先用独立端口验收，通过后交接 7527；已有端口/进程须核验身份后再操作。历史首屏约束随新版布局明确复核，不删减真实 checkpoint、Gene 代谢或验收状态以凑视觉。Kimi 的实际模型以运行回执/会话为准，不能用其他模型的实现冒充。
+
 ## Evolver 插件适配评估（2026-09-22，已执行）
 
 用户要求测试新安装的 Evolver 插件能否满足项目需求。本次为单 Agent 验收：读取现行需求与插件安装源，复用已有官方 MCP 客户端在隔离 loopback 测启动、协议、检索转发、参数与发布失败语义；复验既有 GEP 路径；主 Agent 只更新治理文档，测试产物放独立 TEMP，不改插件/业务代码或锁文件。
