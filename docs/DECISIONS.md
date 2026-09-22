@@ -6,3 +6,6 @@
 4. 包内“身份/AttemptId/Provision”解释为最小业务数据，不据此建设开发调度或完成证明基础设施；开发协调直接使用 Orca CLI。
 5. 当前环境实测：Python 3.13.13、Node 24.16.0、npm 11.13.0、uv 0.11.26、Codex CLI 0.155.1；Poetry 未安装。T0 可通过隔离工具环境运行 Poetry 并产出包内规定的锁，避免全局环境改动。
 6. 外部发布缺配置时为“待发布”；官方 SDK 本地验证通过只能证明本地校验。G3/G4 的外部部分仍需真实沙箱证据。
+7. 2026-09-22 对 npm registry 实查：`@evomap/gep-sdk@1.14.0`、`@evomap/gep-mcp-server@1.7.0` 均声明 Apache-2.0；`@evomap/evolver@2.0.38` 声明 GPL-3.0-or-later，Node engine 为 `^22.13.0 || >=23.4.0`。包内“Node >=18”不能作为最新版 Evolver 要求。当前主链复用 SDK 与 MCP Server，不复制 Evolver 源码。
+8. 上游依据：[GEP SDK](https://github.com/EvoMap/gep-sdk-js) 明确只提供 schema/协议助手；[GEP MCP Server](https://github.com/EvoMap/gep-mcp-server) 提供工具接口；[LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence) 的 checkpointer 保存线程状态；[FAISS](https://github.com/facebookresearch/faiss) 提供检索实现；[SQLModel](https://github.com/fastapi/sqlmodel)、[官方 MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)、[ECharts](https://github.com/apache/echarts) 分别用于元数据、协议客户端、图表。最终安装版本与 notices 由 T0 维护。
+9. Orca 1.4.199 的 `worker-start --worktree new-child` 在当前会话实测返回 `selector_not_found`，没有创建 Task/Dispatch。改用受支持的 `worktree create --agent codex`，取得精确 worktree/terminal 后 `worker-start --terminal ... --worktree id:... --from <coordinator>`；无自制调度、无重复 worker。
