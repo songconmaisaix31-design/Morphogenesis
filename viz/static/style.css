@@ -14,6 +14,6 @@ h1, h2, p { margin-top: 0; } h1 { font-size: clamp(1.7rem, 4vw, 2.6rem); } h2 { 
 .states span, .states small { display: block; } .states strong { display: block; margin: 7px 0; font-size: 1.25rem; }
 .state-passed { color: #55d6a7; } .state-failed { color: #ff8389; } .state-blocked { color: #ffc65a; }
 .grid { flex-wrap: wrap; }.panel { min-width: min(100%, 390px); flex: 1 1 45%; background: #0e1b2d; border: 1px solid #1f3a57; border-radius: 12px; padding: 18px; }.wide { flex-basis: 100%; }
-.chart { width: 100%; height: 340px; }.wide .chart { height: 300px; }.empty { min-height: 160px; display: grid; place-items: center; text-align: center; color: #a8bbcd; border: 1px dashed #42627f; border-radius: 8px; padding: 20px; }
+.chart { width: 100%; height: 340px; }.wide .chart { height: 300px; }.empty { min-height: 160px; display: grid; place-items: center; text-align: center; color: #a8bbcd; border: 1px dashed #42627f; border-radius: 8px; padding: 20px; }.empty[hidden] { display: none; }
 .notes { margin-top: 16px; background: #0e1b2d; border-radius: 12px; padding: 18px; }.notes ul { padding-left: 20px; color: #b9cfe3; }
 @media (max-width: 680px) { main { padding: 20px 12px; } header { align-items: flex-start; flex-direction: column; }.chart { height: 280px; } }
