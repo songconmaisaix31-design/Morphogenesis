@@ -50,7 +50,8 @@ class Runtime:
                  adopted_genes: Callable[[TaskResult], list[str]] | None = None,
                  topology_feedback: Callable[[Envelope, bool], None] | None = None,
                  stop_requested: Callable[[], bool] | None = None,
-                 pause_after_execute: bool = False) -> None:
+                 pause_after_execute: bool = False,
+                 on_event: Callable[[Envelope], None] | None = None) -> None:
         if reviewer.role != "reviewer" or reviewer in members:
             raise ValueError("independent reviewer must be outside the executor member set")
         if not members or any(member.role != "builder" for member in members):
@@ -62,6 +63,7 @@ class Runtime:
         self.bind_experience, self.adopted_genes = bind_experience, adopted_genes
         self.topology_feedback = topology_feedback
         self.stop_requested = stop_requested or (lambda: False)
+        self.on_event = on_event
         self.graph_config: RunnableConfig = {"configurable": {"thread_id": config.run_id}}
         builder = StateGraph(State)
         builder.add_node("select", self._select)
@@ -112,6 +114,8 @@ class Runtime:
                          task_id=attempt.task_id, attempt=attempt, seq=seq, ts=time.time(),
                          provenance=self.provenance, payload=payload, artifact_uri=artifact)
         self.events.append_event(event)
+        if self.on_event:
+            self.on_event(event)
         return event
 
     def _select(self, state: State) -> State:
@@ -152,6 +156,8 @@ class Runtime:
                                    "max_cost_usd": self.config.max_cost_usd})
         if not self.events.append_event(intent):
             raise UnknownExecution("execution intent already exists; no retry")
+        if self.on_event:
+            self.on_event(intent)
         result = self.executor.execute(attempt, self.config,
                                        [Gene.model_validate(value) for value in state["genes"]])
         if (result.attempt != attempt or result.run_id != self.config.run_id
