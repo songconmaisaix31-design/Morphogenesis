@@ -177,6 +177,10 @@ async function checkReset(record, output) {
     await page.waitForFunction(()=>document.getElementById('provenance').textContent.includes('replay'));
     await page.waitForTimeout(650);
     assert.equal(await page.locator('#task_live').textContent(),'not_run');
+    const restored=await readReset(), expected=record.rows.find(row=>row.sequence===11);
+    for(const id of ['story-checkpoint-rate','metric-tokens','story-gene-count','header-round','header-members']) {
+      assert.equal(restored.ids[id],expected.ids[id],`Replay did not restore ${id} after ${fixture}`);
+    }
   }
   return results;
 }
