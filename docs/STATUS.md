@@ -1,5 +1,11 @@
 # 开发状态
 
+## 当前工作：网关第四轮准备中
+
+用户已明确要求切换至 EvoMap 网关并继续第四轮；当前范围与文件所有权以 PLAN 的网关章节为准，替代此前仅整理未提交草稿的阶段限制。原 R 会话已复用为 `task_da11b736e4e5 / ctx_71b6412cc572`，terminal `term_52058249-adb8-426c-a996-5849cc5afa5d`，原 worktree/branch 不变。旧草稿任务按未完成如实结算；没有把旧证据或一次网关连通请求计为第四轮。
+
+R 已通过本轨私有 TEMP/TMP 与独立 pytest basetemp 运行时间竞态测试：7 passed；网关草稿与相关四文件 strict 通过。网关适配与异常路径测试、原 I 集成及第四轮真实运行仍在进行，尚不宣称本轮完成。测试目录设置只作用于命令进程，没有修改全局权限或账号配置。
+
 ## 本轮结果：三次完整软件彩排已通过
 
 收尾复核：主线 `c1542b2` 的 Windows/Ubuntu CI 35691937011 均 success，但较早候选 `e83a816` 的 Windows CI 35691719303 暴露 `tests/t2/test_rehearsal.py:81` 的时间竞态；后续偶然通过不消除该问题。原 R/I 会话通过 Orca terminal 内 `codex resume --last` 恢复到原 worktree/branch，任务分别为 `task_78d3e30ecafd / ctx_76c264a284f2`、`task_0abdacc8d0ba / ctx_44c3b8728ee5`。恢复时 CLI 使用受限沙箱，Orca 通信与共享 Git 元数据访问需确认；当前仅授权范围内准备返修，未将新修改宣称为已验证或推送。
