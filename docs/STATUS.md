@@ -4,6 +4,10 @@
 
 用户本轮已明确批准提交推送、集成复验和第四轮彩排，解除下文历史“待授权”阻塞。R 原 Task 重试派发为 `ctx_232e8907f456`，terminal 仍为 `term_52058249-adb8-426c-a996-5849cc5afa5d`。I 原 Codex 会话 `01a0c788-7734-7993-ba6c-77dd6f208d20` 已通过官方 resume 恢复，新 terminal `term_ca34dd06-6100-49c6-a43c-0511245b1852`，正式任务 `task_7cd7ff6071f2 / ctx_3dc412a2eeef`；旧终端确认 Codex 已退出至 PowerShell 后仅清理空闲 shell。分支、工作树和所有候选未替换；必要命令逐次按用户授权处理，不写永久允许规则。
 
+R 已交付 `94b70816784fcd46ce4f74b8e205bd009b789cc3`，原分支已推送且工作区 clean，71 项回归通过；精确提交的 Ubuntu / Windows CI 35701298167 均 success。I 已收到精确 Handoff，继续集成审计/观察器/启动配置及项目 `opencode.evomap.json`；本轮真实网关 POST 仍为 0，等待完整集成复验后执行。R 保留领域返修所有权。
+
+### 以下为授权前的历史阻塞（已解除，不代表当前状态）
+
 用户已明确要求切换至 EvoMap 网关并继续第四轮；当前范围与文件所有权以 PLAN 的网关章节为准，替代此前仅整理未提交草稿的阶段限制。原 R 会话已复用为 `task_da11b736e4e5 / ctx_71b6412cc572`，terminal `term_52058249-adb8-426c-a996-5849cc5afa5d`，原 worktree/branch 不变。旧草稿任务按未完成如实结算；没有把旧证据或一次网关连通请求计为第四轮。
 
 R 已通过本轨私有 TEMP/TMP 与独立 pytest basetemp 运行时间竞态测试：7 passed；网关定向测试 33 passed，相关 11 文件与全包 53 文件 strict 通过。T2/固定验证器/拓扑回归为 69 passed / 2 failed：旧 Codex 停止测试的 taskkill 被受限沙箱拒绝，最小自有子进程诊断亦为 exit 1 / Access denied，不能记整体通过。未因此修改旧业务停止策略。

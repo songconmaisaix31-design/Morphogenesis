@@ -2,9 +2,9 @@
 
 ## 网关第四轮：尚未执行
 
-当前用户要求以 EvoMap Gateway / `evomap-gpt-5.6-luna` 运行第四轮，最多两个新的修复/恢复请求。R 已完成执行器候选及定向 MockTransport 检查（33 passed）、时间竞态返修检查（7 passed），全包 strict 53 文件通过；这些是本地证据，不是第四轮 task_live。T2/固定验证器/拓扑回归 69 passed / 2 failed，失败源于受限沙箱拒绝旧 Codex 停止路径的 taskkill；独立自有子进程诊断也返回 Access denied。完整回归未通过。
+当前用户已批准原 R/I 会话提交推送、集成复验及第四轮。R 网关候选 `94b70816784fcd46ce4f74b8e205bd009b789cc3` 已在原分支普通提交并推送，T2/固定验证器/拓扑回归 **71 passed in 59.73s**，此前受限沙箱导致的两项停止测试已在获准命令中通过。定向 MockTransport 检查 33 passed、时间竞态检查 7 passed、全包 strict 53 文件通过；精确 R 提交的 [CI 35701298167](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35701298167) 在 Ubuntu 与 Windows 全部通过。以上是代码与测试证据，不是第四轮 task_live。
 
-原 I 会话读取同一 Orca 程序绝对路径被沙箱拒绝；R 正常 `git add` 又被拒绝创建本 worktree 的 Git index.lock。网关六文件候选尚未提交/推送，正式集成/构建/双视口全流程未执行。必要命令权限已询问，尚无明确答复。第四轮真实网关 POST 数为 **0**，尚无第四轮 checkpoint、自愈或 Gene 代谢 live 结论。既有前三轮、一次短文本 API 连通检查及原始证据保留，不计入第四轮。
+I 已恢复原会话与原工作树，正在准备集成、网关证据审计、双视口观察与密钥不传给浏览器/viewer 的配置胶水。第四轮限定 EvoMap Gateway / `evomap-gpt-5.6-luna` 两个新任务、最多两个 POST，目前实际新增为 **0**。前三轮、一次短文本连通检查和 MockTransport 不能替代本轮 checkpoint、自愈或 Gene 代谢 live 验收。EvoMap 并行开发备选通过项目 OpenCode provider 配置准备，模型分档见 PLAN；工具调用兼容尚未实测。
 
 ## 本轮验收：固定完整软件彩排已通过
 
