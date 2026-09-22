@@ -20,9 +20,11 @@ function readGeometry() {
     labels:display.filter(e=>e.type==='tspan').map(bounds),nodes:display.filter(e=>e.type==='path').map(bounds)};
 }
 
-function assertGeometry(row) {
+function assertGeometry(row, {geneInFirstViewport = true} = {}) {
   assert(!row.overflow);
-  assert(row.geneBottom<row.viewportHeight,'Gene ledger outside first viewport');
+  // Desktop keeps the full-ledger gate; a phone scrolls vertically, but still
+  // uses every canvas clipping and overlap assertion below.
+  if (geneInFirstViewport) assert(row.geneBottom<row.viewportHeight,'Gene ledger outside first viewport');
   assert.equal(row.labels.length,3);
   assert.equal(row.nodes.length,3);
   for(const item of [...row.labels,...row.nodes]) {
