@@ -131,6 +131,8 @@ def _from_document(document: Any, source_label: str) -> DashboardData:
     provenance = str(document.get("provenance", "mock"))
     if provenance not in PROVENANCE_VALUES:
         raise DashboardInputError("provenance 必须为 live、replay 或 mock")
+    if provenance != "mock":
+        raise DashboardInputError("JSON 文档入口仅用于显式 mock fixture；真实来源必须使用 T2 JSONL Envelope 导出")
     events = [_validate_envelope(item) for item in document.get("events", [])]
     genes = [_validate_gene(item) for item in document.get("genes", [])]
     metrics = [_validate_metric(item) for item in document.get("metrics", [])]

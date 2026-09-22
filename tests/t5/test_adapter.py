@@ -25,6 +25,12 @@ class DashboardAdapterTests(unittest.TestCase):
         with self.assertRaisesRegex(DashboardInputError, "mock/replay"):
             load_dashboard(path, self.root)
 
+    def test_document_input_cannot_claim_to_be_a_live_runtime(self) -> None:
+        path = self.root / "demo" / "data" / "claimed-live.json"
+        path.write_text(json.dumps({"provenance": "live", "acceptance": {"task_live": "passed"}}), encoding="utf-8")
+        with self.assertRaisesRegex(DashboardInputError, "仅用于显式 mock"):
+            load_dashboard(path, self.root)
+
     def test_jsonl_envelopes_are_loaded_as_events_without_invented_genes(self) -> None:
         path = self.root / "runtime_exports" / "events.jsonl"
         path.write_text(json.dumps({
