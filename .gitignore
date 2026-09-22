@@ -18,3 +18,5 @@ tmp/
 *.sqlite*
 .coverage
 htmlcov/
+tools/.package-review/
+tools/.wheel-site/

@@ -5,8 +5,19 @@ description = "An independently verifiable, fixed-size agent swarm prototype"
 authors = ["Morphogenesis contributors"]
 license = "Apache-2.0"
 readme = "README.md"
-packages = [{include = "contracts"}, {include = "persistence"}, {include = "bootstrap"}]
-include = ["bootstrap/fixtures/*.txt"]
+packages = [
+  {include = "contracts"}, {include = "persistence"}, {include = "bootstrap"},
+  {include = "bridge_node"}, {include = "hub_client"}, {include = "orca_provision"},
+  {include = "orchestration"}, {include = "topology"}, {include = "metabolism"},
+  {include = "mocks"}, {include = "viz"},
+]
+include = [
+  {path = "bootstrap/fixtures/*.txt", format = ["sdist", "wheel"]},
+  {path = "bridge_node/asset_bridge.mjs", format = ["sdist", "wheel"]},
+  {path = "viz/static/**", format = ["sdist", "wheel"]},
+  {path = "demo/**", format = ["sdist", "wheel"]},
+  {path = "THIRD_PARTY_NOTICES.md", format = ["sdist", "wheel"]},
+]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.14"
