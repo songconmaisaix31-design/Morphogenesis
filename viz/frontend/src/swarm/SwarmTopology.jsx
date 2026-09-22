@@ -24,19 +24,35 @@ function edgePath(a, b) {
   return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
 }
 
+function ghostText(ghost) {
+  const name = agentKey(ghost.agent);
+  switch (ghost.status) {
+    case 'recovered':
+      return `${name} 已离开（两任务之间移除），任务重路由 → ${agentKey(ghost.rerouteTarget)}；恢复任务已成功。`;
+    case 'rerouted':
+      return `${name} 已离开（两任务之间移除），恢复选路 → ${agentKey(ghost.rerouteTarget)}；恢复结果尚未判定，不代表已恢复。`;
+    case 'failed':
+      return `${name} 已离开；彩排已停止，未完成恢复${ghost.failure ? `：${ghost.failure}` : '。'}`;
+    case 'offline':
+      return `${name} 不可用；路由快照未记录移除，不涉及重路由。${ghost.reason ? `原因：${ghost.reason}。` : ''}`;
+    default:
+      return `${name} 已离开；恢复选路尚未完成，等待重路由。${ghost.reason ? `原因：${ghost.reason}。` : ''}`;
+  }
+}
+
+const GHOST_TAGS = {
+  recovered: '已离开 · 已重路由成功',
+  rerouted: '已离开 · 已选路待结果',
+  failed: '已离开 · 恢复未完成',
+  offline: '不可用',
+  waiting: '已离开 · 等待重路由',
+};
+
 function GhostBanner({ ghost }) {
   if (!ghost) return null;
-  const name = agentKey(ghost.agent);
-  if (ghost.rerouted) {
-    return (
-      <p className='swarm-ghost-line swarm-ghost-rerouted'>
-        {name} 已离开（两任务之间移除），任务重路由 → {agentKey(ghost.rerouteTarget)}。
-      </p>
-    );
-  }
   return (
-    <p className='swarm-ghost-line swarm-ghost-waiting'>
-      {name} 已离开；恢复选路尚未完成，等待重路由。{ghost.reason ? `原因：${ghost.reason}。` : ''}
+    <p className={`swarm-ghost-line swarm-ghost-${ghost.status}`} role={ghost.status === 'failed' ? 'alert' : undefined}>
+      {ghostText(ghost)}
     </p>
   );
 }
@@ -59,13 +75,7 @@ function NodeDetail({ view, nodeKey, onClose }) {
         <button type='button' className='swarm-detail-close' onClick={onClose} aria-label='关闭详情'>×</button>
       </div>
       {node.reason && <p className='swarm-detail-line'>原因：{node.reason}</p>}
-      {node.ghost && (
-        <p className='swarm-detail-line'>
-          {node.ghost.rerouted
-            ? `已离开；任务重路由 → ${agentKey(node.ghost.rerouteTarget)}`
-            : '已离开；等待重路由，未暗示在途进程已恢复。'}
-        </p>
-      )}
+      {node.ghost && <p className='swarm-detail-line'>{ghostText(node.ghost)}</p>}
       <h4>管道（{edges.length}）</h4>
       {edges.length === 0 && <p className='swarm-detail-dim'>无管道快照。</p>}
       <ul>{edges.map((edge) => (
@@ -245,7 +255,7 @@ function SwarmTopology({ dashboard, active = true, reducedMotion = false }) {
                     <circle r={node.ghost ? 26 : 30} className='swarm-node-disc' />
                     {node.selected && <circle r={38} className='swarm-node-ring' />}
                     <text className='swarm-node-label' y={52} textAnchor='middle'>{node.key}</text>
-                    {node.ghost && <text className='swarm-node-ghost-tag' y={-40} textAnchor='middle'>{node.ghost.rerouted ? '已离开 · 已重路由' : '已离开 · 等待重路由'}</text>}
+                    {node.ghost && <text className='swarm-node-ghost-tag' y={-40} textAnchor='middle'>{GHOST_TAGS[node.ghost.status] ?? GHOST_TAGS.waiting}</text>}
                     {node.eligible && <text className='swarm-node-eligible' y={-52} textAnchor='middle'>eligible</text>}
                     <title>{node.key} · {node.available === false ? '已下线' : node.available === null ? '快照未声明可用性' : '在线'}</title>
                   </g>

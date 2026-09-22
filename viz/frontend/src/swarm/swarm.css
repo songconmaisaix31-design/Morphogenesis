@@ -31,8 +31,9 @@
 .swarm-state-error { color: #e88a8a; }
 
 .swarm-ghost-line { margin: 0 0 6px; font-size: 12px; }
-.swarm-ghost-rerouted { color: var(--swarm-teal); }
-.swarm-ghost-waiting { color: var(--swarm-dim); }
+.swarm-ghost-recovered, .swarm-ghost-rerouted { color: var(--swarm-teal); }
+.swarm-ghost-waiting, .swarm-ghost-offline { color: var(--swarm-dim); }
+.swarm-ghost-failed { color: #e88a8a; }
 
 .swarm-body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(220px, 2fr); gap: 12px; }
 @media (max-width: 1023px) { .swarm-body { grid-template-columns: 1fr; } }

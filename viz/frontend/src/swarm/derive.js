@@ -53,17 +53,43 @@ export function layoutNodes(keys) {
 }
 
 function deriveGhost(current) {
-  // A member is only shown as "left, task re-routed" when the routing fact
-  // records a real removal between tasks AND a recovery selection naming a
-  // different, eligible member. Removal without selection is "waiting".
+  // "已离开，任务重路由" requires BOTH a real removed_member in the routing
+  // fact AND a recovery selection naming a different member (RoutingFact
+  // already guarantees the selection is eligible and not the removed member).
+  // Four states stay distinct and never imply a failure recovered:
+  //   waiting   — removed, no selection yet
+  //   rerouted  — selection made, but no recovery result is recorded yet
+  //   recovered — the recovery task's own TaskResult succeeded
+  //   failed    — stage failed / failure text present, or the recovery result
+  //               is recorded without success; never shown as recovered
+  // A member that is merely unavailable without a routing removal is only
+  // "offline": the view must not speak about re-routing at all.
   const routing = current.routing ?? null;
   const removed = routing?.removed_member ?? null;
   const offline = (current.members ?? []).filter((member) => member.available === false);
   if (!removed && !offline.length) return null;
+
+  const failed = Boolean(current.failure) || current.stage === 'failed';
   const selected = routing?.selected_attempt ?? null;
-  const rerouted = Boolean(
-    removed && selected && !sameAgent(selected.agent, removed),
-  );
+  const selectedOther = Boolean(removed && selected && !sameAgent(selected.agent, removed));
+  const recoveryResult = selectedOther
+    ? (current.results ?? []).find((result) =>
+        result.task_id === routing.task_id && sameAgent(result.attempt?.agent, selected.agent))
+    : null;
+
+  let status;
+  if (failed || (recoveryResult && recoveryResult.status !== 'succeeded')) {
+    status = 'failed';
+  } else if (!removed) {
+    status = 'offline';
+  } else if (!selectedOther) {
+    status = 'waiting';
+  } else if (recoveryResult?.status === 'succeeded' || current.stage === 'completed') {
+    status = 'recovered';
+  } else {
+    status = 'rerouted';
+  }
+
   const ghostAgent = removed ?? offline[0]?.agent ?? null;
   const reason = offline.find((member) => sameAgent(member.agent, ghostAgent))?.reason
     ?? (removed ? '路由快照记录了移除，未提供成员原因' : null);
@@ -72,8 +98,10 @@ function deriveGhost(current) {
     removedAt: routing?.removed_at ?? null,
     boundary: routing?.boundary ?? null,
     reason,
-    rerouted,
-    rerouteTarget: rerouted ? selected.agent : null,
+    status,
+    rerouteTarget: selectedOther ? selected.agent : null,
+    recoveryStatus: recoveryResult?.status ?? null,
+    failure: current.failure ?? null,
     stage: current.stage,
   };
 }
