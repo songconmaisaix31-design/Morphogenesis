@@ -7,7 +7,7 @@
 - 分支：`songconmaisaix31-design/morph-integration`，起点 `02f42c2`，已纳入协调者主线 `366d12b`。
 - 精确合入 T0 `cdc8972`（含完整 11 包配置 `f5c725b`）、桥 `adca7f6`、Hub `07636c1`、供给 `1c4e5e9`、拓扑 `a12d288`、代谢 `240aaf0`、执行 `33ed929`、展示 `0655110`（含 `46aa58e`）。全部使用普通 Git merge，保留各轨历史，无源码覆盖、force push 或贡献删除。
 - 首个已推送集成头 `506d7badc975455bd6b1aa4c0677c1bccb81a791`；T5 原作者类型返修 `e2f1bbe91046d0a26d8f661b458dbbe921887b9e` 合入后为 `970e6b2710dae760b7408072815cabda08bc03b2`。
-- T5 原作者 CSS 返修 `218ba08bbdc001192645e9f40f1bf6e15e5a02d1` 合入后的最终实现为 `70360e9f03ad4f41cc034539175f4db6ffe9740a`；后续本轨报告提交不改变实现。全部要求的提交（包括已有祖先）经 `git merge-base --is-ancestor` 核对在历史内。
+- T5 原作者 CSS 返修 `218ba08bbdc001192645e9f40f1bf6e15e5a02d1` 合入后为 `70360e9f03ad4f41cc034539175f4db6ffe9740a`；原作者随后修复 Gene 标签显示 `9ae01cf6428d04ed365ad778f4b3436d35d536ba`，最终实现合并头为 `eb89c406ec177352b2e160e9098fc6c92864f225`。后续本轨报告提交不改变实现。全部要求的提交（包括已有祖先）经 `git merge-base --is-ancestor` 核对在历史内。
 - Windows；本工作树 `.venv`：Python **3.12.13**、Poetry **2.5.1**（`uv tool run poetry`），Node **24.16.0**。全部包合入后才执行 Python 安装。未改全局环境或锁文件。
 
 ## 命令和结果
@@ -67,7 +67,11 @@ reload/snapshot 均 exit 1：`browser_owner_unavailable: Could not reset stale h
 
 截图本地绝对路径：`C:/Users/DW/orca/workspaces/Morphogenesis/morph-integration/.runtime/integration/reuse-desktop.png`；浏览器结构与网络日志 `browser.json`，终端结果 `browser.log`。等待 ECharts 动画后截图并实际查看。首次截图发现 `.empty { display:grid }` 覆盖 `[hidden]`，导致已加载图下方两个空框；T5 原作者 `218ba08` 修复后重新跑浏览器并查看截图，computed display 为 `none / none / grid`，两个多余框消失，真正的指标空态仍显示。原始前后截图均保留（修复前为 `reuse-before-hidden-fix.png`）。
 
+协调者终审又发现全长 Gene ID 与来源/采用标签在某些 force 布局位置重叠，原作者 `9ae01cf` 仅调整短标签、标签位置与节点间距，保持内部 ID、数据与 richText tooltip 完整。合入后 `node --check viz/static/app.js` 通过；新启动自己的 7510 服务（父 **58152** / 子 **61536**），重跑完整浏览器脚本、实际查看最终截图，三种标签分离可读。额外用 ECharts 标准 `showTip` action 显示完整 ID / 采用次数并截图 `reuse-gene-tooltip.png`；这证明实际 tooltip 渲染，未声称鼠标 hover 动作被测试。最终 JS 亦已重新构建入 wheel、重新安装并通过分发检查；Python 实现未因该展示修复改变，最终双平台 CI 仍执行全套测试。
+
 验证结束后，先从 Win32_Process 核对父 PID 65604 的本工作树命令行与子 PID 46720 的父子关系/7510 参数，再仅终止这两个服务进程；确认 7510 无监听，记录 `cleanup.json`。Playwright 通过 `finally browser.close()` 关闭自己启动的 headless 实例；本轨 Orca 测试 tab 单独关闭。没有终止 T5 的 7500/7501/7502 服务或 Orca 进程。
+
+标签返修后的第二组服务也用同样身份校验仅关闭 **58152 / 61536**，再次确认 7510 无监听，见 `cleanup-final.json`。最终截图和日志保留本地，服务不常驻。
 
 ## 保留限制与未执行项
 
