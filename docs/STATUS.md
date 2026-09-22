@@ -8,8 +8,9 @@
 |---|---|---|---|---|
 | R | morph-rehearsal-runtime | gpt-6-astra / xhigh | task_3ca8b0ded0ae / ctx_bee3929001e7 | term_1fa7a0dc-6e17-4c96-9835-0428cf455e07 |
 | V | morph-rehearsal-viz | gpt-5.6-terra / high | task_d91042ca5a85 / ctx_e028b3a23be7 | term_ffa1e302-b8ed-43c0-bae6-fcc662233d0c |
+| I | morph-rehearsal-integration | gpt-6-astra / high | task_6bf332fa1437 / ctx_0887e4fb6588 | term_1eee9d49-ded9-441b-b7c8-406b5692b797 |
 
-两轨 worktree 均从 `791d3cf` 建立，模型 effective 回执确认、terminal 已实际 working。已核对并关闭两个无任务的启动 PowerShell，不影响 Worker。集成轨在 R/V 完成后启动。用户提供的 API 凭据尚待 Base URL / 用途确认，未进入代码、日志或 Worker prompt；实际投影设备尚未确认。
+R/V worktree 从 `791d3cf` 建立；候选 `652e319` / `d032aba` 已分别提交推送，领域 Worker 等待同一所有者返修。I 从 `501c491` 建立并开始合并验收，三个 Worker 的模型 effective 回执确认、terminal 已实际 working。已核对并关闭三个无任务的启动 PowerShell，不影响 Worker。三次软件彩排沿用已接通 Codex CLI，总计最多六次新调用，结果不验证用户新提供的 API key。该凭据尚待 Base URL / 用途确认，未进入代码、日志或 Worker prompt；实际投影设备尚未确认。
 
 ## 已完成的核心原型基线
 
