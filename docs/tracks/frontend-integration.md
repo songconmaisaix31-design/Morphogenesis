@@ -10,8 +10,10 @@
 | T 真实拓扑视图 | `songconmaisaix31-design/morph-front-swarm` | `ee65171934595cc5fb21d608bc52a3e5f760c786` | `af740e9` | 无 |
 | P WebGL2 黏菌首页 | `songconmaisaix31-design/morph-front-physarum` | `f5448b8f59ce7a592fc0bf38de002a47b333672d` | `af1578d` | 无 |
 | E 最终增量（降级 loader 修复 + categories） | 同上 | `4da31ebd2988cffc9a204bba6c6d82230014feed` | `3b0bd00` | 无 |
+| S 页面壳 + EvoMap 探索器（协调者确认最终） | `songconmaisaix31-design/morph-front-shell` | `ab24fb539cb199b1d298cbd08733750cd72e8b8a` | `1ea0f19` | 无 |
+| E cache_age 契约修复（live→null、非负钳制） | 同上 E 分支 | `89b0d65fdd209c2357f3f1c1aed15ad566d95139` | `5f332f2` | 无 |
 
-待合并：S（App.jsx 重复切换 effect 返修 + 手动 q/type 搜索与真实结果呈现，等协调者最终 SHA）。协调者明确：勿用旧 SHA 提前声称完成；浏览器验收需覆盖至少两类有效查询、类别数据真实来源，以及首屏标题覆盖下的 pointermove 与连续切换。
+全部五批合并且四轨最终 SHA 均已并入；均为协调者交付/确认的精确 SHA，普通 `--no-ff` 合并，无冲突、零胶水改动。`viz/static/assets/finals-shell.{js,css}` 由集成轨在四轨合并后统一 `vite build` 重建（3906 模块，247.84 kB JS / 71.15 kB CSS）。
 
 ## `/api/evomap` 集成审查结论
 
@@ -37,6 +39,11 @@
 | `curl "/api/evomap?limit=99"`、`?type=Bad` | 均 HTTP 400 `invalid_query` |
 | 全新服务进程 7802 首请求 `curl "/api/evomap?q=repair&limit=1"` | search 与 categories 均 `live`；第二请求均 `cache`，live→cache 状态机正确 |
 | `curl "/api/evomap?q=topology&type=Gene&limit=3"`（E 增量后） | HTTP 200；`community_categories` 真实 Hub 计数（by_type: Gene 2509437 / Capsule 2505905 / EvolutionEvent 2094531；by_gene_category: optimize 376082 / repair 342783 / innovate 269904），`hub.categories_endpoint` 如实标注 |
+| `python -m pytest tests/t5 tests/integration -q`（全部合并后） | 44 passed，同 1 个预存环境失败 |
+| `npm run build`（viz/frontend，合并四轨源码后集成重建） | vite 5.4.21 成功；`finals-shell.js` 247.84 kB / `finals-shell.css` 71.15 kB；锁文件未变 |
+| `MORPH_PLAYWRIGHT=… MORPH_CHROMIUM=… node tests/integration/check_frontend_integration.cjs http://127.0.0.1:7899 .runtime/front-integration/final` | **27 passed / 0 failed**（真实 Chromium 1366×768，headless；证据截图+summary.json 在 `.runtime/front-integration/final/`，已亲看） |
+
+浏览器验收覆盖（final 轮，E cache_age 修复合并后）：首屏唯一大字 MORPHOGENESIS + 真实 WebGL 黏菌 canvas（无降级）；标题覆盖区域多点 pointermove 无 pageerror；首屏设计性隐藏 header、hero AGENT SWARM 标记可点；切换后 header 导航可见、`/api/dashboard` 来源如实 `mock`；T 拓扑模块加载、mock fixture 无彩排快照时如实空态（"模拟快照" 徽标，0 虚构节点）；验收三态与来源条呈现；EvoMap 面板首次进入自动加载一次（live · 实时）、Hub 来源行如实（公开只读、API key 未配置）、16 个类别真实计数、6 条边界声明、本地池如实未配置；手动两类有效查询（q=optimize limit=5 与 q=repair type=Capsule limit=5）均 live 返回真实资产（sha256 asset_id）；EvoMap 数据不进入拓扑面板；5 次标记切换 + 键盘 1/2 无重复 id、无 pageerror（S 重复切换 effect 修复复核）；CRT 开关可切换且 localStorage 持久化；reduced motion 下静态降级 + CRT 静止 + 切换正常；浏览器全程仅同源请求（Hub 访问只发生在服务端）。
 
 live 标注：上表真实出站仅为公开只读 `semantic-search` 与 `categories` 的 GET（E 轨已验证授权的既有路径，无密钥、无写操作）；其余均为本地契约。回放/mock/live 未混用。验证只用 7799/7801/7802 动态端口，结束后已全部关闭；7526/7527 未触碰。曾观察到一次首请求 categories 误标 `cache`，受控复验（进程内双请求 + 全新真实服务进程首请求）均未复现，判定为该次 7799 进程残留请求的观测假象而非代码缺陷。
 
@@ -46,6 +53,12 @@ live 标注：上表真实出站仅为公开只读 `semantic-search` 与 `catego
 - `tests/integration/test_demo_environment.py::test_demo_excludes_sentinel_from_viewer_and_passes_executor_args` 在本机失败：`shutil.copy` 找不到 `C:\Python313\pyvenv.cfg`（本机 Python 安装无此文件）。在 E 轨合并前内容（`8275f57` worktree）复跑同样失败，属环境预存。
 - `tests/t1` 38 errors + 5 failed：Node 桥子进程 `sdk_process_failed` 等，集中在 hub/bridge，与本次合并文件无交集（合并只触及 `viz/`、`tests/t5`、`docs/tracks`），判定为环境预存。
 
-## 待裁决的契约偏差（已报协调者，是否退回 E 由协调者定）
+## 契约偏差（已修复并复核）
 
-- `morph.evomap.readonly/1` 文档写明 `cache_age_seconds: null = 本次为 live`；实测 `live` 响应携带**负数** `cache_age_seconds`（`now` 在 HTTP 获取前取值、`fetched_at` 在获取后取值，差为负）。不影响 `state` 字段判断，但消费方若按文档用 `null` 判 live 会误判。属 E 轨领域代码，未擅自修改。
+- `morph.evomap.readonly/1` 文档写明 `cache_age_seconds: null = 本次为 live`；初版实测 `live` 响应携带负数 age。报协调者后由 E 轨以 `89b0d65f` 修复（live→null，cache/stale 钳制非负）；集成侧复核：t5 新增用例通过，最终浏览器轮查询行不再出现负数缓存年龄。
+
+## 交付说明
+
+- 本轨改动仅限：合并提交、`tests/integration/check_frontend_integration.cjs`（新增验收脚本）、`viz/static/assets/finals-shell.{js,css}`（计划规定的集成重建）、本文件。未改任何轨道领域代码、锁文件或 CI。
+- 证据类别：contract_local + 明确 mock fixture + 真实公开只读 Hub GET（无密钥/写操作）。未发起新付费任务；interface_live/task_live 在本轮浏览器验收中保持页面如实 `not_run`。
+- 验收端口 7799/7801/7802/7899 均已确认关闭；7526/7527 进程全程未触碰。
