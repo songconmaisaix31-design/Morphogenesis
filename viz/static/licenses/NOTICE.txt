@@ -21,3 +21,16 @@ The finals dashboard shell is adapted from Tencent's TDesign React Starter.
 Earlier revisions of this directory used Hugo Theme Stack (GPL-3.0-only);
 that adaptation was fully replaced and no Stack-derived code remains, so its
 license texts were removed with it (see git history).
+
+2. Runtime code actually bundled into ../assets/finals-shell.js/.css
+   (all MIT; license texts copied verbatim from the installed npm packages
+   recorded in viz/frontend/package-lock.json):
+     - react 18.3.1            Copyright (c) Meta Platforms — LICENSE-react.MIT.txt
+     - react-dom 18.3.1        Copyright (c) Meta Platforms — LICENSE-react-dom.MIT.txt
+     - scheduler 0.23.2        Copyright (c) Meta Platforms — LICENSE-scheduler.MIT.txt
+     - classnames 2.5.1        Copyright (c) Jed Watson      — LICENSE-classnames.MIT.txt
+     - tdesign-react 1.18.3    Copyright (c) TDesign         — LICENSE-tdesign-react.MIT.txt
+     - tdesign-icons-react 0.6.11 Copyright (c) TDesign      — LICENSE-tdesign-icons-react.MIT.txt
+     - dayjs 1.11.10           Copyright (c) iamkun          — LICENSE-dayjs.MIT.txt
+   Build-only tools (vite, @vitejs/plugin-react, less) are not bundled and
+   their licenses are therefore not duplicated here.
