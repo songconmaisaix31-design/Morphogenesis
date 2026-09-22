@@ -32,6 +32,12 @@ def rehearsal_loader(path: Path, *, replay: bool = False) -> DashboardData:
         return empty_dashboard(f"彩排快照尚未可读：{error}")
 
 
+def degraded_loader(error: DashboardInputError) -> Callable[[], DashboardData]:
+    """Bind the reason now: Python clears the except-block variable afterwards."""
+    reason = f"输入未加载：{error}"
+    return lambda: empty_dashboard(reason)
+
+
 class DashboardHandler(SimpleHTTPRequestHandler):
     def __init__(
         self,
@@ -133,7 +139,7 @@ def main() -> None:
             load_data()
         asset = echarts_asset_path(root)
     except DashboardInputError as error:
-        load_data = lambda: empty_dashboard(f"输入未加载：{error}")
+        load_data = degraded_loader(error)
         asset = root / "viz" / "static" / "missing-echarts.js"
     handler = partial(
         DashboardHandler, directory=str(root / "viz" / "static"),
