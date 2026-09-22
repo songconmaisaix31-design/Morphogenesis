@@ -6,6 +6,10 @@
 
 提交：决赛重建 `494e31bc833576532c071035f1c9320cf8bb8b8b`（其前一个 docs 提交记录本行 SHA，最终 SHA 见 `git log origin/morph-frontend-stack`）。
 
+### 返修：三大数字 300ms 变化渐变（独立 I 验收后）
+
+补齐用户原明确要求的缺项：checkpoint / 本轮 tokens / 活跃 Gene 三个大数字在数值真实变化时以原生 CSS 动画做 300ms 淡入（`@keyframes morph-num-change`，`.num-changed`）。实现要点：按 id 跟踪上次值（`bigNumberValues` Map），仅在真实变化时触发；首次渲染与 1s 稳态轮询不动画；`prefers-reduced-motion: reduce` 下 JS 与 CSS 双重禁用；显示值、DOM id/语义、图表与数据逻辑不变；checkpoint 绿色 pulse 仍仅限全过瞬间。浏览器实证（`tests/t5/check_finals_layout.cjs` 新增断言，未放宽既有项）：稳态轮询 2.3s 内 animationstart 0 次；真实变化恰好触发一次且显示值随后回到真实数据；同值调用不再触发；reduced-motion 页面变化时 0 次。证据：`.runtime/finals/anim-check/`（三视口截图与 JSON，Gene 底部 686/746 首屏内不变）。
+
 ## 模板来源与实际复用映射
 
 | 项 | 值 |

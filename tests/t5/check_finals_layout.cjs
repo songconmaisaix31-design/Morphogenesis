@@ -96,6 +96,50 @@ const assertGeometry = (row, viewportHeight) => {
     const reduced = await page.evaluate(() => document.querySelector('.morph-board.checkpoint-pulse') === null);
     assert.equal(reduced, true, 'pulse must not run under reduced motion');
     await page.close();
+
+    // Big-number fade: steady 1s polling never animates; a real value change
+    // fades exactly once; an identical value does not; reduced-motion never.
+    const anim = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+    await anim.goto(url);
+    await anim.waitForFunction(() => document.querySelector('#provenance').textContent.includes('replay'));
+    const animResult = await anim.evaluate(async () => {
+      const el = document.getElementById('metric-tokens');
+      let starts = 0;
+      el.addEventListener('animationstart', () => { starts += 1; });
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      await sleep(2300);                     // steady polling window
+      const steady = starts;
+      setBigNumber('metric-tokens', '999');  // real change
+      await sleep(120);
+      const onChange = starts;
+      await sleep(1200);                     // next poll restores the real 1226
+      const restored = el.textContent;
+      const afterRestore = starts;
+      setBigNumber('metric-tokens', '1226'); // identical value
+      await sleep(500);
+      return { steady, onChange, restored, afterRestore, sameValue: starts };
+    });
+    assert.equal(animResult.steady, 0, 'steady polling must not flash the number');
+    assert(animResult.onChange >= 1, 'a real change must fade once');
+    assert.equal(animResult.restored, '1226', 'displayed value must follow real data');
+    assert(animResult.afterRestore >= animResult.onChange, 'poll-driven change may fade');
+    assert.equal(animResult.sameValue, animResult.afterRestore, 'identical value must not re-flash');
+    await anim.close();
+
+    const rm = await browser.newPage({ viewport: { width: 1280, height: 720 }, reducedMotion: 'reduce' });
+    await rm.goto(url);
+    await rm.waitForFunction(() => document.querySelector('#provenance').textContent.includes('replay'));
+    const rmResult = await rm.evaluate(async () => {
+      const el = document.getElementById('metric-tokens');
+      let starts = 0;
+      el.addEventListener('animationstart', () => { starts += 1; });
+      setBigNumber('metric-tokens', '999');
+      await new Promise((r) => setTimeout(r, 500));
+      return { starts, flagged: el.classList.contains('num-changed') };
+    });
+    assert.equal(rmResult.starts, 0, 'no fade under reduced motion');
+    assert.equal(rmResult.flagged, false, 'num-changed class must not be set under reduced motion');
+    await rm.close();
   } finally { await browser.close(); }
   fs.writeFileSync(path.join(output, 'finals-layout.json'), JSON.stringify(results, null, 2));
   console.log(JSON.stringify(results.map((r) => ({ width: r.width, overflow: r.state.overflow, geneBottom: Math.round(r.geometry.geneBottom), checkpoint: r.state.checkpoint, tokens: r.state.tokens }))));
