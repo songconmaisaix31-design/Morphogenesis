@@ -11,7 +11,7 @@
 | F | 原 Kimi / morph-frontend-stack / 同名分支；`viz/static/**`, `viz/frontend/**`（独立 npm 构建与锁）, `tests/t5/**`, `demo/README.md`, `THIRD_PARTY_NOTICES.md`, `docs/tracks/frontend-stack.md` | 从当前主线快进，完整模板接入；优先保留既有语义 ID 以复用阶段检查；11 个原 T5 测试不改；开发测试返修由同一 Worker 完成并 commit + push |
 | I | 独立 Codex / morph-finals-integration / 同名分支；`tests/integration/check_finals_replay.cjs`, `docs/tracks/finals-integration.md`；只允许集成胶水 | 并行准备只读历史回放与 1280×720 / 1920×1080 验收；F 完成后普通精确 SHA 合并，11 展示测试、原阶段断言与构建通过；领域问题退 F，commit + push |
 
-原 `observe_rehearsal.cjs` 必然启动新 live，没有只读回放入口，本轮不擅自运行付费演示，也不把 replay 改标 live。I 复用其现有几何函数和阶段事实断言，新增只读回放入口，不修改原 observer / 断言；原 live 全流程记为本轮未执行。19 阶段必须完整覆盖，保存初始、任务中、下线、恢复完成的两档截图。失败时撤销本轮引入的违规变更，由 F 重新实现，不能放松断言。
+原 `observe_rehearsal.cjs` 必然启动新 live，没有只读回放入口，本轮不擅自运行付费演示，也不把 replay 改标 live。I 复用其现有几何函数和阶段事实断言，新增只读回放入口，不修改原 observer / 断言；原 live 全流程记为本轮未执行。原第五轮实际共 20 个快照（sequence 0–19）必须完整覆盖，保存初始、任务中、下线、恢复完成的两档截图。失败时撤销本轮引入的违规变更，由 F 重新实现，不能放松断言。
 
 主 Agent 只维护计划、状态、决策与 ACCEPTANCE，最终注明此次实际改动包含展示 DOM/JS（遵循最新指令），不能虚写“仅 CSS”。验收通过后切换可核对身份的 7527 本地服务，7526 未确认所有权不操作。
 

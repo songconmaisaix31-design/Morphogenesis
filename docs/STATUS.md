@@ -1,5 +1,11 @@
 # 开发状态
 
+## 当前执行：腾讯官方模板决赛版（2026-09-23）
+
+用户已明确放弃旧前端并要求复用大厂模板。当前采用腾讯官方 TDesign React Starter Dashboard，固定 `fce97863edd5d5556f766dd4e342aace31a99487` / MIT，深色黏菌黄主题；不再延续 Stack 外观。原 Kimi 在 `morph-frontend-stack` 负责实际模板源码/组件接入，独立 I 在 `morph-finals-integration` 准备只读阶段验收，产品返修仍回 Kimi；Orca 身份与路径见 [计划](PLAN.md)。
+
+第五轮真实历史文件经 I 核对包含 **20 个快照（sequence 0–19）**，本轮完整重放全部快照，不能把最终序号 19 当成总数。原 observer 无只读模式，不启动新付费真跑；复用其几何和阶段事实断言，同时保留 replay 的 `interface_live/task_live=not_run`。7527 当前仍是上一轮已验收页面，新版未验收前不替换。
+
 ## 最新完成：Kimi Stack 前端已集成并启动 7527（2026-09-22）
 
 用户要求保留拓扑，外围采用 `davidwang.space` 的 Hugo 模板。F 由 Kimi Code 0.43.1 / K3 thinking high 完成，分支 `morph-frontend-stack`，最终 `29c5e3de79da0d7bf27f4fb0847e2902b590730e`；独立 I 分支 `morph-frontend-stack-integration` 最终 `4f9fb0b6476a97ff80a30f6a782f3ce9e4723463`。两分支已推送并核对远端，主线 fast-forward 接收 I。复用 Hugo Theme Stack v4.0.3，保留完整来源和许可证；导航、明暗主题、手机菜单与三栏卡片布局已实现，拓扑节点、权重和下线语义保留。主 Agent 只维护治理和验收，领域返修均由原 Kimi 完成。
