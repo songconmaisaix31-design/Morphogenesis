@@ -15,6 +15,26 @@ const stageLabel = {
   completed: "彩排完成", failed: "彩排已停止",
 };
 
+/* Chart palettes follow the page's Stack color scheme so labels and lines stay
+   readable on both the light (#fff) and dark (#424242) card backgrounds. */
+const chartPalettes = {
+  light: {
+    nodeOnline: "#4a90c4", nodeOffline: "#9aa4ae",
+    labelOnline: "#34495e", labelOffline: "#8a94a0",
+    lineActive: "#5b8fb9", lineInactive: "#98a4af",
+    labelMain: "#34495e", axisLabel: "#707070", legendText: "#34495e",
+    sourceNode: "#8457d9", adoptNode: "#3fb950", geneLine: "#5b8fb9",
+  },
+  dark: {
+    nodeOnline: "#66c2ff", nodeOffline: "#7a8795",
+    labelOnline: "#ecf5ff", labelOffline: "#a8bbcd",
+    lineActive: "#5ebeea", lineInactive: "#778494",
+    labelMain: "#ecf5ff", axisLabel: "rgba(255, 255, 255, 0.7)", legendText: "#ecf5ff",
+    sourceNode: "#a78bfa", adoptNode: "#55d6a7", geneLine: "#56b7e9",
+  },
+};
+const palette = () => chartPalettes[document.documentElement.dataset.scheme === "dark" ? "dark" : "light"];
+
 function append(parent, tag, value, className = "") {
   const element = document.createElement(tag); element.textContent = value;
   if (className) element.className = className;
@@ -46,6 +66,7 @@ function matchingPipe(pipes, current) {
 function topologyGraph(pipes, members) {
   if (!pipes?.length) return showEmpty("story-pipe-chart", "story-pipe-empty", "尚无管道快照");
   showChart("story-pipe-chart", "story-pipe-empty");
+  const colors = palette();
   const availability = new Map((members ?? []).map((member) => [agentLabel(member.agent), member]));
   const names = new Set(pipes.flatMap((pipe) => [agentLabel(pipe.src), agentLabel(pipe.dst)]));
   // Labels sit below every node.  With a circular graph this reserves the
@@ -55,14 +76,14 @@ function topologyGraph(pipes, members) {
     const member = availability.get(name); const online = member?.available !== false;
     return {
       name, online, symbolSize: 28,
-      itemStyle: { color: online ? "#66c2ff" : "#7a8795" },
-      label: { color: online ? "#ecf5ff" : "#a8bbcd", position: "bottom" },
+      itemStyle: { color: online ? colors.nodeOnline : colors.nodeOffline },
+      label: { color: online ? colors.labelOnline : colors.labelOffline, position: "bottom" },
     };
   });
   const links = pipes.map((pipe) => ({
     source: agentLabel(pipe.src), target: agentLabel(pipe.dst), active: pipe.active,
     value: `权重 ${number(pipe.weight)} · 流量 ${number(pipe.flow)} · 成功率 ${(Number(pipe.success_rate) * 100).toFixed(0)}% · ${pipe.active ? "在线" : "离线"}`,
-    lineStyle: { width: Math.max(2, Math.min(12, 1 + Number(pipe.weight) * 4)), type: pipe.active ? "solid" : "dashed", color: pipe.active ? "#5ebeea" : "#778494", opacity: pipe.active ? 1 : .55 },
+    lineStyle: { width: Math.max(2, Math.min(12, 1 + Number(pipe.weight) * 4)), type: pipe.active ? "solid" : "dashed", color: pipe.active ? colors.lineActive : colors.lineInactive, opacity: pipe.active ? 1 : .55 },
   }));
   chartFor("story-pipe-chart").setOption({ animation: false, tooltip: { renderMode: "richText", formatter: (point) => point.data.value || point.name }, series: [{ type: "graph", layout: "circular", roam: false, top: 24, bottom: 32, label: { show: true, distance: 4, fontSize: 10 }, lineStyle: { curveness: .1 }, data: nodes, links }] }, { notMerge: true });
 }
@@ -134,6 +155,7 @@ function rehearsalBoard(rehearsal) {
 function geneGraph(genes, adoptions) {
   if (!genes.length) return showEmpty("gene-chart", "gene-empty", "未导出 T3M GeneView；不能从消息、候选或结果反推谱系。");
   showChart("gene-chart", "gene-empty");
+  const colors = palette();
   const nodeName = (gene) => `${gene.ref.gene_id}@v${gene.ref.version ?? 1}`;
   const shortGeneLabel = (gene) => `Gene ${shortGeneId(gene.ref.gene_id)} v${gene.ref.version ?? 1}`;
   const nodes = genes.map((gene) => ({ name: nodeName(gene), shortLabel: shortGeneLabel(gene), value: `${nodeName(gene)}\n采用 ${gene.use_count ?? 0} 次`, symbolSize: 46 }));
@@ -142,25 +164,72 @@ function geneGraph(genes, adoptions) {
   const byGeneId = new Map();
   genes.forEach((gene) => { const key = gene.ref.gene_id; byGeneId.set(key, [...(byGeneId.get(key) ?? []), gene]); });
   const edges = [...byGeneId.values()].flatMap((versions) => versions.sort((a, b) => (a.ref.version ?? 1) - (b.ref.version ?? 1)).slice(1).map((gene, index) => ({ source: nodeName(versions[index]), target: nodeName(gene), value: "版本" })));
-  genes.forEach((gene) => { if (gene.source_attempt) { const source = `来源 ${agentLabel(gene.source_attempt.agent)}`; nodes.push({ name: source, shortLabel: source, value: source, symbolSize: 32, itemStyle: { color: "#7956d9" } }); edges.push({ source, target: nodeName(gene), value: "source_attempt" }); } });
-  adoptions.forEach((use) => { const source = nodeName(use); const target = `采用 ${agentLabel(use.attempt?.agent)}`; if (genes.some((gene) => nodeName(gene) === source)) { nodes.push({ name: target, shortLabel: target, value: target, symbolSize: 30, itemStyle: { color: "#55d6a7" } }); edges.push({ source, target, value: "采用" }); } });
-  chartFor("gene-chart").setOption({ backgroundColor: "transparent", tooltip: { renderMode: "richText", formatter: (p) => p.data.value || p.name }, series: [{ type: "graph", layout: "force", roam: true, label: { show: true, position: "bottom", distance: 8, color: "#ecf5ff", formatter: (p) => p.data.shortLabel ?? p.name }, force: { repulsion: 280, edgeLength: [110, 165], gravity: .08 }, lineStyle: { color: "#56b7e9" }, data: nodes, links: edges }] }, { notMerge: true });
+  genes.forEach((gene) => { if (gene.source_attempt) { const source = `来源 ${agentLabel(gene.source_attempt.agent)}`; nodes.push({ name: source, shortLabel: source, value: source, symbolSize: 32, itemStyle: { color: colors.sourceNode } }); edges.push({ source, target: nodeName(gene), value: "source_attempt" }); } });
+  adoptions.forEach((use) => { const source = nodeName(use); const target = `采用 ${agentLabel(use.attempt?.agent)}`; if (genes.some((gene) => nodeName(gene) === source)) { nodes.push({ name: target, shortLabel: target, value: target, symbolSize: 30, itemStyle: { color: colors.adoptNode } }); edges.push({ source, target, value: "采用" }); } });
+  chartFor("gene-chart").setOption({ backgroundColor: "transparent", tooltip: { renderMode: "richText", formatter: (p) => p.data.value || p.name }, series: [{ type: "graph", layout: "force", roam: true, label: { show: true, position: "bottom", distance: 8, color: colors.labelMain, formatter: (p) => p.data.shortLabel ?? p.name }, force: { repulsion: 280, edgeLength: [110, 165], gravity: .08 }, lineStyle: { color: colors.geneLine }, data: nodes, links: edges }] }, { notMerge: true });
 }
 
 function messageGraph(events) {
   if (!events.length) return showEmpty("message-chart", "message-empty", "尚未加载 T2 JSONL Envelope 导出；消息流为空。");
   showChart("message-chart", "message-empty");
+  const colors = palette();
   const labels = new Set(); const links = [];
   events.forEach((event) => { const source = agentLabel(event.sender); const target = event.receiver === "broadcast" ? "broadcast" : agentLabel(event.receiver); labels.add(source); labels.add(target); links.push({ source, target, value: event.msg_type }); });
-  chartFor("message-chart").setOption({ tooltip: { renderMode: "richText", formatter: (p) => p.data.value ? `${p.data.source} → ${p.data.target}\n${p.data.value}` : p.name }, series: [{ type: "graph", layout: "circular", roam: true, label: { show: true, color: "#ecf5ff" }, lineStyle: { color: "#66c2ff", curveness: .15 }, edgeLabel: { show: true, formatter: (p) => p.data.value }, data: [...labels].map((name) => ({ name, symbolSize: 42 })), links }] }, { notMerge: true });
+  chartFor("message-chart").setOption({ tooltip: { renderMode: "richText", formatter: (p) => p.data.value ? `${p.data.source} → ${p.data.target}\n${p.data.value}` : p.name }, series: [{ type: "graph", layout: "circular", roam: true, label: { show: true, color: colors.labelMain }, lineStyle: { color: colors.lineActive, curveness: .15 }, edgeLabel: { show: true, color: colors.axisLabel, formatter: (p) => p.data.value }, data: [...labels].map((name) => ({ name, symbolSize: 42 })), links }] }, { notMerge: true });
 }
 
 function metricChart(metrics) {
   if (!metrics.length || !metrics.some((metric) => metric.history.length)) return showEmpty("metric-chart", "metric-empty", "运行导出未提供历史指标，因此不显示或暗示性能变化。");
   showChart("metric-chart", "metric-empty");
+  const colors = palette();
   const metric = metrics.find((item) => item.history.length); const history = metric.history;
   const current = history.at(-1); const mean = history.reduce((sum, value) => sum + value, 0) / history.length; const best = Math.max(...history);
-  chartFor("metric-chart").setOption({ tooltip: { renderMode: "richText", trigger: "axis" }, legend: { textStyle: { color: "#dcecff" } }, xAxis: { type: "category", data: history.map((_, i) => `记录 ${i + 1}`), axisLabel: { color: "#b9cfe3" } }, yAxis: { type: "value", axisLabel: { color: "#b9cfe3" } }, series: [{ name: `${metric.name} 历史`, type: "line", data: history, symbolSize: 8 }, { name: "历史均值", type: "line", data: history.map(() => mean), lineStyle: { type: "dashed" }, symbol: "none" }, { name: "历史最佳", type: "line", data: history.map(() => best), lineStyle: { type: "dotted" }, symbol: "none" }, { name: `当前: ${current}${metric.unit ?? ""}`, type: "scatter", data: history.map((value, i) => i === history.length - 1 ? value : "-"), symbolSize: 15 }] }, { notMerge: true });
+  chartFor("metric-chart").setOption({ tooltip: { renderMode: "richText", trigger: "axis" }, legend: { textStyle: { color: colors.legendText } }, xAxis: { type: "category", data: history.map((_, i) => `记录 ${i + 1}`), axisLabel: { color: colors.axisLabel } }, yAxis: { type: "value", axisLabel: { color: colors.axisLabel } }, series: [{ name: `${metric.name} 历史`, type: "line", data: history, symbolSize: 8 }, { name: "历史均值", type: "line", data: history.map(() => mean), lineStyle: { type: "dashed" }, symbol: "none" }, { name: "历史最佳", type: "line", data: history.map(() => best), lineStyle: { type: "dotted" }, symbol: "none" }, { name: `当前: ${current}${metric.unit ?? ""}`, type: "scatter", data: history.map((value, i) => i === history.length - 1 ? value : "-"), symbolSize: 15 }] }, { notMerge: true });
+}
+
+/* Sidebar menu and color-scheme toggle, following the Stack theme's patterns:
+   the hamburger opens #main-menu on phones, and the toggle stores an explicit
+   light/dark choice under the same StackColorScheme localStorage key. */
+function syncToggleLabel() {
+  const dark = document.documentElement.dataset.scheme === "dark";
+  text("dark-mode-label", dark ? "浅色模式" : "深色模式");
+}
+
+function initInterface() {
+  const menu = byId("main-menu");
+  const hamburger = byId("toggle-menu");
+  const setMenu = (open) => {
+    menu.classList.toggle("show", open);
+    hamburger.classList.toggle("is-active", open);
+    hamburger.setAttribute("aria-expanded", String(open));
+  };
+  hamburger.addEventListener("click", () => setMenu(!menu.classList.contains("show")));
+  menu.querySelectorAll("a[href^='#']").forEach((link) => {
+    // On phones the menu is closed after jumping so the target stays visible.
+    link.addEventListener("click", () => setMenu(false));
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menu.classList.contains("show")) {
+      setMenu(false);
+      hamburger.focus();
+    }
+  });
+  byId("dark-mode-toggle").addEventListener("click", () => {
+    const dark = document.documentElement.dataset.scheme === "dark";
+    const next = dark ? "light" : "dark";
+    document.documentElement.dataset.scheme = next;
+    localStorage.setItem("StackColorScheme", next);
+    syncToggleLabel();
+    main();
+  });
+  window.addEventListener("resize", () => {
+    ["story-pipe-chart", "gene-chart", "message-chart", "metric-chart"].forEach((id) => {
+      const element = byId(id);
+      const instance = element ? echarts.getInstanceByDom(element) : null;
+      if (instance) instance.resize();
+    });
+  });
+  syncToggleLabel();
 }
 
 async function main() {
@@ -178,4 +247,4 @@ async function main() {
     clear("notes"); append(byId("notes"), "li", `仪表板数据不可用：${error.message}`);
   }
 }
-window.addEventListener("DOMContentLoaded", () => { main(); window.setInterval(main, 1000); });
+window.addEventListener("DOMContentLoaded", () => { initInterface(); main(); window.setInterval(main, 1000); });
