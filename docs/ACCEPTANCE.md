@@ -1,5 +1,13 @@
 # 验收矩阵
 
+## 现场准备并行收尾（2026-09-22）
+
+从已验收的第四轮网关主链出发，V `1b2e335` 提交可照做的 [投影/7526 回放/7527 真跑清单](tracks/onsite-viz.md)；O `26a5cf1` 给现有观察器增加显式 `--operator-enter`，只有两视口与真实新根均处于 `awaiting_offline`，才等待现场人员一次 Enter，并留时间证据，默认自动行为不变。集成首次完整 Python 测试发现旧 fixture 固定占用 7526，结果 **199 passed / 1 failed**；原 O 会话 `3d05f4e` 将该本地测试改用独立动态端口，原失败项复验 **1 passed / 29.44s**。I 普通合并并推送 `bcd81beac5b9f73ac9f8267ccbc3f571e4faf738`，主线 fast-forward 接收；最终 SHA 的完整 200 项未重新执行，不能记为“200 passed”。
+
+集成额外通过：`node --test tests/integration/test_browser_options.cjs tests/integration/test_operator_enter.cjs tests/integration/test_observer_control.cjs` **31 passed**；`python tools/typecheck.py` **53 文件 clean**；sdist/wheel、SDK、本地安装后 11 包检查通过。7526 回放 API 为 HTTP 200 / replay / 两 live 状态 not_run，双视口真实布局检查通过，29 个第四轮原文件 bytes+mtime 不变；7527 当时无监听。完整命令、日志和原失败见 [I 报告](tracks/onsite-integration.md)。精确候选 [CI 35709392862](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35709392862) 于记录时仍在运行，未计入通过。
+
+**现场仍待执行：** 目前只检测到一块活动显示屏；17:30–18:00 的借线实接、7526 在实际投影屏全屏可见及 7527 一次新网关真跑，必须由现场见证后分别记录。未收到接通确认前不启动新模型请求；模拟终端测试和浏览器截图均不能证明物理投影。今晚演示执行器为 EvoMap 网关；OpenCode 是备选开发路径，工具调用/流式今晚不测。Hub 保持本地 stub / 待发布；不验证在途进程强杀恢复，路演仅说“成员下线后，后续任务自动重新选路”。
+
 ## 网关第四轮：真实软件彩排通过（2026-09-22）
 
 用户批准后，原 R 提交并推送 `94b70816784fcd46ce4f74b8e205bd009b789cc3`；原 I 普通合并后交付入口 `7c0bb6a2f7b39a7eb524c0c71bc31c7a110f883c`，最终只读报告 `61784b73be6b2a47a3a45f8e206678d4f932ae59` 已推送并由主线 fast-forward 接收。协调者在精确入口提交运行唯一第四轮，模型 `evomap-gpt-5.6-luna`，通过已确认的 `https://api.evomap.ai/v1/chat/completions` 执行两个新任务，没有重试。运行首幕至末幕为北京时间 **16:12:31–16:13:35**；观察器为 16:12:23–16:13:36，summary exitCode=0、failure=null、entered=true。
