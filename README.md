@@ -7,7 +7,7 @@ $env:POETRY_VIRTUALENVS_IN_PROJECT = 'true'
 uv tool run poetry install
 npm ci --ignore-scripts
 uv tool run poetry run python tools/contracts_check.py
-uv tool run poetry run mypy
+uv tool run poetry run python tools/typecheck.py
 uv tool run poetry run python -m build
 npm run check:sdk
 uv tool run poetry run python -m bootstrap prepare --workspace .runtime/sample

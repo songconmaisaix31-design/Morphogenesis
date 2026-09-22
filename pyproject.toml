@@ -18,6 +18,7 @@ httpx = ">=0.28,<0.29"
 mcp = ">=1.20,<2"
 faiss-cpu = ">=1.12,<2"
 numpy = ">=2.0,<3"
+scikit-learn = ">=1.7,<2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8,<10"
