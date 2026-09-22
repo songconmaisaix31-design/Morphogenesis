@@ -1,17 +1,36 @@
-# T5 五分钟本地演示
+# 固定彩排入口
 
-先确认 T0 的 `bootstrap` 和 T2 `orchestration.acceptance` 已合并。真实演示不制造任务、模型输出或事件：T2 的单次受预算限制入口调用 T0 固定样例，写出 `Envelope`、`TaskResult`、T3M `GeneView` 和 `UseRecord` sidecars，最后由本轨只读展示。
+先在本工作树安装锁定环境：
 
 ```powershell
-.\demo\run-demo.ps1
+$env:POETRY_VIRTUALENVS_IN_PROJECT='true'
+uv tool run poetry install --no-interaction
+npm ci --ignore-scripts --no-audit --no-fund
 ```
 
-打开 `http://127.0.0.1:7500`。可通过 `-Model`、`-MaxTokens`、`-MaxCostUsd` 与 `-TimeoutSeconds` 传入显式运行规格；该命令仅在 T2 返回成功且四个固定 sidecar 都存在时才预览，任何失败都停止，不会降级为 mock 或把未验证结果标为 `task_live`。
+真实彩排需由 I / 已授权操作员明确发起；脚本只传递两项不同的新任务授权，失败、未知或中断不会重试：
 
-仅用于布局和图表检查的 fixture 必须显式选择：
+```powershell
+# 自动：成员在两项任务之间按固定顺序下线
+.\demo\run-demo.ps1 -AuthorizeLive -Mode auto
+
+# 手动：页面先启动；控制台出现提示时按 Enter 确认成员下线
+.\demo\run-demo.ps1 -AuthorizeLive -Mode manual
+```
+
+每轮最多两项新任务（`repair`、`recovery`），三轮总预算由 I 跨根累计；脚本不发送密钥，也不调用未授权的第三项任务。页面只绑定 `127.0.0.1`，读取该轮 `rehearsal.json`，首次快照尚未写出时显示等待而非通过。
+真实模式会打印本次页面 launcher / listener PID 及 TEMP stdout/stderr 日志目录；展示结束前先核对命令行，再仅关闭这两个已打印的进程。
+
+已有真实历史的失败备用展示必须显式回放。该模式直接读取原证据，并把页面标为“回放视图”；不改原文件、不调用模型：
+
+```powershell
+.\demo\run-demo.ps1 -Replay "$env:TEMP\morph-rehearsal-<id>\rehearsal.json"
+```
+
+仅检查旧仪表板布局可用 `-Mock`，页面会标为 mock，真实接口和真实任务均为 `not_run`：
 
 ```powershell
 .\demo\run-demo.ps1 -Mock
 ```
 
-它在页面上标识为 `mock`，`interface_live` 与 `task_live` 都是 `not_run`，不能作为运行验收。真实预览只接受受限 T2 证据根目录：`events.jsonl`（完整 `Envelope`）、`result.json`（完整 `TaskResult`）、`genes.json`（`GeneView[]`）和 `adoption.json`（当前 run 的 `UseRecord[]`）；每一项都按共享 Pydantic 模型重验。没有 `metrics.json` 的正式来源，当前/均值/历史最佳图保持空态，不作推断。
+投影彩排清单：打开 `http://127.0.0.1:7500`；确认浏览器缩放 100%、系统分辨率为 1366×768 或 1920×1080；选择实际投影屏并确认无遮挡；观察同屏的 checkpoint、管道图与下线/恢复卡片。物理连屏、选屏和最终分辨率只能由现场操作员完成，未接入投影设备时均为 NOT_RUN。

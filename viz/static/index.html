@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Morphogenesis 运行仪表板</title>
+    <title>Morphogenesis 固定彩排仪表板</title>
     <link rel="stylesheet" href="style.css">
     <script src="/vendor/echarts.min.js" defer></script>
     <script src="app.js" defer></script>
@@ -11,16 +11,43 @@
   <body>
     <main>
       <header>
-        <div><p class="eyebrow">MORPHOGENESIS / T5</p><h1>蜂群运行仪表板</h1></div>
+        <div><p class="eyebrow">MORPHOGENESIS / FIXED REHEARSAL</p><h1>固定彩排 · 恢复路径一览</h1></div>
         <div id="provenance" class="badge">加载中</div>
       </header>
       <section class="source"><strong>数据来源</strong><span id="source-label"></span><span id="hub-status"></span></section>
+      <section id="rehearsal-board" class="rehearsal-board" aria-labelledby="rehearsal-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">DEMO STORYBOARD</p><h2 id="rehearsal-title">从已知 Bug 到恢复与经验代谢</h2></div>
+          <p id="rehearsal-mode" class="pending-copy">等待彩排快照；不会预设通过结果。</p>
+        </div>
+        <div class="story-grid">
+          <article class="story-card question-card" data-story="question">
+            <p class="step">01 / 出题</p><h3>固定已知 Bug</h3><strong id="story-question">未加载</strong>
+            <p id="story-question-detail">等待实际题目、已知失败点与来源。</p>
+          </article>
+          <article class="story-card checkpoint-card" data-story="checkpoints">
+            <p class="step">02 / 独立 checkpoint</p><h3>真实通过率</h3><strong id="story-checkpoint-rate">未加载</strong>
+            <ol id="story-checkpoints" class="checkpoint-list"><li>尚无 checkpoint 快照</li></ol>
+          </article>
+          <article class="story-card pipe-card" data-story="pipes">
+            <p class="step">03 / 选路</p><h3>管道权重</h3><div id="story-pipe-chart" class="story-pipe-chart"></div><div id="story-pipe-empty" class="empty pipe-empty" hidden></div><div id="story-pipes" class="pipe-list"><p>尚无管道快照</p></div>
+          </article>
+          <article class="story-card recovery-card" data-story="recovery">
+            <p class="step">04 / 故障恢复</p><h3>成员下线 → 重新选路</h3><strong id="story-offline-member">未发生 / 未加载</strong>
+            <p id="story-offline-reason">下线原因和恢复 checkpoint 均须来自真实快照。</p>
+          </article>
+        </div>
+        <article class="gene-ledger" data-story="gene-ledger">
+          <div><p class="step">05 / Gene 池</p><h3>生成 · 采用 · 衰减 · 归档</h3><p>仅显示已记录的经验：采用次数、权重、衰减时间与归档状态。</p></div>
+          <div id="story-genes" class="gene-ledger-list"><p>尚无 GeneView 快照</p></div>
+        </article>
+      </section>
       <section class="states" aria-label="验收三态">
         <article><span>contract_local</span><strong id="contract_local">not_run</strong><small>本地契约</small></article>
         <article><span>interface_live</span><strong id="interface_live">not_run</strong><small>真实接口</small></article>
         <article><span>task_live</span><strong id="task_live">not_run</strong><small>真实任务</small></article>
       </section>
-      <section class="grid">
+      <section id="legacy-dashboard" class="grid" aria-label="兼容的历史仪表板">
         <article class="panel"><h2>Gene 谱系</h2><p>仅使用显式导出的 Gene 正文；无正文时不推断谱系。</p><div id="gene-chart" class="chart"></div><div id="gene-empty" class="empty" hidden></div></article>
         <article class="panel"><h2>消息流</h2><p>按 Envelope 的 sender / receiver / msg_type 可视化。</p><div id="message-chart" class="chart"></div><div id="message-empty" class="empty" hidden></div></article>
         <article class="panel wide"><h2>指标：当前、历史均值、历史最佳</h2><p>无历史指标导出即保留空态；图表不预设增长方向。</p><div id="metric-chart" class="chart"></div><div id="metric-empty" class="empty" hidden></div></article>
