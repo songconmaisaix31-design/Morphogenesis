@@ -13,6 +13,9 @@ Write scope: this report and `tests/integration/check_finals_replay.cjs` only. P
 - `--prepare-only` checks all API snapshots without judging the old frontend against the new design. Result: 20 snapshots, 0 failures, source unchanged, private server exited. Artifacts: `.runtime/replay-preparation/` (ignored).
 - Added assertions bound to the new shell's semantic IDs: current-task tokens, actual unarchived Gene count, unique-task round, online membership, and the required black background. Historical token oracle: sequences 0–1 unknown, 2–5 = 911, 6–8 unknown, 9–19 = 1226. Recovery must not inherit 911 or display cumulative 2137. Low weight does not establish archive: only `archived_at` does.
 - Separate explicitly labelled 503/empty UI fixtures test acceptance/statistics reset and replay recovery. These start from sequence 11 with two active Genes so an already-zero final count cannot hide stale-state bugs.
+- Further browser checks cover main-panel overlap, internally clipped Gene text, all real event sequence/timestamps, four historical Gene states (new #4, decayed #5, adopted #10, archived #18–19), and archived dimming. The unchanged original `check_rehearsal_layout.cjs` also runs against this private replay server.
+
+Coordinator reported an initial, unaccepted candidate failure on port 7528: original `check_rehearsal_layout.cjs` read null `#provenance` after `page.goto` because the React shell had not mounted. This is a reported failed check, not this worker's successful validation; it was returned to F, and the original checker must pass unchanged on the delivered candidate.
 
 Commands executed:
 

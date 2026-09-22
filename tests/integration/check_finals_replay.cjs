@@ -46,9 +46,16 @@ function observe() {
     acceptance:Object.fromEntries(['contract_local','interface_live','task_live'].map(id=>[id,get(id).textContent])),
     pipes:series?{data:series.data,links:series.links}:null,
     ids:Object.fromEntries([...document.querySelectorAll('[id]')].map(el=>[el.id,el.textContent])),
+    panels:[...document.querySelectorAll('.morph-boards .morph-board, .morph-main .morph-panel, .gene-ledger')]
+      .map(el=>({className:el.className,...rect(el)})),
+    events:[...document.querySelectorAll('#event-feed .event-row')].map(el=>({
+      sequence:el.querySelector('.event-seq')?.textContent,stage:el.querySelector('.event-stage')?.textContent,
+      time:el.querySelector('.event-time')?.textContent,opacity:getComputedStyle(el).opacity,color:getComputedStyle(el).color})),
     ledger:{rect:rect(ledger),scrollHeight:ledger.scrollHeight,clientHeight:ledger.clientHeight,
       items:[...get('story-genes').children].map(el=>({text:el.textContent,rect:rect(el),className:el.className,
-        opacity:getComputedStyle(el).opacity,color:getComputedStyle(el).color}))},
+        opacity:getComputedStyle(el).opacity,color:getComputedStyle(el).color,
+        clipped:[el,...el.querySelectorAll('*')].filter(child=>child.clientWidth>0 && child.scrollWidth>child.clientWidth+1)
+          .map(child=>({text:child.textContent,scrollWidth:child.scrollWidth,clientWidth:child.clientWidth}))}))},
     theme:{background:getComputedStyle(document.body).backgroundColor,color:getComputedStyle(document.body).color}};
 }
 
@@ -64,6 +71,14 @@ function assertStage(row, current) {
   for (const item of row.ledger.items) {
     assert(item.rect.y >= 0 && item.rect.bottom < row.geometry.viewportHeight, 'Gene item outside first viewport');
     assert(item.rect.x >= 0 && item.rect.right <= row.geometry.viewport, 'Gene item horizontally clipped');
+    assert.deepEqual(item.clipped,[],'Gene content clipped inside ledger');
+  }
+  for(let i=0;i<row.panels.length;i++) {
+    const a=row.panels[i];
+    assert(a.x>=0 && a.right<=row.geometry.viewport && a.width>0 && a.height>0,'Main panel outside viewport');
+    for(const b of row.panels.slice(i+1)) {
+      assert(a.right<=b.x+.5 || b.right<=a.x+.5 || a.bottom<=b.y+.5 || b.bottom<=a.y+.5,'Overlapping main panels');
+    }
   }
   for (const pipe of current.pipes) {
     const edge = row.pipes.links.find(link=>link.source===agentName(pipe.src)&&link.target===agentName(pipe.dst));
@@ -107,6 +122,17 @@ function assertFinalsStats(row, current, history) {
   assert.equal(Number(row.ids['header-round']?.match(/\d+/)?.[0]),taskIds.indexOf(current.task_id)+1,'Task round is not snapshot sequence');
   assert.equal(Number(row.ids['header-members']?.match(/\d+/)?.[0]),current.members.filter(member=>member.available).length,'Online member count');
   assert.equal(row.theme.background,'rgb(11, 14, 20)','Required black page background');
+  assert.deepEqual(row.events.map(event=>event.sequence),[...history].reverse().map(snapshot=>`#${snapshot.sequence}`),'Event list must follow real snapshot history');
+  assert(row.mode.includes(row.events[0].stage),'Current step must agree with latest event');
+  for(let index=0;index<row.events.length;index++) {
+    assert.equal(row.events[index].time,new Date(history.at(-1-index).at*1000).toTimeString().slice(0,8),'Event timestamp must come from real snapshot');
+  }
+  const stateAt={4:'gene-new',5:'gene-decayed',10:'gene-adopted',18:'gene-archived',19:'gene-archived'}[current.sequence];
+  if(stateAt) for(const item of row.ledger.items) assert(item.className.split(' ').includes(stateAt),`Expected actual ${stateAt} at #${current.sequence}`);
+  if(current.genes.length) assert.equal(row.ledger.items.length,current.genes.length,'Every real Gene must appear');
+  if(current.genes.some(gene=>gene.archived_at!==null)) {
+    for(const item of row.ledger.items) assert(Number(item.opacity)<1,'Archived Gene must visibly dim');
+  }
 }
 
 async function checkReset(record, output) {
@@ -251,6 +277,18 @@ async function main(args = process.argv.slice(2)) {
         assert.deepEqual(record.external,[],'External requests');
       } catch(error) {summary.failures.push({width:record.width,error:String(error)});}
       write(path.join(output,`${record.width}.json`),{...record,page:undefined});
+    }
+    if(pages.length) {
+      setSnapshot(document.history.length-1);
+      // Run the pre-existing independent layout checker byte-for-byte unchanged.
+      summary.originalLayoutExit=await new Promise((resolve,reject)=>{
+        const legacy=spawn(process.execPath,[path.join(__dirname,'check_rehearsal_layout.cjs'),url,path.join(output,'original-layout')],
+          {windowsHide:true,env,stdio:['ignore','pipe','pipe']});
+        legacy.stdout.on('data',chunk=>fs.appendFileSync(path.join(output,'original-layout.stdout.log'),chunk));
+        legacy.stderr.on('data',chunk=>fs.appendFileSync(path.join(output,'original-layout.stderr.log'),chunk));
+        legacy.once('error',reject); legacy.once('exit',resolve);
+      });
+      assert.equal(summary.originalLayoutExit,0,'Original read-only layout checker failed');
     }
   } catch(error) {summary.failures.push({error:String(error)});}
   finally {
