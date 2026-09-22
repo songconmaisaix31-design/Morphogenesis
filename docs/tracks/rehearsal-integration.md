@@ -95,7 +95,7 @@ Orca 内嵌 tab 创建成功，但对同一 browserPageId 执行 snapshot 返回
 
 ## 第四轮网关：付费前集成与验收入口
 
-本轮采用 EvoMap Chat Completions，独立于上述三轮 Codex CLI；I 实际模型请求预算为 **0**。协调者审阅以下入口后，才在子进程环境注入 `MORPH_EVOMAP_API_KEY`，手动模式最多两个新 POST；失败/UNKNOWN 不自动重试，不换根重做。独立短文本 smoke 也不计入本轮。此节提交时第四轮真实运行为 **NOT_RUN，待协调者运行入口**。
+本轮采用 EvoMap Chat Completions，独立于上述三轮 Codex CLI；I 实际模型请求预算为 **0**。协调者审阅以下入口后，才在子进程环境注入 `MORPH_EVOMAP_API_KEY`，手动模式最多两个新 POST；失败/UNKNOWN 不自动重试，不换根重做。独立短文本 smoke 也不计入本轮。入口提交 `7c0bb6a2f7b39a7eb524c0c71bc31c7a110f883c` 先完成下述本地门禁；随后协调者运行唯一第四轮，结果见下一节。
 
 观察器沿用原三个位置参数，新增 `--executor codex|evomap` / `--model`，旧 CLI 默认不变。实际 runtime 到达 `awaiting_offline` 且两个页面均显示等待时，经 stdin 发送一次 Enter；没有强杀在途进程。每个历史 sequence 必须出现在两个浏览器的现场记录中，实际 ZRender 边界在逐阶段截图时检查。网关审计读取实际 request/response/proposal，核对 HTTP 200、请求模型、provider 返回模型原文、usage 与 result、任务/Agent 身份、应用正文与完整 Gene 注入/采用；不生成 CLI 事件或把 request 意图单独算成功。
 
@@ -117,7 +117,36 @@ node tests/integration/observe_rehearsal.cjs manual 7526 .runtime/integration/li
 # 完成后由 I 读取 summary.json.root，对该新根执行 audit_rehearsal.py；不得重跑 live。
 ```
 
-demo 在启动前拒绝占用的 7526，自行生成全新 OS TEMP 根，打印当前 launcher/listener PID 与 stdout/stderr 路径。真实结果返回后再记录本轮起止、请求数、tokens、模型、关键截图、只读 bytes+mtime 审计和实时服务身份；不承诺 viewer 跨 worker-release 存活。网关 cost 仍为 null，httpx phase timeout 不是绝对在途截止；物理投影与远端 Hub 未验证。
+demo 在启动前拒绝占用的 7526，自行生成全新 OS TEMP 根，打印当前 launcher/listener PID 与 stdout/stderr 路径。不承诺 viewer 跨 worker-release 存活。网关 cost 仍为 null，httpx phase timeout 不是绝对在途截止；物理投影与远端 Hub 未验证。
+
+## 第四轮网关：真实结果与只读交接
+
+协调者在精确入口 `7c0bb6a2f7b39a7eb524c0c71bc31c7a110f883c` 上运行一次 manual 彩排。观察器 UTC **2026-09-22 08:12:23.186–08:13:36.586**，实际 rehearsal 快照 **08:12:31.186430–08:13:35.489003**；最终 stage=`completed`、task_live=`passed`、exitCode=0、failure=null。`manual-enter.json` 记录 **08:12:52.836Z** 在真实 `awaiting_offline` 时通过 stdin Enter，随后 builder#0 的逻辑可用性下线，builder#1 执行新任务；没有在途进程强杀。
+
+全新原始根为 `C:/Users/DW/AppData/Local/Temp/morph-live4-98b36399c0324192b5af81f8077bc11d/morph-rehearsal-86e5351d49fe49a1b60ba0a4bb4c4e4e`。每任务保留 `gateway/request.json`、`response.json`、`proposal.json` 与 config/result/独立验证/事件；没有 CLI 调用或伪造 CLI turn。两次请求模型均为 **evomap-gpt-5.6-luna**，provider 响应模型原文均为 **gpt-5.6-luna**：
+
+| 新任务 / 实际 Agent | 请求开始–响应结束 UTC | HTTP / 请求数 | prompt / completion / total tokens | HTTP 实测耗时 |
+|---|---|---|---|---|
+| repair / builder#0 | 08:12:35.255422–08:12:43.344883 | 200 / 1 | 544 / 343 / **887** | 8.078 秒 |
+| recovery / builder#1 | 08:12:59.423884–08:13:09.767748 | 200 / 1 | 905 / 443 / **1348** | 10.343 秒 |
+
+合计 **2 POST / 2235 tokens / 0 CLI calls**；I 自行发送 **0**。usage 与两份实际 TaskResult 完全相符，cost_usd 全部保持 null。此后没有 retry、额外任务或模型探测；旧三轮仍单列为 6 CLI calls / 87133 tokens，不与本轮混称。
+
+I 执行 `python -B tests/integration/audit_rehearsal.py <上述新根>`，结果保存 `.runtime/integration/live-4-gateway-20260922-01/audit.json`：
+
+- 四份真实独立 `python -I -S acceptance_runner.py` 报告依次为失败/成功/失败/成功；两个全新样例各自 **0/3→3/3**，任务身份不同。
+- 请求、选路、结果与实际 Agent 身份对应，第二次 eligible 仅 builder#1；第一条边 inactive，ECharts 权重 **1.00→1.90**，反馈线宽 8.6，下线后为虚线。
+- 第一 Gene 的 source_attempt 对应 repair；第二份请求中的完整 experience 正文与 `repair/gene.json` 相等，含第一份真实 proposal 修复正文。第二 proposal 声明采用该 ID，adoption 记录对应第二次实际 Attempt，use_count=1、injected_count=1；没有只凭页面“成功”认定采用。
+- **21 个**非归档 GeneView 按真实 `exp(-(evaluated_at-anchor)/10)` 核验，τ=10 秒；两条 Gene 均在距真实锚点至少 `10*ln(5)` 秒后归档，权重低于 0.2，实际 resolve 列表为空，SQLite immutable 查询正文缓存为 0。
+- 只读审计和 replay 转换前后 **29 个原始文件 bytes+mtime 完全不变**。
+
+现场图像目录 `.runtime/integration/live-4-gateway-20260922-01/` 含 **20 个实际 sequence × 2 尺寸 = 40 张 live 阶段图**，另各一张 waiting 图；`1366.json`、`1920.json` 保存对应 ECharts、页面、几何和 HTTP 记录，两个页面均无 browser error，所有实际阶段均已观察。真实 ZRender 的 3 个节点/标签无裁切、标签相互及与节点不遮挡，无横向溢出；最终 Gene ledger bottom 分别为 696.36/723.86px，均在首屏。已主动查看初始、修复反馈、Gene 生成、等待 Enter、下线、第二 builder 选中、采用、衰减、归档、完成关键实图；小屏关键图为 `1366-{0,4,5,10,18}.png`，大屏为 `1920-{3,6,8,15,19}.png`。
+
+本轮常驻 live viewer 使 Node 的继承管道在生成 summary 后尚未自然结束。协调者核验并仅停止本次 live launcher **46756** / listener **41428** 后，观察父进程正常 exit 0；这是生命周期清理，不是彩排中的下线注入，也没有新调用。该限制如实保留，没有为结项修改领域或验收代码。
+
+协调者随后独立重建 [第四轮只读回放](http://127.0.0.1:7526/)：交接时 launcher **47180** → listener **26576**，日志目录 `C:/Users/DW/AppData/Local/Temp/morph-replay4-coordinator-5790d05a35a0492699a4b8c356093bfd`，身份记录 `live-4-gateway-20260922-01/replay-processes.json`。I 未操作此服务，只运行 `check_rehearsal_layout.cjs` 做 HTTP 只读复查；双视口截图为同目录 `replay/replay-{1366,1920}.png`，已目视 provenance=replay、原始证据只读，interface_live/task_live=not_run。该浏览器检查前后再次确认 29 个原文件 bytes+mtime 不变，见 `replay-immutable.json`。服务归 root 管理，不保证跨未来 release 存活；7525 旧回放未操作。
+
+精确源码入口的 [CI 35703445239](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35703445239) 已由 I 使用 `gh run view` 核验：`headSha=7c0bb6a2f7b39a7eb524c0c71bc31c7a110f883c`，Ubuntu 与 Windows 两 job 均 success，pytest/strict/build/SDK/独立 wheel 步骤全通过。后续提交仅补本轨结果报告；根协调者已读取 audit 并明确接受，负责主线治理记录与最终推送。上述物理投影、远端 Hub、在途强杀、OpenCode 工具调用/流式仍不属于本轮已验证范围。
 
 ## OpenCode 项目级备选模型
 
