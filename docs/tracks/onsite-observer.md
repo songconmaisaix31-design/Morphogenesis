@@ -43,3 +43,19 @@ node --test tests/integration/test_browser_options.cjs tests/integration/test_op
 ## 真实剩余限制
 
 本轨没有真实付费模型调用，没有操作或修改 7526 回放及第四轮证据，没有实接投影和真实人工终端彩排；这些均为 NOT_RUN，31 项本地测试不能升级为现场验收。工作树没有 `.venv`，本次只运行适用 Node 测试和语法检查；Python 全套测试、strict、构建由独立集成轨复验。操作员的物理投影见证与后续新真跑仍须分别记录。
+
+## 返修：隔离环境 fixture 的端口（2026-09-22）
+
+从本轨 `26a5cf1e417813244809807de44c44e917993713` 继续，只修改 `tests/integration/test_demo_environment.py` 与本报告。原测试真实复现 `probe.bind(('127.0.0.1', 7526))` 报 `WinError 10048`；未停止占用该端口的回放服务。
+
+将端口探测移到启动前，使用系统分配的临时端口 `bind(..., 0)`；该值传入 demo 的 `-Port`，fixture server 解析同一 `--port`，清理 URL 也使用同一个值。fixture server 禁用地址复用并设置 Windows `SO_EXCLUSIVEADDRUSE`，保留真实 launcher 的端口与进程所有权检查。选端口与新进程绑定仍有非原子间隙；若候选端口被抢占则明确失败，不重试、不接管、不终止未知监听，不能声称消除了所有并发竞争。
+
+验证借用集成轨已有 Python 环境执行当前工作树测试；未修改其依赖或文件：
+
+```powershell
+& 'C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-integration/.venv/Scripts/python.exe' -m pytest tests/integration/test_demo_environment.py -q -p no:cacheprovider
+node --test tests/integration/test_browser_options.cjs tests/integration/test_operator_enter.cjs tests/integration/test_observer_control.cjs
+git diff --check
+```
+
+结果：Python **1 passed in 29.83s**；Node **31 passed**；diff 检查通过。首次沙箱执行在 pytest 临时目录遇到 `WinError 5`，经批准在宿主环境完成复现和验证。Python 测试仅运行临时目录内的真实 PowerShell launcher 副本及本地假模块，没有付费模型调用，没有修改 demo/viz/运行时或 7526 回放；全套 Python/strict/build 仍由集成轨完成。
