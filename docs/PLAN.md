@@ -1,19 +1,21 @@
 # Morphogenesis 接手与核心闭环一页计划
 
-## 决赛前端重建（2026-09-22，当前）
+## 决赛前端重建（2026-09-23，当前）
 
-用户最新明确“完全放弃现有前端”，取代前一条仅 CSS / 禁改 DOM 的限制，也取代 Stack 外观要求。按指定深色黏菌黄设计系统重建纯 HTML/CSS/JS + ECharts 展示层；后端、数据格式、真实验收语义及已有证据保持不变。旧版保留在 Git 历史。不新增付费模型彩排或 Hub 操作。
+用户明确“完全放弃现有前端”，随后强调“复用模板，复用大厂符合要求的模板”，取代仅 CSS / 禁改 DOM 的限制及 Stack 外观要求。采用腾讯官方 [TDesign React Starter](https://github.com/Tencent/tdesign-react-starter) Dashboard 模板，固定 `fce97863edd5d5556f766dd4e342aace31a99487`（package 0.3.1，MIT）；实际复用 TopPanel、Board、AppLayout 源码与官方组件，通过主题变量适配黏菌黄，不能只仿外观。按已说明的推荐方案采用 React 构建，输出本地静态文件仍由原 Python 服务提供；后端、数据格式、真实验收语义及已有证据保持不变。旧版保留在 Git 历史。不新增付费模型彩排或 Hub 操作。
 
 设计：紧凑页头、checkpoint / 本轮 token / 活跃 Gene 三大数字、占据主画面的真实拓扑、四态 Gene 台账、按真实历史生成的事件流。唯一主色 #F5D547；页面 #0B0E14、面板 #151A23、文字 #E8ECF4，冷灰衰减；不使用渐变、玻璃、大光晕或 emoji。主要数字等宽、300ms 动效且尊重 reduced-motion。未知值显示未知，轮次不把快照序号冒充任务轮次。
 
 | 轨 | 固定所有者与 write_paths | 交付 |
 |---|---|---|
-| F | 原 Kimi / morph-frontend-stack / 同名分支；`viz/static/**`, `tests/t5/**`, `demo/README.md`, `THIRD_PARTY_NOTICES.md`, `docs/tracks/frontend-stack.md` | 从当前主线快进，完整重建展示；优先保留既有语义 ID 以复用阶段检查；开发测试返修由同一 Worker 完成并 commit + push |
+| F | 原 Kimi / morph-frontend-stack / 同名分支；`viz/static/**`, `viz/frontend/**`（独立 npm 构建与锁）, `tests/t5/**`, `demo/README.md`, `THIRD_PARTY_NOTICES.md`, `docs/tracks/frontend-stack.md` | 从当前主线快进，完整模板接入；优先保留既有语义 ID 以复用阶段检查；11 个原 T5 测试不改；开发测试返修由同一 Worker 完成并 commit + push |
 | I | 独立 Codex / morph-finals-integration / 同名分支；`tests/integration/check_finals_replay.cjs`, `docs/tracks/finals-integration.md`；只允许集成胶水 | 并行准备只读历史回放与 1280×720 / 1920×1080 验收；F 完成后普通精确 SHA 合并，11 展示测试、原阶段断言与构建通过；领域问题退 F，commit + push |
 
-原 `observe_rehearsal.cjs` 必然启动新 live，没有只读回放入口，本轮不擅自运行付费演示，也不把 replay 改标 live。I 复用其现有几何函数和阶段事实断言，新增只读回放入口，不修改原 observer / 断言；原 live 全流程记为本轮未执行。19 阶段必须完整覆盖，保存初始、任务中、下线、恢复完成的两档截图。失败时撤销本轮引入的违规变更，由 F 重新实现，不能放松断言。
+原 `observe_rehearsal.cjs` 必然启动新 live，没有只读回放入口，本轮不擅自运行付费演示，也不把 replay 改标 live。I 复用其现有几何函数和阶段事实断言，新增只读回放入口，不修改原 observer / 断言；原 live 全流程记为本轮未执行。原第五轮实际共 20 个快照（sequence 0–19）必须完整覆盖，保存初始、任务中、下线、恢复完成的两档截图。失败时撤销本轮引入的违规变更，由 F 重新实现，不能放松断言。
 
 主 Agent 只维护计划、状态、决策与 ACCEPTANCE，最终注明此次实际改动包含展示 DOM/JS（遵循最新指令），不能虚写“仅 CSS”。验收通过后切换可核对身份的 7527 本地服务，7526 未确认所有权不操作。
+
+Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原 Kimi 会话；I `task_d720edb9ba9e / ctx_f63f74d7919f` 独立准备回放检查后精确合并。模板已核验官方仓库 SHA 与 MIT 全文，本地参考克隆 `%TEMP%/morph-tdesign-fce97863` 只读。必须记录实际复用文件与改动映射，禁止带入模板的虚构指标、登录、远端示例接口和多余进程。
 
 ## 前端重塑：保留拓扑，复用 Stack 模板（2026-09-22）
 
