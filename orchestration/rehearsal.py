@@ -16,7 +16,7 @@ from typing import Literal
 from uuid import uuid4
 
 from langgraph.checkpoint.sqlite import SqliteSaver
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from bootstrap.sample import prepare_workspace
 from bootstrap.verify import SampleVerifier
@@ -32,8 +32,9 @@ from metabolism import LocalMetabolism
 from metabolism.models import UseRecord
 from orchestration.codex import CodexExecutor, Proposal
 from orchestration.events import export_events
+from orchestration.gateway import EVOMAP_MODEL, GatewayExecutor
 from orchestration.rehearsal_models import (
-    Checkpoint, Checkpoints, MemberAvailability, RehearsalDocument,
+    Checkpoint, Checkpoints, ExecutorKind, MemberAvailability, RehearsalDocument,
     RehearsalSnapshot, RoutingFact, Stage,
 )
 from orchestration.runtime import Runtime, adoption_reader
@@ -46,6 +47,7 @@ TaskName = Literal["repair", "recovery"]
 
 class RehearsalOptions(Contract):
     root: Path
+    executor: ExecutorKind = "codex"
     model: str = "gpt-5.6-luna"
     mode: Literal["auto", "manual"] = "auto"
     tau_seconds: float = Field(default=10, gt=0)
@@ -56,6 +58,13 @@ class RehearsalOptions(Contract):
     max_tokens: int = Field(default=20000, gt=0)
     max_cost_usd: float = Field(default=1, gt=0)
     authorized_tasks: list[TaskName] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def executor_model_default(cls, value: object) -> object:
+        if isinstance(value, dict) and value.get("executor") == "evomap" and "model" not in value:
+            return {**value, "model": EVOMAP_MODEL}
+        return value
 
 
 ExecutorFactory = Callable[[Path, RehearsalOptions], Executor]
@@ -124,7 +133,7 @@ class Rehearsal:
             raise ValueError("new rehearsal requires an empty root; use --replay to read existing evidence")
         self.options, self.root, self.provenance = options, root, provenance
         self.wait_for_offline, self.on_snapshot = wait_for_offline, on_snapshot
-        self.executor_factory = executor_factory or self._codex
+        self.executor_factory = executor_factory or (self._gateway if options.executor == "evomap" else self._codex)
         self.rehearsal_id = f"rehearsal-{uuid4().hex}"
         self.store = SQLiteStore(root / "metadata.db")
         provision = FixedProvisioner(5, roles=("planner", "builder", "builder", "reviewer", "aggregator")).provision(
@@ -154,6 +163,9 @@ class Rehearsal:
 
     def _codex(self, evidence: Path, options: RehearsalOptions) -> Executor:
         return CodexExecutor(evidence, model=options.model, stop_requested=self._stopped)
+
+    def _gateway(self, evidence: Path, options: RehearsalOptions) -> Executor:
+        return GatewayExecutor(evidence, model=options.model, stop_requested=self._stopped)
 
     def _stopped(self) -> bool:
         return (self.root / "STOP").exists()
@@ -199,6 +211,7 @@ class Rehearsal:
                     if any(result.status == "failed" for result in self.results) else "blocked"
                     if stage == "failed" else "not_run")
         snapshot = RehearsalSnapshot(
+            executor=self.options.executor, model=self.options.model,
             sequence=len(self.histories), stage=stage, at=now, task_id=self.routing.task_id,
             task_description=self.task_description, provenance=self.provenance,
             acceptance=Acceptance(provenance=self.provenance, contract_local="passed",
@@ -230,7 +243,7 @@ class Rehearsal:
             self.routing = self.routing.model_copy(update={"selected_attempt": event.attempt})
         if phase == "execute_intent":
             self._emit("recovery_selected" if recovery else "repair_selected",
-                       "LangGraph 已按有效成员列表选中实例；本任务只有一次执行调用")
+                       f"LangGraph 已按有效成员列表选中实例；本任务只有一次 {self.options.executor} 调用")
         elif phase == "reviewed":
             result = TaskResult.model_validate(event.payload["result"])
             self.results.append(result)
@@ -246,6 +259,7 @@ class Rehearsal:
         if self._stopped():
             raise InterruptedError("operator STOP before new task")
         task_root = workspace.parent
+        evidence = task_root / ("gateway" if self.options.executor == "evomap" else "cli")
         run_id = f"{self.rehearsal_id}-{name}"
         self.run_ids.append(run_id)
         config = RunConfig(run_id=run_id, workspace=str(workspace), writable_paths=["sample.py"],
@@ -264,10 +278,10 @@ class Rehearsal:
             with SqliteSaver.from_conn_string(str(self.root / "checkpoints.db")) as saver:
                 app = Runtime(config=config, saver=saver, events=self.store, results=self.store,
                               topology=self.topology, metabolism=self.metabolism,
-                              executor=self.executor_factory(task_root / "cli", self.options),
+                              executor=self.executor_factory(evidence, self.options),
                               verifier=self.verifier, members=self._eligible(), reviewer=self.reviewer,
                               provenance=self.provenance, bind_experience=self.metabolism.bind_attempt,
-                              adopted_genes=adoption_reader(task_root / "cli"), topology_feedback=feedback,
+                              adopted_genes=adoption_reader(evidence), topology_feedback=feedback,
                               stop_requested=self._stopped, on_event=self._observe)
                 state = app.start(self.routing.task_id)
             result = TaskResult.model_validate(state["result"])
@@ -276,7 +290,7 @@ class Rehearsal:
             (task_root / "result.json").write_text(result.model_dump_json(indent=2), encoding="utf-8")
             if result.status != "succeeded":
                 raise RuntimeError(f"{name}: {result.status}; {result.verdict.summary}; no retry")
-            proposal = Proposal.model_validate_json((task_root / "cli/proposal.json").read_text(encoding="utf-8"))
+            proposal = Proposal.model_validate_json((evidence / "proposal.json").read_text(encoding="utf-8"))
             gene = Gene(ref=GeneRef(gene_id=f"verified-{run_id}"), provenance=self.provenance,
                         signals_match=["python", "repair", "boundary"],
                         strategy=[proposal.summary, "Independently verified sample repair:\n" + proposal.content],
@@ -350,7 +364,8 @@ def main() -> int:
     parser.add_argument("--root", type=Path)
     parser.add_argument("--replay", type=Path)
     parser.add_argument("--mode", choices=["auto", "manual"], default="auto")
-    parser.add_argument("--model", default="gpt-5.6-luna")
+    parser.add_argument("--executor", choices=["codex", "evomap"], default="codex")
+    parser.add_argument("--model", help="defaults to gpt-5.6-luna or evomap-gpt-5.6-luna for the selected executor")
     parser.add_argument("--authorize-task", action="append", choices=["repair", "recovery"], default=[])
     parser.add_argument("--tau-seconds", type=float, default=10)
     parser.add_argument("--archive-threshold", type=float, default=0.2)
@@ -366,13 +381,15 @@ def main() -> int:
     if sorted(args.authorize_task) != ["recovery", "repair"]:
         parser.error("live rehearsal requires --authorize-task repair --authorize-task recovery (two NEW calls)")
     options = RehearsalOptions(
-        root=args.root or Path(tempfile.mkdtemp(prefix="morph-rehearsal-")), model=args.model,
+        root=args.root or Path(tempfile.mkdtemp(prefix="morph-rehearsal-")), executor=args.executor,
+        model=args.model or (EVOMAP_MODEL if args.executor == "evomap" else "gpt-5.6-luna"),
         mode=args.mode, tau_seconds=args.tau_seconds, archive_threshold=args.archive_threshold,
         stage_delay=args.stage_delay, tick_seconds=args.tick_seconds, timeout_seconds=args.timeout,
         max_tokens=args.max_tokens, max_cost_usd=args.max_cost_usd, authorized_tasks=args.authorize_task,
     )
-    print(json.dumps({"root": str(options.root.resolve()), "model": options.model, "max_new_calls": 2,
-                      "cost_note": "CLI dollar cap is not enforceable; unknown costs remain null"}), flush=True)
+    print(json.dumps({"root": str(options.root.resolve()), "executor": options.executor,
+                      "model": options.model, "max_new_calls": 2,
+                      "cost_note": "No hard in-flight dollar cap; unknown costs remain null"}), flush=True)
     document = Rehearsal(options).run()
     print(json.dumps({"root": str(options.root.resolve()), "stage": document.current.stage,
                       "failure": document.current.failure, "cost_usd": document.current.cost_usd}))
