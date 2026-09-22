@@ -1,5 +1,21 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 当前阶段：固定路演与三次完整彩排（2026-09-22）
+
+用户新增验收：固定已知 bug 的小仓库，自动判定 checkpoint；完整呈现“出题 → 管道图变化 → 下线一位 Agent 并重新选路恢复 → Gene 池代谢”。至少三次软件全流程彩排；实际投影接线单独记录，不能用浏览器截图代替。
+
+基线 `44e2889`。最小并行拆分为两条开发轨加一条独立集成轨，每轨固定 Agent / worktree / branch；原有核心实现与锁不重写。优先复用现有 LangGraph、TopologyEngine、LocalMetabolism、固定独立验证器、ECharts。主 Agent 只维护本计划、状态、决策和验收并核对只读 API 测试。
+
+| 轨 | 模型 | 互斥 write_paths | 交付 |
+|---|---|---|---|
+| R 运行彩排 | Astra xhigh | `orchestration/**`, `bootstrap/**`, `topology/**`, `tests/t2/**`, `tests/t0/test_bootstrap.py`, `tests/t3/topology/**`, `docs/tracks/rehearsal-runtime.md` | 最小有类型演示快照契约、逐项真实 checkpoint、成员下线/重新选路、真实经验产生/采用/墙钟衰减归档、可重复的固定流程 |
+| V 演示界面 | Terra high | `viz/**`, `demo/**`, `tests/t5/**`, `docs/tracks/rehearsal-ui.md` | 消费 R 快照，分步管道/成员/通过率/Gene 池展示，手动与自动彩排入口，大屏布局/现场清单 |
+| I 集成验收 | Astra high | 普通合并、`tests/integration/**`, `docs/tracks/rehearsal-integration.md`，少量导入配置胶水 | 锁环境测试/strict/build、真实完整彩排三次、浏览器截图、精确分支推送 |
+
+运行边界：每次彩排最多两次明确的新模型任务（常规修复、移除成员后新任务恢复），三次合计六次；不重试未知执行。下线发生于两任务间，属于固定成员池的可用性/选路自愈；没有证据时不得声称杀死在途模型进程后自动恢复。Gene 使用真实任务经验与真实时间；演示衰减时间常数需在页面明确显示。API 凭据只通过受保护的进程环境使用，Base URL/用途未确认前不发送，不入 Git/日志/Worker prompt。真实投影设备未确认前为 NOT_RUN。
+
+顺序：R 先交最小快照契约；V 同时完成布局后接该精确契约；各轨测试/返修/commit/push，统一集成做六次以内真实调用与三次浏览器全流程。旧阶段证据不计为本轮三次彩排。
+
 实施结果（2026-09-22）：以下八个功能轨与独立集成轨已完成当前核心原型，主线接收集成提交 `b6bb49c`。G1/G2 与固定样例的三次真实任务通过，外部验收限制和完整命令见 [ACCEPTANCE](ACCEPTANCE.md)，各轨分支/SHA 与资源处置见 [STATUS](STATUS.md)。本计划保留原始范围，未因验收收尾扩展 T4 或远端生产发布。
 
 ## 目标与事实源
