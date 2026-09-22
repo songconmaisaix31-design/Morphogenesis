@@ -1,6 +1,14 @@
 # 开发状态
 
-## 当前工作：网关第四轮准备中
+## 当前结果：网关第四轮与原 R/I 交付已通过
+
+第四轮真实软件彩排在 I 精确入口 `7c0bb6a2f7b39a7eb524c0c71bc31c7a110f883c` 完成：两个 HTTP 200，新坏样例各 0/3→3/3，builder#0 两任务间下线、builder#1 执行并采用 Gene，τ=10 秒衰减与归档不可检索通过；合计 2,235 tokens，费用未知。双视口全部 20 幕、29 原件不变性与 21 个衰减采样审计通过。200 tests / strict53 / 构建分发及 7c0bb6a 精确双平台 CI35703445239 通过。项目 OpenCode 配置已加入 7 个备用代码模型并通过隔离解析/枚举，真实开发工具调用仍未验收。
+
+原 R 分支 `songconmaisaix31-design/morph-rehearsal-runtime` 的 `94b70816784fcd46ce4f74b8e205bd009b789cc3` 已推送，无领域返修；I 分支 `songconmaisaix31-design/morph-rehearsal-integration` 最终报告 `61784b73be6b2a47a3a45f8e206678d4f932ae59` 已推送，协调者以 fast-forward 接收，保留完整历史。后续主线仅补治理验收记录，业务源码与双平台 CI 通过的 `7c0bb6a` 相同。原 live 7526 viewer 已核验关闭，观察父进程 exit0；新 7526 由协调者运行明确 replay 的只读回放，未来清理须重核身份。此前原三轮和第一轮 7525 回放未重跑或修改。详见 [验收记录](ACCEPTANCE.md)。
+
+R 当前派发 `ctx_232e8907f456` 与 I 当前派发 `ctx_3dc412a2eeef` 均已 succeeded。验明交付后分别 worker-release，均返回 retained / external_terminal / processAction=none，随后 ACK；保留原会话，不强关用户终端。
+
+### 本轮恢复与准备过程（历史）
 
 用户本轮已明确批准提交推送、集成复验和第四轮彩排，解除下文历史“待授权”阻塞。R 原 Task 重试派发为 `ctx_232e8907f456`，terminal 仍为 `term_52058249-adb8-426c-a996-5849cc5afa5d`。I 原 Codex 会话 `01a0c788-7734-7993-ba6c-77dd6f208d20` 已通过官方 resume 恢复，新 terminal `term_ca34dd06-6100-49c6-a43c-0511245b1852`，正式任务 `task_7cd7ff6071f2 / ctx_3dc412a2eeef`；旧终端确认 Codex 已退出至 PowerShell 后仅清理空闲 shell。分支、工作树和所有候选未替换；必要命令逐次按用户授权处理，不写永久允许规则。
 

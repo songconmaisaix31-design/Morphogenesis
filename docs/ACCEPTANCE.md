@@ -1,10 +1,28 @@
 # 验收矩阵
 
-## 网关第四轮：尚未执行
+## 网关第四轮：真实软件彩排通过（2026-09-22）
 
-当前用户已批准原 R/I 会话提交推送、集成复验及第四轮。R 网关候选 `94b70816784fcd46ce4f74b8e205bd009b789cc3` 已在原分支普通提交并推送，T2/固定验证器/拓扑回归 **71 passed in 59.73s**，此前受限沙箱导致的两项停止测试已在获准命令中通过。定向 MockTransport 检查 33 passed、时间竞态检查 7 passed、全包 strict 53 文件通过；精确 R 提交的 [CI 35701298167](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35701298167) 在 Ubuntu 与 Windows 全部通过。以上是代码与测试证据，不是第四轮 task_live。
+用户批准后，原 R 提交并推送 `94b70816784fcd46ce4f74b8e205bd009b789cc3`；原 I 普通合并后交付入口 `7c0bb6a2f7b39a7eb524c0c71bc31c7a110f883c`，最终只读报告 `61784b73be6b2a47a3a45f8e206678d4f932ae59` 已推送并由主线 fast-forward 接收。协调者在精确入口提交运行唯一第四轮，模型 `evomap-gpt-5.6-luna`，通过已确认的 `https://api.evomap.ai/v1/chat/completions` 执行两个新任务，没有重试。运行首幕至末幕为北京时间 **16:12:31–16:13:35**；观察器为 16:12:23–16:13:36，summary exitCode=0、failure=null、entered=true。
 
-I 已恢复原会话与原工作树，正在准备集成、网关证据审计、双视口观察与密钥不传给浏览器/viewer 的配置胶水。第四轮限定 EvoMap Gateway / `evomap-gpt-5.6-luna` 两个新任务、最多两个 POST，目前实际新增为 **0**。前三轮、一次短文本连通检查和 MockTransport 不能替代本轮 checkpoint、自愈或 Gene 代谢 live 验收。EvoMap 并行开发备选通过项目 OpenCode provider 配置准备，模型分档见 PLAN；工具调用兼容尚未实测。
+| 第四轮检查 | 实际结果 |
+|---|---|
+| 两次任务 | repair / recovery 两份全新坏样例，外置 `python -I -S acceptance_runner.py` 各从 0/3 到 3/3，四份独立报告一致 |
+| 网关 | 恰好 2 POST、2 HTTP 200；返回模型均 `gpt-5.6-luna`；544+343=887、905+443=1348，合计 **2,235 tokens**，美元费用 unknown/null |
+| 选路恢复 | 首任务 builder#0 成功；真实 awaiting_offline 后 stdin Enter 下线；新任务实际由 builder#1 完成，原成员管道 inactive |
+| Gene | 2 Gene、1 次实际采用；第二次请求中的完整经验正文、proposal、source_attempt 和最终 UseRecord 对应；τ=10 秒真实墙钟衰减，21 个采样点通过，低于 0.2 后归档并 resolve 为空，数据库缓存正文 0 |
+| 现场浏览器 | 1366×768、1920×1080 各捕获全部 20 幕，共 40 张阶段截图（另有两张初始等待画面）；实际图形边界无裁切/标签遮挡，Gene 区在首屏，页面错误 0 |
+| 只读审计 | 原运行根 29 份文件 bytes + mtime 未变；旧首轮 CLI 审计仍通过且 35 份文件不变；旧三轮未重跑、不计入第四轮 |
+| 本地门禁 | `python -B -m pytest -q --basetemp <私有目录>` **200 passed / 135.27s**；`python tools/typecheck.py` 53 文件 clean；Node 检查、SDK、sdist/wheel、安装后 11 包检查通过 |
+| 精确提交 CI | [7c0bb6a / run 35703445239](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35703445239)：Ubuntu 与 Windows 均 success |
+| 凭据 | 仅专用子进程环境使用；Chromium/viewer 排除该变量；164 份运行文本/浏览器记录/跟踪文件扫描无实际凭据样式命中；无全局账号或永久权限规则变更 |
+
+复验命令：集成工作树内 `node tests/integration/observe_rehearsal.cjs manual 7526 .runtime/integration/live-4-gateway-20260922-01 --executor evomap --model evomap-gpt-5.6-luna`，仅执行一次；只读审计为 `python -B tests/integration/audit_rehearsal.py <本轮根>`。证据根为 `C:/Users/DW/AppData/Local/Temp/morph-live4-98b36399c0324192b5af81f8077bc11d/morph-rehearsal-86e5351d49fe49a1b60ba0a4bb4c4e4e`；浏览器 summary、audit、manual-enter、阶段图片在集成工作树 `.runtime/integration/live-4-gateway-20260922-01/`。这些本地产物不入 Git，完整交付命令见 [I 报告](tracks/rehearsal-integration.md)。
+
+原 live viewer 经父子 PID/命令行核验后关闭，观察父进程最终 exit 0。协调者另建 [第四轮只读回放](http://127.0.0.1:7526/)，launcher 47180 → listener 26576，HTTP 成功且 provenance=replay、interface_live/task_live=not_run；日志 `C:/Users/DW/AppData/Local/Temp/morph-replay4-coordinator-5790d05a35a0492699a4b8c356093bfd/`。PID 仅为验收时身份，未来停止前必须重查，不承诺跨宿主生命周期存活。第一轮 7525 回放未操作。
+
+EvoMap 已作为并行开发备选配置加入 [opencode.evomap.json](../opencode.evomap.json)，复用 OpenCode 1.18.31 / MIT 的官方 OpenAI-compatible provider。独立 cwd/XDG 目录与虚假凭据下，配置解析、路径隔离及 7 个代码模型枚举通过；按难度的初始分配见 PLAN，3 个图片模型不进入代码池。**OpenCode 工具调用、流式兼容及其余模型端到端开发尚未实测**，配置可选不等于这些能力通过。
+
+剩余限制：本轮仅证明两任务间的固定成员下线和重新选路，未强杀在途 Agent 进程；物理投影接线/正式现场演示 NOT_RUN；Hub 仍待发布；动态供给与 T4 可选进化未验收；网关费用未知，httpx 分阶段超时不是绝对在途截止或美元硬封顶。
 
 ## 本轮验收：固定完整软件彩排已通过
 
