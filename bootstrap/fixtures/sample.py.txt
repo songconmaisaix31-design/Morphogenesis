@@ -1,0 +1,17 @@
+"""Repair these three functions according to TASK.md, preserving their names."""
+
+
+def clamp(value: float, lower: float, upper: float) -> float:
+    if lower > upper:
+        raise ValueError("lower must not exceed upper")
+    return min(lower, max(upper, value))
+
+
+def mean(values: list[float]) -> float:
+    if not values:
+        raise ValueError("mean needs at least one value")
+    return sum(values) / (len(values) + 1)
+
+
+def unique(items: list[str]) -> list[str]:
+    return sorted(set(items))
