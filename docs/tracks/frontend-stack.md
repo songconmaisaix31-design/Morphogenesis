@@ -2,6 +2,8 @@
 
 2026-09-22 · 实现者：Kimi（Kimi Code 0.43.1 / K3，会话 `session_b4a6ad0c-3fc4-4df3-8ef9-3f3f725da760`）· 分支 `morph-frontend-stack` · 基线 `0fe307a32032993386afe876b27a3b74cf5aa52e`
 
+提交：实现 `b5dfaccceca7280f69e658418757fc0c5c6fca0e`；许可文本与版本表述补充 `ff42968f9c1e44a71ef533e3a2d95a4abb25cf9f`；最终 SHA 以推送后 `git log origin/morph-frontend-stack` 为准（本报告提交为其后一个 docs 提交）。
+
 ## 范围与来源
 
 按用户指定，以参考站 https://davidwang.space/ 实际使用的 **Hugo Theme Stack** 重塑 `viz/static` 展示层；Python 静态服务、`/api/dashboard`、ECharts 与数据契约不变，未引入 Hugo 或任何应用框架、外部字体或 CDN。
