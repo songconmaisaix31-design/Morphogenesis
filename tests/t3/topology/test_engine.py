@@ -39,7 +39,7 @@ def engine() -> TopologyEngine:
             Connection(src=PLANNER, dst=BUILDER_A, weight=1.0),
             Connection(src=PLANNER, dst=BUILDER_B, weight=0.9),
         ],
-        TopologyPolicy(decay_lambda=0, reinforcement=1.0),
+        TopologyPolicy(decay_lambda=0.2, reinforcement=1.0),
     )
 
 
@@ -97,24 +97,30 @@ def test_feedback_reporter_is_not_conflated_with_routed_target() -> None:
 
 
 def test_required_review_link_is_never_pruned_and_minimum_preserves_a_link() -> None:
-    reviewer_link = Connection(src=PLANNER, dst=REVIEWER, weight=0.0, required=True)
-    optional_link = Connection(src=PLANNER, dst=BUILDER_A, weight=0.0)
+    reviewer_link = Connection(src=PLANNER, dst=REVIEWER, weight=0.2, required=True)
+    optional_link = Connection(src=PLANNER, dst=BUILDER_A, weight=0.2)
+    retained_optional_link = Connection(src=PLANNER, dst=BUILDER_B, weight=0.2)
     topology = TopologyEngine(
         PLANNER,
-        [reviewer_link, optional_link],
-        TopologyPolicy(prune_threshold=0.1, low_activity_window=2, min_active_outgoing=1),
+        [reviewer_link, optional_link, retained_optional_link],
+        TopologyPolicy(
+            decay_lambda=0.5,
+            prune_threshold=0.1,
+            low_activity_window=2,
+            min_active_outgoing=2,
+        ),
     )
 
     topology.advance_idle_window()
     topology.advance_idle_window()
     assert topology.prune() == [optional_link]
     active = {pipe.dst for pipe in topology.snapshot() if pipe.active}
-    assert active == {REVIEWER}
+    assert active == {REVIEWER, BUILDER_B}
 
 
 def test_candidates_are_explicit_and_feedback_never_creates_a_connection() -> None:
     topology = engine()
-    candidates = topology.candidate_connections([BUILDER_A, REVIEWER])
+    candidates = topology.candidate_connections([BUILDER_A, REVIEWER, REVIEWER])
 
     assert candidates == [Connection(src=PLANNER, dst=REVIEWER, weight=0.1)]
     with pytest.raises(ValueError, match="no configured connection"):
