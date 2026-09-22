@@ -10,3 +10,5 @@
 8. 上游依据：[GEP SDK](https://github.com/EvoMap/gep-sdk-js) 明确只提供 schema/协议助手；[GEP MCP Server](https://github.com/EvoMap/gep-mcp-server) 提供工具接口；[LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence) 的 checkpointer 保存线程状态；[FAISS](https://github.com/facebookresearch/faiss) 提供检索实现；[SQLModel](https://github.com/fastapi/sqlmodel)、[官方 MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)、[ECharts](https://github.com/apache/echarts) 分别用于元数据、协议客户端、图表。最终安装版本与 notices 由 T0 维护。
 9. Orca 1.4.199 的 `worker-start --worktree new-child` 在当前会话实测返回 `selector_not_found`，没有创建 Task/Dispatch。改用受支持的 `worktree create --agent codex`，取得精确 worktree/terminal 后 `worker-start --terminal ... --worktree id:... --from <coordinator>`；无自制调度、无重复 worker。
 10. 用户明确授权按难度选择模型。本机 `models_cache.json` 实查存在 gpt-6-astra、gpt-5.6-terra、gpt-5.6-luna 及 high/xhigh 等档位。复杂契约/协议/恢复/一致性分配 Astra，边界明确的拓扑/展示分配 Terra，固定规模供给适配分配 Luna；不改用户全局模型配置。
+11. 执行入口采用现有 Codex CLI 的只读模式与结构化提案，由本项目适配器仅应用 `sample.py` 白名单内容，再执行固定独立验收；不自建模型工具循环。CLI 不支持的硬费用封顶如实记限制，未知 usage 不置零。
+12. 协调审查发现 T3T 初版失败信号负值偏离方案成功率语义，闲置窗口未实际衰减；已交原 Worker 返修，旧 `57b26d1` 暂不接受为最终 merge-ready。
