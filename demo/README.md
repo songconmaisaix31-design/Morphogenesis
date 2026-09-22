@@ -19,6 +19,7 @@ npm ci --ignore-scripts --no-audit --no-fund
 ```
 
 每轮最多两项新任务（`repair`、`recovery`），三轮总预算由 I 跨根累计；脚本不发送密钥，也不调用未授权的第三项任务。页面只绑定 `127.0.0.1`，读取该轮 `rehearsal.json`，首次快照尚未写出时显示等待而非通过。
+页面展示层自 2026-09-22 起采用 Hugo Theme Stack（GPL-3.0-only）风格：左侧导航与明暗切换、白色圆角卡片、右侧数据来源/验收三态栏；端口、数据源与拓扑语义不变，详见 `docs/tracks/frontend-stack.md`。
 真实模式会打印本次页面 launcher / listener PID 及 TEMP stdout/stderr 日志目录；展示结束前先核对命令行，再仅关闭这两个已打印的进程。
 
 已有真实历史的失败备用展示必须显式回放。该模式直接读取原证据，并把页面标为“回放视图”；不改原文件、不调用模型：

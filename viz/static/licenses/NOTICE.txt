@@ -1,0 +1,29 @@
+Third-party license texts for the viz/static visual layer
+=========================================================
+
+The T5 dashboard's presentation layer is adapted from Hugo Theme Stack.
+
+1. Hugo Theme Stack — GPL-3.0-only
+   Copyright (C) Jimmy Cai (https://jimmycai.com)
+   Source: https://github.com/CaiJimmy/hugo-theme-stack
+   Pinned for this adaptation: v4.0.3, commit
+   3e123a30b79b5d52a3a8e88a9dd678fcfd28e418 (2026-05-25)
+   Full license text: LICENSE-hugo-theme-stack.GPL-3.0.txt
+   Adapted: design tokens, extended container/sidebar/card layout,
+   menu and hamburger structure, StackColorScheme light/dark pattern.
+   Theme attribution is retained in ../style.css and the page footer.
+   The reference site https://davidwang.space/ runs this theme; its exact
+   deployed theme version was not confirmed — v4.0.3 is the version this
+   track pinned and reused, not a version read from the reference site.
+
+2. Tabler Icons — MIT
+   Copyright (c) 2020-2026 Paweł Kuna
+   Source: https://github.com/tabler/tabler-icons (as bundled by Stack v4.0.3)
+   Full license text: LICENSE-tabler-icons.MIT.txt
+   Used: inline menu and color-scheme toggle icons in ../index.html.
+
+3. hamburgers — MIT
+   Copyright (c) 2016 Jonathan Suh <hello@jonsuh.com> (jonsuh.com)
+   Source: https://github.com/jonsuh/hamburgers (as bundled by Stack v4.0.3)
+   Full license text: LICENSE-hamburgers.MIT.txt
+   Used: the hamburger toggle pattern in ../style.css (simplified).
