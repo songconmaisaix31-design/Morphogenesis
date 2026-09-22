@@ -238,10 +238,13 @@ class EvomapService:
         self, search: CommunitySearch, state: str, now: float, *, error: str | None = None
     ) -> CommunitySearch:
         fetched_at = search.fetched_at
+        age: float | None = None
+        if fetched_at is not None and state != "live":
+            age = max(0.0, now - fetched_at)
         return CommunitySearch(
             state=state, query=search.query, fetched_at=fetched_at,
             cache_ttl_seconds=search.cache_ttl_seconds,
-            cache_age_seconds=(now - fetched_at) if fetched_at is not None else None,
+            cache_age_seconds=age,
             error=error, search_status=search.search_status, provider=search.provider,
             count=search.count, assets=search.assets,
         )
@@ -250,10 +253,13 @@ class EvomapService:
         self, categories: CommunityCategories, state: str, now: float, *, error: str | None = None
     ) -> CommunityCategories:
         fetched_at = categories.fetched_at
+        age: float | None = None
+        if fetched_at is not None and state != "live":
+            age = max(0.0, now - fetched_at)
         return CommunityCategories(
             state=state, fetched_at=fetched_at,
             cache_ttl_seconds=categories.cache_ttl_seconds,
-            cache_age_seconds=(now - fetched_at) if fetched_at is not None else None,
+            cache_age_seconds=age,
             error=error, by_type=categories.by_type,
             by_gene_category=categories.by_gene_category,
         )
