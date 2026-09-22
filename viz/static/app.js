@@ -7,6 +7,7 @@ const agentLabel = (agent) => agent && typeof agent === "object" ? `${agent.role
 const clear = (id) => { byId(id).replaceChildren(); };
 const number = (value, digits = 2) => Number.isFinite(value) ? Number(value).toFixed(digits) : "未知";
 const chartFor = (id) => echarts.getInstanceByDom(byId(id)) ?? echarts.init(byId(id));
+const shortGeneId = (value) => { const id = String(value ?? "unknown"); return id.length > 14 ? `${id.slice(0, 6)}…${id.slice(-6)}` : id; };
 const stageLabel = {
   task_ready: "题目待执行", repair_selected: "首次选路", repair_reviewed: "首次复核", gene_generated: "经验生成",
   awaiting_offline: "等待下线确认", member_offline: "成员已下线", recovery_ready: "恢复任务就绪", recovery_selected: "恢复选路",
@@ -56,12 +57,17 @@ function topologyGraph(pipes, members) {
     value: `权重 ${number(pipe.weight)} · 流量 ${number(pipe.flow)} · 成功率 ${(Number(pipe.success_rate) * 100).toFixed(0)}% · ${pipe.active ? "在线" : "离线"}`,
     lineStyle: { width: Math.max(2, Math.min(12, 1 + Number(pipe.weight) * 4)), type: pipe.active ? "solid" : "dashed", color: pipe.active ? "#5ebeea" : "#778494", opacity: pipe.active ? 1 : .55 },
   }));
-  chartFor("story-pipe-chart").setOption({ animationDurationUpdate: 260, tooltip: { renderMode: "richText", formatter: (point) => point.data.value || point.name }, series: [{ type: "graph", layout: "circular", roam: false, label: { show: true, position: "bottom", fontSize: 11 }, lineStyle: { curveness: .1 }, data: nodes, links }] }, { notMerge: true });
+  chartFor("story-pipe-chart").setOption({ animationDurationUpdate: 260, tooltip: { renderMode: "richText", formatter: (point) => point.data.value || point.name }, series: [{ type: "graph", layout: "circular", roam: false, top: 12, bottom: 16, label: { show: true, position: "top", distance: 4, fontSize: 10 }, lineStyle: { curveness: .1 }, data: nodes, links }] }, { notMerge: true });
 }
 
 function rehearsalBoard(rehearsal) {
   if (!rehearsal) {
     text("rehearsal-mode", "尚未加载彩排快照；不展示预设通过结果。");
+    text("story-question", "未加载"); text("story-question-detail", "等待实际题目、已知失败点与来源。");
+    text("story-checkpoint-rate", "未加载"); clear("story-checkpoints"); append(byId("story-checkpoints"), "li", "尚无独立 checkpoint 快照");
+    clear("story-pipes"); append(byId("story-pipes"), "p", "尚无管道快照"); showEmpty("story-pipe-chart", "story-pipe-empty", "尚无管道快照");
+    text("story-offline-member", "未发生 / 未加载"); text("story-offline-reason", "下线原因和恢复 checkpoint 均须来自实际快照。");
+    clear("story-genes"); append(byId("story-genes"), "p", "尚无经验池快照");
     return;
   }
   const current = rehearsal.current;
@@ -70,8 +76,9 @@ function rehearsalBoard(rehearsal) {
   const replay = rehearsal.mode === "replay";
   const modeLabel = replay ? "回放视图" : rehearsal.mode === "mock" ? "模拟快照" : "现场快照";
   text("rehearsal-mode", `${modeLabel} · ${stageLabel[current.stage] ?? "未标记阶段"} · #${current.sequence}${replay ? " · 原始证据只读" : ""}`);
-  text("story-question", current.task_id);
-  text("story-question-detail", current.task_description || "真实快照未提供题目说明。");
+  const recoveryTask = String(current.task_id ?? "").startsWith("recovery-");
+  text("story-question", recoveryTask ? "恢复任务（新样例）" : "首次修复任务"); byId("story-question").title = String(current.task_id ?? "");
+  text("story-question-detail", recoveryTask ? "移除成员后，另一名构建成员在新坏样例上重新选路。" : "修复 clamp、mean、unique 三个已知 Bug，并交由独立复核。");
 
   const checkpointList = byId("story-checkpoints"); clear("story-checkpoints");
   if (!current.checkpoints) {
@@ -90,8 +97,7 @@ function rehearsalBoard(rehearsal) {
     const row = document.createElement("div"); row.className = `pipe-row ${pipe.active ? "pipe-active" : "pipe-inactive"}`;
     row.style.setProperty("--pipe-width", `${Math.max(3, Math.min(14, 2 + Number(pipe.weight) * 4))}px`);
     append(row, "strong", `${agentLabel(pipe.src)} → ${agentLabel(pipe.dst)}`);
-    append(row, "span", `权重 ${number(pipe.weight)}${before ? `（前 ${number(before.weight)}）` : "（无前序）"}`);
-    append(row, "span", `流量 ${number(pipe.flow)} · 成功率 ${(Number(pipe.success_rate) * 100).toFixed(0)}% · ${pipe.active ? "在线" : "离线"}`);
+    append(row, "span", `权重 ${number(pipe.weight)}${before ? `（前 ${number(before.weight)}）` : "（无前序）"} · 流量 ${number(pipe.flow)} · ${(Number(pipe.success_rate) * 100).toFixed(0)}% · ${pipe.active ? "在线" : "离线"}`);
     pipeList.append(row);
   });
 
@@ -110,7 +116,7 @@ function rehearsalBoard(rehearsal) {
   if (!current.genes?.length) append(geneList, "p", "尚无 GeneView 快照");
   current.genes.forEach((gene) => {
     const card = document.createElement("div"); card.className = "gene-fact";
-    append(card, "strong", `${String(gene.ref?.gene_id ?? "unknown").slice(0, 12)} v${gene.ref?.version ?? 1}`);
+    append(card, "strong", `${shortGeneId(gene.ref?.gene_id)} v${gene.ref?.version ?? 1}`);
     append(card, "span", `生成：${gene.source_attempt ? agentLabel(gene.source_attempt.agent) : "未记录"}`);
     append(card, "span", `采用 ${gene.use_count} · 权重 ${number(gene.weight)}`);
     append(card, "span", `τ ${number(gene.tau_seconds, 1)} 秒 · ${gene.archived_at === null ? "活跃" : "已归档"}`);
@@ -122,7 +128,7 @@ function geneGraph(genes, adoptions) {
   if (!genes.length) return showEmpty("gene-chart", "gene-empty", "未导出 T3M GeneView；不能从消息、候选或结果反推谱系。");
   showChart("gene-chart", "gene-empty");
   const nodeName = (gene) => `${gene.ref.gene_id}@v${gene.ref.version ?? 1}`;
-  const shortGeneLabel = (gene) => `Gene ${String(gene.ref.gene_id).slice(0, 10)}${String(gene.ref.gene_id).length > 10 ? "…" : ""} v${gene.ref.version ?? 1}`;
+  const shortGeneLabel = (gene) => `Gene ${shortGeneId(gene.ref.gene_id)} v${gene.ref.version ?? 1}`;
   const nodes = genes.map((gene) => ({ name: nodeName(gene), shortLabel: shortGeneLabel(gene), value: `${nodeName(gene)}\n采用 ${gene.use_count ?? 0} 次`, symbolSize: 46 }));
   // The shared model has no Gene parent field. Edges show only an explicit
   // source_attempt or precise UseRecord, never an inferred genetic parent.
@@ -159,6 +165,10 @@ async function main() {
     text("source-label", data.source_label); text("hub-status", data.hub_status); stateCards(data.acceptance ?? {}); rehearsalBoard(data.rehearsal);
     const notes = byId("notes"); clear("notes"); (data.notes ?? []).forEach((note) => { const item = document.createElement("li"); item.textContent = note; notes.append(item); });
     geneGraph(data.genes ?? [], data.adoptions ?? []); messageGraph(data.events ?? []); metricChart(data.metrics ?? []);
-  } catch (error) { text("provenance", "加载失败"); byId("notes").textContent = `仪表板数据不可用：${error.message}`; }
+  } catch (error) {
+    text("provenance", "数据不可用"); byId("provenance").className = "badge";
+    text("source-label", "当前快照无法读取"); text("hub-status", "状态未知（页面数据不可用）"); stateCards({}); rehearsalBoard(null);
+    clear("notes"); append(byId("notes"), "li", `仪表板数据不可用：${error.message}`);
+  }
 }
 window.addEventListener("DOMContentLoaded", () => { main(); window.setInterval(main, 1000); });
