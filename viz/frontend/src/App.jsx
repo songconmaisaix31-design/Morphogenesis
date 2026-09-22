@@ -192,18 +192,40 @@ const App = () => {
     return () => { stopped = true; window.clearTimeout(timer); };
   }, [pushToDataZones]);
 
-  // Independent read-only EvoMap status; never feeds the runtime topology.
-  // Read once when the info view is first entered, then only on the explicit
-  // refresh button — no polling of a read-only search endpoint.
-  const fetchEvomap = useCallback(async () => {
-    setEvomap((prev) => ({ ...prev, state: 'loading' }));
+  // Independent read-only EvoMap explorer; never feeds the runtime topology.
+  // Requests fire only on first entry into the info view and on explicit
+  // search/refresh — no polling. A sequence guard drops out-of-order
+  // responses when the user searches again while a request is in flight.
+  const evomapQueryRef = useRef({ q: 'repair', type: undefined, limit: 10 });
+  const evomapSeqRef = useRef(0);
+  const searchEvomap = useCallback(async (query) => {
+    if (query) evomapQueryRef.current = query;
+    const params = evomapQueryRef.current;
+    const search = new URLSearchParams();
+    if (params.q) search.set('q', params.q);
+    if (params.type) search.set('type', params.type);
+    if (params.limit) search.set('limit', String(params.limit));
+    const seq = ++evomapSeqRef.current;
+    setEvomap((prev) => ({ ...prev, state: prev.data ? prev.state : 'loading', loading: true }));
     try {
-      const response = await fetch('/api/evomap', { cache: 'no-store' });
-      if (response.status === 404) setEvomap({ state: 'missing' });
-      else if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      else setEvomap({ state: 'ok', data: await response.json(), at: Date.now() });
+      const response = await fetch(`/api/evomap?${search.toString()}`, { cache: 'no-store' });
+      if (seq !== evomapSeqRef.current) return;
+      if (response.status === 404) {
+        setEvomap({ state: 'missing' });
+      } else if (response.status === 400) {
+        const body = await response.json().catch(() => null);
+        setEvomap((prev) => ({ ...prev, state: 'invalid', detail: body?.detail ?? 'invalid_query', loading: false }));
+      } else if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      } else {
+        const data = await response.json();
+        setEvomap({ state: 'ok', data, loading: false });
+      }
     } catch (error) {
-      setEvomap({ state: 'error', detail: error.message });
+      if (seq !== evomapSeqRef.current) return;
+      // Keep the last good payload but mark the top-level state as a real
+      // failure — old results must never pose as a fresh success.
+      setEvomap((prev) => ({ ...prev, state: 'error', detail: error.message, loading: false }));
     }
   }, []);
 
@@ -223,9 +245,9 @@ const App = () => {
   useEffect(() => {
     if (view === 'swarm' && !evomapRequestedRef.current) {
       evomapRequestedRef.current = true;
-      fetchEvomap();
+      searchEvomap();
     }
-  }, [view, fetchEvomap]);
+  }, [view, searchEvomap]);
 
   useEffect(() => {
     const onHash = () => setViewState(viewFromHash());
@@ -265,7 +287,7 @@ const App = () => {
           </section>
           <section className={viewClass('swarm')} aria-hidden={view !== 'swarm'} inert={view === 'swarm' ? undefined : ''}>
             <Dashboard dashboard={dashboard} active={view === 'swarm'} reducedMotion={reducedMotion} />
-            <EvoMapPanel evomap={evomap} onRefresh={fetchEvomap} />
+            <EvoMapPanel evomap={evomap} onSearch={searchEvomap} />
           </section>
         </div>
       </Content>

@@ -26,13 +26,14 @@ write_paths 见 `docs/FRONTEND_REFACTOR_PLAN.md`。视觉节奏参考 christmas.
 - 文字/DOM 区每次更新；ECharts 重绘只在 swarm 视图可见且页面非隐藏时进行（`redraw`），视图激活时立即 `resize`+重绘。
 - 连接失败不清空数据：保留上次快照，badge 变 `连接失败`（虚线青绿）+ `#connection-state` 给出原因；首次加载即失败显示 `数据不可用` 并在运行说明写入原因。恢复后自动回到 `来源：<provenance>`。
 - `provenance` / `acceptance` / `source_label` / 任务 / 事件 / Gene / 指标等原有功能与 DOM id 全部保留；replay/mock/live 标注沿用 app.js 既有逻辑。
-- EvoMap：独立只读 `/api/evomap`，首次进入信息界面读一次 + 手动刷新按钮（不轮询）。面板递归渲染嵌套契约（如 `community_search.assets`、`local_pool.genes`、source/cache/失败字段），404 显示“尚未提供”，永不并入运行拓扑。
+- EvoMap：独立只读探索面板（契约 `morph.evomap.readonly/1`，见 E 轨文档）。首次进入信息界面读一次默认查询，之后仅手动「搜索/刷新」，不轮询；`q`/`type`(Gene/Capsule)/`limit` 经 `URLSearchParams` 编码，序号守卫丢弃乱序响应，请求中按钮禁用且保留上次结果标注「更新中」。资产按存在字段呈现 short_title/nl_summary/trigger_text/type/status/trust_tier/GDI/similarity/upvotes/view_count/来源节点/asset_id（空 title 回退 asset_id）；null/未知数值一律不显示，绝不渲染为 0；`community_search.state`(live/cache/stale_cache/error)、缓存年龄/TTL、固定错误码、provider/search_status 原样标注；`community_categories`（官方 /a2a/assets/categories）按 `by_type`/`by_gene_category` 嵌套结构展示真实计数并带自身 state/error，缺失时不渲染不造假；`local_pool` 标注 sqlite 来源与 ok/empty/unconfigured/error；`boundaries` 原样列出。400 `invalid_query` 显示 detail，404 显示端点未提供；请求失败保留旧数据但顶层 state 置为 error 并显式标注「以下为上次成功结果」。EvoMap 数据不进入运行拓扑任何区域。
 
 ## 验证
 
-- `cd viz/frontend && npm ci && npm run build`：通过，产物 `viz/static/assets/finals-shell.{js,css}`（207.76 kB / 63.05 kB）。
+- `cd viz/frontend && npm ci && npm run build`：通过，产物 `viz/static/assets/finals-shell.{js,css}`（212.91 kB / 64.80 kB）。
 - `node --check viz/static/app.js`：通过。
-- 真实浏览器冒烟（playwright-core + chromium_headless_shell-1234，`python -m viz.server --port 7584 --input demo/data/mock-run.json`）：首屏仅大字+双标识、页头页脚隐藏、CRT 0.04、首页无全局光标；点击/键盘反复切换且**每次激活恰好一次重绘刷新**（视图 effect 已去重，离开即取消 rAF 刷新）；swarm 视图图表激活重绘、空态真实；CRT 开关+localStorage；503 时数据保留+反馈、恢复；EvoMap 404 态与手动刷新 1 次；reduced motion 无转场无自定义光标；`#/swarm` 深链；0 页面错误。
+- 真实浏览器冒烟（playwright-core + chromium_headless_shell-1234，`python -m viz.server --port 7584 --input demo/data/mock-run.json`）：首屏仅大字+双标识、页头页脚隐藏、CRT 0.04、首页无全局光标；点击/键盘反复切换且**每次激活恰好一次重绘刷新**（视图 effect 已去重，离开即取消 rAF 刷新）；swarm 视图图表激活重绘、空态真实；CRT 开关+localStorage；503 时数据保留+反馈、恢复；EvoMap 404 态；reduced motion 无转场无自定义光标；`#/swarm` 深链；0 页面错误。
+- EvoMap 交互验收（同一 Chromium，后端为 E 轨 worktree 代码只读挂载本轨 static，`/tmp/morph-smoke/evomap_server.py`；真实 Hub 公开只读 GET，无密钥无付费调用）：首页 0 次 EvoMap 请求；首次进入恰好 1 次默认请求并渲染 10 条真实资产（State Machine Repair Workflow Management 等，short_title/nl_summary/GDI/trust/相似度/来源节点齐全）与真实类别计数（Gene 2,509,437 / Capsule 2,505,905 / repair 342,783 等，按 `by_type` + `by_gene_category` 嵌套结构渲染）；两次不同搜索产生两条不同 URL 编码请求（`q=clamp+bug+fix&type=Capsule`、`q=recovery+strategy&type=Gene`）并各显示真实结果；手动刷新恰好 1 次同查询请求；live/cache 状态标注正确（二次同键为 cache）；成功后断线：旧结果保留并明确标注「当前查询失败；以下为上次成功结果」，重连恢复；null GDI/相似度/计数不显示为 0；400/404/503 均可读；EvoMap 资产标题未出现在拓扑区；0 页面错误。
 
 ## 限制与移交
 
