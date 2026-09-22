@@ -28,7 +28,9 @@ function ghostText(ghost) {
   const name = agentKey(ghost.agent);
   switch (ghost.status) {
     case 'recovered':
-      return `${name} 已离开（两任务之间移除），任务重路由 → ${agentKey(ghost.rerouteTarget)}；恢复任务已成功。`;
+      // The literal theme phrase is reserved for a real removed_member whose
+      // recovery actually succeeded; name/target details follow it.
+      return `Ghost 已离开，任务重路由。${name}（两任务之间移除）→ ${agentKey(ghost.rerouteTarget)}；恢复任务已成功。`;
     case 'rerouted':
       return `${name} 已离开（两任务之间移除），恢复选路 → ${agentKey(ghost.rerouteTarget)}；恢复结果尚未判定，不代表已恢复。`;
     case 'failed':
