@@ -1,10 +1,10 @@
 # 开发状态
 
-## 当前执行：腾讯官方模板决赛版（2026-09-23）
+## 最新完成：腾讯官方模板决赛版与 7527 交接（2026-09-23）
 
-用户已明确放弃旧前端并要求复用大厂模板。当前采用腾讯官方 TDesign React Starter Dashboard，固定 `fce97863edd5d5556f766dd4e342aace31a99487` / MIT，深色黏菌黄主题；不再延续 Stack 外观。原 Kimi 在 `morph-frontend-stack` 负责实际模板源码/组件接入，独立 I 在 `morph-finals-integration` 准备只读阶段验收，产品返修仍回 Kimi；Orca 身份与路径见 [计划](PLAN.md)。
+已按最新要求采用腾讯官方 TDesign React Starter Dashboard，固定 `fce97863edd5d5556f766dd4e342aace31a99487` / MIT。实际复用模板源码与官方组件，完成黏菌黄主题、三大数字及 300ms 动效、真实权重拓扑、Gene 四态与历史事件流。Kimi F `morph-frontend-stack` 最终 `f99d13988465cd7e56db591ec2cdbbbca2bee553`；独立 I `morph-finals-integration` 最终 `c62bab718265580cbe9941bfcb8d6ca9f63828c6`。两分支已推送并核对远端，主线 fast-forward 接收；产品返修均由原 Kimi 完成。实际变更包含展示 DOM/JS 与 React 构建，后端及数据契约未改。
 
-第五轮真实历史文件经 I 核对包含 **20 个快照（sequence 0–19）**，本轮完整重放全部快照，不能把最终序号 19 当成总数。原 observer 无只读模式，不启动新付费真跑；复用其几何和阶段事实断言，同时保留 replay 的 `interface_live/task_live=not_run`。7527 当前仍是上一轮已验收页面，新版未验收前不替换。
+原 11 项 T5、31 项 Node、20 快照 × 三视口共 60 帧回放、8 张命名关键截图、数字动效/减少动画/错误空态、干净前端构建和安装包检查通过；29 个原证据文件字节与时间戳不变。命令和限制见 [视觉改版验收](ACCEPTANCE.md) 与 [独立报告](tracks/finals-integration.md)。[7527](http://127.0.0.1:7527/) 已切换新页面并在 Orca 打开，实际入口 1280×720 / 1920×1080 / 390×844 及动效检查通过，当前 listener 40228、源码为已验收 I worktree。不承诺跨宿主退出常驻。7526 未操作；无新付费真跑或 Hub 发布，原 live observer 本轮未执行，页面保留 `contract_local=passed / interface_live=not_run / task_live=not_run`。F 与 I 已结算并调用 worker-release。
 
 ## 最新完成：Kimi Stack 前端已集成并启动 7527（2026-09-22）
 

@@ -1,6 +1,8 @@
 # Morphogenesis 接手与核心闭环一页计划
 
-## 决赛前端重建（2026-09-23，当前）
+## 决赛前端重建（2026-09-23，已完成）
+
+已完成并接收：Kimi F `f99d13988465cd7e56db591ec2cdbbbca2bee553`，独立 I `c62bab718265580cbe9941bfcb8d6ca9f63828c6`；两分支已推送，主线 fast-forward。原 11 项 T5 / 31 项 Node、20 快照三视口 60 帧、8 张关键截图、动效/错误复位、构建和安装包资源检查通过。7527 已切换到新模板只读回放，并通过实际入口三视口检查；详见 [视觉改版验收](ACCEPTANCE.md)。以下保留执行范围与所有权。F 补充任务 `task_ab7ca1d9550f / ctx_fcf86da4cc82` 处理数字动效与实际依赖许可证；F、I 均已结算并执行 worker-release，F 为原有外部终端保留，I owned terminal 已释放。
 
 用户明确“完全放弃现有前端”，随后强调“复用模板，复用大厂符合要求的模板”，取代仅 CSS / 禁改 DOM 的限制及 Stack 外观要求。采用腾讯官方 [TDesign React Starter](https://github.com/Tencent/tdesign-react-starter) Dashboard 模板，固定 `fce97863edd5d5556f766dd4e342aace31a99487`（package 0.3.1，MIT）；实际复用 TopPanel、Board、AppLayout 源码与官方组件，通过主题变量适配黏菌黄，不能只仿外观。按已说明的推荐方案采用 React 构建，输出本地静态文件仍由原 Python 服务提供；后端、数据格式、真实验收语义及已有证据保持不变。旧版保留在 Git 历史。不新增付费模型彩排或 Hub 操作。
 

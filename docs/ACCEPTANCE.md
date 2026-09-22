@@ -1,5 +1,27 @@
 # 验收矩阵
 
+## 视觉改版验收（2026-09-23）
+
+按用户最新“完全放弃现有前端、复用大厂模板”指令，复用腾讯官方 [TDesign React Starter](https://github.com/Tencent/tdesign-react-starter) Dashboard，固定 `fce97863edd5d5556f766dd4e342aace31a99487` / package 0.3.1 / MIT。实际接入 Board、Dashboard TopPanel 和 AppLayout 源码结构以及 TDesign 组件，来源映射见 [F 报告](tracks/frontend-stack.md)。仅触达产品展示层：本次包含 DOM、展示 JS、React/Vite 静态构建与 CSS，不是仅 CSS 改版；后端、数据格式、原 11 项 T5 测试、原 observer 和几何断言未改。旧前端保留在 Git 历史。
+
+Kimi F `morph-frontend-stack` 最终 `f99d13988465cd7e56db591ec2cdbbbca2bee553` 已推送；其中 `b2f61d476fab43dfa0d78c8c84cd83f234169e84` 补齐三大数字 300ms 淡入，最终提交补齐实际 bundle 的 lodash-es 许可证。独立 I `morph-finals-integration` 完成精确 SHA 普通合并，最终 `c62bab718265580cbe9941bfcb8d6ca9f63828c6` 已推送且远端一致，主线 fast-forward 接收。完整命令、失败修正和证据见 [集成报告](tracks/finals-integration.md)。
+
+| 验证 | 结果 |
+|---|---|
+| `PY -m pytest tests/t5 -q` | 原 11 项全部通过 |
+| `node --test tests/integration/test_browser_options.cjs tests/integration/test_observer_control.cjs tests/integration/test_operator_enter.cjs` | 原 31 项全部通过 |
+| `node tests/integration/check_finals_replay.cjs SOURCE OUTPUT` | 历史 20 快照 × 1280×720 / 1366×768 / 1920×1080，共 60 帧通过；原几何检查、真实阶段事实、当前任务 token、活跃 Gene 与四态、错误/空态复位通过；0 JS 错误、0 外部请求 |
+| 数字与动态效果 | 真实变化 300ms 淡入、同值轮询不闪烁、reduced-motion 无动画；F 另测 390×844 窄屏通过 |
+| `npm --prefix viz/frontend ci` / `npm --prefix viz/frontend run build` | 干净依赖安装、构建通过，生成文件可复现 |
+| `PY -m build` / `tools/check_distribution.py --site-dir ... --check-node` | sdist/wheel、11 个安装包资源、独立验证器、Node 依赖通过；15 个静态资源与源码字节一致；7 个实际 bundle 运行依赖的许可证齐全；无 node_modules / .runtime 入包 |
+| 原证据只读审计 | 29 文件集合、大小、SHA-256 与纳秒 mtime 不变；模型请求 0 |
+
+最终动效版截图和 JSON 在 `C:/Users/DW/orca/workspaces/Morphogenesis/morph-finals-integration/.runtime/candidate-b2f61d4/`，许可补丁不改变页面。两档各保留 `initial`、`task-in-progress`、`member-offline`、`recovery-completed` 四张命名截图，共 8 张，并保留全部 60 帧。I 已逐张检查关键帧，协调者检查初始、下线及完成画面。
+
+协调者核对旧 7527 listener 14944 / parent 36668 的命令行与回放源后，仅停止该 listener，在已验收 I worktree 启动相同只读源的新页面，listener 40228。API 返回 replay 与 `passed / not_run / not_run`；实际 `http://127.0.0.1:7527/` 通过 `check_finals_layout.cjs` 三视口及动效检查，1280/1920 的 Gene 台账底部分别为 686/746，均在首屏；截图在 I 的 `.runtime/finals-7527-handoff/`，页面已在 Orca 打开。工具管理的本地服务不承诺跨宿主退出常驻，7526 未操作。
+
+原 `observe_rehearsal.cjs` 无只读入口，会启动新的付费 live；本轮未执行，不能写作原 live 全流程通过。新增只读 runner 复用原几何函数与阶段事实，保留 `contract_local=passed / interface_live=not_run / task_live=not_run`。未新增网关真跑、Hub 发布、Python 全仓/CI 或物理/人工见证。Node 桥仍依赖本地 npm 安装；已构建前端无需启动 Node 开发服务器。
+
 ## Kimi Stack 前端重塑与 7527 交接（2026-09-22）
 
 Kimi F 分支 `morph-frontend-stack` / `29c5e3de79da0d7bf27f4fb0847e2902b590730e` 完成产品实现与返修；独立 I 分支 `morph-frontend-stack-integration` / `4f9fb0b6476a97ff80a30f6a782f3ce9e4723463` 普通合并并验收，均已推送并核对远端。主线以 fast-forward 接收。复用 Hugo Theme Stack v4.0.3 / `3e123a30b79b5d52a3a8e88a9dd678fcfd28e418`，GPL-3.0-only、Tabler Icons / hamburgers MIT 文本及来源随源码和 wheel 分发；参考站精确部署版本未知，未迁入其个人内容。
