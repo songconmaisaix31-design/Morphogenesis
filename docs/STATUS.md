@@ -14,7 +14,7 @@
 
 R/V worktree 从 `791d3cf` 建立；最终领域提交为 R `652e3199d626f60b414b70ee523b5f9703d1e539`、V `80220c5481e64fa197a679a7ec2ea466b6306af6`，集成 I 从 `501c491` 建立，最终为 `e83a8168a066a0c687a15a7d28c15739bab13ad6`。全部 commit + push，三个模型均经 effective 回执确认。主 Agent 只合入候选和维护治理文档，所有显示/类型返修都由原 V 完成。
 
-158 tests、全包 strict 52 文件、SDK、构建与安装后资源检查通过；三轮实时双视口截图和最终 UI 明确 replay 的实际绘制边界检查通过。最终显示修复没有重复模型调用或替换旧 live 图片，证据边界见 [本轮集成报告](tracks/rehearsal-integration.md)。新 API key 尚待 Base URL / 用途，未发送且未进入代码、日志或 Worker prompt；物理投影接线仍 NOT_RUN。
+158 tests、全包 strict 52 文件、SDK、构建与安装后资源检查通过；三轮实时双视口截图和最终 UI 明确 replay 的实际绘制边界检查通过。最终显示修复没有重复模型调用或替换旧 live 图片，证据边界见 [本轮集成报告](tracks/rehearsal-integration.md)。用户补充模型提供方与清单后，约 14:12 完成 EvoMap Gateway `https://api.evomap.ai/v1` 的鉴权和 Luna 一次真实短文本测试：均 HTTP 200，返回 OK / 15 tokens / 4813 ms。模型目录共十项，含额外的 Terra；完整 ID 与证据边界见 ACCEPTANCE。凭据未进入代码、命令参数、验收记录或 Worker prompt；尚未改演示执行器，物理投影接线仍 NOT_RUN。
 
 第一轮 R、V、I 均已 worker_done / succeeded；三个 worker-release 均返回 released / closed_agent_terminal，transcript captured。三个无任务启动 PowerShell 已单独核对关闭。集成自有 7520–7524 服务和临时页面已清理，独立浏览器均正常关闭。原 7525 服务实际随 I 的 release 退出，原先“独立隐藏进程可保留”的判断已被否定。协调者已重新启动 [7525 只读回放](http://127.0.0.1:7525/)，核验 launcher 65808 → listener 57100，HTTP 200、mode/provenance=replay、current.stage=completed、task_live=not_run；日志位于 `%TEMP%/morph-replay-coordinator-983d9f27fa08480a9c1836c25c9dbb64/`。这不是新 live，也不承诺跨 Orca/系统退出常驻；端口空闲后按报告中的 replay 命令重启。原始 TEMP 证据、分支和 worktree 保留。
 

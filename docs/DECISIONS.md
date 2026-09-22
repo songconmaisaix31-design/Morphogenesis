@@ -26,3 +26,4 @@
 24. 实图暴露的节点/标签裁切和相互遮挡均退回 V 原 Worker；最终使用 160px ECharts 图、真实 ZRender 边界和两种视口截图验收。保留全部原始 live 图片，最终 UI 修复仅以明确 replay 的已有数据复验，不额外调用模型，也不声称三轮都运行于最终 UI SHA。仅保留 127.0.0.1:7525 只读回放应用供用户现场检查，其进程交接与 Worker 结项分开记录。
 25. 候选 Windows CI 暴露真实墙钟下的测试速度假设；保留失败，不以另一轮 CI 偶然成功代替修复。仅由原 R 修测试时间语义、原 I 集成，不修改已完成彩排的产品时钟或增加模型调用。原会话通过 cwd 过滤的官方 `codex resume --last` 恢复，不重用已结算的 Task/Dispatch 身份。
 26. 原集成回放服务在 worker-release 后退出，撤回“独立进程可跨 Worker 释放保留”的判断。协调者在自身进程树启动并验证同一原始证据的只读回放，交接包含当前 PID/日志和重启命令；仍不承诺跨 Orca/系统退出运行。
+27. 用户补充 EvoMap 提供方及九个模型名称后，已确认这把凭据属于模型网关。实测 Base URL 为 `https://api.evomap.ai/v1`，Bearer `/models` 返回十个带 `evomap-` 前缀的 ID（额外含 Terra）；一次 `evomap-gpt-5.6-luna` Chat Completions 真实请求返回 200 / OK / 15 tokens。第 20/22 条的“目的地待确认”在模型网关范围内解除，不能据此授权或声称 Hub 发布、Responses/工具调用兼容或三轮网关彩排。现有执行器与账号配置未切换，secret 仅用于本次 HTTP 请求内存。

@@ -6,7 +6,7 @@
 
 用户新增验收：固定已知 bug 的小仓库，自动判定 checkpoint；完整呈现“出题 → 管道图变化 → 下线一位 Agent 并重新选路恢复 → Gene 池代谢”。至少三次软件全流程彩排；实际投影接线单独记录，不能用浏览器截图代替。
 
-结果：主线已接收集成 `e83a8168a066a0c687a15a7d28c15739bab13ad6`。北京时间 13:23–13:30 完成 manual / auto / auto 三轮，每轮两次新任务均通过三个独立 checkpoint，实际成员切换、Gene 采用、墙钟衰减和归档均通过；合计 6 次 CLI / 87,133 tokens，费用未知。158 tests、52 文件 strict、构建/安装包检查通过；最终界面 `80220c5` 以明确 replay 的双尺寸实图和实际绘制边界复验。API 新凭据因缺目的地未测试，真实投影仍 NOT_RUN。详见 [本轮验收](ACCEPTANCE.md) 和 [集成报告](tracks/rehearsal-integration.md)。
+结果：主线已接收集成 `e83a8168a066a0c687a15a7d28c15739bab13ad6`。北京时间 13:23–13:30 完成 manual / auto / auto 三轮，每轮两次新任务均通过三个独立 checkpoint，实际成员切换、Gene 采用、墙钟衰减和归档均通过；合计 6 次 CLI / 87,133 tokens，费用未知。158 tests、52 文件 strict、构建/安装包检查通过；最终界面 `80220c5` 以明确 replay 的双尺寸实图和实际绘制边界复验。约 14:12 补测用户提供的 EvoMap Gateway 凭据，模型目录与 Luna 一次短文本生成均 HTTP 200，实际 15 tokens；尚未用该网关重跑演示，真实投影仍 NOT_RUN。详见 [本轮验收](ACCEPTANCE.md) 和 [集成报告](tracks/rehearsal-integration.md)。
 
 基线 `44e2889`。最小并行拆分为两条开发轨加一条独立集成轨，每轨固定 Agent / worktree / branch；原有核心实现与锁不重写。优先复用现有 LangGraph、TopologyEngine、LocalMetabolism、固定独立验证器、ECharts。主 Agent 只维护本计划、状态、决策和验收并核对只读 API 测试。
 
