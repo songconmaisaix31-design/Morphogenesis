@@ -1,15 +1,56 @@
 # 验收矩阵
 
-## 当前新增验收：固定完整彩排（进行中）
+## 网关第四轮：尚未执行
+
+当前用户已批准原 R/I 会话提交推送、集成复验及第四轮。R 网关候选 `94b70816784fcd46ce4f74b8e205bd009b789cc3` 已在原分支普通提交并推送，T2/固定验证器/拓扑回归 **71 passed in 59.73s**，此前受限沙箱导致的两项停止测试已在获准命令中通过。定向 MockTransport 检查 33 passed、时间竞态检查 7 passed、全包 strict 53 文件通过；精确 R 提交的 [CI 35701298167](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35701298167) 在 Ubuntu 与 Windows 全部通过。以上是代码与测试证据，不是第四轮 task_live。
+
+I 已恢复原会话与原工作树，正在准备集成、网关证据审计、双视口观察与密钥不传给浏览器/viewer 的配置胶水。第四轮限定 EvoMap Gateway / `evomap-gpt-5.6-luna` 两个新任务、最多两个 POST，目前实际新增为 **0**。前三轮、一次短文本连通检查和 MockTransport 不能替代本轮 checkpoint、自愈或 Gene 代谢 live 验收。EvoMap 并行开发备选通过项目 OpenCode provider 配置准备，模型分档见 PLAN；工具调用兼容尚未实测。
+
+## 本轮验收：固定完整软件彩排已通过
+
+收尾测试限制：`e83a816` 的 Windows CI 35691719303 在采用权重 `> 0.5` 上失败（其余 157 项通过），墙钟 τ=0.1 秒与快照耗时约 0.103 秒给出正确的约 0.356 权重，说明测试依赖机器执行速度。后续主线 `c1542b2` 双平台 CI 35691937011 虽然通过，仍保留该已知测试竞态并由原 R 返修；待验证的新修改不计为完成。本问题不更改三轮 τ=10 秒的真实软件彩排证据。
 
 旧版三次单任务测试不计入本轮三次完整彩排。每轮必须在独立 TEMP 根按顺序观察：真实固定 bug/checkpoint 初始失败 → 模型修复并外部复核 → 管道实际权重变化 → 两任务间下线获胜成员 → 另一成员被选中且完成新任务 → 真实 Gene 生成/采用/墙钟衰减/归档后不可检索。每轮最多两个新任务，未知执行不重试。
 
 | 本轮项目 | 状态 |
 |---|---|
-| R 运行 / V 展示实现与集成 | 开发中，最小快照契约 e3fe21d 已交付 |
-| 完整软件彩排 1 / 2 / 3 | NOT_RUN；不能用旧单任务证据或 fixture 替代 |
-| 用户新凭据 API 测试 | NOT_RUN；Base URL / 模型或 Hub 用途待用户确认，凭据未发送 |
-| 真实投影接线 / 实际场地彩排 | NOT_RUN；当前仅检测到一个活动显示屏 |
+| R 运行 / V 展示实现与集成 | 通过；R `652e319`、V 最终 `80220c5`、集成 `e83a816` 已推送并合入主线 |
+| 完整软件彩排 1 / 2 / 3 | 通过；manual / auto / auto，均 completed，各两次真实新任务，六次调用无失败、未知或重试 |
+| Checkpoint / 成员恢复 / Gene | 每轮两个新坏样例均从 0/3 到 3/3；builder#0 下线后 builder#1 实际执行；2 Gene、1 次真实采用、墙钟 τ=10 秒衰减、低于 0.2 本地归档后实际 resolve 为空 |
+| 本地适用检查 | `python -m pytest -q` 158 passed；`python tools/typecheck.py` 52 文件无错误；SDK、sdist/wheel、安装后 11 包/资源/验证器/Node 桥检查通过 |
+| 实时页面 / 最终显示修复 | 三轮各两种视口实时跟随全部 20 幕；最终显示修复仅以标记 replay 的只读实图复验，不能说三轮都运行于最终 UI SHA。1366×768、1920×1080 的节点/标签实际边界无裁切或遮挡，Gene 区在首屏 |
+| 用户新凭据 API 测试 | 基础鉴权与一次文本生成通过：EvoMap Gateway `https://api.evomap.ai/v1`，`GET /models` 200，Luna `POST /chat/completions` 200 / OK；详情如下。未将网关接入现有 CLI 执行器，未用该 key 重跑三轮 |
+| 真实投影接线 / 实际场地彩排 | NOT_RUN；准备时仅检测到一个活动显示屏，软件视口检查不证明物理接线 |
+
+| 轮次 | 北京时间（2026-09-22，运行首幕至末幕） | 新 CLI 调用 | tokens | 结果 |
+|---|---|---:|---:|---|
+| 1，手动 Enter 下线 | 13:23:40–13:25:30 | 2 | 29,076 | completed |
+| 2，自动下线 | 13:26:04–13:27:39 | 2 | 29,014 | completed |
+| 3，自动下线 | 13:28:24–13:29:51 | 2 | 29,043 | completed |
+| 合计 | 三个独立 TEMP 根 | 6 | 87,133 | 费用均为 unknown/null |
+
+本轮使用既有 Codex CLI / gpt-5.6-luna，不验证用户另给的 API key。原始 CLI turn/usage、四份每轮外部 checkpoint、采用记录及逐点衰减时间均已交叉核对；只读回放前后原始 35 个文件字节和 mtime 未变。路径、全部命令和早期显示失败保留于 [本轮集成报告](tracks/rehearsal-integration.md)。最终边界命令：`node tests/integration/check_rehearsal_layout.cjs http://127.0.0.1:7525 .runtime/integration/layout-final`；原始运行复验命令：`python tests/integration/audit_rehearsal.py <TEMP根>`。
+
+供现场检查的 [本地只读回放](http://127.0.0.1:7525/) 明确标记 replay，interface_live / task_live 为 not_run，不增加模型调用。进程身份、日志与安全关闭/重启命令在集成报告；实际手动入口为集成 worktree 内的 `demo/run-demo.ps1 -AuthorizeLive -Mode manual`。现场投影、Hub 远端与在途进程强杀恢复均不得用本轮软件结果代替。
+
+### EvoMap 模型网关补充实测（2026-09-22，北京时间约 14:12）
+
+用户补充提供方与九个模型显示名后，确认其用途为模型推理。官方 [API Grant 页面](https://evomap.ai/api-grant) 介绍模型 API 额度，与知识图谱 API key / A2A node_secret 分开。实际模型网关为 `https://api.evomap.ai/v1`：同一 `/models` 未带凭据时返回 401 / no token provided，使用本次用户提供的凭据时返回 200。凭据只在请求进程内存中使用，未写入仓库、命令参数、验收记录或 Worker prompt；不跟随认证请求重定向。
+
+| 用户显示名 | 网关实际 model ID | 本次证据 |
+|---|---|---|
+| Gemini 3.1 Pro | `evomap-gemini-3.1-pro-preview` | 模型目录返回 |
+| DeepSeek V4 Flash | `evomap-deepseek-v4-flash` | 模型目录返回 |
+| GLM 5.1 | `evomap-glm-5.1` | 模型目录返回 |
+| Gemini 2.5 Flash Image | `evomap-gemini-2.5-flash-image` | 模型目录返回；未生成图片 |
+| Gemini 3 Pro Image | `evomap-gemini-3-pro-image` | 模型目录返回；未生成图片 |
+| Gemini 3.1 Flash Image | `evomap-gemini-3.1-flash-image` | 模型目录返回；未生成图片 |
+| GLM 5.2 | `evomap-glm-5.2` | 模型目录返回 |
+| GPT 5.6 Luna | `evomap-gpt-5.6-luna` | 模型目录及真实短文本生成通过 |
+| GPT 5.6 Sol | `evomap-gpt-5.6-sol` | 模型目录返回 |
+| GPT 5.6 Terra（网关额外返回） | `evomap-gpt-5.6-terra` | 模型目录返回 |
+
+最小生成请求：`POST /chat/completions`，Bearer 认证，JSON 为 `{"model":"evomap-gpt-5.6-luna","messages":[{"role":"user","content":"Reply with exactly OK."}],"max_tokens":128,"stream":false}`。实际 HTTP 200，returned_model=`gpt-5.6-luna`，正文 `OK`，finish_reason=`stop`，耗时 4813 ms。usage：prompt_tokens=11、completion_tokens=4、total_tokens=15，美元费用未报告。共一次新推理请求，无重试；它是独立连通检查，不计入前述三轮/六次 CLI 彩排。其余目录模型尚未逐个推理实测，Chat Completions 成功不证明 Responses API、工具调用或现有 Codex CLI 接入兼容。
 
 以下为上一阶段已完成基线的证据，保留精确范围。
 

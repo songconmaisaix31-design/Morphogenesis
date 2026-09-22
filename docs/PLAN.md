@@ -1,8 +1,42 @@
 # Morphogenesis 接手与核心闭环一页计划
 
-## 当前阶段：固定路演与三次完整彩排（2026-09-22）
+## 当前工作：EvoMap 网关执行器与第四轮全真彩排
+
+用户已在本轮明确批准原 R/I 会话执行提交推送、集成复验及第四轮彩排。此前“待有限命令授权”的阻塞已解除；同一会话可按需执行本项目 Git 元数据写入/推送、Orca 通信和测试（含结束测试自身子进程）的受限外命令。保留全局默认值，不写永久允许规则，不影响其他项目或进程。R 沿原失败 Task 重试；I 沿原会话接收正式集成任务，原候选及报告草稿继续由原所有者完成。
+
+新增要求：EvoMap API 纳入并行开发备选模型。本机已安装 OpenCode 1.18.31（MIT），复用其官方 OpenAI-compatible provider；I 额外独占 `opencode.evomap.json` 的项目级提供方配置胶水（只引用环境变量，无秘密、无新调度器），并在 `docs/tracks/rehearsal-integration.md` 记录接入命令、模型选择、隔离与实际验证边界。按任务难度给出建议分档，目录可见与开发工具调用兼容分别标注；不把图片模型当代码 Worker，不自动替换正在运行的 R/I 模型，不因列入备选而逐个付费调用。具体模型池在本计划及验收记录维护。
+
+2026-09-22 用户明确要求切换执行器到已验证的 EvoMap Gateway，并跑第四轮完整真实软件彩排。基线 `5dd9e2c`；沿用原 R/I Agent、worktree、branch，保留两轨已有未提交返修草稿。主 Agent 只负责计划、状态、决策、验收及按集成交接运行已审阅的真实入口。
+
+| 轨 | 固定所有者 / write_paths | 交付与验收 |
+|---|---|---|
+| R 网关执行 | 原 morph-rehearsal-runtime；`orchestration/**`, `tests/t2/**`, `docs/tracks/rehearsal-runtime.md`；`.runtime/**` 仅本地测试产物 | 复用现有 httpx 与 Executor/Proposal/Pydantic/样例白名单；一次受限 Chat Completions 请求产生提案，无工具循环、无自动重试或 CLI 伪造事件。显式 executor 选择，保留 Codex 兼容；测试凭据缺失、网络/HTTP/无效提案、usage、路径与采用一致性。完成既有时间竞态返修，commit+push |
+| I 集成与第四轮 | 原 morph-rehearsal-integration；普通合并、`tests/integration/**`, `docs/tracks/rehearsal-integration.md`；允许仅在 `demo/run-demo.ps1` 添加执行器/网关参数透传及凭据不传给 viewer 的启动配置胶水，领域问题回 R/V | 接收 R 精确提交后合并；全套测试/strict/build；扩展既有审计与双尺寸浏览器观察器，真实网关第四轮手动下线，保留独立 TEMP 证据；commit+push |
+
+第四轮限定两个新任务、最多两次模型 POST，模型 `evomap-gpt-5.6-luna`，Base URL `https://api.evomap.ai/v1`。每次发送有限输出上限与超时；未知效果不重试。两份全新坏样例各自必须从 0/3 到 3/3，第一位 builder 在两任务间下线，第二位真实执行并采用第一份 Gene，真实墙钟 τ=10 秒衰减归档且不可检索。复用当前 ECharts 页面；出现显示领域缺陷才交回原 V，不预先新开显示轨。
+
+网关凭据只由协调者在运行时注入专用子进程环境，不进入 Worker prompt、Git、日志、页面数据或进程参数。不修改全局 CLI/账号/权限设置；受限环境测试优先使用本轨允许的私有 TEMP，不能完成的步骤如实保留错误。三轮旧证据只读；第四轮单列，物理投影、生产 Hub 发布和在途进程强杀仍不纳入本轮软件证据。
+
+### 并行开发的 EvoMap 备选模型池
+
+下表是初始任务分配建议，不是性能、价格或工具兼容性排名。每个候选仍须满足该轨的真实测试与验收；保持 1 Agent / 1 worktree / 1 branch / 互斥 write_paths。当前 R/I 延续原 Astra 会话，备用配置采用已安装的 OpenCode 1.18.31（MIT）及其官方 [OpenAI-compatible provider](https://opencode.ai/docs/providers/#custom-provider)，通过 [OPENCODE_CONFIG 与环境变量引用](https://opencode.ai/docs/config/) 显式启用，不修改全局账号。
+
+| 任务难度/用途 | 备选模型 ID |
+|---|---|
+| 边界明确的小改动、测试或文档 | `evomap-gpt-5.6-luna`、`evomap-deepseek-v4-flash` |
+| 常规模块开发与返修 | `evomap-glm-5.1`、`evomap-glm-5.2`、`evomap-gpt-5.6-terra`（网关目录额外提供） |
+| 复杂契约、跨模块推理与审查 | `evomap-gpt-5.6-sol`、`evomap-gemini-3.1-pro-preview` |
+| 图像素材，独立于代码 Worker | `evomap-gemini-2.5-flash-image`、`evomap-gemini-3-pro-image`、`evomap-gemini-3.1-flash-image` |
+
+目前目录十项已核验；Luna 的非流式 Chat Completions 已有短文本 HTTP 200，第四轮另行验证修复链。OpenCode 配置解析/模型枚举、真实工具调用与各模型端到端开发验收分列，不把模型目录可见或固定修复 API 成功等同于所有模型可承担自主开发。只保留代码模型在备选配置，图片模型不进入编码任务派发；本轮不为加入备选逐个追加模型调用。
+
+## 当前阶段：三次完整软件彩排已通过（2026-09-22）
+
+收尾返修：候选 Windows CI 暴露测试以 `weight > 0.5` 假设快照耗时小于 69ms 的竞态，即使下一次 CI 偶然通过也需修复。恢复原 R 会话、原 worktree/branch，仅改 `tests/t2/test_rehearsal.py` 与本轨报告，按真实采样时间验证衰减语义；恢复原 I 会话做普通合并及适用检查，并纠正回放进程交接。协调者重建只读回放服务并维护验收记录；不新增演示模型调用，不改业务运行时。
 
 用户新增验收：固定已知 bug 的小仓库，自动判定 checkpoint；完整呈现“出题 → 管道图变化 → 下线一位 Agent 并重新选路恢复 → Gene 池代谢”。至少三次软件全流程彩排；实际投影接线单独记录，不能用浏览器截图代替。
+
+结果：主线已接收集成 `e83a8168a066a0c687a15a7d28c15739bab13ad6`。北京时间 13:23–13:30 完成 manual / auto / auto 三轮，每轮两次新任务均通过三个独立 checkpoint，实际成员切换、Gene 采用、墙钟衰减和归档均通过；合计 6 次 CLI / 87,133 tokens，费用未知。158 tests、52 文件 strict、构建/安装包检查通过；最终界面 `80220c5` 以明确 replay 的双尺寸实图和实际绘制边界复验。约 14:12 补测用户提供的 EvoMap Gateway 凭据，模型目录与 Luna 一次短文本生成均 HTTP 200，实际 15 tokens；尚未用该网关重跑演示，真实投影仍 NOT_RUN。详见 [本轮验收](ACCEPTANCE.md) 和 [集成报告](tracks/rehearsal-integration.md)。
 
 基线 `44e2889`。最小并行拆分为两条开发轨加一条独立集成轨，每轨固定 Agent / worktree / branch；原有核心实现与锁不重写。优先复用现有 LangGraph、TopologyEngine、LocalMetabolism、固定独立验证器、ECharts。主 Agent 只维护本计划、状态、决策和验收并核对只读 API 测试。
 
