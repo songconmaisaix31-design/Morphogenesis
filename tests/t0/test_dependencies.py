@@ -3,6 +3,7 @@ from typing import TypedDict
 
 import faiss
 import numpy as np
+from sklearn.feature_extraction.text import HashingVectorizer
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 
@@ -33,3 +34,13 @@ def test_actual_faiss_wheel_can_index_and_search() -> None:
     distances, ids = index.search(vectors[:1], 1)
     assert ids.tolist() == [[0]]
     assert distances.tolist() == [[0.0]]
+
+
+def test_offline_lexical_vectors_feed_native_faiss() -> None:
+    vectorizer = HashingVectorizer(n_features=32, alternate_sign=False)
+    vectors = vectorizer.transform(["boundary clamp endpoint", "network socket timeout"])
+    dense = vectors.toarray().astype(np.float32)
+    index = faiss.IndexFlatL2(32)
+    index.add(dense)
+    _, ids = index.search(dense[:1], 1)
+    assert ids.tolist() == [[0]]
