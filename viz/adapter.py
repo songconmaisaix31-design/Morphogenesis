@@ -11,7 +11,7 @@ import json
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from contracts.messages import Envelope
 from contracts.resolution import Gene
@@ -108,7 +108,7 @@ def _validate_envelope(item: Any) -> dict[str, Any]:
     try:
         # T2 serializes this exact shared model. Revalidate instead of keeping a
         # local approximation of identities, seq, lineage, or provenance rules.
-        return cast(dict[str, Any], Envelope.model_validate(item).model_dump(mode="json"))
+        return Envelope.model_validate(item).model_dump(mode="json")
     except Exception as error:
         raise DashboardInputError(f"Envelope 不符合 T0 共享契约: {error}") from error
 
@@ -117,7 +117,7 @@ def _validate_gene(item: Any) -> dict[str, Any]:
     if not isinstance(item, dict):
         raise DashboardInputError("Gene 必须是对象")
     try:
-        return cast(dict[str, Any], Gene.model_validate(item).model_dump(mode="json"))
+        return Gene.model_validate(item).model_dump(mode="json")
     except Exception as error:
         raise DashboardInputError(f"Gene 不符合共享契约: {error}") from error
 
