@@ -1,15 +1,29 @@
 # 验收矩阵
 
-## 当前新增验收：固定完整彩排（进行中）
+## 本轮验收：固定完整软件彩排已通过
 
 旧版三次单任务测试不计入本轮三次完整彩排。每轮必须在独立 TEMP 根按顺序观察：真实固定 bug/checkpoint 初始失败 → 模型修复并外部复核 → 管道实际权重变化 → 两任务间下线获胜成员 → 另一成员被选中且完成新任务 → 真实 Gene 生成/采用/墙钟衰减/归档后不可检索。每轮最多两个新任务，未知执行不重试。
 
 | 本轮项目 | 状态 |
 |---|---|
-| R 运行 / V 展示实现与集成 | 开发中，最小快照契约 e3fe21d 已交付 |
-| 完整软件彩排 1 / 2 / 3 | NOT_RUN；不能用旧单任务证据或 fixture 替代 |
+| R 运行 / V 展示实现与集成 | 通过；R `652e319`、V 最终 `80220c5`、集成 `e83a816` 已推送并合入主线 |
+| 完整软件彩排 1 / 2 / 3 | 通过；manual / auto / auto，均 completed，各两次真实新任务，六次调用无失败、未知或重试 |
+| Checkpoint / 成员恢复 / Gene | 每轮两个新坏样例均从 0/3 到 3/3；builder#0 下线后 builder#1 实际执行；2 Gene、1 次真实采用、墙钟 τ=10 秒衰减、低于 0.2 本地归档后实际 resolve 为空 |
+| 本地适用检查 | `python -m pytest -q` 158 passed；`python tools/typecheck.py` 52 文件无错误；SDK、sdist/wheel、安装后 11 包/资源/验证器/Node 桥检查通过 |
+| 实时页面 / 最终显示修复 | 三轮各两种视口实时跟随全部 20 幕；最终显示修复仅以标记 replay 的只读实图复验，不能说三轮都运行于最终 UI SHA。1366×768、1920×1080 的节点/标签实际边界无裁切或遮挡，Gene 区在首屏 |
 | 用户新凭据 API 测试 | NOT_RUN；Base URL / 模型或 Hub 用途待用户确认，凭据未发送 |
-| 真实投影接线 / 实际场地彩排 | NOT_RUN；当前仅检测到一个活动显示屏 |
+| 真实投影接线 / 实际场地彩排 | NOT_RUN；准备时仅检测到一个活动显示屏，软件视口检查不证明物理接线 |
+
+| 轮次 | 北京时间（2026-09-22，运行首幕至末幕） | 新 CLI 调用 | tokens | 结果 |
+|---|---|---:|---:|---|
+| 1，手动 Enter 下线 | 13:23:40–13:25:30 | 2 | 29,076 | completed |
+| 2，自动下线 | 13:26:04–13:27:39 | 2 | 29,014 | completed |
+| 3，自动下线 | 13:28:24–13:29:51 | 2 | 29,043 | completed |
+| 合计 | 三个独立 TEMP 根 | 6 | 87,133 | 费用均为 unknown/null |
+
+本轮使用既有 Codex CLI / gpt-5.6-luna，不验证用户另给的 API key。原始 CLI turn/usage、四份每轮外部 checkpoint、采用记录及逐点衰减时间均已交叉核对；只读回放前后原始 35 个文件字节和 mtime 未变。路径、全部命令和早期显示失败保留于 [本轮集成报告](tracks/rehearsal-integration.md)。最终边界命令：`node tests/integration/check_rehearsal_layout.cjs http://127.0.0.1:7525 .runtime/integration/layout-final`；原始运行复验命令：`python tests/integration/audit_rehearsal.py <TEMP根>`。
+
+供现场检查的 [本地只读回放](http://127.0.0.1:7525/) 明确标记 replay，interface_live / task_live 为 not_run，不增加模型调用。进程身份、日志与安全关闭/重启命令在集成报告；实际手动入口为集成 worktree 内的 `demo/run-demo.ps1 -AuthorizeLive -Mode manual`。现场投影、用户 API 目的地、Hub 远端与在途进程强杀恢复均不得用本轮软件结果代替。
 
 以下为上一阶段已完成基线的证据，保留精确范围。
 

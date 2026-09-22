@@ -1,8 +1,8 @@
 # 开发状态
 
-## 当前进行：完整路演彩排
+## 本轮结果：三次完整软件彩排已通过
 
-2026-09-22 用户新增固定演示全链和至少三次完整彩排，旧三次单任务证据不计入本轮。计划提交 `791d3cf` 已推送。Orca Run `run_2cdbc98915f7`，协调 terminal 沿用原身份。
+2026-09-22 用户新增固定演示全链和至少三次完整彩排，旧三次单任务证据不计入本轮。主线已接收并验收集成 `e83a8168a066a0c687a15a7d28c15739bab13ad6`。北京时间 13:23–13:30 顺序完成 manual / auto / auto，共 6 次真实 CLI / 87,133 tokens，费用未知。每轮两个新任务 3/3、下线改道、Gene 生成/采用/墙钟衰减/归档全部通过。Orca Run `run_2cdbc98915f7`，协调 terminal 沿用原身份。
 
 | 轨 | worktree / branch 后缀 | 实际模型 | Task / Dispatch | terminal |
 |---|---|---|---|---|
@@ -10,7 +10,11 @@
 | V | morph-rehearsal-viz | gpt-5.6-terra / high | task_d91042ca5a85 / ctx_e028b3a23be7 | term_ffa1e302-b8ed-43c0-bae6-fcc662233d0c |
 | I | morph-rehearsal-integration | gpt-6-astra / high | task_6bf332fa1437 / ctx_0887e4fb6588 | term_1eee9d49-ded9-441b-b7c8-406b5692b797 |
 
-R/V worktree 从 `791d3cf` 建立；候选 `652e319` / `d032aba` 已分别提交推送，领域 Worker 等待同一所有者返修。I 从 `501c491` 建立并开始合并验收，三个 Worker 的模型 effective 回执确认、terminal 已实际 working。已核对并关闭三个无任务的启动 PowerShell，不影响 Worker。三次软件彩排沿用已接通 Codex CLI，总计最多六次新调用，结果不验证用户新提供的 API key。该凭据尚待 Base URL / 用途确认，未进入代码、日志或 Worker prompt；实际投影设备尚未确认。
+R/V worktree 从 `791d3cf` 建立；最终领域提交为 R `652e3199d626f60b414b70ee523b5f9703d1e539`、V `80220c5481e64fa197a679a7ec2ea466b6306af6`，集成 I 从 `501c491` 建立，最终为 `e83a8168a066a0c687a15a7d28c15739bab13ad6`。全部 commit + push，三个模型均经 effective 回执确认。主 Agent 只合入候选和维护治理文档，所有显示/类型返修都由原 V 完成。
+
+158 tests、全包 strict 52 文件、SDK、构建与安装后资源检查通过；三轮实时双视口截图和最终 UI 明确 replay 的实际绘制边界检查通过。最终显示修复没有重复模型调用或替换旧 live 图片，证据边界见 [本轮集成报告](tracks/rehearsal-integration.md)。新 API key 尚待 Base URL / 用途，未发送且未进入代码、日志或 Worker prompt；物理投影接线仍 NOT_RUN。
+
+R、V、I 均已 worker_done / succeeded；三个 worker-release 均返回 released / closed_agent_terminal，transcript captured。三个无任务启动 PowerShell 已单独核对关闭。集成自有 7520–7524 服务和临时页面已清理，独立浏览器均正常关闭；按演示交接保留 [7525 只读回放](http://127.0.0.1:7525/)，不是 Worker 保留，也不是新 live。其父/子 PID、日志及核验关闭/重启命令见集成报告。原始 TEMP 证据、分支和 worktree 保留。
 
 ## 已完成的核心原型基线
 
