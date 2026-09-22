@@ -1,5 +1,11 @@
 # 开发状态
 
+## 最新评估：Evolver 插件部分可复用，尚不满足直接接入（2026-09-22）
+
+按用户要求实测已安装并 enabled 的 `evolver@evomap` 0.2.0。17 个适配检查 **13 通过、4 不满足**：Windows 默认 MCP command 是 macOS 绝对路径；不能直接替换 8 个既有 `gep_*` 工具；缺失必填 signals 仍被桥转发；模拟提交已接收但响应断连时默认自动重发，单次调用出现 2 POST。手动采用本机 Node 的标准 MCP 握手、9 工具发现及 7 条隔离 stub 路由通过，关闭 autostart 后断连仅 1 POST 且明确失败。测试只运行本地合成服务，无真实 Hub 发布和模型调用。
+
+本机 CLI / Proxy 尚未就绪，当前 Codex 会话未加载插件 MCP；默认宿主接入不通过，网络检索、实际记忆写入和任务采用 NOT_RUN。项目既有官方 GEP MCP 的安装/选择/记录/召回/导出/隔离对照复验 **1 passed / 4.59s**。保留现有网关、GEP 桥、metabolism、Hub 发布门与演示实现；不因插件 installed 状态替换主链。完整问题、来源、命令与证据见 [验收记录](ACCEPTANCE.md)。
+
 ## 最新结果：7527 本机单屏第五轮网关真跑通过（2026-09-22）
 
 用户明确改为本机单屏、无需外接投影，并授权立即启动 7527。协调者在干净的 I 分支 `songconmaisaix31-design/morph-onsite-integration` / `bcd81beac5b9f73ac9f8267ccbc3f571e4faf738` 运行一次已集成入口；首幕至末幕北京时间 **17:48:48–17:50:14**，观察器 summary 的 demo exitCode=0、failure=null。恰好 2 次 EvoMap POST / HTTP 200，两个新样例各 0/3→3/3，builder#0 两任务间下线后 builder#1 完成后续任务并采用前次 Gene；2 Gene 衰减归档、21 个墙钟采样和归档后不可检索通过。共 **2,137 tokens**，费用未知/null。

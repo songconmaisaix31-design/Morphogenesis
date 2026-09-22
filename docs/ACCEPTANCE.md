@@ -1,5 +1,37 @@
 # 验收矩阵
 
+## Evolver Codex 插件适配评估（2026-09-22）
+
+**结论：已安装的 `evolver@evomap` 0.2.0 可作为待适配的经验检索辅助入口，当前不满足直接接入或替换 Morphogenesis 核心闭环的要求。** 安装与启用已由 `codex plugin list --marketplace evomap --json` 确认；本会话没有加载 `evolver_*` 工具。官方来源为 `https://github.com/EvoMap/evolver-codex-plugin`，市场 checkout `cbff9210f17f35650a223d65744d1ff44e1dd112`，安装缓存 `C:/Users/DW/.codex/plugins/cache/evomap/evolver/0.2.0`，插件清单声明 GPL-3.0-or-later；MCP 握手自身版本为 0.1.0，不能与插件版本混用。
+
+评估复用项目锁定环境中的官方 Python MCP `ClientSession` / `stdio_client` 和既有 `child_environment`，没有改插件缓存或业务源码。测试使用独立临时 HOME、随机 loopback 端口、合成凭据与合成资产；不使用真实网关密钥、不连接或发布到真实 Hub。17 个项目适配检查为 **13 通过、4 不满足**，不是插件上游测试套件，也不是 13 项远端能力通过。程序 exit 0 仅说明检查全部完成，4 项不满足仍按失败记录。
+
+| 项目需求 / 检查 | 结果与证据边界 |
+|---|---|
+| Windows 默认可启动 | **不满足**：安装包 `.mcp.json:4` 写死 `/opt/homebrew/opt/node@22/bin/node`，按该 command 启动得到 `FileNotFoundError / WinError 2`。安装 enabled 不代表宿主已成功加载 |
+| 标准 MCP 互通 | **本地通过**：仅在测试客户端显式使用本机 `node` 和插件绝对入口后，初始化与 9 工具发现通过；未修改真实宿主配置，也未证明新 Codex 会话加载成功 |
+| Recipe / Gene 检索、正文获取、结果轮询 | **隔离 stub 转发通过**：status、recipe_search、recipe_express、search_assets、fetch_asset、poll 的路径、参数及 Bearer 转发一致；未验证真实 Hub 检索命中或任务采用 |
+| 本地提炼与禁止发布参数 | **隔离 stub 转发通过**：distill 显式 `persist=false, publish=false` 正确传递；没有实际写入 Evolver 记忆图。工具 schema 的 publish 默认值为 true，接入时须显式受项目发布门控制 |
+| 直接替换既有 GEP 桥 | **不满足**：列出的 9 个 `evolver_*` 工具不包含项目使用的全部 8 个 `gep_*` 接口，包括 install_gene、record_outcome、recall、evolve、export；现有适配还校验 server name/version，不能只改启动路径替换 |
+| 必填参数校验 | **不满足**：`evolver_search_assets` schema 要求 signals，但直接 MCP 调用 `{}` 仍转发 `{mode: semantic, limit: 5}` 并接受 stub 成功结果。证明桥端不校验该必填参数，不代表所有宿主/Proxy 都不校验 |
+| 未知发布效果不重试 | **默认不满足**：合成 `/asset/submit` 收到首 POST 后断开响应连接，status 仍健康；单次 `evolver_publish_asset` 触发 **2 POST** 并返回成功。桥的 `proxyFetch` 自动恢复分支不区分读写；这是重复提交风险，未声称真实 Hub 已产生重复资产 |
+| 关闭自动启动后的错误行为 | **隔离测试通过**：`EVOMAP_MCP_PROXY_AUTOSTART=0` 时同样断连仅 1 POST 且返回错误；401 也仅 1 请求且 isError。该环境设置只是本地可行缓解，生产端到端未验收 |
+| 经验采用、衰减、归档一致性 | **未由插件提供/未验证**：9 工具中没有项目 mark_used、时间衰减、归档及索引清除接口；应继续由现有 metabolism 负责。不得把 Recipe 展开或检索命中计为 source_attempt / UseRecord 采用证据 |
+| 独立 checkpoint、成员重路由、模型执行 | **不属于该插件已暴露能力**：插件提供经验工作流与 Proxy 桥；当前网关 Executor、LangGraph、独立验收和拓扑机制保留 |
+
+本机运行前置实查：Node 24.16.0、Git 2.47.0.windows.1；PowerShell 未找到 `evolver` 命令，19820 无 listener，用户 `.evolver/settings.json` 和 claim 链接均不存在。插件状态脚本 exit 0，但调用 `sh` 检测 CLI 得到 `spawnSync sh ENOENT`，其“local memory works”文字不是记忆读写实测；不能据此把本地记忆或网络连接记通过。CLI/Proxy 启动、Codex 新会话工具加载、真实 Recipe/Gene 检索和真实任务采用均 **NOT_RUN**；Hub 沙箱前置仍缺失。
+
+本地可复查证据根为 `C:/Users/DW/AppData/Local/Temp/morph-evolver-eval-258cf817c31a47cba766a76c9e648d89/`：`probe.py` 是本轮一次性验收脚本，`report.json` 含 17 项结果、工具 schema 和 loopback 收件记录，另保留 status-helper 与 MCP stderr。测试进程和 stub 正常关闭，插件缓存未改；这些运行产物不提交 Git。
+
+```powershell
+# cwd: C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-integration
+.venv/Scripts/python.exe -B C:/Users/DW/AppData/Local/Temp/morph-evolver-eval-258cf817c31a47cba766a76c9e648d89/probe.py
+# 项目原有官方 GEP MCP 路径对照复验：1 passed / 4.59s
+.venv/Scripts/python.exe -B -m pytest -q tests/t1/bridge/test_mcp.py::test_official_mcp_handshake_list_call_export_and_isolation --basetemp C:/Users/DW/AppData/Local/Temp/morph-evolver-eval-258cf817c31a47cba766a76c9e648d89/baseline-pytest
+```
+
+对照测试真实启动项目锁定 `@evomap/gep-mcp-server` 1.7.0，完成合成 Gene 安装→选择→结果记录→召回→导出、重开持久化和不同工作区隔离；**1 passed**，属于本地官方组件接口证据，不是新模型任务。后续最小接入应先处理 Windows 启动、桥端参数边界及写请求不重试，再用独立 Proxy 验证只读经验检索；不为插件另造编排器，不安装全局 hooks/AGENTS 指令、不运行持续进化循环、不改本轮演示主链。远端发布仍由项目 HubClient 的批准边界控制。
+
 ## 7527 本机单屏：第五轮真实网关彩排（2026-09-22）
 
 用户最新指令为本机单屏、无需外接投影、立即真跑，替代下文历史现场接线前置。运行分支 `songconmaisaix31-design/morph-onsite-integration`，干净 HEAD `bcd81beac5b9f73ac9f8267ccbc3f571e4faf738`。仅执行一次，EvoMap / `evomap-gpt-5.6-luna`，无重试。观察器北京时间 17:48:35–17:50:15；真实快照 17:48:48–17:50:14。summary: demo exitCode=0、failure=null、entered=true。
