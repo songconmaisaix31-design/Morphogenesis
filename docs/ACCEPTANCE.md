@@ -1,12 +1,38 @@
 # 验收矩阵
 
+## 7527 本机单屏：第五轮真实网关彩排（2026-09-22）
+
+用户最新指令为本机单屏、无需外接投影、立即真跑，替代下文历史现场接线前置。运行分支 `songconmaisaix31-design/morph-onsite-integration`，干净 HEAD `bcd81beac5b9f73ac9f8267ccbc3f571e4faf738`。仅执行一次，EvoMap / `evomap-gpt-5.6-luna`，无重试。观察器北京时间 17:48:35–17:50:15；真实快照 17:48:48–17:50:14。summary: demo exitCode=0、failure=null、entered=true。
+
+| 检查 | 实际结果 |
+|---|---|
+| 固定外置 checkpoint | 两份新坏样例，各 clamp / mean / unique 从 0/3 到 3/3；四份独立验证报告一致 |
+| 网关请求 | repair / recovery 各 1 POST、HTTP 200；544+367=911、883+343=1226，共 **2,137 tokens**；费用未知/null |
+| 下线与后续任务 | 首任务 builder#0；真实等待门后移除；新任务 builder#1 成功，旧管道 inactive；没有强杀在途进程 |
+| Enter 证据 | `--operator-enter` 在真实 TTY 启动，两视口与原文件 stage=awaiting_offline / sequence=5 后 armed；17:49:33.303 收到协调者工具输入，.304 forwarded。字段 source=operator 是代码模式名，不代表用户亲手按键 |
+| Gene 池 | 两条 Gene，前次完整正文注入后次请求并实际采用一次；τ=10 秒，21 个真实墙钟权重采样通过，低于 0.2 后归档，resolve 为空、数据库缓存正文 0 |
+| 浏览器记录 | 1366×768 / 1920×1080 各全部 20 幕，40 张阶段截图 + 2 张等待截图；页面错误 0，图形几何门禁通过；已实看采用阶段和最终截图 |
+| 只读审计 | exit 0；原运行根 29 文件 bytes/mtime 在审计前后不变；31 份新运行/浏览器文本无凭据样式命中 |
+| 页面交接 | 7527 HTTP 200 / provenance=live / stage=completed / task_live=passed / calls=2；保留本轮完成状态，没有新模型调用。7526 旧回放仍监听且未操作 |
+
+命令在 I worktree `C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-integration` 的锁定环境运行，凭据仅由专用进程环境传递，未写入文件或命令参数：
+
+```powershell
+node tests/integration/observe_rehearsal.cjs manual 7527 .runtime/integration/live-5-single-screen-20260922-01 --executor evomap --model evomap-gpt-5.6-luna --operator-enter --operator-timeout-seconds 120
+.venv/Scripts/python.exe -B tests/integration/audit_rehearsal.py C:/Users/DW/AppData/Local/Temp/morph-rehearsal-40f04885b37e489fa3ea1a04f61a984d
+```
+
+原运行根：`C:/Users/DW/AppData/Local/Temp/morph-rehearsal-40f04885b37e489fa3ea1a04f61a984d`。观察器 summary、manual-enter、audit、日志、逐幕浏览器 JSON 和 PNG 位于 I worktree `.runtime/integration/live-5-single-screen-20260922-01/`，本地产物不入 Git。本轮没有业务源码修改，不重复模型请求或不相关测试。
+
+验收时 viewer launcher 58304 → listener 25412，均为该 I worktree 的 `viz.server --port 7527 --rehearsal <本轮根>/rehearsal.json`；demo 子进程 60092 已退出，viewer 持有输出管道导致观察器父终端仍存活，未宣称整体终端 exit 0。保留服务供用户访问，不承诺跨宿主退出常驻，清理前需重新核验身份。自动审批拒绝 `Start-Process` 打开桌面浏览器，理由 `blocked by policy`；没有绕过，用户可直接打开 http://127.0.0.1:7527/ 。桌面人工观看/全屏未见证；外接投影按用户指令不执行。Hub 待发布、OpenCode 工具调用/流式未验收、动态供给及在途强杀恢复不在本轮范围。
+
 ## 现场准备并行收尾（2026-09-22）
 
 从已验收的第四轮网关主链出发，V `1b2e335` 提交可照做的 [投影/7526 回放/7527 真跑清单](tracks/onsite-viz.md)；O `26a5cf1` 给现有观察器增加显式 `--operator-enter`，只有两视口与真实新根均处于 `awaiting_offline`，才等待现场人员一次 Enter，并留时间证据，默认自动行为不变。集成首次完整 Python 测试发现旧 fixture 固定占用 7526，结果 **199 passed / 1 failed**；原 O 会话 `3d05f4e` 将该本地测试改用独立动态端口，原失败项复验 **1 passed / 29.44s**。I 普通合并并推送 `bcd81beac5b9f73ac9f8267ccbc3f571e4faf738`，主线 fast-forward 接收；最终 SHA 的完整 200 项未重新执行，不能记为“200 passed”。
 
 集成额外通过：`node --test tests/integration/test_browser_options.cjs tests/integration/test_operator_enter.cjs tests/integration/test_observer_control.cjs` **31 passed**；`python tools/typecheck.py` **53 文件 clean**；sdist/wheel、SDK、本地安装后 11 包检查通过。7526 回放 API 为 HTTP 200 / replay / 两 live 状态 not_run，双视口真实布局检查通过，29 个第四轮原文件 bytes+mtime 不变；7527 当时无监听。完整命令、日志和原失败见 [I 报告](tracks/onsite-integration.md)。精确候选 [CI 35709392862](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35709392862) 已完成，Ubuntu / Windows 两 job 均 success；这属于远端精确 SHA 门禁，仍与本地首次 199/1、返修定向 1 passed 分列。
 
-**现场仍待执行：** 目前只检测到一块活动显示屏；17:30–18:00 的借线实接、7526 在实际投影屏全屏可见及 7527 一次新网关真跑，必须由现场见证后分别记录。未收到接通确认前不启动新模型请求；模拟终端测试和浏览器截图均不能证明物理投影。今晚演示执行器为 EvoMap 网关；OpenCode 是备选开发路径，工具调用/流式今晚不测。Hub 保持本地 stub / 待发布；不验证在途进程强杀恢复，路演仅说“成员下线后，后续任务自动重新选路”。
+**历史现场安排已被替代：** 原计划借线实接、7526 投影全屏和 7527 新真跑；用户现明确本机单屏、无需投影，故取消接线确认前置，并完成上节第五轮。截图不等于物理投影或用户桌面全屏见证。今晚演示执行器为 EvoMap 网关；OpenCode 是备选开发路径，工具调用/流式今晚不测。Hub 保持本地 stub / 待发布；不验证在途进程强杀恢复，路演仅说“成员下线后，后续任务自动重新选路”。
 
 ## 网关第四轮：真实软件彩排通过（2026-09-22）
 

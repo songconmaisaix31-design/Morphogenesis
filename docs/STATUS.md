@@ -1,12 +1,20 @@
 # 开发状态
 
+## 最新结果：7527 本机单屏第五轮网关真跑通过（2026-09-22）
+
+用户明确改为本机单屏、无需外接投影，并授权立即启动 7527。协调者在干净的 I 分支 `songconmaisaix31-design/morph-onsite-integration` / `bcd81beac5b9f73ac9f8267ccbc3f571e4faf738` 运行一次已集成入口；首幕至末幕北京时间 **17:48:48–17:50:14**，观察器 summary 的 demo exitCode=0、failure=null。恰好 2 次 EvoMap POST / HTTP 200，两个新样例各 0/3→3/3，builder#0 两任务间下线后 builder#1 完成后续任务并采用前次 Gene；2 Gene 衰减归档、21 个墙钟采样和归档后不可检索通过。共 **2,137 tokens**，费用未知/null。
+
+`--operator-enter` 的 TTY 门已实跑：两视口及原运行根确认 awaiting_offline 后，协调者于 17:49:33 发送一次 Enter；这是工具操作，不是用户亲手按键或物理投影见证。1366×768 / 1920×1080 各记录全部 20 幕，共 40 张阶段图加 2 张等待图，页面错误 0。只读审计通过，29 原文件 bytes/mtime 未变，31 份文本扫描无凭据样式命中。证据路径及命令见 [验收记录](ACCEPTANCE.md)。
+
+7527 保留本次 live 数据的 completed 页面（验收时 launcher 58304 → listener 25412），没有自动启动下一轮；7526 旧回放 listener 26576 未操作。viewer 存活使观察器父会话仍保留输出句柄，不能把 demo exitCode=0 写成整个终端已退出；未来停止前重核 PID、命令行和运行根。自动审批拒绝 `Start-Process` 打开桌面浏览器，理由 blocked by policy，未绕过；用户可直接访问 http://127.0.0.1:7527/ 。外接投影已取消为验收前置；桌面人工观看/全屏未见证，截图属于真实浏览器软件证据。
+
 ## 当前并行工作：现场展示与人工确认（2026-09-22）
 
 用户要求继续多 Agent 并行开发。Orca Run `run_777080c220e3` 从计划基线 `9e4b432` 发出互斥的展示轨 V（`morph-onsite-viz` / `ctx_151a78289685`，有效模型 gpt-5.6-terra high）和人工证据轨 O（`morph-onsite-observer` / `ctx_b8f099cf5355`，有效模型 gpt-6-astra high）。V `1b2e335af52bd2e7de780d65fc14246a50bd2fd9` 与 O `26a5cf1e417813244809807de44c44e917993713` 已各自推送，31 项 Node 测试与 V 的 11 项展示测试通过。I 原派发 `ctx_af2da0cde34f` 普通合并后发现旧 Python fixture 固定绑定 7526，与常驻回放冲突；首次全套为 199 passed / 1 failed，错误原样保留。
 
 O 原 Codex 会话在同一 worktree/branch 续接 `ctx_3169ef5e1e9a`，提交推送 `3d05f4e941ffe350270ddb9d55933a5065887665`，用系统分配的独立端口修复 fixture；原失败项定向 1 passed。I 收到精确 SHA 后合并，最终分支 `songconmaisaix31-design/morph-onsite-integration` / `bcd81beac5b9f73ac9f8267ccbc3f571e4faf738` 已推送并由主线 fast-forward 接收。31 Node、strict 53 文件、构建/SDK/11 包 wheel、双尺寸只读回放及 29 原件不变性检查通过；最终 SHA 完整 200 项未本地重跑，精确候选 [CI 35709392862](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35709392862) 的 Ubuntu / Windows 两 job 均 success，run completed/success。四个派发均 succeeded，I/V 已 worker-release 关闭 agent terminal，O 恢复自既有外部会话，release 返回 retained / external_terminal。可回收派发列表为 0。详细命令与边界见 [I 报告](tracks/onsite-integration.md)。
 
-今晚演示主执行器为 EvoMap 网关；OpenCode 仅为备选开发路径，其工具调用与流式今晚不测。17:30–18:00 的物理投影接线、7526 全屏回放及新真跑均尚未发生，不能提前计为通过。Hub 保持本地 stub / 待发布；在途进程强杀恢复范围外。路演仅承诺“成员下线后，后续任务自动重新选路”。
+今晚演示主执行器为 EvoMap 网关；OpenCode 仅为备选开发路径，其工具调用与流式今晚不测。原 17:30–18:00 物理投影计划被用户最新本机单屏指令替代；7527 新真跑已通过，见上节。Hub 保持本地 stub / 待发布；在途进程强杀恢复范围外。路演仅承诺“成员下线后，后续任务自动重新选路”。
 
 ## 当前结果：网关第四轮与原 R/I 交付已通过
 
