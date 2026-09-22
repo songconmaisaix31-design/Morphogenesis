@@ -1,0 +1,19 @@
+:root { color-scheme: dark; font-family: Inter, "Microsoft YaHei", sans-serif; background: #09111f; color: #ecf5ff; }
+* { box-sizing: border-box; }
+body { margin: 0; background: radial-gradient(circle at top right, #15385b, #09111f 48%); }
+main { max-width: 1320px; margin: auto; padding: 32px 20px 48px; }
+header, .source, .states, .grid { display: flex; gap: 16px; }
+header { align-items: center; justify-content: space-between; }
+h1, h2, p { margin-top: 0; } h1 { font-size: clamp(1.7rem, 4vw, 2.6rem); } h2 { font-size: 1.05rem; margin-bottom: 6px; } p, small { color: #a8bbcd; font-size: .88rem; }
+.eyebrow { color: #7dd3fc; font-weight: 700; letter-spacing: .13em; }
+.badge { border: 1px solid #4f85b5; border-radius: 999px; padding: 8px 14px; font-weight: 700; }
+.source { margin: 24px 0 16px; align-items: center; flex-wrap: wrap; color: #b9cfe3; }
+.source span { background: #11243b; padding: 7px 10px; border-radius: 6px; }
+.states { margin-bottom: 16px; flex-wrap: wrap; }
+.states article { flex: 1 1 190px; background: #102138; border-left: 4px solid #596b7d; padding: 14px; border-radius: 8px; }
+.states span, .states small { display: block; } .states strong { display: block; margin: 7px 0; font-size: 1.25rem; }
+.state-passed { color: #55d6a7; } .state-failed { color: #ff8389; } .state-blocked { color: #ffc65a; }
+.grid { flex-wrap: wrap; }.panel { min-width: min(100%, 390px); flex: 1 1 45%; background: #0e1b2d; border: 1px solid #1f3a57; border-radius: 12px; padding: 18px; }.wide { flex-basis: 100%; }
+.chart { width: 100%; height: 340px; }.wide .chart { height: 300px; }.empty { min-height: 160px; display: grid; place-items: center; text-align: center; color: #a8bbcd; border: 1px dashed #42627f; border-radius: 8px; padding: 20px; }
+.notes { margin-top: 16px; background: #0e1b2d; border-radius: 12px; padding: 18px; }.notes ul { padding-left: 20px; color: #b9cfe3; }
+@media (max-width: 680px) { main { padding: 20px 12px; } header { align-items: flex-start; flex-direction: column; }.chart { height: 280px; } }
