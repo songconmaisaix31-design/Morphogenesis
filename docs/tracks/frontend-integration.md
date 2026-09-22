@@ -8,8 +8,9 @@
 |---|---|---|---|---|
 | E EvoMap 只读闭环 | `songconmaisaix31-design/morph-front-evomap` | `8275f578ae2aaaf81a044beeaebd453d2e72f31a` | `fe09589` | 无 |
 | T 真实拓扑视图 | `songconmaisaix31-design/morph-front-swarm` | `ee65171934595cc5fb21d608bc52a3e5f760c786` | `af740e9` | 无 |
+| P WebGL2 黏菌首页 | `songconmaisaix31-design/morph-front-physarum` | `f5448b8f59ce7a592fc0bf38de002a47b333672d` | `af1578d` | 无 |
 
-待合并：S（协调者已发现 App.jsx 重复切换 effect，原 S Worker 返修中，等最终 SHA）、E 增量（`viz/server.py` 预存异常闭包 NameError 已退回原 E Worker，等增量 SHA）、P（浏览器参数收尾中）。
+待合并：S（协调者已发现 App.jsx 重复切换 effect 返修中，且按用户补充正加入手动 q/type 搜索与真实结果呈现，等最终 SHA）、E 增量（`viz/server.py` 预存异常闭包 NameError 修复，另按用户补充正验证加入官方 `GET /a2a/assets/categories` 为独立 `community_categories`，等最终 SHA）。协调者明确：勿用旧 SHA 提前声称完成；浏览器验收需覆盖至少两类有效查询、类别数据真实来源，以及首屏标题覆盖下的 pointermove 与连续切换。
 
 ## `/api/evomap` 集成审查结论
 
