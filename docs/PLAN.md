@@ -1,5 +1,17 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 现场彩排并行收尾（2026-09-22）
+
+目标：保持已通过的 EvoMap 网关演示主链，17:30–18:00 用实接投影先全屏查看 7526 的明确回放，再在独立端口进行一次新的真实手动彩排。现场人员控制“成员下线”的 Enter 时点；软件记录和物理投影见证分别验收。OpenCode 是备选开发路径，今晚不做其付费工具调用/流式测试；Hub 保持本地 stub / 待发布；在途强杀恢复不进入本阶段。
+
+| 轨 | 固定所有者 / 独占 write_paths | 交付与边界 |
+|---|---|---|
+| V 现场展示 | 新 Orca Agent + worktree + branch；`demo/README.md`, `viz/**`, `tests/t5/**`, `docs/tracks/onsite-viz.md` | 给出可照读的 7526 回放、投影全屏、独立端口真跑与降级顺序；只修实际复现的显示缺陷。不得修改运行时和集成观察器；投影物理通过只能由现场确认。 |
+| O 人工证据 | 新 Orca Agent + worktree + branch；`tests/integration/**`, `docs/tracks/onsite-observer.md` | 在现有观察器上增加显式的操作员 Enter 模式，等待真实 awaiting_offline 与操作员输入，保留默认自动确认行为、双视口审计、失败不重试及原证据只读。不得修改 `demo/**` / `viz/**` / `orchestration/**`。 |
+| I 独立集成 | 两轨提交并推送后派发 1 个 Orca Agent + worktree + branch；仅普通合并、少量导入/配置胶水、`docs/tracks/onsite-integration.md` | 复验锁环境适用测试、strict、构建、现场入口静态/本地检查；领域问题交回原轨。没有实接投影或新真跑时明确 NOT_RUN。 |
+
+两轨从当前已推送主线 `666b339863c7fb155c875cd9587370cb296ebe3b` 建立；每轨 1 Agent / 1 worktree / 1 branch，按互斥路径开发、测试、提交、推送。主 Agent 只维护本计划、状态、决策和验收，并协调现场人工动作；不把只读回放、浏览器视口或自动按 Enter 算作物理彩排。路演口径固定为“成员下线后，后续任务自动重新选路”。
+
 ## 已通过：EvoMap 网关第四轮与备选模型配置
 
 结果（2026-09-22）：原 R `94b7081` 已推送并由原 I 合入 `7c0bb6a`，200 tests、53 文件 strict、构建/SDK/安装包及精确提交双平台 CI 通过。北京时间 16:12–16:13 第四轮完成：两个真实网关请求、两个任务各 3/3、手动下线后另一 builder 实际执行、Gene 采用与真实衰减归档通过，2,235 tokens / 费用未知。OpenCode 项目配置的 7 个备选代码模型解析/枚举通过，工具调用与其它模型实际开发仍 NOT_RUN。详细证据与边界见 [ACCEPTANCE](ACCEPTANCE.md)。下文保留本轮授权、所有权及原始范围。
