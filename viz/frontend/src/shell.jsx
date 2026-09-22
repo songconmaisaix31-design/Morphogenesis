@@ -1,8 +1,8 @@
-// Entry for the finals dashboard React shell.
+// Entry for the Morphogenesis page shell (hero + agent-swarm dashboard).
 // Layout shell adapted from Tencent tdesign-react-starter (MIT)
 // src/layouts/components/AppLayout.tsx (top layout) and src/pages/Dashboard/Base.
-// Data and ECharts stay in the standalone viz/static/app.js; this tree renders
-// once and never updates, so it cannot clobber the data-owned DOM zones.
+// The shell owns network reads and view state; data zones with ids render once
+// with fixed JSX and are filled by viz/static/app.js via window.MorphDashboard.
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
@@ -11,6 +11,6 @@ import './theme.css';
 import App from './App';
 
 document.documentElement.setAttribute('theme-mode', 'dark');
-// flushSync keeps the static shell in the DOM before the deferred script
-// finishes, so load-event observers always find the semantic nodes.
+// flushSync keeps the static shell in the DOM before the deferred app.js
+// bridge installs, so the first pending update always finds its zones.
 flushSync(() => createRoot(document.getElementById('root')).render(<App />));

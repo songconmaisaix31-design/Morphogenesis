@@ -1,7 +1,7 @@
 /*
- * Morphogenesis finals dashboard — data-zone styles (slime design system).
- * Palette: page #0B0E14, surface #151A23, border rgba(255,255,255,.08),
- * sole accent #F5D547, text #E8ECF4 / #8A93A6 / #64748B; success #34D399 is
+ * Morphogenesis page shell — data-zone styles (shared visual contract).
+ * Palette: page #070B0D, surface #0C1214, border rgba(232,239,237,.08),
+ * accent teal #65D9C7, text #E8EFED / #8CA3A0 / #5C6F6C; success #34D399 is
  * reserved for the transient checkpoint pass pulse (see finals-shell.css).
  * Shell/TDesign tokens live in assets/finals-shell.css (built from
  * viz/frontend); this file styles only the data-owned zones filled by app.js.
@@ -9,13 +9,13 @@
  */
 
 :root {
-  --slime: #f5d547;
-  --ink: #e8ecf4;
-  --ink-dim: #8a93a6;
-  --ink-mute: #64748b;
-  --line: rgba(255, 255, 255, 0.08);
-  --surface: #151a23;
-  --page: #0b0e14;
+  --accent: #65d9c7;
+  --ink: #e8efed;
+  --ink-dim: #8ca3a0;
+  --ink-mute: #5c6f6c;
+  --line: rgba(232, 239, 237, 0.08);
+  --surface: #0c1214;
+  --page: #070b0d;
   --ok: #34d399;
   --mono: Consolas, "Courier New", monospace;
 }
@@ -45,7 +45,7 @@
 .pipe-row strong { font-family: var(--mono); font-size: 12px; color: var(--ink); }
 .pipe-row span { font-size: 11px; margin-top: 2px; color: var(--ink-dim); font-family: var(--mono); }
 .count-pct { font-size: 14px; font-weight: 400; color: var(--ink-dim); }
-.pipe-active strong::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--slime); margin-right: 6px; }
+.pipe-active strong::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 6px; }
 .pipe-inactive { opacity: 0.45; }
 .pipe-inactive strong::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; border: 1px dashed var(--ink-mute); margin-right: 6px; }
 @media (max-width: 1023px) {
@@ -67,21 +67,21 @@
 .gene-head { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
 .gene-fact span { display: block; font-size: 11px; margin-top: 2px; color: var(--ink-dim); font-family: var(--mono); }
 /* Gene four states, driven by the real state class on the card body:
-   new = slime bright border; adopted = solid slime fill with dark text;
+   new = accent bright border; adopted = solid accent fill with dark text;
    decayed = dimmed and slightly shrunk; archived = dim + strikethrough. */
 .gene-state { display: inline-block; font-size: 10px; letter-spacing: 0.08em; padding: 0 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--ink-dim); }
-.gene-new { border-color: var(--slime); }
-.gene-new .gene-state { color: var(--slime); border-color: var(--slime); }
-.gene-adopted { background: var(--slime); border-color: var(--slime); }
-.gene-adopted strong, .gene-adopted span { color: #0b0e14; }
-.gene-adopted .gene-state { color: #0b0e14; border-color: rgba(11, 14, 20, 0.55); }
-.gene-adopted .gene-weight-bar { background: rgba(11, 14, 20, 0.18); }
-.gene-adopted .gene-weight-bar i { background: #0b0e14; }
+.gene-new { border-color: var(--accent); }
+.gene-new .gene-state { color: var(--accent); border-color: var(--accent); }
+.gene-adopted { background: var(--accent); border-color: var(--accent); }
+.gene-adopted strong, .gene-adopted span { color: #070b0d; }
+.gene-adopted .gene-state { color: #070b0d; border-color: rgba(7, 11, 13, 0.55); }
+.gene-adopted .gene-weight-bar { background: rgba(7, 11, 13, 0.18); }
+.gene-adopted .gene-weight-bar i { background: #070b0d; }
 .gene-decayed { opacity: 0.45; transform: scale(0.98); transform-origin: top left; }
 .gene-archived { opacity: 0.55; }
 .gene-archived strong { text-decoration: line-through; color: var(--ink-mute); }
-.gene-weight-bar { height: 4px; background: rgba(255, 255, 255, 0.06); border-radius: 2px; margin-top: 6px; overflow: hidden; }
-.gene-weight-bar i { display: block; height: 100%; background: var(--slime); min-width: 2px; }
+.gene-weight-bar { height: 4px; background: rgba(232, 239, 237, 0.06); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.gene-weight-bar i { display: block; height: 100%; background: var(--accent); min-width: 2px; }
 .gene-decayed .gene-weight-bar i { background: var(--ink-mute); }
 .gene-archived .gene-weight-bar i { background: var(--ink-mute); }
 
@@ -94,7 +94,7 @@
 .event-row .event-stage { color: var(--ink); flex: 0 0 auto; }
 .event-row .event-time { margin-left: auto; font-family: var(--mono); color: var(--ink-mute); flex: 0 0 auto; }
 .event-row.event-latest { color: var(--ink); }
-.event-row.event-latest .event-stage { color: var(--slime); font-weight: 700; }
+.event-row.event-latest .event-stage { color: var(--accent); font-weight: 700; }
 .event-row.event-old-1 { opacity: 0.75; }
 .event-row.event-old-2 { opacity: 0.55; }
 .event-row.event-old-3 { opacity: 0.4; }

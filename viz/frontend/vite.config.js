@@ -23,6 +23,9 @@ export default defineConfig({
       output: {
         entryFileNames: 'assets/finals-shell.js',
         assetFileNames: 'assets/finals-shell.[ext]',
+        // P/T track modules load through import.meta.glob dynamic imports;
+        // the iife build must inline them into the single bundle.
+        inlineDynamicImports: true,
       },
     },
   },
