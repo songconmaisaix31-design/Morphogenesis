@@ -1,0 +1,84 @@
+/* PhysarumField styles. Colors come from the shared contract in
+   docs/FRONTEND_REFACTOR_PLAN.md: bg #070b0d, teal #65d9c7, secondary #8ca3a0. */
+
+.physarum-field {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  overflow: hidden;
+  background: #070b0d;
+  /* Vertical page scroll keeps working on touch; horizontal drags feed. */
+  touch-action: pan-y;
+}
+
+.physarum-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.physarum-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border: 1px solid rgba(101, 217, 199, 0.55);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(101, 217, 199, 0.25) inset;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+@media (pointer: coarse) {
+  .physarum-cursor {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .physarum-cursor {
+    transition: none;
+  }
+}
+
+.physarum-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  background:
+    radial-gradient(60% 50% at 30% 35%, rgba(101, 217, 199, 0.08), transparent 70%),
+    radial-gradient(45% 40% at 72% 60%, rgba(140, 163, 160, 0.07), transparent 70%),
+    #070b0d;
+}
+
+.physarum-fallback svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.physarum-fallback line {
+  stroke: rgba(101, 217, 199, 0.28);
+  stroke-width: 0.35;
+}
+
+.physarum-fallback circle {
+  fill: rgba(101, 217, 199, 0.5);
+}
+
+.physarum-fallback-note {
+  position: relative;
+  margin: 8px 10px;
+  font-size: 12px;
+  color: #8ca3a0;
+  pointer-events: none;
+}
