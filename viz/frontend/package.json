@@ -1,0 +1,21 @@
+{
+  "name": "morph-finals-shell",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Morphogenesis finals dashboard shell; layout adapted from Tencent tdesign-react-starter (MIT) fce97863edd5d5556f766dd4e342aace31a99487",
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "classnames": "^2.3.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tdesign-icons-react": "^0.6.0",
+    "tdesign-react": "^1.15.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "less": "^4.1.3",
+    "vite": "^5.4.11"
+  }
+}

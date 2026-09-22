@@ -1,50 +1,60 @@
-# F 轨报告：Stack 风格前端重塑（保留拓扑）
+# F 轨报告：决赛前端重建（TDesign 外壳 + 黏菌黄设计系统）
 
-2026-09-22 · 实现者：Kimi（Kimi Code 0.43.1 / K3，会话 `session_b4a6ad0c-3fc4-4df3-8ef9-3f3f725da760`）· 分支 `morph-frontend-stack` · 基线 `0fe307a32032993386afe876b27a3b74cf5aa52e`
+2026-09-23（Asia/Shanghai） · 实现者：Kimi（Kimi Code 0.43.1 / K3）· 分支 `morph-frontend-stack` · 从主线快进（含计划 `3821248`）
 
-提交：实现 `b5dfaccceca7280f69e658418757fc0c5c6fca0e`；许可文本与版本表述补充 `ff42968f9c1e44a71ef533e3a2d95a4abb25cf9f`；最终 SHA 以推送后 `git log origin/morph-frontend-stack` 为准（本报告提交为其后一个 docs 提交）。
+用户最新指令完全放弃此前 Stack 前端（保留在 git 历史，最终 Stack 提交 `29c5e3de79da0d7bf27f4fb0847e2902b590730e`），改为按指定深色黏菌黄设计系统重建，并复用核验过的官方大厂模板。后端、数据格式、验收语义与历史证据不变。
 
-## 范围与来源
+## 模板来源与实际复用映射
 
-按用户指定，以参考站 https://davidwang.space/ 实际使用的 **Hugo Theme Stack** 重塑 `viz/static` 展示层；Python 静态服务、`/api/dashboard`、ECharts 与数据契约不变，未引入 Hugo 或任何应用框架、外部字体或 CDN。
+| 项 | 值 |
+|---|---|
+| 上游 | https://github.com/Tencent/tdesign-react-starter |
+| 版本/许可 | package 0.3.1，commit `fce97863edd5d5556f766dd4e342aace31a99487`，MIT（Copyright 2021-present TDesign，全文在 `viz/static/licenses/`） |
+| 本机只读克隆 | `C:/Users/DW/AppData/Local/Temp/morph-tdesign-fce97863` |
 
-| 来源 | 精确版本 | 许可证 | 用途 |
-|---|---|---|---|
-| https://github.com/CaiJimmy/hugo-theme-stack | v4.0.3，commit `3e123a30b79b5d52a3a8e88a9dd678fcfd28e418`（2026-05-25）——本轨固定复用的版本；参考站实际部署的主题确切版本未确认 | GPL-3.0-only | 设计变量（`#f5f5fa` 底色 / `#34495e` 强调色 / 卡片与阴影 token）、extended 三栏栅格断点、粘性左侧边栏 + 菜单 + 汉堡按钮、明暗主题 `StackColorScheme` 模式、页脚样式 |
-| 参考站 https://davidwang.space/ | 实测 1366：底色 rgb(245,245,250)、左栏 ≈197px、右栏 ≈328px | — | 布局核验基准（协调者截图 `morph-stack-reference-qqnJgo/reference-1366.png`）；未复制博客文章、头像、背景图等私人内容 |
-| Tabler Icons（随 Stack v4.0.3 内嵌） | 同上 | MIT | `index.html` 内联菜单/主题切换图标 |
-| hamburgers（Jonathan Suh） | 随 Stack v4.0.3 | MIT | 汉堡按钮模式（简化适配） |
+实际源码复用（非模仿）：
+- `src/components/Board/index.tsx` → `viz/frontend/src/components/Board.jsx`（Card+title/count/desc 结构；删 trend/demo 微图，count 改为数据所有的大数字 span）；
+- `src/pages/Dashboard/Base`（`index.tsx` + `TopPanel.tsx` 的 Row/Col Board 组合）→ `viz/frontend/src/App.jsx` 顶部三 Board（TDesign 栅格为 12 列：xs=12 / md=4）；
+- `src/layouts/components/AppLayout.tsx` 顶栏式布局 → `App.jsx` 外壳（Layout.Header + Content + Footer）；
+- 主题：TDesign 暗色变量经 `[theme-mode='dark']` 用用户令牌覆盖。
+- 裁去：登录、Redux modules、路由、mock 服务、i18n、全部无关页面与假统计；未复制 `.agent`/CLAUDE 类指令。
 
-主题署名保留在页面页脚与 `viz/static/style.css` 头部；完整 GPL-3.0 / MIT 许可与 copyright 文本在 `viz/static/licenses/`（含 NOTICE 逐项说明），明细见 `THIRD_PARTY_NOTICES.md`。
+工程：`viz/frontend/**` 独立 package.json + package-lock（react 18 / tdesign-react 1.15 / vite 5，不动根锁）；`vite build` 以 library/IIFE 形式只产出 `viz/static/assets/finals-shell.{js,css}`（`emptyOutDir:false`，不动 licenses/app.js/echarts）；`define` 内联 NODE_ENV 消除浏览器 `process` 引用；入口用 `flushSync` 保证 defer 结束时静态壳 DOM 已在位。无 Node 运行时服务器、无 CDN/外部字体/登录。React 壳只渲染一次（无状态），数据与 ECharts 仍由独立 `viz/static/app.js` 管理（4 处真实 `renderMode: "richText"`，测试断言不变）。
 
-## 实际结构（协调者 handoff 后的授权布局）
+## 设计系统落实
 
-- 左侧粘性边栏：项目 SVG 标识 + 🧬、站点名/描述、`#provenance` 徽章、锚点菜单（彩排剧情/验收状态/谱系与消息/运行说明）、明暗切换（`StackColorScheme` localStorage + `prefers-color-scheme`，与 Stack 同键同语义）。
-- 主栏首屏（1366×768 实测）：首行 01 出题 / 02 checkpoint / 04 故障恢复三张紧凑概要卡（恢复卡显式占第三格）；第二行全宽拓扑主卡（画布实测 375×220，管道列表在右侧 280px 可滚动列）；第三行 Gene 池摘要（ledger 实测 599..745，整体在首屏内）。长详情（谱系/消息/指标/运行说明）在主栏下移，菜单锚点可达。
-- 右侧边栏（≥1024）：数据来源（`#source-label`/`#hub-status`）与验收三态（`#contract_local` 等）。<1024 不再 `display:none`（msg_486505a2e5e7 修复），在主栏之后正常文档流堆叠，滚动与菜单锚点均可达。
-- 移动端（390×844 实测）：汉堡按钮带 `aria-expanded`/`aria-controls`，点开菜单为卡片式列表；点击锚点后菜单自动收起且目标滚入视口；Enter/Space 开合、Escape 关闭并还焦。
-- 字体：实测 Windows Chromium 经 Segoe UI 字体链接把中文回退成衬线（`.runtime/frontend-stack/font-test.png` 对照），故 `--base-font-family` 以 `Microsoft YaHei` 领衔，其余平台落到各自系统 sans；不加载外部字体。
-- ECharts 四个图按 `data-scheme` 切换亮/暗调色板；拓扑保留真实节点、权重线宽公式（weight 1.9 → 8.6）、下线虚线与恢复语义，核心 DOM id 与 `mock/replay/live` 标记全部保留，`renderMode: "richText"` 仍为 4 处。
+- 令牌：`#0B0E14` 页面 / `#151A23` 面板 / 边框 `rgba(255,255,255,.08)` / 唯一主色 `#F5D547` / 文字 `#E8ECF4`、`#8A93A6`、`#64748B`；`#34D399` 仅用于 checkpoint 全过的瞬时脉冲（约 0.9s 一次，`prefers-reduced-motion` 下禁用）。hover/active 复用 surface/slime 透明度，未新增色值；无渐变横幅、光晕、玻璃、emoji。
+- 页头：项目名 + 实际在线成员数（`members` 中 available 计数，回放末帧 4/5）+ 实际任务轮次（task_id 前缀：repair→`1 · 修复`、recovery→`2 · 恢复`，与 I 核实事实 seq0-5=1、6-19=2 一致；不用快照序号冒充轮次）。
+- 三大等宽数字（Consolas，`clamp(2.5rem,6vw,4.5rem)`）：checkpoint `3/3`（`· 100%` 拆小字号防换行，textContent 语义不变）；本轮 tokens 取 `current.results` 中 task_id 等于当前任务的 usage.tokens（seq0-1/6-8 无匹配为未知，不泄漏上一任务 911、不累加 2137）；活跃 Gene = archived_at 为空的数量（不按 weight 阈值推断）。
+- 拓扑：ECharts circular，透明底；权重线宽公式保持 `clamp(2, 1+weight*4, 12)`（weight 1.9→8.6）；在线边 slime 色 shadowBlur 10；离线边 opacity .25 虚线；在线节点亮环 30px、离线灰点 20px；节点标签在节点正下方（几何断言保持）；签名比对使图只在真实数据变化时以 300ms 过渡。
+- Gene 台账四态卡（真实状态类驱动卡体）：新生成=slime 描边、已采用=slime 实底深字、衰减中=opacity .45+轻缩、已归档=dim+删除线；归档优先，衰减按与上一快照真实 weight 比较，采用按 use_count，新生成按上一快照不存在；权重条 0..1 固定尺度（1=初始满权重），保留真实数值。
+- 事件流：仅由 `rehearsal.history` 真实阶段生成（20 快照 seq0..19），最新一条 slime 强调，依次渐暗，无编造事件。
+- `replay/mock/live` 徽章与验收三态、来源/Hub 状态常驻；费用 null 显示未知；API 失败清空全部数据区（含图表）。
+- 次级区保留 Gene 谱系/消息流/指标/运行说明全部既有功能。
+- 390px 窄屏纵向堆叠无横向溢出；reduced-motion 禁脉冲与图动画。
 
-## 验证命令与结果
-
-环境：本轨 `npm ci` 锁定安装（99 包，锁文件未改）；Python 用同级 `morph-onsite-integration/.venv`；Playwright/Chromium 用既定本机安装；预览端口 7528（事前确认空闲；7525/7526/7527 未触碰）。
+## 验证（全部真实执行）
 
 ```
-node --check viz/static/app.js && node --check tests/t5/check_stack_layout.cjs   # JS-OK
-.venv python -m pytest tests/t5 -q                                              # 11 passed
-node tests/integration/check_rehearsal_layout.cjs http://127.0.0.1:7528 .runtime/frontend-stack/layout-final
-# {"viewports":[1366,1920],"labels":3,"nodes":3,"clipping":false,"overlap":false}（含 geneBottom<视口 旧断言，仍通过）
-node tests/t5/check_stack_layout.cjs http://127.0.0.1:7528 .runtime/frontend-stack/stack-final
-# 1366/1920/390 三视口：无横向溢出、锚点齐、主题切换持久化、页脚署名在；
-# 390 实点 #acceptance-widget 锚点目标可见、菜单收起；键盘 Enter 开/Escape 关、aria-expanded 正确
+node --check viz/static/app.js                                        # 通过
+.venv python -m pytest tests/t5 -q                                    # 11 passed（未改断言）
+node tests/integration/check_rehearsal_layout.cjs http://127.0.0.1:7528 .runtime/finals/legacy-check
+# {"viewports":[1366,1920],"labels":3,"nodes":3,"clipping":false,"overlap":false}（原检查原样通过）
+node tests/t5/check_finals_layout.cjs http://127.0.0.1:7528 .runtime/finals/check
+# 1280x720 / 1920x1080 / 390x844：无横向溢出；Gene 台账底部分别 686/746（首屏内）；
+# 拓扑 3 节点 3 标签无裁切无重叠；checkpoint "3/3 · 100%"、tokens 1226、活跃 Gene 0、
+# 成员 4/5、轮次 2 · 恢复、事件 19+ 条、归档四态文本在；reduced-motion 无脉冲
 ```
 
-真实 Chromium 截图（回放 `morph-rehearsal-40f04885b37e489fa3ea1a04f61a984d/rehearsal.json`，只读）：`.runtime/frontend-stack/stack-final/stack-{1366,1920,390}-{light,dark}.png` 及 `layout-final/replay-{1366,1920}.png`、`geometry.json`、`stack-layout.json`。1366 首屏：拓扑、checkpoint 3/3、Gene 摘要（ledger 底 745 < 768）同屏。
+证据截图：`.runtime/finals/check/finals-{1280,1920,390}.png`（只读回放第五轮 `morph-rehearsal-40f04885b37e489fa3ea1a04f61a984d/rehearsal.json`）、`legacy-check/replay-{1366,1920}.png` 与各自 geometry/finals-layout JSON。
 
-## 限制与交接
+## 变更文件
 
-- 页面数据为只读回放；本轨未做新的真跑、未动网关/Hub/凭据，7527 交接与 `tests/integration` 适配（含逐阶段 mock fixture 的 geneBottom 余量复核，本布局 1366 余量约 23px，长文本阶段可能更紧）交 I 轨。
-- `check_rehearsal_stages.cjs` 的逐阶段全量重放属 I 验收范围，本轨未运行。
-- 管道行的权重以下边框厚度编码（沿用原设计）；离线管道为灰色虚线。
-- 字体方案在本机验证；无 YaHei 的平台回退系统 sans，未逐一实测。
+`viz/frontend/**`（新增工程与锁）、`viz/static/{index.html,style.css,app.js,assets/finals-shell.*}`、`viz/static/licenses/`（Stack/Tabler/hamburgers 许可随代码移除，新增 TDesign MIT + NOTICE）、`tests/t5/check_finals_layout.cjs`（新增；Stack 专用 `check_stack_layout.cjs` 随旧版移除）、`demo/README.md`、`THIRD_PARTY_NOTICES.md`、本报告。`tests/t5/test_adapter.py` 11 项测试未改。
+
+## 交接与限制
+
+- 新增 selector 交接 I：`#metric-tokens`、`#story-gene-count`、`#header-members`、`#header-round`、`#event-feed .event-row`、`.gene-fact.gene-{new|adopted|decayed|archived}`；既有语义 ID（#provenance、#rehearsal-mode `#seq`、#story-checkpoint-rate `N/3` 前缀、#story-genes、.gene-ledger、#story-pipe-chart、node.online/links.active 等）全部保留。
+- I 的 `check_finals_replay.cjs`（其分支 a63edd9）覆盖 20 快照全阶段；本轨未运行付费演示，原 live 全流程本轮未执行。
+- 预览用 7528（验证空闲后启用）；7526/7527 未触碰；未读凭据、未新增网关/Hub 调用。
+- 阶段中途 tokens/轮次边界以 I 核实事实为准（seq6-8 未知、轮次 2）；其他执行器（codex）快照无 executor/model 字段时不受影响。

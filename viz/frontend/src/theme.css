@@ -1,0 +1,171 @@
+/*
+ * Finals dashboard theme: user-specified dark slime tokens override the
+ * TDesign variables (template: tdesign-react-starter, MIT, fce97863).
+ * Sole accent #F5D547; success #34D399 is reserved for the transient
+ * checkpoint pass pulse. No gradients, glow banners, glass, or emoji.
+ */
+:root[theme-mode='dark'] {
+  --td-bg-color-page: #0b0e14;
+  --td-bg-color-container: #151a23;
+  --td-bg-color-container-hover: #151a23;
+  --td-bg-color-container-active: #151a23;
+  --td-bg-color-secondarycontainer: #0b0e14;
+  --td-component-border: rgba(255, 255, 255, 0.08);
+  --td-border-level-1-color: rgba(255, 255, 255, 0.08);
+  --td-border-level-2-color: rgba(255, 255, 255, 0.12);
+  --td-brand-color: #f5d547;
+  --td-brand-color-hover: rgba(245, 213, 71, 0.85);
+  --td-brand-color-active: rgba(245, 213, 71, 0.7);
+  --td-brand-color-focus: rgba(245, 213, 71, 0.25);
+  --td-brand-color-1: rgba(245, 213, 71, 0.12);
+  --td-text-color-primary: #e8ecf4;
+  --td-text-color-secondary: #8a93a6;
+  --td-text-color-placeholder: #64748b;
+  --td-text-color-disabled: #64748b;
+  --td-text-color-anti: #0b0e14;
+  --td-success-color: #34d399;
+  --td-radius-medium: 6px;
+  --td-shadow-1: none;
+  --td-shadow-2: none;
+
+  --slime: #f5d547;
+  --ink: #e8ecf4;
+  --ink-dim: #8a93a6;
+  --ink-mute: #64748b;
+  --line: rgba(255, 255, 255, 0.08);
+  --surface: #151a23;
+  --page: #0b0e14;
+  --ok: #34d399;
+}
+
+html { font-size: 16px; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header (AppLayout top-layout pattern, compact) */
+.morph-layout { min-height: 100vh; background: var(--page); }
+.morph-header.t-layout__header {
+  height: auto;
+  min-height: 40px;
+  padding: 4px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.morph-brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.morph-brand-name { font-weight: 800; letter-spacing: 0.12em; color: var(--slime); font-size: 15px; }
+.morph-brand-sub { color: var(--ink-dim); font-size: 12px; }
+.morph-header-facts { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; min-width: 0; }
+.morph-header-fact { color: var(--ink-dim); font-size: 12px; }
+.morph-header-fact b {
+  color: var(--ink);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 14px;
+  margin-left: 4px;
+}
+.morph-header-mode { color: var(--ink-dim); font-size: 12px; }
+.morph-badge {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+.morph-badge.provenance-live { border-color: var(--slime); color: var(--slime); }
+.morph-badge.provenance-replay { border-color: var(--ink); color: var(--ink); }
+.morph-badge.provenance-mock { border-color: var(--ink-mute); color: var(--ink-mute); }
+
+/* Content */
+.morph-content.t-layout__content {
+  box-sizing: border-box;
+  padding: 10px 16px 16px;
+  max-width: 1560px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Board cards (tdesign-react-starter components/Board pattern) */
+.morph-boards { margin-bottom: 10px; }
+.morph-board.t-card { background: var(--surface); border: 1px solid var(--line); }
+.morph-board .t-card__header { padding: 6px 14px 0; border: 0; min-height: 0; }
+.morph-board .t-card__body { padding: 0 14px 2px; }
+.morph-board .t-card__footer { padding: 0 14px 8px; border: 0; }
+.morph-board-title { color: var(--ink-mute); font-size: 12px; letter-spacing: 0.08em; }
+.morph-board-count {
+  display: inline-block;
+  font-family: Consolas, "Courier New", monospace;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  color: var(--ink);
+}
+.morph-board-desc { color: var(--ink-mute); font-size: 12px; line-height: 1.5; }
+
+/* Transient checkpoint pass pulse; the only place success green pulses. */
+@keyframes morph-pass-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+  100% { box-shadow: 0 0 0 14px rgba(52, 211, 153, 0); }
+}
+.morph-board.checkpoint-pulse { animation: morph-pass-pulse 0.9s ease-out 1; border-color: var(--ok); }
+
+/* Main grid: central topology + right rail */
+.morph-main > * { min-width: 0; }
+.morph-main { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px; }
+.morph-rail { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.morph-panel.t-card { background: var(--surface); border: 1px solid var(--line); }
+.morph-panel .t-card__header { padding: 6px 14px; border-bottom: 1px solid var(--line); min-height: 0; }
+.morph-panel .t-card__body { padding: 6px 14px 8px; }
+.morph-panel-title { color: var(--ink); font-size: 13px; font-weight: 700; letter-spacing: 0.05em; }
+.morph-panel-side { color: var(--ink-dim); font-size: 12px; }
+.morph-panel-line { margin: 0 0 4px; color: var(--ink-dim); font-size: 12px; }
+.morph-panel-line b { color: var(--ink); margin-right: 8px; }
+.morph-panel-note { color: var(--ink-mute); font-size: 12px; margin: 0 0 6px; }
+
+.morph-topology-body { display: flex; gap: 12px; align-items: stretch; }
+.morph-topology-chart { flex: 1 1 auto; min-width: 0; }
+
+/* acceptance strip between the main grid and the Gene ledger */
+.morph-strip { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.morph-strip .states { flex: 1 1 auto; min-width: 0; }
+.morph-strip .source { flex: 0 1 auto; }
+
+/* Gene ledger strip */
+.gene-ledger { margin-bottom: 10px; }
+
+/* Secondary details */
+.morph-secondary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.morph-secondary-wide { grid-column: 1 / -1; }
+
+/* Footer */
+.morph-footer.t-layout__footer {
+  padding: 8px 16px;
+  color: var(--ink-mute);
+  font-size: 12px;
+  border-top: 1px solid var(--line);
+}
+
+/* Narrow screens */
+@media (max-width: 1023px) {
+  .morph-main { grid-template-columns: 1fr; }
+  .morph-secondary { grid-template-columns: 1fr; }
+  .morph-topology-body { flex-direction: column; }
+}
+@media (max-width: 767px) {
+  .morph-content.t-layout__content { padding: 8px 12px 12px; }
+  .morph-header-facts { gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .morph-board.checkpoint-pulse { animation: none; }
+}
