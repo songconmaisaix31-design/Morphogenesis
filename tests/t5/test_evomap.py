@@ -12,6 +12,7 @@ import tempfile
 import threading
 import unittest
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -20,7 +21,7 @@ import httpx
 from contracts.resolution import Gene, GeneRef
 from http.server import ThreadingHTTPServer
 from viz.adapter import DashboardInputError, empty_dashboard
-from viz.evomap_models import CATEGORIES_PATH, EVOMAP_SCHEMA
+from viz.evomap_models import CATEGORIES_PATH, EVOMAP_SCHEMA, SEARCH_PATH
 from viz.evomap_service import EvomapQueryError, EvomapService, read_local_pool
 from viz.server import DashboardHandler, degraded_loader
 
@@ -79,7 +80,7 @@ def _hub_handler(request: httpx.Request) -> httpx.Response:
     return httpx.Response(200, json=_hub_payload())
 
 
-def _service(handler: Any, **kwargs: Any) -> EvomapService:
+def _service(handler: Callable[[httpx.Request], httpx.Response], **kwargs: Any) -> EvomapService:
     requests: list[httpx.Request] = []
 
     def recording(request: httpx.Request) -> httpx.Response:
@@ -280,6 +281,80 @@ class CommunityCategoriesTests(unittest.TestCase):
         self.assertEqual("stale_cache", stale.state)
         self.assertEqual("http_503", stale.error)
         self.assertEqual(3, len(stale.by_type))
+
+
+class CacheAgeClockTests(unittest.TestCase):
+    """Controlled-clock regression for cache_age_seconds metadata.
+
+    report() reads the clock before the GET while _fetch() stamps fetched_at
+    after it, so a slow Hub used to produce a negative live age. The contract
+    (docs/tracks/frontend-evomap.md) is: live => cache_age_seconds is null;
+    cache/stale_cache => a nonnegative, accurate age.
+    """
+
+    @staticmethod
+    def _clock(start: float = 1000.0) -> tuple[list[float], Callable[[], float]]:
+        state = [start]
+        return state, lambda: state[0]
+
+    def test_live_age_is_null_even_when_the_clock_advances_during_fetch(self) -> None:
+        state, clock = self._clock()
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            state[0] += 30.0  # slow Hub: fetched_at lands after report()'s now
+            return _hub_handler(request)
+
+        service = _service(handler, clock=clock)
+        report = service.report(None, None, None)
+        self.assertEqual("live", report.community_search.state)
+        self.assertIsNone(report.community_search.cache_age_seconds)
+        self.assertEqual("live", report.community_categories.state)
+        self.assertIsNone(report.community_categories.cache_age_seconds)
+
+    def test_cache_age_is_nonnegative_and_accurate_for_both_blocks(self) -> None:
+        state, clock = self._clock()
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            state[0] += 5.0  # fetched_at lands a little after report()'s now
+            return _hub_handler(request)
+
+        service = _service(handler, clock=clock)
+        service.report(None, None, None)
+        state[0] += 40.0  # still within the default TTL
+        report = service.report(None, None, None)
+        for block in (report.community_search, report.community_categories):
+            self.assertEqual("cache", block.state)
+            fetched_at = block.fetched_at
+            age = block.cache_age_seconds
+            if fetched_at is None or age is None:
+                self.fail("cache block must carry fetched_at and cache_age_seconds")
+            self.assertGreaterEqual(age, 0.0)
+            self.assertAlmostEqual(state[0] - fetched_at, age)
+
+    def test_stale_cache_age_is_nonnegative_and_accurate_for_both_blocks(self) -> None:
+        state, clock = self._clock()
+        first_call = {SEARCH_PATH: True, CATEGORIES_PATH: True}
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            path = request.url.path
+            if first_call.get(path, False):
+                first_call[path] = False
+                return _hub_handler(request)
+            return httpx.Response(503, text="down")
+
+        service = _service(handler, clock=clock, cache_ttl_seconds=10.0)
+        service.report(None, None, None)
+        state[0] += 40.0  # past the TTL; the refetch fails and serves stale
+        report = service.report(None, None, None)
+        for block in (report.community_search, report.community_categories):
+            self.assertEqual("stale_cache", block.state)
+            self.assertEqual("http_503", block.error)
+            fetched_at = block.fetched_at
+            age = block.cache_age_seconds
+            if fetched_at is None or age is None:
+                self.fail("stale block must carry fetched_at and cache_age_seconds")
+            self.assertGreaterEqual(age, 0.0)
+            self.assertAlmostEqual(state[0] - fetched_at, age)
 
 
 class DegradedLoaderTests(unittest.TestCase):
