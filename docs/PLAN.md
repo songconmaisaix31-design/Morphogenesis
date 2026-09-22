@@ -10,7 +10,7 @@
 | O 人工证据 | 新 Orca Agent + worktree + branch；`tests/integration/**`, `docs/tracks/onsite-observer.md` | 在现有观察器上增加显式的操作员 Enter 模式，等待真实 awaiting_offline 与操作员输入，保留默认自动确认行为、双视口审计、失败不重试及原证据只读。不得修改 `demo/**` / `viz/**` / `orchestration/**`。 |
 | I 独立集成 | 两轨提交并推送后派发 1 个 Orca Agent + worktree + branch；仅普通合并、少量导入/配置胶水、`docs/tracks/onsite-integration.md` | 复验锁环境适用测试、strict、构建、现场入口静态/本地检查；领域问题交回原轨。没有实接投影或新真跑时明确 NOT_RUN。 |
 
-两轨从当前已推送主线 `666b339863c7fb155c875cd9587370cb296ebe3b` 建立；每轨 1 Agent / 1 worktree / 1 branch，按互斥路径开发、测试、提交、推送。主 Agent 只维护本计划、状态、决策和验收，并协调现场人工动作；不把只读回放、浏览器视口或自动按 Enter 算作物理彩排。路演口径固定为“成员下线后，后续任务自动重新选路”。
+两轨从已推送的计划基线 `9e4b43281b2b29a2ae946405bb0aa7ec7eee2def` 建立；每轨 1 Agent / 1 worktree / 1 branch，按互斥路径开发、测试、提交、推送。主 Agent 只维护本计划、状态、决策和验收，并协调现场人工动作；不把只读回放、浏览器视口或自动按 Enter 算作物理彩排。路演口径固定为“成员下线后，后续任务自动重新选路”。
 
 ## 已通过：EvoMap 网关第四轮与备选模型配置
 
