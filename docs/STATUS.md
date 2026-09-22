@@ -1,5 +1,18 @@
 # 开发状态
 
+## 当前进行：完整路演彩排
+
+2026-09-22 用户新增固定演示全链和至少三次完整彩排，旧三次单任务证据不计入本轮。计划提交 `791d3cf` 已推送。Orca Run `run_2cdbc98915f7`，协调 terminal 沿用原身份。
+
+| 轨 | worktree / branch 后缀 | 实际模型 | Task / Dispatch | terminal |
+|---|---|---|---|---|
+| R | morph-rehearsal-runtime | gpt-6-astra / xhigh | task_3ca8b0ded0ae / ctx_bee3929001e7 | term_1fa7a0dc-6e17-4c96-9835-0428cf455e07 |
+| V | morph-rehearsal-viz | gpt-5.6-terra / high | task_d91042ca5a85 / ctx_e028b3a23be7 | term_ffa1e302-b8ed-43c0-bae6-fcc662233d0c |
+
+两轨 worktree 均从 `791d3cf` 建立，模型 effective 回执确认、terminal 已实际 working。已核对并关闭两个无任务的启动 PowerShell，不影响 Worker。集成轨在 R/V 完成后启动。用户提供的 API 凭据尚待 Base URL / 用途确认，未进入代码、日志或 Worker prompt；实际投影设备尚未确认。
+
+## 已完成的核心原型基线
+
 八个功能轨及一个独立集成轨已交付核心原型。通过 Orca CLI 多开，按难度分配 Astra / Terra / Luna；领域返修仍由原 Worker 完成。主 Agent 只维护计划、状态、决策与验收，接收集成结果，不写业务代码。
 
 - 主线：`codex/morphogenesis-mainline`，已接收集成候选 `b6bb49c3112a12f3c0bdcddbddbf2dde453be2e6`，最终状态/验收记录随主线提交推送。
