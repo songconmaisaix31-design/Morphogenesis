@@ -48,16 +48,23 @@ function topologyGraph(pipes, members) {
   showChart("story-pipe-chart", "story-pipe-empty");
   const availability = new Map((members ?? []).map((member) => [agentLabel(member.agent), member]));
   const names = new Set(pipes.flatMap((pipe) => [agentLabel(pipe.src), agentLabel(pipe.dst)]));
+  // Labels sit below every node.  With a circular graph this reserves the
+  // top edge for the node itself and prevents the upper builder name from
+  // being clipped on a 1366px projector.
   const nodes = [...names].map((name) => {
     const member = availability.get(name); const online = member?.available !== false;
-    return { name, online, symbolSize: 28, itemStyle: { color: online ? "#66c2ff" : "#7a8795" }, label: { color: online ? "#ecf5ff" : "#a8bbcd", position: "top" } };
+    return {
+      name, online, symbolSize: 28,
+      itemStyle: { color: online ? "#66c2ff" : "#7a8795" },
+      label: { color: online ? "#ecf5ff" : "#a8bbcd", position: "bottom" },
+    };
   });
   const links = pipes.map((pipe) => ({
     source: agentLabel(pipe.src), target: agentLabel(pipe.dst), active: pipe.active,
     value: `权重 ${number(pipe.weight)} · 流量 ${number(pipe.flow)} · 成功率 ${(Number(pipe.success_rate) * 100).toFixed(0)}% · ${pipe.active ? "在线" : "离线"}`,
     lineStyle: { width: Math.max(2, Math.min(12, 1 + Number(pipe.weight) * 4)), type: pipe.active ? "solid" : "dashed", color: pipe.active ? "#5ebeea" : "#778494", opacity: pipe.active ? 1 : .55 },
   }));
-  chartFor("story-pipe-chart").setOption({ animation: false, tooltip: { renderMode: "richText", formatter: (point) => point.data.value || point.name }, series: [{ type: "graph", layout: "circular", roam: false, top: 18, bottom: 28, label: { show: true, distance: 4, fontSize: 10 }, lineStyle: { curveness: .1 }, data: nodes, links }] }, { notMerge: true });
+  chartFor("story-pipe-chart").setOption({ animation: false, tooltip: { renderMode: "richText", formatter: (point) => point.data.value || point.name }, series: [{ type: "graph", layout: "circular", roam: false, top: 24, bottom: 32, label: { show: true, distance: 4, fontSize: 10 }, lineStyle: { curveness: .1 }, data: nodes, links }] }, { notMerge: true });
 }
 
 function rehearsalBoard(rehearsal) {
