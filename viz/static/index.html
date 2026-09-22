@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Morphogenesis 运行仪表板</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div><p class="eyebrow">MORPHOGENESIS / T5</p><h1>蜂群运行仪表板</h1></div>
+        <div id="provenance" class="badge">加载中</div>
+      </header>
+      <section class="source"><strong>数据来源</strong><span id="source-label"></span><span id="hub-status"></span></section>
+      <section class="states" aria-label="验收三态">
+        <article><span>contract_local</span><strong id="contract_local">not_run</strong><small>本地契约</small></article>
+        <article><span>interface_live</span><strong id="interface_live">not_run</strong><small>真实接口</small></article>
+        <article><span>task_live</span><strong id="task_live">not_run</strong><small>真实任务</small></article>
+      </section>
+      <section class="grid">
+        <article class="panel"><h2>Gene 谱系</h2><p>仅使用显式导出的 Gene 正文；无正文时不推断谱系。</p><div id="gene-chart" class="chart"></div><div id="gene-empty" class="empty" hidden></div></article>
+        <article class="panel"><h2>消息流</h2><p>按 Envelope 的 sender / receiver / msg_type 可视化。</p><div id="message-chart" class="chart"></div><div id="message-empty" class="empty" hidden></div></article>
+        <article class="panel wide"><h2>指标：当前、历史均值、历史最佳</h2><p>无历史指标导出即保留空态；图表不预设增长方向。</p><div id="metric-chart" class="chart"></div><div id="metric-empty" class="empty" hidden></div></article>
+      </section>
+      <section class="notes"><h2>运行说明</h2><ul id="notes"></ul></section>
+    </main>
+  </body>
+</html>

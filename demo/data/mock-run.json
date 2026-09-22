@@ -1,0 +1,55 @@
+{
+  "provenance": "mock",
+  "acceptance": {
+    "contract_local": "passed",
+    "interface_live": "not_run",
+    "task_live": "not_run"
+  },
+  "notes": [
+    "这是仅供视觉验证的 mock fixture；不代表真实任务、真实接口或 Hub 发布。",
+    "Hub 沙箱未配置，因此状态为待发布。"
+  ],
+  "genes": [
+    {
+      "ref": {"gene_id": "review-first", "version": 1},
+      "signals_match": ["fixed-sample"],
+      "strategy": ["run verifier"],
+      "provenance": "mock"
+    },
+    {
+      "ref": {"gene_id": "review-first", "version": 2},
+      "signals_match": ["fixed-sample"],
+      "strategy": ["run verifier", "record evidence"],
+      "provenance": "mock"
+    }
+  ],
+  "events": [
+    {
+      "run_id": "mock-run-001",
+      "msg_id": "m-001",
+      "msg_type": "intent",
+      "sender": {"role": "planner", "instance": 0},
+      "receiver": {"role": "builder", "instance": 0},
+      "task_id": "fixed-sample",
+      "attempt": {"task_id": "fixed-sample", "agent": {"role": "builder", "instance": 0}, "attempt": 0},
+      "seq": 0,
+      "ts": 1.0,
+      "provenance": "mock"
+    },
+    {
+      "run_id": "mock-run-001",
+      "msg_id": "m-002",
+      "msg_type": "result",
+      "sender": {"role": "builder", "instance": 0},
+      "receiver": {"role": "reviewer", "instance": 0},
+      "task_id": "fixed-sample",
+      "attempt": {"task_id": "fixed-sample", "agent": {"role": "builder", "instance": 0}, "attempt": 0},
+      "seq": 1,
+      "ts": 2.0,
+      "provenance": "mock"
+    }
+  ],
+  "metrics": [
+    {"name": "复核耗时", "unit": "s", "history": [4.2, 5.1, 3.8, 4.6]}
+  ]
+}
