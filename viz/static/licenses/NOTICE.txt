@@ -1,29 +1,23 @@
 Third-party license texts for the viz/static visual layer
 =========================================================
 
-The T5 dashboard's presentation layer is adapted from Hugo Theme Stack.
+The finals dashboard shell is adapted from Tencent's TDesign React Starter.
 
-1. Hugo Theme Stack — GPL-3.0-only
-   Copyright (C) Jimmy Cai (https://jimmycai.com)
-   Source: https://github.com/CaiJimmy/hugo-theme-stack
-   Pinned for this adaptation: v4.0.3, commit
-   3e123a30b79b5d52a3a8e88a9dd678fcfd28e418 (2026-05-25)
-   Full license text: LICENSE-hugo-theme-stack.GPL-3.0.txt
-   Adapted: design tokens, extended container/sidebar/card layout,
-   menu and hamburger structure, StackColorScheme light/dark pattern.
-   Theme attribution is retained in ../style.css and the page footer.
-   The reference site https://davidwang.space/ runs this theme; its exact
-   deployed theme version was not confirmed — v4.0.3 is the version this
-   track pinned and reused, not a version read from the reference site.
+1. tdesign-react-starter — MIT
+   Copyright (c) 2021-present TDesign
+   Source: https://github.com/Tencent/tdesign-react-starter
+   Pinned for this adaptation: package 0.3.1, commit
+   fce97863edd5d5556f766dd4e342aace31a99487
+   Read-only upstream clone used: C:/Users/DW/AppData/Local/Temp/morph-tdesign-fce97863
+   Full license text: LICENSE-tdesign-react-starter.MIT.txt
+   Adapted (source mapping recorded in docs/tracks/frontend-stack.md):
+     - src/components/Board/index.tsx        → viz/frontend/src/components/Board.jsx
+     - src/pages/Dashboard/Base (+TopPanel)  → viz/frontend/src/App.jsx board row
+     - src/layouts/components/AppLayout.tsx  → viz/frontend/src/App.jsx shell
+   Removed from the template: login, Redux modules, router, mock services,
+   demo statistics, i18n, and all unrelated pages.
+   Theme variables are overridden with the user-specified slime tokens.
 
-2. Tabler Icons — MIT
-   Copyright (c) 2020-2026 Paweł Kuna
-   Source: https://github.com/tabler/tabler-icons (as bundled by Stack v4.0.3)
-   Full license text: LICENSE-tabler-icons.MIT.txt
-   Used: inline menu and color-scheme toggle icons in ../index.html.
-
-3. hamburgers — MIT
-   Copyright (c) 2016 Jonathan Suh <hello@jonsuh.com> (jonsuh.com)
-   Source: https://github.com/jonsuh/hamburgers (as bundled by Stack v4.0.3)
-   Full license text: LICENSE-hamburgers.MIT.txt
-   Used: the hamburger toggle pattern in ../style.css (simplified).
+Earlier revisions of this directory used Hugo Theme Stack (GPL-3.0-only);
+that adaptation was fully replaced and no Stack-derived code remains, so its
+license texts were removed with it (see git history).

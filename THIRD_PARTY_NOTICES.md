@@ -17,8 +17,12 @@ Checked against installed package metadata on 2026-09-22. Exact direct and trans
 | numpy | 2.5.3 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | https://github.com/numpy/numpy — numeric arrays; retain wheel bundled-library notices |
 | scikit-learn | 1.9.1 | BSD-3-Clause | https://github.com/scikit-learn/scikit-learn — offline HashingVectorizer requested by metabolism; no model download |
 | pytest / mypy / build | 9.1.1 / 1.20.2 / 1.6.1 | MIT | https://github.com/pytest-dev/pytest / https://github.com/python/mypy / https://github.com/pypa/build — development checks |
-| Hugo Theme Stack | v4.0.3（commit `3e123a30b79b5d52a3a8e88a9dd678fcfd28e418`，本轨固定复用版本；参考站 davidwang.space 实际部署的主题确切版本未确认） | GPL-3.0-only | https://github.com/CaiJimmy/hugo-theme-stack — `viz/static` 展示层样式适配：设计变量、侧边栏/卡片/菜单布局与明暗主题模式；未复制任何博客文章、头像或私人内容；主题署名保留在 `viz/static/style.css` 头部与页面页脚，完整许可与 copyright 文本在 `viz/static/licenses/` |
-| Tabler Icons（经 Stack v4.0.3 内嵌版本） | 随 Stack v4.0.3 | MIT | https://github.com/tabler/tabler-icons — `viz/static/index.html` 内联菜单/主题切换图标；汉堡按钮模式 © Jonathan Suh hamburgers（MIT）；许可文本同在 `viz/static/licenses/` |
+| tdesign-react-starter | 0.3.1（commit `fce97863edd5d5556f766dd4e342aace31a99487`） | MIT | https://github.com/Tencent/tdesign-react-starter — 决赛展示层外壳实际复用：Board 卡片、Dashboard/Base TopPanel 组合、AppLayout 顶栏布局（源码映射见 `viz/static/licenses/NOTICE.txt` 与 `docs/tracks/frontend-stack.md`）；完整 MIT 文本在 `viz/static/licenses/` |
+| React / ReactDOM | 18.3.x（`viz/frontend/package-lock.json`） | MIT | https://github.com/facebook/react — 外壳运行时，打包进 `viz/static/assets/finals-shell.js` |
+| tdesign-react / tdesign-icons-react | 1.15.x / 0.6.x（`viz/frontend/package-lock.json`） | MIT | https://github.com/Tencent/tdesign-react — 外壳组件库与主题变量，随 finals-shell 打包；无 CDN |
+| Vite / @vitejs/plugin-react / less | 5.4.x / 4.3.x / 4.x（`viz/frontend/package-lock.json`） | MIT | https://github.com/vitejs/vite — 仅构建期工具，产物为静态本地文件 |
+
+2026-09-23 起展示层改为上述 TDesign 适配；此前 Hugo Theme Stack（GPL-3.0-only）/ Tabler Icons / hamburgers 适配已整体移除，无残留代码，其许可文本随代码一并删除（见 git 历史）。
 
 Evolver is not installed, linked, or copied. Current npm metadata was checked separately by the coordinator: `@evomap/evolver` 2.0.38 is GPL-3.0-or-later. Its implementation is not needed for this foundation.
 
