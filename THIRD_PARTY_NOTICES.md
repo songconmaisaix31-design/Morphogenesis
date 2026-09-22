@@ -15,6 +15,7 @@ Checked against installed package metadata on 2026-09-22. Exact direct and trans
 | mcp (Python) | 1.30.0 | MIT | https://github.com/modelcontextprotocol/python-sdk — standard MCP client |
 | faiss-cpu | 1.15.1 | MIT | https://github.com/facebookresearch/faiss / https://github.com/kyamagu/faiss-wheels — native vector index dependency |
 | numpy | 2.5.3 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | https://github.com/numpy/numpy — numeric arrays; retain wheel bundled-library notices |
+| scikit-learn | 1.9.1 | BSD-3-Clause | https://github.com/scikit-learn/scikit-learn — offline HashingVectorizer requested by metabolism; no model download |
 | pytest / mypy / build | 9.1.1 / 1.20.2 / 1.6.1 | MIT | https://github.com/pytest-dev/pytest / https://github.com/python/mypy / https://github.com/pypa/build — development checks |
 
 Evolver is not installed, linked, or copied. Current npm metadata was checked separately by the coordinator: `@evomap/evolver` 2.0.38 is GPL-3.0-or-later. Its implementation is not needed for this foundation.

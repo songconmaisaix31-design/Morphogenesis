@@ -80,7 +80,7 @@ def test_missing_node_is_not_python_fallback(monkeypatch: pytest.MonkeyPatch) ->
 def test_real_child_failures_are_bounded_and_redacted(tmp_path: Path, source: str, error: str) -> None:
     script = tmp_path / "fake.mjs"
     script.write_text(source, encoding="utf-8")
-    client = NodeAssetBridge(timeout_seconds=0.5)
+    client = NodeAssetBridge(timeout_seconds=0.5 if error == "sdk_timeout" else 10)
     client._script = script
     with pytest.raises(BridgeError) as caught:
         client.canonicalize({"secret": "secret-request-data"})

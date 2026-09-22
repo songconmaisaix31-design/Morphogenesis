@@ -93,7 +93,7 @@ def test_mcp_rejects_unvalidated_install_and_preserves_caller_errors(tmp_path: P
 def test_mcp_failed_initialization_has_no_retry(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, source: str, error: str,
 ) -> None:
-    client = LocalGepMcpClient(tmp_path, timeout_seconds=0.3)
+    client = LocalGepMcpClient(tmp_path, timeout_seconds=0.3 if error == "mcp_timeout" else 10)
     starts = 0
 
     def parameters() -> StdioServerParameters:

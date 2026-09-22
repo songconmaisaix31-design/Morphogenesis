@@ -117,7 +117,10 @@ def test_success_requires_independent_evidence() -> None:
     assert Usage(tokens=0, cost_usd=0).tokens == 0
 
 
-@pytest.mark.parametrize("path", ["../other", "C:/outside", "/outside", "..\\other", "\\outside"])
+@pytest.mark.parametrize("path", [
+    "../other", "C:/outside", "/outside", "..\\other", "\\outside",
+    ".", "./", "sub/file:stream", "NUL", "sub/CON.txt", "sub./file", " ",
+])
 def test_runtime_path_boundary(path: str) -> None:
     with pytest.raises(ValidationError):
         RunConfig(run_id="r", workspace="work", writable_paths=[path])
@@ -133,3 +136,11 @@ def test_runtime_approval_and_quota() -> None:
         Provision(provision_id="p", run_id="r", requested=2, members=[BUILDER, BUILDER])
     with pytest.raises(ValidationError, match="quota"):
         Provision(provision_id="p", run_id="r", requested=2, members=[BUILDER, REVIEWER], quota=1)
+
+
+@pytest.mark.parametrize("amount", [float("nan"), float("inf"), -float("inf")])
+def test_runtime_cost_rejects_nonfinite(amount: float) -> None:
+    with pytest.raises(ValidationError):
+        RunConfig(run_id="r", workspace="work", writable_paths=["sample.py"], max_cost_usd=amount)
+    with pytest.raises(ValidationError):
+        Usage(cost_usd=amount)
