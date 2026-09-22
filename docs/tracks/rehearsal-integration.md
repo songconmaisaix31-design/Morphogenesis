@@ -27,6 +27,10 @@ V `35b3836adbce5c18c327cbc4f3aeba2b6475879b` 修复长任务标题、Gene 短标
 
 第一、二轮 live 截图发现节点圆形底端稍被裁切，V `4593ad8ab5c65a9cde3a1039a10e78d9134ea34a` 调整边界与标签，第三轮使用该修正。第三轮完全展开的 28px 节点又暴露相向标签过近，继续交 V 最小返修。每轮 live 原始截图不覆盖、不替换；最后的显示修复必须以明确 replay 标识重渲染已有证据验证，不能声称三轮都运行于最终 UI SHA。
 
+最终 V `80220c5481e64fa197a679a7ec2ea466b6306af6` 将管道图改为 160px、稳定无动画布局、底部标签，I 已普通合并。此前 `6fb1b7891859a23123f7f1d18818b1ba3337b011` 的顶部裁切仍失败，实际 ZRender builder#1 的 y=-6.38px，拒绝截图和几何日志留存为 `layout-rejected-6fb1b78/`，没有拿它充作通过证据。
+
+最终运行 `node tests/integration/check_rehearsal_layout.cjs http://127.0.0.1:7525 .runtime/integration/layout-final`：1366×768 / 1920×1080 均通过。脚本读取真实 ZRender 绘制矩形与节点圆形，检查 3 个标签/3 个节点都在画布内、标签两两不交叠、文字矩形与节点圆形不相交；另核对横向无溢出、Gene ledger 在首屏。已主动查看 `layout-final/replay-1366.png`、`replay-1920.png`，数据和几何明细为 `geometry.json`。该新门禁也实际拒绝过已知坏候选，并非仅断言 DOM 或字符串。最终 UI 验证明确为只读 replay；所有 live 原始截图仍保留其实际版本。
+
 Orca 内嵌 tab 创建成功，但对同一 browserPageId 执行 snapshot 返回 `runtime_unavailable: The Orca runtime closed the connection before responding`。原错误留 `.runtime/integration/orca-snapshot.json`；未重启 Orca 或杀 helper，改用用户批准的独立 headless Chromium。
 
 ## 三轮 live
@@ -64,6 +68,8 @@ Orca 内嵌 tab 创建成功，但对同一 browserPageId 执行 snapshot 返回
 原始 CLI `command.json`、`codex.jsonl`、proposal、stdout/stderr 和外部评审报告留在各 TEMP 根的 repair/recovery 子目录，未入 Git。每轮 `.runtime/integration/live-N/{1366,1920}.json` 保存页面状态、真实 ECharts option、HTTP 回执；`{1366,1920}-0.png` 至 `-19.png` 是 viewport 实图，涵盖初始、反馈、生成、下线、重新选路、采用、衰减、归档、完成。已主动打开关键图片检查，不仅断言文字。
 
 回放现场入口 `demo/run-demo.ps1 -Replay <第一轮/rehearsal.json> -Port 7525` 正常就绪，页面 provenance=replay、原始证据只读，interface_live/task_live=not_run。`replay_immutable.py` 在 CLI `--replay` 和真实浏览器回放前后比较 35 个原始文件的字节与 mtime，全部不变，见 `replay-immutable.json`。回放不计入本轮三次 live。
+
+最终接受版本的静态资源变更后，重新执行 `python -m build` 和安装 wheel 后 `check_distribution.py --check-node`，结果见 `build-accepted.log`、`wheel-accepted-check.log`：sdist/wheel 和 11 包/资源/固定外部验证器/Node 桥通过。完整 pytest 的 158 项与 strict 52 文件结果仍适用；后续领域变更仅 UI JS/CSS，执行过 Node 语法和真实浏览器几何检查，未重复付费任务。没有改 Python/npm 锁或全局配置。
 
 ## 服务清理与只读演示交接
 
