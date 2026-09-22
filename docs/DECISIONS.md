@@ -4,7 +4,7 @@
 2. 初始四轨安排已被用户后续指令替代：按功能去耦合并行，八个互斥功能轨见 PLAN；T4 暂不进入主闭环，最后独立集成。
 3. 用户“不要重复造轮子”优先：编排、校验、持久化、检索、协议、哈希、可视化均使用成熟依赖；项目自研限权重反馈、经验代谢和必要适配。
 4. 包内“身份/AttemptId/Provision”解释为最小业务数据，不据此建设开发调度或完成证明基础设施；开发协调直接使用 Orca CLI。
-5. 当前环境实测：Python 3.13.13、Node 24.16.0、npm 11.13.0、uv 0.11.26、Codex CLI 0.155.1；Poetry 未安装。T0 可通过隔离工具环境运行 Poetry 并产出包内规定的锁，避免全局环境改动。
+5. 接手时环境实测：Python 3.13.13、Node 24.16.0、npm 11.13.0、uv 0.11.26、Codex CLI 0.155.1；Poetry 未全局安装。最终通过 uv 隔离工具环境运行 Poetry 2.5.1，集成 worktree 使用独立 .venv / Python 3.12.13；CI 使用 Python 3.13，未改全局配置。
 6. 外部发布缺配置时为“待发布”；官方 SDK 本地验证通过只能证明本地校验。G3/G4 的外部部分仍需真实沙箱证据。
 7. 2026-09-22 对 npm registry 实查：`@evomap/gep-sdk@1.14.0`、`@evomap/gep-mcp-server@1.7.0` 均声明 Apache-2.0；`@evomap/evolver@2.0.38` 声明 GPL-3.0-or-later，Node engine 为 `^22.13.0 || >=23.4.0`。包内“Node >=18”不能作为最新版 Evolver 要求。当前主链复用 SDK 与 MCP Server，不复制 Evolver 源码。
 8. 上游依据：[GEP SDK](https://github.com/EvoMap/gep-sdk-js) 明确只提供 schema/协议助手；[GEP MCP Server](https://github.com/EvoMap/gep-mcp-server) 提供工具接口；[LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence) 的 checkpointer 保存线程状态；[FAISS](https://github.com/facebookresearch/faiss) 提供检索实现；[SQLModel](https://github.com/fastapi/sqlmodel)、[官方 MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)、[ECharts](https://github.com/apache/echarts) 分别用于元数据、协议客户端、图表。最终安装版本与 notices 由 T0 维护。
@@ -14,3 +14,7 @@
 12. 协调审查发现 T3T 初版失败信号负值偏离方案成功率语义，闲置窗口未实际衰减；原 Worker 已在 `a12d288` 修复，10 项锁定测试通过。运行时需从持久复核事件恢复每轮内存拓扑。
 13. P 供给原版未支持重复角色；原 Worker 在同一 terminal 续接任务，`1c4e5e9` 为每个角色分配稳定实例编号，支持两位 builder 的选路验证。该 Worker 已完成并通过 Orca worker-release 释放，分支与输出归档保留。
 14. 展示不应从任意事件 payload 推断经验或成功；消费明确的事件、经验快照、复核结果导出。ECharts 使用 T0 锁定的本地依赖，不保留独立 CDN 版本。
+15. 最终集成保留各轨历史。全包 strict 和远端 CI 暴露的 T5 冗余 cast、截图发现的 hidden 空框和 Gene 标签遮挡均退回原 Worker，分别由 e2f1bbe、218ba08、9ae01cf 修复，协调者没有修改业务实现。
+16. Orca 内嵌浏览器 helper 不可用，未重启全局运行时；复用现有 Playwright / Chromium 独立 headless 验证真实事件页面，分别记录 HTTP、DOM/Canvas、截图与内嵌能力限制。只清理自己核验过身份的服务和页面。
+17. 三次真实任务已足以核查既定正常/暂停接续/经验复用路径。集成不再次付费调用；用最终独立验证器复验保留候选，并在复制的已完成 SQLite 检查点上重复恢复，禁止执行器和复核器重新调用。早期只读 backup 导致一个 shm 的 mtime 改变，已在报告保留该失败及修正，不能删去或夸大不变性。
+18. 最终交付是固定修复样例的核心原型。Hub 沙箱凭据与正式契约、产品运行时动态供给、单次模型硬费用上限、可选 T4 与正式现场稳定性均不得用本地检查替代；具体结论见 ACCEPTANCE。
