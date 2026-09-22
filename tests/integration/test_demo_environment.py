@@ -15,9 +15,6 @@ import pytest
 
 @pytest.mark.skipif(sys.platform != 'win32' or not shutil.which('pwsh'), reason='Windows demo launcher')
 def test_demo_excludes_sentinel_from_viewer_and_passes_executor_args(tmp_path: Path):
-    # Unique fixture files, fixed candidate port; never stop an existing listener.
-    with socket.socket() as probe:
-        probe.bind(('127.0.0.1', 7526))
     source = Path(__file__).resolve().parents[2]
     (tmp_path/'demo').mkdir()
     shutil.copyfile(source/'demo/run-demo.ps1', tmp_path/'demo/run-demo.ps1')
@@ -28,13 +25,21 @@ def test_demo_excludes_sentinel_from_viewer_and_passes_executor_args(tmp_path: P
     for package in ('viz', 'orchestration'):
         (tmp_path/package).mkdir()
         (tmp_path/package/'__init__.py').write_text('', encoding='utf-8')
-    (tmp_path/'viz/server.py').write_text('''import json, os
+    (tmp_path/'viz/server.py').write_text('''import argparse, json, os, socket
 from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200); self.end_headers(); self.wfile.write(b'fixture-only')
-server = HTTPServer(('127.0.0.1', 7526), Handler)
+class ExclusiveHTTPServer(HTTPServer):
+    allow_reuse_address = False
+    def server_bind(self):
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+parser = argparse.ArgumentParser()
+parser.add_argument('--port', type=int, required=True)
+args, _ = parser.parse_known_args()
+server = ExclusiveHTTPServer(('127.0.0.1', args.port), Handler)
 server.timeout = 25
 Path('viewer-env.json').write_text(json.dumps({'key_present': 'MORPH_EVOMAP_API_KEY' in os.environ, 'pid': os.getpid()}))
 server.handle_request()
@@ -46,9 +51,16 @@ Path('executor-env.json').write_text(json.dumps({'key_present': 'MORPH_EVOMAP_AP
 ''', encoding='utf-8')
     env = {k: v for k, v in os.environ.items() if k.upper() != 'MORPH_EVOMAP_API_KEY'}
     env.update(MORPH_EVOMAP_API_KEY='fixture-only-not-a-secret', TEMP=str(tmp_path), TMP=str(tmp_path))
+    # Select immediately before launch, independently of any live/replay viewer.
+    # The launcher ownership checks and exclusive server bind fail closed if
+    # another process takes this candidate; never retry or stop that listener.
+    with socket.socket() as probe:
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        probe.bind(('127.0.0.1', 0))
+        port = probe.getsockname()[1]
     try:
         completed = subprocess.run(['pwsh', '-NoProfile', '-File', str(tmp_path/'demo/run-demo.ps1'),
-                                    '-AuthorizeLive', '-Executor', 'evomap', '-Mode', 'manual', '-Port', '7526'],
+                                    '-AuthorizeLive', '-Executor', 'evomap', '-Mode', 'manual', '-Port', str(port)],
                                    env=env, capture_output=True, text=True, encoding='utf-8', timeout=30)
         assert completed.returncode == 0, completed.stdout + completed.stderr
         assert not json.loads((tmp_path/'viewer-env.json').read_text())['key_present']
@@ -66,5 +78,5 @@ Path('executor-env.json').write_text(json.dumps({'key_present': 'MORPH_EVOMAP_AP
             # Start-Process may keep the capturing parent open until the bounded
             # viewer already exits; connection refusal then requires no cleanup.
             with suppress(URLError):
-                with urlopen('http://127.0.0.1:7526/', timeout=3) as response:
+                with urlopen(f'http://127.0.0.1:{port}/', timeout=3) as response:
                     assert response.read() == b'fixture-only'
