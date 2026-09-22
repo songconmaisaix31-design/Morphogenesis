@@ -8,8 +8,9 @@ Orca 新工作树 `C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-integr
 |---|---|---|---|
 | V | `1b2e335af52bd2e7de780d65fc14246a50bd2fd9` | `f609cfa0692d0323c423b63edf3a113cb388b8b6` | 仅 `demo/README.md`、`docs/tracks/onsite-viz.md` |
 | O | `26a5cf1e417813244809807de44c44e917993713` | `e11367c4eb304807650353a6712853241271e528` | 仅 `tests/integration/**`、`docs/tracks/onsite-observer.md` |
+| O 端口返修 | `3d05f4e941ffe350270ddb9d55933a5065887665` | `b42e053d60b10db51accb232a2496493765784f0` | 仅 `tests/integration/test_demo_environment.py`、`docs/tracks/onsite-observer.md` |
 
-I 自身仅维护本报告，暂未需要导入/配置胶水。V/O 域文件不由 I 代改。本轮新模型请求数为 **0**；未启动真实 demo、未操作回放服务生命周期。
+I 自身仅维护本报告，没有导入/配置胶水或代改域文件。本轮新模型请求数为 **0**；未启动真实模型 demo、未操作回放服务生命周期。首轮失败与后续返修证据均保留；按协调者最新交接，返修只复跑原失败项及受影响检查，不重复无关全套。
 
 ## 锁环境与实际验证
 
@@ -26,6 +27,7 @@ npm ci --ignore-scripts --no-audit --no-fund
 |---|---|
 | `node --test tests/integration/test_browser_options.cjs tests/integration/test_operator_enter.cjs tests/integration/test_observer_control.cjs` | **31 passed**，`node-tests.log`；含实际观察器 VM 流程、合成 TTY、默认自动 Enter、人工门禁失败收尾、凭据哨兵与未知转发不重试 |
 | `.venv/Scripts/python.exe -B -m pytest -q --basetemp "$testTemp/pytest"` | 首次 **199 passed / 1 failed / 115.95s**，`pytest.log`；端口冲突返修见下节 |
+| `.venv/Scripts/python.exe -B -m pytest -q tests/integration/test_demo_environment.py --basetemp "$testTemp/pytest"` | 合并 O 返修后 **1 passed / 29.44s**，`pytest-port.log`；首轮唯一失败已关闭，未声称最终 SHA 重跑过完整 200 项 |
 | `.venv/Scripts/python.exe tools/typecheck.py` | **53 source files clean**，`strict.log` |
 | `.venv/Scripts/python.exe -m build` | sdist / wheel 成功，`build.log` |
 | `npm run check:sdk` | schema 1.14.0、asset ID、防篡改通过，`published=false`，`sdk.log` |
@@ -40,11 +42,15 @@ npm ci --ignore-scripts --no-audit --no-fund
 
 ### 既有测试端口冲突
 
-`tests/integration/test_demo_environment.py:20` 在 `probe.bind(('127.0.0.1', 7526))` 抛出 `OSError: [WinError 10048]`。该测试在 probe、fixture viewer、demo 参数和收尾 URL 硬编码 7526，与协调者常驻只读回放冲突；失败发生于模型/子进程启动之前。I 没有停止或重启 7526，也没有跳过该测试冒充全套通过。已通过 Orca escalation 退回拥有 `tests/integration/**` 的原 O Worker；等待其端口隔离修订的精确推送 SHA 后合并复验。
+`tests/integration/test_demo_environment.py:20` 在 `probe.bind(('127.0.0.1', 7526))` 抛出 `OSError: [WinError 10048]`。该测试在 probe、fixture viewer、demo 参数和收尾 URL 硬编码 7526，与协调者常驻只读回放冲突；失败发生于模型/子进程启动之前。I 没有停止或重启 7526，也没有跳过该测试冒充全套通过。通过 Orca escalation 退回原 O Worker，收到并核实远端 `3d05f4e941ffe350270ddb9d55933a5065887665` 后普通合并。
+
+返修以 `bind(('127.0.0.1', 0))` 获取系统分配端口，统一传给 demo 参数、fixture viewer 和清理 URL，使用 Windows 独占 socket；探测与子进程绑定之间仍有时间间隙，冲突时失败，不重试、不接管未知进程。I 在新的私有 TEMP `C:/Users/DW/AppData/Local/Temp/morph-onsite-i-port-a19919d3d5374ec08cb3458772256536` 中定向复验原失败项通过；实际路径见 `pytest-port-temp.txt`。该测试使用真实 PowerShell launcher 副本及本地 fixture 模块，验证 viewer 不持有凭据哨兵、executor 参数与环境正确，不发网关请求。无产品、锁、JS、构建输入变更，因此此前 199 项、31 Node、strict、SDK、wheel 结果继续适用；本次只新增定向测试与端口/API 检查。
 
 ## 7526 只读回放与 7527 准备状态
 
 2026-09-22 **08:58:10 UTC / 16:58:10 北京时间**，`Invoke-WebRequest http://127.0.0.1:7526/api/dashboard -TimeoutSec 10` 返回 HTTP 200、`provenance=replay`、`contract_local=passed`、`interface_live=not_run`、`task_live=not_run`、stage=`completed`。记录见 `replay-api.json`。`Get-NetTCPConnection -State Listen -LocalPort 7526,7527` 当时只返回 `127.0.0.1:7526` / PID 26576；**7527 没有监听**。这是当时的准备状态，不是端口预留或未来可用保证；不按本报告历史 PID 终止进程。
+
+返修验证结束后 **09:14:46 UTC / 17:14:46 北京时间**再次只读核对，7526 仍 HTTP 200、replay、双 live 状态 not_run，同一 listener；7527 仍无监听，见 `ports-final.json`。
 
 ```powershell
 $env:MORPH_PLAYWRIGHT='C:/Users/DW/AppData/Roaming/npm/node_modules/@playwright/cli/node_modules/playwright'
