@@ -1,5 +1,11 @@
 # 开发状态
 
+## 当前开发：Kimi 实现 Stack 前端重塑（2026-09-22）
+
+用户明确保留拓扑，外围采用 `davidwang.space` 的 Hugo 模板。计划提交 `0fe307a32032993386afe876b27a3b74cf5aa52e` 已推送；Orca Run `run_982e98c53b9f`，协调 terminal `term_f835f335-f1c6-424b-b119-bb299acaa555`。F 在独立 worktree `morph-frontend-stack` / 同名分支，由 Kimi Code 0.43.1、实际 K3 thinking high 实现，session `session_b4a6ad0c-3fc4-4df3-8ef9-3f3f725da760`，terminal `term_19fbd0f3-6bee-4499-9394-ea2b0fb97f57`；Task `task_a4a10e35bff2` / Dispatch `ctx_5a1d0dd53ba3`。
+
+首次 worker-start 在新目录信任页被 agent_unconfigured 拒绝，Task/Dispatch 均未创建；核对目录无项目 MCP 配置并完成该目录信任后，原 terminal 被识别为 kimi，第二次派发 ready / input_accepted，后续终端已观察到 Kimi 实际读取需求和源码。Orca 的 Kimi 提交检测返回 provider unsupported，未把 input_accepted 当完成。参考站截图与布局数据在 `%TEMP%/morph-stack-reference-qqnJgo/`，显示 Stack 浅色三栏卡片；个人图像不迁入。领域验收/提交尚在执行，随后独立集成；未将新版记为完成。
+
 ## 最新结果：真实 EvoMap 免费 Gene 获取与审查完成（2026-09-22）
 
 首次注册及绑定已由 HTTP 200 / claimed=true 核验。用户确认具体免费 repair Gene 后，仅一次 authenticated A2A fetch 返回 1 条资产，扣费 0 credits。Gene `sha256:c9ed1efef4529b9d43ac5738c27bb76735decf483aad5ddcabb974f53a252ae2` 通过现有官方 SDK schema 与哈希校验，可作为修复策略参考。
