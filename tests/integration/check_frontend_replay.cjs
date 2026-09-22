@@ -78,7 +78,7 @@ function fetchJson(u) {
         ...(current.pipes ?? []).flatMap((p) => [agentKey(p.src), agentKey(p.dst)]),
       ])].sort();
       const expectedEdges = (current.pipes ?? []).map((p) => ({
-        key: `${agentKey(p.src)}→${agentKey(p.dst)}`, active: p.active !== false,
+        key: `${agentKey(p.src)}→${agentKey(p.dst)}`, active: p.active !== false, weight: p.weight ?? null,
       }));
       const removed = current.routing?.removed_member ? agentKey(current.routing.removed_member) : null;
       const rerouted = current.routing?.selected_attempt?.agent ? agentKey(current.routing.selected_attempt.agent) : null;
@@ -132,6 +132,59 @@ function fetchJson(u) {
       record('event feed rows == rehearsal.history, latest first',
         feed.rows === apiHistory && (apiHistory === 0 ? /尚无阶段快照/.test(feed.text) : feed.firstRow.includes(`#${latestSeq}`)),
         `dom_rows=${feed.rows} api_history=${apiHistory} first="${feed.firstRow.slice(0, 40)}"`);
+
+      // Big numbers + checkpoint list vs snapshot facts.
+      const boards = await page.evaluate(() => ({
+        rate: document.getElementById('story-checkpoint-rate')?.textContent ?? '',
+        checks: [...document.querySelectorAll('#story-checkpoints li')].map((el) => el.textContent),
+        tokens: document.getElementById('metric-tokens')?.textContent ?? '',
+        geneCount: document.getElementById('story-gene-count')?.textContent ?? '',
+        offlineMember: document.getElementById('story-offline-member')?.textContent ?? '',
+        offlineReason: document.getElementById('story-offline-reason')?.textContent ?? '',
+      }));
+      const cps = current.checkpoints ?? null;
+      if (cps) {
+        record('checkpoint big number == passed/total·ratio', boards.rate.startsWith(`${cps.passed_count}/${cps.total}`) && boards.rate.includes(`${Math.round(cps.ratio * 100)}%`), boards.rate);
+        const expectChecks = (cps.checks ?? []).map((c) => `${c.name}：${c.passed === true ? '通过' : c.passed === false ? '失败' : '待判定'}`);
+        record('checkpoint list == snapshot checks', JSON.stringify(boards.checks) === JSON.stringify(expectChecks), boards.checks.join(' | '));
+      }
+      const tokenValues = (current.results ?? []).map((r) => r?.usage?.tokens).filter((t) => Number.isFinite(t));
+      record('tokens big number from real result usage', tokenValues.length === 0 ? boards.tokens === '未知' : tokenValues.includes(Number(boards.tokens)), `dom=${boards.tokens} api=${tokenValues}`);
+      const curGenes = current.genes ?? [];
+      const activeGenes = curGenes.filter((g) => g.archived_at === null || g.archived_at === undefined).length;
+      record('gene count == active genes in snapshot', boards.geneCount === String(curGenes.length ? activeGenes : '未知'), `dom=${boards.geneCount} api=${activeGenes}/${curGenes.length}`);
+      const ledger = await page.evaluate(() => ({
+        cards: document.querySelectorAll('#story-genes .gene-fact').length,
+        states: [...document.querySelectorAll('#story-genes .gene-state')].map((el) => el.textContent),
+        archived: [...document.querySelectorAll('#story-genes .gene-fact')].filter((el) => el.textContent.includes('已归档')).length,
+      }));
+      const apiArchived = curGenes.filter((g) => g.archived_at !== null && g.archived_at !== undefined).length;
+      record('gene ledger cards == snapshot genes, archived count matches',
+        ledger.cards === curGenes.length && ledger.archived === apiArchived,
+        `dom=${ledger.cards}/${ledger.archived} api=${curGenes.length}/${apiArchived} states=${ledger.states}`);
+      const pipeRows = await page.evaluate(() => [...document.querySelectorAll('#story-pipes .pipe-row')].map((el) => ({
+        active: el.className.includes('pipe-active'), text: el.textContent,
+      })));
+      record('pipe list rows == pipes with weights', pipeRows.length === expectedEdges.length
+        && pipeRows.every((row, i) => row.active === expectedEdges[i].active
+          && (expectedEdges[i].weight === null || row.text.includes(`权重 ${Number(expectedEdges[i].weight).toFixed(2)}`))),
+        pipeRows.map((r) => r.text.slice(0, 60)).join(' || '));
+      if (removed) {
+        record('offline card names removed member + reason + reroute',
+          boards.offlineMember.includes(removed) && boards.offlineReason.includes(rerouted ?? ''),
+          `${boards.offlineMember} | ${boards.offlineReason.slice(0, 60)}`);
+      }
+
+      // Click through every node; each detail aside must quote that key.
+      let detailOk = true;
+      const detailNotes = [];
+      for (const key of expectedKeys) {
+        await page.locator(`.swarm-svg g.swarm-node:has(.swarm-node-label:text-is("${key}"))`).dispatchEvent('click');
+        await page.waitForSelector('.swarm-detail:not(.swarm-detail-hint)', { timeout: 5000 });
+        const text = await page.textContent('.swarm-detail');
+        if (!text.includes(key)) { detailOk = false; detailNotes.push(key); }
+      }
+      record('all node details quote their own key', detailOk, detailNotes.join(','));
       await page.screenshot({ path: path.join(output, 'replay-swarm.png'), fullPage: true });
     } else {
       // nodata: empty_dashboard (provenance live, source_label 未加载导出)
