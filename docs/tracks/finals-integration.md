@@ -11,6 +11,8 @@ Write scope: this report and `tests/integration/check_finals_replay.cjs` only. P
 - Geometry imports original `readGeometry` / `assertGeometry` unchanged, including complete ledger in first viewport, canvas clipping and label/node overlap. Browser mode captures every snapshot at 1280×720, 1366×768 and 1920×1080, waits 650 ms after the observed stage, and saves the four named keyframes at 1280 and 1920.
 - Original stage facts remain: 0/3 → 3/3, weight 1.00 → 1.90 with width 8.6, inactive dashed edge, member `online=false`, final completed. Replay must keep `interface_live` and `task_live` at `not_run`.
 - `--prepare-only` checks all API snapshots without judging the old frontend against the new design. Result: 20 snapshots, 0 failures, source unchanged, private server exited. Artifacts: `.runtime/replay-preparation/` (ignored).
+- Added assertions bound to the new shell's semantic IDs: current-task tokens, actual unarchived Gene count, unique-task round, online membership, and the required black background. Historical token oracle: sequences 0–1 unknown, 2–5 = 911, 6–8 unknown, 9–19 = 1226. Recovery must not inherit 911 or display cumulative 2137. Low weight does not establish archive: only `archived_at` does.
+- Separate explicitly labelled 503/empty UI fixtures test acceptance/statistics reset and replay recovery. These start from sequence 11 with two active Genes so an already-zero final count cannot hide stale-state bugs.
 
 Commands executed:
 
@@ -23,6 +25,6 @@ node tests/integration/check_finals_replay.cjs C:/Users/DW/AppData/Local/Temp/mo
 
 ## Pending acceptance
 
-Await coordinator-accepted exact F SHA before ordinary merge. Merge coordinator governance `54b7981` before final delivery. Review actual Tencent TDesign React Starter source/provenance, frontend-only product diff, DOM/JS scope, black/yellow design, current-task tokens, task round, real active Gene counts/four states, archived dimming, current step/events, stale-state reset on API error/empty, and actual screenshots. Run unchanged 11 T5 tests, unchanged 31 Node tests, clean frontend install/build, Python build and installed-wheel resource checks. Preserve original observer and tests.
+Await coordinator-accepted exact F SHA before ordinary merge. Coordinator governance `a186e7b` (including `54b7981`) is merged normally. Review actual Tencent TDesign React Starter source/provenance, frontend-only product diff, DOM/JS scope, black/yellow design, current-task tokens, task round, real active Gene counts/four states, archived dimming, current step/events, stale-state reset on API error/empty, and actual screenshots. Run unchanged 11 T5 tests, unchanged 31 Node tests, clean frontend install/build, Python build and installed-wheel resource checks. Preserve original observer and tests.
 
 Full original live observer, new model/gateway execution, remote Hub publishing, and physical screen witnessing are **not run**. Replay/browser evidence cannot establish equivalent live acceptance. No candidate frontend acceptance is claimed by this preparation report.

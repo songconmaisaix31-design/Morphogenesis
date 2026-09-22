@@ -94,6 +94,62 @@ function assertOriginalStageFacts(rows) {
   assert.equal(rows.at(-1).acceptance.task_live, 'not_run');
 }
 
+function assertFinalsStats(row, current, history) {
+  const results=current.results.filter(result=>result.task_id===current.task_id);
+  const tokens=results.length && results.every(result=>Number.isFinite(result.usage?.tokens))
+    ? results.reduce((sum,result)=>sum+result.usage.tokens,0) : null;
+  const shown=row.ids['metric-tokens']?.trim();
+  if(tokens===null) assert.equal(shown,'未知','Unknown current-task usage must remain unknown');
+  else assert.equal(shown.replace(/,/g,''),String(tokens),'Current-task tokens must not sum previous tasks');
+  const active=current.genes.filter(gene=>gene.archived_at===null).length;
+  assert.equal(row.ids['story-gene-count']?.trim(),String(active),'Active count must follow actual archive state');
+  const taskIds=[...new Set(history.map(snapshot=>snapshot.task_id))];
+  assert.equal(Number(row.ids['header-round']?.match(/\d+/)?.[0]),taskIds.indexOf(current.task_id)+1,'Task round is not snapshot sequence');
+  assert.equal(Number(row.ids['header-members']?.match(/\d+/)?.[0]),current.members.filter(member=>member.available).length,'Online member count');
+  assert.equal(row.theme.background,'rgb(11, 14, 20)','Required black page background');
+}
+
+async function checkReset(record, output) {
+  const {page,width}=record;
+  const readReset=()=>page.evaluate(()=>({
+    provenance:document.getElementById('provenance').textContent,
+    acceptance:Object.fromEntries(['contract_local','interface_live','task_live'].map(id=>[id,document.getElementById(id).textContent])),
+    ids:Object.fromEntries([...document.querySelectorAll('[id]')].map(el=>[el.id,el.textContent])),
+  }));
+  const results=[];
+  for(const fixture of ['error','empty']) {
+    // Explicitly labelled UI fixtures, kept separate from historical replay facts.
+    const handler=route=>fixture==='error'
+      ? route.fulfill({status:503,body:'Explicit local integration error fixture'})
+      : route.fulfill({json:{provenance:'mock',source_label:'Explicit local empty integration fixture',hub_status:'待发布',
+        acceptance:{contract_local:'not_run',interface_live:'not_run',task_live:'not_run'},
+        genes:[],adoptions:[],events:[],metrics:[],notes:['contract_local empty fixture'],rehearsal:null,result:null}});
+    await page.route('**/api/dashboard',handler);
+    try {
+      await page.waitForFunction(kind=>{
+        const value=document.getElementById('provenance').textContent;
+        return kind==='error'?value==='数据不可用':value.includes('mock');
+      },fixture);
+      await page.waitForTimeout(650);
+      const row=await readReset();
+      await page.screenshot({path:path.join(output,`${width}-${fixture}.png`)});
+      assert.deepEqual(Object.values(row.acceptance),['not_run','not_run','not_run']);
+      assert(!row.ids['story-checkpoint-rate'].includes('3/3'),'Stale completed checkpoint after missing data');
+      assert.equal(row.ids['metric-tokens']?.trim(),'未知',`Stale or fabricated token usage after ${fixture}`);
+      assert(/未知|未加载|^0$|^[-—]+$/.test(row.ids['story-gene-count']?.trim()??''),`Stale Gene count after ${fixture}`);
+      for(const id of ['header-round','header-members']) {
+        assert(/未知|未加载|^[-—]+$/.test(row.ids[id]?.trim()??''),`Stale or fabricated ${id} after ${fixture}`);
+      }
+      if(fixture==='error') assert(row.ids.notes.includes('HTTP 503'),'Error cause is missing');
+      results.push({fixture,...row});
+    } finally {await page.unroute('**/api/dashboard',handler);}
+    await page.waitForFunction(()=>document.getElementById('provenance').textContent.includes('replay'));
+    await page.waitForTimeout(650);
+    assert.equal(await page.locator('#task_live').textContent(),'not_run');
+  }
+  return results;
+}
+
 async function main(args = process.argv.slice(2)) {
   assert(args.length===2 || (args.length===3 && args[2]==='--prepare-only'), 'SOURCE_REHEARSAL NEW_OUTPUT [--prepare-only]');
   const source = path.resolve(args[0]), output = path.resolve(args[1]), prepareOnly = args[2]==='--prepare-only';
@@ -176,18 +232,25 @@ async function main(args = process.argv.slice(2)) {
           if(keyframe && width!==1366) fs.copyFileSync(path.join(output,screenshot),path.join(output,`${width}-${keyframe}.png`));
           summary.frames.push({width,sequence:current.sequence,stage:current.stage,screenshot});
           assertStage(row,current);
+          assertFinalsStats(row,current,document.history.slice(0,index+1));
         } catch(error) {summary.failures.push({width,sequence:current.sequence,error:String(error)});}
         write(path.join(output,`${width}.json`),{...record,page:undefined});
       }
     }
     write(path.join(output,'api-replay.json'),apiRows);
+    if(pages.length) setSnapshot(11); // Two active Genes: prove resets clear nonzero statistics, not an already-zero final count.
     for(const record of pages) {
       try {
         assert.deepEqual(record.rows.map(row=>row.sequence),document.history.map(s=>s.sequence));
         assertOriginalStageFacts(record.rows);
+        await record.page.waitForFunction(()=>/#11(?:\D|$)/.test(document.getElementById('rehearsal-mode').textContent));
+        await record.page.waitForTimeout(650);
+        assert.equal(await record.page.locator('#story-gene-count').textContent(),'2');
+        record.reset=await checkReset(record,output);
         assert.deepEqual(record.errors,[],'JavaScript errors');
         assert.deepEqual(record.external,[],'External requests');
       } catch(error) {summary.failures.push({width:record.width,error:String(error)});}
+      write(path.join(output,`${record.width}.json`),{...record,page:undefined});
     }
   } catch(error) {summary.failures.push({error:String(error)});}
   finally {
@@ -210,5 +273,5 @@ async function main(args = process.argv.slice(2)) {
   assert.equal(summary.failures.length,0,'Replay acceptance failed; inspect preserved output, do not weaken assertions');
 }
 
-module.exports={inventory,assertStage,assertOriginalStageFacts,main};
+module.exports={inventory,assertStage,assertOriginalStageFacts,assertFinalsStats,main};
 if(require.main===module) main().catch(error=>{console.error(error);process.exitCode=1;});
