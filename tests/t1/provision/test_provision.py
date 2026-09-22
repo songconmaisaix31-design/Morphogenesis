@@ -37,6 +37,19 @@ def test_fixed_fallback_materializes_stable_three_layer_identity() -> None:
     )
 
 
+def test_repeated_roles_receive_distinct_stable_instances() -> None:
+    roles = ("planner", "builder", "builder", "reviewer", "aggregator")
+    provisioner = FixedProvisioner(size=5, roles=roles)
+
+    first = provisioner.provision("run-1", 5)
+    second = provisioner.provision("run-1", 5)
+
+    assert [member.role for member in first.members] == list(roles)
+    assert [member.instance for member in first.members] == [0, 0, 1, 0, 0]
+    assert first.members == second.members
+    assert len(set(first.members)) == 5
+
+
 def test_quota_rejects_before_overprovisioning() -> None:
     service = ProvisioningService(fallback=FixedProvisioner(size=4, quota=2))
 
@@ -66,7 +79,7 @@ def test_negative_and_zero_requests_are_rejected() -> None:
 
 
 def test_budget_exhaustion_and_stop_state_reject_supply() -> None:
-    config = RunConfig(run_id="run-1", workspace="workspace", writable_paths=["."])
+    config = RunConfig(run_id="run-1", workspace="workspace", writable_paths=["src"])
     service = ProvisioningService(budget_gate=BudgetGate(config))
 
     with pytest.raises(ProvisioningRejected, match="token budget"):

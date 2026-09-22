@@ -8,9 +8,9 @@
 def provision(run_id: str, count: int) -> Provision: ...
 ```
 
-它不规定 HTTP、CLI、URL、凭据、请求体、响应体或重试语义。未来只有在 ORCA 提供公开契约后，才可在本轨之外接入一个实现；ORCA 外部 ID 仅保存在 T0 `Provision.external_ids` 的不透明映射中。
+它不规定 HTTP、CLI、URL、凭据、请求体、响应体或重试语义。未来只有在 ORCA 提供公开契约后，才可由本轨在 `orca_provision/` 内维护远端适配实现；ORCA 外部 ID 仅保存在 T0 `Provision.external_ids` 的不透明映射中。
 
-`ProvisioningService` 在收到显式 `remote` 实现时调用该 Protocol；`remote=None`（当前默认，因地址/凭据/公开契约均未提供）降级到 `FixedProvisioner`。固定 fallback 默认最多 4 个成员，按稳定顺序分配 `planner`、`builder`、`reviewer`、`aggregator`，来源记录为 `source="fixed"`、`provenance="live"`，表示本地供给记录本身真实生成，不表示 ORCA 远端已验证。
+`ProvisioningService` 在收到显式 `remote` 实现时调用该 Protocol；`remote=None`（当前默认，因地址/凭据/公开契约均未提供）降级到 `FixedProvisioner`。固定 fallback 默认最多 4 个成员，按稳定顺序分配 `planner`、`builder`、`reviewer`、`aggregator`；同一角色重复出现时，其 `instance` 从 0 递增，来源记录为 `source="fixed"`、`provenance="live"`，表示本地供给记录本身真实生成，不表示 ORCA 远端已验证。
 
 `provision_swarm` 将每个 `AgentId` 绑定到给定 `task_id` 的 `AttemptId`，产生明确的 `Role -> AgentId -> AttemptId` 映射。相同 run/count 的 fallback 成员身份稳定；它只产生数据记录，后续执行和调度由 T2 负责。
 

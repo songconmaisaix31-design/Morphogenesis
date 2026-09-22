@@ -52,12 +52,19 @@ class FixedProvisioner:
             raise ProvisioningRejected(
                 f"provision quota {self._quota} rejects requested count {count}"
             )
+        members: list[AgentId] = []
+        next_instance: dict[Role, int] = {}
+        for role in self._roles[:count]:
+            instance = next_instance.get(role, 0)
+            members.append(AgentId(role=role, instance=instance))
+            next_instance[role] = instance + 1
+
         return Provision(
             provision_id=f"fixed:{run_id}:{count}",
             run_id=run_id,
             source="fixed",
             requested=count,
-            members=[AgentId(role=role, instance=0) for role in self._roles[:count]],
+            members=members,
             quota=self._quota,
             provenance="live",
             external_ids={},
