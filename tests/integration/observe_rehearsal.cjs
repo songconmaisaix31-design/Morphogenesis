@@ -1,6 +1,6 @@
 // A single authorized demo invocation with two read-only browser observers.
 // No retry: failure preserves logs and stops this process after the current demo exits.
-// Usage: node tests/integration/observe_rehearsal.cjs manual|auto PORT OUTPUT_DIR [--executor codex|evomap] [--model MODEL]
+// Usage: node tests/integration/observe_rehearsal.cjs manual|auto PORT OUTPUT_DIR [--executor codex|evomap] [--model MODEL] [--operator-enter] [--operator-timeout-seconds 120]
 // Requires the already installed Playwright and Chromium paths via environment.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -8,19 +8,28 @@ const {spawn} = require('node:child_process');
 const assert = require('node:assert/strict');
 const {parseArgs} = require('node:util');
 const {withoutGatewayKey,readGeometry,assertGeometry}=require('./rehearsal_browser.cjs');
+const {assertTerminal,assertAwaitingOffline,operatorEnter}=require('./operator_enter.cjs');
 
 function options(args) {
-  const {values,positionals}=parseArgs({args,allowPositionals:true,options:{executor:{type:'string',default:'codex'},model:{type:'string'}}});
+  const {values,positionals}=parseArgs({args,allowPositionals:true,options:{executor:{type:'string',default:'codex'},model:{type:'string'},'operator-enter':{type:'boolean',default:false},'operator-timeout-seconds':{type:'string'}}});
   const [mode,portText,outputArg]=positionals;
   assert.equal(positionals.length,3,'mode PORT OUTPUT_DIR required');
   assert(['codex','evomap'].includes(values.executor),'unknown executor');
   const model=values.model??(values.executor==='evomap'?'evomap-gpt-5.6-luna':'gpt-5.6-luna');
   assert(/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/.test(model),'invalid model');
-  return {mode,portText,outputArg,executor:values.executor,model};
+  assert(['manual','auto'].includes(mode),'unknown mode');
+  assert(/^\d+$/.test(portText)&&Number(portText)>0&&Number(portText)<=65535,'invalid port');
+  const operator=values['operator-enter'];
+  const timeoutText=values['operator-timeout-seconds']??'120';
+  assert(!operator||mode==='manual','--operator-enter requires manual mode');
+  assert(values['operator-timeout-seconds']===undefined||operator,'operator timeout requires --operator-enter');
+  assert(/^\d+$/.test(timeoutText)&&Number(timeoutText)>0&&Number(timeoutText)<=480,'operator timeout must be 1..480 seconds');
+  return {mode,portText,outputArg,executor:values.executor,model,operator,operatorTimeoutMs:Number(timeoutText)*1000};
 }
 
 async function main(args=process.argv.slice(2)) {
-const {mode,portText,outputArg,executor,model}=options(args);
+const {mode,portText,outputArg,executor,model,operator,operatorTimeoutMs}=options(args);
+if(operator) assertTerminal(process.stdin); // Fail before launching any live demo.
 assert(['manual', 'auto'].includes(mode));
 assert(/^\d+$/.test(portText));
 assert(Number(portText)>0&&Number(portText)<=65535);
@@ -58,15 +67,21 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
   child.on('exit', code => {exited=true;exitCode=code;});
   child.on('error', () => {exited=true;exitCode=-1;});
   const deadline=Date.now()+480000;
+  const cancellation=new AbortController();
+  const cancel=()=>cancellation.abort();
+  if(operator) {process.on('SIGINT',cancel);process.on('SIGTERM',cancel);}
+  if(operator) child.stdin.on('error',cancel);
   let failure=null;
   try {
     while(Date.now()<deadline) {
+      if(operator&&cancellation.signal.aborted) throw Error('OPERATOR_CANCELLED');
       try { const response=await fetch(url+'/api/dashboard'); if(response.ok) break; } catch {}
       if(exited) throw Error(`Demo exited before viewer readiness: ${exitCode}`);
       await pause(200);
     }
     await Promise.all(pages.map(record=>record.page.goto(url)));
     while(Date.now()<deadline) {
+      if(operator&&cancellation.signal.aborted) throw Error('OPERATOR_CANCELLED');
       for(const record of pages) {
         const observation=await record.page.evaluate(()=>{
           const get=id=>document.getElementById(id);
@@ -94,12 +109,24 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
         }
       }
       if(mode==='manual'&&!entered&&pages.every(r=>r.last.includes('等待下线确认'))) {
-        // Wait until the runtime reaches its real input(), then deliver Enter through stdin.
-        await pause(2300);
+        // Preserve the legacy automatic confirmation delay unless explicitly opted in.
+        if(!operator) await pause(2300);
         assert(root,'Runtime must identify the new root before manual confirmation');
         assert.equal(JSON.parse(fs.readFileSync(path.join(root,'rehearsal.json'))).current.stage,'awaiting_offline');
-        child.stdin.write('\n');entered=true;
-        fs.writeFileSync(path.join(output,'manual-enter.json'),JSON.stringify({at:new Date().toISOString(),input:'Enter',stage:'awaiting_offline'}));
+        if(operator) {
+          await operatorEnter({input:process.stdin,timeoutMs:Math.min(operatorTimeoutMs,deadline-Date.now()),signal:cancellation.signal,
+            validate:()=>{
+              assert(!exited,'OPERATOR_DEMO_EXITED');
+              return assertAwaitingOffline(pages,JSON.parse(fs.readFileSync(path.join(root,'rehearsal.json'))));
+            },
+            record:evidence=>fs.writeFileSync(path.join(output,'manual-enter.json'),JSON.stringify(evidence,null,2)),
+            prompt:()=>console.log('双视口与真实 awaiting_offline 已核对；请在本终端按一次 Enter 下线成员，Ctrl+C 取消。'),
+            deliver:()=>new Promise((resolve,reject)=>child.stdin.write('\n',error=>error?reject(Error('OPERATOR_FORWARD_FAILED_NO_RETRY')):resolve()))});
+          entered=true;
+        } else {
+          child.stdin.write('\n');entered=true;
+          fs.writeFileSync(path.join(output,'manual-enter.json'),JSON.stringify({at:new Date().toISOString(),input:'Enter',stage:'awaiting_offline'}));
+        }
       }
       if(exited&&pages.every(r=>/彩排完成|彩排已停止/.test(r.last))) break;
       if(exited&&exitCode!==0) throw Error(`Demo failed: ${exitCode}`);
@@ -125,11 +152,17 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
       assert(record.observations.at(-1).mode.includes('彩排完成'));
       assert.equal(record.observations.at(-1).acceptance.task_live,'passed');
     }
-  } catch(error) {failure=String(error);throw error;}
+  } catch(error) {
+    failure=String(error);
+    // EOF causes the runtime input() to fail, preserving evidence without recovery.
+    if(operator&&!entered) child.stdin.end();
+    throw error;
+  }
   finally {
-    fs.writeFileSync(path.join(output,'summary.json'),JSON.stringify({startedAt,endedAt:new Date().toISOString(),mode,executor,model,root,port:Number(portText),parentPid:child.pid,exitCode,entered,failure,browser:browser.version()},null,2));
+    if(operator) {process.removeListener('SIGINT',cancel);process.removeListener('SIGTERM',cancel);}
+    fs.writeFileSync(path.join(output,'summary.json'),JSON.stringify({startedAt,endedAt:new Date().toISOString(),mode,executor,model,root,port:Number(portText),parentPid:child.pid,exitCode,entered,failure,browser:browser.version(),...(operator?{confirmation:'operator',operatorTimeoutMs}: {})},null,2));
     await browser.close();
   }
 }
-module.exports={options};
+module.exports={options,main};
 if(require.main===module) main().catch(error=>{console.error(error);process.exitCode=1;});
