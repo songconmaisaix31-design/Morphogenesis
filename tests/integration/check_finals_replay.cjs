@@ -46,6 +46,7 @@ function observe() {
     acceptance:Object.fromEntries(['contract_local','interface_live','task_live'].map(id=>[id,get(id).textContent])),
     pipes:series?{data:series.data,links:series.links}:null,
     ids:Object.fromEntries([...document.querySelectorAll('[id]')].map(el=>[el.id,el.textContent])),
+    numberAnimations:window.__finalsNumberAnimations.splice(0),
     panels:[...document.querySelectorAll('.morph-boards .morph-board, .morph-main .morph-panel, .gene-ledger')]
       .map(el=>({className:el.className,...rect(el)})),
     events:[...document.querySelectorAll('#event-feed .event-row')].map(el=>({
@@ -138,6 +139,13 @@ function assertFinalsStats(row, current, history) {
   if(current.genes.some(gene=>gene.archived_at!==null)) {
     for(const item of row.ledger.items) assert(Number(item.opacity)<1,'Archived Gene must visibly dim');
   }
+}
+
+function assertNumberAnimations(row, previous) {
+  const ids=['story-checkpoint-rate','metric-tokens','story-gene-count'];
+  const changed=previous?ids.filter(id=>row.ids[id]!==previous.ids[id]):[];
+  assert.deepEqual(row.numberAnimations.map(event=>event.id).sort(),changed.sort(),'Each changed number fades once; stable values never flash');
+  for(const event of row.numberAnimations) assert.equal(event.duration,'0.3s','Number fade must last 300 ms');
 }
 
 async function checkReset(record, output) {
@@ -235,6 +243,14 @@ async function main(args = process.argv.slice(2)) {
       for(const [width,height] of [[1280,720],[1366,768],[1920,1080]]) {
         const page = await browser.newPage({viewport:{width,height}});
         const record = {page,width,height,errors:[],external:[],rows:[]};
+        await page.addInitScript(()=>{
+          window.__finalsNumberAnimations=[];
+          document.addEventListener('animationstart',event=>{
+            if(['story-checkpoint-rate','metric-tokens','story-gene-count'].includes(event.target.id)) {
+              window.__finalsNumberAnimations.push({id:event.target.id,name:event.animationName,duration:getComputedStyle(event.target).animationDuration});
+            }
+          },true);
+        });
         page.on('pageerror',error=>record.errors.push(error.message));
         await page.route('**/*',route=>{
           if(new URL(route.request().url()).origin!==url) {record.external.push(route.request().url());return route.abort();}
@@ -268,6 +284,7 @@ async function main(args = process.argv.slice(2)) {
           summary.frames.push({width,sequence:current.sequence,stage:current.stage,screenshot});
           assertStage(row,current);
           assertFinalsStats(row,current,document.history.slice(0,index+1));
+          assertNumberAnimations(row,record.rows.at(-2));
         } catch(error) {summary.failures.push({width,sequence:current.sequence,error:String(error)});}
         write(path.join(output,`${width}.json`),{...record,page:undefined});
       }
@@ -288,6 +305,18 @@ async function main(args = process.argv.slice(2)) {
       write(path.join(output,`${record.width}.json`),{...record,page:undefined});
     }
     if(pages.length) {
+      const reducedPage=pages[0].page;
+      await reducedPage.emulateMedia({reducedMotion:'reduce'});
+      await reducedPage.evaluate(()=>{window.__finalsNumberAnimations=[];});
+      setSnapshot(0); // All three statistics change from populated #11, using real replay data.
+      await reducedPage.waitForFunction(()=>/#0(?:\D|$)/.test(document.getElementById('rehearsal-mode').textContent));
+      await reducedPage.waitForTimeout(1300); // Includes an unchanged poll as well as transition settlement.
+      summary.reducedMotion=await reducedPage.evaluate(()=>({
+        starts:window.__finalsNumberAnimations,
+        names:['story-checkpoint-rate','metric-tokens','story-gene-count'].map(id=>getComputedStyle(document.getElementById(id)).animationName)
+      }));
+      assert.deepEqual(summary.reducedMotion.starts,[],'Reduced motion must not animate changing numbers');
+      assert.deepEqual(summary.reducedMotion.names,['none','none','none']);
       setSnapshot(document.history.length-1);
       // Run the pre-existing independent layout checker byte-for-byte unchanged.
       summary.originalLayoutExit=await new Promise((resolve,reject)=>{
