@@ -8,11 +8,15 @@ not turn arbitrary JSON or a mock fixture into task-live evidence.
 from __future__ import annotations
 
 import json
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from contracts.messages import Envelope
+from contracts.resolution import Gene
+from contracts.results import TaskResult
+from metabolism import GeneView, UseRecord
 
 MAX_INPUT_BYTES = 2 * 1024 * 1024
 ALLOWED_SUFFIXES = {".json", ".jsonl"}
@@ -30,7 +34,9 @@ class DashboardData:
     acceptance: dict[str, str]
     events: list[dict[str, Any]]
     genes: list[dict[str, Any]]
+    adoptions: list[dict[str, Any]]
     metrics: list[dict[str, Any]]
+    result: dict[str, Any] | None
     hub_status: str
     source_label: str
     notes: list[str]
@@ -41,7 +47,9 @@ class DashboardData:
             "acceptance": self.acceptance,
             "events": self.events,
             "genes": self.genes,
+            "adoptions": self.adoptions,
             "metrics": self.metrics,
+            "result": self.result,
             "hub_status": self.hub_status,
             "source_label": self.source_label,
             "notes": self.notes,
@@ -58,7 +66,9 @@ def empty_dashboard(note: str = "尚未加载运行事件导出。") -> Dashboar
         },
         events=[],
         genes=[],
+        adoptions=[],
         metrics=[],
+        result=None,
         hub_status="待发布（未配置 Hub 沙箱）",
         source_label="未加载导出",
         notes=[note],
@@ -98,22 +108,18 @@ def _validate_envelope(item: Any) -> dict[str, Any]:
     try:
         # T2 serializes this exact shared model. Revalidate instead of keeping a
         # local approximation of identities, seq, lineage, or provenance rules.
-        return Envelope.model_validate(item).model_dump(mode="json")
+        return cast(dict[str, Any], Envelope.model_validate(item).model_dump(mode="json"))
     except Exception as error:
         raise DashboardInputError(f"Envelope 不符合 T0 共享契约: {error}") from error
 
 
 def _validate_gene(item: Any) -> dict[str, Any]:
-    if not isinstance(item, dict) or not isinstance(item.get("ref"), dict):
-        raise DashboardInputError("Gene 必须包含 ref 对象")
-    ref = item["ref"]
-    if not isinstance(ref.get("gene_id"), str) or not ref["gene_id"]:
-        raise DashboardInputError("Gene.ref.gene_id 必须为非空字符串")
-    if not isinstance(item.get("strategy"), list) or not item["strategy"]:
-        raise DashboardInputError("Gene.strategy 必须为非空列表")
-    if item.get("provenance", "live") not in PROVENANCE_VALUES:
-        raise DashboardInputError("Gene.provenance 无效")
-    return item
+    if not isinstance(item, dict):
+        raise DashboardInputError("Gene 必须是对象")
+    try:
+        return cast(dict[str, Any], Gene.model_validate(item).model_dump(mode="json"))
+    except Exception as error:
+        raise DashboardInputError(f"Gene 不符合共享契约: {error}") from error
 
 
 def _validate_metric(item: Any) -> dict[str, Any]:
@@ -123,6 +129,15 @@ def _validate_metric(item: Any) -> dict[str, Any]:
     if not isinstance(history, list) or not all(isinstance(value, (int, float)) for value in history):
         raise DashboardInputError("指标 history 必须为数值列表")
     return {"name": item["name"], "history": history, "unit": str(item.get("unit", ""))}
+
+
+def _model_list(value: Any, model: type[GeneView] | type[UseRecord], label: str) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        raise DashboardInputError(f"{label} 必须为数组")
+    try:
+        return [model.model_validate(item).model_dump(mode="json") for item in value]
+    except Exception as error:
+        raise DashboardInputError(f"{label} 不符合共享只读模型: {error}") from error
 
 
 def _from_document(document: Any, source_label: str) -> DashboardData:
@@ -138,12 +153,16 @@ def _from_document(document: Any, source_label: str) -> DashboardData:
     metrics = [_validate_metric(item) for item in document.get("metrics", [])]
     if not all(event["provenance"] == provenance for event in events):
         raise DashboardInputError("文档和事件的 provenance 必须一致")
+    if not all(gene["provenance"] == provenance for gene in genes):
+        raise DashboardInputError("文档和 Gene 的 provenance 必须一致")
     return DashboardData(
         provenance=provenance,
         acceptance=_acceptance(document.get("acceptance"), provenance),
         events=events,
         genes=genes,
+        adoptions=[],
         metrics=metrics,
+        result=None,
         hub_status="待发布（未配置 Hub 沙箱）",
         source_label=source_label,
         notes=[str(note) for note in document.get("notes", []) if isinstance(note, str)],
@@ -169,9 +188,75 @@ def load_dashboard(path: Path, project_root: Path) -> DashboardData:
             acceptance=_acceptance({}, provenance),
             events=events,
             genes=[],
+            adoptions=[],
             metrics=[],
+            result=None,
             hub_status="待发布（未配置 Hub 沙箱）",
             source_label=f"T2 JSONL 事件导出：{safe_path.name}",
             notes=["该导出只含 Envelope；未导出 Gene 正文与历史指标，相关视图保持空态。"],
         )
     return _from_document(json.loads(text), f"mock fixture：{safe_path.name}")
+
+
+def _safe_runtime_root(path: Path, project_root: Path) -> Path:
+    """Accept only a named T2 evidence root or a project-local exported run."""
+    resolved = path.resolve()
+    temp_root = Path(tempfile.gettempdir()).resolve()
+    project_exports = (project_root / "runtime_exports").resolve()
+    is_project_export = resolved.is_relative_to(project_exports)
+    is_t2_temp_export = resolved.parent == temp_root and resolved.name.startswith("morph-t2-")
+    if path.is_symlink() or not resolved.is_dir() or not (is_project_export or is_t2_temp_export):
+        raise DashboardInputError("运行目录必须是受限的 runtime_exports 子目录或 T2 命名临时证据目录")
+    return resolved
+
+
+def _read_runtime_json(path: Path, label: str) -> Any:
+    if not path.is_file() or path.is_symlink() or path.stat().st_size > MAX_INPUT_BYTES:
+        raise DashboardInputError(f"{label} 缺失、不是普通文件或超过 2 MiB")
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise DashboardInputError(f"{label} 不是有效 JSON") from error
+
+
+def load_runtime_export(root: Path, project_root: Path) -> DashboardData:
+    """Load T2's fixed evidence sidecars without inferring data from payloads.
+
+    Required files are `events.jsonl` (T2 `Envelope` export) and `result.json`
+    (`TaskResult`). Optional `genes.json` and `adoption.json` are T3M's exact
+    `GeneView` and `UseRecord` snapshots. No payload scraping or fallback
+    promotion of acceptance occurs here.
+    """
+    safe_root = _safe_runtime_root(root, project_root)
+    events_path = safe_root / "events.jsonl"
+    if not events_path.is_file() or events_path.is_symlink() or events_path.stat().st_size > MAX_INPUT_BYTES:
+        raise DashboardInputError("events.jsonl 缺失、不是普通文件或超过 2 MiB")
+    events = [_validate_envelope(json.loads(line)) for line in events_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    result = TaskResult.model_validate(_read_runtime_json(safe_root / "result.json", "result.json"))
+    if events and any(event["run_id"] != result.run_id or event["provenance"] != result.provenance for event in events):
+        raise DashboardInputError("events.jsonl 与 result.json 的 run_id/provenance 不一致")
+    genes_path = safe_root / "genes.json"
+    adoptions_path = safe_root / "adoption.json"
+    genes = _model_list(_read_runtime_json(genes_path, "genes.json"), GeneView, "genes.json") if genes_path.exists() else []
+    adoptions = _model_list(_read_runtime_json(adoptions_path, "adoption.json"), UseRecord, "adoption.json") if adoptions_path.exists() else []
+    if any(item["run_id"] != result.run_id or item["provenance"] != result.provenance for item in adoptions):
+        raise DashboardInputError("adoption.json 与 result.json 的 run_id/provenance 不一致")
+    if any(item["provenance"] != result.provenance for item in genes):
+        raise DashboardInputError("genes.json 与 result.json 的 provenance 不一致")
+    notes = ["T2 运行证据：Envelope、TaskResult 与可选 T3M GeneView/UseRecord 均按共享模型重验。"]
+    if not genes:
+        notes.append("未提供 genes.json 或快照为空；Gene 谱系保持空态。")
+    if not adoptions:
+        notes.append("未提供 adoption.json 或本次未采用 Gene；不从注入或候选推断采用。")
+    return DashboardData(
+        provenance=result.provenance,
+        acceptance=result.acceptance.model_dump(mode="json"),
+        events=events,
+        genes=genes,
+        adoptions=adoptions,
+        metrics=[],
+        result=result.model_dump(mode="json"),
+        hub_status="待发布（未配置 Hub 沙箱）",
+        source_label=f"T2 受限运行证据：{safe_root.name}",
+        notes=notes,
+    )

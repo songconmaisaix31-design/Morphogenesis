@@ -1,7 +1,10 @@
 param(
   [switch]$Mock,
   [int]$Port = 7500,
-  [string]$T2Command = $env:MORPHOGENESIS_T2_DEMO_COMMAND
+  [string]$Model = "gpt-5.6-luna",
+  [int]$MaxTokens = 20000,
+  [double]$MaxCostUsd = 1.0,
+  [int]$TimeoutSeconds = 120
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,22 +21,19 @@ if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
   throw "Python is required for the T5 local preview."
 }
 
-# T0 prepares the fixed task; T5 never fabricates a task, a model result, or an
-# event export. T2's command is injected by its owner once the CLI is frozen.
-$workspace = Join-Path $env:TEMP "morphogenesis-t5-demo"
-if (Test-Path (Join-Path $Root "bootstrap\__main__.py")) {
-  python -m bootstrap prepare --workspace $workspace
-} else {
-  throw "T0 bootstrap entry is unavailable; do not substitute a mock task."
+# T2 owns the live one-call fixed task entry. It invokes T0 bootstrap itself,
+# writes T2's fixed evidence sidecars under a fresh temp root, and does not
+# retry or substitute mock data when an execution fails.
+if (-not (Test-Path (Join-Path $Root "orchestration\acceptance.py"))) {
+  throw "T2 acceptance entry is not merged; do not substitute a mock runtime."
 }
-if ([string]::IsNullOrWhiteSpace($T2Command)) {
-  throw "Set MORPHOGENESIS_T2_DEMO_COMMAND to T2's documented runtime/export command; no runtime was executed."
-}
-& powershell -NoProfile -Command $T2Command
+$runRoot = Join-Path $env:TEMP ("morph-t2-live-demo-" + [guid]::NewGuid().ToString("N"))
+python -m orchestration.acceptance --root $runRoot --model $Model --max-tokens $MaxTokens --max-cost-usd $MaxCostUsd --timeout $TimeoutSeconds
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-$export = Join-Path $Root "runtime_exports\events.jsonl"
-if (-not (Test-Path $export)) {
-  throw "T2 completed without runtime_exports/events.jsonl; dashboard will not infer events."
+foreach ($required in @("events.jsonl", "result.json", "genes.json", "adoption.json")) {
+  if (-not (Test-Path (Join-Path $runRoot $required))) {
+    throw "T2 completed without $required; dashboard will not infer its contents."
+  }
 }
-python -m viz.server --port $Port --input $export
+python -m viz.server --port $Port --t2-root $runRoot
