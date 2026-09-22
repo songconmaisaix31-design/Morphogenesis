@@ -1,6 +1,7 @@
 """Independent validation boundary; executor sandbox enforcement belongs to T2."""
 
 from pathlib import Path
+import json
 import os
 import shutil
 import subprocess
@@ -16,8 +17,10 @@ class SampleVerifier:
     def __init__(self, evidence_dir: str | Path, timeout_seconds: float = 15) -> None:
         self.evidence_dir = Path(evidence_dir).resolve()
         self.timeout_seconds = timeout_seconds
+        self.last_checks: dict[str, bool | None] = {}
 
     def verify(self, workspace: str, reviewer: AgentId) -> Verification:
+        self.last_checks = dict.fromkeys(("clamp", "mean", "unique"))
         root = Path(workspace).resolve()
         if self.evidence_dir.is_relative_to(root):
             raise ValueError("verification evidence must be outside executor workspace")
@@ -47,7 +50,20 @@ class SampleVerifier:
                 )
                 exit_code: int | None = completed.returncode
                 output = completed.stdout + completed.stderr
-                completed_suite = "Ran 3 tests" in output and output.rstrip().endswith("OK")
+                structured = [line.removeprefix("MORPH_CHECKPOINTS=")
+                              for line in completed.stdout.splitlines()
+                              if line.startswith("MORPH_CHECKPOINTS=")]
+                if len(structured) == 1:
+                    try:
+                        data = json.loads(structured[0])
+                        checks = data["checks"]
+                        if (data["tests_run"] == 3 and set(checks) == set(self.last_checks)
+                                and all(value is None or type(value) is bool for value in checks.values())):
+                            self.last_checks = checks
+                    except (ValueError, KeyError, TypeError):
+                        pass
+                completed_suite = ("Ran 3 tests" in output and output.rstrip().endswith("OK")
+                                   and all(value is True for value in self.last_checks.values()))
                 passed: bool | None = (exit_code == 0 and completed_suite)
                 if exit_code == 0 and not completed_suite:
                     passed, exit_code = None, None
@@ -56,8 +72,13 @@ class SampleVerifier:
                 exit_code, passed = None, None
                 output = "Independent verification timed out; outcome unknown."
             report.write_text(output, encoding="utf-8")
+            structured_report = report.with_suffix(".json")
+            structured_report.write_text(json.dumps({
+                "checks": self.last_checks, "command": command, "exit_code": exit_code,
+                "reviewer": reviewer.model_dump(mode="json"),
+            }, indent=2), encoding="utf-8")
         return Verification(
-            passed=passed, reviewer=reviewer, evidence=[report.as_uri()],
+            passed=passed, reviewer=reviewer, evidence=[report.as_uri(), structured_report.as_uri()],
             command=command, exit_code=exit_code,
             summary="Fixed sample acceptance passed" if passed else output[-4000:],
         )

@@ -1,10 +1,27 @@
 """Fixed independent cases. Invoked by verifier with python -I -S, never copied to executor."""
 
 import importlib.util
+import json
 from pathlib import Path
 import sys
 from types import ModuleType
 import unittest
+
+
+class CheckpointResult(unittest.TextTestResult):
+    """Report the actual unittest result, including failing subtests, as JSON."""
+
+    def checkpoint_results(self) -> dict[str, bool | None]:
+        failed = {test.id().split(" (")[0].rsplit(".", 1)[-1]
+                  for test, _ in self.failures + self.errors}
+        skipped = {test.id().split(".")[-1] for test, _ in self.skipped}
+        return {name.removeprefix("test_"): None if name in skipped else name not in failed
+                for name in ("test_clamp", "test_mean", "test_unique")}
+
+
+class CheckpointRunner(unittest.TextTestRunner):
+    def _makeResult(self) -> CheckpointResult:
+        return CheckpointResult(self.stream, self.descriptions, self.verbosity)
 
 
 def load_candidate(path: Path) -> ModuleType:
@@ -51,7 +68,12 @@ def run(path: Path) -> bool:
                     self.assertEqual(items, original)
 
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(AcceptanceCases)
-    return unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful()
+    result = CheckpointRunner(verbosity=2).run(suite)
+    assert isinstance(result, CheckpointResult)
+    print("MORPH_CHECKPOINTS=" + json.dumps({
+        "tests_run": result.testsRun, "checks": result.checkpoint_results(),
+    }))
+    return result.wasSuccessful()
 
 
 if __name__ == "__main__":

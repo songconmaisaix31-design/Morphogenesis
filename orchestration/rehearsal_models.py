@@ -104,7 +104,9 @@ class RehearsalSnapshot(Contract):
         sources = [self.acceptance.provenance]
         if self.checkpoints:
             sources.append(self.checkpoints.provenance)
-        sources.extend(item.provenance for item in [*self.genes, *self.adoptions, *self.results])
+        sources.extend(item.provenance for item in self.genes)
+        sources.extend(item.provenance for item in self.adoptions)
+        sources.extend(item.provenance for item in self.results)
         if any(source != self.provenance for source in sources):
             raise ValueError("snapshot sources must have matching provenance")
         return self

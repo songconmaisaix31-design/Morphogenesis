@@ -16,6 +16,8 @@ def test_fixed_independent_acceptance_and_real_caller(tmp_path: Path) -> None:
     broken = verifier.verify(str(workspace), reviewer)
     assert broken.passed is False
     assert broken.exit_code == 1
+    assert isinstance(verifier, SampleVerifier)
+    assert verifier.last_checks == {"clamp": False, "mean": False, "unique": False}
     # A deterministic fixture repair validates evaluator semantics; not a model task run.
     source = (workspace / "sample.py").read_text(encoding="utf-8")
     fixed = source.replace("min(lower, max(upper, value))", "max(lower, min(upper, value))")
@@ -28,6 +30,7 @@ def test_fixed_independent_acceptance_and_real_caller(tmp_path: Path) -> None:
     assert passed.passed is True
     assert passed.exit_code == 0
     assert passed.reviewer == reviewer
+    assert verifier.last_checks == {"clamp": True, "mean": True, "unique": True}
     reports = list((tmp_path / "evidence").glob("verification-*.txt"))
     assert len(reports) == 2
     assert any("Ran 3 tests" in report.read_text(encoding="utf-8") for report in reports)
@@ -49,6 +52,17 @@ def test_verifier_timeout_is_unknown(tmp_path: Path) -> None:
     )
     assert result.passed is None
     assert result.exit_code is None
+
+
+def test_partial_checkpoint_is_computed_from_external_subtests(tmp_path: Path) -> None:
+    workspace = prepare_workspace(tmp_path / "executor")
+    source = workspace / "sample.py"
+    source.write_text(source.read_text().replace("min(lower, max(upper, value))",
+                                                "max(lower, min(upper, value))"))
+    verifier = SampleVerifier(tmp_path / "evidence")
+    verdict = verifier.verify(str(workspace), AgentId(role="reviewer", instance=0))
+    assert verdict.passed is False
+    assert verifier.last_checks == {"clamp": True, "mean": False, "unique": False}
 
 
 def test_early_process_exit_is_not_acceptance(tmp_path: Path) -> None:
