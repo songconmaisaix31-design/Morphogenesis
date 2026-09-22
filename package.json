@@ -1,0 +1,15 @@
+{
+  "name": "morphogenesis",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": { "check:sdk": "node tools/check_sdk.cjs" },
+  "dependencies": {
+    "@evomap/gep-sdk": "1.14.0",
+    "@evomap/gep-mcp-server": "1.7.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "echarts": "^6.0.0"
+  }
+}

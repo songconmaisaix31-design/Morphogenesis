@@ -1,0 +1,26 @@
+name: foundation
+on: [push, pull_request]
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+      - run: uv tool run poetry install
+      - run: npm ci --ignore-scripts
+      - run: uv tool run poetry run python -m pytest -q
+      - run: uv tool run poetry run python tools/typecheck.py
+      - run: uv tool run poetry run python -m build
+      - run: npm run check:sdk
+      - run: uv pip install --python python --no-deps --target tools/.wheel-site dist/morphogenesis-0.1.0-py3-none-any.whl
+      - run: uv tool run poetry run python -I tools/check_distribution.py --site-dir tools/.wheel-site --check-node

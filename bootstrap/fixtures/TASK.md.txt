@@ -1,0 +1,9 @@
+# Repair three deterministic bugs
+
+Edit only `sample.py`. Preserve the function signatures; use Python standard library only.
+
+- `clamp(value, lower, upper)` returns the value limited to the inclusive interval. Raise `ValueError` if lower exceeds upper.
+- `mean(values)` returns the arithmetic mean, including negative and fractional values. Raise `ValueError` for an empty list.
+- `unique(items)` removes duplicates while preserving the order of first occurrence. Empty input returns an empty list.
+
+The fixed independent acceptance suite is outside this workspace. Do not alter tests, task instructions or create other files. You may run local Python checks. Return a concise description of the changes.
