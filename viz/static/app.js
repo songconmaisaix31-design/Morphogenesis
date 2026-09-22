@@ -57,7 +57,7 @@ function topologyGraph(pipes, members) {
     value: `权重 ${number(pipe.weight)} · 流量 ${number(pipe.flow)} · 成功率 ${(Number(pipe.success_rate) * 100).toFixed(0)}% · ${pipe.active ? "在线" : "离线"}`,
     lineStyle: { width: Math.max(2, Math.min(12, 1 + Number(pipe.weight) * 4)), type: pipe.active ? "solid" : "dashed", color: pipe.active ? "#5ebeea" : "#778494", opacity: pipe.active ? 1 : .55 },
   }));
-  chartFor("story-pipe-chart").setOption({ animationDurationUpdate: 260, tooltip: { renderMode: "richText", formatter: (point) => point.data.value || point.name }, series: [{ type: "graph", layout: "circular", roam: false, top: 12, bottom: 16, label: { show: true, position: "top", distance: 4, fontSize: 10 }, lineStyle: { curveness: .1 }, data: nodes, links }] }, { notMerge: true });
+  chartFor("story-pipe-chart").setOption({ animationDurationUpdate: 260, tooltip: { renderMode: "richText", formatter: (point) => point.data.value || point.name }, series: [{ type: "graph", layout: "circular", roam: false, top: 24, bottom: 4, label: { show: true, position: "top", distance: 4, fontSize: 10 }, lineStyle: { curveness: .1 }, data: nodes, links }] }, { notMerge: true });
 }
 
 function rehearsalBoard(rehearsal) {
