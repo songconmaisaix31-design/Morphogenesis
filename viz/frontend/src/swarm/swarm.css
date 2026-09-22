@@ -1,0 +1,130 @@
+/* AGENT SWARM view: cold white / teal HUD on the shared #070b0d ground.
+   Palette per docs/FRONTEND_REFACTOR_PLAN.md: bg #070b0d, ink #e8efed,
+   dim #8ca3a0, accent teal #65d9c7. No gradients on surfaces, no emoji. */
+.swarm-shell {
+  --swarm-bg: #070b0d;
+  --swarm-ink: #e8efed;
+  --swarm-dim: #8ca3a0;
+  --swarm-teal: #65d9c7;
+  --swarm-line: rgba(140, 163, 160, 0.22);
+  position: relative;
+  background: var(--swarm-bg);
+  color: var(--swarm-ink);
+  border: 1px solid var(--swarm-line);
+  border-radius: 6px;
+  padding: 10px 14px 8px;
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  min-width: 0;
+}
+
+.swarm-hud { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.swarm-badge {
+  border: 1px solid var(--swarm-line); border-radius: 999px;
+  padding: 2px 10px; font-size: 12px; font-weight: 700; color: var(--swarm-dim);
+}
+.swarm-badge.swarm-prov-live { border-color: var(--swarm-teal); color: var(--swarm-teal); }
+.swarm-badge.swarm-prov-replay { border-color: var(--swarm-ink); color: var(--swarm-ink); }
+.swarm-hud-stage { color: var(--swarm-ink); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+.swarm-hud-dim { color: var(--swarm-dim); font-size: 12px; }
+
+.swarm-state { color: var(--swarm-dim); font-size: 13px; margin: 18px 4px; }
+.swarm-state-error { color: #e88a8a; }
+
+.swarm-ghost-line { margin: 0 0 6px; font-size: 12px; }
+.swarm-ghost-rerouted { color: var(--swarm-teal); }
+.swarm-ghost-waiting { color: var(--swarm-dim); }
+
+.swarm-body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(220px, 2fr); gap: 12px; }
+@media (max-width: 1023px) { .swarm-body { grid-template-columns: 1fr; } }
+
+.swarm-frame {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--swarm-line); border-radius: 6px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(101, 217, 199, 0.05), transparent 62%),
+    var(--swarm-bg);
+  outline: none;
+}
+.swarm-frame:focus-visible { border-color: var(--swarm-teal); }
+
+.swarm-glow {
+  position: absolute; left: -140px; top: -140px; width: 280px; height: 280px;
+  border-radius: 50%; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle, rgba(101, 217, 199, 0.10), transparent 65%);
+  transition: opacity 0.25s ease;
+}
+
+.swarm-svg { display: block; width: 100%; height: auto; min-height: 320px; }
+.swarm-layer { transition: transform 0.18s ease-out; will-change: transform; }
+
+.swarm-edge { fill: none; stroke: var(--swarm-dim); opacity: 0.55; transition: opacity 0.15s ease; }
+.swarm-edge-active { stroke: var(--swarm-teal); opacity: 0.9; }
+.swarm-edge-off { stroke-dasharray: 6 5; opacity: 0.3; }
+.swarm-edge-hot { opacity: 1; }
+.swarm-edge-dim { opacity: 0.14; }
+.swarm-svg-note { fill: var(--swarm-dim); font-size: 15px; }
+
+.swarm-node { cursor: pointer; }
+.swarm-node-disc {
+  fill: var(--swarm-bg); stroke: var(--swarm-teal); stroke-width: 2.5;
+  transition: stroke-width 0.15s ease;
+}
+.swarm-node:hover .swarm-node-disc { stroke-width: 4; }
+.swarm-node-off .swarm-node-disc { stroke: var(--swarm-dim); stroke-dasharray: 4 4; opacity: 0.6; }
+.swarm-node-unknown .swarm-node-disc { stroke: var(--swarm-dim); opacity: 0.75; }
+.swarm-node-ghost .swarm-node-disc { stroke-dasharray: 3 5; opacity: 0.45; }
+.swarm-node-picked .swarm-node-disc { stroke-width: 4.5; }
+.swarm-node-ring { fill: none; stroke: var(--swarm-teal); stroke-width: 1; opacity: 0.5; }
+.swarm-node-label {
+  fill: var(--swarm-ink); font-size: 15px;
+  font-family: Consolas, "Courier New", monospace; pointer-events: none;
+}
+.swarm-node-off .swarm-node-label, .swarm-node-ghost .swarm-node-label { fill: var(--swarm-dim); }
+.swarm-node-ghost-tag { fill: var(--swarm-dim); font-size: 12px; pointer-events: none; }
+.swarm-node-eligible { fill: var(--swarm-teal); font-size: 11px; letter-spacing: 0.1em; pointer-events: none; }
+
+.swarm-detail {
+  border: 1px solid var(--swarm-line); border-radius: 6px;
+  padding: 8px 12px; font-size: 12px; color: var(--swarm-ink);
+  max-height: 480px; overflow: auto;
+}
+.swarm-detail-hint { color: var(--swarm-dim); display: flex; flex-direction: column; justify-content: center; }
+.swarm-detail-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.swarm-detail-head strong { font-family: Consolas, monospace; font-size: 14px; }
+.swarm-detail-close {
+  margin-left: auto; background: none; border: 1px solid var(--swarm-line);
+  color: var(--swarm-dim); border-radius: 4px; cursor: pointer; font-size: 14px; line-height: 1;
+  padding: 2px 7px;
+}
+.swarm-detail-close:hover, .swarm-detail-close:focus-visible { color: var(--swarm-teal); border-color: var(--swarm-teal); }
+.swarm-pill { border: 1px solid var(--swarm-teal); color: var(--swarm-teal); border-radius: 999px; padding: 1px 8px; font-size: 11px; }
+.swarm-pill-off { border-color: var(--swarm-dim); color: var(--swarm-dim); }
+.swarm-pill-unknown { border-color: var(--swarm-line); color: var(--swarm-dim); }
+.swarm-detail h4 { margin: 10px 0 3px; font-size: 12px; color: var(--swarm-teal); letter-spacing: 0.06em; }
+.swarm-detail ul { margin: 0; padding-left: 16px; }
+.swarm-detail li { margin: 2px 0; }
+.swarm-detail-line { margin: 2px 0; color: var(--swarm-dim); }
+.swarm-detail-dim { color: var(--swarm-dim); }
+
+.swarm-foot {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  margin-top: 6px; padding-top: 6px;
+  border-top: 1px solid var(--swarm-line);
+  color: var(--swarm-dim); font-size: 12px;
+}
+
+/* Hidden view: every animation/timer look freezes; layout stays mounted. */
+.swarm-paused .swarm-glow { opacity: 0 !important; }
+.swarm-paused .swarm-layer,
+.swarm-paused .swarm-edge,
+.swarm-paused .swarm-node-disc { transition: none; }
+
+/* Reduced motion: no cursor effects, no transitions at all. */
+@media (prefers-reduced-motion: reduce) {
+  .swarm-glow { display: none; }
+  .swarm-layer, .swarm-edge, .swarm-node-disc { transition: none; }
+}
+.swarm-reduced .swarm-glow { display: none; }
+.swarm-reduced .swarm-layer,
+.swarm-reduced .swarm-edge,
+.swarm-reduced .swarm-node-disc { transition: none; }
