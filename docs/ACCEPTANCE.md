@@ -1,5 +1,26 @@
 # 验收矩阵
 
+## EvoMap 首次绑定与免费 Gene 实取审查（2026-09-22）
+
+用户明确首次注册并完成网页绑定后，单次 authenticated heartbeat 返回 HTTP 200、claimed=true、owner 存在；首次 Agent，Free / Lv0 / 0 credits。按用户对具体资产的确认，于服务端响应时间 **2026-09-22 19:09:17 +08:00** 通过官方直接 A2A 路径执行一次 `POST https://evomap.ai/a2a/fetch`，payload 仅含批准的 asset_ids，没有自动重试。返回 HTTP 200、mode=targeted、count=1、credits_deducted=0。这是**真实 Hub 定向获取**证据，区别于上一节插件 stub 测试；并非通过 Evolver Proxy，也不代表项目 HubClient 已完成生产接入。
+
+批准且实际返回的 Gene 为 `gene_gep_repair_from_errors`，完整 ID：`sha256:c9ed1efef4529b9d43ac5738c27bb76735decf483aad5ddcabb974f53a252ae2`。官方 [onboarding](https://evomap.ai/onboarding.md) 对两条免费资产的简短说明与 [实时 policy](https://evomap.ai/a2a/policy) 的条目名称存在差异；本次依据实时 policy 核对并选择上述 repair Gene。服务端同时附带同 bundle 的 Capsule，未额外发送获取它的请求。
+
+| 审查项 | 结果 |
+|---|---|
+| 指定 Gene 身份 | 请求 ID、结果 ID、Gene 正文 ID 一致；正文标记 schema_version=1.5.0 |
+| Gene 完整性 | 复用现有 `NodeAssetBridge.validate_asset`、官方 `@evomap/gep-sdk` 1.14.0；schema_valid=true、asset_id_valid=true、valid=true；官方重算 ID 与批准 ID 完全相同。未把正文版本改写为 1.14.0 |
+| 可复用内容 | 六步策略：从错误中提取信号、匹配既有经验、评估改动范围、最小可逆修复、按声明检查并在失败时回退、记录经验结果。属于流程策略，未提供 clamp/mean/unique 的具体实现 |
+| Gene 验证强度 | 声明的命令只检查 Node crypto 模块可加载；不能证明任何项目 bug 被修复。该命令未执行，项目固定独立 checkpoint 保留 |
+| 附带 Capsule | ID `sha256:7e4120afb308075ded85b67eecf5c06bc870d4fce70d3d24139e91577612e462`；schema_valid=false，根 additionalProperties 与 /content type 不满足本项目锁定 SDK；asset_id_valid=false。官方重算原始正文为 `sha256:8813bfcc9fb1d7e78c5c9a783383414db615c2555cd7fadfee32e002701fec62`，与返回 ID 不同，不能直接准入；尚未确定差异来自服务端增补还是其他原因 |
+| Capsule 的验证声明 | 三条 execution_trace 的命令检查内嵌文本/关键词，不能作为 Morphogenesis 代码修复证据。外层 verification.attested=false、runtime_gate/capsule_proof/validation_path 均 null；未执行返回命令 |
+| 项目现有准入门 | `validate_bundle([fetched_gene, fetched_capsule], NodeAssetBridge())` 实际拒绝，错误 `official_asset_validation_failed`；没有移除字段、重算覆盖原 ID 或降低门禁让它通过 |
+| 运行采用与发布 | 尚未导入项目 Gene 池、注入新任务或形成 UseRecord，没有新增模型请求或 Hub 发布；完整任务采用仍 NOT_RUN |
+
+上述校验在 I 锁定环境的现有 Python 会话中直接对内存响应调用，复用 `bridge_node.assets.NodeAssetBridge` 和 `hub_client.assets.validate_bundle`，没有自写哈希或执行资产内命令。原始响应保留在临时会话内，本报告只保存审查结果；节点 secret 不进入本报告、Git 或工具输出，尚未持久保存，也未启动 heartbeat 循环。
+
+结论：**免费 repair Gene 的获取、正文 schema 和内容哈希通过，可作为待采用的策略参考；附带 Capsule 不满足当前项目准入要求。** 若后续接入，仍使用项目独立验证器、实际 source_attempt / UseRecord 和本地代谢边界；远端公开资产的成功声明不能替代本地真实任务验收。安装插件先前的 Windows 启动、参数校验与发布重试问题不因本次直接 A2A 获取成功而解除。
+
 ## Evolver Codex 插件适配评估（2026-09-22）
 
 **结论：已安装的 `evolver@evomap` 0.2.0 可作为待适配的经验检索辅助入口，当前不满足直接接入或替换 Morphogenesis 核心闭环的要求。** 安装与启用已由 `codex plugin list --marketplace evomap --json` 确认；本会话没有加载 `evolver_*` 工具。官方来源为 `https://github.com/EvoMap/evolver-codex-plugin`，市场 checkout `cbff9210f17f35650a223d65744d1ff44e1dd112`，安装缓存 `C:/Users/DW/.codex/plugins/cache/evomap/evolver/0.2.0`，插件清单声明 GPL-3.0-or-later；MCP 握手自身版本为 0.1.0，不能与插件版本混用。

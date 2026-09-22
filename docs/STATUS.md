@@ -1,5 +1,11 @@
 # 开发状态
 
+## 最新结果：真实 EvoMap 免费 Gene 获取与审查完成（2026-09-22）
+
+首次注册及绑定已由 HTTP 200 / claimed=true 核验。用户确认具体免费 repair Gene 后，仅一次 authenticated A2A fetch 返回 1 条资产，扣费 0 credits。Gene `sha256:c9ed1efef4529b9d43ac5738c27bb76735decf483aad5ddcabb974f53a252ae2` 通过现有官方 SDK schema 与哈希校验，可作为修复策略参考。
+
+响应附带 Capsule 未通过 schema/哈希，现有 `validate_bundle` 以 `official_asset_validation_failed` 拒绝。未运行资产命令、安装到 Gene 池、注入模型任务或发布；不能把通用策略和文本验证声明算作项目修复验收。本次证明直接 Hub 定向获取可用，不证明 Evolver 插件/Proxy 已接通，既有插件阻塞仍保留。节点凭据仅在临时会话内，未持久保存或开启心跳循环。详见 [验收记录](ACCEPTANCE.md)。
+
 ## 最新评估：Evolver 插件部分可复用，尚不满足直接接入（2026-09-22）
 
 按用户要求实测已安装并 enabled 的 `evolver@evomap` 0.2.0。17 个适配检查 **13 通过、4 不满足**：Windows 默认 MCP command 是 macOS 绝对路径；不能直接替换 8 个既有 `gep_*` 工具；缺失必填 signals 仍被桥转发；模拟提交已接收但响应断连时默认自动重发，单次调用出现 2 POST。手动采用本机 Node 的标准 MCP 握手、9 工具发现及 7 条隔离 stub 路由通过，关闭 autostart 后断连仅 1 POST 且明确失败。测试只运行本地合成服务，无真实 Hub 发布和模型调用。
