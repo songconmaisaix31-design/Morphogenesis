@@ -7,10 +7,10 @@
  *
  *   Adapted portions (design tokens, sidebar/menu/card layout, color-scheme
  *   pattern) follow the theme's GPL-3.0 terms and retain this attribution plus
- *   the page-footer credit. No blog posts, avatar images, or other personal
- *   content from davidwang.space are copied. Hamburger pattern © Jonathan Suh
- *   (MIT); inline menu icons © Tabler Icons (MIT). Fonts use the local system
- *   stack only — no external font or CDN is loaded.
+ *   the page-footer credit; full license texts live in ./licenses/. No blog
+ *   posts, avatar images, or other personal content from davidwang.space are
+ *   copied. Hamburger pattern © Jonathan Suh (MIT). Menu icons © Tabler Icons
+ *   (MIT). Fonts use the local system stack only — no external font or CDN.
  */
 
 /* --- variables.scss (adapted) --- */

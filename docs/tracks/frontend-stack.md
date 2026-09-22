@@ -8,12 +8,12 @@
 
 | 来源 | 精确版本 | 许可证 | 用途 |
 |---|---|---|---|
-| https://github.com/CaiJimmy/hugo-theme-stack | v4.0.3，commit `3e123a30b79b5d52a3a8e88a9dd678fcfd28e418`（2026-05-25，与参考站 Hugo 0.165.0 生成物同期） | GPL-3.0-only | 设计变量（`#f5f5fa` 底色 / `#34495e` 强调色 / 卡片与阴影 token）、extended 三栏栅格断点、粘性左侧边栏 + 菜单 + 汉堡按钮、明暗主题 `StackColorScheme` 模式、页脚样式 |
+| https://github.com/CaiJimmy/hugo-theme-stack | v4.0.3，commit `3e123a30b79b5d52a3a8e88a9dd678fcfd28e418`（2026-05-25）——本轨固定复用的版本；参考站实际部署的主题确切版本未确认 | GPL-3.0-only | 设计变量（`#f5f5fa` 底色 / `#34495e` 强调色 / 卡片与阴影 token）、extended 三栏栅格断点、粘性左侧边栏 + 菜单 + 汉堡按钮、明暗主题 `StackColorScheme` 模式、页脚样式 |
 | 参考站 https://davidwang.space/ | 实测 1366：底色 rgb(245,245,250)、左栏 ≈197px、右栏 ≈328px | — | 布局核验基准（协调者截图 `morph-stack-reference-qqnJgo/reference-1366.png`）；未复制博客文章、头像、背景图等私人内容 |
 | Tabler Icons（随 Stack v4.0.3 内嵌） | 同上 | MIT | `index.html` 内联菜单/主题切换图标 |
 | hamburgers（Jonathan Suh） | 随 Stack v4.0.3 | MIT | 汉堡按钮模式（简化适配） |
 
-主题署名保留在页面页脚与 `viz/static/style.css` 头部；适配部分遵循 GPL-3.0 条款，明细见 `THIRD_PARTY_NOTICES.md`。
+主题署名保留在页面页脚与 `viz/static/style.css` 头部；完整 GPL-3.0 / MIT 许可与 copyright 文本在 `viz/static/licenses/`（含 NOTICE 逐项说明），明细见 `THIRD_PARTY_NOTICES.md`。
 
 ## 实际结构（协调者 handoff 后的授权布局）
 

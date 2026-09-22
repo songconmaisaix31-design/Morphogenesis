@@ -17,8 +17,8 @@ Checked against installed package metadata on 2026-09-22. Exact direct and trans
 | numpy | 2.5.3 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | https://github.com/numpy/numpy — numeric arrays; retain wheel bundled-library notices |
 | scikit-learn | 1.9.1 | BSD-3-Clause | https://github.com/scikit-learn/scikit-learn — offline HashingVectorizer requested by metabolism; no model download |
 | pytest / mypy / build | 9.1.1 / 1.20.2 / 1.6.1 | MIT | https://github.com/pytest-dev/pytest / https://github.com/python/mypy / https://github.com/pypa/build — development checks |
-| Hugo Theme Stack | v4.0.3（commit `3e123a30b79b5d52a3a8e88a9dd678fcfd28e418`） | GPL-3.0-only | https://github.com/CaiJimmy/hugo-theme-stack — `viz/static` 展示层样式适配：设计变量、侧边栏/卡片/菜单布局与明暗主题模式（参考实例 https://davidwang.space/）；未复制任何博客文章、头像或私人内容；主题署名保留在 `viz/static/style.css` 头部与页面页脚 |
-| Tabler Icons（经 Stack v4.0.3 内嵌版本） | 随 Stack v4.0.3 | MIT | https://github.com/tabler/tabler-icons — `viz/static/index.html` 内联菜单/主题切换图标；汉堡按钮模式 © Jonathan Suh hamburgers（MIT） |
+| Hugo Theme Stack | v4.0.3（commit `3e123a30b79b5d52a3a8e88a9dd678fcfd28e418`，本轨固定复用版本；参考站 davidwang.space 实际部署的主题确切版本未确认） | GPL-3.0-only | https://github.com/CaiJimmy/hugo-theme-stack — `viz/static` 展示层样式适配：设计变量、侧边栏/卡片/菜单布局与明暗主题模式；未复制任何博客文章、头像或私人内容；主题署名保留在 `viz/static/style.css` 头部与页面页脚，完整许可与 copyright 文本在 `viz/static/licenses/` |
+| Tabler Icons（经 Stack v4.0.3 内嵌版本） | 随 Stack v4.0.3 | MIT | https://github.com/tabler/tabler-icons — `viz/static/index.html` 内联菜单/主题切换图标；汉堡按钮模式 © Jonathan Suh hamburgers（MIT）；许可文本同在 `viz/static/licenses/` |
 
 Evolver is not installed, linked, or copied. Current npm metadata was checked separately by the coordinator: `@evomap/evolver` 2.0.38 is GPL-3.0-or-later. Its implementation is not needed for this foundation.
 
