@@ -31,6 +31,11 @@ class RunConfig(Contract):
                 raise ValueError("writable_paths must be relative to workspace")
             if ".." in posix.parts or ".." in windows.parts:
                 raise ValueError("writable_paths cannot traverse parents")
+            if not windows.parts or ":" in path:
+                raise ValueError("writable_paths cannot normalize to root or contain ADS")
+            for part in windows.parts:
+                if part.endswith((" ", ".")) or PureWindowsPath(part).is_reserved():
+                    raise ValueError("writable_paths cannot contain Windows device or ambiguous names")
         return self
 
 

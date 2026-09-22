@@ -19,6 +19,6 @@ jobs:
       - run: uv tool run poetry install
       - run: npm ci --ignore-scripts
       - run: uv tool run poetry run python tools/contracts_check.py
-      - run: uv tool run poetry run mypy
+      - run: uv tool run poetry run python tools/typecheck.py
       - run: uv tool run poetry run python -m build
       - run: npm run check:sdk
