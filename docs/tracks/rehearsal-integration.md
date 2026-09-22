@@ -1,0 +1,80 @@
+# I 固定完整彩排集成验收
+
+范围：普通合并 R `652e3199d626f60b414b70ee523b5f9703d1e539`、V `d032aba942464800842f43c2e2fcb20aacc8fca1`，以及协调治理 `61a2027`。起点 `501c491`，独立分支 `songconmaisaix31-design/morph-rehearsal-integration`。领域返修交原 V，I 只维护验收脚本和本报告。
+
+## 环境与本地检查
+
+使用本 worktree 的 `.venv`，Python 3.12.13，通过 `uv venv --python 3.12 .venv` 和 `POETRY_VIRTUALENVS_IN_PROJECT=true; uv tool run --offline poetry install --sync --no-interaction` 安装原锁；`npm ci` 安装原 npm 锁。未修改全局环境或锁文件。官方 Codex CLI 0.155.1，沿用既有账号；不读取、传递或测试本轮另给的 API key。
+
+初次适用检查：
+
+- `.venv/Scripts/python.exe -m pytest -q`：158 passed，91.70 秒。
+- `.venv/Scripts/python.exe tools/typecheck.py`：52 文件，发现 `viz/adapter.py` 两处 redundant-cast，交 V 返修。
+- `node --check viz/static/app.js`：通过。
+- `npm run check:sdk`：schema 1.14.0 校验、asset ID、防篡改均通过，published=false。
+- `.venv/Scripts/python.exe -m build`：sdist/wheel 成功。
+- `uv pip install --python .venv/Scripts/python.exe --no-deps --target .runtime/integration/wheel-site dist/morphogenesis-0.1.0-py3-none-any.whl`；设置本目录 NODE_PATH 后运行 `tools/check_distribution.py --site-dir .runtime/integration/wheel-site --check-node`：11 包从 wheel 加载，资源、独立验证器、Node 桥通过。
+- `uv tool run --offline poetry check --lock`：通过，仅原有元数据弃用提示。
+- PowerShell Parser 检查 `demo/run-demo.ps1`：无解析错误。
+
+日志均在本 worktree 的 `.runtime/integration/`，不入 Git。
+
+## 付费前浏览器预检与返修
+
+使用 R 既有 FixtureExecutor 生成明确 mock 的完整 `rehearsal.json`，未调用模型。Chromium 通过现有 Playwright 安装启动，没有安装新的浏览器。原始 `preflight-1366.png`/`preflight-1920.png` 为 fullPage，显示 105px 图表标签裁切、小屏 Gene 区越过首屏等问题；首屏是否容纳以 viewport 截图为准。
+
+V `35b3836adbce5c18c327cbc4f3aeba2b6475879b` 修复长任务标题、Gene 短标签、首屏紧凑布局、网络失败陈旧绿态。复查 T5 11 passed；`empty-failure.json`/`waiting.png`/`fetch-failure.png` 验证未就绪与网络错误不保留通过状态。`2aa6c297015d9a23f411e571fb1dcc12afc0a710` 修复两处 redundant-cast，完整 strict 52 文件通过。`19c3a344b11afa9c5b94f6d838e32c5a3fe74b4f` 修复顶部标签边界，付费前主动查看两种 viewport 截图，确认核心 Gene 区首屏可读、无横向溢出。
+
+第一、二轮 live 截图发现节点圆形底端稍被裁切，V `4593ad8ab5c65a9cde3a1039a10e78d9134ea34a` 调整边界与标签，第三轮使用该修正。第三轮完全展开的 28px 节点又暴露相向标签过近，继续交 V 最小返修。每轮 live 原始截图不覆盖、不替换；最后的显示修复必须以明确 replay 标识重渲染已有证据验证，不能声称三轮都运行于最终 UI SHA。
+
+Orca 内嵌 tab 创建成功，但对同一 browserPageId 执行 snapshot 返回 `runtime_unavailable: The Orca runtime closed the connection before responding`。原错误留 `.runtime/integration/orca-snapshot.json`；未重启 Orca 或杀 helper，改用用户批准的独立 headless Chromium。
+
+## 三轮 live
+
+三轮顺序执行均 completed；每轮使用 `demo/run-demo.ps1 -AuthorizeLive -Mode manual|auto -Port PORT -Model gpt-5.6-luna -TimeoutSeconds 180 -TauSeconds 10 -StageDelay 2` 调用 R 官方入口；manual、auto、auto 顺序，总计六次新 CLI 调用、六个 turn，无 UNKNOWN、失败或重试。`tests/integration/observe_rehearsal.cjs` 是一次现场入口加两个只读浏览器的验收观察脚本，`audit_rehearsal.py` 只读审计留存事实，不生成或调度任务。
+
+浏览器脚本使用环境 `MORPH_PLAYWRIGHT=C:/Users/DW/AppData/Roaming/npm/node_modules/@playwright/cli/node_modules/playwright`、`MORPH_CHROMIUM=C:/Users/DW/AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe`；运行 `node tests/integration/observe_rehearsal.cjs manual|auto PORT .runtime/integration/live-N`。输出目录已存在则拒绝覆盖。Chromium 151.0.7922.34，两页同时真实 HTTP 轮询相同的新 rehearsal.json，覆盖每轮 #0—#19 全部快照。
+
+证据根均在 `C:/Users/DW/AppData/Local/Temp/`：
+
+| 轮 | 模式 | 独立根目录名 | runtime 首/末 UTC | 结束 |
+|---|---|---|---|---|
+| 1 | manual | `morph-rehearsal-478415a14d4345ae87edf564c10a17aa` | 05:23:40.716862 / 05:25:30.556849 | completed |
+| 2 | auto | `morph-rehearsal-f1ef4bbac84247b9919a4e7a927b6112` | 05:26:04.219718 / 05:27:39.966394 | completed |
+| 3 | auto | `morph-rehearsal-8a253c1f138c4d79b18dffc5bb888350` | 05:28:24.145570 / 05:29:51.460674 | completed |
+
+时间日期均 2026-09-22；完整 viewer/进程启动和结束时刻另见每轮 `summary.json`。第一轮在 `05:24:28.934Z` 真正写入 stdin Enter，记录于 `live-1/manual-enter.json`；不杀任何在途模型进程。
+
+| 轮 / 新任务 | 实际 CLI call / turn | input tokens | output tokens | 合计 tokens | cost_usd |
+|---|---|---|---|---|---|
+| 1 repair | 1 / 1 | 14056 | 288 | 14344 | null |
+| 1 recovery | 1 / 1 | 14418 | 314 | 14732 | null |
+| 2 repair | 1 / 1 | 14062 | 267 | 14329 | null |
+| 2 recovery | 1 / 1 | 14411 | 274 | 14685 | null |
+| 3 repair | 1 / 1 | 14062 | 264 | 14326 | null |
+| 3 recovery | 1 / 1 | 14410 | 307 | 14717 | null |
+| 总计 | 6 / 6 | 85419 | 1714 | 87133 | null |
+
+六条 turn.completed 均有 usage，cached_input_tokens/cache_write_input_tokens 均为 0。reasoning_output_tokens 分别 86、81、80、51、74、62，已包含在 output_tokens，不重复累加。所有命令的 model 参数实际为 gpt-5.6-luna。
+
+每轮审计命令：`.venv/Scripts/python.exe tests/integration/audit_rehearsal.py <上述根>`，输出至 `live-N/audit.json`。实际核对两次独立外部 `python -I -S acceptance_runner.py` 的前后四份 checkpoint 报告：坏样例 clamp/mean/unique 均 false，修复后三者均 true；实际 TaskResult 分别属于 builder#0、builder#1，后者为新的 TaskId。核对获胜成员不可用、对应管道 inactive、实际 ECharts links 权重 1→1.9、线宽 5→8.6、离线虚线、第二条管道反馈 0.9→1.81。每轮准确一条采用记录，first Gene 的 source_attempt=首次真实调用、use_count=1、injected_count=1、采用 Attempt=第二次真实调用。
+
+逐点用已有 GeneView 的时间验证 `exp(-(evaluated_at-anchor)/10)`，不是快进时钟；归档时间距创建/最后采用至少 `10*ln(5)` 秒。归档后两条 Gene 均低于 0.2，snapshot 的实际 resolve 列表为空；额外 SQLite immutable 只读查询确认正文表为空，没有读写原数据库。
+
+原始 CLI `command.json`、`codex.jsonl`、proposal、stdout/stderr 和外部评审报告留在各 TEMP 根的 repair/recovery 子目录，未入 Git。每轮 `.runtime/integration/live-N/{1366,1920}.json` 保存页面状态、真实 ECharts option、HTTP 回执；`{1366,1920}-0.png` 至 `-19.png` 是 viewport 实图，涵盖初始、反馈、生成、下线、重新选路、采用、衰减、归档、完成。已主动打开关键图片检查，不仅断言文字。
+
+回放现场入口 `demo/run-demo.ps1 -Replay <第一轮/rehearsal.json> -Port 7525` 正常就绪，页面 provenance=replay、原始证据只读，interface_live/task_live=not_run。`replay_immutable.py` 在 CLI `--replay` 和真实浏览器回放前后比较 35 个原始文件的字节与 mtime，全部不变，见 `replay-immutable.json`。回放不计入本轮三次 live。
+
+## 服务清理与只读演示交接
+
+已按 Win32_Process 的父子 PID、命令行和专用端口核验并清理自有 viewer：7520（70272→61464）、7521（53424→24048）、7522（42044→49704）、7523（14960→58732）、7524（54128→48820）。证据 `.runtime/integration/cleanup.json`；上述端口不再监听。各次 Playwright 浏览器正常 close，临时 Orca 页面 `0d89fe97-b8b9-4524-be08-3845bb1aca87` 已确认所属本 worktree 后关闭；未触碰 Orca helper/运行时或队友进程。
+
+按协调者要求仅保留 [第一轮只读回放页面](http://127.0.0.1:7525/) 供用户现场投影检查；这不是新 live，也不是保留 Worker 运行。证据原路径为 `C:/Users/DW/AppData/Local/Temp/morph-rehearsal-478415a14d4345ae87edf564c10a17aa/rehearsal.json`。进程链为 PowerShell 46168 → 本 worktree Python launcher 61712 → 实际监听 Python 70764；精确命令行留 `.runtime/integration/replay-processes.json`。父 PowerShell 的已退出启动 shell 不影响该独立隐藏进程服务。
+
+从本 worktree 重启的已验证命令（仅端口空闲时）：`pwsh -NoProfile -File demo/run-demo.ps1 -Replay C:/Users/DW/AppData/Local/Temp/morph-rehearsal-478415a14d4345ae87edf564c10a17aa/rehearsal.json -Port 7525`。本次实际通过 `Start-Process -WindowStyle Hidden` 启动，stdout/stderr 为 `.runtime/integration/replay.stdout.log` 和 `replay.stderr.log`。
+
+关闭时先用 `Get-NetTCPConnection -LocalPort 7525 -State Listen` 以及 `Get-CimInstance Win32_Process -Filter 'ProcessId=70764'`、61712、46168 核对上述链和 `--port 7525 --rehearsal ... --replay`；确认 PID 未复用后依次 `Stop-Process -Id 70764`、61712、46168（已自行退出的父进程跳过）。若身份不符，不按旧 PID 停止。所有 TEMP 原证据、截图、锁环境和分支均保留。
+
+## 真实限制
+
+固定逻辑成员在两任务之间下线，不证明在途 CLI 被杀后恢复；Hub 待发布，无外部 Hub 写入；运行时供给为固定成员池；真实投影接线 NOT_RUN。CLI 不提供调用中美元硬上限，cost=null 保持未知。静态、fixture、package 证据均不替代三轮 task_live。
