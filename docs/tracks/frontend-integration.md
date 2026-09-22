@@ -42,10 +42,16 @@
 | `python -m pytest tests/t5 tests/integration -q`（全部合并后） | 44 passed，同 1 个预存环境失败 |
 | `npm run build`（viz/frontend，合并四轨源码后集成重建） | vite 5.4.21 成功；`finals-shell.js` 247.84 kB / `finals-shell.css` 71.15 kB；锁文件未变 |
 | `MORPH_PLAYWRIGHT=… MORPH_CHROMIUM=… node tests/integration/check_frontend_integration.cjs http://127.0.0.1:7899 .runtime/front-integration/final` | **27 passed / 0 failed**（真实 Chromium 1366×768，headless；证据截图+summary.json 在 `.runtime/front-integration/final/`，已亲看） |
+| `node tests/integration/check_frontend_replay.cjs http://127.0.0.1:7898 .runtime/front-integration/replay replay`（7898 为本轨独立 `--replay` 服务，读既有真实证据 `morph-rehearsal-40f04885…/rehearsal.json`，未触碰 7527） | **15 passed / 0 failed**（证据 `.runtime/front-integration/replay/`，已亲看） |
+| `node tests/integration/check_frontend_replay.cjs http://127.0.0.1:7897 .runtime/front-integration/nodata nodata`（7897 为无数据源服务） | **9 passed / 0 failed**（证据 `.runtime/front-integration/nodata/`，已亲看） |
 
 浏览器验收覆盖（final 轮，E cache_age 修复合并后）：首屏唯一大字 MORPHOGENESIS + 真实 WebGL 黏菌 canvas（无降级）；标题覆盖区域多点 pointermove 无 pageerror；首屏设计性隐藏 header、hero AGENT SWARM 标记可点；切换后 header 导航可见、`/api/dashboard` 来源如实 `mock`；T 拓扑模块加载、mock fixture 无彩排快照时如实空态（"模拟快照" 徽标，0 虚构节点）；验收三态与来源条呈现；EvoMap 面板首次进入自动加载一次（live · 实时）、Hub 来源行如实（公开只读、API key 未配置）、16 个类别真实计数、6 条边界声明、本地池如实未配置；手动两类有效查询（q=optimize limit=5 与 q=repair type=Capsule limit=5）均 live 返回真实资产（sha256 asset_id）；EvoMap 数据不进入拓扑面板；5 次标记切换 + 键盘 1/2 无重复 id、无 pageerror（S 重复切换 effect 修复复核）；CRT 开关可切换且 localStorage 持久化；reduced motion 下静态降级 + CRT 静止 + 切换正常；浏览器全程仅同源请求（Hub 访问只发生在服务端）。
 
-live 标注：上表真实出站仅为公开只读 `semantic-search` 与 `categories` 的 GET（E 轨已验证授权的既有路径，无密钥、无写操作）；其余均为本地契约。回放/mock/live 未混用。验证只用 7799/7801/7802 动态端口，结束后已全部关闭；7526/7527 未触碰。曾观察到一次首请求 categories 误标 `cache`，受控复验（进程内双请求 + 全新真实服务进程首请求）均未复现，判定为该次 7799 进程残留请求的观测假象而非代码缺陷。
+回放验收覆盖（真实第五轮证据，独立 7898 端口 `--replay`）：页头与拓扑徽标均为"回放视图 · 原始证据只读"；验收三态 `contract_local=passed / interface_live=not_run / task_live=not_run` 且 provenance=replay，回放从不冒充 task_live；拓扑 5 个节点身份与 `/api/dashboard` 的 members+pipes 逐一相等（planner#0 / builder#0 / builder#1 / reviewer#0 / aggregator#0）；边数 2 与 active 计数 1 均与 pipes 一致；HUD 阶段/快照号/任务 ID 来自快照（彩排完成 · #19 · recovery-rehearsal-d67607bc…）；ghost 横幅如实呈现 builder#0 下线原因、重路由 builder#1 及"恢复任务已成功"（字面短语仅在真实成功结果存在时出现）；点选 builder#0 详情引用真实原因与结果；事件流 20 行与 rehearsal.history 等长、最新 #19 在前。
+
+无数据验收覆盖（协调者 provenance 视觉核对）：`empty_dashboard` 语义 provenance=live + source_label=未加载导出。实测页头"来源：live"与"未加载导出"同屏并列，拓扑明确"AGENT SWARM · 空态"+"未加载彩排快照；不展示预设节点或边"，Gene/谱系/消息/指标/事件各区空态文案均如实，验收三态全 not_run，零虚构节点边。**结论：不构成误导，无需胶水修改，不改后端 provenance 语义**；唯一可斟酌点为空态拓扑徽标沿用 provenance 文案"现场快照"，已作可选建议记录，不改动。nodata fullPage 截图曾现 hero 叠影，经视口复测确认为 fullPage 拼接伪影（隐藏视图 visibility:hidden/opacity:0，实际交互无叠影）。
+
+live 标注：上表真实出站仅为公开只读 `semantic-search` 与 `categories` 的 GET（E 轨已验证授权的既有路径，无密钥、无写操作）；回放轮只读既有真实证据文件，不修改原件、不冒充 task_live；其余均为本地契约。回放/mock/live 未混用。验证只用 7799/7801/7802/7897/7898/7899 动态端口，结束后均按命令行核对精确关闭；7526/7527 进程全程未触碰（7527 仍由协调者管理运行中）。曾观察到一次首请求 categories 误标 `cache`，受控复验（进程内双请求 + 全新真实服务进程首请求）均未复现，判定为该次 7799 进程残留请求的观测假象而非代码缺陷。
 
 ## 预存问题（非本次合并引入，已核对基线）
 
@@ -59,6 +65,6 @@ live 标注：上表真实出站仅为公开只读 `semantic-search` 与 `catego
 
 ## 交付说明
 
-- 本轨改动仅限：合并提交、`tests/integration/check_frontend_integration.cjs`（新增验收脚本）、`viz/static/assets/finals-shell.{js,css}`（计划规定的集成重建）、本文件。未改任何轨道领域代码、锁文件或 CI。
-- 证据类别：contract_local + 明确 mock fixture + 真实公开只读 Hub GET（无密钥/写操作）。未发起新付费任务；interface_live/task_live 在本轮浏览器验收中保持页面如实 `not_run`。
-- 验收端口 7799/7801/7802/7899 均已确认关闭；7526/7527 进程全程未触碰。
+- 本轨改动仅限：合并提交、`tests/integration/check_frontend_integration.cjs` 与 `tests/integration/check_frontend_replay.cjs`（新增验收脚本）、`viz/static/assets/finals-shell.{js,css}`（计划规定的集成重建）、本文件。未改任何轨道领域代码、锁文件或 CI。
+- 证据类别：contract_local + 明确 mock fixture + 只读 replay（既有真实证据，原件未动）+ 真实公开只读 Hub GET（无密钥/写操作）。未发起新付费任务；interface_live/task_live 在本轮浏览器验收中保持页面如实 `not_run`。
+- 验收端口 7799/7801/7802/7897/7898/7899 均已在结束后按确切命令行核对并关闭；7526/7527 进程全程未触碰。
