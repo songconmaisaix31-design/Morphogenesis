@@ -16,13 +16,13 @@ const stageLabel = {
   completed: "彩排完成", failed: "彩排已停止",
 };
 
-/* Slime design system chart palette (single dark theme). */
+/* Shell design system chart palette (single dark theme, teal accent). */
 const chartColors = {
-  nodeOnlineFill: "#0B0E14", nodeRing: "#F5D547", nodeOffline: "#64748B",
-  labelOnline: "#E8ECF4", labelOffline: "#64748B",
-  lineActive: "#F5D547", lineActiveGlow: "rgba(245, 213, 71, 0.35)", lineInactive: "#64748B",
-  labelMain: "#E8ECF4", labelDim: "#8A93A6", axisLabel: "#8A93A6",
-  sourceNode: "#8A93A6", adoptNode: "#F5D547", geneNode: "#E8ECF4", geneLine: "#8A93A6",
+  nodeOnlineFill: "#070B0D", nodeRing: "#65D9C7", nodeOffline: "#5C6F6C",
+  labelOnline: "#E8EFED", labelOffline: "#5C6F6C",
+  lineActive: "#65D9C7", lineActiveGlow: "rgba(101, 217, 199, 0.35)", lineInactive: "#5C6F6C",
+  labelMain: "#E8EFED", labelDim: "#8CA3A0", axisLabel: "#8CA3A0",
+  sourceNode: "#8CA3A0", adoptNode: "#65D9C7", geneNode: "#E8EFED", geneLine: "#8CA3A0",
 };
 
 function append(parent, tag, value, className = "") {
@@ -167,7 +167,7 @@ function eventFeed(history) {
   });
 }
 
-function rehearsalBoard(rehearsal) {
+function rehearsalBoard(rehearsal, { redrawTopology = true } = {}) {
   if (!rehearsal) {
     text("rehearsal-mode", "尚未加载彩排快照；不展示预设通过结果。");
     text("header-members", "未知"); text("header-round", "未知");
@@ -175,7 +175,8 @@ function rehearsalBoard(rehearsal) {
     text("story-question", "未加载"); text("story-question-detail", "等待实际题目、已知失败点与来源。");
     if (bigNumberChanged("story-checkpoint-rate", "未加载") && !reducedMotion()) flashNumber(byId("story-checkpoint-rate"));
     text("story-checkpoint-rate", "未加载"); clear("story-checkpoints"); append(byId("story-checkpoints"), "li", "尚无独立 checkpoint 快照");
-    clear("story-pipes"); append(byId("story-pipes"), "p", "尚无管道快照"); showEmpty("story-pipe-chart", "story-pipe-empty", "尚无管道快照");
+    clear("story-pipes"); append(byId("story-pipes"), "p", "尚无管道快照");
+    if (redrawTopology) showEmpty("story-pipe-chart", "story-pipe-empty", "尚无管道快照");
     text("story-offline-member", "未发生 / 未加载"); text("story-offline-reason", "下线原因和恢复 checkpoint 均须来自实际快照。");
     clear("story-genes"); append(byId("story-genes"), "p", "尚无经验池快照");
     clear("event-feed"); append(byId("event-feed"), "p", "尚无阶段快照");
@@ -225,7 +226,14 @@ function rehearsalBoard(rehearsal) {
   }
 
   const pipeList = byId("story-pipes"); clear("story-pipes");
-  topologyGraph(current.pipes, current.members);
+  if (redrawTopology) {
+    // T 轨 SwarmTopology 合入后接管拓扑画布；此处的 ECharts 圆形图是降级视图。
+    if (document.body.dataset.swarmModule === "loaded") {
+      byId("story-pipe-empty").hidden = true;
+    } else {
+      topologyGraph(current.pipes, current.members);
+    }
+  }
   if (!current.pipes?.length) append(pipeList, "p", "尚无管道快照");
   current.pipes.forEach((pipe) => {
     const before = prior ? matchingPipe(prior.pipes ?? [], pipe) : null;
@@ -282,40 +290,55 @@ function metricChart(metrics) {
   chartFor("metric-chart").setOption({ animation: !reducedMotion(), tooltip: { renderMode: "richText", trigger: "axis" }, legend: { textStyle: { color: chartColors.labelMain } }, xAxis: { type: "category", data: history.map((_, i) => `记录 ${i + 1}`), axisLabel: { color: chartColors.axisLabel } }, yAxis: { type: "value", axisLabel: { color: chartColors.axisLabel } }, series: [{ name: `${metric.name} 历史`, type: "line", data: history, symbolSize: 8, lineStyle: { color: chartColors.lineActive }, itemStyle: { color: chartColors.lineActive } }, { name: "历史均值", type: "line", data: history.map(() => mean), lineStyle: { type: "dashed", color: chartColors.labelDim }, symbol: "none" }, { name: "历史最佳", type: "line", data: history.map(() => best), lineStyle: { type: "dotted", color: chartColors.labelDim }, symbol: "none" }, { name: `当前: ${current}${metric.unit ?? ""}`, type: "scatter", data: history.map((value, i) => i === history.length - 1 ? value : "-"), symbolSize: 15, itemStyle: { color: chartColors.lineActive } }] }, { notMerge: true });
 }
 
-/* The React shell mounts asynchronously; data zones exist only after it has
-   rendered, so wait for a known node before the first poll. */
-function shellReady() {
-  return new Promise((resolve) => {
-    const check = () => document.getElementById("story-pipe-chart") ? resolve() : window.setTimeout(check, 30);
-    check();
+/* The page shell (viz/frontend/src/App.jsx) owns all network reads and polls
+   /api/dashboard once per second. This bridge only renders what it is given:
+   - update(data, {redraw, resize}) fills text/DOM zones on every call and
+     repaints ECharts canvases only when the swarm view is actually visible
+     (redraw === true), so hidden views pause their redraw work;
+   - fail(message) keeps the last good snapshot on screen and only flips the
+     provenance badge and the connection status line (数据不被清空). */
+let lastData = null;
+
+function resizeCharts() {
+  ["story-pipe-chart", "gene-chart", "message-chart", "metric-chart"].forEach((id) => {
+    const element = byId(id);
+    const instance = element ? echarts.getInstanceByDom(element) : null;
+    if (instance) instance.resize();
   });
 }
 
-function initInterface() {
-  window.addEventListener("resize", () => {
-    ["story-pipe-chart", "gene-chart", "message-chart", "metric-chart"].forEach((id) => {
-      const element = byId(id);
-      const instance = element ? echarts.getInstanceByDom(element) : null;
-      if (instance) instance.resize();
-    });
-  });
+function update(data, { redraw = true, resize = false } = {}) {
+  if (!byId("provenance")) { window.__morphPendingDashboard = { data, redraw, resize }; return; }
+  lastData = data;
+  text("provenance", `来源：${data.provenance}`); byId("provenance").className = `morph-badge provenance-${data.provenance}`;
+  text("connection-state", "");
+  text("source-label", data.source_label); text("hub-status", data.hub_status); stateCards(data.acceptance ?? {});
+  rehearsalBoard(data.rehearsal, { redrawTopology: redraw });
+  const notes = byId("notes"); clear("notes"); (data.notes ?? []).forEach((note) => { const item = document.createElement("li"); item.textContent = note; notes.append(item); });
+  if (!redraw) return;
+  if (resize) resizeCharts();
+  geneGraph(data.genes ?? [], data.adoptions ?? []); messageGraph(data.events ?? []); metricChart(data.metrics ?? []);
 }
 
-async function main() {
-  try {
-    const response = await fetch("/api/dashboard", { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    text("provenance", `来源：${data.provenance}`); byId("provenance").className = `morph-badge provenance-${data.provenance}`;
-    text("source-label", data.source_label); text("hub-status", data.hub_status); stateCards(data.acceptance ?? {}); rehearsalBoard(data.rehearsal);
-    const notes = byId("notes"); clear("notes"); (data.notes ?? []).forEach((note) => { const item = document.createElement("li"); item.textContent = note; notes.append(item); });
-    geneGraph(data.genes ?? [], data.adoptions ?? []); messageGraph(data.events ?? []); metricChart(data.metrics ?? []);
-  } catch (error) {
-    // API failure must not leave stale data on screen: every zone is cleared.
-    text("provenance", "数据不可用"); byId("provenance").className = "morph-badge";
-    text("source-label", "当前快照无法读取"); text("hub-status", "状态未知（页面数据不可用）"); stateCards({}); rehearsalBoard(null);
-    clear("notes"); append(byId("notes"), "li", `仪表板数据不可用：${error.message}`);
-    geneGraph([], []); messageGraph([]); metricChart([]);
+function fail(message) {
+  if (!byId("provenance")) return;
+  const badge = byId("provenance");
+  if (lastData) {
+    badge.textContent = "连接失败"; badge.className = "morph-badge provenance-failed";
+    text("connection-state", `连接失败 · 保留上次快照（${message}）`);
+  } else {
+    // First load already failed: no snapshot exists, say so instead of
+    // implying one, and put the cause into the run notes.
+    badge.textContent = "数据不可用"; badge.className = "morph-badge provenance-failed";
+    text("connection-state", `连接失败 · 尚无快照（${message}）`);
+    text("source-label", "当前快照无法读取"); text("hub-status", "状态未知（页面数据不可用）");
+    clear("notes"); append(byId("notes"), "li", `仪表板数据不可用：${message}`);
   }
 }
-window.addEventListener("DOMContentLoaded", async () => { initInterface(); await shellReady(); main(); window.setInterval(main, 1000); });
+
+window.MorphDashboard = { update, fail };
+window.addEventListener("resize", resizeCharts);
+window.addEventListener("DOMContentLoaded", () => {
+  const pending = window.__morphPendingDashboard;
+  if (pending) { delete window.__morphPendingDashboard; update(pending.data, { redraw: pending.redraw, resize: true }); }
+});
