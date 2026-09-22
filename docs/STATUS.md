@@ -2,6 +2,8 @@
 
 ## 本轮结果：三次完整软件彩排已通过
 
+收尾复核：主线 `c1542b2` 的 Windows/Ubuntu CI 35691937011 均 success，但较早候选 `e83a816` 的 Windows CI 35691719303 暴露 `tests/t2/test_rehearsal.py:81` 的时间竞态；后续偶然通过不消除该问题。原 R/I 会话通过 Orca terminal 内 `codex resume --last` 恢复到原 worktree/branch，任务分别为 `task_78d3e30ecafd / ctx_76c264a284f2`、`task_0abdacc8d0ba / ctx_44c3b8728ee5`。恢复时 CLI 使用受限沙箱，Orca 通信与共享 Git 元数据访问需确认；当前仅授权范围内准备返修，未将新修改宣称为已验证或推送。
+
 2026-09-22 用户新增固定演示全链和至少三次完整彩排，旧三次单任务证据不计入本轮。主线已接收并验收集成 `e83a8168a066a0c687a15a7d28c15739bab13ad6`。北京时间 13:23–13:30 顺序完成 manual / auto / auto，共 6 次真实 CLI / 87,133 tokens，费用未知。每轮两个新任务 3/3、下线改道、Gene 生成/采用/墙钟衰减/归档全部通过。Orca Run `run_2cdbc98915f7`，协调 terminal 沿用原身份。
 
 | 轨 | worktree / branch 后缀 | 实际模型 | Task / Dispatch | terminal |
@@ -14,7 +16,7 @@ R/V worktree 从 `791d3cf` 建立；最终领域提交为 R `652e3199d626f60b414
 
 158 tests、全包 strict 52 文件、SDK、构建与安装后资源检查通过；三轮实时双视口截图和最终 UI 明确 replay 的实际绘制边界检查通过。最终显示修复没有重复模型调用或替换旧 live 图片，证据边界见 [本轮集成报告](tracks/rehearsal-integration.md)。新 API key 尚待 Base URL / 用途，未发送且未进入代码、日志或 Worker prompt；物理投影接线仍 NOT_RUN。
 
-R、V、I 均已 worker_done / succeeded；三个 worker-release 均返回 released / closed_agent_terminal，transcript captured。三个无任务启动 PowerShell 已单独核对关闭。集成自有 7520–7524 服务和临时页面已清理，独立浏览器均正常关闭；按演示交接保留 [7525 只读回放](http://127.0.0.1:7525/)，不是 Worker 保留，也不是新 live。其父/子 PID、日志及核验关闭/重启命令见集成报告。原始 TEMP 证据、分支和 worktree 保留。
+第一轮 R、V、I 均已 worker_done / succeeded；三个 worker-release 均返回 released / closed_agent_terminal，transcript captured。三个无任务启动 PowerShell 已单独核对关闭。集成自有 7520–7524 服务和临时页面已清理，独立浏览器均正常关闭。原 7525 服务实际随 I 的 release 退出，原先“独立隐藏进程可保留”的判断已被否定。协调者已重新启动 [7525 只读回放](http://127.0.0.1:7525/)，核验 launcher 65808 → listener 57100，HTTP 200、mode/provenance=replay、current.stage=completed、task_live=not_run；日志位于 `%TEMP%/morph-replay-coordinator-983d9f27fa08480a9c1836c25c9dbb64/`。这不是新 live，也不承诺跨 Orca/系统退出常驻；端口空闲后按报告中的 replay 命令重启。原始 TEMP 证据、分支和 worktree 保留。
 
 ## 已完成的核心原型基线
 
