@@ -56,7 +56,9 @@ function observe() {
         opacity:getComputedStyle(el).opacity,color:getComputedStyle(el).color,
         clipped:[el,...el.querySelectorAll('*')].filter(child=>child.clientWidth>0 && child.scrollWidth>child.clientWidth+1)
           .map(child=>({text:child.textContent,scrollWidth:child.scrollWidth,clientWidth:child.clientWidth}))}))},
-    theme:{background:getComputedStyle(document.body).backgroundColor,color:getComputedStyle(document.body).color}};
+    theme:{background:getComputedStyle(document.body).backgroundColor,color:getComputedStyle(document.body).color,
+      accent:getComputedStyle(document.documentElement).getPropertyValue('--slime').trim(),
+      numberFont:getComputedStyle(get('metric-tokens')).fontFamily}};
 }
 
 function assertStage(row, current) {
@@ -122,11 +124,14 @@ function assertFinalsStats(row, current, history) {
   assert.equal(Number(row.ids['header-round']?.match(/\d+/)?.[0]),taskIds.indexOf(current.task_id)+1,'Task round is not snapshot sequence');
   assert.equal(Number(row.ids['header-members']?.match(/\d+/)?.[0]),current.members.filter(member=>member.available).length,'Online member count');
   assert.equal(row.theme.background,'rgb(11, 14, 20)','Required black page background');
+  assert.equal(row.theme.accent.toLowerCase(),'#f5d547','Required yellow accent');
+  assert(/monospace/i.test(row.theme.numberFont),'Main numbers must use monospace');
   assert.deepEqual(row.events.map(event=>event.sequence),[...history].reverse().map(snapshot=>`#${snapshot.sequence}`),'Event list must follow real snapshot history');
   assert(row.mode.includes(row.events[0].stage),'Current step must agree with latest event');
   for(let index=0;index<row.events.length;index++) {
     assert.equal(row.events[index].time,new Date(history.at(-1-index).at*1000).toTimeString().slice(0,8),'Event timestamp must come from real snapshot');
   }
+  if(row.events.length>1) assert(Number(row.events[1].opacity)<Number(row.events[0].opacity),'Old events must visibly dim');
   const stateAt={4:'gene-new',5:'gene-decayed',10:'gene-adopted',18:'gene-archived',19:'gene-archived'}[current.sequence];
   if(stateAt) for(const item of row.ledger.items) assert(item.className.split(' ').includes(stateAt),`Expected actual ${stateAt} at #${current.sequence}`);
   if(current.genes.length) assert.equal(row.ledger.items.length,current.genes.length,'Every real Gene must appear');
