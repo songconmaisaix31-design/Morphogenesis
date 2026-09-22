@@ -19,10 +19,10 @@ import httpx
 
 from contracts.resolution import Gene, GeneRef
 from http.server import ThreadingHTTPServer
-from viz.adapter import empty_dashboard
-from viz.evomap_models import EVOMAP_SCHEMA
+from viz.adapter import DashboardInputError, empty_dashboard
+from viz.evomap_models import CATEGORIES_PATH, EVOMAP_SCHEMA
 from viz.evomap_service import EvomapQueryError, EvomapService, read_local_pool
-from viz.server import DashboardHandler
+from viz.server import DashboardHandler, degraded_loader
 
 
 ASSET = {
@@ -59,6 +59,26 @@ def _hub_payload(assets: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     }
 
 
+def _categories_payload() -> dict[str, Any]:
+    return {
+        "by_type": [
+            {"type": "Gene", "count": 2509437},
+            {"type": "Capsule", "count": 2505905},
+            {"type": "EvolutionEvent", "count": 2094531, "unobserved": "dropped"},
+        ],
+        "by_gene_category": [
+            {"category": "optimize", "count": 376082},
+            {"category": "repair", "count": 342783},
+        ],
+    }
+
+
+def _hub_handler(request: httpx.Request) -> httpx.Response:
+    if request.url.path == CATEGORIES_PATH:
+        return httpx.Response(200, json=_categories_payload())
+    return httpx.Response(200, json=_hub_payload())
+
+
 def _service(handler: Any, **kwargs: Any) -> EvomapService:
     requests: list[httpx.Request] = []
 
@@ -74,7 +94,7 @@ def _service(handler: Any, **kwargs: Any) -> EvomapService:
 class EvomapServiceTests(unittest.TestCase):
     def test_success_projects_only_observed_fields_and_sends_no_credentials(self) -> None:
         service = _service(
-            lambda request: httpx.Response(200, json=_hub_payload()),
+            _hub_handler,
             environ={"MORPH_EVOMAP_API_KEY": "secret-test-key"},
         )
         report = service.report(None, None, None)
@@ -97,7 +117,7 @@ class EvomapServiceTests(unittest.TestCase):
         self.assertNotIn("secret-test-key", json.dumps(report.as_dict()))
 
     def test_missing_key_is_reported_as_unconfigured_without_blocking_search(self) -> None:
-        service = _service(lambda request: httpx.Response(200, json=_hub_payload()), environ={})
+        service = _service(_hub_handler, environ={})
         report = service.report("timeout", "Gene", "3")
         self.assertFalse(report.hub["api_key_configured"])
         self.assertEqual("live", report.community_search.state)
@@ -107,19 +127,22 @@ class EvomapServiceTests(unittest.TestCase):
         self.assertEqual("3", params["limit"])
 
     def test_second_call_within_ttl_serves_cache_without_a_new_request(self) -> None:
-        service = _service(lambda request: httpx.Response(200, json=_hub_payload()))
+        service = _service(_hub_handler)
         first = service.report(None, None, None)
         second = service.report(None, None, None)
         self.assertEqual("live", first.community_search.state)
         self.assertEqual("cache", second.community_search.state)
-        self.assertEqual(1, len(service._test_requests))  # type: ignore[attr-defined]
+        self.assertEqual("live", first.community_categories.state)
+        self.assertEqual("cache", second.community_categories.state)
+        self.assertEqual(2, len(service._test_requests))  # type: ignore[attr-defined]
         self.assertIsNotNone(second.community_search.cache_age_seconds)
 
     def test_distinct_queries_are_cached_independently(self) -> None:
-        service = _service(lambda request: httpx.Response(200, json=_hub_payload()))
+        service = _service(_hub_handler)
         service.report("alpha", None, None)
         service.report("beta", None, None)
-        self.assertEqual(2, len(service._test_requests))  # type: ignore[attr-defined]
+        # Two search fetches plus one shared categories fetch (cached the second time).
+        self.assertEqual(3, len(service._test_requests))  # type: ignore[attr-defined]
 
     def test_timeout_maps_to_fixed_error_code_with_single_attempt(self) -> None:
         def handler(request: httpx.Request) -> httpx.Response:
@@ -131,14 +154,18 @@ class EvomapServiceTests(unittest.TestCase):
         self.assertEqual("error", search.state)
         self.assertEqual("timeout", search.error)
         self.assertEqual([], search.assets)
-        self.assertEqual(1, len(service._test_requests))  # type: ignore[attr-defined]
+        self.assertEqual("error", report.community_categories.state)
+        self.assertEqual("timeout", report.community_categories.error)
+        # One attempt per block, never a retry.
+        self.assertEqual(2, len(service._test_requests))  # type: ignore[attr-defined]
 
     def test_http_rejection_is_not_retried_and_status_is_coded(self) -> None:
         service = _service(lambda request: httpx.Response(429, text="slow down"))
         report = service.report(None, None, None)
         self.assertEqual("error", report.community_search.state)
         self.assertEqual("http_429", report.community_search.error)
-        self.assertEqual(1, len(service._test_requests))  # type: ignore[attr-defined]
+        self.assertEqual("http_429", report.community_categories.error)
+        self.assertEqual(2, len(service._test_requests))  # type: ignore[attr-defined]
 
     def test_malformed_body_is_rejected(self) -> None:
         service = _service(lambda request: httpx.Response(200, content=b"not json"))
@@ -152,7 +179,13 @@ class EvomapServiceTests(unittest.TestCase):
 
     def test_failure_after_success_serves_stale_cache_with_error(self) -> None:
         responses = [httpx.Response(200, json=_hub_payload()), httpx.Response(503, text="down")]
-        service = _service(lambda request: responses.pop(0), cache_ttl_seconds=0.01)
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.url.path == CATEGORIES_PATH:
+                return httpx.Response(200, json=_categories_payload())
+            return responses.pop(0)
+
+        service = _service(handler, cache_ttl_seconds=0.01)
         import time
 
         self.assertEqual("live", service.report(None, None, None).community_search.state)
@@ -162,23 +195,147 @@ class EvomapServiceTests(unittest.TestCase):
         self.assertEqual("stale_cache", search.state)
         self.assertEqual("http_503", search.error)
         self.assertEqual(1, search.count)
+        self.assertEqual("live", report.community_categories.state)
 
     def test_invalid_query_parameters_raise_before_any_request(self) -> None:
-        service = _service(lambda request: httpx.Response(200, json=_hub_payload()))
+        service = _service(_hub_handler)
         for args in [("", None, None), ("x" * 501, None, None), (None, "Mutation", None), (None, None, "0"), (None, None, "51"), (None, None, "abc")]:
             with self.assertRaises(EvomapQueryError):
                 service.report(*args)
         self.assertEqual(0, len(service._test_requests))  # type: ignore[attr-defined]
 
     def test_report_contract_shape(self) -> None:
-        service = _service(lambda request: httpx.Response(200, json=_hub_payload()))
+        service = _service(_hub_handler)
         data = service.report(None, None, None).as_dict()
         self.assertEqual(EVOMAP_SCHEMA, data["schema"])
-        self.assertEqual({"base_url", "endpoint", "auth", "api_key_configured"}, set(data["hub"]))
+        self.assertEqual(
+            {"base_url", "endpoint", "categories_endpoint", "auth", "api_key_configured"},
+            set(data["hub"]),
+        )
         self.assertIn("community_search", data)
+        self.assertIn("community_categories", data)
         self.assertIn("local_pool", data)
         self.assertTrue(data["boundaries"])
         json.dumps(data)  # The whole contract must stay JSON-serializable.
+
+
+class CommunityCategoriesTests(unittest.TestCase):
+    def test_live_counts_are_projected_with_strict_validation(self) -> None:
+        service = _service(_hub_handler)
+        report = service.report(None, None, None)
+        categories = report.community_categories
+        self.assertEqual("live", categories.state)
+        self.assertIsNone(categories.error)
+        self.assertEqual(
+            [
+                {"type": "Gene", "count": 2509437},
+                {"type": "Capsule", "count": 2505905},
+                {"type": "EvolutionEvent", "count": 2094531},
+            ],
+            categories.by_type,
+        )
+        self.assertEqual(
+            [{"category": "optimize", "count": 376082}, {"category": "repair", "count": 342783}],
+            categories.by_gene_category,
+        )
+        request = [r for r in service._test_requests if r.url.path == CATEGORIES_PATH][0]  # type: ignore[attr-defined]
+        self.assertNotIn("authorization", request.headers)
+        self.assertEqual("evomap.ai", request.url.host)
+        self.assertEqual(b"", request.read())
+
+    def test_malformed_counts_fail_closed_without_touching_search(self) -> None:
+        for bad in [
+            {},
+            {"by_type": [{"type": "Gene", "count": "many"}], "by_gene_category": []},
+            {"by_type": [], "by_gene_category": [{"category": "repair", "count": True}]},
+            {"by_type": [{"type": "", "count": 1}], "by_gene_category": []},
+            {"by_type": [{"type": "Gene", "count": -1}], "by_gene_category": []},
+        ]:
+            def handler(request: httpx.Request) -> httpx.Response:
+                if request.url.path == CATEGORIES_PATH:
+                    return httpx.Response(200, json=bad)
+                return httpx.Response(200, json=_hub_payload())
+
+            service = _service(handler)
+            report = service.report(None, None, None)
+            self.assertEqual("error", report.community_categories.state, bad)
+            self.assertEqual("malformed_response", report.community_categories.error, bad)
+            self.assertEqual([], report.community_categories.by_type)
+            self.assertEqual("live", report.community_search.state)
+
+    def test_categories_failure_serves_stale_cache_then_recovers(self) -> None:
+        responses = [httpx.Response(200, json=_categories_payload()), httpx.Response(503, text="down")]
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.url.path == CATEGORIES_PATH:
+                return responses.pop(0)
+            return httpx.Response(200, json=_hub_payload())
+
+        service = _service(handler, cache_ttl_seconds=0.01)
+        import time
+
+        self.assertEqual("live", service.report(None, None, None).community_categories.state)
+        time.sleep(0.02)
+        stale = service.report(None, None, None).community_categories
+        self.assertEqual("stale_cache", stale.state)
+        self.assertEqual("http_503", stale.error)
+        self.assertEqual(3, len(stale.by_type))
+
+
+class DegradedLoaderTests(unittest.TestCase):
+    """Regression: the degraded dashboard loader must outlive its except block.
+
+    Python clears the exception variable when an except block exits, so a
+    lambda closing over it raised NameError and /api/dashboard answered 500
+    instead of the documented degraded empty dashboard.
+    """
+
+    def test_loader_survives_the_except_block(self) -> None:
+        try:
+            raise DashboardInputError("未找到锁定的本地 ECharts；先运行 npm ci")
+        except DashboardInputError as error:
+            load_data = degraded_loader(error)
+        data = load_data()
+        self.assertEqual(["输入未加载：未找到锁定的本地 ECharts；先运行 npm ci"], data.notes)
+        self.assertEqual("live", data.provenance)
+        self.assertEqual(
+            {"contract_local": "not_run", "interface_live": "not_run", "task_live": "not_run"},
+            data.acceptance,
+        )
+        self.assertEqual([], data.events)
+
+    def test_dashboard_route_returns_degraded_payload_not_500(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        try:
+            raise DashboardInputError("输入文件不存在")
+        except DashboardInputError as error:
+            load_data = degraded_loader(error)
+
+        def handler(*args: Any, **kwargs: Any) -> DashboardHandler:
+            return DashboardHandler(
+                *args, directory=str(root), dashboard_loader=load_data,
+                echarts_asset=root / "missing-echarts.js",
+                evomap_service=EvomapService(store_path=None), **kwargs,
+            )
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+
+        base = f"http://127.0.0.1:{server.server_address[1]}"
+        try:
+            with urllib.request.urlopen(base + "/api/dashboard", timeout=10) as response:
+                status, body = response.status, json.loads(response.read())
+        except urllib.error.HTTPError as error:
+            self.fail(f"expected degraded 200, got {error.code}: {error.read()!r}")
+        self.assertEqual(200, status)
+        self.assertEqual(["输入未加载：输入文件不存在"], body["notes"])
+        self.assertEqual("live", body["provenance"])
+        self.assertEqual("not_run", body["acceptance"]["contract_local"])
 
 
 class LocalPoolTests(unittest.TestCase):
@@ -253,7 +410,7 @@ class LocalPoolTests(unittest.TestCase):
         self.assertEqual("store_unreadable", pool.error)
 
     def test_unconfigured_pool_is_closed_not_empty(self) -> None:
-        service = EvomapService(transport=httpx.MockTransport(lambda r: httpx.Response(200, json=_hub_payload())))
+        service = EvomapService(transport=httpx.MockTransport(_hub_handler))
         pool = service.report(None, None, None).local_pool
         self.assertEqual("unconfigured", pool.state)
 
@@ -264,7 +421,7 @@ class EvomapRouteTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         root = Path(self.temp_dir.name)
-        self.service = _service(lambda request: httpx.Response(200, json=_hub_payload()))
+        self.service = _service(_hub_handler)
 
         def handler(*args: Any, **kwargs: Any) -> DashboardHandler:
             return DashboardHandler(
@@ -295,6 +452,7 @@ class EvomapRouteTests(unittest.TestCase):
         self.assertEqual(200, status)
         self.assertEqual(EVOMAP_SCHEMA, body["schema"])
         self.assertEqual("live", body["community_search"]["state"])
+        self.assertEqual("live", body["community_categories"]["state"])
         self.assertEqual("unconfigured", body["local_pool"]["state"])
 
     def test_query_parameters_are_forwarded_and_validated(self) -> None:

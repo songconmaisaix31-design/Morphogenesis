@@ -18,6 +18,7 @@ write_paths：`viz/evomap_models.py`、`viz/evomap_service.py`、`viz/server.py`
 3. 是否计费/配额：未知（响应与官方包内均无说明）。缓解：进程内缓存（默认 TTL 300s，按查询键）、页面不轮询、单次获取仅一次请求。
 4. 未验证（不臆造）：鉴权后的差异行为、`include_context=true` 的增量字段、单资产全文拉取路由、`/a2a/memory/*` 及一切写路由（publish/hello/revoke 等均未触碰）。
 5. `MORPH_EVOMAP_API_KEY` 当前环境未配置；代码只报告配置布尔值，从不读取发送或记录密钥。Hub 沙箱（`MORPH_HUB_URL`）仍未提供，A2A hello/publish/fetch 保持待发布。
+6. `GET https://evomap.ai/a2a/assets/categories` **无任何 Authorization 头即 HTTP 200**（2026-09-22 本机实测，600 字节），字段为 `by_type[{type,count}]`（Gene/Capsule/EvolutionEvent）与 `by_gene_category[{category,count}]`。这是面向浏览的社区统计上下文：**不参与运行拓扑，类别计数不得当作本项目指标**。同搜索一样：恰好一次请求、无重试、进程内缓存。
 
 ## `/api/evomap` 响应契约（`morph.evomap.readonly/1`）
 
@@ -30,6 +31,7 @@ write_paths：`viz/evomap_models.py`、`viz/evomap_service.py`、`viz/server.py`
   "hub": {
     "base_url": "https://evomap.ai",
     "endpoint": "/a2a/assets/semantic-search",
+    "categories_endpoint": "/a2a/assets/categories",
     "auth": "public_read_observed_no_credentials_sent",
     "api_key_configured": false        // 仅布尔；密钥值不出现在任何输出
   },
@@ -49,6 +51,15 @@ write_paths：`viz/evomap_models.py`、`viz/evomap_service.py`、`viz/server.py`
         nl_summary, trigger_text, gdi_* 评分, upvotes/view_count 等计数,
         payload/verification 原样对象；绝不补全缺失字段 */]
   },
+  "community_categories": {
+    "state": "live | cache | stale_cache | error",
+    "fetched_at": 0.0,                 // null = 从未成功
+    "cache_ttl_seconds": 300.0,
+    "cache_age_seconds": 0.0,          // null = 本次为 live
+    "error": null,                     // 与 community_search 同一套固定码
+    "by_type": [{"type": "Gene", "count": 2509437} /* …strict 校验后原样计数 */],
+    "by_gene_category": [{"category": "repair", "count": 342783} /* … */]
+  },
   "local_pool": {
     "state": "ok | empty | unconfigured | error",
     "source": "sqlite:metadata.db",    // null = 未配置
@@ -61,23 +72,24 @@ write_paths：`viz/evomap_models.py`、`viz/evomap_service.py`、`viz/server.py`
 }
 ```
 
-给 S 轨的接线要点：`community_search` 与 `local_pool` 都是 **EvoMap 上下文数据，不是运行拓扑事实**；按 `state` 显示来源标注（live/cache/stale_cache/error 与 sqlite 本地池），error 时展示固定错误码即可，不要自行翻译远端文本。密钥永远不会出现在响应里。
+给 S 轨的接线要点：`community_search`、`community_categories` 与 `local_pool` 都是 **EvoMap 上下文数据，不是运行拓扑事实**；按 `state` 显示来源标注（live/cache/stale_cache/error 与 sqlite 本地池），error 时展示固定错误码即可，不要自行翻译远端文本。`community_categories` 的计数是 Hub 社区统计，只能作为浏览上下文展示，不得接入拓扑图或当作本项目验收/代谢指标。密钥永远不会出现在响应里。
 
 ## 服务端行为
 
-- `viz/server.py` 新增 `--evomap-store <metadata.db>`；不配置时 `local_pool.state=unconfigured`，社区搜索不受影响。
-- 远端获取：httpx、`trust_env=False`、不跟随重定向、15s 超时、1 MiB 响应上限、恰好一次请求（无重试）；错误码固定化，远端响应文本不进日志不进响应。
-- 缓存：进程内、按 `(q,type,limit)` 键；TTL 内标注 `cache`；TTL 后失败且有旧值时标注 `stale_cache` 并带错误码。
+- `viz/server.py` 新增 `--evomap-store <metadata.db>`；不配置时 `local_pool.state=unconfigured`，社区搜索与类别统计不受影响。输入或锁定的 ECharts 缺失时走降级空仪表盘（`degraded_loader`），`/api/dashboard` 始终返回 200 降级响应而非 500。
+- 远端获取：httpx、`trust_env=False`、不跟随重定向、15s 超时、1 MiB 响应上限、每个区块恰好一次请求（无重试）；错误码固定化，远端响应文本不进日志不进响应。
+- 缓存：进程内；搜索按 `(q,type,limit)` 键，类别统计单键共享；TTL 内标注 `cache`；TTL 后失败且有旧值时标注 `stale_cache` 并带错误码。
 - 本地池：stdlib `sqlite3` `mode=ro` 只读打开（含不写 journal/WAL），正文逐条经共享 `Gene` 契约重验；不通过的行剔除并计数说明；已归档无正文版本按 T3M 规则不显示。
 - 线程安全：单服务实例 + 锁；页面并发不放大 Hub 请求数。
 
 ## 测试与验收边界
 
-- `tests/t5/test_evomap.py`（18 项）：MockTransport 覆盖成功投影/无凭据发送/缓存/独立键/超时/429/503/畸形/超大/参数校验（mock 范围，零真实 Hub 请求）；真实临时 SQLite 覆盖本地池 ok/missing/unreadable/归档剔除（真实本地读，无网络）；真实本机 HTTP 覆盖路由契约/400/dashboard 回归。
+- `tests/t5/test_evomap.py`（23 项）：MockTransport 覆盖成功投影/无凭据发送/缓存/独立键/超时/429/503/畸形/超大/参数校验（mock 范围，零真实 Hub 请求）；categories 区块覆盖严格字段校验（缺字段/字符串计数/布尔计数/空名/负数均 fail-closed 为 `malformed_response` 且不影响搜索区块）、stale_cache 恢复、无凭据发送；真实临时 SQLite 覆盖本地池 ok/missing/unreadable/归档剔除（真实本地读，无网络）；真实本机 HTTP 覆盖路由契约/400/dashboard 降级回归（except 块变量清除导致的 NameError/500 回归）。
 - 全量 `pytest`：216 通过、2 失败——失败项 `tests/integration/test_demo_environment.py` 与 `tests/t1/bridge/test_mcp.py` 在干净基线 `972d4ba` 上同样失败（环境变量缺失与 Windows 控制台编码），与本轨无关。
 - `python tools/typecheck.py`：55 文件 strict 通过。
-- live/mock 边界：真实 Hub 请求仅 5 次且全部为只读 GET——接口核对 3 次（curl/python 直连，含完整字段确认）+ 真实服务端集成 2 次（不同 limit 的缓存键各一次），第二次同键请求验证命中 `cache` 未新发请求。无 POST、无模型调用、无密钥参与。
+- live/mock 边界：真实 Hub 请求累计 8 次且全部为只读 GET——接口核对 4 次（搜索 3 次 + categories 1 次，curl/python 直连，含完整字段确认）+ 真实服务端集成 4 次（既往不同 limit 缓存键 2 次 + 本次 categories 端到端 search/categories 各 1 次），同键第二次请求验证命中 `cache` 未新发请求。无 POST、无模型调用、无密钥参与。
 - 端到端实测（2026-09-22）：`--evomap-store` 指向真实 `SQLiteStore` 写出的 `metadata.db`，`GET /api/evomap?q=repair&type=Gene&limit=2` 返回 `live` 社区数据 + `ok` 本地池（`gene_repair_boundary` 正文与策略完整）；`type=Mutation` 返回 400 `invalid_query`。
+- categories 端到端实测（2026-09-22）：真实服务端 `GET /api/evomap?q=repair&limit=2` 返回 `community_categories.state=live`，`by_type` 三类计数与 curl 直连一致，响应中无任何密钥；同机 `--input` 指向不存在文件时 `GET /api/dashboard` 返回 200 降级空仪表盘（`输入未加载：…`），不再因 except 块变量清除抛 NameError/500。
 
 ## 遗留限制
 

@@ -1,6 +1,6 @@
 """Server-side, read-only EvoMap data loop for the dashboard.
 
-Two independent sources, each labelled with its real origin:
+Three independent sources, each labelled with its real origin:
 
 - ``community_search``: the official Hub's public read-only endpoint
   ``GET https://evomap.ai/a2a/assets/semantic-search`` (the same route the
@@ -8,6 +8,12 @@ Two independent sources, each labelled with its real origin:
   ``gep_list_genes``).  Verified live on 2026-09-22 to return HTTP 200 with
   no Authorization header.  One attempt per fetch, never a retry, results are
   cached in-process so the page cannot poll the Hub.
+- ``community_categories``: the official Hub's public read-only endpoint
+  ``GET https://evomap.ai/a2a/assets/categories``, verified live on
+  2026-09-22 to return HTTP 200 with ``by_type[{type,count}]`` and
+  ``by_gene_category[{category,count}]``.  Browsing context only: the counts
+  never enter run topology and are not project metrics.  Same one-attempt,
+  no-retry, in-process-cache discipline as the search.
 - ``local_pool``: a read-only SQLite projection of the runtime ``genes`` and
   ``metabolism_gene_state`` tables, revalidated against the shared ``Gene``
   contract.
@@ -33,6 +39,7 @@ from pydantic import JsonValue, TypeAdapter, ValidationError
 
 from contracts.resolution import Gene
 from viz.evomap_models import (
+    CATEGORIES_PATH,
     ERROR_CONNECTION,
     ERROR_MALFORMED,
     ERROR_STORE_MISSING,
@@ -42,6 +49,7 @@ from viz.evomap_models import (
     ERROR_TRANSPORT,
     HUB_BASE_URL,
     SEARCH_PATH,
+    CommunityCategories,
     CommunitySearch,
     EvomapReport,
     LocalPool,
@@ -76,6 +84,7 @@ _OBJECT = TypeAdapter(dict[str, JsonValue])
 
 BOUNDARIES = [
     "community_search 来自 EvoMap Hub 公开只读接口 /a2a/assets/semantic-search；不是本项目的运行拓扑或任务事实。",
+    "community_categories 来自 EvoMap Hub 公开只读接口 /a2a/assets/categories；类别计数只是社区浏览上下文，不参与运行拓扑，也不是本项目指标。",
     "local_pool 是本地运行存储的只读投影；archived Gene 正文按 T3M 规则已被本地移除。",
     "服务端每次获取仅一次请求、无自动重试；命中进程内缓存时标注 cache/stale_cache。",
     "MORPH_EVOMAP_API_KEY 只报告是否配置；公开搜索不需要也未使用该密钥。",
@@ -128,6 +137,33 @@ def _project_asset(item: Any) -> dict[str, Any] | None:
     return projected if projected else None
 
 
+def _validate_counts(value: Any, key: str) -> list[dict[str, Any]]:
+    """Strict shape check for the categories route's ``[{key, count}]`` lists.
+
+    Anything outside the observed live contract (non-list, missing/wrong-typed
+    fields, negative or boolean counts) fails closed as malformed; unknown
+    extra keys on an item are dropped, not renamed.
+    """
+    if not isinstance(value, list):
+        raise _FetchError(ERROR_MALFORMED)
+    result: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            raise _FetchError(ERROR_MALFORMED)
+        name = item.get(key)
+        count = item.get("count")
+        if (
+            not isinstance(name, str)
+            or not name
+            or isinstance(count, bool)
+            or not isinstance(count, int)
+            or count < 0
+        ):
+            raise _FetchError(ERROR_MALFORMED)
+        result.append({key: name, "count": count})
+    return result
+
+
 class EvomapService:
     """One shared, lock-guarded service per dashboard server process."""
 
@@ -151,30 +187,52 @@ class EvomapService:
         self._environ = os.environ if environ is None else environ
         self._lock = threading.Lock()
         self._cache: dict[tuple[str, str | None, int], tuple[float, CommunitySearch]] = {}
+        self._categories_cache: tuple[float, CommunityCategories] | None = None
 
     def report(self, q: str | None, asset_type: str | None, limit: str | None) -> EvomapReport:
         params = validate_query(q, asset_type, limit)
+        now = self._clock()
+        search = self._search(params, now)
+        categories = self._categories(now)
+        return self._build(params, search, categories, now)
+
+    def _search(self, params: dict[str, Any], now: float) -> CommunitySearch:
         key = (params["q"], params.get("type"), params["limit"])
         with self._lock:
             cached = self._cache.get(key)
-        now = self._clock()
         if cached is not None and now - cached[0] <= self.cache_ttl_seconds:
-            return self._build(params, self._with_state(cached[1], "cache", now), now)
+            return self._with_state(cached[1], "cache", now)
         try:
             fresh = self._fetch(params)
         except _FetchError as error:
             if cached is not None:
-                stale = self._with_state(cached[1], "stale_cache", now, error=error.code)
-                return self._build(params, stale, now)
-            empty = CommunitySearch(
+                return self._with_state(cached[1], "stale_cache", now, error=error.code)
+            return CommunitySearch(
                 state="error", query=params, fetched_at=None,
                 cache_ttl_seconds=self.cache_ttl_seconds, cache_age_seconds=None,
                 error=error.code, search_status=None, provider=None, count=0, assets=[],
             )
-            return self._build(params, empty, now)
         with self._lock:
             self._cache[key] = (now, fresh)
-        return self._build(params, self._with_state(fresh, "live", now), now)
+        return self._with_state(fresh, "live", now)
+
+    def _categories(self, now: float) -> CommunityCategories:
+        with self._lock:
+            cached = self._categories_cache
+        if cached is not None and now - cached[0] <= self.cache_ttl_seconds:
+            return self._with_categories_state(cached[1], "cache", now)
+        try:
+            fresh = self._fetch_categories()
+        except _FetchError as error:
+            if cached is not None:
+                return self._with_categories_state(cached[1], "stale_cache", now, error=error.code)
+            return CommunityCategories(
+                state="error", fetched_at=None, cache_ttl_seconds=self.cache_ttl_seconds,
+                cache_age_seconds=None, error=error.code, by_type=[], by_gene_category=[],
+            )
+        with self._lock:
+            self._categories_cache = (now, fresh)
+        return self._with_categories_state(fresh, "live", now)
 
     def _with_state(
         self, search: CommunitySearch, state: str, now: float, *, error: str | None = None
@@ -188,22 +246,42 @@ class EvomapService:
             count=search.count, assets=search.assets,
         )
 
-    def _build(self, params: dict[str, Any], search: CommunitySearch, now: float) -> EvomapReport:
+    def _with_categories_state(
+        self, categories: CommunityCategories, state: str, now: float, *, error: str | None = None
+    ) -> CommunityCategories:
+        fetched_at = categories.fetched_at
+        return CommunityCategories(
+            state=state, fetched_at=fetched_at,
+            cache_ttl_seconds=categories.cache_ttl_seconds,
+            cache_age_seconds=(now - fetched_at) if fetched_at is not None else None,
+            error=error, by_type=categories.by_type,
+            by_gene_category=categories.by_gene_category,
+        )
+
+    def _build(
+        self,
+        params: dict[str, Any],
+        search: CommunitySearch,
+        categories: CommunityCategories,
+        now: float,
+    ) -> EvomapReport:
         return EvomapReport(
             generated_at=now,
             hub={
                 "base_url": HUB_BASE_URL,
                 "endpoint": SEARCH_PATH,
+                "categories_endpoint": CATEGORIES_PATH,
                 "auth": "public_read_observed_no_credentials_sent",
                 "api_key_configured": bool(self._environ.get("MORPH_EVOMAP_API_KEY", "").strip()),
             },
             community_search=search,
+            community_categories=categories,
             local_pool=self._local_pool(),
             boundaries=BOUNDARIES,
         )
 
-    def _fetch(self, params: dict[str, Any]) -> CommunitySearch:
-        """Exactly one GET against the official public search route; no retry."""
+    def _get_object(self, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+        """Exactly one GET against an official public route; no retry."""
         raw = bytearray()
         status: int | None = None
         try:
@@ -211,7 +289,7 @@ class EvomapService:
                 transport=self._transport, trust_env=False, follow_redirects=False,
                 timeout=httpx.Timeout(self.timeout_seconds),
             ) as client:
-                with client.stream("GET", HUB_BASE_URL + SEARCH_PATH, params=params) as response:
+                with client.stream("GET", HUB_BASE_URL + path, params=params) as response:
                     status = response.status_code
                     for chunk in response.iter_bytes():
                         remaining = MAX_RESPONSE_BYTES - len(raw)
@@ -229,9 +307,12 @@ class EvomapService:
         if status != 200:
             raise _FetchError(f"http_{status}")
         try:
-            body = _OBJECT.validate_json(bytes(raw), strict=True)
+            return _OBJECT.validate_json(bytes(raw), strict=True)
         except (ValidationError, ValueError):
             raise _FetchError(ERROR_MALFORMED) from None
+
+    def _fetch(self, params: dict[str, Any]) -> CommunitySearch:
+        body = self._get_object(SEARCH_PATH, params)
         raw_assets = body.get("assets")
         if not isinstance(raw_assets, list):
             raise _FetchError(ERROR_MALFORMED)
@@ -246,6 +327,15 @@ class EvomapService:
             provider=provider if isinstance(provider, str) else None,
             count=count if isinstance(count, int) and count >= 0 else len(assets),
             assets=assets,
+        )
+
+    def _fetch_categories(self) -> CommunityCategories:
+        body = self._get_object(CATEGORIES_PATH)
+        return CommunityCategories(
+            state="live", fetched_at=self._clock(),
+            cache_ttl_seconds=self.cache_ttl_seconds, cache_age_seconds=None, error=None,
+            by_type=_validate_counts(body.get("by_type"), "type"),
+            by_gene_category=_validate_counts(body.get("by_gene_category"), "category"),
         )
 
     def _local_pool(self) -> LocalPool:
