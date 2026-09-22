@@ -71,11 +71,11 @@ Orca 内嵌 tab 创建成功，但对同一 browserPageId 执行 snapshot 返回
 
 最终接受版本的静态资源变更后，重新执行 `python -m build` 和安装 wheel 后 `check_distribution.py --check-node`，结果见 `build-accepted.log`、`wheel-accepted-check.log`：sdist/wheel 和 11 包/资源/固定外部验证器/Node 桥通过。上述 pytest 158 项与 strict 52 文件通过属于当时的本地检查结果，不代表后续远端 CI 全绿；已知 Windows CI 时间竞态见下节。后续领域变更仅 UI JS/CSS，执行过 Node 语法和真实浏览器几何检查，未重复付费任务。没有改 Python/npm 锁或全局配置。
 
-## 后续 CI 时间竞态（报告修订草稿）
+## 后续 CI 时间竞态
 
 协调者交接指出：候选 `e83a816` 的 [CI 35691719303](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35691719303) 在 Windows 上为 157 passed、1 failed，失败位于 `tests/t2/test_rehearsal.py:81` 的 `weight > 0.5` 断言。fixture 的 `tau_seconds=0.1`，该断言隐含从采用到快照必须少于 `0.1*ln(2)` 秒（约 69ms）；已记录的实际间隔约 0.103 秒、权重约 0.3563，与产品真实墙钟衰减一致，不能据此改产品时钟或扩大运行时修复范围。
 
-原 R Worker 负责该测试及 R 报告的限定返修。本文本修订尚未取得或验证 R 的最终修复提交，未合并、提交、推送，也未重跑测试或 CI；Windows/Ubuntu 最终候选均通过仍待后续证据。本次仅修订报告，不新增真实模型调用，不改三轮原始证据；已完成的六次调用预算保持不变。
+原 R Worker 负责该测试及 R 报告的限定返修；早先暂停阶段仅保留报告草稿，未集成。新的网关任务获授权后，I 以 `882ac25` 保存纠正，并普通合并 R `94b70816784fcd46ce4f74b8e205bd009b789cc3` 及主线 `f774e18`。R 按实际采用时间锚点验证衰减，另覆盖真实延迟 0.2 秒的快照；本候选全套 pytest 的 200 项已通过，未改产品墙钟或旧三轮证据。R 精确提交的双平台 [CI 35701298167](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35701298167) 由协调者交接为通过；I 最终候选 CI 单独核对。
 
 ## 服务清理与只读演示交接
 
@@ -92,3 +92,50 @@ Orca 内嵌 tab 创建成功，但对同一 browserPageId 执行 snapshot 返回
 ## 真实限制
 
 固定逻辑成员在两任务之间下线，不证明在途 CLI 被杀后恢复；Hub 待发布，无外部 Hub 写入；运行时供给为固定成员池；真实投影接线 NOT_RUN。CLI 不提供调用中美元硬上限，cost=null 保持未知。静态、fixture、package 证据均不替代三轮 task_live。
+
+## 第四轮网关：付费前集成与验收入口
+
+本轮采用 EvoMap Chat Completions，独立于上述三轮 Codex CLI；I 实际模型请求预算为 **0**。协调者审阅以下入口后，才在子进程环境注入 `MORPH_EVOMAP_API_KEY`，手动模式最多两个新 POST；失败/UNKNOWN 不自动重试，不换根重做。独立短文本 smoke 也不计入本轮。此节提交时第四轮真实运行为 **NOT_RUN，待协调者运行入口**。
+
+观察器沿用原三个位置参数，新增 `--executor codex|evomap` / `--model`，旧 CLI 默认不变。实际 runtime 到达 `awaiting_offline` 且两个页面均显示等待时，经 stdin 发送一次 Enter；没有强杀在途进程。每个历史 sequence 必须出现在两个浏览器的现场记录中，实际 ZRender 边界在逐阶段截图时检查。网关审计读取实际 request/response/proposal，核对 HTTP 200、请求模型、provider 返回模型原文、usage 与 result、任务/Agent 身份、应用正文与完整 Gene 注入/采用；不生成 CLI 事件或把 request 意图单独算成功。
+
+密钥仅转交 demo 子进程；观察器在加载 Playwright 前从自身环境移除该变量，Chromium 启动再次显式排除；demo 的 viewer 使用 PowerShell 7.4+ `Start-Process -Environment` 的空值删除，Mock/Replay 入口也删除，执行器保留专用环境。没有持久 `.env`、header/env/key 输出或含密钥命令行。Windows 真实 PowerShell 启动测试用本地 fixture 模块和非秘密 sentinel，证明 viewer 不含变量、执行器含变量且参数正确；没有外网或真实请求。首次该测试的 finally 清理连接遇到已按 25 秒期限退出的 fixture 服务，核心断言此前已通过；仅修正测试清理，不改领域逻辑，后续全套通过。
+
+本地结果及不入 Git 的日志：
+
+- `.venv/Scripts/python.exe -B -m pytest -q --basetemp <唯一私有目录>`：**200 passed / 135.27s**；进程 TEMP/TMP 限于本轨，日志 `.runtime/integration/verify-gateway-cc8fb864855f4d27b9d67fef26fd47b5/pytest.log`。
+- `tools/typecheck.py`：**53 source files clean**；全部 integration JS `node --check`、PowerShell Parser、`npm run check:sdk`、`python -m build`、独立目标安装 wheel 后 `python -I tools/check_distribution.py --site-dir ... --check-node` 均通过。包日志 `.runtime/integration/package-gateway-d81ec2c43afa42219ae894330246aaa8/`，11 个包来自 wheel，published=false。
+- `node --test tests/integration/test_browser_options.cjs`：2 passed，包括实际无 sentinel 子进程；pytest 新增 7 个 gateway 收据审计与 1 个 Windows demo 环境集成测试。坏证据覆盖缺/错 usage、缺返回模型、错 Attempt、错 Gene 正文及不同应用文件。
+- `check_rehearsal_stages.cjs` 读取旧 **mock** fixture 的只读原件，以全新 TEMP 副本逐阶段展示：19 snapshots × 双视口 = **38 张截图**，真实几何检查通过；全程 task_live=not_run。截图/几何 `.runtime/integration/preflight-gateway-aa82b2ca751b45499d94cb462f1d9133/`；主动查看了 1366 初始/采用、1920 下线/完成实图。临时根 `C:/Users/DW/AppData/Local/Temp/morph-i-gateway-stages-1dcace8868a04d9c8f91eecbd506c5b1`；原 mock 字节/mtime 未改，自有 7526 viewer 经父子 PID 与命令行核验后已清理。7525 root 服务未操作。
+
+协调者执行命令（本工作树；预先通过专用进程环境注入凭据，命令中不含凭据；目录必须尚不存在）：
+
+```powershell
+$env:MORPH_PLAYWRIGHT = 'C:/Users/DW/AppData/Roaming/npm/node_modules/@playwright/cli/node_modules/playwright'
+$env:MORPH_CHROMIUM = 'C:/Users/DW/AppData/Local/ms-playwright/chromium-1234/chrome-win64/chrome.exe'
+node tests/integration/observe_rehearsal.cjs manual 7526 .runtime/integration/live-4-gateway-20260922-01 --executor evomap --model evomap-gpt-5.6-luna
+# 完成后由 I 读取 summary.json.root，对该新根执行 audit_rehearsal.py；不得重跑 live。
+```
+
+demo 在启动前拒绝占用的 7526，自行生成全新 OS TEMP 根，打印当前 launcher/listener PID 与 stdout/stderr 路径。真实结果返回后再记录本轮起止、请求数、tokens、模型、关键截图、只读 bytes+mtime 审计和实时服务身份；不承诺 viewer 跨 worker-release 存活。网关 cost 仍为 null，httpx phase timeout 不是绝对在途截止；物理投影与远端 Hub 未验证。
+
+## OpenCode 项目级备选模型
+
+新增显式选用的 `opencode.evomap.json`，复用已安装 **opencode-ai 1.18.31 / MIT**、官方 [`@ai-sdk/openai-compatible` provider](https://opencode.ai/docs/providers/#custom-provider) 和 [环境变量引用](https://opencode.ai/docs/config/#env-vars)。固定 baseURL 为 `https://api.evomap.ai/v1`，apiKey 仅 `{env:MORPH_EVOMAP_API_KEY}`；无默认 model，不影响未选此配置的项目，分享 disabled、自动更新关闭、操作默认 ask、外部目录及 `.env` 读取 deny。七个文本 ID 与主线目录一致；三个图片模型未纳入代码池。
+
+`check_opencode_config.py --executable C:/Users/DW/AppData/Roaming/npm/node_modules/opencode-ai/bin/opencode.exe` 在独立临时 cwd/XDG 目录、白名单进程环境、仅 sentinel 下先核验 `debug paths`，再执行 `models evomap`：**配置解析和七项枚举通过**。版本 1.18.31，日志位于上述 verify 目录的 `opencode.log` 及 `morph-opencode-config-3oc70v7m/`；禁用远端目录获取、默认插件、升级与 LSP 下载，未读写全局账号配置、没有七模型付费探测。未打印解析后的 key。
+
+后续由协调者在已绑定 owner/worktree/branch/write_paths 的专用 Orca 终端中启动；每工作树单独配置与本地状态，保留现有 R/I 会话模型。本轮仅交命令，不实际启动新开发 Worker：
+
+```powershell
+$taskState = Join-Path (Get-Location).Path '.runtime/opencode'
+$env:XDG_CONFIG_HOME = Join-Path $taskState 'config'
+$env:XDG_DATA_HOME = Join-Path $taskState 'data'
+$env:XDG_CACHE_HOME = Join-Path $taskState 'cache'
+$env:XDG_STATE_HOME = Join-Path $taskState 'state'
+$env:OPENCODE_CONFIG = Join-Path (Get-Location).Path 'opencode.evomap.json'
+# 凭据由授权方仅注入此进程；不用 auth login 或全局配置。
+opencode --model evomap/evomap-gpt-5.6-luna
+```
+
+初始分配建议沿主线：小改动/测试/文档用 Luna 或 DeepSeek V4 Flash；常规模块用 Terra、GLM 5.1/5.2；复杂契约/跨模块审查用 Sol 或 Gemini 3.1 Pro Preview。这是待实测的初始选择，不是性能/价格排名；仍须明确每轨 owner、独立分支和互斥 write_paths。**OpenCode 工具调用、流式兼容和七模型端到端开发均 NOT_RUN**；第四轮 Chat Completions 即使通过，也不能算该工具链验收。

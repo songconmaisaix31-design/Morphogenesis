@@ -1,0 +1,30 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
+  "autoupdate": false,
+  "enabled_providers": ["evomap"],
+  "permission": {
+    "*": "ask",
+    "read": {"*": "allow", "*.env": "deny", "*.env.*": "deny"},
+    "external_directory": "deny"
+  },
+  "provider": {
+    "evomap": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "EvoMap (compatibility pending)",
+      "options": {
+        "baseURL": "https://api.evomap.ai/v1",
+        "apiKey": "{env:MORPH_EVOMAP_API_KEY}"
+      },
+      "models": {
+        "evomap-gpt-5.6-luna": {"name": "EvoMap GPT 5.6 Luna"},
+        "evomap-gpt-5.6-sol": {"name": "EvoMap GPT 5.6 Sol"},
+        "evomap-gpt-5.6-terra": {"name": "EvoMap GPT 5.6 Terra"},
+        "evomap-deepseek-v4-flash": {"name": "EvoMap DeepSeek V4 Flash"},
+        "evomap-glm-5.1": {"name": "EvoMap GLM 5.1"},
+        "evomap-glm-5.2": {"name": "EvoMap GLM 5.2"},
+        "evomap-gemini-3.1-pro-preview": {"name": "EvoMap Gemini 3.1 Pro Preview"}
+      }
+    }
+  }
+}

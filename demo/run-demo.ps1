@@ -4,7 +4,8 @@ param(
   [string]$Replay,
   [switch]$AuthorizeLive,
   [int]$Port = 7500,
-  [string]$Model = "gpt-5.6-luna",
+  [ValidateSet("codex", "evomap")][string]$Executor = "codex",
+  [string]$Model,
   [int]$MaxTokens = 20000,
   [double]$MaxCostUsd = 1.0,
   [int]$TimeoutSeconds = 120,
@@ -18,6 +19,7 @@ $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root
 $Python = Join-Path $Root ".venv\Scripts\python.exe"
+if (-not $Model) { $Model = if ($Executor -eq "evomap") { "evomap-gpt-5.6-luna" } else { "gpt-5.6-luna" } }
 
 function Stop-OwnViewer {
   param([int]$LauncherProcessId, [int]$ViewerPort)
@@ -43,6 +45,7 @@ if (Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyCon
 if ($Mock) {
   if ($Replay -or $AuthorizeLive) { throw "-Mock 不能与 -Replay 或 -AuthorizeLive 组合。" }
   Write-Host "启动标记为 mock 的旧仪表板预览；这不会执行任务。"
+  Remove-Item Env:MORPH_EVOMAP_API_KEY -ErrorAction SilentlyContinue
   & $Python -m viz.server --port $Port --input demo/data/mock-run.json
   exit $LASTEXITCODE
 }
@@ -52,6 +55,7 @@ if ($Replay) {
   if ((Split-Path -Leaf $rehearsalJson) -ne "rehearsal.json") { throw "-Replay 必须指向已有 rehearsal.json。" }
   Write-Host "只读回放：$rehearsalJson"
   Write-Host "打开 http://127.0.0.1:$Port；页面明确标为回放，不调用模型、不改原证据。"
+  Remove-Item Env:MORPH_EVOMAP_API_KEY -ErrorAction SilentlyContinue
   & $Python -m viz.server --port $Port --rehearsal $rehearsalJson --replay
   exit $LASTEXITCODE
 }
@@ -66,7 +70,8 @@ $viewerLogRoot = Join-Path $env:TEMP ("morph-viz-viewer-" + [guid]::NewGuid().To
 New-Item -ItemType Directory -Path $viewerLogRoot | Out-Null
 $viewerOut = Join-Path $viewerLogRoot "viewer.stdout.log"
 $viewerErr = Join-Path $viewerLogRoot "viewer.stderr.log"
-$viewer = Start-Process -FilePath $Python -ArgumentList @("-m", "viz.server", "--port", "$Port", "--rehearsal", "$rehearsalJson") -WorkingDirectory $Root -WindowStyle Hidden -RedirectStandardOutput $viewerOut -RedirectStandardError $viewerErr -PassThru
+# PowerShell 7.4+ per-child override: the executor retains its process credential.
+$viewer = Start-Process -FilePath $Python -ArgumentList @("-m", "viz.server", "--port", "$Port", "--rehearsal", "$rehearsalJson") -WorkingDirectory $Root -WindowStyle Hidden -Environment @{ MORPH_EVOMAP_API_KEY = $null } -RedirectStandardOutput $viewerOut -RedirectStandardError $viewerErr -PassThru
 $readyBy = (Get-Date).AddSeconds(12)
 $viewerListener = $null
 while ((Get-Date) -lt $readyBy) {
@@ -92,7 +97,7 @@ Write-Host "展示结束后，先核对这两个 PID 的命令行均为本次 vi
 Write-Host "本轮最多两个明确授权的新任务；失败、未知或中断时不自动重试。"
 if ($Mode -eq "manual") { Write-Host "手动模式将在成员下线前停在控制台；确认后按 Enter。" }
 
-& $Python -m orchestration.rehearsal --root $runRoot --mode $Mode --model $Model --authorize-task repair --authorize-task recovery --tau-seconds $TauSeconds --archive-threshold $ArchiveThreshold --stage-delay $StageDelay --tick-seconds $TickSeconds --timeout $TimeoutSeconds --max-tokens $MaxTokens --max-cost-usd $MaxCostUsd
+& $Python -m orchestration.rehearsal --root $runRoot --mode $Mode --executor $Executor --model $Model --authorize-task repair --authorize-task recovery --tau-seconds $TauSeconds --archive-threshold $ArchiveThreshold --stage-delay $StageDelay --tick-seconds $TickSeconds --timeout $TimeoutSeconds --max-tokens $MaxTokens --max-cost-usd $MaxCostUsd
 $result = $LASTEXITCODE
 if ($result -ne 0) {
   Write-Host "彩排未完成（exit $result）。只读页面仍指向保留的证据根：$runRoot"

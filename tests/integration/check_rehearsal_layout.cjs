@@ -4,13 +4,15 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
+const {withoutGatewayKey}=require('./rehearsal_browser.cjs');
+for(const key of Object.keys(process.env)) if(key.toUpperCase()==='MORPH_EVOMAP_API_KEY') delete process.env[key];
 const {chromium} = require(process.env.MORPH_PLAYWRIGHT);
 const [url, output] = process.argv.slice(2);
 assert(url && output);
 fs.mkdirSync(output, {recursive:true});
 
 (async () => {
-  const browser = await chromium.launch({headless:true, executablePath:process.env.MORPH_CHROMIUM});
+  const browser = await chromium.launch({headless:true, executablePath:process.env.MORPH_CHROMIUM,env:withoutGatewayKey(process.env)});
   const rows=[];
   try {
     for(const [width,height] of [[1366,768],[1920,1080]]) {
