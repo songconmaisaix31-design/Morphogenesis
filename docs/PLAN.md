@@ -1,5 +1,18 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 当前工作：EvoMap 网关执行器与第四轮全真彩排
+
+2026-09-22 用户明确要求切换执行器到已验证的 EvoMap Gateway，并跑第四轮完整真实软件彩排。基线 `5dd9e2c`；沿用原 R/I Agent、worktree、branch，保留两轨已有未提交返修草稿。主 Agent 只负责计划、状态、决策、验收及按集成交接运行已审阅的真实入口。
+
+| 轨 | 固定所有者 / write_paths | 交付与验收 |
+|---|---|---|
+| R 网关执行 | 原 morph-rehearsal-runtime；`orchestration/**`, `tests/t2/**`, `docs/tracks/rehearsal-runtime.md`；`.runtime/**` 仅本地测试产物 | 复用现有 httpx 与 Executor/Proposal/Pydantic/样例白名单；一次受限 Chat Completions 请求产生提案，无工具循环、无自动重试或 CLI 伪造事件。显式 executor 选择，保留 Codex 兼容；测试凭据缺失、网络/HTTP/无效提案、usage、路径与采用一致性。完成既有时间竞态返修，commit+push |
+| I 集成与第四轮 | 原 morph-rehearsal-integration；普通合并、`tests/integration/**`, `docs/tracks/rehearsal-integration.md`；允许仅在 `demo/run-demo.ps1` 添加执行器/网关参数透传及凭据不传给 viewer 的启动配置胶水，领域问题回 R/V | 接收 R 精确提交后合并；全套测试/strict/build；扩展既有审计与双尺寸浏览器观察器，真实网关第四轮手动下线，保留独立 TEMP 证据；commit+push |
+
+第四轮限定两个新任务、最多两次模型 POST，模型 `evomap-gpt-5.6-luna`，Base URL `https://api.evomap.ai/v1`。每次发送有限输出上限与超时；未知效果不重试。两份全新坏样例各自必须从 0/3 到 3/3，第一位 builder 在两任务间下线，第二位真实执行并采用第一份 Gene，真实墙钟 τ=10 秒衰减归档且不可检索。复用当前 ECharts 页面；出现显示领域缺陷才交回原 V，不预先新开显示轨。
+
+网关凭据只由协调者在运行时注入专用子进程环境，不进入 Worker prompt、Git、日志、页面数据或进程参数。不修改全局 CLI/账号/权限设置；受限环境测试优先使用本轨允许的私有 TEMP，不能完成的步骤如实保留错误。三轮旧证据只读；第四轮单列，物理投影、生产 Hub 发布和在途进程强杀仍不纳入本轮软件证据。
+
 ## 当前阶段：三次完整软件彩排已通过（2026-09-22）
 
 收尾返修：候选 Windows CI 暴露测试以 `weight > 0.5` 假设快照耗时小于 69ms 的竞态，即使下一次 CI 偶然通过也需修复。恢复原 R 会话、原 worktree/branch，仅改 `tests/t2/test_rehearsal.py` 与本轨报告，按真实采样时间验证衰减语义；恢复原 I 会话做普通合并及适用检查，并纠正回放进程交接。协调者重建只读回放服务并维护验收记录；不新增演示模型调用，不改业务运行时。
