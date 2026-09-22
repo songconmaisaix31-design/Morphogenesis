@@ -19,7 +19,7 @@ Checked against installed package metadata on 2026-09-22. Exact direct and trans
 | pytest / mypy / build | 9.1.1 / 1.20.2 / 1.6.1 | MIT | https://github.com/pytest-dev/pytest / https://github.com/python/mypy / https://github.com/pypa/build — development checks |
 | tdesign-react-starter | 0.3.1（commit `fce97863edd5d5556f766dd4e342aace31a99487`） | MIT | https://github.com/Tencent/tdesign-react-starter — 决赛展示层外壳实际复用：Board 卡片、Dashboard/Base TopPanel 组合、AppLayout 顶栏布局（源码映射见 `viz/static/licenses/NOTICE.txt` 与 `docs/tracks/frontend-stack.md`）；完整 MIT 文本在 `viz/static/licenses/` |
 | React / ReactDOM / scheduler | 18.3.1 / 18.3.1 / 0.23.2（`viz/frontend/package-lock.json`） | MIT | https://github.com/facebook/react — 外壳运行时，打包进 `viz/static/assets/finals-shell.js`；许可文本在 `viz/static/licenses/` |
-| tdesign-react / tdesign-icons-react / classnames / dayjs | 1.18.3 / 0.6.11 / 2.5.1 / 1.11.10（`viz/frontend/package-lock.json`） | MIT | https://github.com/Tencent/tdesign-react — 实际打入 finals-shell 的组件库与运行时依赖；许可文本在 `viz/static/licenses/`；无 CDN |
+| tdesign-react / tdesign-icons-react / classnames / dayjs / lodash-es | 1.18.3 / 0.6.11 / 2.5.1 / 1.11.10 / 4.18.1（`viz/frontend/package-lock.json`） | MIT | https://github.com/Tencent/tdesign-react 等 — 实际打入 finals-shell 的组件库与运行时依赖（lodash-es 经 I 审计 bundle 模块确认）；许可文本在 `viz/static/licenses/`；无 CDN |
 | Vite / @vitejs/plugin-react / less | 5.4.x / 4.3.x / 4.x（`viz/frontend/package-lock.json`） | MIT | https://github.com/vitejs/vite — 仅构建期工具，产物为静态本地文件 |
 
 2026-09-23 起展示层改为上述 TDesign 适配；此前 Hugo Theme Stack（GPL-3.0-only）/ Tabler Icons / hamburgers 适配已整体移除，无残留代码，其许可文本随代码一并删除（见 git 历史）。
