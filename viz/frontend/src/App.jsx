@@ -227,17 +227,6 @@ const App = () => {
     }
   }, [view, fetchEvomap]);
 
-  // View switch: pause hidden-view redraws, flush the latest snapshot into the
-  // freshly visible view on the next frame (charts resize after re-layout).
-  useEffect(() => {
-    viewRef.current = view;
-    if (view === 'swarm' && dashboardRef.current) {
-      const raf = window.requestAnimationFrame(() => pushToDataZones(dashboardRef.current, { redraw: true, resize: true }));
-      return () => window.cancelAnimationFrame(raf);
-    }
-    return undefined;
-  }, [view, pushToDataZones]);
-
   useEffect(() => {
     const onHash = () => setViewState(viewFromHash());
     window.addEventListener('hashchange', onHash);

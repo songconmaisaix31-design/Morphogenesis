@@ -30,9 +30,9 @@ write_paths 见 `docs/FRONTEND_REFACTOR_PLAN.md`。视觉节奏参考 christmas.
 
 ## 验证
 
-- `cd viz/frontend && npm ci && npm run build`：通过，产物 `viz/static/assets/finals-shell.{js,css}`（207.95 kB / 63.05 kB）。
+- `cd viz/frontend && npm ci && npm run build`：通过，产物 `viz/static/assets/finals-shell.{js,css}`（207.76 kB / 63.05 kB）。
 - `node --check viz/static/app.js`：通过。
-- 真实浏览器冒烟（playwright-core + chromium_headless_shell-1234，`python -m viz.server --port 7583 --input demo/data/mock-run.json`）：首屏仅大字+双标识、页头页脚隐藏、CRT 0.04、首页无全局光标；点击/键盘反复切换；swarm 视图图表激活重绘、空态真实；CRT 开关+localStorage；503 时数据保留+反馈、恢复；EvoMap 404 态与手动刷新 1 次；reduced motion 无转场无自定义光标；`#/swarm` 深链；0 页面错误。
+- 真实浏览器冒烟（playwright-core + chromium_headless_shell-1234，`python -m viz.server --port 7584 --input demo/data/mock-run.json`）：首屏仅大字+双标识、页头页脚隐藏、CRT 0.04、首页无全局光标；点击/键盘反复切换且**每次激活恰好一次重绘刷新**（视图 effect 已去重，离开即取消 rAF 刷新）；swarm 视图图表激活重绘、空态真实；CRT 开关+localStorage；503 时数据保留+反馈、恢复；EvoMap 404 态与手动刷新 1 次；reduced motion 无转场无自定义光标；`#/swarm` 深链；0 页面错误。
 
 ## 限制与移交
 
