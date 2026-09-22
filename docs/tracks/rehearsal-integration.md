@@ -69,17 +69,25 @@ Orca 内嵌 tab 创建成功，但对同一 browserPageId 执行 snapshot 返回
 
 回放现场入口 `demo/run-demo.ps1 -Replay <第一轮/rehearsal.json> -Port 7525` 正常就绪，页面 provenance=replay、原始证据只读，interface_live/task_live=not_run。`replay_immutable.py` 在 CLI `--replay` 和真实浏览器回放前后比较 35 个原始文件的字节与 mtime，全部不变，见 `replay-immutable.json`。回放不计入本轮三次 live。
 
-最终接受版本的静态资源变更后，重新执行 `python -m build` 和安装 wheel 后 `check_distribution.py --check-node`，结果见 `build-accepted.log`、`wheel-accepted-check.log`：sdist/wheel 和 11 包/资源/固定外部验证器/Node 桥通过。完整 pytest 的 158 项与 strict 52 文件结果仍适用；后续领域变更仅 UI JS/CSS，执行过 Node 语法和真实浏览器几何检查，未重复付费任务。没有改 Python/npm 锁或全局配置。
+最终接受版本的静态资源变更后，重新执行 `python -m build` 和安装 wheel 后 `check_distribution.py --check-node`，结果见 `build-accepted.log`、`wheel-accepted-check.log`：sdist/wheel 和 11 包/资源/固定外部验证器/Node 桥通过。上述 pytest 158 项与 strict 52 文件通过属于当时的本地检查结果，不代表后续远端 CI 全绿；已知 Windows CI 时间竞态见下节。后续领域变更仅 UI JS/CSS，执行过 Node 语法和真实浏览器几何检查，未重复付费任务。没有改 Python/npm 锁或全局配置。
+
+## 后续 CI 时间竞态（报告修订草稿）
+
+协调者交接指出：候选 `e83a816` 的 [CI 35691719303](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35691719303) 在 Windows 上为 157 passed、1 failed，失败位于 `tests/t2/test_rehearsal.py:81` 的 `weight > 0.5` 断言。fixture 的 `tau_seconds=0.1`，该断言隐含从采用到快照必须少于 `0.1*ln(2)` 秒（约 69ms）；已记录的实际间隔约 0.103 秒、权重约 0.3563，与产品真实墙钟衰减一致，不能据此改产品时钟或扩大运行时修复范围。
+
+原 R Worker 负责该测试及 R 报告的限定返修。本文本修订尚未取得或验证 R 的最终修复提交，未合并、提交、推送，也未重跑测试或 CI；Windows/Ubuntu 最终候选均通过仍待后续证据。本次仅修订报告，不新增真实模型调用，不改三轮原始证据；已完成的六次调用预算保持不变。
 
 ## 服务清理与只读演示交接
 
 已按 Win32_Process 的父子 PID、命令行和专用端口核验并清理自有 viewer：7520（70272→61464）、7521（53424→24048）、7522（42044→49704）、7523（14960→58732）、7524（54128→48820）。证据 `.runtime/integration/cleanup.json`；上述端口不再监听。各次 Playwright 浏览器正常 close，临时 Orca 页面 `0d89fe97-b8b9-4524-be08-3845bb1aca87` 已确认所属本 worktree 后关闭；未触碰 Orca helper/运行时或队友进程。
 
-按协调者要求仅保留 [第一轮只读回放页面](http://127.0.0.1:7525/) 供用户现场投影检查；这不是新 live，也不是保留 Worker 运行。证据原路径为 `C:/Users/DW/AppData/Local/Temp/morph-rehearsal-478415a14d4345ae87edf564c10a17aa/rehearsal.json`。进程链为 PowerShell 46168 → 本 worktree Python launcher 61712 → 实际监听 Python 70764；精确命令行留 `.runtime/integration/replay-processes.json`。父 PowerShell 的已退出启动 shell 不影响该独立隐藏进程服务。
+**交接纠正：此前关于 7525 服务可跨 Worker 释放继续存活的结论错误。** 旧服务在原 I 的 `worker-release` 后退出；PowerShell 46168 → Python launcher 61712 → 监听 Python 70764 均为失效的历史身份，不得再据此执行关闭操作。`.runtime/integration/replay-processes.json`、`replay.stdout.log` 和 `replay.stderr.log` 仅保留为当时启动和验证的历史记录，不能证明跨释放存活。
 
-从本 worktree 重启的已验证命令（仅端口空闲时）：`pwsh -NoProfile -File demo/run-demo.ps1 -Replay C:/Users/DW/AppData/Local/Temp/morph-rehearsal-478415a14d4345ae87edf564c10a17aa/rehearsal.json -Port 7525`。本次实际通过 `Start-Process -WindowStyle Hidden` 启动，stdout/stderr 为 `.runtime/integration/replay.stdout.log` 和 `replay.stderr.log`。
+根据协调者本次交接，root 已在协调者进程树下重建 [第一轮只读回放页面](http://127.0.0.1:7525/)，新身份为 launcher **65808** → listener **57100**。协调者已验证 HTTP 200、provenance=`replay`、task_live=`not_run`；这是协调者交接的验证结果，本次限定报告修订未重新探测或操作该服务，也不据此保证它跨未来生命周期继续存活。
 
-关闭时先用 `Get-NetTCPConnection -LocalPort 7525 -State Listen` 以及 `Get-CimInstance Win32_Process -Filter 'ProcessId=70764'`、61712、46168 核对上述链和 `--port 7525 --rehearsal ... --replay`；确认 PID 未复用后依次 `Stop-Process -Id 70764`、61712、46168（已自行退出的父进程跳过）。若身份不符，不按旧 PID 停止。所有 TEMP 原证据、截图、锁环境和分支均保留。
+重建服务的日志为 `C:/Users/DW/AppData/Local/Temp/morph-replay-coordinator-983d9f27fa08480a9c1836c25c9dbb64/stdout.log` 和同目录 `stderr.log`。其读取的第一轮原始证据仍为 `C:/Users/DW/AppData/Local/Temp/morph-rehearsal-478415a14d4345ae87edf564c10a17aa/rehearsal.json`，协调者交接确认原始证据不变；回放不计为新的 live 或模型调用。
+
+该重建服务归 root 协调者管理，I 不负责启动、停止或更改。此前验证过的 `demo/run-demo.ps1 -Replay <第一轮/rehearsal.json> -Port 7525` 是回放入口，不是跨 Worker 释放存活的保证；后续服务处置由协调者重新核验实时端口、父子身份和命令行后执行，不使用本报告的历史 PID 直接停止进程。所有 TEMP 原证据、截图、锁环境和分支均保留。
 
 ## 真实限制
 
