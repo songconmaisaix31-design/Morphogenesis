@@ -13,6 +13,7 @@ from typing import Any
 EVOMAP_SCHEMA = "morph.evomap.readonly/1"
 HUB_BASE_URL = "https://evomap.ai"
 SEARCH_PATH = "/a2a/assets/semantic-search"
+CATEGORIES_PATH = "/a2a/assets/categories"
 
 # Fixed, sanitized error codes; remote response text never enters the report.
 ERROR_TIMEOUT = "timeout"
@@ -55,6 +56,34 @@ class CommunitySearch:
 
 
 @dataclass(frozen=True)
+class CommunityCategories:
+    """One bounded, cache-annotated read of the official public category counts.
+
+    Browsing context only: the counts are Hub community statistics, never
+    run-topology facts or project metrics.
+    """
+
+    state: str  # live | cache | stale_cache | error
+    fetched_at: float | None
+    cache_ttl_seconds: float
+    cache_age_seconds: float | None
+    error: str | None
+    by_type: list[dict[str, Any]]
+    by_gene_category: list[dict[str, Any]]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "state": self.state,
+            "fetched_at": self.fetched_at,
+            "cache_ttl_seconds": self.cache_ttl_seconds,
+            "cache_age_seconds": self.cache_age_seconds,
+            "error": self.error,
+            "by_type": self.by_type,
+            "by_gene_category": self.by_gene_category,
+        }
+
+
+@dataclass(frozen=True)
 class LocalPool:
     """Read-only projection of the local runtime Gene store."""
 
@@ -79,6 +108,7 @@ class EvomapReport:
     generated_at: float
     hub: dict[str, Any]
     community_search: CommunitySearch
+    community_categories: CommunityCategories
     local_pool: LocalPool
     boundaries: list[str]
 
@@ -88,6 +118,7 @@ class EvomapReport:
             "generated_at": self.generated_at,
             "hub": self.hub,
             "community_search": self.community_search.as_dict(),
+            "community_categories": self.community_categories.as_dict(),
             "local_pool": self.local_pool.as_dict(),
             "boundaries": self.boundaries,
         }
