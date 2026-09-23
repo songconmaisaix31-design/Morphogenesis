@@ -54,3 +54,39 @@ v2.0.38 安装源码 `evolver-proxy/dist/daemon/proxyDaemon.js` 是本轮适配�
 - 已有 `.venv` 可导入 Python 3.12.13 / httpx 0.28.1 / Pydantic 2.13.5；依赖由 T 轨提供。
 
 完整工具进程、项目适配测试、真实资产构建与 PUBLISH→指定 ID 的远端 FETCH→真实使用 REPORT 尚未完成。解除远端账户限制后仍需主控明确安排下一次有界请求；本报告不构成自动重跑入口。
+
+## 18:52 恢复：离线前置修正与官方 adapter 拒绝误判
+
+本次恢复遵守 PLAN 18:52 覆盖指令及主控消息 `msg_34a2f1a5921e`、`msg_6705e8ffd0f1`：只新增项目内离线脚本及本报告，不改 `hub_client`、官方安装包、原 `preflight.mjs` 或其 guard。没有新增真实 hello、heartbeat、publish、fetch、report，也没有生成或轮换真实身份。续接基线为 `3786659dfde536a3b37b571ff0b198821f07aa24`，期间主控治理提交推进到 `824cf66`；本报告的结果只覆盖离线检查。
+
+官方 [hello 协议参考](https://evomap.ai/a2a/skill?topic=hello) 的主控只读缓存 `.runtime/hub-discovery/hello-reference.md` 明确说明：HTTP 200 同时承载 `payload.status=acknowledged` 与 `rejected`，客户端必须先判 payload 状态。[官方接入说明](https://evomap.ai/skill.md) 的缓存也明确 hello payload 的 `model`、`name`、`env_fingerprint` 字段。原拒绝的最早时间为 **2026-09-23 19:30:52.373 CST**，只是服务端重试下界；届时仍不能自动重发，也不证明 CAPTCHA 已解除。
+
+### 官方 v2.0.38 的实际离线复现
+
+在 **2026-09-23T10:54:44.470Z（18:54:44.470 CST）**，直接实例化原安装 `@evomap/evolver-adapter-public@2.0.38` 的 `PublicHubCapability`，注入内存 `fetchFn` 和明确标为 fixture 的 sender/model/fingerprint，调用一次 `hello({evolverVersion:'2.0.38', preserveCredentials:true})`。注入回执采用官方拒绝形状：HTTP 200、`status=rejected`、`captcha_required=true`、`retry_after_ms=3600000`。
+
+- 原 adapter **返回 `ok=true`、本地 sender ID 和 `retryAfterMs=3600000`**。`hubCapability.js:181–199` 的身份回退及 `payload.ok !== false && Boolean(nodeId)` 没有拦截这类普通拒绝；专门的 secret-divergence 分支不能覆盖 CAPTCHA 拒绝。
+- 原请求 payload **没有顶层 `model` 或 `name`**；`agent_name` 固定为包名，`env_fingerprint.model` 存在。不能据此声称本轮 hello 元数据要求已经满足。
+- 这是 `provenance=mock` 的上游行为复现，不是另一条 Hub 拒绝回执，也不是修改官方包后的结果。官方源码保持原样。
+
+证据：`.runtime/freeze-evolver/recovery-evidence/offline-RVhogL/official-adapter-reproduction.json`。
+
+### 独立恢复脚本与验证
+
+新增 `.runtime/freeze-evolver/recovery-hello.mjs` 与 `recovery-offline.test.mjs`。恢复 helper 复用原官方 `gepEnvelope` / `HubFetch`，不复用 v1 lifecycle；没有默认网络 transport 或真实网络 CLI 入口，目标固定为 `https://offline.invalid`，必须注入 transport。已有 node ID、model、name、fingerprint 均必填；没有真实模型依据时不会用 `unknown` 补足。测试所用 `node_offline_fixture_only` / `offline-model-fixture` 全部显式标记为 mock，不能用于恢复真实身份或登记 live 验收。
+
+发送前以 `wx` 独占创建并 fsync `request.json`，保存官方生成的 request ID、请求时间、记录时间、明确输入的 model/name/fingerprint 以及 `unknown_before_send` 状态；文件已存在即拒绝再次调用。回执另存 `result.json`，只有有效 GEP hello 信封、`acknowledged` 与相同 `your_node_id` 同时成立才记本地成功。拒绝、缺失状态、不同身份、网络断连、HTTP 错误、重定向、非 JSON 均保留失败或 unknown，不重试。没有读取或持久化真实凭据，日志只输出白名单元数据，不复制异常文本、Authorization、node secret 或 claim 链接；原 bootstrap guard 的 bytes 和 mtime 均保持不变。
+
+验证命令（项目根，2026-09-23 18:54:44 CST）：
+
+```powershell
+node --test .runtime/freeze-evolver/recovery-offline.test.mjs
+```
+
+结果：**6 passed / 0 failed / 816.3637 ms**，涵盖官方误判复现、请求元数据先落盘、HTTP 200 拒绝、7 类异常/不完整回执、显式确认同身份、必填输入缺失、秘密不落日志及原 guard 不变。断连、402、500、重定向、非 JSON、空 payload、不同身份的每个案例都只有一次注入 transport 调用，再用相同目录调用均在发送前失败。测试汇总结束于 **2026-09-23T10:54:44.521Z**，证据根 `.runtime/freeze-evolver/recovery-evidence/offline-RVhogL/`；全部脚本及运行证据被现有 `.gitignore` 忽略，不随文档提交。
+
+拒绝测试的本地 request ID 为 `msg_1790160884472_ba466536`，请求时间 `2026-09-23T10:54:44.472Z`；注入回执 ID 为 `msg_offline_fixture_receipt`。二者仅用于离线字段关联验证，不是新增真实 Hub 请求或回执 ID。
+
+只读存在检查：真实用户 `C:/Users/DW/.evomap/node_id`、`node_secret`、`.evolver/settings.json` 以及项目 `state/node_id`、`state/node_secret` 均不存在；仅调用 `Test-Path`，没有打开凭据值、扫描历史/日志/浏览器存储或修改 home/权限。没有新节点 ID 可报告，Proxy 19820 未启动，状态目录仍为本项目 `.runtime/freeze-evolver/state/`。
+
+本次仅完成离线恢复准备及上游缺陷定位。完整前置二、真实工具进程、G3/G4 的 PUBLISH→远端同 ID FETCH→实际使用 REPORT 仍 **BLOCKED / NOT_RUN**；下一步需要账户操作者按官方流程处理现有账户/节点，并由主控明确放行具体一次网络动作。恢复真实 transport、凭据使用与完整 Proxy 行为仍须在该授权下验证，本离线脚本不构成这些动作的自动授权。
