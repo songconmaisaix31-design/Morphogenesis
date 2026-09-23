@@ -1,5 +1,32 @@
 # 验收矩阵
 
+## Hub 官方协议与浏览器恢复调查（2026-09-23 18:52 CST）
+
+用户追加要求继续沟通 Hub、核对官方接入材料，必要时 computer-use。本轮在 `3786659dfde536a3b37b571ff0b198821f07aa24` 上继续前置调查，没有再次注册、发送 heartbeat 或发布资产。官方公开文档、Help API 均可访问，说明当前不是整站不可达；这不代表节点认证通过。
+
+### 已核实的接入要求
+
+| 接口层 | 需要接入的内容与本项目验收要求 |
+|---|---|
+| Hub 节点认证 | 首次 `POST /a2a/hello` 使用完整 GEP-A2A 信封、唯一请求 ID/UTC 时间、真实 `model`、公开名称和环境指纹。当前 [hello 协议](https://evomap.ai/a2a/skill?topic=hello) 明确首次 `sender_id` 可省略、由 Hub 分配；后续固定使用 `payload.your_node_id`。先恢复已有身份，不能把拒绝响应的 Hub sender 当作本机节点。`skill.md` 要求名称，简版 Help 示例未展示该字段，本项目取完整要求。任务书的随机 8 位 hex 和旧 helper 的 12 位 hex 均不再作为最新协议唯一要求。 |
+| 节点凭据 | 成功 hello 的 `payload.node_secret` 用于后续 `Authorization: Bearer`。网关模型 API key、Hub node_secret、Proxy 本地 IPC token、网站账户 session 是四类独立凭据，不能互换。仅项目内私有状态或进程内存可写；不得按文档默认路径改全局配置。已有 secret 不自动轮换或清除。 |
+| Evolver Proxy | 固定官方 2.0.38；`EVOMAP_PROXY=1`，loopback `127.0.0.1:19820`。状态/settings 显式定向项目目录，保留 local_only 校验器。本机 Proxy 监听、认证状态和一次真实 heartbeat 均须单独通过；安装或 HTTP 200 不算通过。 |
+| PUBLISH | 官方 GEP SDK 生成/验证内容地址；发布 Gene + Capsule bundle，`blast_radius` 取实际非零变更，`model_name` 取真实生成模型。已装 Proxy 提供 `POST /asset/submit` 的 `mode=sync` bundle 路径；queued/local stored 不能算 Hub 接收。仍须审计内部重试，未知写结果不重发。 |
+| FETCH / REPORT | 指定发布的同一 asset_id；Proxy `POST /asset/fetch` 有本地缓存/降级路径，必须保留真实远端拉取证据。实际使用后才发送验证/使用报告；`POST /asset/reuse-result` 的 HTTP 200 仍可能 `recorded=false`，不能算成功。Hub 协议 `POST /a2a/report` 需要 target_asset_id 与真实 validation_report。 |
+| 查询与可选服务 | hello/publish/fetch/report 是 POST，但不能泛化成全部 `/a2a/*` 都 POST；官方 Help、部分状态与发现接口使用 GET。KG 是独立方案/凭据范围，不是本轮 Hub 闭环前置；本轮没有请求 KG，仍未核验账户方案。 |
+
+来源：[完整接入说明](https://evomap.ai/skill.md)、[For AI Agents](https://evomap.ai/wiki/03-for-ai-agents)、[A2A 协议](https://evomap.ai/wiki/05-a2a-protocol)、[Evolver 配置](https://evomap.ai/wiki/35-evolver-configuration)。本地只读对照 `@evomap/evolver-adapter-public@2.0.38` 与 `@evomap/evolver-proxy@2.0.38` 的实际安装文件；尚未以真实 Hub 验证上述 Proxy 链路。
+
+### 拒绝解释和 computer-use 实测
+
+官方 `GET /a2a/skill?topic=hello` 返回了与上轮完全同型的拒绝示例：HTTP 200 下 `payload.status=rejected`，原因 `hello_blocked: bulk-fetch antibody active`，带 `captcha_required` 与 `retry_after_ms`。它明确这与设备、IP 或节点身份的反滥用信号有关，拒绝不会发 node_secret；没有据此确定本次究竟是哪一维触发。上次 `10:30:52.373Z + 3600000 ms` 对应最早 **19:30:52.373 CST**，不是保证届时恢复。`GET /a2a/help?q=captcha&limit=5` 返回 0 项，仅表示该发现查询没有结果，不证明不存在人工验证渠道。
+
+Orca computer-use 已在 Tabbit 新标签打开 `https://evomap.ai/account`，页面显示未登录；进入官方登录页 `https://evomap.ai/login?redirect=%2Faccount`，提供 Google、GitHub、邮箱登录。实际窗口树与截图已检查，截图保留 `.runtime/hub-discovery/evomap-login.png`。当前等待用户在浏览器登录或指出已登录的浏览器；没有读取浏览器 cookie、密码或账户 session，也未发送申诉。
+
+官方 [账户状态与恢复说明](https://evomap.ai/wiki/06-billing-reputation) 提供拥有者认证的 `GET /account/agents/:nodeId/status`，可查看 suspension_context、active_antibodies 和 can_self_unsuspend。自助恢复仅适用指定低严重度 bulk_fetch_suspend，一位拥有者每 7 天一次，且不清除 IP/device/user 维度限制；本次尚无登录、已确认节点或适用性证据，不能声称已恢复。需先查看实际状态，再按正常官方流程处理。
+
+公开参考原件缓存位于忽略目录 `.runtime/hub-discovery/`：`official-skill.md`、`official-wiki.json`、`help-hello-concept.json`、`hello-reference.md`（JSON 内容）、`help-captcha.json`。主控恢复原 E Task，仅离线修正前置脚本并复现 v2 hello 的拒绝判定风险；没有修改官方依赖或业务 HubClient。G3/G4 仍 BLOCKED，后续真实闭环、G5 与最终 CI 结论保持下文限制。
+
 ## 封板夜前置核查（2026-09-23 18:31 CST）
 
 本轮从主线 `bd10f37c0ad378955210a1a76bd431f31a25ffee` 开始，互斥文件并行计划 `2b58b59` 已推送。**前置一通过，前置二 BLOCKED；尚未放行领域改造、真实 Hub 闭环或新一轮现场演示。** 用户任务书要求两个前置都通过后继续，本条保留实际失败，不以离线适配或旧彩排代替。
