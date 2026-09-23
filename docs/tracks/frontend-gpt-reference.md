@@ -1,5 +1,43 @@
 # F：用户网页包直接移植与 GPT 图像审查返修
 
+## 本轮：直接改造 Linear 应用前端结构
+
+**上一版 `2df313857d716a27113c47709342c8d57fb6405f` 的后台视觉通过结论已撤回。** 原版仍是全宽 52px 品牌栏、三栏仪表板、锚点导航与长图表堆叠；单独复用字体与灰阶不足以兑现用户的包体改造要求。本轮以原包实际应用 DOM/CSS/SVG 为基底返修，不改已满足要求的黏菌与序幕。
+
+- 同一 F Agent、worktree、branch；普通合并指定治理 `07c4565`，合并提交 `e24c68f`，无冲突。没有改部署、后端、API、锁文件或其它轨报告。
+- 亲看原应用完整画框 `C:/Users/DW/AppData/Local/Temp/morph-linear-structure-audit/source-app-issue.png` 与旧 `final-checks/workspace-1366.png`；重新在 7843 运行读取实际应用 DOM。主控 `msg_60d5004e7711` 接受新结构方向，并要求一般 replay 事件使用紧凑活动行，已落实。
+- 直接打开 ZIP 原件核对解压源码：HeroIllustration JS 124779 bytes、CSS 44138 bytes、IssueListView JS 11342 bytes、scenarios JS 25335 bytes，四份均逐字节相等。字体来源核验沿用上一轮。
+- 使用既有 Babel parser/generator 将上述编译 JS 与 Button JS 仅在 TEMP 格式化后阅读；使用既有 PostCSS 抽取选定根规则，并保留源 selector。没有装新依赖，也没有执行整包原站运行时于产品。
+
+| 包内实际模块 / selector | 新产品目标和改造 |
+| --- | --- |
+| HeroIllustration `WS84WW_frame/view` | `Backend.jsx` 的 `frame → sidebar + view`；8px frame padding、232px 侧栏、独立薄边界内容画框。`linear-package.css` 保留声明，`backend.css` 仅将 1320×720 营销画框适配为窗口尺寸、去掉 scale(.5)。 |
+| HeroIllustration `Mmx1Wq_sidebar/navItems/navItem` | 侧栏内品牌/工具、16px 间隔、分组导航、28px 行/13px 字号/510 字重/8px 圆角；五个真实视图切换，搜索按钮进入既有只读 EvoMap，另一工具返回序幕。没有无功能的新任务按钮。 |
+| IssueListView `_1uFtza_header/locationBar/breadcrumb/viewBar/pillButton` | 工具栏仅在内容画框内，44px；真实当前视图/任务 ID/来源、运行状态和打开详情控件。1366/1920 下左边界 x=241，消除全宽品牌通栏。 |
+| HeroIllustration `KFZpfa_viewBody/contentColumn/propertiesColumn` | 直接保留 `56fr / 663fr / 56fr / 287fr / 10fr` issue 内部比例；标题、说明和活动是正文，来源/轮次/成员/指标/中文验收是24px属性行，无独立320px验收通栏。 |
+| HeroIllustration `KFZpfa_activityListRow/commentCard` | replay 阶段历史用紧凑系统事件行，保留新到旧顺序、真实阶段/序号/时间；已有 Envelope 消息用源 commentCard 展示类型与真实发送/接收者。没有捏造聊天或用户。 |
+| scenarios `GkoSzG_panel` / `NN4GVa_header/identity`，HeroIllustration `KFZpfa_chatBox` | 原层叠面板改为显式打开的运行详情；原状态 ID、完整 contract_local/interface_live/task_live、来源、checkpoint 和运行说明均可访问；删除原聊天输入/模型名/假交互。Escape 关闭并返回触发按钮焦点。 |
+| `index.html` SVG path/rect 和 `BarChart` symbol | `LinearIcons.jsx` 直接抽取11个图标，保持 path/viewBox，改为静态 React SVG；不带原品牌、外部 href 或跟踪器。 |
+
+当前任务、蜂群拓扑、Gene、证据、EvoMap 是 `tab/tabpanel` 视图。Arrow/Home/End 切换，Tab 只到当前可交互内容；非当前面板 hidden/inert，原 bridge 数据 ID 保持挂载且唯一。隐藏 ECharts 不初始化，切换后释放旧实例并按实际容器绘制新实例；序幕/页面隐藏时也释放图表，返回后用最后有效数据恢复。重新绘制不重置 503 保留快照提示。真实 Swarm 仍由既有组件与实际成员/管道驱动。
+
+本轮证据根仍为 `C:/Users/DW/AppData/Local/Temp/morph-gpt-reference-evidence`：
+
+- 源码抽取证据：`linear-source-dom.json`、`*-*.js.readable.js`、`inspect-linear-source.cjs`、`extract-linear-css.cjs`、`extract-linear-icons.py`。
+- 首轮交审实图：`structure-v2-1366.png`、`structure-v2-details-1366.png`、`structure-v2-replay-1366.png`、`structure-v2-topology-1366.png`；此时 replay 仍用大卡，后续已返修，不当最终证据。
+- 新结构验证：`structure-checks-v1/result.json`，125项通过，pageerror=0，非同源/非GET请求=0。已亲看其375后台/详情/成员、1366紧凑活动、1920 Gene和375证据图。
+- 最终截图与检查：`structure-checks-final-v2/`，**131项全部通过**，pageerror=0、非同源/非GET请求=0；包括三尺寸成员详情完整滚入内容视口、普通系统事件行高度≤40px、375成员按钮高度≥36px。亲看最终 `replay-375-member.png` 和 `replay-task-1366.png`，截图确实显示相应内容。`structure-checks-final/` 是一次未完成的检查：Chromium 的边缘滚动使详情底部超出断言边界0.5px；记录保留，截图动作改为居中滚动，完整可见性断言保持不变，最终成功记录不混用失败目录。
+- 原 `node tests/integration/check_frontend_story.cjs http://127.0.0.1:7841 <TEMP>/structure-story` 通过；序幕顺序、显式CTA、Tab、reduced-motion、深链、三尺寸和错误边界仍成立，跨轨脚本没有修改。
+- `npm --prefix viz/frontend run build` 通过，49 modules，已更新静态产物；仍有既有 Vite CJS 与字体 URL 留到运行时的提示，实际字体检查通过。`python -m pytest tests/t5 -q`：51 passed（15.93s）。
+- `node --check viz/static/app.js`、`node --check tests/t5/check_reference_layout.cjs`、最终 `git diff --check` 均通过。仅最后的截图动作/断言与文档发生改变后，没有重新跑无关检查。
+- 主控 `msg_1fada091dfb0` 已亲看新1366 replay和375后台/详情，明确接受本轮源应用结构/层级及活动密度；这与被撤回的旧视觉结论分开记录。
+
+本次重启后旧服务 PID 已消失；F 重新核验 7841 空闲并用 Hidden 进程恢复 `C:/Python313/python.exe -m viz.server --port 7841 --input demo/data/mock-run.json`，cwd 为本工作树，PID **39204**。预览 `http://127.0.0.1:7841/#/workspace`，服务保持 mock，只在浏览器验证页注入既有 replay-dashboard.json；历史原件未写入。7843 与7799没有恢复或变更，本次服务器信息存于 TEMP `servers.json`。
+
+限制：源包离线 Agent tasks/Insights/UI Refresh 点击没有成功切换，源运行对照只确认 issue 画面，不声称源交互通过；产品五视图是本轮实际验证的交互。没有新增付费模型请求/新任务/Hub 写入；模型身份、两次 API 结果及费用未知沿用下文真实记录。I 后续合并本轨与 D `50d1353` 再独立验收部署。
+
+## 上一轮记录（保留来源与历史证据，不代表当前后台验收）
+
 ## 范围、身份、基线
 
 - 工作树：`C:/Users/DW/orca/workspaces/Morphogenesis/morph-gpt-reference`。

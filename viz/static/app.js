@@ -39,6 +39,7 @@ function showEmpty(chartId, emptyId, message) {
 function showChart(chartId, emptyId) {
   byId(chartId).style.display = "block";
   byId(emptyId).hidden = true;
+  return byId(chartId).getBoundingClientRect().width > 0 && byId(chartId).getBoundingClientRect().height > 0;
 }
 
 function stateCards(acceptance) {
@@ -82,7 +83,7 @@ let lastTopologySignature = "";
 
 function topologyGraph(pipes, members) {
   if (!pipes?.length) { lastTopologySignature = ""; return showEmpty("story-pipe-chart", "story-pipe-empty", "尚无管道快照"); }
-  showChart("story-pipe-chart", "story-pipe-empty");
+  if (!showChart("story-pipe-chart", "story-pipe-empty")) return;
   const availability = new Map((members ?? []).map((member) => [agentLabel(member.agent), member]));
   const names = new Set(pipes.flatMap((pipe) => [agentLabel(pipe.src), agentLabel(pipe.dst)]));
   // Labels sit below every node.  With a circular graph this reserves the
@@ -158,11 +159,12 @@ function eventFeed(history) {
   const entries = [...history].reverse();
   entries.forEach((snapshot, index) => {
     const row = document.createElement("div");
-    row.className = `event-row${index === 0 ? " event-latest" : index === 1 ? " event-old-1" : index === 2 ? " event-old-2" : " event-old-3"}`;
-    append(row, "span", `#${snapshot.sequence}`, "event-seq");
-    append(row, "span", stageLabel[snapshot.stage] ?? String(snapshot.stage ?? "未标记阶段"), "event-stage");
+    row.className = `KFZpfa_activityListRow event-row event-system${index === 0 ? " event-latest" : ""}`;
+    const heading = append(row, "div", "", "backend-event-heading");
+    append(heading, "span", stageLabel[snapshot.stage] ?? String(snapshot.stage ?? "未标记阶段"), "event-stage");
+    append(heading, "span", `#${snapshot.sequence}`, "event-seq");
     const at = Number(snapshot.at);
-    append(row, "span", Number.isFinite(at) ? new Date(at * 1000).toTimeString().slice(0, 8) : "时间未知", "event-time");
+    append(row, "span", snapshot.at != null && Number.isFinite(at) ? new Date(at * 1000).toTimeString().slice(0, 8) : "时间未知", "event-time");
     feed.append(row);
   });
 }
@@ -188,9 +190,10 @@ function exportedFacts(data) {
     clear("event-feed");
     append(byId("event-feed"), "p", `Envelope 导出 · ${data.provenance ?? "未知来源"}`);
     [...events].reverse().forEach((event) => {
-      const row = append(byId("event-feed"), "div", "", "event-row");
-      append(row, "span", `#${event.seq ?? "?"}`, "event-seq");
-      append(row, "span", event.msg_type ?? "未知类型", "event-stage");
+      const row = append(byId("event-feed"), "div", "", "KFZpfa_commentCard event-row");
+      const heading = append(row, "div", "", "backend-event-heading");
+      append(heading, "span", event.msg_type ?? "未知类型", "event-stage");
+      append(heading, "span", `#${event.seq ?? "?"}`, "event-seq");
       append(row, "span", `${agentLabel(event.sender)} → ${agentLabel(event.receiver)}`, "event-time");
       row.title = `task ${event.task_id ?? "未知"} · ${event.msg_id ?? "未知消息"}`;
     });
@@ -202,7 +205,7 @@ function rehearsalBoard(rehearsal, { redrawTopology = true } = {}) {
     text("rehearsal-mode", "尚未加载彩排快照；不展示预设通过结果。");
     text("header-members", "未知"); text("header-round", "未知");
     setBigNumber("metric-tokens", "未知"); setBigNumber("story-gene-count", "未知");
-    text("story-question", "未加载"); text("story-question-detail", "等待实际题目、已知失败点与来源。");
+    text("story-question", "尚无运行中的任务"); text("story-question-detail", "等待任务快照。已有导出活动仍可查看。");
     if (bigNumberChanged("story-checkpoint-rate", "未加载") && !reducedMotion()) flashNumber(byId("story-checkpoint-rate"));
     text("story-checkpoint-rate", "未加载"); clear("story-checkpoints"); append(byId("story-checkpoints"), "li", "尚无独立 checkpoint 快照");
     clear("story-pipes"); append(byId("story-pipes"), "p", "尚无管道快照");
@@ -290,7 +293,7 @@ function rehearsalBoard(rehearsal, { redrawTopology = true } = {}) {
 
 function geneGraph(genes, adoptions) {
   if (!genes.length) return showEmpty("gene-chart", "gene-empty", "未导出 T3M GeneView；不能从消息、候选或结果反推谱系。");
-  showChart("gene-chart", "gene-empty");
+  if (!showChart("gene-chart", "gene-empty")) return;
   const nodeName = (gene) => `${gene.ref.gene_id}@v${gene.ref.version ?? 1}`;
   const shortGeneLabel = (gene) => `Gene ${shortGeneId(gene.ref.gene_id)} v${gene.ref.version ?? 1}`;
   const nodes = genes.map((gene) => ({ name: nodeName(gene), shortLabel: shortGeneLabel(gene), value: `${nodeName(gene)}\n采用 ${gene.use_count ?? 0} 次`, symbolSize: 46, itemStyle: { color: chartColors.geneNode } }));
@@ -306,7 +309,7 @@ function geneGraph(genes, adoptions) {
 
 function messageGraph(events) {
   if (!events.length) return showEmpty("message-chart", "message-empty", "尚未加载 T2 JSONL Envelope 导出；消息流为空。");
-  showChart("message-chart", "message-empty");
+  if (!showChart("message-chart", "message-empty")) return;
   const labels = new Set(); const links = [];
   events.forEach((event) => { const source = agentLabel(event.sender); const target = event.receiver === "broadcast" ? "broadcast" : agentLabel(event.receiver); labels.add(source); labels.add(target); links.push({ source, target, value: event.msg_type }); });
   chartFor("message-chart").setOption({ animation: !reducedMotion(), tooltip: { renderMode: "richText", formatter: (p) => p.data.value ? `${p.data.source} → ${p.data.target}\n${p.data.value}` : p.name }, series: [{ type: "graph", layout: "circular", roam: true, top: 30, bottom: 48, left: 48, right: 48, label: { show: true, position: "bottom", distance: 8, fontSize: 10, color: chartColors.labelMain }, lineStyle: { color: chartColors.lineActive, curveness: .15 }, edgeLabel: { show: true, color: chartColors.axisLabel, formatter: (p) => p.data.value }, data: [...labels].map((name) => ({ name, symbolSize: 42, itemStyle: { color: chartColors.geneNode } })), links }] }, { notMerge: true });
@@ -314,7 +317,7 @@ function messageGraph(events) {
 
 function metricChart(metrics) {
   if (!metrics.length || !metrics.some((metric) => metric.history.length)) return showEmpty("metric-chart", "metric-empty", "运行导出未提供历史指标，因此不显示或暗示性能变化。");
-  showChart("metric-chart", "metric-empty");
+  if (!showChart("metric-chart", "metric-empty")) return;
   const metric = metrics.find((item) => item.history.length); const history = metric.history;
   const current = history.at(-1); const mean = history.reduce((sum, value) => sum + value, 0) / history.length; const best = Math.max(...history);
   chartFor("metric-chart").setOption({ animation: !reducedMotion(), tooltip: { renderMode: "richText", trigger: "axis" }, legend: { textStyle: { color: chartColors.labelMain } }, xAxis: { type: "category", data: history.map((_, i) => `记录 ${i + 1}`), axisLabel: { color: chartColors.axisLabel } }, yAxis: { type: "value", axisLabel: { color: chartColors.axisLabel } }, series: [{ name: `${metric.name} 历史`, type: "line", data: history, symbolSize: 8, lineStyle: { color: chartColors.lineActive }, itemStyle: { color: chartColors.lineActive } }, { name: "历史均值", type: "line", data: history.map(() => mean), lineStyle: { type: "dashed", color: chartColors.labelDim }, symbol: "none" }, { name: "历史最佳", type: "line", data: history.map(() => best), lineStyle: { type: "dotted", color: chartColors.labelDim }, symbol: "none" }, { name: `当前: ${current}${metric.unit ?? ""}`, type: "scatter", data: history.map((value, i) => i === history.length - 1 ? value : "-"), symbolSize: 15, itemStyle: { color: chartColors.lineActive } }] }, { notMerge: true });
@@ -333,7 +336,7 @@ function resizeCharts() {
   ["story-pipe-chart", "gene-chart", "message-chart", "metric-chart"].forEach((id) => {
     const element = byId(id);
     const instance = element ? echarts.getInstanceByDom(element) : null;
-    if (instance) instance.resize();
+    if (instance && element.getBoundingClientRect().width > 0) instance.resize();
   });
 }
 
@@ -372,7 +375,29 @@ function fail(message) {
   }
 }
 
+// Navigation keeps all bridge-owned zones mounted. Dispose hidden ECharts
+// (including force-layout work), then redraw only the newly visible panel.
+function refreshVisibleCharts() {
+  const visible = !document.hidden && document.querySelector('.morph-backend')?.dataset.active === 'true';
+  ["story-pipe-chart", "gene-chart", "message-chart", "metric-chart"].forEach(id => {
+    const element = byId(id);
+    if (element && (!visible || element.getBoundingClientRect().width === 0)) {
+      echarts.getInstanceByDom(element)?.dispose();
+      if (id === "story-pipe-chart") lastTopologySignature = "";
+    }
+  });
+  if (!visible || !lastData) return;
+  resizeCharts();
+  geneGraph(lastData.genes ?? [], lastData.adoptions ?? []);
+  messageGraph(lastData.events ?? []);
+  metricChart(lastData.metrics ?? []);
+  if (document.body.dataset.swarmModule !== "loaded" && lastData.rehearsal?.current) {
+    topologyGraph(lastData.rehearsal.current.pipes, lastData.rehearsal.current.members);
+  }
+}
 window.MorphDashboard = { update, fail };
+window.addEventListener("morph:panel-visible", refreshVisibleCharts);
+document.addEventListener("visibilitychange", refreshVisibleCharts);
 window.addEventListener("resize", resizeCharts);
 window.addEventListener("DOMContentLoaded", () => {
   const pending = window.__morphPendingDashboard;
