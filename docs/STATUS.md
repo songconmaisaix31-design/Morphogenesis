@@ -2,6 +2,10 @@
 
 ## 当前：Linear 包体前端直接改造返修（2026-09-23）
 
+最新交付：F 已提交并推送 `d0724a6a2f32f2f03860bbab06ebb82266abdcaf`，远端一致且工作树干净。构建、51 T5、131 项最终浏览器检查、原序幕链和 diff 检查通过；主控另亲看成员手机详情与序幕完成帧。`ctx_36490c2cd445` 已 succeeded，`delivery_be435eaca245` 处理并 ACK，release 返回 external_terminal / processAction none。
+
+按已计划的独立 I 流程，Orca 创建 `morph-gpt-reference-integration`，Task `task_c0228dbdfa14` / Dispatch `ctx_180813d3a4ea` / terminal `term_3c3674d4-6f50-4faf-96ca-d24a8a86df40`。当前派发范围收窄为本地精确合并 F + D `50d1353` + 治理 `f434982`，构建/T5/部署测试、序幕和三尺寸、服务端真实文件 replay 与提交推送；不执行先前自动审批拒绝的云端交接命令。独立预览使用空闲后核验的 7844；F 7841 保留，7799/7526/7527 不操作。公网集成和部署仍未验收。
+
 F 已完成原任务并推送 `2df313857d716a27113c47709342c8d57fb6405f`，原 `ctx_083902b49b4d` 成功结算。随后用户指出后台与 Linear 不像，并两次明确使用 `linear-site.zip` 的前端直接修改。主控实际打开 ZIP（686 项、8,774,425 bytes）及本地页面重新截图，确认现有版主要复用字体/数值，尚未复刻原应用结构；撤回此前视觉通过结论。
 
 原 F 会话/工作树/分支立即续接 `task_1b8cd2d6f0b5 / ctx_eb0b56092f6f`，必须直接复用实际 DOM/组件结构、SVG 和样式，再接现有业务数据。用户随后要求托管前端开发；当前任务持续由主控监督。资料读取确认解除后，F 普通合并规划至 `e24c68feff2e953e30661552d12180b16814a487`，已实际修改 Backend.jsx、backend.css、静态数据 bridge，新增 linear-package.css 和 LinearIcons.jsx：直接来源类名、11 个 SVG、侧栏/内容区工具栏、任务正文与属性、五个独立视图和隐藏图表处理均已形成未提交候选。
