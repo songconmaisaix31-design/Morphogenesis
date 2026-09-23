@@ -1,5 +1,11 @@
 # D 轨：封板夜 G5 软件链路
 
+## 最新结果（2026-09-23 20:38 CST）
+
+**G5 只读软件部署及真实公网浏览器已通过。** 当前部署精确版本 **`53bb52c31ab68655e2bca620508488d7f95e00e6`**，公网入口 [47.93.118.110:7799](http://47.93.118.110:7799/)，后端/API 与 Web 均 healthy；外部 HTTP smoke 与三视口浏览器 **72 passed / 0 failed**。数据明确为第四轮历史 **replay**：`contract_local=passed`、`interface_live=not_run`、`task_live=not_run`，费用保持 null。本轮唯一正常公共 Hub 页面读取中，社区搜索/分类是 live，本地池 unconfigured；不等于本项目 Hub 发布、模型新任务或物理现场验收。
+
+已恢复轻量 [7526 只读回放](http://127.0.0.1:7526/)，保留 [WLAN 7799](http://192.168.60.54:7799/) 和用户原 7844。**7527 新 gateway live 缺模型凭据，未执行**；没有新增模型调用/新 usage、没有发 Enter 或未知结果重试。热点、第二设备和物理投影仍 NOT_RUN。下文保留所有失败与接续过程，早先公网 blocked 状态已由本节真实部署证据取代。
+
 ## 领域恢复与软件核验（2026-09-23 19:34–19:45 CST）
 
 主控消息 `msg_3b877f1a471c` 明确两前置通过并恢复 D 开发，已消费 ACK；本节取代下文只读阻塞结论，历史记录保留。仍使用同工作区 `codex/morphogenesis-mainline`，未切分支；E 的报告和 Hub 代码改动完整保留，未暂存。当前进程网关 key 只检查存在性，结果 false；没有读取 Hub node_secret 充作模型 key。
@@ -93,6 +99,45 @@ Docker 自身 restart 策略恢复了既有本机多个项目容器；D 没有�
 最小修复仅 `deploy/compose.yaml` API health timeout **5→15秒**；所有 Pydantic/证据断言、HTTP 请求超时、限流和无写路由保持。`.venv/Scripts/python.exe -m pytest tests/deployment -q`：**32 passed / 13.84秒**，`pytest-health-timeout.txt`。主控 `msg_9d0027d565b3` 接受修复与串行提交；新确切 SHA 将替代25968dc用于下一包，不重写旧提交或镜像标签。
 
 只保留 D 本轮两个 `morphogenesis-freeze-check-{api,web}-1` 的 ID、project label、镜像和 health log 到 `local-container-health-before-stop.json`；确认名称/标签后仅 `docker stop --time 10 <这两个准确ID>`，按主控许可减少本轨负载，保留镜像/容器/日志。没有停止 Desktop、7844、局域网viewer或其它项目。此时尚未 save/scp/load 新镜像、远端 up 或公网开放；新版容器复验与正常 Hub 只读页面窗口等待 E 写链结束后主控放行。
+
+### 20:18–20:20 内存串行处置
+
+健康超时最小修复已提交推送 **`53bb52c31ab68655e2bca620508488d7f95e00e6`**，远端分支相同 SHA，提交只含 compose 与本报告。主控先放行优先本机导出/正常退出 Desktop，随后通过 `msg_fe177ec13b26`、`msg_92cb89a9230a` 改为更窄处置，最新指令已按 FIFO ACK；没有执行 `docker desktop stop`（仅查询其 `--help`）。新 SHA 标准包仍为89文件，缓存构建于20:18:34 exit0，日志 `local-image-build-53bb52c.log`；新版尚未 up/save，保留等待串行窗口。
+
+本轨三个 viewer 进程各占约5.9GB PrivateMemory，主控要求停止两个重复 loopback viewer，仅保留 WLAN。先核对 `55020→55676` 为本轮 loopback7799、`53392→13016` 为本轮7526，记录 `viewers-before-stop.json`、`viewer-memory-before.json`。通过 Win32 `AttachConsole` 定向这两个自有父进程，再 `GenerateConsoleCtrlEvent(CTRL_C_EVENT,0)`，两服务记录 **KeyboardInterrupt** 后退出；后续 `Get-Process` 确认四 PID 均不存在，`netstat` 确认127.0.0.1:7799和7526无监听。没有强杀、没有新建HTTP控制路由、没有操作旧F/7844。
+
+两个 listener 停止前 PrivateMemory 合计 **11747053568 bytes（约10.94 GiB）**；之后系统 FreePhysicalMemory=6382016 KiB、FreeVirtualMemory=17522688 KiB。此为进程计数和系统观察，不能把全部系统变化都归因于单一操作。当前保留 `192.168.60.54:7799` listener51992/parent56004、原7844 listener44240/parent41400；7527仍未启动。后续必要的 viewer/health 启动将按主控要求评估进程局部 `OPENBLAS_NUM_THREADS=1`、`OMP_NUM_THREADS=1`、`MKL_NUM_THREADS=1`，不改全局环境、依赖或网络。
+
+### 20:25–20:38 新版容器、转运、公网与浏览器
+
+主控 `msg_03894509469f` 在内存回收后放行 D 顺序继续。以下构建、镜像标签、远端目录均固定 **53bb52c31ab68655e2bca620508488d7f95e00e6**；不复制 E 未提交代码。89 个白名单源文件重新审计，`archive-members-53bb52c.txt` 留存。新版容器 `up --wait` 返回 exit0，API/Web均healthy；API首个启动期health仍曾超15秒，后续实际exit0后才放行，没有删除该失败记录。`local-53bb52c-final-health.json` 保留最终两容器状态，nginx完整smoke保留 `smoke-container-53bb52c.json`，期间未调用Hub。完成后核对新准确ID与project，正常stop仅本轨两个本机验收容器，保留镜像/日志/数据，不退出Desktop或停止其它项目。
+
+关键命令与返回：
+
+| 命令 / 步骤 | 实际结果与证据 |
+| --- | --- |
+| `docker image save --platform linux/amd64 -o .runtime/freeze-demo/images-53bb52c.tar morphogenesis-api:53bb52c31ab68655e2bca620508488d7f95e00e6 morphogenesis-web:53bb52c31ab68655e2bca620508488d7f95e00e6` | exit0；172410880 bytes；SHA256 **4f732b04d365531d192b3235a9882b4b53c1fb4581f43ec47313161267088040**；manifest仅两个期望标签，`image-manifest-53bb52c.json` |
+| `scp -o BatchMode=yes -o ConnectTimeout=10 .runtime/freeze-demo/images-53bb52c.tar gongzhi-ecs:/tmp/morphogenesis-images-53bb52c.tar`；同方式复制 `morphogenesis-53bb52c31ab68655e2bca620508488d7f95e00e6.tar.gz` | 单次成功；读取中间尺寸142049280证明确有进度，没有重新传输；远端标准SHA256与本机一致，`remote-image-sha256.txt` |
+| `Get-Content -Raw .runtime/freeze-demo/remote-load-53bb52c.sh \| ssh ... 'bash -s'` | exit0；确认新release不存在、7799无监听、既有data原件hash吻合后解包、`docker load -i /tmp/morphogenesis-images-53bb52c.tar`、新版本loopback `up --no-build --force-recreate --wait --wait-timeout120`、容器内smoke通过；`remote-load-53bb52c.log` |
+| 远端 `docker ps`、`docker inspect ... .State.Health`、`ss -ltnp` | `remote-loopback-healthy.txt`：本项目仅127.0.0.1:7799，API两次health约4秒exit0、Web三次exit0，共治四容器healthy，原80/443/8080保持 |
+| 仅当前进程线程变量均1，完整 `import viz.server` 的Win32 GetProcessMemoryInfo | **2.093秒 / PrivateMemory144433152 bytes**；`thread-capped-import.json`。随后用同样进程环境隐藏恢复7526，launcher53284/listener28296，实际smoke通过，PrivateMemory149307392 bytes；`viewer-7526-thread-capped.json`、`smoke-7526-thread-capped.json`、`viewer-memory-final.json` |
+| `Get-Content -Raw .runtime/freeze-demo/remote-public-53bb52c.sh \| ssh ... 'bash -s'` | 主控明确批准后，仅同版本同project的 `MORPH_BIND_IP=0.0.0.0`，两容器真实healthy；脚本末尾多余CR空行报 **exit127 / bash line11 command not found**，原件保留。没有重放recreate；只读确认已完成的公开绑定后继续尚未发生的SG动作 |
+| `aliyun ecs AuthorizeSecurityGroup --RegionId cn-beijing --SecurityGroupId sg-2zeedkqp6urfm9c29ghm --IpProtocol tcp --PortRange 7799/7799 --SourceCidrIp 0.0.0.0/0 --Policy accept --Priority 1 --Description 'Morphogenesis readonly demo TCP 7799' --retry-count 0 --connect-timeout 10 --read-timeout 20` | **唯一一次写 / exit0**；RequestId **01A0CE43-6F8C-5D25-B744-43AD24C15E7F**，新规则 **sgr-2ze0gdv6v5l8uvesxy6p**，CreateTime2026-09-23T12:35:21Z；`security-group-authorize-result.json` |
+| 写前/后 `aliyun ecs DescribeSecurityGroupAttribute` 与按ruleID比对JSON对象 | 新增仅TCP7799/7799、0.0.0.0/0、Accept一条，原五条规则对象完全相同；`security-group-before-write.json`、`security-group-after.json`。未改域名、TLS、其它端口/规则 |
+| `.venv/Scripts/python.exe deploy/smoke.py http://47.93.118.110:7799 --with-fonts` | **exit0**，实际外部同源只读边界/字体/三态/429验证；`smoke-public-53bb52c.json`，20:36:23结束，没有`--evomap-live` |
+| `node tests/integration/check_frontend_replay.cjs http://47.93.118.110:7799 .runtime/freeze-demo/browser-public-53bb52c replay` | **exit0 / 72 passed / 0 failed**；1366×768、1920×1080、375×812。`summary-replay.json`、真实`dashboard.json`/`evomap.json`、22张截图，零pageerror/console error/HTTP failure/外域浏览器请求 |
+
+远端加载后的 **linux/amd64 单平台 manifest** ID 为 API `sha256:5b3186ca748c1f045396a6be588b02ce60ee69addf0c9d2ceda6d440a15bd6cb`、Web `sha256:1b0045b769f150324ec6d466e79d363979d30b93d29582bd51c0e6ec6ae4c2ad`。本机 image inspect 是含 provenance attestation 的索引 ID（API86132be...、Webbb788f...），因此未错误要求两种ID字面一致；转运标准tar字节SHA已一致核验，固定标签与平台已检查。容器实现属于53bb52c，后续只提交报告不重新部署。
+
+主控在公网稳定后明确放行一次正常公共只读UI入口。为不受刚完成的smoke限流测试影响，等待原限流窗口恢复后只打开一次workspace；`summary-replay.json`记录唯一 `/api/evomap?q=repair&limit=10` 浏览器GET，无刷新/重试/额外`--evomap-live`。服务端既有两条公开GET返回 `community_search.state=live`、`community_categories.state=live`（fetched_at1790167050.882581 / 1790167051.4762383），`local_pool.state=unconfigured`；均无模型key、无付费模型调用。正常入口完成后已通知主控以便E写链接续。
+
+已实际查看公网 `replay-1366-task.png`、`replay-1920-topology.png`、`replay-375-details.png`、`replay-1366-evomap.png`：任务/拓扑/手机详情布局可读，验收弹层明确passed/not_run/not_run，EvoMap真实数据与本项目任务来源分列。**本次是从工作站经实际公网IP到独立ECS服务的浏览器验收，非mock、loopback或SSH隧道；仍不是第二设备/热点/物理投影验收**。原第四轮快照hash再次保持f3639cd...；请求模型/usage仍仅原历史2次、2235 tokens、cost=null，本轮新gateway调用0。
+
+最终保留运行端点：公网47.93.118.110:7799、WLAN192.168.60.54:7799、loopback7526，用户原7844未动。7527新live因进程无MORPH_EVOMAP_API_KEY且未获得安全文件来源仍NOT_RUN；没有mock占位、没有Enter、没有未知结果重试。全量/最终E累计SHA与CI由I复核；此公网版本不冒充包含E尚未提交的G3/G4代码。
+
+本地容器及公网 smoke 各 **38项**；公网浏览器完成时刻 `2026-09-23T12:37:44.484Z`。三视口浏览器报告准确文件名为 `summary-replay.json`（早期协调消息泛称summary），唯一正常公共入口浏览器请求数为1。20:38凭据存在性再次为false。历史原件最终SHA256仍与前述相同。
+
+**进程交接**：后台 viewer 是本轨 `Start-Process -WindowStyle Hidden` 创建的进程，没有安装服务或建立额外常驻管理器。已留 `viewer-final-lineage.json`，7526 listener28296/launcher53284，WLAN listener51992/launcher56004；启动 shell 已退出但viewer仍存活。没有实际验证 Orca `worker-release` 的进程/Job回收范围，不能承诺释放本终端后仍保活；主控应保留终端或接管后复查，不把启动成功当持续可用保证。可按本报告命令、进程局部三个线程变量为1、清除gateway环境重新启动自有viewer；停止前须重核PID/父/命令。远端容器由服务器Docker Compose的 `unless-stopped` 管理，独立于此Windows终端，不执行远端stop或删除部署数据。
 
 ## 当前状态（2026-09-23 18:32，北京时间）
 
