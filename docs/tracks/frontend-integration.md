@@ -68,3 +68,11 @@ live 标注：上表真实出站仅为公开只读 `semantic-search` 与 `catego
 - 本轨改动仅限：合并提交、`tests/integration/check_frontend_integration.cjs` 与 `tests/integration/check_frontend_replay.cjs`（新增验收脚本）、`viz/static/assets/finals-shell.{js,css}`（计划规定的集成重建）、本文件。未改任何轨道领域代码、锁文件或 CI。
 - 证据类别：contract_local + 明确 mock fixture + 只读 replay（既有真实证据，原件未动）+ 真实公开只读 Hub GET（无密钥/写操作）。未发起新付费任务；interface_live/task_live 在本轮浏览器验收中保持页面如实 `not_run`。
 - 验收端口 7799/7801/7802/7897/7898/7899 均已在结束后按确切命令行核对并关闭；7526/7527 进程全程未触碰。
+
+## 2026-09-23 最终 S/E 增量集成
+
+- 依协调者交付的精确 SHA，先普通 `--no-ff` 合并 E `6046ab8b36a6963db56cfb11452dd587510cf39a`（合并提交 `5d6b8d7`），再普通 `--no-ff` 合并 S `26b6e1a19b7307a0041817fd298f6d065e81a344`（合并提交 `4a87b58`）。唯一冲突是两份规定由本轨统一产出的 `viz/static/assets/finals-shell.{js,css}`；以合并后 S 源码重新执行 `cd viz/frontend && npm run build` 解决，Vite 5.4.21 成功（JS 255.78 kB，CSS 72.51 kB）。未改领域源码、锁文件或后端语义。
+- `python -m pytest tests/t5 tests/integration -q`：**58 passed**；唯一失败仍为预存本机环境问题：`tests/integration/test_demo_environment.py` 复制 `C:\Python313\pyvenv.cfg` 时该文件不存在。`node --check tests/integration/check_frontend_integration.cjs` 与 `git diff --check` 通过。
+- 更新本轨验收脚本：真实 Chromium mock 页面新增 375×768 hero 边界/无横向溢出检查，以及真实公开只读 GET 下分别点击 Gene 与 Capsule 后的 `/api/evomap/asset` 详情、时间线、分支状态检查；空数据脚本按 S 已确认语义，在没有任何已加载快照时以 `source_label=未加载导出` 替代 raw `provenance=live` 的展示，避免把“未加载”说成现场结果。
+- 实际浏览器验收均在本轨隔离端口完成，浏览器路由限制为同源，Hub 请求只由本地服务端发起。`7899 --input demo/data/mock-run.json`：**31 passed / 0 failed**（1366×768、375×768、WebGL 食物鼠标、转场 0.34s 后 inactive Physarum `visibility:hidden`、反复视图切换、Gene/Capsule asset detail/timeline/branches、无 JS error）；稳定态截图为 `.runtime/front-integration/final-settled-rerun-20260923/05-final-swarm.png`，已亲看，无首屏叠层。`7897` 无数据：**9 passed / 0 failed**（零虚构拓扑，三项 acceptance=not_run）；`7898 --rehearsal C:/Users/DW/AppData/Local/Temp/morph-rehearsal-40f04885b37e489fa3ea1a04f61a984d/rehearsal.json --replay`：**23 passed / 0 failed**（既有真实证据只读回放、来源/节点/管道/checkpoint/tokens/Gene 与 API 同源事实逐项相符）。截图及 JSON summary 位于 `.runtime/front-integration/{final-settled-rerun-20260923,nodata-rerun-20260923,replay-20260923}/`，不入库。
+- 证据边界：mock 页面仍是 `mock`；空数据不等于 live 任务；回放只是既有真实证据的只读显示；本轮唯一对外访问是 EvoMap 官方公开只读 GET（无 API key、无写操作），不构成 `task_live` 或物理投影验收。7526/7527 未触碰。

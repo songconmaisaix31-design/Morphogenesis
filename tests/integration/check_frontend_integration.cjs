@@ -25,13 +25,14 @@ function record(name, ok, detail = '') {
   try {
     const page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
     const errors = [], external = [];
-    let dashboardReads = 0, evomapReads = 0;
+    let dashboardReads = 0, evomapReads = 0, evomapDetailReads = 0;
     page.on('pageerror', (error) => errors.push(error.message));
     await page.route('**/*', (route) => {
       const request = new URL(route.request().url());
       if (request.origin !== url) { external.push(request.href); return route.abort(); }
       if (request.pathname === '/api/dashboard') dashboardReads++;
       if (request.pathname === '/api/evomap') evomapReads++;
+      if (request.pathname === '/api/evomap/asset') evomapDetailReads++;
       return route.continue();
     });
 
@@ -71,12 +72,37 @@ function record(name, ok, detail = '') {
     record('pointermove over title-covered field, no pageerror so far', errors.length === 0, errors.join(' | '));
     await page.screenshot({ path: path.join(output, '01-physarum-hero.png') });
 
+    // The responsive contract is a real viewport check, not a full-page
+    // stitching artifact: the hero title must remain inside a 375px phone.
+    const phone = await browser.newPage({ viewport: { width: 375, height: 768 } });
+    const phoneErrors = [];
+    phone.on('pageerror', (error) => phoneErrors.push(error.message));
+    await phone.goto(url, { waitUntil: 'domcontentloaded' });
+    await phone.waitForSelector('.morph-hero-title', { timeout: 20000 });
+    const phoneHero = await phone.locator('.morph-hero-title').evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { left: r.left, right: r.right, width: r.width, viewport: innerWidth, scrollWidth: document.documentElement.scrollWidth };
+    });
+    record('375px hero title is in viewport without horizontal overflow',
+      phoneHero.left >= 0 && phoneHero.right <= phoneHero.viewport && phoneHero.scrollWidth === phoneHero.viewport && phoneErrors.length === 0,
+      JSON.stringify(phoneHero));
+    await phone.screenshot({ path: path.join(output, '01b-phone-hero.png') });
+    await phone.close();
+
     // 3. Switch to AGENT SWARM via the hero marker (first screen hides the
     //    header by design; the two hero markers are the normal-state switch).
     const heroSwitchVisible = await page.locator('.morph-hero-markers .morph-marker:text-is("AGENT SWARM")').isVisible();
     record('hero AGENT SWARM marker visible on first screen', heroSwitchVisible);
     await page.click('.morph-hero-markers .morph-marker:text-is("AGENT SWARM")');
     await page.waitForFunction(() => document.body.dataset.view === 'swarm', null, { timeout: 10000 });
+    await page.waitForTimeout(400); // let the documented 0.34s crossfade settle before visual capture
+    const settledSwarm = await page.evaluate(() => {
+      const hero = document.querySelector('.morph-hero');
+      const style = hero ? getComputedStyle(hero) : null;
+      return { opacity: style?.opacity ?? '', visibility: style?.visibility ?? '' };
+    });
+    record('swarm transition settled; inactive physarum hero hidden',
+      settledSwarm.visibility === 'hidden', JSON.stringify(settledSwarm));
     const navVisible = await page.locator('.morph-nav .morph-marker:text-is("PHYSARUM")').isVisible();
     record('header nav visible in swarm view', navVisible);
     await page.waitForFunction(() => document.getElementById('provenance')?.textContent !== '加载中', null, { timeout: 15000 });
@@ -146,10 +172,26 @@ function record(name, ok, detail = '') {
         assetIds: [...document.querySelectorAll('.morph-evomap-id')].slice(0, 3).map((el) => el.getAttribute('title') ?? ''),
       }));
     };
-    const search1 = await doSearch('optimize', '', '5');
-    record('manual query q=optimize limit=5 returns real assets', /live|cache/.test(search1.chip) && search1.assets > 0 && search1.assetIds.every((id) => id.startsWith('sha256:')), JSON.stringify({ chip: search1.chip, assets: search1.assets }));
+    const search1 = await doSearch('optimize', 'Gene', '5');
+    record('manual Gene query q=optimize limit=5 returns real assets', /live|cache/.test(search1.chip) && search1.assets > 0 && search1.assetIds.every((id) => id.startsWith('sha256:')), JSON.stringify({ chip: search1.chip, assets: search1.assets }));
+    await page.locator('.morph-evomap-asset-open').first().click();
+    await page.waitForFunction(() => {
+      const detail = document.querySelector('.morph-evomap-detail');
+      return detail && !detail.textContent.includes('正在读取资产详情');
+    }, null, { timeout: 60000 });
+    const geneDetail = await page.evaluate(() => document.querySelector('.morph-evomap-detail')?.textContent ?? '');
+    record('click Gene loads detail, timeline, and branch status from public GET',
+      /资产详情/.test(geneDetail) && /演化时间线/.test(geneDetail) && /基因分支/.test(geneDetail), geneDetail.slice(0, 180).replace(/\s+/g, ' '));
     const search2 = await doSearch('repair', 'Capsule', '5');
     record('manual query type=Capsule echo + state', /live|cache/.test(search2.chip) && search2.queryLine.includes('type=Capsule'), JSON.stringify({ chip: search2.chip, assets: search2.assets, line: search2.queryLine.slice(0, 80) }));
+    await page.locator('.morph-evomap-asset-open').first().click();
+    await page.waitForFunction(() => {
+      const detail = document.querySelector('.morph-evomap-detail');
+      return detail && !detail.textContent.includes('正在读取资产详情');
+    }, null, { timeout: 60000 });
+    const capsuleDetail = await page.evaluate(() => document.querySelector('.morph-evomap-detail')?.textContent ?? '');
+    record('click Capsule loads detail and timeline, branches correctly n/a',
+      /资产详情/.test(capsuleDetail) && /演化时间线/.test(capsuleDetail) && /非 Gene 资产，不请求分支/.test(capsuleDetail), capsuleDetail.slice(0, 180).replace(/\s+/g, ' '));
     await page.screenshot({ path: path.join(output, '03-evomap-explorer.png'), fullPage: false });
     // EvoMap panel must not leak into the topology zone.
     const crossCheck = await page.evaluate(() => ({
@@ -211,7 +253,7 @@ function record(name, ok, detail = '') {
 
     const summary = {
       url, when: new Date().toISOString(),
-      viewport: '1366x768', dashboardReads, evomapReads, externalRequests: external,
+      viewport: '1366x768 + 375x768', dashboardReads, evomapReads, evomapDetailReads, externalRequests: external,
       pageerrors: errors, results,
       passed: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok).length,
     };

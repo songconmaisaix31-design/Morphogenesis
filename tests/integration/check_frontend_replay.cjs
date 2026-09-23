@@ -63,7 +63,12 @@ function fetchJson(u) {
       sourceLabel: document.getElementById('source-label')?.textContent ?? '',
       rehearsalMode: document.getElementById('rehearsal-mode')?.textContent ?? '',
     }));
-    record('header provenance matches server', header.provenance === `来源：${dashboard.provenance}`, `${header.provenance} vs ${dashboard.provenance}`);
+    // empty_dashboard deliberately exposes its source_label (未加载导出) in
+    // place of the raw `live` provenance: there is no loaded live snapshot to
+    // claim. Replay and populated sources continue to show provenance verbatim.
+    const expectedHeaderProvenance = mode === 'nodata' ? dashboard.source_label : `来源：${dashboard.provenance}`;
+    record('header provenance/source state matches server semantics', header.provenance === expectedHeaderProvenance,
+      `${header.provenance} vs ${expectedHeaderProvenance}`);
     record('header source_label matches server', header.sourceLabel === dashboard.source_label, header.sourceLabel);
 
     await page.click('.morph-hero-markers .morph-marker:text-is("AGENT SWARM")');
