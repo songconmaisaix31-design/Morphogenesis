@@ -1,7 +1,7 @@
 # Decentralized Swarm v0.2 修正版一页计划
 
 当前事实源 SWARM_TASK.md，替代旧规划冲突项。冻结主线 605cf48，续接实验检查点 e9a3836；唯一开发/推送分支 decentralized-swarm，工作树 C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm。不修改主线树、冻结文档、演示进程或部署。
-按单分支并行要求，沿用同一隔离工作树互斥文件所有权。三个长期领域轨，最后独立 I；提交前申请串行 Git slot，显式暂存自有文件，不 git add .。主控仅写 SWARM_TASK/PLAN/STATUS。旧 Run run_78114f173f9d 的 A/B 已结算，C 因 terminal_missing failed；保留全部提交，恢复须检查真实进程。
+按单分支并行要求，沿用同一隔离工作树互斥文件所有权。三个长期领域轨，最后独立 I；提交前申请串行 Git slot，显式暂存自有文件，不 git add .。主控仅写 SWARM_TASK/PLAN/STATUS。Run run_78114f173f9d 已恢复并继续沿用；保留全部历史提交，真实进程与最新领域交付、独立验收状态见 SWARM_STATUS。旧终端故障及释放未知记录保留，不冒称已清理。
 
 | 轨 | 独占 write_paths | 修正版交付 |
 |---|---|---|

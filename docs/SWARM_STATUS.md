@@ -55,3 +55,31 @@
 - C首轮运行/自增长19项通过183.28s，observer/mirror9项通过18.55s。随后两个新增预算恢复反例先实际失败，再由C修复；最新完整C领域测试尚在运行，未宣称总体通过。
 - A/B已分别worker_done succeeded，按用户同一Worker持续负责返修的约定暂保留原会话，供独立I缺陷回派；验收结束后释放。C仍原Task开发，无额外业务Agent。
 - 独立I Task task_966c65aed2e9 已登记，真实依赖A/B/C完成后才派发；只负责SWARM_REVIEW、必要独立集成反例与少量批准胶水。冻结主线不合并，付费模型/生产Hub/任意代码沙箱仍未执行。
+
+## EvoMap API 追加阶段（2026-09-24 00:18 CST）
+
+- 用户明确要求所有参与算法尝试的测试 Agent、蜂群 Agent 使用 EvoMap 提供的 API；SWARM_TASK/PLAN 的 0e03dde 已推送并替代旧的本轮不调用模型限制。真实请求仍受先预留、无自动重试、未知停止规则约束，生产 Hub 与冻结主线不在变更范围。
+- C 本地检查点 bc1827a 已推送：最终运行/自增长/observer/mirror 合并30项通过207.79s，CLI状态退出码4项通过1.21s；Windows/Linux strict 通过。新 CLI demo 与 resume 均 exit0，三个成员完成六个任务，恢复未增加原六条完成记录；这些都是 contract_local。
+- C 原 Worker 继续最小 EvoMap 接入；B 原 Worker 以新 Task task_845f576515e4 / Dispatch ctx_ec7174adeeab 继续预算契约。已观察真实 transcript 和 live/working，未把派发成功当成开发已开始。A 保持原领域返修会话；I 等新的 C/B 门禁后再开始。
+- 复用固定 EvoMap 网关和既有安全传输，模型请求单独子进程，源任务独立验证且不向模型提供参考答案；复用任务也必须经过模型请求并追踪 source asset/context/execution。限定 JSON 数据任务不放开任意候选代码执行。
+- 当前 Process/User/Machine 均无 MORPH_EVOMAP_API_KEY，已通过异步问题请求安全凭据配置位置及可选模型/额度。没有搜索旧日志里的凭据、发出模型请求或套用 fixture 价格。真实 API / 算法实验暂未运行；缺少可信计价时保留 unknown，不伪造硬费用保证。
+- 冻结主线重新检查仍为605cf48且clean，7526/7527/7799/7844没有新增监听；不启动演示进程或 Docker daemon。
+
+## EvoMap 代码阶段交付与独立验收启动（2026-09-24 00:40 CST）
+
+- B 追加阶段 b3f1bc32a8f9448211eb749934db60636ba0b632 已推送：显式 unbounded_reservation_usd 默认为拒绝；无价格时已知 tokens 与未知费用分开、预留不释放，unknown_cost 阻止后续准入。43 项预算测试通过10.59s，Windows/Linux strict各2文件通过，没有真实模型调用。
+- C 追加阶段 d4808870bf5b196babf40ebf3f82503365fe9074 已推送：EvoMap HTTP专用凭据子进程、既有单请求传输提取、6个固定oracle数据任务、真实API入口与模型/请求/用量/采用证据。最终84项相关测试通过156.61s，包含原网关33项回归；Windows/Linux strict各9文件通过。三进程API路径单项通过108.47s，6次MockTransport请求、每成员2次、6个固定验证结果及1次跨成员采用，仍只计contract_local。
+- 原CI35887345947@bc1827a的Ubuntu全量为2 failed/433 passed/1 skipped，Windows因fail-fast取消。C修复POSIX Barrier引用寿命；旧0.25s续租失败只有stopped日志，原因未确定，新增确定性SQLite/线程续租和2s墙钟测试均通过。新API首次三进程测试182.80s失败因能力不匹配而零请求，已明确data能力并增加局部终态退出；诊断读取暴露Windows状态文件共享冲突，增加已知失败的有界本地rename重试，不重试API。失败原件保留。
+- 独立I已实际开始：task_966c65aed2e9 / ctx_58ee16b22270 / term_9e6c4217-cce7-4d41-9a66-5f390113a708。初次input_accepted停在终端粘贴输入框，检查无权限问题后仅补Enter，随后transcript与fleet证实working/live，没有重复派发。I负责完整pytest、strict/build/SDK/wheel、独立边界审阅与精确SHA CI。
+- A/B/C原领域会话保留供I返修，最终结算后释放。主控仅SWARM_STATUS有未提交状态记录，I不得覆盖。d480887的CI35889933044仍在运行；没有把此前本地域测试写成全仓通过。
+- 用户尚未提供可用凭据路径与具体实验配置。源码接入完成不等于真实API算法实验完成；interface_live/task_live真实阶段继续pending/not_run，未调用生产Hub、合并主线或部署。
+
+## 独立验收与续租返修（2026-09-24 01:04 CST）
+
+- I 对 d480887 完整本机 pytest：467 passed、0 skipped、2 条故意坏输入警告，524.53s；独立跨成员采用后重启反例另跑 1 passed / 34.46s。读取原始进程、账本、采用和预算证据，未把 fixture 或 MockTransport 升级为 live。完整记录见 SWARM_REVIEW。
+- d480887 的 CI35889933044：Ubuntu 466 passed / 1 skipped，strict79文件、build、SDK与安装后wheel检查均通过；Windows 466 passed / 1 failed，唯一失败为真实墙钟续租。原错误只有截断后的 stopped 状态，原CI确切原因仍未知；原失败日志保留，未以本机通过覆盖CI失败。
+- C 原所有者新增真实墙钟/SQLite反例：TTL仍为2秒，submitting状态写入延迟2.5秒；旧流程先停续租再写状态，实际1 failed / 11.75s，已续租9次但提交时LeaseLost。修为续租期间完成慢准备、停止线程后按原TTL作最终fenced续租并立即提交；过期或旧持有者仍拒绝，恢复审计读取权威完成记录的最终期限。该反例证明独立真实缺陷，不断言它是原CI失败唯一原因。
+- 修复后关键3项通过29.88s；完整Worker25项通过149.46s；最终诊断增量+selfgrowth+EvoMap模拟20项通过205.49s；Windows/Linux目标strict通过。未扩大TTL或放宽fencing。I随后运行适用本地回归与完整strict/build/SDK/wheel，新精确SHA双平台CI提供最终全仓证明，旧SHA本机全仓结果保持单独标注。
+- C自动复用原终端返回agent_unconfigured且未创建Task；检查注册表后按Orca恢复指南手工创建task_c61a9ee0b646 / ctx_ebeb8d3e8606，向原term_eb48b960-a63e-4136-89d5-4cff1d605681仅投递一次preamble，确认turn_started与真实开发。此次为注册Task/Dispatch的unsupervised投影，不冒称supervised启动；原ctx_d551d3198d73资源保留至返修结算后精确释放。
+- 真实EvoMap尚无凭据或有效实验计价配置，仍未发请求。无价格的已知tokens不等于零费用：unknown_cost保留预留并停止新准入，不能保证无价格配置完成六题。最终执行与人工限制以独立SWARM_REVIEW及实际API回执为准。
+- C返修已普通提交推送fc6983ea598c94fc9e7e2a04b40b648e48cc50cf（01:04:21 CST），只含原轨三个文件；I开始最终适用回归及构建验收。01:04主控再次核验冻结HEAD/clean、四份治理文件原始字节及四个保留端口，均与接手基线一致。最终独立报告为docs/SWARM_REVIEW.md；报告之后的文档提交不改变本节明确标注的测试版本，最终head双平台CI另按确切SHA核验。
