@@ -4,7 +4,7 @@
 
 用户更新后已核验 Codex 0.156.1，更新提示不再是阻塞。原 Run 沿用 `run_9e3490b7a7c0`，协调终端为 `term_88f69376-8035-4b15-bd13-7b1233427f41`。D 在原 worktree / branch 以 `ctx_3ece065caa25` 恢复开发；F 原 provider session 以 `ctx_083902b49b4d` 恢复，既有实现和 80 项浏览器检查保留。
 
-D 已完成独立 Compose、同源只读 Nginx 代理、Python host/HEAD 与标准归档白名单，67 项部署/T5 测试通过；本机 `morphogenesis-d-check` 两容器实际 healthy，公开 EvoMap 只读查询和第四轮历史文件的真实容器读取通过。候选已分阶段提交，最终推送与交接仍由 D 完成。北京 Docker Hub 直连超时，最终采用本机构建、标准 docker save/scp/load，不修改服务器 Docker 配置。
+D 已完成独立 Compose、同源只读 Nginx 代理、Python host/HEAD 与标准归档白名单，67 项部署/T5 测试通过；本机 `morphogenesis-d-check` 两容器实际 healthy，公开 EvoMap 只读查询 37 项和第四轮历史文件的真实容器读取 36 项通过。最终分支 `songconmaisaix31-design/morph-beijing-deploy` 已推送，远端精确 SHA 为 `50d13530a7a9c7b8d1e0cc4c258dc0186710b567`；其中功能提交 `da393da` 的标准归档亦独立构建与复验通过。D 已成功结算，临时容器/网络清理，原工作树与证据保留。北京 Docker Hub 直连超时，最终采用本机构建、标准 docker save/scp/load，不修改服务器 Docker 配置。
 
 最终公网数据明确选择第四轮单个 `rehearsal.json`（226,518 bytes），仅私有只读挂载，并强制现有 `--replay` 加载；容器返回 `provenance=replay / contract_local=passed / interface_live=not_run / task_live=not_run`。本轮没有新模型任务或 Hub 写入。
 
