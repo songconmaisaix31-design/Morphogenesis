@@ -50,7 +50,7 @@ class Signal(Model):
 class PipeHistory(Model):
     worker_id: str
     pipe_key: str
-    weight: float = Field(default=1.0, ge=0, le=1)
+    weight: float = Field(default=0.25, ge=0, le=1)
     samples: int = Field(default=0, ge=0)
 
 

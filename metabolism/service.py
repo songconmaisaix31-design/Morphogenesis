@@ -14,6 +14,7 @@ from contracts.identity import AgentId, AttemptId
 from contracts.provenance import Provenance
 from contracts.resolution import Gene, GeneRef
 from metabolism.index import CosineIndex, Embedding, lexical_embedding
+from metabolism.decay import exponential_decay
 from metabolism.models import Adoption, AttemptContext, GeneState, GeneView, InjectionBatch, UseRecord
 from persistence import SQLiteStore
 from persistence.store import GeneRow
@@ -75,7 +76,7 @@ class LocalMetabolism:
     def _evaluate(state: GeneState, now: float) -> None:
         if now < state.evaluated_at:
             raise ValueError("time cannot move backwards")
-        state.weight = math.exp(-(now - state.anchor_at) / state.tau_seconds)
+        state.weight = exponential_decay(now - state.anchor_at, state.tau_seconds)
         state.evaluated_at = now
 
     @staticmethod
