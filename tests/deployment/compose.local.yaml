@@ -1,0 +1,5 @@
+# Only the D worker's isolated local acceptance; not included in release bundles.
+services:
+  web:
+    ports: !override
+      - "127.0.0.1:17899:8080"

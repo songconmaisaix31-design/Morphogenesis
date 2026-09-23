@@ -63,33 +63,50 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
-        self.wfile.write(body)
+        if self.command != "HEAD":
+            self.wfile.write(body)
+
+    def do_HEAD(self) -> None:  # noqa: N802
+        route = urlsplit(self.path).path
+        if route in {"/api/dashboard", "/api/evomap", "/api/evomap/asset", "/vendor/echarts.min.js"}:
+            self.do_GET()
+            return
+        super().do_HEAD()
 
     def do_GET(self) -> None:  # noqa: N802
         route = urlsplit(self.path)
         if route.path == "/api/evomap":
-            params = parse_qs(route.query, keep_blank_values=False, max_num_fields=8)
+            try:
+                params = parse_qs(route.query, keep_blank_values=False, max_num_fields=8)
+            except ValueError:
+                self._json_response(400, b'{"error":"too_many_query_fields"}')
+                return
             self._serve_evomap(params)
             return
         if route.path == "/api/evomap/asset":
-            params = parse_qs(route.query, keep_blank_values=False, max_num_fields=4)
+            try:
+                params = parse_qs(route.query, keep_blank_values=False, max_num_fields=4)
+            except ValueError:
+                self._json_response(400, b'{"error":"too_many_query_fields"}')
+                return
             self._serve_evomap_asset(params)
             return
-        if self.path == "/api/dashboard":
+        if route.path == "/api/dashboard":
             # Re-read the one named rehearsal.json on each request so the local
             # page follows R's real stage snapshots. Browser input never reaches
             # this loader and no request path is interpreted as a filesystem path.
             body = json.dumps(self.dashboard_loader().as_dict(), ensure_ascii=False).encode("utf-8")
             self._json_response(200, body)
             return
-        if self.path == "/vendor/echarts.min.js":
+        if route.path == "/vendor/echarts.min.js":
             body = self.echarts_asset.read_bytes()
             self.send_response(200)
             self.send_header("Content-Type", "text/javascript; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "public, max-age=3600")
             self.end_headers()
-            self.wfile.write(body)
+            if self.command != "HEAD":
+                self.wfile.write(body)
             return
         super().do_GET()
 
@@ -130,6 +147,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Serve the Morphogenesis T5 dashboard locally.")
+    parser.add_argument("--host", default="127.0.0.1", help="Listen address; containers must explicitly use 0.0.0.0")
     parser.add_argument("--port", type=int, default=7500)
     source = parser.add_mutually_exclusive_group()
     source.add_argument("--input", type=Path, help="Allowlisted mock document or Envelope JSONL")
@@ -165,8 +183,8 @@ def main() -> None:
         dashboard_loader=load_data, echarts_asset=asset,
         evomap_service=EvomapService(store_path=args.evomap_store),
     )
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), handler)
-    print(f"Morphogenesis T5 dashboard: http://127.0.0.1:{args.port}")
+    server = ThreadingHTTPServer((args.host, args.port), handler)
+    print(f"Morphogenesis T5 dashboard: http://{args.host}:{args.port}")
     server.serve_forever()
 
 
