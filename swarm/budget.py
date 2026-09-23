@@ -112,6 +112,19 @@ class BudgetLedger:
         with connection(self.path) as db:
             return self._snapshot(db, worker_id, self._now())
 
+    def pending(self, worker_id: str, *, limit: int = 100) -> list[Reservation]:
+        """Read durable in-flight holds even when worker status was never written.
+
+        Runtime decides whether the owner is recovering before marking uncertain;
+        merely observing a live in-flight request must not change its state.
+        """
+        if not worker_id.strip() or not 1 <= limit <= 1000:
+            raise ValueError("worker_id required; limit must be in [1,1000]")
+        with connection(self.path) as db:
+            return [Reservation.model_validate_json(row[0]) for row in db.execute(
+                "SELECT body FROM budget_reservations WHERE swarm_id=? AND worker_id=? AND status='pending' "
+                "ORDER BY created_at,reservation_id LIMIT ?", (self.swarm_id, worker_id, limit))]
+
     def reserve(self, worker_id: str, task_id: str, bound: ExecutionBound, *, request_id: str | None = None) -> Reservation:
         bound = ExecutionBound.model_validate(bound.model_dump())
         if not worker_id.strip() or not task_id.strip():
@@ -208,7 +221,7 @@ class BudgetLedger:
             if reported is None:
                 db.execute("UPDATE budget_reservations SET status='uncertain',settled_at=? WHERE reservation_id=?",
                            (now, reservation.reservation_id))
-                db.execute("UPDATE swarm_budgets SET breaker=COALESCE(breaker,'unknown_usage') WHERE swarm_id=?",
+                db.execute("UPDATE swarm_budgets SET breaker='unknown_usage' WHERE swarm_id=?",
                            (self.swarm_id,))
             else:
                 assert estimate is not None
@@ -225,9 +238,13 @@ class BudgetLedger:
                             reported.total_tokens > self.policy.max_tokens)
                 violated = violated or (reservation.bound.request_bound == "verified" and estimate > reservation.reserved_estimate_usd)
                 reason = "provider_bound_violated" if violated else None
-                if spent >= self.policy.max_cost_usd:
+                if spent >= self.policy.max_cost_usd and reason is None:
                     reason = "swarm_cost_estimate_exhausted"
                 if reason:
-                    db.execute("UPDATE swarm_budgets SET breaker=COALESCE(breaker,?) WHERE swarm_id=?",
-                               (reason, self.swarm_id))
+                    if reason == "provider_bound_violated":
+                        db.execute("UPDATE swarm_budgets SET breaker=CASE WHEN breaker='unknown_usage' THEN breaker ELSE ? END "
+                                   "WHERE swarm_id=?", (reason, self.swarm_id))
+                    else:
+                        db.execute("UPDATE swarm_budgets SET breaker=COALESCE(breaker,?) WHERE swarm_id=?",
+                                   (reason, self.swarm_id))
             return self._snapshot(db, reservation.worker_id, now)

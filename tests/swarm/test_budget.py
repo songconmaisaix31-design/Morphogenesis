@@ -118,7 +118,7 @@ def test_measured_high_consumption_trips_durable_shared_breaker(tmp_path: Path) 
     ledger = BudgetLedger(tmp_path / "budget.db", "account", p)
     r = ledger.reserve("a", "high_fake", bound())
     state = ledger.settle(r, usage(200, 400))
-    assert state.reason == "swarm_cost_estimate_exhausted"
+    assert state.reason == "provider_bound_violated"  # Also exhausted; violation must take priority.
     assert state.tokens == 600 and state.estimated_cost_usd == pytest.approx(0.001)
     for worker in ("a", "b", "c"):
         peer = BudgetLedger(tmp_path / "budget.db", "account", p)
@@ -278,3 +278,45 @@ def test_unbounded_low_usage_never_frees_allowance_across_restart(tmp_path):
     assert restarted.snapshot().admission_charged_usd==r.reserved_estimate_usd
     with pytest.raises(BudgetBlocked,match='capacity'):
         restarted.reserve('B','next',bound(1,0))
+
+
+def test_late_bound_violation_overrides_existing_admission_exhaustion(tmp_path):
+    ledger=BudgetLedger(tmp_path/'budget.db','run',policy(max_cost_usd=.0001))
+    final=ledger.reserve('A','final',bound(100,0))
+    pending=ledger.reserve('B','zero',bound(0,0))
+    assert ledger.settle(final,usage(100,0)).reason=='swarm_cost_estimate_exhausted'
+    violated=ledger.settle(pending,usage(1,0))
+    assert violated.reason=='provider_bound_violated'
+    assert BudgetLedger(ledger.path,'run',ledger.policy).snapshot().reason=='provider_bound_violated'
+
+
+def test_pending_accessor_recovers_reserve_status_gap_without_creating_authority(tmp_path):
+    p=policy()
+    ledger=BudgetLedger(tmp_path/'budget.db','run',p)
+    one=ledger.reserve('crashed','a',bound(),request_id='a:1')
+    ledger.reserve('live','b',bound())
+    other=BudgetLedger(ledger.path,'other',p)
+    other.reserve('crashed','other-task',bound())
+    # No worker JSON was written. The durable reservation still identifies recovery.
+    restarted=BudgetLedger(ledger.path,'run',p)
+    assert restarted.pending('crashed')==[one]
+    assert restarted.pending('missing')==[]
+    assert restarted.snapshot().pending_reservations==2  # Lookup never mutates.
+    with pytest.raises(ValueError):
+        restarted.pending('crashed',limit=1001)
+    restarted.mark_uncertain(restarted.pending('crashed',limit=1)[0])
+    assert restarted.pending('crashed')==[]
+    assert restarted.snapshot().reason=='unknown_usage'
+    with pytest.raises(BudgetBlocked,match='unknown_usage'):
+        restarted.reserve('replacement','c',bound())
+
+
+def test_unknown_usage_overrides_prior_exhaustion_and_later_violation(tmp_path):
+    ledger=BudgetLedger(tmp_path/'budget.db','run',policy(max_cost_usd=.0001))
+    final=ledger.reserve('A','final',bound(100,0))
+    unknown=ledger.reserve('B','unknown',bound(0,0))
+    violated=ledger.reserve('C','violated',bound(0,0))
+    assert ledger.settle(final,usage(100,0)).reason=='swarm_cost_estimate_exhausted'
+    assert ledger.mark_uncertain(unknown).reason=='unknown_usage'
+    assert ledger.settle(violated,usage(1,0)).reason=='unknown_usage'
+    assert ledger.snapshot().uncertain_reservations==1

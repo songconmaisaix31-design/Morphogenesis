@@ -78,8 +78,13 @@ radius/file-lock/account contract, while preserving the historical implementatio
   `reserve(worker_id, task_id, bound: ExecutionBound, *, request_id: str | None=None)
   -> Reservation`;
   `settle(reservation, usage: JsonValue) -> BudgetSnapshot`;
-  `mark_uncertain(reservation)`; `snapshot(worker_id=None)`.
+  `mark_uncertain(reservation)`; `snapshot(worker_id=None)`;
+  `pending(worker_id: str, *, limit=100) -> list[Reservation]` (max 1000).
   Reservations and breakers are swarm-run scoped, never account-wide guarantees.
+  `pending` reads authoritative in-flight holds without changing them, including
+  the crash window after reserve commit and before any worker status file. C calls
+  it on proven owner recovery and marks those holds uncertain; it does not mark a
+  live owner's requests merely because they are observed.
   Use existing AttemptId or task ID plus integer fence for request identity. A new
   identity is allowed after a known settled failure; the same request is never
   reserved again. A pending/uncertain request for that task blocks a new identity.
@@ -102,6 +107,9 @@ radius/file-lock/account contract, while preserving the historical implementatio
   `admission_charged_usd` and `unreconciled_reservations` expose this separately from
   pending holds and measured usage estimates. A lower estimate never creates new
   allowance. The current adapter never emits `billed` or a non-null actual cost.
+  Breaker priority is unknown usage, then request-bound violation, then admission
+  exhaustion. A known valid final-credit request may complete its fenced result;
+  a simultaneous/later bound violation is never hidden behind exhaustion.
 
 ## A/C integration agreement
 

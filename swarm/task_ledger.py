@@ -166,7 +166,7 @@ class TaskLedger:
         target = Path(canonical_scope(root / signal.scope))
         if not target.is_relative_to(root):
             raise ValueError("task scope escapes workspace")
-        return signal.model_copy(update={"workspace": str(root), "scope": str(target.relative_to(root))})
+        return signal.model_copy(update={"workspace": str(root), "scope": target.relative_to(root).as_posix()})
 
     def enqueue(self, signal: Signal, *, dependencies: tuple[str, ...] = (),
                 acceptance: dict[str, JsonValue] | None = None, evidence_key: str | None = None,

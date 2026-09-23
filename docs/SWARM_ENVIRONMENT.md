@@ -22,8 +22,10 @@ for explicit migration; no automatic import, deletion, or dropping unknown holds
 
 Locality requires explicit `authorized_scopes`; empty means no authorization.
 Resolved workspace/scope paths, module filters and one-hop dependency neighborhoods
-are applied in SQL before task bodies are decoded. Queries use a SQLite B-tree
-workspace/scope index, bounded result limit (default 100, max 1000), at most 64
+are applied in SQL before task bodies are decoded. Relative `Signal.scope` uses
+POSIX separators for the A candidate interface; absolute lease scopes retain
+native canonical paths. Queries use a SQLite B-tree workspace/scope index,
+bounded result limit (default 100, max 1000), at most 64
 scope/module/dependency filters, and capability filtering before LIMIT. This is
 bounded data retrieval, not a constant-complexity or throughput theorem. x/y/radius
 remain compatibility display fields without any authority or routing meaning.
@@ -113,6 +115,12 @@ lower observed usage never restores allowance. Unknown usage/cost retains the fu
 stops new admission; no expiry, reset or blind retry exists. Disabled admission is
 explicitly labeled and makes no ceiling claim. Identical settlement charges once;
 conflicting known usage is rejected. Unknown evidence is not overwritten later.
+The read-only `pending(worker_id, limit=100)` accessor exposes SQLite reservations
+even when a crash prevented any status-file write; proven owner recovery can mark
+them uncertain. Merely reading active requests does not mutate them. Breaker
+priority preserves unknown usage above bound violation above ordinary exhaustion;
+valid work using the final allowance can finish, while a bound violation still
+rejects effects even when it simultaneously exhausts the budget.
 
 ## Read sources, versions, and reuse
 
@@ -151,6 +159,15 @@ Current installed versions verified: Python 3.12.13, SQLite 3.53.1, Pydantic 2.1
   8.19s**, with the same two expected warnings. Targeted strict models/budget for
   Windows and `--platform linux`: **2 files clean each**. This is a targeted
   follow-up, not a repeated 61-test full gate. B-path `git diff --check` is clean.
+- C's nested Windows scope handoff regression: `python -m pytest
+  tests/swarm/test_ledger.py -q`: **5 passed in 1.56s**; targeted strict task ledger:
+  **1 file clean**. The test passes `src/sub` from ledger through claim to A's
+  actual `Candidate` inspection while preserving native absolute fencing.
+- Final follow-up gate including pending-recovery accessor and breaker precedence:
+  `python -m pytest tests/swarm/test_budget.py tests/swarm/test_ledger.py -q`:
+  **34 passed in 10.22s**. Strict task ledger/budget for Windows and Linux targets:
+  **2 files clean each**. Earlier unchanged field/router/lease/metabolism tests were
+  not repeated solely for this narrow correction.
 
 These tests execute real local SQLite and subprocess contention, actual terminated
 lease owners, Windows junctions and local target writes. Executor usage remains

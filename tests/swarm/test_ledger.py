@@ -91,3 +91,22 @@ def test_immutable_tasks_missing_dependencies_cycles_and_run_isolation(tmp_path)
     assert other.snapshot()==[]
     other.enqueue(s(tmp_path,'a'))
     assert len(other.snapshot())==1
+
+
+def test_nested_scope_stays_portable_through_claim_candidate_boundary(tmp_path):
+    from pathlib import Path
+    from contracts.identity import AgentId, AttemptId
+    from local_assets.models import Candidate, FileChange
+    from local_assets.validate import inspect_candidate
+    from swarm.task_ledger import canonical_scope
+    ledger=TaskLedger(tmp_path/'tasks.db','run')
+    record=ledger.enqueue(s(tmp_path,'nested','src/sub'))
+    assert record.signal.scope=='src/sub'
+    lease=ledger.claim('nested','worker',locality=Locality(workspace=str(tmp_path),authorized_scopes=('src',)))
+    assert lease.scope==canonical_scope(tmp_path/'src/sub')
+    candidate=Candidate(attempt=AttemptId(task_id='nested',agent=AgentId(role='builder',instance=0),attempt=lease.token-1),
+                        base_revision='0'*40,scope=record.signal.scope,
+                        changes=(FileChange(path='src/sub/value.txt',before=None,after='value'),),
+                        declared_files=1,declared_lines=1)
+    inspect_candidate(candidate)
+    assert Path(record.signal.workspace)/candidate.scope==Path(lease.scope)
