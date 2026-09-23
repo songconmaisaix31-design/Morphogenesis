@@ -89,7 +89,7 @@ class BudgetLedger:
         if worker_id is not None and reason is None:
             recent = db.execute("SELECT body,status,tokens,created_at,settled_at FROM budget_reservations "
                                 "WHERE swarm_id=? AND worker_id=? AND "
-                                "(status!='settled' OR settled_at>?)",
+                                "(status NOT IN ('settled','unknown_cost_allowed') OR settled_at>?)",
                                 (self.swarm_id, worker_id, now - self.policy.burn_window_seconds)).fetchall()
             burn = 0
             for row in recent:
@@ -174,7 +174,7 @@ class BudgetLedger:
                           (self.swarm_id, request_id, task_id)).fetchone():
                 raise BudgetBlocked("task_already_reserved_no_retry")
             recent = db.execute("SELECT body,tokens FROM budget_reservations WHERE swarm_id=? AND worker_id=? "
-                                "AND (status!='settled' OR settled_at>?)",
+                                "AND (status NOT IN ('settled','unknown_cost_allowed') OR settled_at>?)",
                                 (self.swarm_id, worker_id, now - self.policy.burn_window_seconds)).fetchall()
             burn = 0
             for row in recent:
@@ -243,10 +243,12 @@ class BudgetLedger:
                 if estimate is None:
                     # Operator admission allowance is not a model price. Preserve
                     # the full hold while recording the independently known usage.
-                    db.execute("UPDATE budget_reservations SET status='uncertain',usage_metering='verified',cost='unknown',"
+                    status = "unknown_cost_allowed" if self.policy.allow_unknown_cost else "uncertain"
+                    db.execute("UPDATE budget_reservations SET status=?,usage_metering='verified',cost='unknown',"
                                "settled_at=?,tokens=?,settlement=? WHERE reservation_id=?",
-                               (now, reported.total_tokens, settlement, reservation.reservation_id))
-                    self._trip(db, "unknown_cost")
+                               (status, now, reported.total_tokens, settlement, reservation.reservation_id))
+                    if not self.policy.allow_unknown_cost:
+                        self._trip(db, "unknown_cost")
                 else:
                     # Usage plus local prices is not a bill. Never free committed
                     # allowance on a lower estimate, even for an unbounded request.

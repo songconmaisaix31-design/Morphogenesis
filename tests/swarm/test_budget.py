@@ -320,3 +320,58 @@ def test_unknown_usage_overrides_prior_exhaustion_and_later_violation(tmp_path):
     assert ledger.mark_uncertain(unknown).reason=='unknown_usage'
     assert ledger.settle(violated,usage(1,0)).reason=='unknown_usage'
     assert ledger.snapshot().uncertain_reservations==1
+
+
+def test_unknown_cost_opt_in_retains_holds_and_allows_known_usage(tmp_path):
+    p=BudgetPolicy(max_cost_usd=.4,prices=None,unbounded_reservation_usd=.2,
+                   allow_unknown_cost=True)
+    ledger=BudgetLedger(tmp_path/'budget.db','run',p)
+    unbounded=bound().model_copy(update={'request_bound':'unbounded','provider_enforced':False,
+        'max_cost_usd':None,'bound_evidence':None})
+    first=ledger.reserve('A','a',unbounded)
+    state=ledger.settle(first,usage())
+    assert not state.sleeping and state.reason is None
+    assert state.tokens==30 and state.cost=='unknown' and state.actual_cost_usd is None
+    assert state.reserved_estimate_usd==.2 and state.uncertain_reservations==0
+    second=ledger.reserve('B','b',unbounded)
+    ledger.settle(second,usage(1,1))
+    with pytest.raises(BudgetBlocked,match='capacity'):
+        ledger.reserve('C','c',unbounded)
+
+
+def test_unknown_cost_opt_in_does_not_allow_unknown_usage(tmp_path):
+    p=BudgetPolicy(max_cost_usd=1,prices=None,unbounded_reservation_usd=.2,
+                   allow_unknown_cost=True)
+    ledger=BudgetLedger(tmp_path/'budget.db','run',p)
+    unbounded=bound().model_copy(update={'request_bound':'unbounded','provider_enforced':False,
+        'max_cost_usd':None,'bound_evidence':None})
+    reservation=ledger.reserve('A','a',unbounded)
+    state=ledger.settle(reservation,None)
+    assert state.sleeping and state.reason=='unknown_usage'
+    with pytest.raises(BudgetBlocked,match='unknown_usage'):
+        ledger.reserve('B','b',unbounded)
+
+
+def test_allow_unknown_cost_is_strict_and_default_off():
+    assert BudgetPolicy(max_cost_usd=1).allow_unknown_cost is False
+    with pytest.raises(ValueError):
+        BudgetPolicy.model_validate({'max_cost_usd':1,'allow_unknown_cost':1})
+
+
+def test_unknown_cost_known_usage_ages_out_of_burn_but_hold_remains(tmp_path):
+    now=[100.]
+    p=BudgetPolicy(max_cost_usd=.4,prices=None,unbounded_reservation_usd=.2,
+                   allow_unknown_cost=True,burn_rate_tokens=31,burn_window_seconds=10)
+    ledger=BudgetLedger(tmp_path/'budget.db','run',p,clock=lambda:now[0])
+    unbounded=bound().model_copy(update={'request_bound':'unbounded','provider_enforced':False,
+        'max_cost_usd':None,'bound_evidence':None})
+    first=ledger.reserve('A','a',unbounded)
+    ledger.settle(first,usage())
+    with pytest.raises(BudgetBlocked,match='burn_rate'):
+        ledger.reserve('A','b',unbounded.model_copy(update={'input_tokens':2,'max_output_tokens':0}))
+    now[0]=111.
+    second=ledger.reserve('A','b',unbounded.model_copy(update={'input_tokens':2,'max_output_tokens':0}))
+    ledger.settle(second,usage(1,0))
+    assert ledger.snapshot().reserved_estimate_usd==pytest.approx(.4)
+    with pytest.raises(BudgetBlocked,match='capacity'):
+        ledger.reserve('B','c',unbounded.model_copy(update={'input_tokens':1,'max_output_tokens':0}))

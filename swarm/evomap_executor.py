@@ -24,17 +24,27 @@ from local_assets.models import AssetSafetyError, Candidate, ConsumptionExecutio
 from local_assets.paths import FROZEN_MAINLINE, no_links, safe_join
 from local_assets.validate import blast_radius
 from orchestration.gateway import _Completion, _usage
-from orchestration.gateway_transport import EVOMAP_MODEL, single_request
+from orchestration.gateway_transport import single_request
 from swarm.models import ExecutionBound, Signal
 from swarm.worker_loop import ExecutionResult, FixtureExecutor, _write_json
 
 _JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 _KEY_ENV = "MORPH_EVOMAP_API_KEY"
+EvoMapTextModel = Literal[
+    "evomap-deepseek-v4-flash",
+    "evomap-gemini-3.1-pro-preview",
+    "evomap-glm-5.1",
+    "evomap-glm-5.2",
+    "evomap-gpt-5.6-luna",
+    "evomap-gpt-5.6-sol",
+    "evomap-gpt-5.6-terra",
+]
+SOL_MODEL: EvoMapTextModel = "evomap-gpt-5.6-sol"
 
 
 class EvoMapConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
-    model: str = Field(default=EVOMAP_MODEL, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
+    model: EvoMapTextModel = SOL_MODEL
     credential_file: Path
     max_input_bytes: int = Field(default=12000, gt=0, le=16000)
     max_output_tokens: int = Field(default=1024, gt=0, le=4096)
