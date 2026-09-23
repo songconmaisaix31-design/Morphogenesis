@@ -18,7 +18,7 @@
 
 | 轨 | 固定工作树 / write_paths | 交付 |
 |---|---|---|
-| F | `morph-gpt-reference`，原 write_paths 不变 | 完成前端原任务；当前停在 Codex 交互提醒，不能代替原 F 提交或绕过门禁 |
+| F | `morph-gpt-reference`，原 write_paths 不变 | 继续 Linear 原包结构返修；重启后已恢复原会话，完成活动行密度、三视口验收、commit + push |
 | D | `morph-beijing-deploy`；`deploy/**`, `viz/server.py`, `tests/deployment/**`, `docs/tracks/beijing-deployment.md` | 基于 c68def4 + 最新主控治理提交，保留现有栈，为 Python 服务增加保持 loopback 默认的明确监听配置；制作隔离容器/代理/部署说明与必需测试；构建只用锁定依赖，不改锁；commit + push |
 | I | `morph-gpt-reference-integration`；原集成 write_paths、`docs/tracks/beijing-deployment-integration.md` | F/D 完成后精确 SHA 普通合并，复验前端流程和真实同源后端，容器构建/HTTP/浏览器通过；领域缺陷退原 Worker；commit + push |
 

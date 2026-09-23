@@ -6,9 +6,11 @@ F 已完成原任务并推送 `2df313857d716a27113c47709342c8d57fb6405f`，原 `
 
 原 F 会话/工作树/分支立即续接 `task_1b8cd2d6f0b5 / ctx_eb0b56092f6f`，必须直接复用实际 DOM/组件结构、SVG 和样式，再接现有业务数据。用户随后要求托管前端开发；当前任务持续由主控监督。资料读取确认解除后，F 普通合并规划至 `e24c68feff2e953e30661552d12180b16814a487`，已实际修改 Backend.jsx、backend.css、静态数据 bridge，新增 linear-package.css 和 LinearIcons.jsx：直接来源类名、11 个 SVG、侧栏/内容区工具栏、任务正文与属性、五个独立视图和隐藏图表处理均已形成未提交候选。
 
-首次候选 `npm run build` 被恢复会话沙箱拒绝，Vite/esbuild 返回 `Cannot read directory ../../../../../..: Access is denied` 和配置文件解析失败；尚未产出新版静态包。F 已请求批量构建/截图命令确认，需人工在终端处理，主控未代批或切换审批模式。源码审查发现手机成员按钮 min-height 被后置基础规则覆盖，已以 `msg_984bd385a5a5` 交回 F；修复、构建、实际浏览器验收、commit/push 和 I 集成均仍待完成。旧 51/80 项通过不代表当前未构建候选通过。
+首次候选构建曾被恢复会话沙箱拒绝；随后 F 已于 16:55 产出新静态包与 `structure-v2-*` 四张 1366 实图，17:00 前继续修改源码和检查脚本，不能沿用此前“尚未构建”的状态。主控已实际对照源应用与 mock/replay/详情图：侧栏品牌、内容内 44px 工具栏、任务正文和紧凑属性已按源结构落地；活动区每事件约 80px 独立空卡仍偏疏，交回 F 改为源应用的紧凑系统活动行。手机成员按钮覆盖顺序已由 F 报告修复，仍待新构建的 375 实测。
 
-新鲜对照证据位于 `C:/Users/DW/AppData/Local/Temp/morph-linear-structure-audit`：源应用完整画框 `source-app-issue.png`、同视口源页 `reference-1366.png`、修改前后台 `product-before-1366.png`、实际尺寸 `observations.json`。参考服务 7843 / PID 32828 与产品预览 7841 / PID 28604 均为协调者启动。源包页面中点击 tasks/insights/project 未实际切换，不将对应重复截图计为交互成功。D 已交付 `50d1353` 保留，I 和公网部署等待新 F 视觉返修验收。
+17:03 Orca 再次重启，旧返修 Dispatch `ctx_eb0b56092f6f` 被运行时结算为 `terminal_missing / failed`，Task 恢复 ready，工作树 WIP 保留。主控将原 Run 绑定当前终端 `term_e3377ef4-b845-40c3-8b7e-a55ae9632243`，在原工作树恢复原 provider session `01a0cce1-3e9f-7061-a005-d9a8d538cab9`，同 Task 续接 `ctx_36490c2cd445`；没有新建实现轨、改变权限设置或代批。后续活动行返修、重新构建、三视口与交互验收、commit/push、独立 I 集成仍待完成。
+
+新鲜对照证据位于 `C:/Users/DW/AppData/Local/Temp/morph-linear-structure-audit`：源应用完整画框 `source-app-issue.png`、同视口源页 `reference-1366.png`、修改前后台 `product-before-1366.png`、实际尺寸 `observations.json`。源包页面中点击 tasks/insights/project 未实际切换，不将对应重复截图计为交互成功。7841/7843/7799 已在此次重启后核实无监听，旧 PID 记录失效；F 将在端口身份核验后恢复其独立测试预览。D 已交付 `50d1353` 保留，I 和公网部署等待新 F 视觉返修验收。
 
 ## 当前：终端更新完成，部署容器验证通过，F 等待命令权限确认（2026-09-23）
 
