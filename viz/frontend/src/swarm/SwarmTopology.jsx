@@ -76,6 +76,7 @@ function SwarmTopology({ swarm, active = true, reducedMotion = false }) {
           <span>第 {safePage + 1} / {graphPages} 组 · 显示 {graphNodes.length} / {view.nodes.length} 实体</span>
           <button type='button' disabled={safePage >= graphPages - 1} onClick={() => setGraphPage((page) => Math.min(graphPages - 1, page + 1))}>下一组</button>
         </div>
+        <p className='swarm-pan-hint'>横向滑动查看完整拓扑</p>
         <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} className='swarm-svg' role='img' aria-label='去中心化蜂群事实图'>
           <g className='swarm-layer'>
             {graphEdges.map((edge) => {

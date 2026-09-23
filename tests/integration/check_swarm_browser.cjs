@@ -105,6 +105,27 @@ function json(response, status, value) {
       for (const kind of ['worker', 'capability', 'task', 'asset']) {
         if (!await page.locator(`.swarm-node-${kind}`).count()) throw new Error(`${width}px ${kind} node is unreachable`);
       }
+      if (width === 375) {
+        await page.getByText('横向滑动查看完整拓扑').waitFor();
+        const graphMetrics = await page.evaluate(() => {
+          const frame = document.querySelector('.swarm-frame');
+          const workerLabel = document.querySelector('.swarm-node-worker .swarm-node-label');
+          if (!frame || !workerLabel) return null;
+          const labelHeight = workerLabel.getBoundingClientRect().height;
+          frame.scrollLeft = frame.scrollWidth;
+          const asset = document.querySelector('.swarm-node-asset');
+          const assetRect = asset?.getBoundingClientRect();
+          const frameRect = frame.getBoundingClientRect();
+          return {
+            labelHeight,
+            scrollable: frame.scrollWidth > frame.clientWidth,
+            assetVisible: Boolean(assetRect && assetRect.left >= frameRect.left && assetRect.right <= frameRect.right),
+          };
+        });
+        if (!graphMetrics?.scrollable) throw new Error('375px graph has no contained horizontal viewport');
+        if (graphMetrics.labelHeight < 11) throw new Error(`375px graph label is only ${graphMetrics.labelHeight}px tall`);
+        if (!graphMetrics.assetVisible) throw new Error('375px asset column is not reachable by horizontal scroll');
+      }
       await page.getByRole('button', { name: '下一组' }).click();
       await page.getByText('第 2 / 12 组').waitFor();
       await page.getByRole('button', { name: 'task task-009' }).waitFor();
