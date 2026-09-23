@@ -1,5 +1,15 @@
 # 开发状态
 
+## 当前：终端更新完成，部署容器验证通过，F 等待命令权限确认（2026-09-23）
+
+用户更新后已核验 Codex 0.156.1，更新提示不再是阻塞。原 Run 沿用 `run_9e3490b7a7c0`，协调终端为 `term_88f69376-8035-4b15-bd13-7b1233427f41`。D 在原 worktree / branch 以 `ctx_3ece065caa25` 恢复开发；F 原 provider session 以 `ctx_083902b49b4d` 恢复，既有实现和 80 项浏览器检查保留。
+
+D 已完成独立 Compose、同源只读 Nginx 代理、Python host/HEAD 与标准归档白名单，67 项部署/T5 测试通过；本机 `morphogenesis-d-check` 两容器实际 healthy，公开 EvoMap 只读查询和第四轮历史文件的真实容器读取通过。候选已分阶段提交，最终推送与交接仍由 D 完成。北京 Docker Hub 直连超时，最终采用本机构建、标准 docker save/scp/load，不修改服务器 Docker 配置。
+
+最终公网数据明确选择第四轮单个 `rehearsal.json`（226,518 bytes），仅私有只读挂载，并强制现有 `--replay` 加载；容器返回 `provenance=replay / contract_local=passed / interface_live=not_run / task_live=not_run`。本轮没有新模型任务或 Hub 写入。
+
+F 的恢复会话现停在读取前端差异的 `Yes, proceed` 命令权限弹窗，已请求用户在终端处理；已要求后续必要提交推送合并为一次确认，不能代替用户批准或绕过该门。F 尚未提交，独立 I 必须等待 F/D 精确提交后合并。远端文件、容器与安全组仍未修改，7799 尚未公开；下文旧更新提示与旧 PID 为历史记录。
+
 ## 当前：北京 ECS 已连接，公网发布待 GPT 启动交互解除（2026-09-23）
 
 已用本机 Aliyun CLI 3.4.11 实查北京 ECS `i-2ze2nztd89vevmw21wif`（`cn-beijing`、Running、Ubuntu 24.04、公网 `47.93.118.110`），SSH 别名 `gongzhi-ecs` 可只读访问。服务器 Docker 29.1.3 / Compose 2.40.3，80/443 和 loopback 8080 为既有共治容器；Morphogenesis 计划使用独立 `/opt/morphogenesis` 与 TCP 7799。安全组 `sg-2zeedkqp6urfm9c29ghm` 尚未开放 7799；没有修改远端文件、容器、防火墙或域名，也没有公网部署成功声明。计划提交 `2b71d63` 已推送。
