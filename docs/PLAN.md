@@ -1,5 +1,51 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 北京 ECS 公网部署与后端接入（2026-09-23，进行中）
+
+用户明确授权连接项目后端，使用已配置的阿里云 CLI 部署到北京服务器，不绑定域名，直接暴露公网。已实时核验 ECS `i-2ze2nztd89vevmw21wif` / `47.93.118.110` / `cn-beijing` / Ubuntu 24.04，SSH 别名 `gongzhi-ecs` 可连接；80/443 为现有共治项目，保持其容器、数据和代理配置。新项目采用独立 `/opt/morphogenesis`、Compose project 与公网 TCP 7799；前端静态资源和 `/api/dashboard`、只读 `/api/evomap` 同源，由 Web 代理提供，Python 后端仅容器网络可达。不开数据库、模型凭据或控制接口公网端口。
+
+延续 F 的前端所有权，新增不冲突的 D 部署轨：
+
+| 轨 | 固定工作树 / write_paths | 交付 |
+|---|---|---|
+| F | `morph-gpt-reference`，原 write_paths 不变 | 完成前端原任务；当前停在 Codex 交互提醒，不能代替原 F 提交或绕过门禁 |
+| D | `morph-beijing-deploy`；`deploy/**`, `viz/server.py`, `tests/deployment/**`, `docs/tracks/beijing-deployment.md` | 基于 c68def4 + 最新主控治理提交，保留现有栈，为 Python 服务增加保持 loopback 默认的明确监听配置；制作隔离容器/代理/部署说明与必需测试；构建只用锁定依赖，不改锁；commit + push |
+| I | `morph-gpt-reference-integration`；原集成 write_paths、`docs/tracks/beijing-deployment-integration.md` | F/D 完成后精确 SHA 普通合并，复验前端流程和真实同源后端，容器构建/HTTP/浏览器通过；领域缺陷退原 Worker；commit + push |
+
+部署使用验收后的集成提交、可回滚版本目录与既有 Docker，不升级或重启其它项目。先内网验证，再只开放 7799 安全组规则，最后从本机真实浏览器经公网 IP 检查。仅复制项目代码、构建产物及明确的演示数据，不复制工作站凭据、私钥、CLI 配置或运行目录。数据默认空态或明确 mock；若使用现有历史运行记录，保持 replay 标识，不声称新 task_live。用户尚未要求新任务执行 API，本轮不扩建控制面或运行付费任务。
+
+## GPT + EvoMap API：双包设计语言直接移植（2026-09-23，进行中）
+
+用户解除 Kimi 限制，明确使用 GPT 与本轮提供的 EvoMap API，并授权高级模型；要求对照 `christmas-site.zip`、`linear-site.zip` 一比一改造成项目页面，使用包体开发。该最新指令取代历史“只观察、不复用包内样式/资源”的限制。基线为已验收序幕 `c68def4de25cedb48acd258bea614f7dff35cc16`。主 Agent 只做计划、设计对照与验收；API 中已实时核验的 `evomap-gpt-5.6-sol` 接收参考/现有截图做具体设计审查，GPT 开发 Worker 直接读取两个包实现，另一个 GPT Worker 独立集成。凭据只注入单次调用的进程内存，不入 Git、日志、页面或 Worker prompt；调用次数/usage 如实记录，费用未知不估算。
+
+验收以源页面的布局和实际 CSS 为准：直接移植适用字体/字体声明、颜色与间距变量、全屏 section 排版、细边界、控件比例及动效结构，保留来源路径和实际版本/许可证信息，不把快照称为官方开源模板。包中的品牌文案/圣诞模型映射为 Morphogenesis 内容，分析跟踪、营销远端请求和离线抓取修补不得进入产品。Christmas 包抓取的 canvas 高度 100000 与 offline-reveal-fix 属快照缺陷，先核对真实章节后修正；Linear 包实际营销页和嵌入应用视图分清，产品后台按其应用视图密度/排版复刻，保留可用真实功能。
+
+固定流程继续是原生黄色黏菌与中英文小字 → 黑底自生长拓扑与 Agent swarm 小字 → 中英产品大字慢显 → 点击后台。无鼠标/触屏趋食。后台保留 API/真实数据、来源、验收三态、未知值、错误/空态及只读 EvoMap。响应式、Tab/焦点、reduced-motion、深链和隐藏暂停必须可用。不能再交付只换配色、粗重标题盖满拓扑、大块空卡片的近似模仿。
+
+| 轨 | 固定工作树与独占 write_paths | 交付 |
+|---|---|---|
+| F / GPT | `morph-gpt-reference`；`viz/frontend/**`, `viz/static/**`, `tests/t5/**`, `docs/tracks/frontend-gpt-reference.md`, `THIRD_PARTY_NOTICES.md` | 包体实读、实图对照、具体资源/样式复用映射；适用构建/T5、桌面手机实图与交互；原有锁文件仅确有需要时向主控 Handoff；领域返修和 commit+push 由本轨负责 |
+| I / GPT | `morph-gpt-reference-integration`；普通精确 SHA 合并、`tests/integration/**`, `docs/tracks/frontend-gpt-reference-integration.md` 与必要少量接线胶水 | 1366/1920/375 三视口对照参考，检查真实内容、核心流程和无意外远端请求；领域缺陷交回 F；commit+push；通过后才更新 7799 |
+
+开发端口独立，7799 更新前核验进程身份；7526/7527 不属于本轮。此次 API 调用用于设计开发与审查，不增加项目任务彩排，不代表 task_live、真实 Hub 或物理展示完成。
+
+## Kimi 参考包视觉返修（2026-09-23，受 Kimi 配额阻塞）
+
+实际启动了 Kimi Code 2.0.2 / K3；会话 `session_119fcf87-b6f9-4c7a-9993-1d0abd2c3538` 返回 `[provider.auth_error] 403 You've reached your weekly (7-day) usage limit`，`kimi session list` 确认 `lastTurnReason=failed`。F 尚未读写业务文件，原工作树仍 clean；当前 7799 仍为上一轮 `c68def4` 版本。Orca Run `run_447156e77a56`、Task `task_b5062d326661`、Dispatch `ctx_f43cd1da249a` 已在确认失败后 stop，仅关闭本次创建的 Kimi 终端。恢复额度或用户指定其它执行模型后沿原 Task 继续，不将计划文档算作视觉改版交付。
+
+用户再次明确要求充分参考 `C:\Users\DW\WorkBuddy\2026-09-23-01-19-38\christmas-site.zip` 与同目录 `linear-site.zip` 的页面格式和审美，并指定 Kimi 实现。以已经交付的序幕集成 `c68def4de25cedb48acd258bea614f7dff35cc16` 为业务基线；原 G/B/S 轨已结束，本阶段统一将前端领域所有权交给原 Kimi F 工作树 `morph-frontend-stack`，避免多人分别修改视觉语言。主 Agent 维护计划、设计验收与状态，F 负责实现和领域返修，完成后独立 I 精确 SHA 合并验收。
+
+设计要求：先实际打开两份本地页面，检查首屏、滚动后的章节/应用截图及窄屏；读取样式数值仅帮助理解，不将打包脚本、字体、模型或品牌资产搬入项目。Christmas 的参考点是全屏黑色舞台、约 10% 的页边距、大字与空白的比例、画面和文字交替成为视觉主体及缓慢过渡；不能只截一个未加载完模型的画面。Linear 的参考点是细致的灰阶、细边界、小圆角、紧凑导航、文档式内容与上下文栏、连续的信息层级；消除目前过重的大卡片、巨型空容器、粗黑大字和过量黄色框线。使用统一字体栈、字号/行高/字距、间距和灰阶 token，在轨道文档记录参考观察与具体落地映射。黏菌黄作为自然主体和少量关键状态色。
+
+保留用户确认的叙事顺序：自动黄色原生黏菌 +「黏菌 / PHYSARUM」小字 → 同黑底自生长拓扑 +「自生长 / AGENT SWARM」小字 →「形态发生 / MORPHOGENESIS」中英文大字慢显 → 点击进入后台；无鼠标/触屏趋食。调整标题比例避免大字遮住整个拓扑，移除过时小字叠压；概念图与事实拓扑仍可分辨。后台继续使用原有真实数据契约，未知值、来源、三态、空态与错误态完整且易读；EvoMap 只读。`#/physarum`、`#/workspace`、`#/swarm` 深链、键盘焦点、reduced-motion 与隐藏动画暂停须保留。
+
+| 轨 | 固定所有者与 write_paths | 完成条件 |
+|---|---|---|
+| F / 原 Kimi | `morph-frontend-stack`；`viz/frontend/**`, `viz/static/**`, `tests/t5/**`, `docs/tracks/frontend-kimi-reference.md`, 必要的 `THIRD_PARTY_NOTICES.md` | 先核对干净状态，再快进到 c68def4 并合入本计划；真实 Kimi 会话完成设计、实现、测试和返修；原生黏菌算法只在有确切问题时改；不改 Python API 或锁文件；构建、T5、桌面与手机实图和操作验证通过；commit + push |
+| I / 独立集成 | 独立 Orca worktree / branch；精确合并、`tests/integration/**`, `docs/tracks/frontend-kimi-reference-integration.md` 与少量接线胶水 | 对照两包实图验收 1366×768、1920×1080、375×812 的序幕阶段与后台；复用适用检查，领域问题退原 Kimi；完整入口可用且来源明确；commit + push |
+
+运行范围：复用本地 mock/只读回放，不新增任务模型彩排或 Hub 写操作。开发预览使用未占用的独立端口；最终验收后核对 PID/cwd 再更新 7799，保留 7526/7527。以实际 Kimi 运行回执和会话标识确认模型，不能用其它模型代码冒充 Kimi 交付。
+
 ## 沉浸式序幕与产品后台重塑（2026-09-23，进行中）
 
 用户最新目标：保留已验收的原生黄色 Physarum 自动背景且不恢复鼠标/触屏趋食；首屏依次显示小字「黏菌 / PHYSARUM」、同黑底下自生长的拓扑概念动画及小字「自生长 / AGENT SWARM」、再缓慢显示大字「形态发生 / MORPHOGENESIS」，最后由用户点击「进入产品后台」。中文产品名按 Morphogenesis 的直译暂定为「形态发生」。后台参考用户提供的 `linear-site.zip` 的深色三栏密度与层级；序幕参考 `christmas-site.zip` 的黑底大字留白和时间节奏。两包只作本地视觉观察，不复制模型、字体、脚本、图片、文案或站点源码。已在隔离本地服务实际截图核对：前者为居中大字黑底，后者的应用示例为顶栏、左导航、中内容、右详情。
