@@ -11,9 +11,9 @@
 //                   the component always degrades to the static fallback
 //                   itself, onError is purely informational.
 //
-// Behavior: moving the pointer over the field attracts agents (no key or
-// click needed); agents slow down and aggregate near the cursor core;
-// leaving the field eases attraction back to zero so colonies recover
+// Behavior: moving the pointer over the field biases chemotaxis and advances
+// a connected feeding front (no key or click needed); leaving the field eases
+// attraction back to zero so the field recovers
 // smoothly. The simulation pauses while the tab is hidden or `active` is
 // false, and all WebGL resources are disposed on unmount. Touch (coarse
 // pointer) devices start at reduced quality and feed on touch-drag;

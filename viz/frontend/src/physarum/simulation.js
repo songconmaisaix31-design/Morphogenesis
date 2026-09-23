@@ -6,8 +6,8 @@
 // PingPongShader.js, Shader.js), re-implemented without Three.js so the
 // component carries no new runtime dependency. Ping-pong float textures,
 // agent update -> points -> diffuse/decay -> display passes are preserved,
-// as are branching (3-species sensor steering), aggregation (occupancy
-// displacement) and trails (diffuse/decay). Food seeking, core slowdown,
+// as are branching (sensor steering), aggregation (occupancy
+// displacement) and trails (diffuse/decay). Food seeking, flowing front,
 // smooth recovery, HiDPI coordinate mapping, visibility pause and disposal
 // are new for Morphogenesis.
 // License text: viz/static/licenses/physarum/Physarum-WebGL.LICENSE.MIT.txt
@@ -32,28 +32,20 @@ export class PhysarumUnavailable extends Error {
 // Species parameters, fixed for determinism (the reference randomizes per
 // page load; ranges mirror its randomizeSettings()).
 const SETTINGS = {
-  decay: 0.95,
-  trailOpacity: 1.0,
-  dotOpacity: 0.2,
+  decay: 0.975,
   dotSizes: [1, 1, 1],
-  moveSpeed: [1.7, 2.1, 1.4],
-  sensorDistance: [6.0, 9.0, 4.5],
-  rotationAngle: [0.5, 0.65, 0.4],
-  sensorAngle: [0.5, 0.7, 0.45],
-  // Weak cross-species repulsion, strong self-attraction: keeps the three
-  // colonies branching instead of merging into one mass.
-  attract0: [1.0, -0.15, -0.15],
-  attract1: [-0.15, 1.0, -0.15],
-  attract2: [-0.15, -0.15, 1.0],
-  // Morphogenesis palette (docs/FRONTEND_REFACTOR_PLAN.md). col1 is the cold
-  // white at reduced luminance: full-strength white sums over trails and dots
-  // into blown-out blobs (feedback from visual review).
-  col0: [0x65 / 255, 0xd9 / 255, 0xc7 / 255], // teal #65d9c7
-  col1: [(0xe8 / 255) * 0.5, (0xef / 255) * 0.5, (0xed / 255) * 0.5], // cold white #e8efed @50%
-  col2: [0x8c / 255, 0xa3 / 255, 0xa0 / 255], // secondary #8ca3a0
+  moveSpeed: [1.75, 1.85, 1.65],
+  sensorDistance: [7.0, 8.5, 5.5],
+  rotationAngle: [0.36, 0.43, 0.32],
+  sensorAngle: [0.48, 0.56, 0.42],
+  // All agents follow the same trail: one connected plasmodium, with varied
+  // sensor geometry supplying small branching differences.
+  attract0: [0.34, 0.34, 0.34],
+  attract1: [0.34, 0.34, 0.34],
+  attract2: [0.34, 0.34, 0.34],
   bgColor: [0x07 / 255, 0x0b / 255, 0x0d / 255], // page background #070b0d
-  foodCoreRadius: 56, // px in view space
-  foodTurn: 0.9, // rad/frame steering cap toward food
+  foodCoreRadius: 70, // px in view space
+  foodTurn: 0.085, // gentle rad/frame chemotactic bias
   // Food strength easing rate (1/s): ~350 ms to converge, gives the smooth
   // recovery when the pointer leaves.
   foodEase: 3.0,
@@ -120,26 +112,20 @@ function disposeTarget(gl, target) {
   gl.deleteTexture(target.texture);
 }
 
-// Initial layout, ported from resetPositions() of the reference (three
-// clusters at random interior points, random headings, species by cluster).
+// A single elongated seed colony keeps the rear connected as its leading edge
+// spreads into a fan. Sensor variants share one trail rather than separating.
 function seedAgents(grid, viewWidth, viewHeight) {
   const count = grid * grid;
   const data = new Float32Array(count * 4);
-  const marg = Math.min(viewWidth, viewHeight) * 0.2;
-  const clusters = [0, 1, 2].map(() => ({
-    x: rndFloat(marg, Math.max(marg + 1, viewWidth - marg)) - viewWidth * 0.5,
-    y: rndFloat(marg, Math.max(marg + 1, viewHeight - marg)) - viewHeight * 0.5,
-  }));
+  const cx = -Math.min(viewWidth * 0.18, 230);
   for (let i = 0; i < count; i++) {
     const id = i * 4;
     const team = Math.min(2, Math.floor((i / count) * 3));
-    const base = clusters[team];
     const ang = rndFloat(0, Math.PI * 2);
-    // Spread seeds wide enough that no cluster starts as a saturated blob.
-    const dis = rndFloat(30, 90) + team * 50 + rndFloat(0, 40);
-    data[id] = base.x + dis * Math.cos(ang);
-    data[id + 1] = base.y + dis * Math.sin(ang);
-    data[id + 2] = ang;
+    const dis = Math.sqrt(Math.random()) * Math.min(viewHeight * 0.22, 145);
+    data[id] = cx + dis * Math.cos(ang) * 1.25;
+    data[id + 1] = dis * Math.sin(ang);
+    data[id + 2] = rndFloat(-0.8, 0.8);
     data[id + 3] = team;
   }
   return data;
@@ -156,6 +142,7 @@ export class PhysarumSim {
     this.running = false;
     this.disposed = false;
     this.food = { x: 0, y: 0, strength: 0, target: 0 };
+    this.front = { x: 0, y: 0 };
     this.viewWidth = 0;
     this.viewHeight = 0;
     this.avgFrameMs = 0;
@@ -269,6 +256,10 @@ export class PhysarumSim {
     if (w === this.viewWidth && h === this.viewHeight) return;
     this.viewWidth = w;
     this.viewHeight = h;
+    if (!this.agentRead) {
+      this.front.x = w * 0.2;
+      this.front.y = h * 0.08;
+    }
     this.canvas.width = w;
     this.canvas.height = h;
     const gl = this.gl;
@@ -357,6 +348,13 @@ export class PhysarumSim {
       if (Math.abs(this.food.strength - this.food.target) < 0.001) {
         this.food.strength = this.food.target;
       }
+      // The anterior margin advances over time; the posterior anchor stays
+      // connected, rather than teleporting the entire mass with the cursor.
+      const frontEase = 1 - Math.exp(-1.25 * (dt / 1000));
+      const targetX = this.food.strength * this.food.x + (1 - this.food.strength) * this.viewWidth * 0.2;
+      const targetY = this.food.strength * this.food.y + (1 - this.food.strength) * this.viewHeight * 0.08;
+      this.front.x += (targetX - this.front.x) * frontEase;
+      this.front.y += (targetY - this.front.y) * frontEase;
     }
     this._lastTs = ts;
     this._step();
@@ -435,12 +433,10 @@ export class PhysarumSim {
     const f = this.uniforms.display;
     this._bindTexture(0, this.trailRead.texture, f.diffuseTexture);
     this._bindTexture(1, this.pointsTarget.texture, f.pointsTexture);
-    gl.uniform3fv(f.col0, s.col0);
-    gl.uniform3fv(f.col1, s.col1);
-    gl.uniform3fv(f.col2, s.col2);
     gl.uniform3fv(f.bgColor, s.bgColor);
-    gl.uniform1f(f.trailOpacity, s.trailOpacity);
-    gl.uniform1f(f.dotOpacity, s.dotOpacity);
+    gl.uniform2f(f.resolution, w, h);
+    gl.uniform1f(f.time, this.time);
+    gl.uniform2f(f.frontPos, this.front.x, this.front.y);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     gl.bindVertexArray(null);

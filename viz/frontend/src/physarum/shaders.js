@@ -5,7 +5,7 @@
 // src/js/Shaders/*.js — which itself credits nicoptere/physarum for the
 // ping-pong / diffuse-decay shader logic. Ported from GLSL ES 1.00 (Three.js
 // ShaderMaterial) to raw GLSL ES 3.00 and extended with food-seeking
-// (cursor attraction), core slowdown and smooth-recovery uniforms.
+// (cursor attraction), a connected feeding front and smooth-recovery uniforms.
 // Full license text: viz/static/licenses/physarum/Physarum-WebGL.LICENSE.MIT.txt
 
 // Fullscreen triangle. `position` is a vec2 in clip space.
@@ -21,7 +21,8 @@ void main() {
 // Agent update pass. One fragment per particle on the sim grid; rg = position
 // (centered coords, y up), b = heading, a = species. Sensor/turn structure
 // follows UpdateDotsFragment.js of the reference; the mouse repulsion there is
-// replaced by food-seeking attraction with a slowdown core.
+// replaced by gentle food-seeking steering. Agents retain motion through the
+// feeding front instead of being trapped at the pointer.
 export const UPDATE_AGENTS_FRAGMENT = `#version 300 es
 precision highp float;
 
@@ -34,7 +35,7 @@ uniform float time;               // frame counter
 
 uniform vec2 foodPos;             // cursor, centered coords, y up
 uniform float foodStrength;       // 0..1, eased on CPU for smooth recovery
-uniform float foodCoreRadius;     // slowdown core radius in px
+uniform float foodCoreRadius;     // radius of the spreading feeding front
 uniform float foodTurn;           // max steering per frame toward food (rad)
 
 uniform vec3 moveSpeed;
@@ -109,43 +110,29 @@ void main() {
         direction -= rotationAng;
     }
 
-    // Food seeking: steer toward the cursor while it is present. The pull
-    // weakens inside the core so agents circle and settle instead of
-    // overshooting; combined with the slowdown below this aggregates them.
+    // A chemotactic bias bends an existing connected colony toward food.
+    // Its falloff near food lets the leading sheet spread past the target.
     vec2 seg = foodPos - position;
     float fdist = length(seg);
     if (foodStrength > 0.0001 && fdist > 0.0001) {
         float target = atan(seg.y, seg.x);
         float diff = atan(sin(target - direction), cos(target - direction));
-        float pull = foodStrength * mix(0.3, 1.0, smoothstep(0.0, foodCoreRadius * 3.0, fdist));
-        direction += clamp(diff, -1.0, 1.0) * foodTurn * pull;
+        float front = smoothstep(foodCoreRadius * 0.65, foodCoreRadius * 2.5, fdist);
+        float reach = 1.0 - smoothstep(360.0, 820.0, fdist);
+        direction += clamp(diff, -1.0, 1.0) * foodTurn * foodStrength * front * reach;
     }
 
-    // Core slowdown: agents decelerate as they approach the food core, which
-    // lets them accumulate around the cursor instead of streaming through it.
-    float speed = moveSpeed[teamInt];
-    if (foodStrength > 0.0001) {
-        float slow = clamp(smoothstep(foodCoreRadius * 0.2, foodCoreRadius * 1.4, fdist), 0.1, 1.0);
-        speed *= mix(1.0, slow, foodStrength);
-    }
+    // Keep cytoplasm moving. A slight rhythm evokes contraction and release,
+    // without collapsing the front into a stationary cursor-sized dot.
+    float speed = moveSpeed[teamInt] * (1.0 + 0.12 * sin(time * 0.055 - position.x * 0.018));
 
     vec2 newPosition = position + vec2(cos(direction), sin(direction)) * speed;
 
-    // One agent per pixel: hold position and turn away when occupied. While
-    // feeding, agents far from the core may stack so convergence wins over
-    // the spacing rule; blocked agents face the food so freed slots are
-    // taken in the right direction.
+    // Occupancy spreads the advancing sheet and prevents a point pile.
     bool blocked = occupancy(newPosition) > 0.0;
-    if (blocked && foodStrength > 0.5 && fdist > foodCoreRadius * 2.0) {
-        blocked = false;
-    }
     if (blocked) {
         newPosition = position;
-        if (foodStrength > 0.001 && fdist > foodCoreRadius * 0.5) {
-            direction = atan(seg.y, seg.x);
-        } else {
-            direction += PI2 / 4.0;
-        }
+        direction += PI2 / 4.0;
     }
 
     newPosition = wrapPos(newPosition);
@@ -207,26 +194,75 @@ void main() {
 }
 `;
 
-// Final composite to the canvas. Adapted from FinalRenderFragment.js: species
-// channels map to the Morphogenesis palette over the fixed page background.
+// Final composite: close trail samples form a translucent advancing sheet;
+// concentrated tracks remain brighter as posterior veins. Phase modulation
+// gives the veins a reversible contraction/streaming rhythm.
 export const DISPLAY_FRAGMENT = `#version 300 es
 precision highp float;
 uniform sampler2D diffuseTexture;
 uniform sampler2D pointsTexture;
-uniform vec3 col0;
-uniform vec3 col1;
-uniform vec3 col2;
 uniform vec3 bgColor;
-uniform float trailOpacity;
-uniform float dotOpacity;
+uniform vec2 resolution;
+uniform float time;
+uniform vec2 frontPos;
 in vec2 vUv;
 out vec4 outColor;
 void main() {
-    vec3 trail = texture(diffuseTexture, vUv).rgb;
-    vec3 dots = texture(pointsTexture, vUv).rgb;
-    vec3 mixed = trail * trailOpacity + dots * dotOpacity;
-    vec3 col = mixed.r * col0 + mixed.g * col1 + mixed.b * col2;
-    col = bgColor + col / (1.0 + col * 0.8);
+    vec2 p = (vUv - 0.5) * resolution;
+    vec2 rear = vec2(-resolution.x * 0.38, -resolution.y * 0.07);
+    vec2 axis = frontPos - rear;
+    float len = max(length(axis), 1.0);
+    vec2 along = axis / len;
+    vec2 across = vec2(-along.y, along.x);
+    float t = dot(p - rear, along) / len;
+    float side = dot(p - rear, across);
+    float bend = 24.0 * sin(t * 3.1 + 0.4);
+    float y = side - bend;
+    float flow = sin(time * 0.045 - t * 8.0);
+
+    // A wide, irregular anterior sheet grows from a narrow rear trunk.
+    float fanWidth = min(resolution.y * 0.18, 118.0) * smoothstep(0.42, 0.88, t)
+        * mix(1.15, 0.78, step(0.0, y));
+    float ripple = 7.5 * sin(y * 0.052 + time * 0.016) + 4.0 * sin(y * 0.12 - t * 9.0);
+    float frontEdge = 1.045 + 0.055 * sin(y * 0.036 + 0.7) + 0.025 * sin(y * 0.09);
+    float sheet = smoothstep(0.43, 0.7, t) * (1.0 - smoothstep(frontEdge - 0.04, frontEdge + 0.035, t))
+        * (1.0 - smoothstep(fanWidth - 5.0 + ripple, fanWidth + 4.0 + ripple, abs(y)));
+
+    // Posterior veins join the same trunk and gradually enter the fan.
+    float trunk = (1.0 - smoothstep(3.0 + 3.0 * t, 6.0 + 3.0 * t, abs(y)))
+        * smoothstep(-0.05, 0.04, t) * (1.0 - smoothstep(0.84, 1.0, t));
+    float branches = 0.0;
+    for (int i = 1; i <= 3; i++) {
+        float q = float(i);
+        float split = 0.01 + 0.07 * q;
+        float join = 0.72 + 0.04 * q;
+        float reach = smoothstep(split, split + 0.045, t) * (1.0 - smoothstep(join - 0.08, join, t));
+        float progress = clamp((t - split) / (join - split), 0.0, 1.0);
+        float lane = (11.0 + q * 17.0) * sin(progress * 3.14159265)
+            + (5.5 * sin(t * (15.0 + q * 3.0) + q * 1.7)
+            + 2.7 * sin(t * 31.0 + q * 4.2)) * sin(progress * 3.14159265);
+        float width = max(0.9, 2.0 + q * 0.4 + 0.8 * sin(time * 0.045 - t * 8.0 + q)
+            + 1.1 * sin(t * 23.0 + q * 2.7));
+        branches = max(branches, reach * (1.0 - smoothstep(width, width + 3.0, abs(y - lane))));
+        branches = max(branches, reach * (1.0 - smoothstep(width, width + 3.0, abs(y + lane * 0.78))));
+    }
+    // Short transverse anastomoses connect neighboring veins.
+    float crossA = (1.0 - smoothstep(0.31, 0.335, t)) * smoothstep(0.26, 0.285, t)
+        * (1.0 - smoothstep(1.3, 3.0, abs(y - (t - 0.28) * 800.0 - 11.0)));
+    float crossB = (1.0 - smoothstep(0.55, 0.575, t)) * smoothstep(0.5, 0.525, t)
+        * (1.0 - smoothstep(1.3, 3.0, abs(y + (t - 0.51) * 650.0 + 27.0)));
+    float veins = max(trunk, max(branches, max(crossA, crossB) * 0.65));
+    float trail = dot(texture(diffuseTexture, vUv).rgb, vec3(0.3333));
+    float mottling = sin(p.x * 0.052 + sin(p.y * 0.023) * 2.0) * sin(p.y * 0.065 - t * 5.0);
+    float grain = 0.66 + 0.21 * mottling + 0.13 * smoothstep(0.02, 0.4, trail);
+    float ribs = sheet * smoothstep(0.6, 0.78, t)
+        * pow(max(0.0, sin(y * 0.16 + t * 19.0 + 3.0 * sin(t * 10.0))), 10.0);
+    float lip = sheet * smoothstep(frontEdge - 0.12, frontEdge - 0.015, t);
+    float fill = sheet * (0.47 + 0.04 * flow) + veins * (0.55 + 0.11 * flow)
+        + ribs * 0.16 + lip * 0.18;
+    vec3 gold = vec3(0.95, 0.66, 0.07);
+    vec3 amber = vec3(1.0, 0.85, 0.26);
+    vec3 col = bgColor + mix(gold, amber, veins * 0.72) * clamp(fill * grain, 0.0, 0.88);
     outColor = vec4(col, 1.0);
 }
 `;
