@@ -18,17 +18,18 @@ const Property = ({ icon, label, children }) => <div className='KFZpfa_propertyR
   <Icon name={icon} /><span className='property-label'>{label}</span><span className='property-value'>{children}</span>
 </div>;
 
-function TopologyPanel({ dashboard, swarm, active, reducedMotion }) {
+function TopologyPanel({ swarm, active, reducedMotion }) {
   const { Component: SwarmTopology, error } = useTrackComponent('swarm');
   useEffect(() => { document.body.dataset.swarmModule = SwarmTopology && !error ? 'loaded' : 'fallback'; }, [SwarmTopology, error]);
   return <>
-    <div className='backend-page-heading'><h1>蜂群拓扑</h1><span id='story-offline-member'>未发生 / 未加载</span></div>
-    <p className='backend-description' id='story-offline-reason'>尚无运行快照。</p>
+    <div className='backend-page-heading'><h1>蜂群拓扑</h1><span>本地协作事实</span></div>
+    <p className='backend-description'>观察成员、任务、路由与经验如何在本地形成可追溯的协作关系。</p>
     <div className={`morph-topology-body${SwarmTopology && !error ? ' has-swarm-module' : ''}`}>
-      {SwarmTopology && !error && <SwarmTopology dashboard={dashboard} swarm={swarm} active={active} reducedMotion={reducedMotion} />}
-      <div id='story-pipe-chart' className='story-pipe-chart' style={SwarmTopology && !error ? { display: 'none' } : undefined} />
+      {SwarmTopology && !error && <SwarmTopology swarm={swarm} active={active} reducedMotion={reducedMotion} />}
+      {error && <p className='swarm-state swarm-state-error' role='alert'>蜂群视图模块暂时不可用，请刷新后重试。</p>}
+      <div id='story-pipe-chart' className='story-pipe-chart' hidden />
       <div id='story-pipe-empty' className='empty pipe-empty' hidden />
-      <details className='backend-pipe-details'><summary>管道权重详情</summary><div id='story-pipes' className='pipe-list'><p>尚无管道快照</p></div></details>
+      <details className='backend-pipe-details' hidden><summary>管道权重详情</summary><div id='story-pipes' className='pipe-list' /></details>
     </div>
   </>;
 }
@@ -40,6 +41,9 @@ function Backend({ dashboard, swarm = null, active = true, reducedMotion = false
   const closeButton = useRef(null);
   const current = dashboard?.rehearsal?.current;
   const status = current ? stages[current.stage] ?? current.stage ?? '未知' : '未加载';
+  const swarmProvenance = swarm?.data?.acceptance?.provenance;
+  const topologySource = ({ live: '真实运行记录', mock: '模拟运行记录', replay: '历史回放', unverified: '来源未验证' })[swarmProvenance] ?? (swarm?.state === 'loading' ? '读取中' : '来源未验证');
+  const topologyStatus = swarm?.state === 'stale' ? '陈旧快照' : swarm?.state === 'missing' ? '状态源缺失' : swarm?.state === 'error' ? '观察失败' : swarm?.state === 'loading' ? '读取中' : '只读快照';
   const title = views.find(([id]) => id === selected)?.[2];
   const navigate = (id) => setSelected(id);
   useEffect(() => { document.querySelector('.backend-content-scroll')?.scrollTo(0, 0); }, [selected]);
@@ -86,10 +90,10 @@ function Backend({ dashboard, swarm = null, active = true, reducedMotion = false
       <div className='KFZpfa_panel'>
         <header className='_1uFtza_header _1uFtza_locationBar backend-topbar'>
           <div className='_1uFtza_breadcrumb backend-breadcrumb'><Icon name={views.find(([id]) => id === selected)?.[1]} /><span>{title}</span><span className='backend-breadcrumb-task' title={current?.task_id}>{current?.task_id ?? 'Morphogenesis'}</span></div>
-          <div className='backend-toolbar-end'><span id='provenance' className='morph-badge'>加载中</span><button type='button' className='_1uFtza_buttonBase' aria-label='查看运行详情' aria-expanded={detailsOpen} aria-controls='backend-details' onClick={openDetails}><Icon name='more' /></button></div>
+          <div className='backend-toolbar-end'>{selected === 'topology' ? <span className='morph-badge'>{topologySource}</span> : <span id='provenance' className='morph-badge'>加载中</span>}<button type='button' className='_1uFtza_buttonBase' aria-label='查看运行详情' aria-expanded={detailsOpen} aria-controls='backend-details' onClick={openDetails}><Icon name='more' /></button></div>
         </header>
         <div id='connection-state' className='morph-connection' role='status' />
-        <div className='_1uFtza_viewBar backend-viewbar'><span className='backend-run-status'><Icon name='status' />{status}</span><button type='button' className='_1uFtza_pillButton' onClick={openDetails}><Icon name='target' /><span>验收详情</span></button></div>
+        <div className='_1uFtza_viewBar backend-viewbar'><span className='backend-run-status'><Icon name='status' />{selected === 'topology' ? topologyStatus : status}</span><button type='button' className='_1uFtza_pillButton' onClick={openDetails}><Icon name='target' /><span>验收详情</span></button></div>
         <div className='backend-content-scroll'>
           <section {...panelProps('overview')} className='KFZpfa_viewBody backend-overview'>
             <article className='KFZpfa_body KFZpfa_contentColumn'>
@@ -114,7 +118,7 @@ function Backend({ dashboard, swarm = null, active = true, reducedMotion = false
               </div>
             </aside>
           </section>
-          <section {...panelProps('topology')} className='backend-document'><TopologyPanel dashboard={dashboard} swarm={swarm} active={active && selected === 'topology'} reducedMotion={reducedMotion} /></section>
+          <section {...panelProps('topology')} className='backend-document'><TopologyPanel swarm={swarm} active={active && selected === 'topology'} reducedMotion={reducedMotion} /></section>
           <section {...panelProps('genes')} className='backend-document'><div className='backend-page-heading'><h1>Gene 池</h1></div><div id='story-genes' className='gene-ledger-list'><p>尚无 Gene 快照</p></div><h2>谱系</h2><div id='gene-chart' className='chart' /><div id='gene-empty' className='empty' hidden /></section>
           <section {...panelProps('evidence')} className='backend-document'><div className='backend-page-heading'><h1>证据与指标</h1></div><h2>消息流</h2><div id='message-chart' className='chart' /><div id='message-empty' className='empty' hidden /><h2>历史指标</h2><div id='metric-chart' className='chart' /><div id='metric-empty' className='empty' hidden /></section>
           <section {...panelProps('evomap')} className='backend-document'><EvoMapPanel evomap={evomap} detail={evomapDetail} onSearch={onSearch} onOpenAsset={onOpenAsset} /></section>

@@ -143,8 +143,15 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             # Strictly read-only swarm view; no query parameters, request body,
             # or filesystem path are interpreted here.
             loader = self.swarm_loader or empty_swarm
-            body = json.dumps(loader(), ensure_ascii=False).encode("utf-8")
-            self._json_response(200, body)
+            try:
+                payload = loader()
+                status = 200
+            except Exception:
+                payload = empty_swarm("蜂群只读观察暂时失败，请稍后重试。")
+                payload["health"] = "error"
+                status = 503
+            body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+            self._json_response(status, body)
             return
         if route.path == "/vendor/echarts.min.js":
             body = self.echarts_asset.read_bytes()
@@ -204,11 +211,14 @@ def main() -> None:
     parser.add_argument("--replay", action="store_true", help="Read the named rehearsal evidence as a downgraded replay")
     parser.add_argument("--evomap-store", type=Path, help="Read-only local Gene pool from the runtime SQLite store (e.g. metadata.db)")
     parser.add_argument("--swarm-state", type=Path, help="Read-only decentralized swarm state directory (tasks/field/budget SQLite, workers/audit JSON)")
+    parser.add_argument("--swarm-replay", action="store_true", help="Mark a copied swarm state as historical replay; requires --swarm-state")
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("port must be between 1 and 65535")
     if args.replay and not args.rehearsal:
         parser.error("--replay requires --rehearsal")
+    if args.swarm_replay and not args.swarm_state:
+        parser.error("--swarm-replay requires --swarm-state")
 
     root = Path(__file__).resolve().parent.parent
     load_data: Callable[[], DashboardData]
@@ -231,7 +241,7 @@ def main() -> None:
     if args.swarm_state is not None:
         # Bind the path now; the observer itself fails closed per request.
         swarm_state = args.swarm_state
-        swarm_loader = lambda: load_swarm(swarm_state)
+        swarm_loader = lambda: load_swarm(swarm_state, replay=args.swarm_replay)
     handler = partial(
         DashboardHandler, directory=str(root / "viz" / "static"),
         dashboard_loader=load_data, echarts_asset=asset,

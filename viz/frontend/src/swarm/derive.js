@@ -195,11 +195,11 @@ export const LEASE_LABELS = {
   partial: '提交中', handoff: '已交接', failed: '已失败',
 };
 export const LEASE_ORDER = { leased: 0, partial: 1, expired: 2, handoff: 3, available: 4, completed: 5, failed: 6 };
-export const RESERVATION_LABELS = { reserved: '已预留', settled: '已结算', unknown: '未知' };
+export const RESERVATION_LABELS = { reserved: '已预留', settled: '已结算', unknown: '未知', unknown_cost_allowed: '费用未知 · 允许继续' };
 
 // Deterministic bipartite layout: workers on the left, capability pipes on the
 // right; a single population falls back to a full-width row.
-export function layoutSwarmNodes(workerIds, pipeIds) {
+export function layoutSwarmNodes(columns) {
   const positions = new Map();
   const placeColumn = (ids, x) => {
     const n = ids.length;
@@ -208,28 +208,22 @@ export function layoutSwarmNodes(workerIds, pipeIds) {
       positions.set(id, { x, y: n === 1 ? 0.5 : 0.12 + (i / (n - 1)) * 0.76 });
     });
   };
-  const placeRow = (ids) => {
-    const n = ids.length;
-    if (!n) return;
-    ids.forEach((id, i) => {
-      positions.set(id, { x: n === 1 ? 0.5 : 0.12 + (i / (n - 1)) * 0.76, y: 0.5 });
-    });
-  };
-  if (workerIds.length && pipeIds.length) {
-    placeColumn(workerIds, 0.18);
-    placeColumn(pipeIds, 0.82);
-  } else if (workerIds.length) {
-    placeRow(workerIds);
-  } else {
-    placeRow(pipeIds);
-  }
+  const populated = columns.filter((ids) => ids.length);
+  populated.forEach((ids, index) => placeColumn(ids, populated.length === 1 ? 0.5 : 0.08 + (index / (populated.length - 1)) * 0.84));
   return positions;
 }
 
-export function deriveSwarmView(swarm) {
-  if (!swarm || typeof swarm !== 'object') {
-    return { state: 'disconnected', message: '蜂群数据不可用；不保留旧画面。' };
+export function deriveSwarmView(transport) {
+  if (!transport || typeof transport !== 'object') {
+    return { state: 'error', message: '蜂群数据暂时不可用，请稍后重试。' };
   }
+  const transportState = transport.state ?? 'error';
+  const swarm = transport.data;
+  if (!swarm || typeof swarm !== 'object') return {
+    state: transportState, message: transportState === 'loading' ? '正在读取 /api/swarm…'
+      : transportState === 'missing' ? '当前没有可读取的蜂群状态。'
+      : `蜂群只读观察失败${transport.detail ? `：${transport.detail}` : '。'}`,
+  };
   const workers = Array.isArray(swarm.workers) ? swarm.workers : [];
   const tasks = Array.isArray(swarm.tasks) ? swarm.tasks : [];
   const routes = Array.isArray(swarm.routes) ? swarm.routes : [];
@@ -240,34 +234,42 @@ export function deriveSwarmView(swarm) {
   const promotions = Array.isArray(swarm.promotions) ? swarm.promotions : [];
   const budget = swarm.budget ?? null;
 
-  if (!workers.length && !tasks.length && !routes.length && !signals.length && !assets.length && !audit.length) {
+  if (swarm.health === 'missing') {
     return {
-      state: 'empty',
-      message: swarm.health === 'missing' ? '未配置蜂群状态目录；/api/swarm 保持空态。' : '尚无蜂群运行快照。',
+      state: 'missing', message: swarm.notes?.[0] ?? '当前没有可读取的蜂群状态。',
       health: swarm.health ?? 'partial',
       hubStatus: swarm.hub_status ?? '待发布',
     };
   }
 
-  const workerIds = workers.map((worker) => worker.worker_id).filter(Boolean);
-  const pipeIds = [...new Set(routes.map((route) => route.pipe_key).filter(Boolean))];
-  const positions = layoutSwarmNodes(workerIds, pipeIds);
+  const workerIds = workers.map((worker) => worker.worker_id).filter(Boolean).map((id) => `worker:${id}`);
+  const capabilityIds = [...new Set([
+    ...routes.map((route) => route.pipe_key), ...tasks.map((task) => task.capability),
+  ].filter(Boolean))].map((id) => `capability:${id}`);
+  const taskIds = tasks.map((task) => task.task_id).filter(Boolean).map((id) => `task:${id}`);
+  const assetIds = [...new Set(assets.flatMap((asset) => [asset.asset_id, asset.candidate_asset_id]).filter(Boolean))].map((id) => `asset:${id}`);
+  const positions = layoutSwarmNodes([workerIds, capabilityIds, taskIds, assetIds]);
 
   const nodes = [
-    ...workerIds.map((id) => {
-      const worker = workers.find((item) => item.worker_id === id) ?? {};
+    ...workerIds.map((key) => {
+      const id = key.slice(7); const worker = workers.find((item) => item.worker_id === id) ?? {};
       return {
-        key: id, kind: 'worker', position: positions.get(id),
+        key, label: id, kind: 'worker', position: positions.get(key),
         state: worker.state ?? 'unknown', remainingEnergy: worker.remaining_energy ?? null,
         completed: worker.completed ?? null, provenance: worker.provenance ?? null,
       };
     }),
-    ...pipeIds.map((id) => ({ key: id, kind: 'pipe', position: positions.get(id), state: 'pipe' })),
+    ...capabilityIds.map((key) => ({ key, label: key.slice(11), kind: 'capability', position: positions.get(key) })),
+    ...taskIds.map((key) => {
+      const task = tasks.find((item) => item.task_id === key.slice(5)) ?? {};
+      return { key, label: key.slice(5), kind: 'task', position: positions.get(key), state: task.lease_state ?? task.status ?? 'unknown' };
+    }),
+    ...assetIds.map((key) => ({ key, label: key.slice(6), kind: 'asset', position: positions.get(key) })),
   ];
 
-  const edges = routes.map((route, index) => ({
-    key: `${route.worker_id}→${route.pipe_key}#${index}`,
-    source: route.worker_id, target: route.pipe_key,
+  const routeEdges = routes.map((route, index) => ({
+    key: `route:${route.worker_id}→${route.pipe_key}#${index}`, kind: 'route',
+    source: `worker:${route.worker_id}`, target: `capability:${route.pipe_key}`,
     weight: route.decayed_weight ?? route.weight ?? null,
     rawWeight: route.weight ?? null,
     samples: route.samples ?? null,
@@ -278,9 +280,30 @@ export function deriveSwarmView(swarm) {
   tasks.forEach((task) => (task.dependencies ?? []).forEach((dependency) => {
     dependsOn.push({ taskId: task.task_id, dependency });
   }));
+  const taskEdges = tasks.flatMap((task) => {
+    const edges = [];
+    if (task.capability) edges.push({ key: `cap:${task.capability}:${task.task_id}`, kind: 'capability', source: `capability:${task.capability}`, target: `task:${task.task_id}` });
+    if (task.owner) edges.push({ key: `lease:${task.owner}:${task.task_id}`, kind: 'lease', source: `worker:${task.owner}`, target: `task:${task.task_id}` });
+    (task.dependencies ?? []).forEach((dependency) => edges.push({ key: `dep:${dependency}:${task.task_id}`, kind: 'dependency', source: `task:${dependency}`, target: `task:${task.task_id}` }));
+    if (task.derived_from) edges.push({ key: `derived:${task.derived_from}:${task.task_id}`, kind: 'lineage', source: `task:${task.derived_from}`, target: `task:${task.task_id}` });
+    return edges;
+  });
+  const signalEdges = signals.filter((signal) => signal.task_id).map((signal) => ({
+    key: `signal:${signal.signal_id}:${signal.task_id}`, kind: 'pheromone', source: `capability:${tasks.find((task) => task.task_id === signal.task_id)?.capability}`, target: `task:${signal.task_id}`,
+    weight: signal.decayed_concentration ?? signal.concentration ?? null,
+  })).filter((edge) => positions.has(edge.source));
+  const assetEdges = assets.flatMap((asset, index) => {
+    const edges = [];
+    if (asset.asset_id && asset.candidate_asset_id) edges.push({ key: `adopt:${index}`, kind: 'adoption', source: `asset:${asset.asset_id}`, target: `asset:${asset.candidate_asset_id}` });
+    if (asset.task_id && asset.candidate_asset_id) edges.push({ key: `result:${index}`, kind: 'lineage', source: `task:${asset.task_id}`, target: `asset:${asset.candidate_asset_id}` });
+    return edges;
+  });
+  const edges = [...routeEdges, ...taskEdges, ...signalEdges, ...assetEdges];
+  const hasFacts = nodes.length || edges.length || signals.length || audit.length || workerAudit.length || promotions.length || (budget?.reservations?.length ?? 0);
 
   return {
-    state: 'ready',
+    state: transportState === 'stale' ? 'stale' : hasFacts ? 'ready' : 'empty',
+    message: hasFacts ? transport.detail : '状态目录可读，但当前没有蜂群事实。',
     schema: swarm.schema,
     health: swarm.health ?? 'partial',
     hubStatus: swarm.hub_status ?? '待发布',
@@ -291,5 +314,6 @@ export function deriveSwarmView(swarm) {
     workers, tasks, routes, signals,
     budget, audit, workerAudit, assets, promotions, dependsOn,
     boundaries: Array.isArray(swarm.boundaries) ? swarm.boundaries : [],
+    sources: swarm.sources ?? {}, lastSuccessAt: transport.lastSuccessAt ?? null,
   };
 }
