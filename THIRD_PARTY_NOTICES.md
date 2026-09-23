@@ -81,3 +81,25 @@ see Section 6 of the License. Implementations of the protocol are welcome
 and encouraged, but must not be marketed under the EvoMap, GEP, or Genome
 Evolution Protocol names without prior written permission.
 ```
+
+## User-provided design snapshots (2026-09-23)
+
+The user explicitly authorized direct reuse of the supplied `christmas-site.zip`
+and `linear-site.zip` for this project. These are user-provided website snapshots,
+not verified open-source templates. Snapshot source version and redistribution
+license were not included/verified; no MIT or Apache license is asserted for these
+assets or adapted declarations. Existing third-party notices above remain intact.
+
+| Snapshot / original relative path | Product target | Reuse and changes |
+| --- | --- | --- |
+| christmas-site / `assets/index-b8e6792d.css` (`.section`, odd section alignment) | `viz/frontend/src/reference.css` | Actual black stage, `100dvh`, 10% horizontal padding, `#ffeded`, Jost and `6vmin` declarations; scroll chapters become timed scenes, bilingual title weight/line-height adapted, alternating left/right text alignment retained. |
+| christmas-site / `_ext/fonts.googleapis.com/css2_ed0de8.css` and `_ext/fonts.gstatic.com/s/jost/v20/92zatBhPNqw73oTd4g.woff2` | `viz/frontend/src/reference.css`, `viz/static/fonts/Jost-latin.woff2` | Local Latin Jost font copied byte-for-byte, local `@font-face`; original CSS said `Jost Medium` while supplied face is `Jost`, so family name corrected. Chinese uses the installed CJK sans fallback. URL path says v20; actual upstream release/license unknown from this snapshot. |
+| linear-site / `assets/css/layout.B05Dfi6O_cf0c9cb7.css` and `assets/font/InterVariable_36a96895.woff2` | `viz/frontend/src/reference.css`, `viz/static/fonts/InterVariable.woff2` | Local variable font copied byte-for-byte; 100-900 face declaration, actual dark surface/text/border variables and 400/510/590/680 weights reused. No remote font fetch. |
+| linear-site / `assets/css/HeroIllustration.CR-IZ0h7_16ec15e1.css` (`WS84WW`, `Mmx1Wq`, `_5YOmVq`) | `viz/frontend/src/backend/backend.css`, `Backend.jsx` | 232px sidebar, 28px navigation, 8px row radius, 720px centered document, 32px icon, 24px metadata, neutral translucent borders/backgrounds and sidebar/document/context structure adapted to real Morphogenesis regions. Mobile wraps controls instead of shrinking a marketing illustration to half size. |
+| linear-site / `assets/css/IssueListView.BH55qTC9_ccd67967.css`, `Button.dcAi4KbO_f1b9ab6e.css` | `viz/frontend/src/backend/backend.css` | Compact row/control alignment, small control type, hover backgrounds and 0.16s transitions; native buttons keep actual section navigation and read-only search actions. |
+
+Generated `viz/static/assets/finals-shell.css` and `.js` include these adaptations.
+Brand names/copy, original site JS bundles, GTM/trackers, remote marketing requests,
+images, Christmas models and the offline reveal hacks are not product imports.
+Font-specific licenses have not been independently established from the supplied
+files; the user's reuse authorization is recorded without relabeling ownership.

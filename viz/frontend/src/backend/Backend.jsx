@@ -1,6 +1,6 @@
 // Product workspace. The shell owns network requests and calls MorphDashboard;
 // its data-owned DOM IDs live here and must remain stable across React renders.
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from 'tdesign-react';
 import Board from '../components/Board';
 import EvoMapPanel from '../components/EvoMapPanel';
@@ -18,7 +18,7 @@ const TopologyPanel = ({ dashboard, active, reducedMotion }) => {
       actions={<span className='morph-panel-side' id='story-offline-member'>未发生 / 未加载</span>}>
       <p className='morph-panel-line'><b id='story-question'>未加载</b><span id='story-question-detail'>等待实际题目、已知失败点与来源。</span></p>
       <p className='morph-panel-line' id='story-offline-reason'>下线原因和恢复 checkpoint 均须来自真实快照。</p>
-      <div className='morph-topology-body'>
+      <div className={`morph-topology-body${SwarmTopology && !error ? ' has-swarm-module' : ''}`}>
         <div className='morph-topology-chart'>
           {SwarmTopology && !error
             ? <div className='swarm-topology-slot'><SwarmTopology dashboard={dashboard} active={active} reducedMotion={reducedMotion} /></div>
@@ -33,7 +33,7 @@ const TopologyPanel = ({ dashboard, active, reducedMotion }) => {
 };
 
 const EventPanel = () => (
-  <Card className='morph-panel' bordered={false} title={<span className='morph-panel-title'>事件流 · 真实阶段历史</span>}>
+  <Card className='morph-panel' bordered={false} title={<span className='morph-panel-title'>事件流</span>}>
     <div id='event-feed' className='event-feed'><p>尚无阶段快照</p></div>
   </Card>
 );
@@ -51,13 +51,13 @@ const AcceptanceStrip = () => (
 
 const GeneLedger = () => (
   <Card className='morph-panel gene-ledger' bordered={false}
-    title={<span className='morph-panel-title'>Gene 池 · 生成 / 采用 / 衰减 / 归档</span>}>
+    title={<span className='morph-panel-title'>Gene 池</span>}>
     <div id='story-genes' className='gene-ledger-list'><p>尚无 GeneView 快照</p></div>
   </Card>
 );
 
 const SecondaryPanel = () => (
-  <section className='morph-secondary' aria-label='谱系、消息与指标详情'>
+  <section id='backend-evidence' className='morph-secondary' aria-label='谱系、消息与指标详情'>
     <Card className='morph-panel' bordered={false} title={<span className='morph-panel-title'>Gene 谱系</span>}>
       <p className='morph-panel-note'>仅使用显式导出的 Gene 正文；无正文时不推断谱系。</p>
       <div id='gene-chart' className='chart'></div><div id='gene-empty' className='empty' hidden></div>
@@ -78,7 +78,10 @@ const scrollToSection = (id) => document.getElementById(id)?.scrollIntoView({
   block: 'start',
 });
 
-const Backend = ({ dashboard, active = true, reducedMotion = false, evomap, evomapDetail, onSearch, onOpenAsset, onReturn }) => (
+const Backend = ({ dashboard, active = true, reducedMotion = false, evomap, evomapDetail, onSearch, onOpenAsset, onReturn }) => {
+  const [selectedSection, setSelectedSection] = useState('backend-overview');
+  const navigate = (id) => { setSelectedSection(id); scrollToSection(id); };
+  return (
   <div className='morph-backend'>
     <header className='backend-topbar'>
       <div className='backend-brand'><span className='backend-brand-mark' aria-hidden='true'>◒</span><span>形态发生</span><small>MORPHOGENESIS</small></div>
@@ -91,13 +94,12 @@ const Backend = ({ dashboard, active = true, reducedMotion = false, evomap, evom
     </header>
     <div className='backend-grid'>
       <nav className='backend-sidebar' aria-label='工作台导航'>
-        <div className='backend-nav-group'><span className='backend-nav-caption'>WORKSPACE</span>
-          <button type='button' onClick={() => scrollToSection('backend-overview')}><span aria-hidden='true'>◫</span> 总览</button>
-          <button type='button' onClick={() => scrollToSection('backend-topology')}><span aria-hidden='true'>◇</span> 选路拓扑</button>
-          <button type='button' onClick={() => scrollToSection('backend-genes')}><span aria-hidden='true'>⌘</span> Gene 池</button>
-          <button type='button' onClick={() => scrollToSection('backend-evomap')}><span aria-hidden='true'>⌕</span> EvoMap 只读</button>
+        <div className='backend-nav-group'><span className='backend-nav-caption'>Workspace</span>
+          {[['backend-overview', '◫', '蜂群总览'], ['backend-topology', '◇', '选路拓扑'], ['backend-genes', '⌘', 'Gene 池'], ['backend-evidence', '≋', '证据与指标'], ['backend-evomap', '⌕', 'EvoMap 只读']].map(([id, icon, label]) => (
+            <button key={id} type='button' aria-current={selectedSection === id ? 'location' : undefined} onClick={() => navigate(id)}><span aria-hidden='true'>{icon}</span>{label}</button>
+          ))}
         </div>
-        <div className='backend-nav-group backend-sidebar-status'><span className='backend-nav-caption'>RUNTIME</span>
+        <div className='backend-nav-group backend-sidebar-status'><span className='backend-nav-caption'>Runtime</span>
           <span>在线成员 <b id='header-members'>未知</b></span>
           <span>任务轮次 <b id='header-round'>未知</b></span>
           <span id='rehearsal-mode'>等待彩排快照；不预设结果。</span>
@@ -105,7 +107,8 @@ const Backend = ({ dashboard, active = true, reducedMotion = false, evomap, evom
         <p className='backend-sidebar-foot'>仅展示同源数据与显式验收状态。</p>
       </nav>
       <main className='backend-main' id='backend-overview'>
-        <div className='backend-heading'><div><span className='backend-eyebrow'>AGENT SWARM / OVERVIEW</span><h1>蜂群总览</h1><p>任务进展、选路关系与 Gene 状态</p></div><span className='backend-heading-tag'>同源只读视图</span></div>
+        <div className='backend-document'>
+        <div className='backend-heading'><div><span className='backend-project-mark' aria-hidden='true'>◈</span><h1>蜂群总览</h1><p>任务进展、选路关系与 Gene 状态</p></div><span className='backend-heading-tag'>同源只读视图</span></div>
         <section className='backend-metrics' aria-label='运行指标'>
           <Board title='CHECKPOINT 通过率' countId='story-checkpoint-rate' count='未加载'
             desc={<ol id='story-checkpoints' className='checkpoint-list'><li>尚无 checkpoint 快照</li></ol>} />
@@ -117,13 +120,15 @@ const Backend = ({ dashboard, active = true, reducedMotion = false, evomap, evom
         <SecondaryPanel />
         <Card className='morph-panel backend-notes' bordered={false} title={<span className='morph-panel-title'>运行说明</span>}><ul id='notes' className='morph-notes'></ul></Card>
         <section id='backend-evomap' className='backend-evomap'><EvoMapPanel evomap={evomap} detail={evomapDetail} onSearch={onSearch} onOpenAsset={onOpenAsset} /></section>
+        </div>
       </main>
       <aside className='backend-context' aria-label='当前上下文'>
-        <div className='backend-context-head'><span className='backend-eyebrow'>CONTEXT</span><h2>运行上下文</h2></div>
-        <div className='backend-context-scroll'><EventPanel /><AcceptanceStrip /></div>
+        <div className='backend-context-head'><h2>运行上下文</h2><span>Properties</span></div>
+        <div className='backend-context-scroll'><AcceptanceStrip /><EventPanel /></div>
       </aside>
     </div>
   </div>
-);
+  );
+};
 
 export default React.memo(Backend);

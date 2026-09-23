@@ -1,0 +1,69 @@
+/* Adapted declarations from user-provided 2026-09-23 snapshots.
+ * Christmas: assets/index-b8e6792d.css; Linear: layout + HeroIllustration.
+ * Detailed file mapping and unknown snapshot license: THIRD_PARTY_NOTICES.md.
+ */
+@font-face {
+  font-family: 'Jost'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url('/fonts/Jost-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter Variable'; font-weight: 100 900; font-style: normal; font-display: swap;
+  src: url('/fonts/InterVariable.woff2') format('woff2');
+}
+:root[theme-mode='dark'] {
+  --font-regular: 'Inter Variable', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --font-weight-normal: 400; --font-weight-medium: 510; --font-weight-semibold: 590; --font-weight-bold: 680;
+  --color-bg-primary: #08090a; --color-bg-panel: #0f1011; --color-bg-secondary: #1c1c1f;
+  --color-border-primary: #23252a; --color-border-translucent: #ffffff0d; --color-border-translucent-strong: #ffffff14;
+  --color-text-primary: #f7f8f8; --color-text-secondary: #d0d6e0; --color-text-tertiary: #8a8f98; --color-text-quaternary: #62666d;
+  --page: var(--color-bg-primary); --surface: var(--color-bg-panel); --ink: var(--color-text-primary);
+  --ink-dim: var(--color-text-secondary); --ink-mute: var(--color-text-tertiary); --line: var(--color-border-translucent-strong);
+  --td-font-family: var(--font-regular); --td-text-color-primary: var(--ink); --td-text-color-secondary: var(--ink-dim);
+}
+body { font-family: var(--font-regular); }
+
+/* Christmas section grammar: black, 100dvh, 10% inset, #ffeded, 6vmin.
+ * The chronological scenes replace scroll chapters. Odd chapters align right.
+ * Chinese uses the installed CJK sans; no synthetic Jost glyph claims. */
+.morph-view-physarum, .story-physarum-scene, .story-growth-scene, .morph-hero { height: 100dvh; min-height: 100dvh; background: #000; }
+.morph-hero { display: flex; align-items: center; justify-content: flex-end; padding-inline: 10%; box-sizing: border-box; }
+.morph-hero-field { z-index: 0; }
+.story-physarum-label { align-items: flex-end; color: #ffeded; gap: 8px; animation: reference-caption 1.8s ease .45s both; }
+.story-physarum-label [lang='zh-CN'] { font-size: clamp(16px, 2.4vmin, 25px); font-weight: 400; letter-spacing: .15em; }
+.story-physarum-label [lang='en'] { color: #ffeded; font: 400 clamp(12px, 1.8vmin, 18px)/1.4 Jost, sans-serif; letter-spacing: .16em; }
+.growth-intro { background: #000; min-height: 100dvh; }
+.growth-intro__graph { left: 61%; top: 49%; width: 100%; height: 90%; opacity: .88; transition: opacity 2.4s ease; }
+.growth-intro__orbit { display: none; }
+.growth-intro__caption { left: 10%; bottom: auto; top: 45%; transform: none; align-items: flex-start; flex-direction: column; gap: 8px; animation-name: reference-caption; }
+.growth-intro__caption-cn { font-size: clamp(16px, 2.4vmin, 25px); color: #ffeded; font-weight: 400; letter-spacing: .15em; }
+.growth-intro__caption-en { font: 400 clamp(12px, 1.8vmin, 18px)/1.4 Jost, sans-serif; color: #ffeded; letter-spacing: .16em; }
+.growth-intro__concept { font-size: 10px; margin: 12px 0 0; color: #909090; letter-spacing: .1em; }
+.has-product .growth-intro__caption { visibility: hidden; }
+.has-product .growth-intro__graph { opacity: .45; }
+.story-product { inset: 0; width: auto; padding-inline: 10%; transform: none; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; }
+.story-product.is-visible { transform: none; }
+.story-product h1 { align-items: flex-end; gap: 20px; font-size: 6vmin; font-weight: 400; line-height: 1.12; }
+.story-product h1 [lang='zh-CN'] { font-size: 1em; font-weight: 400; color: #ffeded; letter-spacing: .12em; padding-left: 0; }
+/* Reference h1 is 2em over the 6vmin section, not 6vmin itself.
+ * 11vmin preserves that prominence while fitting the longer product name. */
+.story-product h1 [lang='en'] { font: 700 clamp(48px, 11vmin, 108px)/1.1 Jost, sans-serif; color: #ffeded; letter-spacing: normal; }
+.story-enter { margin-top: 40px; min-height: 44px; border: 0; border-bottom: 1px solid #ffffff40; padding: 10px 0; color: #f5d547; font: 400 13px/24px var(--font-regular); letter-spacing: .06em; }
+.story-enter span { margin-left: 40px; }
+.story-enter:hover { background: #ffffff0d; }
+.story-enter:focus-visible { outline: 2px solid #f5d547; outline-offset: 6px; }
+.story-connection { left: 10%; color: #d0d6e0; }
+.morph-layout[data-document-visible='false'] *, .morph-view:not(.is-active) * { animation-play-state: paused !important; }
+@keyframes reference-caption { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+@media (max-width: 600px) {
+  .growth-intro__graph { left: 59%; top: 39%; width: 155%; height: 65%; }
+  .growth-intro__caption { top: auto; bottom: 24%; width: 80%; justify-content: flex-start; }
+  .growth-intro__concept { flex-basis: auto; text-align: left; }
+  .story-product h1 { font-size: 6vmin; gap: 16px; }
+  .story-product h1 [lang='zh-CN'] { font-size: 1.3em; }
+  .story-product h1 [lang='en'] { font-size: clamp(22px, 8.4vw, 50px); }
+  .story-enter { margin-top: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-physarum-label { animation: none; }
+  .growth-intro__graph { transition: none; }
+}

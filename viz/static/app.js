@@ -16,13 +16,13 @@ const stageLabel = {
   completed: "彩排完成", failed: "彩排已停止",
 };
 
-/* Shell design system chart palette (single dark theme, teal accent). */
+/* Linear-derived neutral plot ink; yellow remains a limited data accent. */
 const chartColors = {
-  nodeOnlineFill: "#070B0D", nodeRing: "#65D9C7", nodeOffline: "#5C6F6C",
-  labelOnline: "#E8EFED", labelOffline: "#5C6F6C",
-  lineActive: "#65D9C7", lineActiveGlow: "rgba(101, 217, 199, 0.35)", lineInactive: "#5C6F6C",
-  labelMain: "#E8EFED", labelDim: "#8CA3A0", axisLabel: "#8CA3A0",
-  sourceNode: "#8CA3A0", adoptNode: "#65D9C7", geneNode: "#E8EFED", geneLine: "#8CA3A0",
+  nodeOnlineFill: "#101112", nodeRing: "#B9C0D4", nodeOffline: "#62666D",
+  labelOnline: "#D0D6E0", labelOffline: "#8A8F98",
+  lineActive: "#B9C0D4", lineActiveGlow: "rgba(185, 192, 212, 0.12)", lineInactive: "#62666D",
+  labelMain: "#D0D6E0", labelDim: "#8A8F98", axisLabel: "#8A8F98",
+  sourceNode: "#8A8F98", adoptNode: "#E6C85D", geneNode: "#D0D6E0", geneLine: "#8A8F98",
 };
 
 function append(parent, tag, value, className = "") {
@@ -167,6 +167,36 @@ function eventFeed(history) {
   });
 }
 
+// A plain export may have Gene bodies and Envelopes without a rehearsal.
+// Present those records as exports; never infer members, GeneView lifecycle,
+// checkpoint results or token usage from their presence.
+function exportedFacts(data) {
+  if (data.rehearsal?.current) return;
+  const genes = data.genes ?? [];
+  if (genes.length) {
+    clear("story-genes");
+    append(byId("story-genes"), "p", `${genes.length} 份导出正文 · 生命周期未提供 · 来源 ${data.provenance ?? "未知"}`);
+    genes.forEach((gene) => {
+      const row = append(byId("story-genes"), "div", "", "gene-fact gene-export");
+      append(row, "strong", `${gene.ref?.gene_id ?? "未知 Gene"} · v${gene.ref?.version ?? "未知"}`);
+      append(row, "span", (gene.strategy ?? []).join(" → ") || "策略正文未提供");
+      append(row, "span", `signals · ${(gene.signals_match ?? []).join(", ") || "未提供"}`);
+    });
+  }
+  const events = data.events ?? [];
+  if (events.length) {
+    clear("event-feed");
+    append(byId("event-feed"), "p", `Envelope 导出 · ${data.provenance ?? "未知来源"}`);
+    [...events].reverse().forEach((event) => {
+      const row = append(byId("event-feed"), "div", "", "event-row");
+      append(row, "span", `#${event.seq ?? "?"}`, "event-seq");
+      append(row, "span", event.msg_type ?? "未知类型", "event-stage");
+      append(row, "span", `${agentLabel(event.sender)} → ${agentLabel(event.receiver)}`, "event-time");
+      row.title = `task ${event.task_id ?? "未知"} · ${event.msg_id ?? "未知消息"}`;
+    });
+  }
+}
+
 function rehearsalBoard(rehearsal, { redrawTopology = true } = {}) {
   if (!rehearsal) {
     text("rehearsal-mode", "尚未加载彩排快照；不展示预设通过结果。");
@@ -279,7 +309,7 @@ function messageGraph(events) {
   showChart("message-chart", "message-empty");
   const labels = new Set(); const links = [];
   events.forEach((event) => { const source = agentLabel(event.sender); const target = event.receiver === "broadcast" ? "broadcast" : agentLabel(event.receiver); labels.add(source); labels.add(target); links.push({ source, target, value: event.msg_type }); });
-  chartFor("message-chart").setOption({ animation: !reducedMotion(), tooltip: { renderMode: "richText", formatter: (p) => p.data.value ? `${p.data.source} → ${p.data.target}\n${p.data.value}` : p.name }, series: [{ type: "graph", layout: "circular", roam: true, label: { show: true, color: chartColors.labelMain }, lineStyle: { color: chartColors.lineActive, curveness: .15 }, edgeLabel: { show: true, color: chartColors.axisLabel, formatter: (p) => p.data.value }, data: [...labels].map((name) => ({ name, symbolSize: 42, itemStyle: { color: chartColors.geneNode } })), links }] }, { notMerge: true });
+  chartFor("message-chart").setOption({ animation: !reducedMotion(), tooltip: { renderMode: "richText", formatter: (p) => p.data.value ? `${p.data.source} → ${p.data.target}\n${p.data.value}` : p.name }, series: [{ type: "graph", layout: "circular", roam: true, top: 30, bottom: 48, left: 48, right: 48, label: { show: true, position: "bottom", distance: 8, fontSize: 10, color: chartColors.labelMain }, lineStyle: { color: chartColors.lineActive, curveness: .15 }, edgeLabel: { show: true, color: chartColors.axisLabel, formatter: (p) => p.data.value }, data: [...labels].map((name) => ({ name, symbolSize: 42, itemStyle: { color: chartColors.geneNode } })), links }] }, { notMerge: true });
 }
 
 function metricChart(metrics) {
@@ -319,6 +349,7 @@ function update(data, { redraw = true, resize = false } = {}) {
   text("connection-state", "");
   text("source-label", data.source_label); text("hub-status", data.hub_status); stateCards(data.acceptance ?? {});
   rehearsalBoard(data.rehearsal, { redrawTopology: redraw });
+  exportedFacts(data);
   const notes = byId("notes"); clear("notes"); (data.notes ?? []).forEach((note) => { const item = document.createElement("li"); item.textContent = note; notes.append(item); });
   if (!redraw) return;
   if (resize) resizeCharts();

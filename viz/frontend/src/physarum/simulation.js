@@ -49,7 +49,7 @@ const SETTINGS = {
   col0: [0xf5 / 255, 0xd5 / 255, 0x47 / 255], // slime yellow #f5d547
   col1: [(0xd8 / 255) * 0.75, (0xa8 / 255) * 0.75, (0x33 / 255) * 0.75], // muted amber
   col2: [(0xc7 / 255) * 0.8, (0x8c / 255) * 0.8, (0x25 / 255) * 0.8], // deep amber
-  bgColor: [0x07 / 255, 0x0b / 255, 0x0d / 255], // page background #070b0d
+  bgColor: [0, 0, 0], // shared Christmas-derived black stage; simulation unchanged
 };
 
 const rndFloat = (min, max) => min + (max - min) * Math.random();

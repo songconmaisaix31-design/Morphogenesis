@@ -9,6 +9,7 @@ import { flushSync } from 'react-dom';
 import 'tdesign-react/es/style/index.css';
 import './theme.css';
 import App from './App';
+import './reference.css';
 
 document.documentElement.setAttribute('theme-mode', 'dark');
 // flushSync keeps the static shell in the DOM before the deferred app.js
