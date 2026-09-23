@@ -462,7 +462,7 @@ function SwarmFacts({ swarm, active = true, reducedMotion = false }) {
               </li>
             ))}
           </ul>
-          <p className='swarm-detail-dim'>预留 {number(budgetTotals.reserved_usd, 6)} USD · 计入 {number(budgetTotals.admitted_usd, 6)} USD · {budgetTotals.reserved ?? 0} 预留 / {budgetTotals.settled ?? 0} 结算 / {budgetTotals.unknown ?? 0} 未知</p>
+          <p className='swarm-detail-dim'>占用 {number(budgetTotals.total_hold_usd, 6)} USD（pending {number(budgetTotals.pending_hold_usd, 6)} / unknown {number(budgetTotals.unknown_hold_usd, 6)}）· 计入 {number(budgetTotals.admitted_usd, 6)} USD · {budgetTotals.reserved ?? 0} 预留 / {budgetTotals.settled ?? 0} 结算 / {budgetTotals.unknown ?? 0} 未知</p>
         </section>
 
         <section className='swarm-fact' aria-label='审计流'>
