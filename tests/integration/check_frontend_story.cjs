@@ -12,11 +12,13 @@ fs.mkdirSync(output, { recursive: true });
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.MORPH_CHROMIUM, headless: true });
   const errors = [];
+  const consoleErrors = [];
   const failures = [];
   const check = (name, actual) => { assert(actual, name); console.log(`PASS ${name}`); };
   const makePage = async (width, height, reducedMotion = 'no-preference') => {
     const page = await browser.newPage({ viewport: { width, height }, reducedMotion });
     page.on('pageerror', (error) => errors.push(error.message));
+    page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push({ text: message.text(), location: message.location() }); });
     page.on('response', (response) => {
       if (response.status() >= 400 && !response.url().includes('/api/evomap')) failures.push(`${response.status()} ${response.url()}`);
     });
@@ -84,6 +86,8 @@ fs.mkdirSync(output, { recursive: true });
     await alias.goto(`${base}/#/swarm`, { waitUntil: 'domcontentloaded' });
     check('legacy swarm hash opens workspace', await alias.evaluate(() => document.body.dataset.view === 'workspace'));
     check('no uncaught browser errors', errors.length === 0);
+    check('no unexpected browser console errors',
+      consoleErrors.every(({ text, location }) => /404 \(Not Found\)/.test(text) && location.url.includes('/api/evomap')));
     check('no unexpected HTTP failures', failures.length === 0);
     console.log(`PASS screenshots ${output}`);
   } finally {
