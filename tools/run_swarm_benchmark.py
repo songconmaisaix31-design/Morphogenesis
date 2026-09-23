@@ -205,7 +205,7 @@ def seed_benchmark(config: Any, examples: list[BenchmarkExample]) -> tuple[Path,
         signal = Signal(task_id=f"benchmark-{number}", signal_id=f"benchmark-{number}", workspace=str(target),
                         scope=scope, module=scope, kind="opportunity", required_capability=capability_for(example),
                         payload={"instruction": benchmark_instruction(example), "input": {"question": example.question},
-                                 "output_path": path, "sample_id": example.sample_id})
+                                 "output_path": path})
         ledger.enqueue(signal, acceptance={"validation_policy": policy.model_dump(mode="json")})
         field.deposit(signal)
     return target, state
@@ -354,13 +354,23 @@ def summarize(scores: Iterable[Score]) -> dict[str, int | float]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sources", type=Path, required=True, help="task-specific directory outside Git")
-    parser.add_argument("--manifest", type=Path, required=True, help="public metadata destination; no answers")
+    parser.add_argument("--sources", type=Path, help="task-specific directory outside Git")
+    parser.add_argument("--manifest", type=Path, help="public metadata destination; no answers")
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
     parser.add_argument("--download", action="store_true", help="clone pinned public source revisions")
+    parser.add_argument("--run-config", type=Path, help="EvoMapRun JSON; starts one approved live benchmark condition")
     args = parser.parse_args(argv)
     try:
+        if args.sources is None:
+            raise ValueError("benchmark_sources_required")
         gsm, bbh = download_sources(args.sources) if args.download else (args.sources / "gsm8k", args.sources / "bbh")
+        if args.run_config is not None:
+            from swarm.cli import EvoMapRun
+            result = run_benchmark(EvoMapRun.model_validate_json(args.run_config.read_bytes()), gsm, bbh, seed=args.seed)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.manifest is None:
+            raise ValueError("benchmark_manifest_required")
         examples = select_examples(gsm, bbh, seed=args.seed)
         args.manifest.parent.mkdir(parents=True, exist_ok=True)
         args.manifest.write_text(json.dumps(public_manifest(examples, seed=args.seed), indent=2) + "\n", encoding="utf-8")

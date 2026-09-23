@@ -14,6 +14,7 @@ from tools.run_swarm_benchmark import (
     capability_for,
     public_manifest,
     score_response,
+    seed_benchmark,
     summarize_run_records,
     summarize,
 )
@@ -100,3 +101,21 @@ def test_run_records_keep_missing_tasks_and_deduplicate_request_telemetry(tmp_pa
     assert report["request_count"] == 1
     assert report["tokens"] == {"known_requests": 1, "known_total": 10, "total": 10}
     assert report["cost"] == {"known_requests": 0, "billed_usd": None}
+
+
+def test_seeded_benchmark_payload_obeys_generic_executor_schema(tmp_path):
+    from swarm.evomap_executor import DataTask
+    from swarm.models import BudgetPolicy
+    from swarm.task_ledger import TaskLedger
+
+    config = SimpleNamespace(directory=tmp_path / "run", swarm_id="benchmark-fixture", workers=2, tasks=2,
+                             budget=BudgetPolicy.model_validate({"max_cost_usd": 1, "unbounded_reservation_usd": 1,
+                                 "limits": {"max_tasks": 2, "max_attempts": 2, "max_attempts_per_task": 1,
+                                            "max_derived_tasks": 0, "max_runtime_seconds": 60}}))
+    examples = [example(), BenchmarkExample("fixture:1", "bbh", "boolean_expressions", "q", "True")]
+    _, state = seed_benchmark(config, examples)
+    ledger = TaskLedger(state / "tasks.sqlite3", config.swarm_id, limits=config.budget.limits)
+    for number in range(2):
+        signal = ledger.get(f"benchmark-{number}").signal
+        DataTask.model_validate(signal.payload)
+        assert "sample_id" not in signal.payload
