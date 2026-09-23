@@ -6,6 +6,8 @@
 
 返修沿原 F / 原 worktree / 原分支 / 原 write_paths，由同一 Worker 完成，不增轨、不改黏菌序幕或后端。以 `linear-site` 内实际应用示例为后台参考：还原侧栏品牌与分组、内容区工具栏、文档留白和灰阶/边界，复用实际 SVG 与样式来源；将指标改为紧凑属性，导航对应可用内容视图，任务、拓扑、Gene、事件和 EvoMap 使用现有真实数据。压缩常驻工程说明，以可读状态和详情保留来源与三态，不能假造任务、聊天或用户。
 
+用户进一步明确“用这个页面的前端进行修改”：`C:/Users/DW/WorkBuddy/2026-09-23-01-19-38/linear-site.zip` 是直接实现基底，必须复用包体实际应用 DOM/组件结构、SVG 和样式，再替换本项目内容与数据接入；只抽 token 或自行重画相似后台不满足本次要求。原站跟踪服务不进入产品，实际复用文件与适配边界记录在 F 报告。
+
 验收须重拍同一视口的源应用与产品，比较结构与层级，不能仅以字宽/栏宽断言代替视觉相似。桌面 1366/1920、手机 375，mock 和原第四轮只读 replay、导航/详情/错误态/键盘及构建和适用 T5 验证后 commit+push；然后 I 合并 F/D，继续已授权北京公网部署。
 
 ## 北京 ECS 公网部署与后端接入（2026-09-23，进行中）
@@ -16,7 +18,7 @@
 
 | 轨 | 固定工作树 / write_paths | 交付 |
 |---|---|---|
-| F | `morph-gpt-reference`，原 write_paths 不变 | 完成前端原任务；当前停在 Codex 交互提醒，不能代替原 F 提交或绕过门禁 |
+| F | `morph-gpt-reference`，原 write_paths 不变 | 继续 Linear 原包结构返修；重启后已恢复原会话，完成活动行密度、三视口验收、commit + push |
 | D | `morph-beijing-deploy`；`deploy/**`, `viz/server.py`, `tests/deployment/**`, `docs/tracks/beijing-deployment.md` | 基于 c68def4 + 最新主控治理提交，保留现有栈，为 Python 服务增加保持 loopback 默认的明确监听配置；制作隔离容器/代理/部署说明与必需测试；构建只用锁定依赖，不改锁；commit + push |
 | I | `morph-gpt-reference-integration`；原集成 write_paths、`docs/tracks/beijing-deployment-integration.md` | F/D 完成后精确 SHA 普通合并，复验前端流程和真实同源后端，容器构建/HTTP/浏览器通过；领域缺陷退原 Worker；commit + push |
 

@@ -1,5 +1,21 @@
 # 开发状态
 
+## 当前：Linear 包体前端直接改造返修（2026-09-23）
+
+F 已完成原任务并推送 `2df313857d716a27113c47709342c8d57fb6405f`，原 `ctx_083902b49b4d` 成功结算。随后用户指出后台与 Linear 不像，并两次明确使用 `linear-site.zip` 的前端直接修改。主控实际打开 ZIP（686 项、8,774,425 bytes）及本地页面重新截图，确认现有版主要复用字体/数值，尚未复刻原应用结构；撤回此前视觉通过结论。
+
+原 F 会话/工作树/分支立即续接 `task_1b8cd2d6f0b5 / ctx_eb0b56092f6f`，必须直接复用实际 DOM/组件结构、SVG 和样式，再接现有业务数据。用户随后要求托管前端开发；当前任务持续由主控监督。资料读取确认解除后，F 普通合并规划至 `e24c68feff2e953e30661552d12180b16814a487`，已实际修改 Backend.jsx、backend.css、静态数据 bridge，新增 linear-package.css 和 LinearIcons.jsx：直接来源类名、11 个 SVG、侧栏/内容区工具栏、任务正文与属性、五个独立视图和隐藏图表处理均已形成未提交候选。
+
+首次候选构建曾被恢复会话沙箱拒绝；随后 F 已于 16:55 产出新静态包与 `structure-v2-*` 四张 1366 实图，17:00 前继续修改源码和检查脚本，不能沿用此前“尚未构建”的状态。主控已实际对照源应用与 mock/replay/详情图：侧栏品牌、内容内 44px 工具栏、任务正文和紧凑属性已按源结构落地；活动区每事件约 80px 独立空卡仍偏疏，交回 F 改为源应用的紧凑系统活动行。手机成员按钮覆盖顺序已由 F 报告修复，仍待新构建的 375 实测。
+
+17:03 Orca 再次重启，旧返修 Dispatch `ctx_eb0b56092f6f` 被运行时结算为 `terminal_missing / failed`，Task 恢复 ready，工作树 WIP 保留。主控将原 Run 绑定当前终端 `term_e3377ef4-b845-40c3-8b7e-a55ae9632243`，在原工作树恢复原 provider session `01a0cce1-3e9f-7061-a005-d9a8d538cab9`，同 Task 续接 `ctx_36490c2cd445`；没有新建实现轨、改变权限设置或代批。后续活动行返修、重新构建、三视口与交互验收、commit/push、独立 I 集成仍待完成。
+
+恢复后第一批命令经用户在原终端批准，前端构建完成，`python -m pytest tests/t5 -q` 为 51 passed / 15.93s。F 随后修正隐藏图表和未知状态；第二批命令也已实际执行，新 7841 服务 PID 39204 使用本轨源码和只读 mock，重新构建与三尺寸浏览器验收 125 项通过，错误/非同源/非 GET 请求均为 0。主控亲看 `structure-checks-v1/replay-task-1366.png`、`workspace-375.png`、`details-375.png`，确认活动行密度与源应用结构通过本轮视觉检查，并以 `msg_1fada091dfb0` 要求完成已有收尾后提交。原序幕链由 F 报告通过；补充成员截图可见性检查仍在收尾，最终前端提交和独立集成尚未完成。
+
+主控一次写入部署交接说明的命令被自动审批以 `blocked by policy` 拒绝，未执行，未换工具重试。公网尚未上线。Orca 成功创建预览浏览器页，但 snapshot/console helper 返回 `runtime_unavailable`；随后核验 Orca runtime 仍为同一实例且正常，未因此重启。视觉验收使用 F 的实际 Chromium 产物与主控图片检查，HTTP 200 仅证明服务可达。
+
+新鲜对照证据位于 `C:/Users/DW/AppData/Local/Temp/morph-linear-structure-audit`：源应用完整画框 `source-app-issue.png`、同视口源页 `reference-1366.png`、修改前后台 `product-before-1366.png`、实际尺寸 `observations.json`。源包页面中点击 tasks/insights/project 未实际切换，不将对应重复截图计为交互成功。7841 已由 F 核验空闲后恢复，7843/7799 未操作。D 已交付 `50d1353` 保留，I 等待新 F 精确提交。
+
 ## 当前：终端更新完成，部署容器验证通过，F 等待命令权限确认（2026-09-23）
 
 用户更新后已核验 Codex 0.156.1，更新提示不再是阻塞。原 Run 沿用 `run_9e3490b7a7c0`，协调终端为 `term_88f69376-8035-4b15-bd13-7b1233427f41`。D 在原 worktree / branch 以 `ctx_3ece065caa25` 恢复开发；F 原 provider session 以 `ctx_083902b49b4d` 恢复，既有实现和 80 项浏览器检查保留。
