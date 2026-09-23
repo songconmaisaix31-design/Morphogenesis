@@ -29,8 +29,9 @@ def main() -> int:
         if module.__file__ is None or not Path(module.__file__).resolve().is_relative_to(target):
             raise AssertionError(f"{name} did not import from installed wheel target")
     for name in ("swarm.worker_loop", "swarm.observer", "swarm.hub_mirror", "swarm.cli",
-                 "swarm.budget", "swarm.lease", "swarm.pheromone", "swarm.router",
-                 "local_assets.store", "local_assets.validate", "local_assets.promote", "local_assets.snapshot"):
+                 "swarm.budget", "swarm.lease", "swarm.pheromone", "swarm.router", "swarm.task_ledger",
+                 "local_assets.store", "local_assets.validate", "local_assets.promote", "local_assets.snapshot",
+                 "local_assets.apply", "local_assets.consume"):
         module = importlib.import_module(name)
         if module.__file__ is None or not Path(module.__file__).resolve().is_relative_to(target):
             raise AssertionError(f"{name} did not import from installed wheel target")

@@ -84,7 +84,7 @@ class HubMirror:
     def _publish(self, asset_id: str, approval: PublishApproval,
                  publication: PublicationRecord | None) -> None:
         client = self.client
-        if client is None or self.store.state(asset_id) != "promoted":
+        if client is None or self.store.state(asset_id) != "approved":
             return
         if publication is None:
             bundle = self.store.promoted_bundle(asset_id)

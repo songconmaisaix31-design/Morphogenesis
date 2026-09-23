@@ -87,12 +87,14 @@ def test_three_independent_workers_selfgrow_offline_and_restart(tmp_path: Path):
         assert Path(event["validation_workspace"]).is_dir()
         assert event["execution_workspace"] != event["validation_workspace"]
     for number in range(6):
-        assert runpy.run_path(str(target / f"task_{number}.py"))["answer"]() == number
+        assert runpy.run_path(str(target / f"module_{number // 2}/task_{number}.py"))["answer"]() == number
     from swarm.worker_loop import Worker, WorkerConfig
     from swarm.pheromone import PheromoneField
     from swarm.lease import LeaseManager
+    from swarm.task_ledger import TaskLedger
     from local_assets.store import LocalAssetStore
-    field = PheromoneField(state / "field.sqlite3")
+    ledger = TaskLedger(state / "tasks.sqlite3", "local-fixture")
+    field = PheromoneField(state / "field.sqlite3", ledger=ledger)
     assert all(signal.completed and signal.concentration > 1 for signal in field.snapshot())
     assert all(field.pipe_history(f"builder-{i}", "repair").samples == 2 for i in range(3))
     store = LocalAssetStore(state / "assets")
@@ -102,7 +104,9 @@ def test_three_independent_workers_selfgrow_offline_and_restart(tmp_path: Path):
     for config in configs:
         assert Worker(WorkerConfig.model_validate_json(config)).run()["state"] == "idle"
     assert len(list((state / "audit").rglob("*.json"))) == before
-    assert LeaseManager(state / "leases").snapshot() == []
+    assert LeaseManager(ledger).snapshot() == []
+    assert all(task.status == "completed" and task.effect_applied for task in ledger.snapshot())
+    assert all(report.isolation == "non_arbitrary_literal_files" for report in store.reports())
 
 
 def test_fake_high_usage_breaker_sleeps_all_three_processes(tmp_path: Path):
@@ -115,10 +119,64 @@ def test_fake_high_usage_breaker_sleeps_all_three_processes(tmp_path: Path):
     from swarm.budget import BudgetLedger
     from swarm.worker_loop import WorkerConfig
     config = WorkerConfig.model_validate_json(demo_config(target, state, 0, 0.001))
-    ledger = BudgetLedger(state / "budget.sqlite3", config.account_id, config.budget)
+    ledger = BudgetLedger(state / "budget.sqlite3", config.swarm_id, config.budget)
     snapshot = ledger.snapshot()
     assert snapshot.sleeping and snapshot.actual_cost_usd is None
     assert snapshot.estimated_cost_usd >= 0.2
     audit = [json.loads(path.read_bytes()) for path in (state / "audit").rglob("*.json")]
     assert any(event["outcome"] == "budget_stopped" for event in audit)
-    assert all("return -1" in p.read_text() for p in target.glob("task_*.py"))
+    assert all("return -1" in p.read_text() for p in target.rglob("task_*.py"))
+
+
+def _one_process(config_json):
+    context = multiprocessing.get_context("spawn")
+    process = context.Process(target=_offline_worker, args=(config_json, context.Barrier(1)))
+    process.start()
+    try:
+        process.join(120)
+        assert process.exitcode == 0
+    finally:
+        if process.is_alive():
+            process.terminate()
+            process.join(10)
+
+
+def test_approved_content_adopted_by_different_worker_in_new_process(tmp_path):
+    from contracts.identity import AgentId
+    from local_assets.models import FileExpectation, ValidationPolicy
+    from local_assets.store import LocalAssetStore
+    from swarm.models import Signal
+    from swarm.task_ledger import TaskLedger
+    from swarm.pheromone import PheromoneField
+    from swarm.worker_loop import WorkerConfig
+    target, state = seed_demo(tmp_path / "reuse")
+    first_json = demo_config(target, state, 0, 1.0)
+    _one_process(first_json)
+    ledger = TaskLedger(state / "tasks.sqlite3", "local-fixture")
+    source = ledger.get("fixture-0")
+    store = LocalAssetStore(state / "assets")
+    source_id = source.result["candidate_asset_id"]
+    original = store.fetch_approved(source_id)
+    destination = "module_0/reused.py"
+    after = original.changes[0].after
+    policy = ValidationPolicy(version="fixture-files-v1", expectations=(FileExpectation(path=destination, content=after),))
+    signal = Signal(task_id="reuse-next-session", signal_id="reuse-next-session", workspace=str(target),
+                    scope="module_0", module="module_0", kind="opportunity", required_capability="repair",
+                    payload={"reuse_task_id": "fixture-0", "path_map": {original.changes[0].path: destination}})
+    # Environment seeding describes dependency and scope; it assigns no worker.
+    ledger.enqueue(signal, dependencies=("fixture-0",), acceptance={"validation_policy": policy.model_dump(mode="json")})
+    PheromoneField(state / "field.sqlite3", ledger=ledger).deposit(signal)
+    config = WorkerConfig.model_validate_json(first_json).model_copy(update={"agent": AgentId(role="builder", instance=7)})
+    _one_process(config.model_dump_json())
+    task = ledger.get(signal.task_id)
+    assert task.status == "completed" and task.owner == "builder-7" and task.effect_applied
+    assert (target / destination).read_bytes() == after.encode("utf-8")
+    assert runpy.run_path(str(target / destination))["answer"]() == 0
+    adoption, = store.adoptions()
+    assert adoption.asset_id == source_id and adoption.result_id == task.result_id
+    assert adoption.context.worker_id == "builder-7" and adoption.context.task_id != original.attempt.task_id
+    assert adoption.context.input_context == task.result["input_context"]
+    assert store.consumption(adoption.context.execution_id).candidate_asset_id == task.result["candidate_asset_id"]
+    events = [json.loads(p.read_bytes()) for p in (state / "audit").rglob("*.json")]
+    assert len({row["pid"] for row in events if row["outcome"] == "promoted"}) == 2
+    assert next(row for row in events if row["task_id"] == signal.task_id)["consumed_asset_ids"] == [source_id]

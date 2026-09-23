@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 import time
 
-from pydantic import JsonValue, TypeAdapter
+from pydantic import JsonValue
 
 
 def fixture_policy(max_cost_usd: float) -> dict[str, JsonValue]:
@@ -21,8 +21,10 @@ def fixture_policy(max_cost_usd: float) -> dict[str, JsonValue]:
 def seed_demo(directory: Path) -> tuple[Path, Path]:
     """Seed environmental observations once, before any independent worker exists."""
     from local_assets.paths import git
+    from local_assets.models import FileExpectation, ValidationPolicy
     from swarm.models import Signal
     from swarm.pheromone import PheromoneField
+    from swarm.task_ledger import TaskLedger
     from swarm.worker_loop import check_state_path
 
     directory = check_state_path(directory)
@@ -32,20 +34,27 @@ def seed_demo(directory: Path) -> tuple[Path, Path]:
     target.mkdir(parents=True)
     git(target, "init", "-b", "swarm-local-demo")
     for number in range(6):
-        (target / f"task_{number}.py").write_bytes(
-            f"def answer():\n    return -1\n\nif __name__ == '__main__':\n    assert answer() == {number}\n".encode("utf-8"))
-    git(target, "add", "--", *(f"task_{number}.py" for number in range(6)))
+        seed_path = target / f"module_{number // 2}" / f"task_{number}.py"
+        seed_path.parent.mkdir(exist_ok=True)
+        seed_path.write_bytes(b"def answer():\n    return -1\n")
+    git(target, "add", "--", "module_0", "module_1", "module_2")
     git(target, "-c", "user.name=Local Swarm Fixture", "-c", "user.email=fixture@localhost",
         "commit", "-m", "Seed six broken local fixture functions")
-    field = PheromoneField(state / "field.sqlite3")
+    ledger = TaskLedger(state / "tasks.sqlite3", "local-fixture")
+    field = PheromoneField(state / "field.sqlite3", ledger=ledger)
     for number in range(6):
-        path = f"task_{number}.py"
+        module = f"module_{number // 2}"
+        path = f"{module}/task_{number}.py"
         before = (target / path).read_bytes().decode("utf-8")
-        field.deposit(Signal(task_id=f"fixture-{number}", signal_id=f"fixture-{number}",
-                             workspace=str(target), scope=path, kind="error_pattern",
-                             x=float((number // 2) * 10), y=float(number % 2) * 0.1,
-                             payload={"changes": [{"path": path, "before": before,
-                                                    "after": before.replace("return -1", f"return {number}")}]}))
+        # The fixed acceptance is seeded independently of future candidate output.
+        expected = f"def answer():\n    return {number}\n"
+        policy = ValidationPolicy(version="fixture-files-v1", expectations=(
+            FileExpectation(path=path, content=expected),))
+        signal = Signal(task_id=f"fixture-{number}", signal_id=f"fixture-{number}",
+                        workspace=str(target), scope=module, module=module, kind="error_pattern",
+                        payload={"changes": [{"path": path, "before": before, "after": expected}]})
+        ledger.enqueue(signal, acceptance={"validation_policy": policy.model_dump(mode="json")})
+        field.deposit(signal)
     return target, state
 
 
@@ -55,14 +64,17 @@ def demo_config(target: Path, state: Path, instance: int, max_cost_usd: float) -
     from swarm.worker_loop import WorkerConfig
 
     return WorkerConfig(state=state, target=target, agent=AgentId(role="builder", instance=instance),
-                        locality=Locality(workspace=str(target), x=instance * 10, radius=1),
+                        locality=Locality(workspace=str(target), authorized_scopes=(f"module_{instance}",),
+                                          modules=(f"module_{instance}",)),
                         budget=BudgetPolicy.model_validate(fixture_policy(max_cost_usd)),
-                        commands=((sys.executable, "-B", "{scope}"),), seed=instance).model_dump_json()
+                        seed=instance).model_dump_json()
 
 
 def process_worker(config_json: str) -> None:
     from swarm.worker_loop import Worker, WorkerConfig
-    Worker(WorkerConfig.model_validate_json(config_json)).run()
+    result = Worker(WorkerConfig.model_validate_json(config_json)).run()
+    if result.get("state") in {"stopped", "needs_review"}:
+        raise SystemExit(1)
 
 
 def demo(directory: Path, *, max_cost_usd: float, resume: bool = False) -> dict[str, JsonValue]:
@@ -110,15 +122,14 @@ def main(argv: list[str] | None = None) -> int:
     worker.add_argument("--state", type=Path, required=True)
     worker.add_argument("--target", type=Path, required=True)
     worker.add_argument("--instance", type=int, required=True)
-    worker.add_argument("--x", type=float, default=0)
-    worker.add_argument("--y", type=float, default=0)
-    worker.add_argument("--radius", type=float, default=1)
+    worker.add_argument("--scope", action="append", required=True,
+                        help="authorized backend path relative to target; repeat for multiple scopes")
+    worker.add_argument("--module", action="append", default=[])
+    worker.add_argument("--swarm-id", default="local-fixture")
     worker.add_argument("--max-cost-usd", type=float, required=True)
     worker.add_argument("--max-tokens", type=int, default=20000)
     worker.add_argument("--energy", type=int, default=20)
     worker.add_argument("--executor", choices=["fixture"], required=True)
-    worker.add_argument("--validation-json", type=Path, required=True,
-                        help="operator-owned JSON array of argv arrays; use {scope} as a path token")
     args = parser.parse_args(argv)
     try:
         result: JsonValue
@@ -136,18 +147,19 @@ def main(argv: list[str] | None = None) -> int:
             from swarm.worker_loop import Worker, WorkerConfig
             policy = fixture_policy(args.max_cost_usd)
             policy["max_tokens"] = args.max_tokens
-            commands = TypeAdapter(tuple[tuple[str, ...], ...]).validate_json(args.validation_json.read_bytes())
             config = WorkerConfig(state=args.state, target=args.target,
                                   agent=AgentId(role="builder", instance=args.instance),
-                                  locality=Locality(workspace=str(args.target.resolve()), x=args.x,
-                                                    y=args.y, radius=args.radius),
+                                  locality=Locality(workspace=str(args.target.resolve()),
+                                                    authorized_scopes=tuple(args.scope), modules=tuple(args.module)),
                                   budget=BudgetPolicy.model_validate(policy), energy=args.energy,
-                                  commands=commands)
+                                  swarm_id=args.swarm_id)
             result = Worker(config).run()
         print(json.dumps(result, ensure_ascii=False, indent=2))
         if isinstance(result, dict) and "process_exitcodes" in result:
             count = result.get("completed_tasks")
             return 0 if result["process_exitcodes"] == [0, 0, 0] and isinstance(count, int) and count >= 6 else 1
+        if isinstance(result, dict) and result.get("state") in {"stopped", "needs_review"}:
+            return 1
         return 0
     except (ValueError, OSError):
         # Fixed text prevents data/credentials from validation exceptions leaking.

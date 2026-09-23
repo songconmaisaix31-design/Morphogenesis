@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
 import json
 from pathlib import Path
 import sys
@@ -18,6 +17,7 @@ from contracts.results import TaskResult, Verification
 from hub_client import CapsuleEvidence, GenePolicy, HubClient, HubConfig, PublicationRecord, PublishApproval
 from hub_client.assets import build_assets
 from local_assets import AssetPromoter, AssetValidator, Candidate, FileChange, LocalAssetStore
+from local_assets.models import FileExpectation, ValidationPolicy
 from local_assets.paths import git
 from swarm.hub_mirror import HubMirror
 
@@ -37,12 +37,12 @@ def promoted(tmp_path_factory):
                           declared_files=1, declared_lines=2)
     store = LocalAssetStore(root / "assets")
     asset_id = store.publish(candidate)
-    report = AssetValidator(store, target, commands=((sys.executable, "-B", "-c", "import example; assert example.answer == 2"),)).validate(asset_id)
+    policy = ValidationPolicy(version="mirror-fixture-v1", expectations=(
+        FileExpectation(path="example.py", content="answer = 2\n"),))
+    report = AssetValidator(store, target, policy=policy).validate(asset_id)
     assert report.passed, report.reasons
-    @contextmanager
-    def local_guard(scope):
-        yield lambda: None
-    AssetPromoter(store, target).promote(asset_id, report.report_id, local_guard)
+    AssetPromoter(store, policy_version=policy.version).promote(asset_id, report.report_id)
+    assert (target / "example.py").read_bytes() == b"answer = 1\n"
     return store, asset_id, report
 
 
@@ -102,7 +102,7 @@ def test_offline_mirror_enqueue_nonblocking_unknown_never_retried(promoted, tmp_
         assert mirror.enqueue(asset_id, approval=approval)
         assert time.monotonic() - before < 0.5
         assert entered.wait(40)
-        assert store.state(asset_id) == "promoted"
+        assert store.state(asset_id) == "approved"
         # One waiting item fills the bounded queue while the first HTTP call waits.
         assert mirror.enqueue(asset_id, approval=approval)
         assert not mirror.enqueue(asset_id, approval=approval)
