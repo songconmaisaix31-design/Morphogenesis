@@ -81,3 +81,28 @@ see Section 6 of the License. Implementations of the protocol are welcome
 and encouraged, but must not be marketed under the EvoMap, GEP, or Genome
 Evolution Protocol names without prior written permission.
 ```
+
+## User-provided design snapshots (2026-09-23)
+
+The user explicitly authorized direct reuse of the supplied `christmas-site.zip`
+and `linear-site.zip` for this project. These are user-provided website snapshots,
+not verified open-source templates. Snapshot source version and redistribution
+license were not included/verified; no MIT or Apache license is asserted for these
+assets or adapted declarations. Existing third-party notices above remain intact.
+
+| Snapshot / original relative path | Product target | Reuse and changes |
+| --- | --- | --- |
+| christmas-site / `assets/index-b8e6792d.css` (`.section`, odd section alignment) | `viz/frontend/src/reference.css` | Actual black stage, `100dvh`, 10% horizontal padding, `#ffeded`, Jost and `6vmin` declarations; scroll chapters become timed scenes, bilingual title weight/line-height adapted, alternating left/right text alignment retained. |
+| christmas-site / `_ext/fonts.googleapis.com/css2_ed0de8.css` and `_ext/fonts.gstatic.com/s/jost/v20/92zatBhPNqw73oTd4g.woff2` | `viz/frontend/src/reference.css`, `viz/static/fonts/Jost-latin.woff2` | Local Latin Jost font copied byte-for-byte, local `@font-face`; original CSS said `Jost Medium` while supplied face is `Jost`, so family name corrected. Chinese uses the installed CJK sans fallback. URL path says v20; actual upstream release/license unknown from this snapshot. |
+| linear-site / `assets/css/layout.B05Dfi6O_cf0c9cb7.css` and `assets/font/InterVariable_36a96895.woff2` | `viz/frontend/src/reference.css`, `viz/static/fonts/InterVariable.woff2` | Local variable font copied byte-for-byte; 100-900 face declaration, actual dark surface/text/border variables and 400/510/590/680 weights reused. No remote font fetch. |
+| linear-site / `assets/css/HeroIllustration.CR-IZ0h7_16ec15e1.css`, `assets/js/HeroIllustration-DvABf-oD_13f56681.js`, application subtree in `index.html` | `viz/frontend/src/backend/linear-package.css`, `Backend.jsx`, `backend.css` | Selected root CSS rules copied with original selectors: `WS84WW` frame/view, `Mmx1Wq` sidebar, `KFZpfa` issue body/properties/activity/commentCard. Actual frame > sidebar + view > locationBar > viewBody > content/properties DOM organization and grouped interactive navigation adapted to React and real Morphogenesis data. Marketing scale and crop removed; narrow screens scroll navigation and stack properties. |
+| linear-site / `assets/css/IssueListView.BH55qTC9_ccd67967.css`, `assets/js/IssueListView-JMvnarPW_152e5db9.js`; `assets/css/Button.dcAi4KbO_f1b9ab6e.css`, `assets/js/Button-C0yyrcbs_a4b21226.js` | `viz/frontend/src/backend/linear-package.css`, `Backend.jsx`, `backend.css` | `_1uFtza` 44px content location bar/view bar, breadcrumb, pill/button controls copied; native button organization retained with working tabs, search, details, and return actions. Source illustration `tabIndex=-1` changed for keyboard access. |
+| linear-site / `assets/css/scenarios.bL-CLJt9_84939a09.css`, `assets/js/scenarios-DRvFe3vm_62acb04f.js` | `viz/frontend/src/backend/linear-package.css`, `Backend.jsx` | `GkoSzG_panel` layered surface and `NN4GVa` identity/header CSS and DOM adapted to an explicitly opened read-only run-details panel. Source model labels, chat text, composer, and simulated interactions not imported. |
+| linear-site / `index.html` application SVGs and inline `BarChart` symbol | `viz/frontend/src/backend/LinearIcons.jsx` | Eleven SVG geometries extracted for search, activity, inbox, target, topology, Gene, more, status, task, metrics, and chevron. Static React SVG elements with original paths/viewBox; external sprite references resolved locally, source brand logo excluded. |
+
+Generated `viz/static/assets/finals-shell.css` and `.js` include these adaptations.
+Source brand names/copy, complete original site runtime bundles, GTM/trackers,
+remote marketing requests, images, Christmas models and offline reveal hacks
+are not product imports; the component structure and SVG geometry above are adaptations.
+Font-specific licenses have not been independently established from the supplied
+files; the user's reuse authorization is recorded without relabeling ownership.

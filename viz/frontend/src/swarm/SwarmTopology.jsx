@@ -10,12 +10,10 @@ import './swarm.css';
 const VIEW_W = 1000;
 const VIEW_H = 620;
 
-const number = (value, digits = 2) =>
-  Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : '未知';
-const percent = (value) =>
-  Number.isFinite(Number(value)) ? `${(Number(value) * 100).toFixed(0)}%` : '未知';
-const timeOf = (ts) =>
-  Number.isFinite(Number(ts)) ? new Date(Number(ts) * 1000).toTimeString().slice(0, 8) : '时间未知';
+const knownNumber = (value) => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
+const number = (value, digits = 2) => knownNumber(value) ? Number(value).toFixed(digits) : '未知';
+const percent = (value) => knownNumber(value) ? `${(Number(value) * 100).toFixed(0)}%` : '未知';
+const timeOf = (ts) => knownNumber(ts) ? new Date(Number(ts) * 1000).toTimeString().slice(0, 8) : '时间未知';
 
 function edgePath(a, b) {
   const x1 = a.x * VIEW_W; const y1 = a.y * VIEW_H;
@@ -265,6 +263,14 @@ function SwarmTopology({ dashboard, active = true, reducedMotion = false }) {
               })}
             </g>
           </svg>
+        </div>
+        <div className='swarm-member-list' aria-label='按成员查看拓扑详情'>
+          {view.nodes.map(node => (
+            <button key={node.key} type='button' aria-pressed={selectedKey === node.key}
+              onClick={() => setSelectedKey(selectedKey === node.key ? null : node.key)}>
+              {node.key}<span>{node.available === false ? '已下线' : node.available === null ? '未知' : '在线'}</span>
+            </button>
+          ))}
         </div>
         {selectedKey
           ? <NodeDetail view={view} nodeKey={selectedKey} onClose={() => setSelectedKey(null)} />

@@ -15,6 +15,12 @@ const App = () => {
   const [phase, setPhase] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 3 : 0);
   const [evomap, setEvomap] = useState({ state: 'idle' });
   const reducedMotion = useReducedMotion();
+  const [visible, setVisible] = useState(() => !document.hidden);
+  useEffect(() => {
+    const update = () => setVisible(!document.hidden);
+    document.addEventListener('visibilitychange', update);
+    return () => document.removeEventListener('visibilitychange', update);
+  }, []);
 
   const viewRef = useRef(view);
   const dashboardRef = useRef(null);
@@ -178,7 +184,7 @@ const App = () => {
     let elapsed = 0;
     let started = 0;
     let timer = 0;
-    const marks = [650, 3200, 7600, 9000];
+    const marks = [0, 3600, 8000, 10400];
     const update = () => {
       if (document.hidden) return;
       started = window.performance.now();
@@ -206,16 +212,17 @@ const App = () => {
   const viewClass = (name) => `morph-view morph-view-${name}${view === name ? ' is-active' : ''}`;
 
   return (
-    <div className='morph-layout'>
+    <div className='morph-layout' data-document-visible={visible}>
       <main className='morph-stage'>
         <section className={viewClass('physarum')} aria-label='形态发生序幕'
           aria-hidden={view !== 'physarum'} inert={view === 'physarum' ? undefined : ''}>
           <div className={`story-physarum-scene${phase >= 1 ? ' is-past' : ''}`}>
             <Hero active={view === 'physarum' && phase < 1} reducedMotion={reducedMotion} showLabel={phase >= 0} />
           </div>
-          <div className={`story-growth-scene${phase >= 1 ? ' is-visible' : ''}`}
+          <div className={`story-growth-scene${phase >= 1 ? ' is-visible' : ''}${phase >= 2 ? ' has-product' : ''}`}
             aria-hidden={phase < 1}>
-            <GrowthIntro active={view === 'physarum' && phase >= 1} reducedMotion={reducedMotion} />
+            <GrowthIntro key={view === 'physarum' && phase >= 1 ? 'growing' : 'waiting'}
+              active={visible && view === 'physarum' && phase >= 1} reducedMotion={reducedMotion} />
             <div className={`story-product${phase >= 2 ? ' is-visible' : ''}`} aria-hidden={phase < 2}>
               <h1><span lang='zh-CN'>形态发生</span><span lang='en'>MORPHOGENESIS</span></h1>
               <button type='button' className={`story-enter${phase >= 3 ? ' is-visible' : ''}`}
