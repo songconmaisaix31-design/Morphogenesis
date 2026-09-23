@@ -10,11 +10,20 @@
 | 历史第四轮原件 | 当前主线 `.venv/Scripts/python.exe -B tests/integration/audit_rehearsal.py <下文第四轮原始根>` exit 0；2 请求、2,235 tokens、21 衰减采样、实际采用和归档一致，29 份文件不变；本轮新增模型调用 0 |
 | Evolver 工具准备 | 项目 `.runtime/freeze-evolver/` 内固定安装官方 2.0.38，并安装 1.94.0 比对官方 bootstrap API；没有全局安装或修改用户 home。2.0.38 Proxy CLI 要求已有节点凭据；旧版默认 start 会启动持续行为，因此采用官方模块的受控组合前置，未修改官方源码 |
 | 唯一真实 hello | UTC `2026-09-23T10:30:49.970Z`–`10:30:52.458Z`，Hub 回执 `msg_1790159452373_c5ed9018`，`status=rejected`、`reason=hello_blocked: bulk-fetch antibody active`、`captcha_required=true`、`retry_after_ms=3600000` |
+| 本次请求不符合任务书之处 | 后续源码审计发现官方 v1 helper 自行生成 `node_` 加 12 位 hex，未按任务书预置固定身份，payload 未携带 `model`；拒绝前请求 node ID 未留存。此项是本次执行缺口，不能仅把前置失败归因于外部 CAPTCHA，不能称已发出符合全部硬规则的 hello；不补造元数据、不重注册 |
 | 尚未发生的副作用 | 没有获得节点凭据；v2 authenticated hello、heartbeat、19820 Proxy listener、PUBLISH/FETCH/REPORT 全未执行；没有自动重试、更换身份、升级、领任务或质押 |
 | 本机/远端条件 | 初始仅 7844 本地回放监听；7799/7526/7527 尚未激活。本机 Docker daemon 不可用；已配置 `gongzhi-ecs` 只读连接成功、原共治容器健康，Morphogenesis 公网仍未部署。当前 Worker 进程没有 `MORPH_EVOMAP_API_KEY` |
 | 竞态历史定位 | `e83a816` 失败针对 adopted Gene `weight > 0.5`，已由 `94b7081` 改为实际 elapsed/tau 公式并覆盖 0.2 秒延迟。`pipes[0].weight` 的反馈更新为同步路径，不能靠额外等待改善；T 轨已在未改测试代码下基线 7 passed，正式收尾回归尚未放行 |
 
 脱敏回执位于本项目 `.runtime/freeze-evolver/bootstrap-hello.json`、`preflight-result.json`，不入 Git。外部拦截的 CAPTCHA 需用户在正常官方流程处理；不以换身份或换网络规避。E/D/T 当前只整理前置报告，等待用户是否调整开工门禁。G3/G4 外部部分保持 BLOCKED，G5 新软件演示/陌生网络/物理展示保持 NOT_RUN。
+
+### 本阶段报告与自动 CI（18:40 CST 收尾）
+
+T 核查报告 `9f59c0046ea6079f92c42b28eec5661c04c9373b`、E 阻塞及请求缺口报告 `4962d52053fc8654857a6825d223f2eb1a891926`、D 只读审计报告 `8141d5de4a87e5d31b1bf1c3ecc95efac6c59feb` 均由各自 Worker 直接提交并推送主线；详见 [T](tracks/freeze-race.md)、[E](tracks/freeze-evolution.md)、[D](tracks/freeze-demo.md)。三个 Dispatch 均以 `failed / preflight blocked` 如实结算并释放，表示完整原任务未完成；已完成的环境和核查产物保留。未启动 I 集成或后续开发。
+
+文档 push 自动触发的 CI 已实际运行，不能写成 CI 未执行，也不能沿用双平台全绿。`gh run view 35849890857 --json headSha,status,conclusion,jobs` 与 `--log-failed` 核实 [8141d5d 的 CI](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35849890857)：Ubuntu `python -m pytest -q` 为 **1 failed / 254 passed / 1 skipped**，`tests/deployment/test_deployment.py:128` 在 `mount["bind"]["create_host_path"]` 处 `KeyError: 'create_host_path'`；Windows job 被矩阵取消，后续类型/构建/包验证未完成。前一文档提交的 [CI 35849678131](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35849678131) 同一失败。本轮变更只含文档，这不是上文已修复的 Gene 墙钟断言；恢复工作后由 D 负责核查 Compose 配置输出兼容性和返修，不能简单删掉只读挂载安全断言。
+
+尚未完成：合规 hello/heartbeat 与真实 Proxy、G3/G4 适配及三步证据、G5 软件和公网部署、正式本地全量验证与最终双平台绿灯、G0 三层护栏文档实施。G0 的历史真实用量已只读复核为 2,235 tokens / cost=null，未增加模型调用；KG 未请求，当前账号方案/权限未核验。恢复需要用户明确处理原开工门禁；新网关运行另需安全提供项目凭据，热点/第二设备及物理展示仍需人工。
 
 ## Linear 原包直接改造与本地后端集成（2026-09-23）
 

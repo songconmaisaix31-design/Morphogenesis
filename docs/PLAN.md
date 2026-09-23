@@ -14,6 +14,8 @@
 | 主控 | `docs/PLAN.md`, `docs/STATUS.md`, `docs/DECISIONS.md`, `docs/ACCEPTANCE.md` | 串行提交协调；G0 三层预算护栏与真实历史用量复核；只据真实回执更新 G3/G4/G5 |
 | I / 最后独立集成 | `tests/integration/**`, `docs/tracks/freeze-integration.md`, `.runtime/freeze-integration/**` | E/D/T 完成后复核确切 SHA、全量测试/类型/构建/双平台 CI；少量接线需先归属协调 |
 
+18:40 阶段结算：E/T/D 仅前置核查报告已提交推送，完整任务均因开工门禁以 failed 结算并释放，I 未派发；领域代码零改动。用户未回复时不推定已解除门禁。自动 CI 暴露 D 所属部署测试 `create_host_path` 缺键，Ubuntu 254 passed / 1 failed / 1 skipped、Windows cancelled，恢复后优先由 D 修复并验证；旧 Gene 竞态已经在基线内修复，本轮不再添加等待。
+
 统一约束：沿用 `Acceptance` 的 `passed` 状态与 live/replay/mock 语义；来源细分类用适配器字段表示，不能擅改共享 Provenance 契约。模型标识记录请求和实际返回两者，费用未知保持 null。仅授权本轮一组 Hub 发布/回收/效果报告及必要的一轮有界网关演示；任何未知写结果停止重试。不存在可用 Premium 凭据时不探测 KG。G0 仍有上游在途硬封顶限制，G5 软件、异网可达、物理展示分别记录。主控已只读核实既有 `gongzhi-ecs` 可连接；前置放行后 D 是本项目 `/opt/morphogenesis` / 7799 的唯一部署操作者，替代旧部署材料中的主控/I 操作者约定，仍禁止触及共治容器和 80/443。
 
 ## Linear 后台结构返修（2026-09-23）

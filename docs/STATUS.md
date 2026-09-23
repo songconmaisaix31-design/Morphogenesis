@@ -4,9 +4,11 @@
 
 本轮主线计划 `2b58b59` 已推送；Orca Run `run_f9bd1eee2076`，E `ctx_cfb082ada33d`、D `ctx_7046d717bcb8`、T `ctx_eadb0857cb15` 已按互斥文件启动，共用主线、不新建功能分支。网关与第四轮合入核查通过，当前主线只读复审原第四轮通过且 29 份文件不变。T 已安装本项目锁定 Python/npm 环境，未修改锁文件；历史权重竞态已在 `94b7081` 修复，未改测试下基线 7 passed。
 
-唯一 Evolver bootstrap hello 被 Hub 明确拒绝：回执 `msg_1790159452373_c5ed9018`、`captcha_required=true`、`retry_after_ms=3600000`。没有节点凭据，后续 heartbeat/Proxy/PUBLISH/FETCH/REPORT 全未执行，没有重试或更换身份。依据用户“两个前置都过才继续”，各轨保持核查/报告范围，领域代码零改动，待用户明确是否调整门禁；具体证据见 [ACCEPTANCE](ACCEPTANCE.md)。
+唯一 Evolver bootstrap hello 被 Hub 明确拒绝：回执 `msg_1790159452373_c5ed9018`、`captcha_required=true`、`retry_after_ms=3600000`。后续审计又发现该旧版官方 helper 未携带要求的 `model`，使用自动 12 位 hex 身份且没有留存请求 node ID；这是本次执行缺口，不能只归因于外部拦截。没有节点凭据，后续 heartbeat/Proxy/PUBLISH/FETCH/REPORT 全未执行，没有重试或更换身份。依据用户“两个前置都过才继续”，各轨保持核查/报告范围，领域代码零改动，待用户明确是否调整门禁；具体证据见 [ACCEPTANCE](ACCEPTANCE.md)。
 
 G5 尚有独立前置：本机 Docker daemon 未运行，当前进程无 `MORPH_EVOMAP_API_KEY`；远端 SSH 只读连接及原共治容器健康已核实。尚未激活 7799/7526/7527、部署公网或做热点/物理投影。已请求用户指定项目凭据来源与现场第二设备条件，未获答复不推定存在。
+
+18:40 收尾：T `9f59c00`、E `4962d52`、D `8141d5d` 的自有核查报告均已推送；三个 Dispatch 因前置阻塞以 failed 结算，owned terminals 全部 release，reclaimable=0，原预览未操作。领域实现与测试文件均未修改，不启动 I。文档 push 自动触发的 CI 35849890857 已失败：Ubuntu 254 passed / 1 failed / 1 skipped，部署测试第 128 行 `create_host_path` 缺键；Windows cancelled，类型/构建未通过。详细回执和后续 D 返修归属见 ACCEPTANCE；这与已修复的 Gene 权重竞态不同，主线目前不能宣称双平台全绿。
 
 ## 当前：Linear 包体前端直接改造返修（2026-09-23）
 
