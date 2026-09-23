@@ -229,6 +229,43 @@ const App = () => {
     }
   }, []);
 
+  // On-demand asset detail: fires only when the user clicks a result's 详情
+  // button — never prefetched per card and never on a timer. Frozen E-track
+  // contract morph.evomap.asset/1: GET /api/evomap/asset?id=<asset_id> with a
+  // sequence guard dropping out-of-order responses.
+  const [evomapDetail, setEvomapDetail] = useState({ state: 'idle' });
+  const evomapDetailSeqRef = useRef(0);
+  const openEvomapAsset = useCallback(async (assetId) => {
+    if (!assetId) return;
+    const seq = ++evomapDetailSeqRef.current;
+    setEvomapDetail({ state: 'loading', assetId });
+    try {
+      const params = new URLSearchParams({ id: String(assetId) });
+      const response = await fetch(`/api/evomap/asset?${params.toString()}`, { cache: 'no-store' });
+      if (seq !== evomapDetailSeqRef.current) return;
+      if (response.status === 404) {
+        // Official single-asset misses surface the fixed asset-not-found code
+        // (http_404 inside asset_detail on 200, or the coded 404 body); only an
+        // uncoded 404 means the E-track route itself is not merged yet.
+        const body = await response.json().catch(() => null);
+        const code = body?.error ?? body?.detail;
+        if (code === 'asset_not_found' || code === 'http_404') setEvomapDetail({ state: 'not_found', assetId });
+        else setEvomapDetail({ state: 'missing', assetId });
+      } else if (response.status === 400) {
+        const body = await response.json().catch(() => null);
+        setEvomapDetail({ state: 'invalid', assetId, detail: body?.detail ?? body?.error ?? 'invalid_asset_id' });
+      } else if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      } else {
+        const data = await response.json();
+        setEvomapDetail({ state: 'ok', assetId, data });
+      }
+    } catch (error) {
+      if (seq !== evomapDetailSeqRef.current) return;
+      setEvomapDetail((prev) => ({ ...prev, state: 'error', detail: error.message }));
+    }
+  }, []);
+
   // View switch: pause hidden-view redraws, flush the latest snapshot into the
   // freshly visible view on the next frame (charts resize after re-layout).
   useEffect(() => {
@@ -287,7 +324,7 @@ const App = () => {
           </section>
           <section className={viewClass('swarm')} aria-hidden={view !== 'swarm'} inert={view === 'swarm' ? undefined : ''}>
             <Dashboard dashboard={dashboard} active={view === 'swarm'} reducedMotion={reducedMotion} />
-            <EvoMapPanel evomap={evomap} onSearch={searchEvomap} />
+            <EvoMapPanel evomap={evomap} detail={evomapDetail} onSearch={searchEvomap} onOpenAsset={openEvomapAsset} />
           </section>
         </div>
       </Content>
