@@ -25,10 +25,10 @@ from contracts.results import TaskResult, Usage, Verification
 from contracts.runtime import RunConfig
 from orchestration.codex import Proposal, task_workspace
 from orchestration.sample_policy import validate_sample
-
-EVOMAP_BASE_URL = "https://api.evomap.ai/v1"
-EVOMAP_MODEL = "evomap-gpt-5.6-luna"
-MAX_RESPONSE_BYTES = 1024 * 1024
+from orchestration.gateway_transport import (
+    EVOMAP_BASE_URL as EVOMAP_BASE_URL, EVOMAP_MODEL as EVOMAP_MODEL,
+    MAX_RESPONSE_BYTES as MAX_RESPONSE_BYTES, single_request,
+)
 
 
 class _ReportedUsage(BaseModel):
@@ -122,7 +122,7 @@ class GatewayExecutor:
             raise ValueError("MORPH_EVOMAP_API_KEY is missing or invalid")
         output_limit = min(config.max_tokens, 4096)
         phase_timeout = min(config.timeout_seconds, 180.0)
-        messages = [
+        messages: list[JsonValue] = [
             {"role": "system", "content":
              "Repair the supplied Python module according to TASK. Return exactly one JSON object, "
              "without Markdown, matching this schema: " + json.dumps(Proposal.model_json_schema()) +
@@ -135,7 +135,8 @@ class GatewayExecutor:
                 "experience": [gene.model_dump(mode="json") for gene in genes],
             }, ensure_ascii=False)},
         ]
-        payload = {"model": self.model, "messages": messages, "max_tokens": output_limit, "stream": False}
+        payload: dict[str, JsonValue] = {"model": self.model, "messages": messages,
+                                        "max_tokens": output_limit, "stream": False}
         encoded_payload = json.dumps(payload, ensure_ascii=False)
         if key in encoded_payload:
             raise ValueError("credential found in model input; request refused")
@@ -155,34 +156,11 @@ class GatewayExecutor:
         # Revalidate the effect boundary after reading inputs and recording intent.
         task_workspace(config)
         endpoint = self._endpoint()
-        status: int | None = None
-        error_kind: str | None = None
-        raw = bytearray()
-        started = time.monotonic()
-        try:
-            with httpx.Client(transport=self._transport, trust_env=False, follow_redirects=False,
-                              timeout=httpx.Timeout(phase_timeout)) as client:
-                # stream is only bounded HTTP body reading; the model request is stream=false.
-                with client.stream("POST", endpoint, json=payload,
-                                   headers={"Authorization": f"Bearer {key}"}) as response:
-                    status = response.status_code
-                    for chunk in response.iter_bytes():
-                        remaining = MAX_RESPONSE_BYTES - len(raw)
-                        raw.extend(chunk[:remaining])
-                        if len(chunk) > remaining:
-                            error_kind = "response_too_large"
-                            break
-        except httpx.HTTPError as exc:
-            # Exception strings may include sensitive headers; record only the class.
-            error_kind = type(exc).__name__
-        elapsed = time.monotonic() - started
-        try:
-            body: JsonValue = json.loads(raw)
-        except (ValueError, UnicodeError):
-            body = raw.decode("utf-8", errors="replace")
+        reply = single_request(payload, key=key, phase_timeout=phase_timeout, transport=self._transport)
+        status, body, error_kind, elapsed = reply.status, reply.body, reply.error_kind, reply.elapsed_seconds
         self._write("response.json", {
             "http_status": status, "body": body, "error_kind": error_kind,
-            "elapsed_seconds": elapsed, "finished_at": time.time(), "cost_usd": None,
+            "elapsed_seconds": elapsed, "finished_at": reply.finished_at, "cost_usd": None,
         }, key)
         reported = _usage(body)
         usage = Usage(tokens=reported.total_tokens if reported else None, cost_usd=None)

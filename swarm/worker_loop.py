@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 import os
 from pathlib import Path
@@ -73,6 +73,9 @@ class ExecutionResult:
     provenance: Provenance = "mock"
     usage_source: Literal["fixture_mock", "provider_reported", "replay"] = "fixture_mock"
     original_run_uri: str | None = None
+    metadata: dict[str, JsonValue] = field(default_factory=dict)
+    consumed_asset_ids: tuple[str, ...] = ()
+    uncertain: bool = False
 
 
 class Executor(Protocol):
@@ -82,10 +85,13 @@ class Executor(Protocol):
     usage_source: Literal["fixture_mock", "provider_reported", "replay"]
     original_run_uri: str | None
 
+    def check_paths(self, target: Path, state: Path) -> None: ...
+
     def bound(self, signal: Signal) -> ExecutionBound: ...
 
     def execute(self, signal: Signal, attempt: AttemptId, repository: Path,
-                directory: Path, *, base_revision: str, base_head: str) -> ExecutionResult: ...
+                directory: Path, *, base_revision: str, base_head: str,
+                experience: ConsumptionExecution | None = None) -> ExecutionResult: ...
 
 
 class FixtureExecutor:
@@ -97,6 +103,9 @@ class FixtureExecutor:
     provenance: Provenance = "mock"
     usage_source: Literal["fixture_mock", "provider_reported", "replay"] = "fixture_mock"
     original_run_uri: str | None = None
+
+    def check_paths(self, target: Path, state: Path) -> None:
+        pass
 
     def bound(self, signal: Signal) -> ExecutionBound:
         if "reuse_task_id" not in signal.payload:
@@ -111,7 +120,12 @@ class FixtureExecutor:
                               bound_evidence="local fixture: two synthetic units; no paid calls")
 
     def execute(self, signal: Signal, attempt: AttemptId, repository: Path,
-                directory: Path, *, base_revision: str, base_head: str) -> ExecutionResult:
+                directory: Path, *, base_revision: str, base_head: str,
+                experience: ConsumptionExecution | None = None) -> ExecutionResult:
+        if experience is not None:
+            self.materialize(experience.candidate, repository, directory)
+            return ExecutionResult(experience.candidate, _FIXTURE_USAGE, str(directory),
+                                   consumed_asset_ids=(experience.asset_id,))
         changes = _CHANGES.validate_python(signal.payload.get("changes"))
         candidate = Candidate(attempt=attempt, base_revision=base_revision, base_head=base_head,
                               changes=changes, declared_files=len(changes), declared_lines=0,
@@ -161,7 +175,16 @@ def _write_json(path: Path, value: JsonValue) -> None:
             json.dump(value, stream, ensure_ascii=False, allow_nan=False)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, path)
+        for retry in range(3):
+            try:
+                os.replace(temporary, path)
+                break
+            except PermissionError:
+                # Windows readers may briefly deny delete-sharing. This is a
+                # known failed local rename, never a repeat of external work.
+                if retry == 2:
+                    raise
+                time.sleep(0.02 * (retry + 1))
     finally:
         temporary.unlink(missing_ok=True)
 
@@ -218,6 +241,7 @@ class Worker:
             raise AssetSafetyError("locality_target_mismatch")
         self.worker_id = config.worker_id
         self.executor = executor or FixtureExecutor()
+        self.executor.check_paths(self.target, self.state)
         self.mirror = mirror
         Acceptance(provenance=self.executor.provenance, original_run_uri=self.executor.original_run_uri)
         self.ledger = TaskLedger(self.state / "tasks.sqlite3", config.swarm_id, limits=config.budget.limits)
@@ -276,7 +300,8 @@ class Worker:
     def _audit(self, signal: Signal, lease: Lease, attempt: AttemptId, outcome: str, *,
                report: ValidationReport | None = None, asset_id: str | None = None,
                workspace: str | None = None, usage: JsonValue = None,
-               result_id: str | None = None, consumed: list[str] | None = None) -> None:
+               result_id: str | None = None, consumed: list[str] | None = None,
+               metadata: dict[str, JsonValue] | None = None) -> None:
         value: dict[str, JsonValue] = {
             "worker_id": self.worker_id, "swarm_id": self.config.swarm_id, "pid": os.getpid(),
             "signal_id": signal.signal_id, "task_id": signal.task_id,
@@ -293,8 +318,14 @@ class Worker:
             "usage_source": self.executor.usage_source, "actual_cost_usd": None,
             "provenance": self.executor.provenance, "original_run_uri": self.executor.original_run_uri,
             "evidence_class": "contract_local", "created_at": time.time(),
-            "interface_live": "not_run", "task_live": "not_run",
+            "interface_live": "not_run", "task_live": "not_run", "execution": metadata or {},
         }
+        if self.executor.provenance == "live" and metadata is not None:
+            value["evidence_class"] = "interface_live"
+            value["interface_live"] = metadata.get("interface_live", "not_run")
+            if (outcome == "promoted" and metadata.get("task_kind") == "bounded_json"
+                    and metadata.get("interface_live") == "passed"):
+                value["task_live"] = "passed"
         if outcome == "promoted":
             value["feedback_state"] = ("complete" if self._pending and self._pending.get("feedback_complete")
                                        else "incomplete")
@@ -346,7 +377,8 @@ class Worker:
         workspace = pending.get("workspace")
         self._audit(task.signal, lease, report.attempt, "promoted", report=report, asset_id=asset_id,
                     workspace=workspace if isinstance(workspace, str) else None,
-                    usage=pending.get("usage"), result_id=result_id, consumed=consumed)
+                    usage=pending.get("usage"), result_id=result_id, consumed=consumed,
+                    metadata=TypeAdapter(dict[str, JsonValue]).validate_python(pending.get("metadata", {})))
         count = pending.get("completion_count")
         if not isinstance(count, int):
             raise AssetSafetyError("finalization_counter_invalid")
@@ -412,51 +444,54 @@ class Worker:
         consumption: ConsumptionExecution | None = None
         asset_id: str | None = None
         result_id: str | None = None
+        phase = "lease_check"
+        failure: dict[str, JsonValue] = {}
         outcome = "execution_unknown"
         usage: JsonValue = None
         try:
             keeper.start()
             # Acceptance comes from immutable operator-seeded task facts.
             policy = ValidationPolicy.model_validate(self.ledger.get(signal.task_id).acceptance.get("validation_policy"))
+            phase = "reserve"
             bound = self.executor.bound(signal)
-            if not bound.provider_enforced:
-                raise BudgetBlocked("provider_bound_not_enforced")
             keeper.check()
             self._active = self.budget.reserve(self.worker_id, signal.task_id, bound,
                                               request_id=f"{signal.task_id}:{lease.token}")
             self._status("executing")
             try:
                 keeper.check()
+                phase = "snapshot"
                 revision, head = snapshot_revision(self.target, signal.scope, self.state / "snapshots")
                 keeper.check()
                 execution_id = uuid4().hex
                 directory = self.state / "execution" / execution_id
                 consumption = self._consume(signal, keeper.current, attempt, revision, head, execution_id)
-                if consumption is None:
-                    result = self.executor.execute(signal, attempt, self.target, directory,
-                                                   base_revision=revision, base_head=head)
-                else:
-                    if type(self.executor) is not FixtureExecutor:
-                        raise AssetSafetyError("reuse_executor_not_supported")
-                    self.executor.materialize(consumption.candidate, self.target, directory)
-                    result = ExecutionResult(consumption.candidate, _FIXTURE_USAGE, str(directory))
+                phase = "execute"
+                result = self.executor.execute(signal, attempt, self.target, directory,
+                                               base_revision=revision, base_head=head, experience=consumption)
+                if consumption is not None and (
+                    result.candidate != consumption.candidate or result.consumed_asset_ids != (consumption.asset_id,)
+                ):
+                    consumption = None
             except BaseException:
                 self.budget.mark_uncertain(self._active)
                 self._active = None
                 raise
             usage = result.usage
-            settled = self.budget.settle(self._active, usage)
+            phase = "settle"
+            settled = (self.budget.mark_uncertain(self._active) if result.uncertain else
+                       self.budget.settle(self._active, usage))
             self._active = None
             self._status("settled")
             if (result.provenance != self.executor.provenance
                     or result.usage_source != self.executor.usage_source
                     or result.original_run_uri != self.executor.original_run_uri):
                 raise AssetSafetyError("execution_provenance_mismatch")
-            if settled.uncertain_reservations:
+            if settled.uncertain_reservations and settled.reason != "unknown_cost":
                 outcome = "unknown_usage"
                 return "sleeping"
             if settled.sleeping and settled.reason not in {
-                "worker_burn_rate", "swarm_cost_estimate_exhausted",
+                "worker_burn_rate", "swarm_cost_estimate_exhausted", "unknown_cost",
             }:
                 outcome = "budget_stopped"
                 return "sleeping"
@@ -468,6 +503,7 @@ class Worker:
                 if candidate.attempt != attempt or candidate.scope != signal.scope:
                     raise AssetSafetyError("executor_identity_or_scope_mismatch")
                 asset_id = self.assets.publish(candidate)
+                phase = "validate"
                 report = AssetValidator(self.assets, self.target, policy=policy,
                                         timeout_seconds=self.config.validation_seconds).validate(asset_id)
                 outcome = "quarantined"
@@ -479,6 +515,7 @@ class Worker:
                 return "failed"
             if asset_id is None:
                 raise AssetSafetyError("missing_validated_asset")
+            phase = "prepare_application"
             prepared = AssetApplicator(self.assets, self.target, policy_version=policy.version,
                                        protected_paths=(_SOURCE,)).prepare(asset_id, report.report_id)
             if Path(prepared.scope).resolve() != Path(lease.scope).resolve():
@@ -494,6 +531,7 @@ class Worker:
                 "worker_id": self.worker_id, "fencing_token": lease.token,
                 "provenance": self.executor.provenance, "evidence_class": "contract_local",
                 "policy_version": policy.version,
+                "execution": result.metadata,
             }
 
             def apply(assert_owned: Callable[[], None]) -> None:
@@ -504,11 +542,14 @@ class Worker:
                 "lease": _JSON.validate_python(lease.model_dump(mode="json")), "result_id": result_id,
                 "asset_id": asset_id, "report_id": report.report_id, "workspace": result.workspace,
                 "completion_count": self.completed + 1, "feedback_started": False, "feedback_complete": False,
+                "metadata": result.metadata,
                 "usage": {"usage": _JSON.validate_python(parsed_usage.model_dump(mode="json"))}
                 if parsed_usage else None,
             }
             self._status("submitting")
+            phase = "submit"
             self.leases.submit(lease, result_id, result_data, apply=apply)
+            phase = "finalize"
             self._finalize()
             outcome = "promoted"
             if self.mirror is not None:
@@ -520,7 +561,8 @@ class Worker:
         except BudgetBlocked as error:
             outcome = error.reason
             return "sleeping"
-        except Exception:
+        except Exception as error:
+            failure = {"failure_stage": phase, "failure_kind": type(error).__name__}
             try:
                 owned = self.leases.is_valid(keeper.current)
             except Exception:
@@ -537,7 +579,8 @@ class Worker:
                 if outcome != "promoted":
                     self._audit(signal, lease, attempt, outcome, report=report, asset_id=asset_id,
                                 workspace=result.workspace if result else None, usage=usage,
-                                result_id=result_id, consumed=[consumption.asset_id] if consumption else [])
+                                result_id=result_id, consumed=[consumption.asset_id] if consumption else [],
+                                metadata={**(result.metadata if result else {}), **failure})
             finally:
                 self.leases.release(keeper.current)
 
@@ -564,6 +607,9 @@ class Worker:
             self._status("sensing")
             signal = self.router.choose(self.worker_id, self.config.locality, self.config.capabilities)
             if signal is None:
+                local = self.ledger.candidates(self.config.locality, include_blocked=True)
+                if local and len(local) < 100 and all(task.status in {"completed", "failed"} for task in local):
+                    return self._status("idle", "local_tasks_terminal")
                 idle += 1
                 result = self._status("idle", "no_local_signal")
                 self._backoff(idle)

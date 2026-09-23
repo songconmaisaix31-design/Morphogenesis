@@ -25,6 +25,33 @@ def events(config):
     return [json.loads(path.read_bytes()) for path in (config.state / "audit").rglob("*.json")]
 
 
+def test_atomic_status_sharing_conflict_is_locally_bounded(tmp_path, monkeypatch):
+    import os
+    from swarm.worker_loop import _write_json
+    destination = tmp_path / "status.json"
+    destination.write_text('{"old":true}')
+    original = os.replace
+    calls = []
+    def shared(source, target):
+        calls.append(target)
+        if len(calls) == 1:
+            assert json.loads(destination.read_bytes()) == {"old": True}
+            raise PermissionError("fixture file sharing")
+        return original(source, target)
+    monkeypatch.setattr(os, "replace", shared)
+    _write_json(destination, {"completed": 1})
+    assert len(calls) == 2 and json.loads(destination.read_bytes()) == {"completed": 1}
+    calls.clear()
+    def denied(source, target):
+        calls.append(target)
+        raise PermissionError("persistent fixture sharing")
+    monkeypatch.setattr(os, "replace", denied)
+    with pytest.raises(PermissionError):
+        _write_json(destination, {"completed": 2})
+    assert len(calls) == 3 and json.loads(destination.read_bytes()) == {"completed": 1}
+    assert not list(tmp_path.glob("*.tmp"))
+
+
 class UnknownUsage(FixtureExecutor):
     def execute(self, signal, attempt, repository, directory, **snapshot):
         return ExecutionResult(None, {"secret": "must-not-enter-audit"})
@@ -71,7 +98,7 @@ def test_bound_prevents_executor_call(tmp_path):
     assert worker.run()["state"] == "sleeping"
     assert executor.called is False
     assert worker.budget.snapshot().pending_reservations == 0
-    assert events(config)[0]["outcome"] == "provider_bound_not_enforced"
+    assert events(config)[0]["outcome"] == "explicit_unbounded_admission_required"
 
 
 @pytest.mark.parametrize("outside", [True, False])
@@ -275,16 +302,60 @@ def test_two_generations_preserve_head_index_and_unrelated_wip(tmp_path):
     assert unrelated.read_bytes() == unrelated_bytes and untracked.read_bytes() == b"preserve me\n"
 
 
-def test_renewal_keeps_slow_local_execution_owned(tmp_path):
+def test_renewal_keeps_slow_local_execution_owned(tmp_path, monkeypatch):
+    from threading import Event
+    renewed = Event()
+    clock = [time.time()]
+    renewals = []
     class Slow(FixtureExecutor):
         def execute(self, *args, **kwargs):
-            time.sleep(0.6)
+            # Exercise three real SQLite renewals across more than the initial
+            # TTL. A controlled ledger clock avoids equating CI scheduler delay
+            # with failure of the renewal protocol.
+            for _ in range(3):
+                renewed.clear()
+                clock[0] += 0.2
+                assert renewed.wait(5), "renewal thread did not persist its next expiry"
             return super().execute(*args, **kwargs)
     config = configured(tmp_path, energy=1, lease_seconds=0.25)
     worker = Worker(config, Slow())
-    assert worker.run()["state"] == "exhausted"
+    clock[0] = time.time()
+    monkeypatch.setattr(worker.ledger, "now", lambda: clock[0])
+    original = worker.leases.renew
+    def record(lease, **kwargs):
+        result = original(lease, **kwargs)
+        if result is not None:
+            renewals.append((lease.expires_at, result.expires_at))
+            renewed.set()
+        return result
+    monkeypatch.setattr(worker.leases, "renew", record)
+    outcome = worker.run()
+    assert outcome["state"] == "exhausted", {"status": outcome, "audit": events(config)}
+    assert sum(after > before for before, after in renewals) >= 3
     assert len(worker.assets.promotions()) == 1
     assert worker.leases.snapshot() == []
+
+
+def test_real_wall_clock_renewal_outlives_initial_ttl(tmp_path, monkeypatch):
+    renewed = []
+    class Slow(FixtureExecutor):
+        def execute(self, *args, **kwargs):
+            time.sleep(2.5)
+            return super().execute(*args, **kwargs)
+    config = configured(tmp_path, energy=1, lease_seconds=2)
+    worker = Worker(config, Slow())
+    original = worker.leases.renew
+    def record(lease, **kwargs):
+        result = original(lease, **kwargs)
+        if result is not None:
+            renewed.append((lease.expires_at, result.expires_at))
+        return result
+    monkeypatch.setattr(worker.leases, "renew", record)
+    result = worker.run()
+    assert result["state"] == "exhausted", {"status": result, "audit": events(config)}
+    assert result["completed"] == 1 and len(renewed) >= 2
+    assert all(new > old for old, new in renewed)
+    assert len(worker.assets.promotions()) == 1 and worker.leases.snapshot() == []
 
 
 def test_restart_completed_before_approval_does_not_reexecute(tmp_path, monkeypatch):

@@ -130,7 +130,8 @@ def test_fake_high_usage_breaker_sleeps_all_three_processes(tmp_path: Path):
 
 def _one_process(config_json):
     context = multiprocessing.get_context("spawn")
-    process = context.Process(target=_offline_worker, args=(config_json, context.Barrier(1)))
+    start = context.Barrier(1)  # Keep the POSIX semaphore alive until child join.
+    process = context.Process(target=_offline_worker, args=(config_json, start))
     process.start()
     try:
         process.join(120)

@@ -101,4 +101,70 @@ Acceptance includes three independent offline processes performing six actual fi
 
 All fixture/model/metering and HTTP mock evidence is `contract_local`. Python socket blocking is not an OS sandbox for arbitrary child binaries; arbitrary candidates are never executed. Real model-gateway availability while Hub is offline, production Hub, billed cost reconciliation, arbitrary-code sandbox execution, physical operation, exact candidate CI and merging into mainline are **not run**. No mainline merge, deployment or demo-process mutation is authorized. Existing temporary artifacts from historical runs are retained; no unrelated cleanup is performed.
 
-The coordinator relayed a subsequent requirement at 2026-09-24 00:11 Asia/Shanghai: algorithm attempts must use the EvoMap API. This local checkpoint is retained as deterministic safety regression evidence. C continues a separate bounded data-candidate API adapter phase; credentials, explicit pricing/admission policy and real request evidence are not yet available at this checkpoint. It is not the final live acceptance result.
+The coordinator relayed a subsequent requirement at 2026-09-24 00:11 Asia/Shanghai: algorithm attempts must use the EvoMap API. The local checkpoint `bc1827a046f0b65beb643726257c7c7c4f20deb7` (2026-09-24 00:14:13 +08:00) is retained as deterministic regression evidence. The API phase below extends it; a concrete credential path and admission configuration remain unavailable for real execution.
+
+## EvoMap data algorithm entry
+
+`python -m swarm evomap --config <operator-config.json>` starts three independent workers; `--resume` uses the same persisted run. All six algorithm tasks use the existing EvoMap Chat Completions endpoint and the configured model. The six tasks are integer sorting, order-preserving string deduplication, three-smallest selection, integer sum, string frequencies, and a second member reusing the first sorting result. Python `sorted`, `dict.fromkeys`, `heapq.nsmallest`, `sum` and `collections.Counter` create fixed oracles at seeding time. Oracles stay in task acceptance and never enter the signal payload or model context.
+
+Workers receive backend scope permissions and module membership only. Builder 2 may access `module_0` for the `reuse` module while its own independent task stays in `module_2`; builder 0 selects only `module_0` tasks. The source and consuming tasks therefore share a real scope and its exclusive lease, satisfying A's existing applicability rule. Approved content enters the actual consuming model request. Only a returned answer with the exact source bytes and the supplied asset ID can bind A's existing consumption/adoption receipt; injection or a local copy alone is insufficient.
+
+The model returns JSON data, normalized to a JSON file candidate. A's independent literal-file policy validates the exact expected result. No model code is imported, evaluated or executed. These tasks can support limited data-task acceptance; they do not establish general coding-agent or operating-system sandbox acceptance.
+
+Example configuration structure below uses **operator admission allowances**, not provider prices or a billed-cost ceiling. Choose an unused experiment directory and a private credential file outside every repository, task, state, execution and validation directory. This example is not evidence of a configured or completed live run:
+
+```json
+{
+  "directory": "C:/Users/DW/AppData/Local/Temp/swarm-evomap-operator-run",
+  "swarm_id": "evomap-data-v02",
+  "api": {
+    "model": "evomap-gpt-5.6-luna",
+    "credential_file": "C:/Users/DW/private/evomap-api-key.txt",
+    "max_input_bytes": 12000,
+    "max_output_tokens": 1024,
+    "timeout_seconds": 60
+  },
+  "budget": {
+    "max_tokens": 20000,
+    "max_cost_usd": 0.06,
+    "unbounded_reservation_usd": 0.01,
+    "prices": null,
+    "limits": {
+      "max_tasks": 6,
+      "max_attempts": 6,
+      "max_attempts_per_task": 1,
+      "max_derived_tasks": 0,
+      "max_runtime_seconds": 300
+    }
+  }
+}
+```
+
+`request_bound=unbounded` and `provider_enforced=false` are intentional. The explicit positive `unbounded_reservation_usd` enables B's admission policy; its default is denial. Without real matching price configuration, valid reported tokens remain known but costs remain `null`, the full reservation is retained, and `unknown_cost` blocks subsequent requests. Known valid in-flight responses may still finish fixed validation and fenced submission. Thus a price-less run cannot promise six requests/completions. Missing usage, unknown transport effects and token-limit violations reject effects and stop further admission. There are no retries, fallback providers, new-run retries or automatic paid tests.
+
+The file path is the only credential reference passed to workers. An HTTP-only child reads its content; the parent does not. Inherited `MORPH_EVOMAP_API_KEY` is rejected before Git, SDK or validator launch, so configure the file route and clear that inherited variable. Linked or overlapping credential paths are rejected before snapshots or preimage reads. The child has a bounded lifetime, bounded response and no further child process. The extracted `orchestration.gateway_transport.single_request` retains the original httpx no-retry, no-redirect and no-environment-proxy lifecycle. The original `GatewayExecutor` remains restricted to its existing sample/TASK exercise and retains its STOP, usage, secret-redaction and path checks.
+
+Durable request evidence records identity/model/limits/input byte count, with no raw prompt or credential path. Task inputs and routing probabilities remain reproducible from the immutable task and routing ledger. Response evidence contains only parsed, credential-screened content and numeric usage; exception strings, headers and raw error bodies are excluded. Each final audit/result binds requested/returned model, local/provider request IDs, HTTP status, elapsed time, actual cost `null`, execution evidence URI and adoption lineage. Missing provider IDs/models stay `null`.
+
+The experiment summary requires at least five distinct accepted tasks, all three member IDs, three independent OS PIDs and an authoritative cross-member adoption receipt before its `task_live` scenario passes; six completions plus zero child failures are required for CLI exit 0. A 200 status alone never passes `interface_live`. Mock transport and simulated IPC remain `mock`/`contract_local`. Local terminal tasks allow bounded early exit; otherwise dependency waits use exponential backoff within energy/time limits.
+
+## API-phase regression and CI limits
+
+The extracted transport passed the **33 original gateway tests in 5.78s**. API negative/credential/unknown-cost checks passed **13 tests in 28.16s**; the corrected three-process API-path test passed **1 test in 108.47s**, making exactly six MockTransport requests (two per member), applying six oracle-checked JSON results and persisting one exact cross-member adoption. These are offline contract tests, not actual EvoMap calls.
+
+Final combined C domain gate, 2026-09-24 00:34 +08:00, with all BLAS thread variables at 1:
+
+```powershell
+./.venv/Scripts/python.exe -m pytest tests/swarm/test_worker_runtime.py tests/swarm/test_selfgrowth.py tests/swarm/test_observer.py tests/swarm/test_mirror.py tests/swarm/test_worker_cli.py tests/swarm/test_worker_evomap.py tests/t2/test_gateway.py -q
+# 84 passed in 156.61s
+./.venv/Scripts/python.exe -m mypy --strict swarm/worker_loop.py swarm/evomap_executor.py swarm/observer.py swarm/hub_mirror.py swarm/cli.py swarm/__main__.py orchestration/gateway.py orchestration/gateway_transport.py tools/check_distribution.py
+# 9 source files clean; same command with --platform linux also clean
+./.venv/Scripts/python.exe -m swarm evomap --help
+# exit 0; explicit --config and --resume entry available
+```
+
+The gate includes the additional aggregate-live acceptance negative cases, deterministic and real-wall-clock renewal cases, and bounded Windows sharing-conflict test. Full pytest/build/SDK/distribution and exact-SHA cross-platform CI remain independent I's responsibility; they were not substituted by this domain run.
+
+Original CI [run 35887345947](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35887345947) at `bc1827a` had **2 failed, 433 passed, 1 skipped** on Ubuntu; Windows was cancelled. The process test lost its temporary Barrier's POSIX semaphore before child unpickling; it now retains a parent reference until join. The old 0.25s wall-clock renewal failure reported only `stopped`, so its specific failure cause remains unknown. Replacement protocol coverage advances a controlled ledger clock across three persisted real-thread renewals; separate wall-clock coverage uses a 2s TTL, execution longer than that TTL, and checks actual renewal count. Neither Windows success nor Linux-target type checking proves the next Linux CI run passed.
+
+The first new API concurrency run under `pytest-123` failed in **182.80s** with zero admitted requests: new `opportunity` signals defaulted to `innovation`, while workers advertised `repair`. The data task and worker capabilities are now explicitly `data`. A diagnostic Windows file read also exposed a transient `WinError 5` on status replacement. Status export now permits at most three local rename attempts for that known failed sharing operation, preserving the old file on persistent failure; this does not repeat model/API work. Original failure artifacts remain retained. No real EvoMap request, actual billed-cost reconciliation, production Hub publish, mainline merge or deployment has occurred in this phase.
