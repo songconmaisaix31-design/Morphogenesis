@@ -33,7 +33,7 @@ BOUNDARIES = [
     "不调用任何模型；不伪造 task_live。",
     "费用未知时保留 unknown，不显示为零。",
     "Hub 状态待发布；本地批准不等于 Hub promoted。",
-    "租约态按只读快照推导：leased/completed/expired/partial/handoff/failed。",
+    "租约态直接映射持久化任务状态；claimed 按 TTL 分为 leased/expired。",
 ]
 
 def _as_float(value: Any) -> float | None:
@@ -98,31 +98,27 @@ def _signal_of(task: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
-def _lease_state(task: dict[str, Any], attempt_history: list[dict[str, Any]], now: float) -> str:
-    """Derive one of the five documented lease states plus terminal states.
+def _lease_state(task: dict[str, Any], now: float) -> str:
+    """Map the durable task status directly to a read-time lease state.
 
-    This is a read-time classification of the durable facts; it never expires,
-    releases or re-claims anything.
+    ``lease_state`` is a projection of ``status``, never a re-derivation from
+    attempt history. Only ``claimed`` is split into leased/expired by its TTL;
+    every other durable status (partial/handoff/blocked/submitting/completed/
+    failed/available) passes through unchanged, so the raw ``status`` field and
+    ``lease_state`` can never contradict each other.
     """
     status = _as_str(task.get("status")) or "available"
-    if status == "completed":
-        return "completed"
-    if status == "failed":
-        return "failed"
-    if status == "submitting":
-        return "partial"
-    expiry = _as_float(task.get("expiry"))
     if status == "claimed":
+        expiry = _as_float(task.get("expiry"))
         return "expired" if (expiry is not None and expiry <= now) else "leased"
-    # status == "available"
-    workers = {_as_str(a.get("worker_id")) for a in attempt_history}
-    workers.discard(None)
-    attempts = _as_int(task.get("attempts")) or 0
-    if len(workers) > 1:
-        return "handoff"
-    if attempts > 0:
-        return "expired"
-    return "available"
+    return status
+
+
+def _as_bool(value: Any) -> bool:
+    """SQLite stores ``effect_applied`` as INTEGER 0/1, not bool."""
+    if isinstance(value, bool):
+        return value
+    return _as_int(value) == 1
 
 
 def _workers(view: dict[str, Any]) -> list[dict[str, Any]]:
@@ -193,7 +189,7 @@ def _tasks(view: dict[str, Any], now: float) -> list[dict[str, Any]]:
             "workspace": _as_str(task.get("workspace")),
             "kind": _as_str(signal.get("kind")),
             "status": _as_str(task.get("status")),
-            "lease_state": _lease_state(task, attempt_history, now),
+            "lease_state": _lease_state(task, now),
             "attempts": _as_int(task.get("attempts")),
             "token": _as_int(task.get("token")),
             "owner": _as_str(task.get("owner")),
@@ -202,7 +198,7 @@ def _tasks(view: dict[str, Any], now: float) -> list[dict[str, Any]]:
             "updated_at": _as_float(task.get("updated_at")),
             "derived_from": _as_str(task.get("derived_from")),
             "result_id": _as_str(task.get("result_id")),
-            "effect_applied": task.get("effect_applied") is True,
+            "effect_applied": _as_bool(task.get("effect_applied")),
             "dependencies": deps,
             "attempt_history": attempt_history,
         })
@@ -298,14 +294,17 @@ def _budget(view: dict[str, Any]) -> dict[str, Any]:
             "settled_at": _as_float(row.get("settled_at")),
         })
     reservations.sort(key=lambda item: (item["created_at"] is None, item["created_at"], item["reservation_id"]))
-    reserved = sum((r["reserved_usd"] or 0.0) for r in reservations if r["state"] == "reserved")
+    pending_hold = sum((r["reserved_usd"] or 0.0) for r in reservations if r["state"] == "reserved")
+    unknown_hold = sum((r["reserved_usd"] or 0.0) for r in reservations if r["state"] == "unknown")
     admitted = sum((r["admitted_usd"] or 0.0) for r in reservations)
     return {
         "breaker": breaker,
         "admission_control": admission_control,
         "reservations": reservations,
         "totals": {
-            "reserved_usd": reserved,
+            "pending_hold_usd": pending_hold,
+            "unknown_hold_usd": unknown_hold,
+            "total_hold_usd": pending_hold + unknown_hold,
             "admitted_usd": admitted,
             "reserved": sum(1 for r in reservations if r["state"] == "reserved"),
             "settled": sum(1 for r in reservations if r["state"] == "settled"),
@@ -444,7 +443,9 @@ def empty_swarm(note: str = "未配置蜂群状态目录；/api/swarm 保持空�
         "routes": [],
         "signals": [],
         "budget": {"breaker": None, "admission_control": None, "reservations": [],
-                   "totals": {"reserved_usd": 0.0, "admitted_usd": 0.0, "reserved": 0, "settled": 0, "unknown": 0}},
+                   "totals": {"pending_hold_usd": 0.0, "unknown_hold_usd": 0.0,
+                              "total_hold_usd": 0.0, "admitted_usd": 0.0,
+                              "reserved": 0, "settled": 0, "unknown": 0}},
         "audit": [],
         "worker_audit": [],
         "assets": [],

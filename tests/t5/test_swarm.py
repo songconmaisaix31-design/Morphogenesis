@@ -60,32 +60,29 @@ def _task(task_id: str, status: str = "available", *, attempts: int = 0, owner: 
 
 
 class ProjectionTests(unittest.TestCase):
-    def test_lease_states_are_classified_without_mutation(self) -> None:
-        tasks = [
-            _task("leased", "claimed", owner="w1", expiry=2000.0, token=1, attempts=1),
-            _task("expired", "claimed", owner="w1", expiry=900.0, token=1, attempts=1),
-            _task("partial", "submitting", owner="w1", token=1, attempts=1),
-            _task("completed", "completed", owner="w1", token=1, attempts=1),
-            _task("failed", "failed", owner="w1", token=2, attempts=3),
-            _task("handoff", "available", attempts=2, token=2),
-            _task("available", "available", attempts=0),
+    def test_lease_state_directly_maps_durable_status(self) -> None:
+        cases = [
+            ("t-available", "available", None, "available"),
+            ("t-leased", "claimed", 2000.0, "leased"),
+            ("t-expired", "claimed", 900.0, "expired"),
+            ("t-submitting", "submitting", None, "submitting"),
+            ("t-partial", "partial", None, "partial"),
+            ("t-handoff", "handoff", None, "handoff"),
+            ("t-blocked", "blocked", None, "blocked"),
+            ("t-completed", "completed", None, "completed"),
+            ("t-failed", "failed", None, "failed"),
         ]
-        attempts = [
-            {"swarm_id": "swarm", "task_id": "handoff", "token": 1, "worker_id": "w1",
-             "started_at": 910.0, "finished_at": 920.0, "outcome": "expired", "evidence": None},
-            {"swarm_id": "swarm", "task_id": "handoff", "token": 2, "worker_id": "w2",
-             "started_at": 930.0, "finished_at": 940.0, "outcome": "released", "evidence": None},
-        ]
-        view = _view({"ledger": _db(tables={"tasks": tasks, "task_attempts": attempts, "dependencies": []})})
+        tasks = [_task(task_id, status=status, expiry=expiry, attempts=2, owner="w1", token=1)
+                 for task_id, status, expiry, _ in cases]
+        view = _view({"ledger": _db(tables={"tasks": tasks, "dependencies": []})})
         result = project(view, now=1000.0)
-        by_id = {task["task_id"]: task["lease_state"] for task in result["tasks"]}
-        self.assertEqual("leased", by_id["leased"])
-        self.assertEqual("expired", by_id["expired"])
-        self.assertEqual("partial", by_id["partial"])
-        self.assertEqual("completed", by_id["completed"])
-        self.assertEqual("failed", by_id["failed"])
-        self.assertEqual("handoff", by_id["handoff"])
-        self.assertEqual("available", by_id["available"])
+        by_id = {task["task_id"]: task for task in result["tasks"]}
+        for task_id, status, _expiry, expected in cases:
+            task = by_id[task_id]
+            self.assertEqual(expected, task["lease_state"], task_id)
+            # The raw status column is preserved and, except claimed's TTL split,
+            # is exactly the lease_state: the two can never contradict.
+            self.assertEqual(status, task["status"], task_id)
 
     def test_dependencies_are_read_not_inferred(self) -> None:
         deps = [
@@ -148,7 +145,10 @@ class ProjectionTests(unittest.TestCase):
         self.assertEqual(1, totals["reserved"])
         self.assertEqual(1, totals["settled"])
         self.assertEqual(1, totals["unknown"])
-        self.assertAlmostEqual(2.0, totals["reserved_usd"])
+        # pending hold (r1=2.0), unknown hold (r3=1.0), total occupation, debit.
+        self.assertAlmostEqual(2.0, totals["pending_hold_usd"])
+        self.assertAlmostEqual(1.0, totals["unknown_hold_usd"])
+        self.assertAlmostEqual(3.0, totals["total_hold_usd"])
         self.assertAlmostEqual(0.5, totals["admitted_usd"])
 
     def test_adoption_chain_and_promotions_are_traceable_by_asset_id(self) -> None:
@@ -255,6 +255,75 @@ class LoadSwarmTests(unittest.TestCase):
         self.assertEqual(1, len(view["tasks"]))
         self.assertEqual("leased", view["tasks"][0]["lease_state"])
         self.assertEqual(self._snapshot(), before)
+
+
+class SeedDemoContractTests(unittest.TestCase):
+    """Real seed_demo state read through the observer (real SQLite INTEGER 0/1).
+
+    seed_demo creates the genuine tasks.sqlite3 / field.sqlite3 the observer
+    reads; these tests never hand-write booleans or synthetic tables. Status
+    updates are test-fixture setup written directly to the temp SQLite file,
+    not through any swarm object, and only before the read-only observer runs.
+    """
+
+    def setUp(self) -> None:
+        self.temp_dir = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.root = Path(self.temp_dir.name)
+
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def _seed(self) -> Path:
+        from swarm.cli import seed_demo
+
+        _, state = seed_demo(self.root / "run")
+        return state
+
+    def test_lease_state_and_effect_applied_via_real_observer(self) -> None:
+        state = self._seed()
+        with sqlite3.connect(state / "tasks.sqlite3") as db:
+            db.execute("UPDATE tasks SET status='partial' WHERE task_id='fixture-0'")
+            db.execute("UPDATE tasks SET status='handoff' WHERE task_id='fixture-1'")
+            db.execute("UPDATE tasks SET status='blocked' WHERE task_id='fixture-2'")
+            db.execute("UPDATE tasks SET status='submitting' WHERE task_id='fixture-3'")
+            db.execute("UPDATE tasks SET status='completed', effect_applied=1 WHERE task_id='fixture-4'")
+            db.commit()
+        view = load_swarm(state)
+        by_id = {task["task_id"]: task for task in view["tasks"]}
+        self.assertEqual("partial", by_id["fixture-0"]["lease_state"])
+        self.assertEqual("partial", by_id["fixture-0"]["status"])
+        self.assertEqual("handoff", by_id["fixture-1"]["lease_state"])
+        self.assertEqual("blocked", by_id["fixture-2"]["lease_state"])
+        self.assertEqual("submitting", by_id["fixture-3"]["lease_state"])
+        self.assertEqual("completed", by_id["fixture-4"]["lease_state"])
+        # effect_applied is INTEGER 0/1 on the wire; it must convert to bool.
+        self.assertIs(True, by_id["fixture-4"]["effect_applied"])
+        self.assertIs(False, by_id["fixture-0"]["effect_applied"])
+        self.assertIs(False, by_id["fixture-5"]["effect_applied"])
+
+    def test_unknown_budget_hold_is_not_hidden(self) -> None:
+        state = self._seed()
+        with sqlite3.connect(state / "budget.sqlite3") as db:
+            db.execute("CREATE TABLE swarm_budgets (swarm_id TEXT PRIMARY KEY, policy_json TEXT NOT NULL, "
+                       "breaker TEXT, started_at REAL NOT NULL)")
+            db.execute("INSERT INTO swarm_budgets VALUES ('swarm', '{\"admission_control\":\"enabled\"}', NULL, 0.0)")
+            db.execute("CREATE TABLE budget_reservations (reservation_id TEXT PRIMARY KEY, swarm_id TEXT NOT NULL, "
+                       "worker_id TEXT NOT NULL, task_id TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL, "
+                       "created_at REAL NOT NULL, settled_at REAL, tokens INTEGER, estimate_usd REAL, "
+                       "reserved_usd REAL NOT NULL, request_id TEXT NOT NULL, usage_metering TEXT NOT NULL, "
+                       "request_bound TEXT NOT NULL, admission_control TEXT NOT NULL, cost TEXT NOT NULL, "
+                       "settlement TEXT, admitted_usd REAL)")
+            db.execute("INSERT INTO budget_reservations VALUES ('r1','swarm','w1','t1','{}','uncertain',"
+                       "1.0,2.0,NULL,NULL,1.0,'t1:1','unknown','unbounded','enabled','unknown',NULL,NULL)")
+            db.commit()
+        view = load_swarm(state)
+        totals = view["budget"]["totals"]
+        # One unknown 1 USD hold must remain visible as occupation, never zero.
+        self.assertAlmostEqual(0.0, totals["pending_hold_usd"])
+        self.assertAlmostEqual(1.0, totals["unknown_hold_usd"])
+        self.assertAlmostEqual(1.0, totals["total_hold_usd"])
+        self.assertAlmostEqual(0.0, totals["admitted_usd"])
+        self.assertEqual(1, totals["unknown"])
 
 
 class SwarmRouteTests(unittest.TestCase):
