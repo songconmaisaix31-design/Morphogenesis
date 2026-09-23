@@ -1,5 +1,19 @@
 # 验收矩阵
 
+## 最终累计代码复验（2026-09-23 21:26 CST）
+
+独立 I 在 `425d7e55b0cc8c3f2496a506b9f045fcb1b5fbfd` 运行标准检查；其中业务代码为 E 最终 `4938bb9230cf3acaf2cff63774f743a8a20d5bad`，两提交之间仅四份治理文档。主控已读取 `.runtime/freeze-integration/20260923-ctx3881/` 原始日志，结果如下：
+
+| 验证命令（现有项目 .venv） | 结果 |
+|---|---|
+| `python -m pytest -q` | **294 passed / 88.52s** |
+| `python tools/typecheck.py` | **55 source files / 0 errors** |
+| `python -m build` | wheel / sdist 成功；项目内临时隔离安装 poetry-core 2.5.0，无锁文件或全局配置变更 |
+| `npm run check:sdk` | 官方 1.14.0 schema/hash/防篡改验证通过；published=false |
+| `python -I tools/check_distribution.py --site-dir <项目内隔离 wheel-site> --check-node` | 11 包、资源、安装态 verifier 和 Node 依赖检查通过 |
+
+[业务代码精确 SHA 的 CI](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35865484484)：Windows 和 Ubuntu 均 completed/success，涵盖同一工作流的测试、类型、构建、SDK 与安装态检查。源码领域无新失败，不再修改已修复的时间竞态。完整命令和原始状态见 [I 报告](tracks/freeze-integration.md)，其提交 **`07809ce5fcc2679e6023a6816a8a166fbdc57b79`** 已于21:28:28普通推送成功。这证明本地契约及构建通过，**不改变下文真实 Hub 费用/候选门禁或 G5 人工/新网关验收状态**。
+
 ## G3/G4：真实候选已入 Hub，FETCH 被余额确认门禁阻止（2026-09-23 21:03 CST）
 
 官方 Proxy 2.0.38 与最新 GEP SDK 1.14.0 的 Capsule schema 不支持当前 Hub 必填的 `validation` 字段；原 `local_only` 校验器、SDK/schema、锁文件均未修改。按任务书允许的直连路线，复用官方 HubFetch、GEP envelope 与 SDK 内容寻址，以固定原节点发布一次 Gene/Capsule/EvolutionEvent；所有资产记录真实模型 `evomap-gpt-5.6-luna`、实际 blast_radius=1 file/17 lines，`kg_enrich=false`。基础 schema 投影通过不等同于完整 wire schema 通过；Python 独立行为验收与自包含 Node 结构检查分别记录，后者不冒称执行 Python。

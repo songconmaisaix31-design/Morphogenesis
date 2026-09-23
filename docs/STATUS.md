@@ -1,5 +1,15 @@
 # 开发状态
 
+## 封板累计复验：代码通过，外部门禁保留（2026-09-23 21:30 CST）
+
+I `ctx_3881542562f6` 已 succeeded 结算并 release；E/D 以完整外部门禁未达成 failed 结算，T succeeded，全部对应 Worker 已释放。当前 Run 的资源清单为 released=8（包含前置/恢复历史 Dispatch）、reclaimable=0，收件箱已处理并 ACK。主控保留的 viewer 不属于已释放 Worker，公网运行资源保持。
+
+独立 I 已在 `425d7e5`（业务代码 `4938bb9`）完成 **294 passed / 88.52s / 0 skipped**、55 文件 strict、wheel/sdist 构建、官方 SDK 与 11 包隔离分发检查。业务代码精确 SHA 的 [Windows / Ubuntu CI](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35865484484) 全部 success。I 报告已提交为 **`07809ce5fcc2679e6023a6816a8a166fbdc57b79`**，21:28:28 普通 push 成功，累计包含此前治理提交425d7e5。不因文档变化重复已通过的本地测试；最终治理 HEAD 的 CI 由主控按精确 SHA 另核对。
+
+E 前置及适配通过，真实三资产 bundle 已进入 Hub；G3/G4 完整目标受 candidate/noop/not-callable 与 FETCH confirm_required（预览3.36 credits，余额0，零正文）阻塞，未使用或 REPORT。D 公网只读软件通过，地址 `http://47.93.118.110:7799/`，部署代码 `53bb52c`；任务仍是第四轮历史 replay。新网关7527缺独立凭据、热点身份待确认、现场单屏观看未验收。T 竞态已在主线修复且56项T2复验通过，无额外sleep改动。G0文档已补齐三层护栏及2235tokens真实历史记录，未知费用保持null，在途硬封顶仍受上游限制。
+
+运行交接：主控新7526 listener 8220 / launcher40460（127.0.0.1），WLAN7799 listener66040 / launcher50588（172.20.10.2）；原7844 listener44240未改。公网容器独立运行。根文档425d7e5最初push遇SSL_ERROR_SYSCALL；保留提交后，使用既有127.0.0.1:7890代理、schannel及HTTP/1.1的单命令配置恢复Git读取与普通推送，未改全局代理或降低TLS校验。原失败及成功回执分别保留于 I 证据根。
+
 ## 当前：公网软件通过，真实 Hub 候选与付费 FETCH 门禁已确认（2026-09-23 21:04 CST）
 
 固定节点认证、官方 Proxy/MCP 前置通过。E 适配最终 66 项领域测试与 strict 通过，已提交推送 `4938bb9230cf3acaf2cff63774f743a8a20d5bad`，远端一致，按外部门禁 failed 结算并释放；三次 Proxy 明确拒绝后，任务书允许的官方直连唯一发布收到 quarantine/newcomer_candidate，三个 SDK 内容地址被 Hub 记录。认证详情仍为 candidate/noop/not-callable；精确 FETCH 返回 confirm_required，需 3.36 credits、余额 0、零正文。未确认付费、充值、使用或 REPORT；G3/G4 不翻绿。Chrome 节点页显示 Published=1、Promoted=0。完整请求和响应 ID 见 ACCEPTANCE。
