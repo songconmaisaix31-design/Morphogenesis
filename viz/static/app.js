@@ -310,7 +310,12 @@ function resizeCharts() {
 function update(data, { redraw = true, resize = false } = {}) {
   if (!byId("provenance")) { window.__morphPendingDashboard = { data, redraw, resize }; return; }
   lastData = data;
-  text("provenance", `来源：${data.provenance}`); byId("provenance").className = `morph-badge provenance-${data.provenance}`;
+  // empty_dashboard() reports provenance=live while nothing was loaded: do not
+  // let the badge read as live run data when the source label itself says
+  // 未加载导出 and no rehearsal.current exists.
+  const unloaded = data.source_label === "未加载导出" && !data.rehearsal?.current;
+  text("provenance", unloaded ? "未加载导出" : `来源：${data.provenance}`);
+  byId("provenance").className = `morph-badge provenance-${unloaded ? "unloaded" : data.provenance}`;
   text("connection-state", "");
   text("source-label", data.source_label); text("hub-status", data.hub_status); stateCards(data.acceptance ?? {});
   rehearsalBoard(data.rehearsal, { redrawTopology: redraw });
