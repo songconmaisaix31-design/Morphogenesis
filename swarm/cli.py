@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import multiprocessing
 from pathlib import Path
+import re
 import sys
 import time
 
@@ -13,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, JsonValue, TypeAdapter, model_valida
 from typing import Self
 
 from swarm.models import BudgetPolicy
-from swarm.evomap_executor import EvoMapConfig
+from swarm.evomap_executor import EvoMapConfig, EvoMapTextModel
 
 
 class EvoMapRun(BaseModel):
@@ -22,26 +24,36 @@ class EvoMapRun(BaseModel):
     swarm_id: str = "evomap-data-v02"
     api: EvoMapConfig
     budget: BudgetPolicy
+    workers: int = 3
+    tasks: int = 6
+    worker_models: tuple[EvoMapTextModel, ...] = ()
+    capability_names: tuple[str, ...] = ()
 
     @model_validator(mode="after")
     def bounded_experiment(self) -> Self:
         limits = self.budget.limits
-        if (limits.max_tasks != 6 or limits.max_attempts != 6 or limits.max_attempts_per_task != 1
+        if (self.workers, self.tasks) not in {(3, 6), (8, 48), (16, 96)}:
+            raise ValueError("evomap_scale_must_be_3x6_8x48_or_16x96")
+        if self.worker_models and len(self.worker_models) != self.workers:
+            raise ValueError("worker_models_must_match_worker_count")
+        if (len(self.capability_names) > 16 or len(set(self.capability_names)) != len(self.capability_names)
+                or any(not re.fullmatch(r"[a-z][a-z0-9_]{0,63}", name) for name in self.capability_names)):
+            raise ValueError("capability_names_must_be_unique_bounded_identifiers")
+        if (limits.max_tasks != self.tasks or limits.max_attempts != self.tasks or limits.max_attempts_per_task != 1
                 or limits.max_derived_tasks != 0 or limits.max_runtime_seconds > 900):
-            raise ValueError("evomap_requires_six_single_attempt_tasks_no_derivation_max900s")
+            raise ValueError("evomap_requires_one_attempt_per_task_no_derivation_max900s")
         if (self.budget.admission_control != "enabled" or self.budget.unbounded_reservation_usd is None
                 or self.api.max_input_bytes + self.api.max_output_tokens > self.budget.max_tokens):
             raise ValueError("evomap_requires_explicit_unbounded_admission")
-        if self.budget.prices is not None and (
-            self.budget.prices.provider != "evomap" or self.budget.prices.model != self.api.model
-        ):
+        effective_models = set(self.worker_models or (self.api.model,))
+        if self.budget.prices is not None and (self.budget.prices.provider != "evomap"
+                or effective_models != {self.budget.prices.model}):
             raise ValueError("evomap_matching_prices_required")
         return self
 
 
 def seed_evomap(config: EvoMapRun) -> tuple[Path, Path]:
-    """Six data algorithms; oracles live only in immutable acceptance records."""
-    from collections import Counter
+    """Deterministic diverse data tasks; oracles live only in acceptance records."""
     from local_assets.models import FileExpectation, ValidationPolicy
     from local_assets.paths import git
     from swarm.evomap_executor import canonical_answer
@@ -56,23 +68,50 @@ def seed_evomap(config: EvoMapRun) -> tuple[Path, Path]:
     target, state = directory / "local-workspace", directory / "state"
     target.mkdir(parents=True)
     git(target, "init", "-b", "swarm-local-data")
-    values = [9, -2, 5, 9, 0, 3]
-    words = ["pear", "apple", "pear", "fig", "apple"]
-    # The third task uses a mature standard-library heap operation.
     import heapq
-    tasks = TypeAdapter(list[tuple[str, str, str, JsonValue, JsonValue]]).validate_python([
-        ("module_0", "module_0", "Sort the integer input in ascending order, preserving duplicates.", values, sorted(values)),
-        ("module_1", "module_1", "Remove repeated strings, preserving their first-occurrence order.", words, list(dict.fromkeys(words))),
-        ("module_2", "module_2", "Return the three smallest integers in ascending order, preserving duplicates.", values, heapq.nsmallest(3, values)),
-        ("module_0", "module_0", "Return the sum of the integer input as a JSON integer.", values, sum(values)),
-        ("module_1", "module_1", "Return an object mapping each string to its occurrence count.", words, dict(Counter(words))),
-        ("module_0", "reuse", "Sort the integer input in ascending order, preserving duplicates. Use the supplied approved result when applicable.", values, sorted(values)),
-    ])
+    tasks: list[tuple[str, str, str, JsonValue, JsonValue]] = []
+    for number in range(config.tasks):
+        module_number = number % config.workers
+        values = [((number + 3) * factor) % 29 - 14 for factor in (7, 2, 11, 5, 7, 3)]
+        words = [f"item-{(number + offset * offset) % 7}" for offset in range(7)]
+        operation = number % 5
+        task: tuple[str, JsonValue, JsonValue]
+        if operation == 0:
+            task = ("Sort the integer input in ascending order, preserving duplicates.",
+                    TypeAdapter(JsonValue).validate_python(values),
+                    TypeAdapter(JsonValue).validate_python(sorted(values)))
+        elif operation == 1:
+            task = ("Remove repeated strings, preserving their first-occurrence order.",
+                    TypeAdapter(JsonValue).validate_python(words),
+                    TypeAdapter(JsonValue).validate_python(list(dict.fromkeys(words))))
+        elif operation == 2:
+            task = (
+                "Return the three smallest integers in ascending order, preserving duplicates.",
+                TypeAdapter(JsonValue).validate_python(values),
+                TypeAdapter(JsonValue).validate_python(heapq.nsmallest(3, values)))
+        elif operation == 3:
+            task = ("Return the sum of the integer input as a JSON integer.",
+                    TypeAdapter(JsonValue).validate_python(values), sum(values))
+        else:
+            task = ("Return an object mapping each string to its occurrence count.",
+                    TypeAdapter(JsonValue).validate_python(words),
+                    TypeAdapter(JsonValue).validate_python(dict(Counter(words))))
+        instruction: str = task[0]
+        incoming: JsonValue = task[1]
+        expected: JsonValue = task[2]
+        tasks.append((f"module_{module_number}", f"module_{module_number}", instruction, incoming, expected))
+    # The final task must use data-0's exact result, so its independent model
+    # response can prove approved cross-member reuse rather than mere injection.
+    source_values = [((0 + 3) * factor) % 29 - 14 for factor in (7, 2, 11, 5, 7, 3)]
+    tasks[-1] = ("module_0", "reuse", "Sort the integer input in ascending order, preserving duplicates. "
+                  "Use the supplied approved result when applicable.",
+                  TypeAdapter(JsonValue).validate_python(source_values),
+                  TypeAdapter(JsonValue).validate_python(sorted(source_values)))
     for number, (scope, _, _, _, _) in enumerate(tasks):
         initial_path = target / scope / f"result_{number}.json"
         initial_path.parent.mkdir(exist_ok=True)
         initial_path.write_text("null\n", encoding="utf-8", newline="\n")
-    git(target, "add", "--", "module_0", "module_1", "module_2")
+    git(target, "add", "--", *(f"module_{number}" for number in range(config.workers)))
     git(target, "-c", "user.name=Local Swarm Data", "-c", "user.email=data@localhost",
         "commit", "-m", "Seed bounded JSON algorithm inputs")
     ledger = TaskLedger(state / "tasks.sqlite3", config.swarm_id, limits=config.budget.limits)
@@ -81,13 +120,17 @@ def seed_evomap(config: EvoMapRun) -> tuple[Path, Path]:
         path = f"{scope}/result_{number}.json"
         payload: dict[str, JsonValue] = {"instruction": instruction, "input": incoming, "output_path": path}
         dependencies: tuple[str, ...] = ()
-        if number == 5:
+        if number == config.tasks - 1:
             dependencies = ("data-0",)
             payload.update({"reuse_task_id": "data-0", "path_map": {"module_0/result_0.json": path}})
         policy = ValidationPolicy(version="bounded-json-oracle-v1", expectations=(
             FileExpectation(path=path, content=canonical_answer(expected)),))
+        capability = ("data_sort", "data_dedup", "data_topk", "data_sum", "data_count")[number % 5]
+        if number == config.tasks - 1:
+            capability = "data_sort"
         signal = Signal(task_id=f"data-{number}", signal_id=f"data-{number}", workspace=str(target),
-                        scope=scope, module=module, kind="opportunity", required_capability="data", payload=payload)
+                        scope=scope, module=module, kind="opportunity",
+                        required_capability=capability, payload=payload)
         ledger.enqueue(signal, dependencies=dependencies, acceptance={"validation_policy": policy.model_dump(mode="json")})
         field.deposit(signal)
     return target, state
@@ -98,20 +141,36 @@ def evomap_worker_config(config: EvoMapRun, instance: int) -> str:
     from swarm.models import Locality
     from swarm.worker_loop import WorkerConfig
     target = (config.directory / "local-workspace").resolve()
+    previous = (instance - 1) % config.workers
+    scopes: tuple[str, ...] = (f"module_{instance}", f"module_{previous}")
+    modules: tuple[str, ...] = (f"module_{instance}", f"module_{previous}")
+    if instance == config.workers - 1:
+        scopes = (*scopes, "module_0")
+        modules = (*modules, "reuse")
+    authorized_modules = {int(scope.removeprefix("module_")) for scope in scopes}
+    if config.capability_names:
+        capabilities = {name: 1.0 for name in config.capability_names}
+    else:
+        # Every worker can execute the operation classes present in either authorized module.
+        capabilities = {("data_sort", "data_dedup", "data_topk", "data_sum", "data_count")[task % 5]: 1.0
+                        for task in range(config.tasks)
+                        if task % config.workers in authorized_modules}
+        if instance == config.workers - 1:
+            capabilities["data_sort"] = 1.0
     return WorkerConfig(state=config.directory / "state", target=target,
                         agent=AgentId(role="builder", instance=instance), swarm_id=config.swarm_id,
                         locality=Locality(workspace=str(target),
-                            authorized_scopes=("module_2", "module_0") if instance == 2 else (f"module_{instance}",),
-                            modules=("module_2", "reuse") if instance == 2 else (f"module_{instance}",)),
-                        budget=config.budget, capabilities={"data": 1.0}, seed=instance, max_idle=100, energy=150,
+                            authorized_scopes=scopes, modules=modules),
+                        budget=config.budget, capabilities=capabilities, seed=instance, max_idle=100, energy=150,
                         lease_seconds=min(300, config.budget.limits.max_runtime_seconds)).model_dump_json()
 
 
-def _evomap_process(config_json: str, worker_json: str) -> None:
+def _evomap_process(config_json: str, worker_json: str, instance: int) -> None:
     from swarm.evomap_executor import EvoMapExecutor
     from swarm.worker_loop import Worker, WorkerConfig
     config = EvoMapRun.model_validate_json(config_json)
-    executor = EvoMapExecutor(config.api)
+    model = config.worker_models[instance] if config.worker_models else config.api.model
+    executor = EvoMapExecutor(config.api.model_copy(update={"model": model}))
     result = Worker(WorkerConfig.model_validate_json(worker_json), executor).run()
     if result.get("state") in {"stopped", "needs_review"}:
         raise SystemExit(1)
@@ -132,7 +191,7 @@ def evomap_experiment(config: EvoMapRun, *, resume: bool = False) -> dict[str, J
     _, state = (directory / "local-workspace", directory / "state") if resume else seed_evomap(config)
     context = multiprocessing.get_context("spawn")
     workers = [context.Process(target=_evomap_process,
-               args=(config.model_dump_json(), evomap_worker_config(config, i))) for i in range(3)]
+               args=(config.model_dump_json(), evomap_worker_config(config, i), i)) for i in range(config.workers)]
     try:
         for process in workers:
             process.start()
@@ -142,10 +201,11 @@ def evomap_experiment(config: EvoMapRun, *, resume: bool = False) -> dict[str, J
         events = read_records(state / "audit", limit=1000).get("records")
         rows = [row for row in events if isinstance(row, dict)] if isinstance(events, list) else []
         view = observe(state)
-        summary = evomap_acceptance(rows, view)
+        summary = evomap_acceptance(rows, view, expected_workers=config.workers, expected_tasks=config.tasks)
         return {"process_exitcodes": [process.exitcode for process in workers], **summary,
                 "state_directory": str(state), "provenance": "live", "evidence_class": "interface_live",
-                "task_scope": "bounded_json_data_only", "max_requests": 6, "view": view}
+                "task_scope": "bounded_json_data_only", "max_requests": config.tasks,
+                "configured_workers": config.workers, "configured_tasks": config.tasks, "view": view}
     finally:
         for process in workers:
             if process.is_alive():
@@ -153,7 +213,8 @@ def evomap_experiment(config: EvoMapRun, *, resume: bool = False) -> dict[str, J
                 process.join(5)
 
 
-def evomap_acceptance(rows: list[dict[str, JsonValue]], view: dict[str, JsonValue]) -> dict[str, JsonValue]:
+def evomap_acceptance(rows: list[dict[str, JsonValue]], view: dict[str, JsonValue], *,
+                      expected_workers: int = 3, expected_tasks: int = 6) -> dict[str, JsonValue]:
     accepted = [row for row in rows if row.get("provenance") == "live" and row.get("outcome") == "promoted"
                 and row.get("task_live") == "passed"]
     participants: dict[str, JsonValue] = {}
@@ -163,12 +224,13 @@ def evomap_acceptance(rows: list[dict[str, JsonValue]], view: dict[str, JsonValu
             previous = participants.get(worker, 0)
             participants[worker] = previous + 1 if isinstance(previous, int) else 1
     pids = {row["pid"] for row in accepted if isinstance(row.get("pid"), int)}
-    tasks = {row["task_id"] for row in accepted if isinstance(row.get("task_id"), str)}
+    tasks = {str(row["task_id"]) for row in accepted if isinstance(row.get("task_id"), str)}
     sections = view.get("sections")
     validation = sections.get("validation") if isinstance(sections, dict) else None
     tables = validation.get("tables") if isinstance(validation, dict) else None
     adoptions = tables.get("adoptions") if isinstance(tables, dict) else None
     cross_member = 0
+    lineage: list[JsonValue] = []
     if isinstance(adoptions, list):
         for adoption_row in adoptions:
             body = adoption_row.get("body") if isinstance(adoption_row, dict) else None
@@ -184,11 +246,54 @@ def evomap_acceptance(rows: list[dict[str, JsonValue]], view: dict[str, JsonValu
                            and r.get("consumed_asset_ids") == [body.get("asset_id")]), None)
             if source and target and source.get("worker_id") != target.get("worker_id"):
                 cross_member += 1
+                lineage.append({"asset_id": body.get("asset_id"), "source_task": source.get("task_id"),
+                                "source_worker": source.get("worker_id"), "target_task": target.get("task_id"),
+                                "target_worker": target.get("worker_id")})
     interface = any(row.get("provenance") == "live" and row.get("interface_live") == "passed" for row in rows)
-    passed = len(tasks) >= 5 and len(pids) == 3 and len(participants) == 3 and cross_member > 0
-    return {"completed_tasks": len(tasks), "participation": participants, "independent_pids": len(pids),
-            "cross_member_adoptions": cross_member, "interface_live": "passed" if interface else "not_run",
+    latencies: list[float] = []
+    request_usage: dict[str, int | None] = {}
+    for row in rows:
+        execution = row.get("execution")
+        latency = execution.get("elapsed_seconds") if isinstance(execution, dict) else None
+        if isinstance(latency, (int, float)) and not isinstance(latency, bool):
+            latencies.append(float(latency))
+        request_id = execution.get("request_id") if isinstance(execution, dict) else None
+        usage = row.get("usage")
+        if isinstance(request_id, str) and request_id not in request_usage:
+            tokens = usage.get("total_tokens") if isinstance(usage, dict) else None
+            request_usage[request_id] = (tokens if isinstance(tokens, int)
+                                         and not isinstance(tokens, bool) else None) if isinstance(usage, dict) else None
+    known_tokens = [tokens for tokens in request_usage.values() if tokens is not None]
+    budget = sections.get("budget") if isinstance(sections, dict) else None
+    budget_tables = budget.get("tables") if isinstance(budget, dict) else None
+    reservations = budget_tables.get("budget_reservations") if isinstance(budget_tables, dict) else None
+    reservation_rows = [row for row in reservations if isinstance(row, dict)] if isinstance(reservations, list) else []
+    durable_tokens: list[int] = []
+    for reservation_row in reservation_rows:
+        durable_token = reservation_row.get("tokens")
+        if isinstance(durable_token, int) and not isinstance(durable_token, bool):
+            durable_tokens.append(durable_token)
+    unknown_reservations = sum(row.get("usage_metering") != "verified" for row in reservation_rows)
+    token_summary: dict[str, JsonValue] = {"audited_requests": len(request_usage),
+        "known_requests": len(durable_tokens) if reservation_rows else len(known_tokens),
+        "unknown_reservations": unknown_reservations,
+        "known_total": sum(durable_tokens) if reservation_rows else sum(known_tokens),
+        "total": (None if unknown_reservations else sum(durable_tokens)) if reservation_rows
+                 else (None if any(tokens is None for tokens in request_usage.values()) else sum(known_tokens))}
+    passed = (len(tasks) == expected_tasks and len(pids) == expected_workers
+              and len(participants) == expected_workers and cross_member > 0)
+    completed_task_ids = TypeAdapter(list[JsonValue]).validate_python(sorted(tasks))
+    result: dict[str, JsonValue] = {"completed_tasks": len(tasks), "participation": participants, "independent_pids": len(pids),
+            "unique_completed_tasks": completed_task_ids, "cross_member_adoptions": cross_member,
+            "adoption_lineage": lineage, "latency_seconds": {"count": len(latencies),
+                "total": sum(latencies), "minimum": min(latencies) if latencies else None,
+                "maximum": max(latencies) if latencies else None},
+            "tokens": token_summary,
+            "stop_reasons": dict(Counter(str(row.get("outcome")) for row in rows)),
+            "cost": {"estimated_usd": None, "billed_usd": None, "status": "unknown"},
+            "interface_live": "passed" if interface else "not_run",
             "task_live": "passed" if passed else "blocked" if rows else "not_run"}
+    return result
 
 
 def fixture_policy(max_cost_usd: float) -> dict[str, JsonValue]:
@@ -341,8 +446,12 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         if isinstance(result, dict) and "process_exitcodes" in result:
             count = result.get("completed_tasks")
-            return 0 if (result["process_exitcodes"] == [0, 0, 0] and isinstance(count, int) and count >= 6
-                         and result.get("task_live", "passed") == "passed") else 1
+            workers_value = result.get("configured_workers", 3)
+            tasks_value = result.get("configured_tasks", 6)
+            expected_workers = workers_value if isinstance(workers_value, int) else 3
+            expected_tasks = tasks_value if isinstance(tasks_value, int) else 6
+            return 0 if (result["process_exitcodes"] == [0] * expected_workers and count == expected_tasks
+                          and result.get("task_live", "passed") == "passed") else 1
         if isinstance(result, dict) and result.get("state") in {"stopped", "needs_review"}:
             return 1
         return 0
