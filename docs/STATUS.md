@@ -2,6 +2,10 @@
 
 ## 当前：Linear 包体前端直接改造返修（2026-09-23）
 
+本地阶段已完成：I 最终 `7c24398e99b526b8ca45de077079db9c46de86ed` 已推送并核对远端，主线已 fast-forward 接收；代码提交为 `93efcaee903cb7350d946e99eb81861264344f6b`，后续提交只改报告和截图等待步骤。67 项 Python、server strict、构建、131 项参考布局、原序幕链及 72 项真实 API 回放通过，0 页面/控制台/HTTP/外域错误；历史原件不变。完整证据见 [I 报告](tracks/frontend-gpt-reference-integration.md)。I `ctx_180813d3a4ea` 已 succeeded，`delivery_d1a3b73ab67c` 已处理并 ACK，owned terminal 已 release，reclaimable 列表为空。
+
+终端释放导致 I 的原预览子进程退出。主控核验 7844 空闲后，使用已验收 I 工作树 `.venv/Scripts/python.exe -m viz.server --host 127.0.0.1 --port 7844 --rehearsal <原第四轮单个文件> --replay` Hidden 恢复同一只读入口；当前 launcher **41400**、listener **44240**。恢复后实际 API 为 replay、5 成员、2 管道、passed/not_run/not_run；日志为 I 证据根下 `coordinator-preview.*.log`。预览不承诺跨 Orca/系统退出常驻。公网与最终组合容器仍未部署或验收，7799/7526/7527 未操作。
+
 最新交付：F 已提交并推送 `d0724a6a2f32f2f03860bbab06ebb82266abdcaf`，远端一致且工作树干净。构建、51 T5、131 项最终浏览器检查、原序幕链和 diff 检查通过；主控另亲看成员手机详情与序幕完成帧。`ctx_36490c2cd445` 已 succeeded，`delivery_be435eaca245` 处理并 ACK，release 返回 external_terminal / processAction none。
 
 按已计划的独立 I 流程，Orca 创建 `morph-gpt-reference-integration`，Task `task_c0228dbdfa14` / Dispatch `ctx_180813d3a4ea` / terminal `term_3c3674d4-6f50-4faf-96ca-d24a8a86df40`。当前派发范围收窄为本地精确合并 F + D `50d1353` + 治理 `f434982`，构建/T5/部署测试、序幕和三尺寸、服务端真实文件 replay 与提交推送；不执行先前自动审批拒绝的云端交接命令。独立预览使用空闲后核验的 7844；F 7841 保留，7799/7526/7527 不操作。公网集成和部署仍未验收。

@@ -1,5 +1,23 @@
 # 验收矩阵
 
+## Linear 原包直接改造与本地后端集成（2026-09-23）
+
+F `d0724a6a2f32f2f03860bbab06ebb82266abdcaf` 直接复用用户 Linear 包的应用 DOM/组件结构、源 CSS 与 11 个 SVG，形成真实任务、拓扑、Gene、证据、EvoMap 五视图；保留黄色原生黏菌、无鼠标/触屏趋食和双语序幕。独立 I 普通合入 F、D `50d1353` 与治理；最终 `7c24398e99b526b8ca45de077079db9c46de86ed` 已推送并由主线 fast-forward 接收。旧 `2df3138` 后台视觉通过结论仍撤回，不混用旧截图。
+
+| 本轮实际验证 | 结果 |
+| --- | --- |
+| 锁环境 `npm --prefix viz/frontend run build` | 通过；归一化构建产物与 F 相同 |
+| `.venv/Scripts/python.exe -m pytest tests/t5 tests/deployment -q` | 67 passed |
+| `.venv/Scripts/python.exe -m mypy --strict viz/server.py` | 1 source file success |
+| `node tests/t5/check_reference_layout.cjs <7844> <output> <fixture>` | 131 项通过；明确 mock/浏览器注入，0 页面错误、非同源/非 GET 请求 |
+| `node tests/integration/check_frontend_story.cjs <7844> <output>` | 原序幕、显式进入、键盘、深链、三视口与减少动态效果通过 |
+| `node tests/integration/check_frontend_replay.cjs <7844> <output> replay` | 72 项通过；直接读取真实 API，未注入响应；1366/1920/375 五视图、字体、详情、数据事实、0 控制台/HTTP/页面/外域错误 |
+| 历史原件与来源 | 226518 bytes、mtime、SHA-256 前后不变；API 为 replay / passed / not_run / not_run，费用未知 |
+
+主控亲看源应用、新版桌面/手机、成员详情、稳定后的 Gene 图和黏菌双语帧。I 发现默认 favicon 404 后，经主控认定为入口配置胶水补一行 data favicon；保留首次 71/1 失败记录，修复后严格复验通过。未弱化事实或错误断言。命令、证据根和资源来源见 [完整 I 报告](tracks/frontend-gpt-reference-integration.md)。
+
+预览 [后台](http://127.0.0.1:7844/#/workspace) / [序幕](http://127.0.0.1:7844/#/physarum) 使用服务端 `--replay` 读取第四轮单个原件。I 终端释放后，主控核验空闲并 Hidden 恢复同一验收工作树，launcher 41400 / listener 44240；恢复后真实 API 已复查。未新增模型任务或 Hub 写入。公网部署交接命令被自动审批拒绝，最终 F+D 组合容器、公网与物理展示仍 NOT_RUN；D 单轨历史容器通过不替代这些验收。用户提供快照及字体许可未核实的限制保留。
+
 ## 视觉改版验收（2026-09-23）
 
 按用户最新“完全放弃现有前端、复用大厂模板”指令，复用腾讯官方 [TDesign React Starter](https://github.com/Tencent/tdesign-react-starter) Dashboard，固定 `fce97863edd5d5556f766dd4e342aace31a99487` / package 0.3.1 / MIT。实际接入 Board、Dashboard TopPanel 和 AppLayout 源码结构以及 TDesign 组件，来源映射见 [F 报告](tracks/frontend-stack.md)。仅触达产品展示层：本次包含 DOM、展示 JS、React/Vite 静态构建与 CSS，不是仅 CSS 改版；后端、数据格式、原 11 项 T5 测试、原 observer 和几何断言未改。旧前端保留在 Git 历史。
