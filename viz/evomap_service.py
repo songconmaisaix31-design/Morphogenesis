@@ -18,6 +18,15 @@ Three independent sources, each labelled with its real origin:
   ``metabolism_gene_state`` tables, revalidated against the shared ``Gene``
   contract.
 
+Click-triggered per-asset context (``asset_view``) proxies three more official
+public read-only routes, all verified live on 2026-09-23 to return HTTP 200
+with no Authorization header: ``GET /a2a/assets/:id`` (404 ``asset_not_found``
+for unknown ids), ``GET /a2a/assets/:id/timeline`` (any asset) and
+``GET /a2a/assets/:id/branches`` (Gene only; 404 ``asset_not_found_or_not_gene``
+otherwise).  Branches is only requested after the detail block confirms the
+asset is a Gene. Successful results are cached per asset_id; a user retry
+after an error always re-fetches so a transient failure is not held for a TTL.
+
 ``MORPH_EVOMAP_API_KEY`` is only inspected for presence (reported as a
 boolean); it is never sent, logged or returned because the search route is
 public and authenticated behaviour is unverified.
@@ -27,18 +36,24 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
 import threading
 import time
 from collections.abc import Callable, Mapping
+from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar, cast
 
 import httpx
 from pydantic import JsonValue, TypeAdapter, ValidationError
 
 from contracts.resolution import Gene
 from viz.evomap_models import (
+    ASSET_BRANCHES_PATH,
+    ASSET_DETAIL_PATH,
+    ASSET_TIMELINE_PATH,
+    ASSETS_PATH,
     CATEGORIES_PATH,
     ERROR_CONNECTION,
     ERROR_MALFORMED,
@@ -49,9 +64,13 @@ from viz.evomap_models import (
     ERROR_TRANSPORT,
     HUB_BASE_URL,
     SEARCH_PATH,
+    AssetDetail,
+    AssetTimeline,
+    AssetView,
     CommunityCategories,
     CommunitySearch,
     EvomapReport,
+    GeneBranches,
     LocalPool,
 )
 
@@ -60,12 +79,18 @@ MAX_LIMIT = 50
 DEFAULT_LIMIT = 10
 MAX_QUERY_CHARS = 500
 MAX_GENES = 200
+MAX_ASSET_CACHE_ENTRIES = 64
 ASSET_TYPES = ("Gene", "Capsule")
 DEFAULT_QUERY = "repair"
+ASSET_ID_PATTERN = re.compile(r"sha256:[0-9a-f]{64}")
 
-# Only keys actually observed in the Hub's live response (2026-09-22 probe,
-# recorded in docs/tracks/frontend-evomap.md). Unknown keys are dropped, not
-# renamed; missing keys stay absent.
+BlockT = TypeVar("BlockT", AssetDetail, AssetTimeline, GeneBranches)
+
+# Only keys actually observed in the Hub's live responses (2026-09-22 search
+# probe, 2026-09-23 asset-detail probe, recorded in
+# docs/tracks/frontend-evomap.md). Unknown keys are dropped, not renamed;
+# missing keys stay absent. The last five scalars and the last two objects are
+# detail-route keys that the search response does not carry.
 _ASSET_SCALARS = frozenset({
     "kind", "asset_id", "asset_type", "local_id", "url", "status",
     "source_node_id", "source_node_alias", "author", "model_name", "trust_tier",
@@ -77,8 +102,9 @@ _ASSET_SCALARS = frozenset({
     "upvotes", "downvotes", "agent_rating_avg", "agent_rating_count",
     "callable", "payload_ready", "has_strategy", "has_capsule",
     "validation_status", "validation_credible", "similarity",
+    "fork_count", "iteration_count", "user_vote",
 })
-_ASSET_OBJECTS = frozenset({"payload", "verification"})
+_ASSET_OBJECTS = frozenset({"payload", "verification", "lineage", "bundle_capsule"})
 
 _OBJECT = TypeAdapter(dict[str, JsonValue])
 
@@ -91,9 +117,33 @@ BOUNDARIES = [
     "搜索接口的费用与配额未知；不得把本端点当作轮询来源。",
 ]
 
+ASSET_BOUNDARIES = [
+    "asset_detail/asset_timeline/gene_branches 来自 EvoMap Hub 公开只读接口 /a2a/assets/:id、/:id/timeline、/:id/branches（实测无认证 200）；均为社区上下文，不是本项目的运行拓扑或任务事实。",
+    "gene_branches 仅在 asset_detail 判定为 Gene 时请求；非 Gene 标 not_applicable、detail 不可用标 unknown，两种状态都不产生额外请求。",
+    "按 asset_id 进程内缓存（TTL 同搜索）；成功结果命中 cache，错误结果由下一次点击重新获取。",
+    "每次点击最多三次只读 GET、无自动重试；Hub 404 以固定码 http_404 呈现（asset_not_found / asset_not_found_or_not_gene）。",
+    "MORPH_EVOMAP_API_KEY 只报告是否配置；密钥不出现在任何输出。",
+]
+
 
 class EvomapQueryError(ValueError):
     """Browser-supplied search parameters outside the documented contract."""
+
+
+class EvomapAssetError(ValueError):
+    """Browser-supplied asset id outside the documented contract."""
+
+
+def validate_asset_id(asset_id: str | None) -> str:
+    """Only the observed ``sha256:<64 lowercase hex>`` form is ever proxied.
+
+    The strict pattern also makes path construction safe: no slash, query or
+    fragment characters can reach the Hub URL.
+    """
+    value = (asset_id or "").strip()
+    if not ASSET_ID_PATTERN.fullmatch(value):
+        raise EvomapAssetError("id must be sha256:<64 lowercase hex>")
+    return value
 
 
 class _FetchError(RuntimeError):
@@ -164,6 +214,114 @@ def _validate_counts(value: Any, key: str) -> list[dict[str, Any]]:
     return result
 
 
+def _is_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _count_or(value: Any, fallback: int) -> int:
+    return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else fallback
+
+
+_EVENT_SCALARS = ("type", "timestamp", "description")
+
+_BRANCH_NUMBERS = ("capsule_count", "avg_gdi", "avg_confidence", "success_rate")
+_BRANCH_STRINGS = ("node_id", "node_alias")
+_CAPSULE_STRINGS = ("asset_id", "status", "outcome", "summary", "created_at")
+_CAPSULE_NUMBERS = ("gdi_score", "confidence")
+
+
+def _project_capsule(item: Any) -> dict[str, Any] | None:
+    """Whitelist projection of a branch capsule; the asset id is mandatory."""
+    if not isinstance(item, dict):
+        return None
+    asset_id = item.get("asset_id")
+    if not isinstance(asset_id, str) or not asset_id:
+        return None
+    capsule: dict[str, Any] = {"asset_id": asset_id}
+    for key in _CAPSULE_STRINGS:
+        value = item.get(key)
+        if isinstance(value, str) and key in item:
+            capsule[key] = value
+    for key in _CAPSULE_NUMBERS:
+        value = item.get(key)
+        if _is_number(value) and key in item:
+            capsule[key] = value
+    return capsule
+
+
+def _project_timeline_events(value: Any) -> list[dict[str, Any]]:
+    """Strict shape check for the timeline route's event list.
+
+    Every event must carry string type/timestamp/description (the observed
+    live contract); ``data`` passes through only as an object. Anything else
+    fails closed as malformed; unknown extra keys are dropped, not renamed.
+    """
+    if not isinstance(value, list):
+        raise _FetchError(ERROR_MALFORMED)
+    events: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            raise _FetchError(ERROR_MALFORMED)
+        event: dict[str, Any] = {}
+        for key in _EVENT_SCALARS:
+            field = item.get(key)
+            if not isinstance(field, str):
+                raise _FetchError(ERROR_MALFORMED)
+            event[key] = field
+        data = item.get("data")
+        if isinstance(data, dict):
+            event["data"] = dict(data)
+        events.append(event)
+    return events
+
+
+def _project_branches(value: Any) -> list[dict[str, Any]]:
+    """Strict shape check for the branches route's per-agent branch list.
+
+    A branch must be an object with a non-empty string node_id, an integer
+    capsule_count and a list capsules (each capsule must at least carry its
+    asset_id); the remaining observed fields are whitelisted when present and
+    correctly typed. Violations fail closed as malformed.
+    """
+    if not isinstance(value, list):
+        raise _FetchError(ERROR_MALFORMED)
+    branches: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            raise _FetchError(ERROR_MALFORMED)
+        node_id = item.get("node_id")
+        capsule_count = item.get("capsule_count")
+        capsules_raw = item.get("capsules")
+        if (
+            not isinstance(node_id, str)
+            or not node_id
+            or isinstance(capsule_count, bool)
+            or not isinstance(capsule_count, int)
+            or capsule_count < 0
+            or not isinstance(capsules_raw, list)
+        ):
+            raise _FetchError(ERROR_MALFORMED)
+        capsules = [c for c in (_project_capsule(c) for c in capsules_raw) if c is not None]
+        branch: dict[str, Any] = {
+            "node_id": node_id, "capsule_count": capsule_count, "capsules": capsules,
+        }
+        for key in _BRANCH_STRINGS:
+            field = item.get(key)
+            if isinstance(field, str) and key in item:
+                branch[key] = field
+        for key in _BRANCH_NUMBERS:
+            if key == "capsule_count":
+                continue
+            field = item.get(key)
+            if _is_number(field) and key in item:
+                branch[key] = field
+        best = _project_capsule(item.get("best_capsule"))
+        if best is not None:
+            branch["best_capsule"] = best
+        branches.append(branch)
+    return branches
+
+
 class EvomapService:
     """One shared, lock-guarded service per dashboard server process."""
 
@@ -188,6 +346,7 @@ class EvomapService:
         self._lock = threading.Lock()
         self._cache: dict[tuple[str, str | None, int], tuple[float, CommunitySearch]] = {}
         self._categories_cache: tuple[float, CommunityCategories] | None = None
+        self._asset_cache: dict[str, dict[str, tuple[float, Any]]] = {}
 
     def report(self, q: str | None, asset_type: str | None, limit: str | None) -> EvomapReport:
         params = validate_query(q, asset_type, limit)
@@ -262,6 +421,161 @@ class EvomapService:
             cache_age_seconds=age,
             error=error, by_type=categories.by_type,
             by_gene_category=categories.by_gene_category,
+        )
+
+    def asset_view(self, asset_id: str | None) -> AssetView:
+        """Click-triggered per-asset context from the three public detail routes.
+
+        At most three read-only GETs per click (detail + timeline + branches
+        only when the detail says Gene).
+        Successful results are cached; a click after an error retries the
+        failed read rather than serving an error cache entry.
+        """
+        aid = validate_asset_id(asset_id)
+        now = self._clock()
+        with self._lock:
+            entry = self._asset_cache.setdefault(aid, {})
+            self._evict_asset_cache()
+        detail: AssetDetail = self._asset_block(
+            entry, "detail", lambda: self._fetch_detail(aid), self._detail_error, now,
+        )
+        timeline: AssetTimeline = self._asset_block(
+            entry, "timeline", lambda: self._fetch_timeline(aid), self._timeline_error, now,
+        )
+        branches = self._branches(detail, entry, aid, now)
+        return AssetView(
+            generated_at=now,
+            hub={
+                "base_url": HUB_BASE_URL,
+                "asset_endpoint": ASSET_DETAIL_PATH,
+                "timeline_endpoint": ASSET_TIMELINE_PATH,
+                "branches_endpoint": ASSET_BRANCHES_PATH,
+                "auth": "public_read_observed_no_credentials_sent",
+                "api_key_configured": bool(self._environ.get("MORPH_EVOMAP_API_KEY", "").strip()),
+            },
+            asset_id=aid,
+            asset_detail=detail,
+            asset_timeline=timeline,
+            gene_branches=branches,
+            boundaries=ASSET_BOUNDARIES,
+        )
+
+    def _restamp(self, block: BlockT, state: str, now: float, *, error: str | None = None) -> BlockT:
+        fetched_at = block.fetched_at
+        age: float | None = None
+        if fetched_at is not None and state != "live":
+            age = max(0.0, now - fetched_at)
+        return replace(block, state=state, cache_age_seconds=age, error=error)
+
+    def _asset_block(
+        self,
+        entry: dict[str, tuple[float, Any]],
+        slot: str,
+        fetch: Callable[[], BlockT],
+        make_error: Callable[[str], BlockT],
+        now: float,
+    ) -> BlockT:
+        cached = entry.get(slot)
+        if (
+            cached is not None
+            and cached[1].state != "error"
+            and now - cached[0] <= self.cache_ttl_seconds
+        ):
+            block = cast(BlockT, cached[1])
+            return self._restamp(block, "cache", now)
+        try:
+            fresh = fetch()
+        except _FetchError as error:
+            if cached is not None and cached[1].state != "error":
+                return self._restamp(cast(BlockT, cached[1]), "stale_cache", now, error=error.code)
+            fresh = make_error(error.code)
+        with self._lock:
+            entry[slot] = (now, fresh)
+        return fresh
+
+    def _branches(
+        self, detail: AssetDetail, entry: dict[str, tuple[float, Any]], aid: str, now: float
+    ) -> GeneBranches:
+        if detail.state == "error" or detail.asset is None:
+            return self._branches_idle("unknown")
+        if detail.asset.get("asset_type") != "Gene":
+            return self._branches_idle("not_applicable")
+        return self._asset_block(
+            entry, "branches", lambda: self._fetch_branches(aid), self._branches_error, now,
+        )
+
+    def _branches_idle(self, state: str) -> GeneBranches:
+        return GeneBranches(
+            state=state, fetched_at=None, cache_ttl_seconds=self.cache_ttl_seconds,
+            cache_age_seconds=None, error=None, gene_summary=None, branches=[],
+            total_capsules=None, total_branches=None,
+        )
+
+    def _detail_error(self, code: str) -> AssetDetail:
+        return AssetDetail(
+            state="error", fetched_at=None, cache_ttl_seconds=self.cache_ttl_seconds,
+            cache_age_seconds=None, error=code, asset=None,
+        )
+
+    def _timeline_error(self, code: str) -> AssetTimeline:
+        return AssetTimeline(
+            state="error", fetched_at=None, cache_ttl_seconds=self.cache_ttl_seconds,
+            cache_age_seconds=None, error=code, asset_type=None, events=[], total=0,
+        )
+
+    def _branches_error(self, code: str) -> GeneBranches:
+        return GeneBranches(
+            state="error", fetched_at=None, cache_ttl_seconds=self.cache_ttl_seconds,
+            cache_age_seconds=None, error=code, gene_summary=None, branches=[],
+            total_capsules=None, total_branches=None,
+        )
+
+    def _evict_asset_cache(self) -> None:
+        while len(self._asset_cache) > MAX_ASSET_CACHE_ENTRIES:
+            oldest = min(
+                self._asset_cache,
+                key=lambda key: max((ts for ts, _ in self._asset_cache[key].values()), default=0.0),
+            )
+            del self._asset_cache[oldest]
+
+    def _fetch_detail(self, aid: str) -> AssetDetail:
+        body = self._get_object(f"{ASSETS_PATH}/{aid}")
+        if body.get("asset_id") != aid:
+            raise _FetchError(ERROR_MALFORMED)
+        asset = _project_asset(body)
+        if asset is None:
+            raise _FetchError(ERROR_MALFORMED)
+        return AssetDetail(
+            state="live", fetched_at=self._clock(),
+            cache_ttl_seconds=self.cache_ttl_seconds, cache_age_seconds=None,
+            error=None, asset=asset,
+        )
+
+    def _fetch_timeline(self, aid: str) -> AssetTimeline:
+        body = self._get_object(f"{ASSETS_PATH}/{aid}/timeline")
+        events = _project_timeline_events(body.get("events"))
+        asset_type = body.get("asset_type")
+        return AssetTimeline(
+            state="live", fetched_at=self._clock(),
+            cache_ttl_seconds=self.cache_ttl_seconds, cache_age_seconds=None,
+            error=None,
+            asset_type=asset_type if isinstance(asset_type, str) else None,
+            events=events, total=_count_or(body.get("total"), len(events)),
+        )
+
+    def _fetch_branches(self, aid: str) -> GeneBranches:
+        body = self._get_object(f"{ASSETS_PATH}/{aid}/branches")
+        branches = _project_branches(body.get("branches"))
+        gene_summary = body.get("gene_summary")
+        capsule_total = sum(len(branch["capsules"]) for branch in branches)
+        return GeneBranches(
+            state="live", fetched_at=self._clock(),
+            cache_ttl_seconds=self.cache_ttl_seconds, cache_age_seconds=None,
+            error=None,
+            gene_summary=gene_summary if isinstance(gene_summary, str) else None,
+            branches=branches,
+            total_capsules=_count_or(body.get("total_capsules"), capsule_total),
+            total_branches=_count_or(body.get("total_branches"), len(branches)),
         )
 
     def _build(
@@ -457,3 +771,7 @@ def _json_default(value: Any) -> Any:
 
 def dumps_report(report: EvomapReport) -> bytes:
     return json.dumps(report.as_dict(), ensure_ascii=False, default=_json_default).encode("utf-8")
+
+
+def dumps_asset_view(view: AssetView) -> bytes:
+    return json.dumps(view.as_dict(), ensure_ascii=False, default=_json_default).encode("utf-8")

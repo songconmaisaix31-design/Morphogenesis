@@ -21,9 +21,14 @@ import httpx
 from contracts.resolution import Gene, GeneRef
 from http.server import ThreadingHTTPServer
 from viz.adapter import DashboardInputError, empty_dashboard
-from viz.evomap_models import CATEGORIES_PATH, EVOMAP_SCHEMA, SEARCH_PATH
-from viz.evomap_service import EvomapQueryError, EvomapService, read_local_pool
+from viz.evomap_models import ASSET_VIEW_SCHEMA, CATEGORIES_PATH, EVOMAP_SCHEMA, SEARCH_PATH
+from viz.evomap_service import EvomapAssetError, EvomapQueryError, EvomapService, read_local_pool
 from viz.server import DashboardHandler, degraded_loader
+
+
+GENE_ID = "sha256:7c0d1dcabea1b5b48d6e4966ff248e2ee9a1a761390a89ef4f9a42363be0bbb1"
+CAPSULE_ID = "sha256:9e7ab29dab2c70d2ee93cb00124902cbe986523fdffde34ac1c638248d611e66"
+UNKNOWN_ID = "sha256:" + "f" * 64
 
 
 ASSET = {
@@ -78,6 +83,93 @@ def _hub_handler(request: httpx.Request) -> httpx.Response:
     if request.url.path == CATEGORIES_PATH:
         return httpx.Response(200, json=_categories_payload())
     return httpx.Response(200, json=_hub_payload())
+
+
+def _detail_payload(asset_id: str, asset_type: str = "Gene") -> dict[str, Any]:
+    return {
+        "kind": "asset",
+        "asset_id": asset_id,
+        "asset_type": asset_type,
+        "url": f"https://evomap.ai/asset/{asset_id}",
+        "status": "promoted",
+        "source_node_id": "node_9fc2a98290c767be",
+        "source_node_alias": "Guenther",
+        "author": "node_9fc2a98290c767be",
+        "short_title": "Cassandra Repair Strategy & Best Practices",
+        "nl_summary": "This gene guides Cassandra repair.",
+        "trigger_text": "cassandra repair nodetool pr",
+        "gdi_score": 34.15,
+        "view_count": 3,
+        "fork_count": 0,
+        "iteration_count": 0,
+        "user_vote": None,
+        "payload": {"type": asset_type, "id": "gene_d0dc0f9e1002", "category": "innovate"},
+        "verification": {"attested": False},
+        "lineage": {"ancestors": [], "children": []},
+        "bundle_capsule": {"asset_id": "sha256:" + "6" * 64, "status": "candidate"},
+        "unobserved_detail_field": "dropped",
+    }
+
+
+def _timeline_payload(asset_id: str, asset_type: str = "Gene") -> dict[str, Any]:
+    return {
+        "asset_id": asset_id,
+        "asset_type": asset_type,
+        "events": [
+            {"type": "promoted", "timestamp": "2026-07-01T01:40:37.490Z",
+             "description": "Promoted to production", "unobserved": "dropped"},
+            {"type": "created", "timestamp": "2026-07-01T01:40:37.492Z",
+             "description": f"{asset_type} published", "data": {"status": "promoted"}},
+        ],
+        "total": 2,
+    }
+
+
+def _branches_payload(asset_id: str) -> dict[str, Any]:
+    capsule = {
+        "asset_id": "sha256:" + "6" * 64,
+        "gdi_score": 27.33,
+        "confidence": 0.75,
+        "status": "candidate",
+        "outcome": "success",
+        "summary": "Comprehensive Cassandra repair strategy.",
+        "created_at": "2026-07-01T01:40:37.530Z",
+        "unobserved_capsule_field": "dropped",
+    }
+    return {
+        "gene_asset_id": asset_id,
+        "gene_summary": "Comprehensive Cassandra repair strategy.",
+        "branches": [{
+            "node_id": "node_9fc2a98290c767be",
+            "node_alias": "Guenther",
+            "capsule_count": 1,
+            "avg_gdi": 27.33,
+            "avg_confidence": 0.75,
+            "success_rate": 1,
+            "best_capsule": dict(capsule),
+            "capsules": [dict(capsule)],
+            "unobserved_branch_field": "dropped",
+        }],
+        "total_capsules": 1,
+        "total_branches": 1,
+    }
+
+
+def _asset_handler(request: httpx.Request) -> httpx.Response:
+    """Mock Hub for the asset view routes: Gene detail/timeline/branches."""
+    prefix = "/a2a/assets/"
+    path = request.url.path
+    if not path.startswith(prefix):
+        return _hub_handler(request)
+    rest = path[len(prefix):]
+    if not rest.startswith("sha256:"):
+        # semantic-search / categories / other collection routes.
+        return _hub_handler(request)
+    if rest.endswith("/timeline"):
+        return httpx.Response(200, json=_timeline_payload(rest[: -len("/timeline")]))
+    if rest.endswith("/branches"):
+        return httpx.Response(200, json=_branches_payload(rest[: -len("/branches")]))
+    return httpx.Response(200, json=_detail_payload(rest))
 
 
 def _service(handler: Callable[[httpx.Request], httpx.Response], **kwargs: Any) -> EvomapService:
@@ -490,13 +582,270 @@ class LocalPoolTests(unittest.TestCase):
         self.assertEqual("unconfigured", pool.state)
 
 
+class AssetViewTests(unittest.TestCase):
+    """Click-triggered /api/evomap/asset loop (mock Hub transport, zero real requests)."""
+
+    def test_invalid_asset_ids_raise_before_any_request(self) -> None:
+        service = _service(_asset_handler)
+        bad_ids = [
+            None, "", "gene_d0dc0f9e1002", "sha256:" + "A" * 64,
+            "sha256:" + "0" * 63, "sha256:" + "0" * 65,
+            "sha256:" + "0" * 62 + "/x", GENE_ID + "?admin=1",
+        ]
+        for bad in bad_ids:
+            with self.assertRaises(EvomapAssetError, msg=repr(bad)):
+                service.asset_view(bad)
+        self.assertEqual(0, len(service._test_requests))  # type: ignore[attr-defined]
+
+    def test_gene_click_fetches_three_routes_without_credentials(self) -> None:
+        service = _service(_asset_handler, environ={"MORPH_EVOMAP_API_KEY": "secret-test-key"})
+        view = service.asset_view(GENE_ID)
+        self.assertEqual(GENE_ID, view.asset_id)
+        self.assertEqual("live", view.asset_detail.state)
+        self.assertEqual("live", view.asset_timeline.state)
+        self.assertEqual("live", view.gene_branches.state)
+
+        asset = view.asset_detail.asset
+        if asset is None:
+            self.fail("detail asset must be projected")
+        self.assertEqual(GENE_ID, asset["asset_id"])
+        self.assertEqual("Cassandra Repair Strategy & Best Practices", asset["short_title"])
+        self.assertEqual({"ancestors": [], "children": []}, asset["lineage"])
+        self.assertEqual({"asset_id": "sha256:" + "6" * 64, "status": "candidate"}, asset["bundle_capsule"])
+        self.assertEqual(0, asset["fork_count"])
+        self.assertIn("user_vote", asset)
+        self.assertNotIn("unobserved_detail_field", asset)
+
+        timeline = view.asset_timeline
+        self.assertEqual("Gene", timeline.asset_type)
+        self.assertEqual(2, timeline.total)
+        self.assertEqual(
+            {"type": "promoted", "timestamp": "2026-07-01T01:40:37.490Z",
+             "description": "Promoted to production"},
+            timeline.events[0],
+        )
+        self.assertEqual({"status": "promoted"}, timeline.events[1]["data"])
+
+        branches = view.gene_branches
+        self.assertEqual("Comprehensive Cassandra repair strategy.", branches.gene_summary)
+        self.assertEqual(1, branches.total_capsules)
+        self.assertEqual(1, branches.total_branches)
+        branch = branches.branches[0]
+        self.assertEqual("node_9fc2a98290c767be", branch["node_id"])
+        self.assertEqual("Guenther", branch["node_alias"])
+        self.assertEqual(27.33, branch["avg_gdi"])
+        self.assertNotIn("unobserved_branch_field", branch)
+        capsule = branch["capsules"][0]
+        self.assertEqual("success", capsule["outcome"])
+        self.assertNotIn("unobserved_capsule_field", capsule)
+        self.assertEqual(capsule["asset_id"], branch["best_capsule"]["asset_id"])
+
+        requests = service._test_requests  # type: ignore[attr-defined]
+        self.assertEqual(3, len(requests))
+        paths = [r.url.path for r in requests]
+        self.assertEqual(
+            [f"/a2a/assets/{GENE_ID}", f"/a2a/assets/{GENE_ID}/timeline", f"/a2a/assets/{GENE_ID}/branches"],
+            paths,
+        )
+        for request in requests:
+            self.assertNotIn("authorization", request.headers)
+            self.assertEqual("evomap.ai", request.url.host)
+            self.assertEqual(b"", request.read())
+        self.assertTrue(view.hub["api_key_configured"])
+        self.assertNotIn("secret-test-key", json.dumps(view.as_dict()))
+
+    def test_capsule_click_never_requests_branches(self) -> None:
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.url.path == f"/a2a/assets/{CAPSULE_ID}":
+                return httpx.Response(200, json=_detail_payload(CAPSULE_ID, "Capsule"))
+            if request.url.path == f"/a2a/assets/{CAPSULE_ID}/timeline":
+                return httpx.Response(200, json=_timeline_payload(CAPSULE_ID, "Capsule"))
+            return httpx.Response(404, json={"error": "asset_not_found_or_not_gene"})
+
+        service = _service(handler)
+        view = service.asset_view(CAPSULE_ID)
+        self.assertEqual("live", view.asset_detail.state)
+        self.assertEqual("Capsule", view.asset_timeline.asset_type)
+        self.assertEqual("not_applicable", view.gene_branches.state)
+        self.assertIsNone(view.gene_branches.error)
+        self.assertEqual([], view.gene_branches.branches)
+        paths = [r.url.path for r in service._test_requests]  # type: ignore[attr-defined]
+        self.assertEqual(2, len(paths))
+        self.assertFalse(any(path.endswith("/branches") for path in paths))
+
+    def test_error_manual_retry_refetches_and_can_recover(self) -> None:
+        requests = 0
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            nonlocal requests
+            requests += 1
+            if requests <= 2:
+                return httpx.Response(404, json={"error": "asset_not_found"})
+            return _asset_handler(request)
+
+        service = _service(handler)
+        first = service.asset_view(UNKNOWN_ID)
+        self.assertEqual("error", first.asset_detail.state)
+        self.assertEqual("http_404", first.asset_detail.error)
+        self.assertIsNone(first.asset_detail.asset)
+        self.assertEqual("error", first.asset_timeline.state)
+        self.assertEqual("http_404", first.asset_timeline.error)
+        # Detail unavailable: Gene-ness undetermined, no branches request sent.
+        self.assertEqual("unknown", first.gene_branches.state)
+        self.assertEqual(2, len(service._test_requests))  # type: ignore[attr-defined]
+        # A repeated user click retries both failed reads even within the TTL
+        # and can recover when the Hub is available again.
+        second = service.asset_view(UNKNOWN_ID)
+        self.assertEqual("live", second.asset_detail.state)
+        self.assertEqual("live", second.asset_timeline.state)
+        self.assertEqual("live", second.gene_branches.state)
+        self.assertEqual(5, len(service._test_requests))  # type: ignore[attr-defined]
+        self.assertEqual(5, requests)
+
+    def test_second_click_within_ttl_serves_cache_without_new_requests(self) -> None:
+        service = _service(_asset_handler)
+        service.asset_view(GENE_ID)
+        second = service.asset_view(GENE_ID)
+        self.assertEqual(3, len(service._test_requests))  # type: ignore[attr-defined]
+        self.assertEqual("cache", second.asset_detail.state)
+        self.assertEqual("cache", second.asset_timeline.state)
+        self.assertEqual("cache", second.gene_branches.state)
+        self.assertIsNotNone(second.asset_detail.cache_age_seconds)
+
+    def test_distinct_assets_are_cached_independently(self) -> None:
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.url.path.startswith(f"/a2a/assets/{CAPSULE_ID}"):
+                if request.url.path.endswith("/timeline"):
+                    return httpx.Response(200, json=_timeline_payload(CAPSULE_ID, "Capsule"))
+                return httpx.Response(200, json=_detail_payload(CAPSULE_ID, "Capsule"))
+            return _asset_handler(request)
+
+        service = _service(handler)
+        service.asset_view(GENE_ID)
+        service.asset_view(CAPSULE_ID)
+        service.asset_view(GENE_ID)
+        # Gene: 3 routes; Capsule: 2 routes; second Gene click fully cached.
+        self.assertEqual(5, len(service._test_requests))  # type: ignore[attr-defined]
+
+    def test_malformed_timeline_fails_closed_without_touching_detail(self) -> None:
+        for bad_events in [
+            "not-a-list",
+            [{"type": "created", "description": "missing timestamp"}],
+            [{"type": "created", "timestamp": "t", "description": 7}],
+            ["not-an-object"],
+        ]:
+            def handler(request: httpx.Request) -> httpx.Response:
+                if request.url.path.endswith("/timeline"):
+                    return httpx.Response(200, json={"asset_id": GENE_ID, "asset_type": "Gene", "events": bad_events, "total": 1})
+                return _asset_handler(request)
+
+            service = _service(handler)
+            view = service.asset_view(GENE_ID)
+            self.assertEqual("error", view.asset_timeline.state, bad_events)
+            self.assertEqual("malformed_response", view.asset_timeline.error, bad_events)
+            self.assertEqual([], view.asset_timeline.events)
+            self.assertEqual("live", view.asset_detail.state, bad_events)
+            self.assertEqual("live", view.gene_branches.state, bad_events)
+
+    def test_malformed_branches_fail_closed(self) -> None:
+        for bad_branches in [
+            "not-a-list",
+            [{"node_alias": "Guenther", "capsule_count": 1, "capsules": []}],
+            [{"node_id": "node_x", "capsule_count": "one", "capsules": []}],
+            [{"node_id": "node_x", "capsule_count": 1, "capsules": "nope"}],
+        ]:
+            def handler(request: httpx.Request) -> httpx.Response:
+                if request.url.path.endswith("/branches"):
+                    return httpx.Response(200, json={"gene_asset_id": GENE_ID, "branches": bad_branches})
+                return _asset_handler(request)
+
+            service = _service(handler)
+            view = service.asset_view(GENE_ID)
+            self.assertEqual("error", view.gene_branches.state, bad_branches)
+            self.assertEqual("malformed_response", view.gene_branches.error, bad_branches)
+            self.assertEqual([], view.gene_branches.branches)
+            self.assertEqual("live", view.asset_detail.state, bad_branches)
+
+    def test_branch_capsules_without_asset_id_are_dropped(self) -> None:
+        payload = _branches_payload(GENE_ID)
+        payload["branches"][0]["capsules"].append({"summary": "no id"})
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.url.path.endswith("/branches"):
+                return httpx.Response(200, json=payload)
+            return _asset_handler(request)
+
+        service = _service(handler)
+        view = service.asset_view(GENE_ID)
+        self.assertEqual("live", view.gene_branches.state)
+        self.assertEqual(1, len(view.gene_branches.branches[0]["capsules"]))
+        # total_capsules falls back to the projected capsule count only when absent.
+        self.assertEqual(1, view.gene_branches.total_capsules)
+
+    def test_detail_asset_id_mismatch_is_malformed(self) -> None:
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.url.path.endswith(("/timeline", "/branches")):
+                return _asset_handler(request)
+            return httpx.Response(200, json=_detail_payload(CAPSULE_ID))
+
+        service = _service(handler)
+        view = service.asset_view(GENE_ID)
+        self.assertEqual("error", view.asset_detail.state)
+        self.assertEqual("malformed_response", view.asset_detail.error)
+        self.assertEqual("unknown", view.gene_branches.state)
+        self.assertFalse(
+            any(r.url.path.endswith("/branches") for r in service._test_requests)  # type: ignore[attr-defined]
+        )
+
+    def test_failure_after_success_serves_stale_cache_with_error(self) -> None:
+        state = {"failing": False}
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            if state["failing"]:
+                return httpx.Response(503, text="down")
+            return _asset_handler(request)
+
+        service = _service(handler, cache_ttl_seconds=0.01)
+        import time
+
+        self.assertEqual("live", service.asset_view(GENE_ID).asset_detail.state)
+        time.sleep(0.02)
+        state["failing"] = True
+        view = service.asset_view(GENE_ID)
+        self.assertEqual("stale_cache", view.asset_detail.state)
+        self.assertEqual("http_503", view.asset_detail.error)
+        self.assertIsNotNone(view.asset_detail.asset)
+        self.assertEqual("stale_cache", view.asset_timeline.state)
+        self.assertEqual("stale_cache", view.gene_branches.state)
+        self.assertEqual(1, view.gene_branches.total_branches)
+
+    def test_asset_view_contract_shape(self) -> None:
+        service = _service(_asset_handler)
+        data = service.asset_view(GENE_ID).as_dict()
+        self.assertEqual(ASSET_VIEW_SCHEMA, data["schema"])
+        self.assertEqual(
+            {"base_url", "asset_endpoint", "timeline_endpoint", "branches_endpoint", "auth", "api_key_configured"},
+            set(data["hub"]),
+        )
+        self.assertEqual(GENE_ID, data["asset_id"])
+        for block in ("asset_detail", "asset_timeline", "gene_branches"):
+            self.assertIn(block, data)
+            self.assertTrue(
+                {"state", "fetched_at", "cache_ttl_seconds", "cache_age_seconds", "error"}
+                <= set(data[block]),
+                block,
+            )
+        self.assertTrue(data["boundaries"])
+        json.dumps(data)  # The whole contract must stay JSON-serializable.
+
+
 class EvomapRouteTests(unittest.TestCase):
     """Real local HTTP against the real handler; the Hub stays a mock transport."""
 
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         root = Path(self.temp_dir.name)
-        self.service = _service(_hub_handler)
+        self.service = _service(_asset_handler)
 
         def handler(*args: Any, **kwargs: Any) -> DashboardHandler:
             return DashboardHandler(
@@ -542,6 +891,23 @@ class EvomapRouteTests(unittest.TestCase):
         status, body = self._get("/api/dashboard")
         self.assertEqual(200, status)
         self.assertIn("provenance", body)
+
+    def test_asset_route_returns_the_documented_contract(self) -> None:
+        status, body = self._get(f"/api/evomap/asset?id={GENE_ID}")
+        self.assertEqual(200, status)
+        self.assertEqual(ASSET_VIEW_SCHEMA, body["schema"])
+        self.assertEqual(GENE_ID, body["asset_id"])
+        self.assertEqual("live", body["asset_detail"]["state"])
+        self.assertEqual("live", body["asset_timeline"]["state"])
+        self.assertEqual("live", body["gene_branches"]["state"])
+
+    def test_asset_route_validates_id_before_any_hub_request(self) -> None:
+        for path in ["/api/evomap/asset", "/api/evomap/asset?id=gene_abc", "/api/evomap/asset?id=sha256:" + "0" * 63]:
+            status, body = self._get(path)
+            self.assertEqual(400, status, path)
+            self.assertEqual(ASSET_VIEW_SCHEMA, body["schema"])
+            self.assertEqual("invalid_asset_id", body["error"])
+        self.assertEqual(0, len(self.service._test_requests))  # type: ignore[attr-defined]
 
 
 if __name__ == "__main__":

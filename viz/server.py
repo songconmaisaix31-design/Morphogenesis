@@ -13,7 +13,8 @@ from typing import Any, Callable
 from urllib.parse import parse_qs, urlsplit
 
 from viz.adapter import DashboardData, DashboardInputError, empty_dashboard, load_dashboard, load_rehearsal, load_runtime_export
-from viz.evomap_service import EvomapQueryError, EvomapService, dumps_report
+from viz.evomap_models import ASSET_VIEW_SCHEMA
+from viz.evomap_service import EvomapAssetError, EvomapQueryError, EvomapService, dumps_asset_view, dumps_report
 
 
 def echarts_asset_path(project_root: Path) -> Path:
@@ -70,6 +71,10 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             params = parse_qs(route.query, keep_blank_values=False, max_num_fields=8)
             self._serve_evomap(params)
             return
+        if route.path == "/api/evomap/asset":
+            params = parse_qs(route.query, keep_blank_values=False, max_num_fields=4)
+            self._serve_evomap_asset(params)
+            return
         if self.path == "/api/dashboard":
             # Re-read the one named rehearsal.json on each request so the local
             # page follows R's real stage snapshots. Browser input never reaches
@@ -103,6 +108,20 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             self._json_response(400, body)
             return
         self._json_response(200, dumps_report(report))
+
+    def _serve_evomap_asset(self, params: dict[str, list[str]]) -> None:
+        values = params.get("id")
+        asset_id = values[0] if values else None
+        try:
+            view = self.evomap_service.asset_view(asset_id)
+        except EvomapAssetError as error:
+            body = json.dumps(
+                {"schema": ASSET_VIEW_SCHEMA, "error": "invalid_asset_id", "detail": str(error)},
+                ensure_ascii=False,
+            ).encode("utf-8")
+            self._json_response(400, body)
+            return
+        self._json_response(200, dumps_asset_view(view))
 
     def log_message(self, format: str, *args: object) -> None:
         # Keep demo output concise; request data never enters a shell or HTML.
