@@ -33,7 +33,7 @@ COPY demo/data/mock-run.json demo/data/mock-run.json
 COPY --from=charts /build/node_modules/echarts/dist/echarts.min.js node_modules/echarts/dist/echarts.min.js
 COPY LICENSE THIRD_PARTY_NOTICES.md /app/notices/
 COPY --from=charts /build/node_modules/echarts/LICENSE /app/notices/LICENSE-echarts.txt
-COPY deploy/healthcheck.py /app/deploy/healthcheck.py
+COPY deploy/healthcheck.py deploy/smoke.py /app/deploy/
 USER 10001:10001
 EXPOSE 7500
 ENTRYPOINT ["python", "-m", "viz.server", "--host", "0.0.0.0", "--port", "7500"]

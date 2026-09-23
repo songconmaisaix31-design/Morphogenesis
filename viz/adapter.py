@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from contracts.messages import Envelope
+from contracts.provenance import Acceptance
 from contracts.resolution import Gene
 from contracts.results import TaskResult
 from metabolism import GeneView, UseRecord
@@ -97,7 +98,7 @@ def load_rehearsal(path: Path, *, replay: bool = False) -> DashboardData:
 
     current = document.current
     mode_label = {"live": "现场快照", "replay": "回放视图", "mock": "模拟快照"}[document.mode]
-    return DashboardData(
+    dashboard = DashboardData(
         provenance=document.mode,
         acceptance=current.acceptance.model_dump(mode="json"),
         events=[],
@@ -114,6 +115,52 @@ def load_rehearsal(path: Path, *, replay: bool = False) -> DashboardData:
         ],
         rehearsal=document.model_dump(mode="json"),
     )
+    validate_dashboard_snapshot(dashboard.as_dict())
+    return dashboard
+
+
+def validate_dashboard_snapshot(data: dict[str, Any]) -> None:
+    """Check the served evidence with its owning contracts, without promoting it.
+
+    This checks consistency, not the existence of a remote artifact or a new run.
+    Deployment probes use the same validation as the rehearsal adapter.
+    """
+    try:
+        provenance = data["provenance"]
+        acceptance_data = dict(data["acceptance"])
+        if acceptance_data.get("provenance", provenance) != provenance:
+            raise ValueError("dashboard acceptance provenance mismatch")
+        acceptance = Acceptance.model_validate({**acceptance_data, "provenance": provenance})
+        results: list[TaskResult] = []
+        rehearsal = data.get("rehearsal")
+        if rehearsal is not None:
+            document = RehearsalDocument.model_validate(rehearsal)
+            if document.mode != provenance or document.current.acceptance != acceptance:
+                raise ValueError("dashboard and rehearsal acceptance mismatch")
+            results = document.current.results
+            expected = results[-1].model_dump(mode="json") if results else None
+            if data.get("result") != expected:
+                raise ValueError("dashboard and rehearsal result mismatch")
+            if acceptance.task_live == "passed" and document.current.stage != "completed":
+                raise ValueError("task_live passed requires completed rehearsal")
+        elif data.get("result") is not None:
+            result = TaskResult.model_validate(data["result"])
+            if result.provenance != provenance or result.acceptance != acceptance:
+                raise ValueError("dashboard and result acceptance mismatch")
+            results = [result]
+        for dimension in ("interface_live", "task_live"):
+            if getattr(acceptance, dimension) == "passed" and (
+                not results or any(getattr(result.acceptance, dimension) != "passed" for result in results)
+            ):
+                raise ValueError(f"{dimension} passed requires matching TaskResult evidence")
+        if provenance != "live" and any(getattr(acceptance, dimension) != "not_run" for dimension in ("interface_live", "task_live")):
+            raise ValueError("mock/replay live dimensions must remain not_run")
+        if not any(data.get(key) for key in ("events", "genes", "adoptions", "metrics", "result", "rehearsal")) and any(
+            getattr(acceptance, dimension) != "not_run" for dimension in ("contract_local", "interface_live", "task_live")
+        ):
+            raise ValueError("empty dashboard must remain not_run")
+    except (ValueError, TypeError, KeyError) as error:
+        raise DashboardInputError(f"dashboard evidence contract: {error}") from error
 
 
 def _safe_path(path: Path, roots: tuple[Path, ...]) -> Path:

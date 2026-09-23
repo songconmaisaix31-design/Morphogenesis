@@ -50,6 +50,7 @@
 !deploy/nginx.conf
 !deploy/proxy.conf
 !deploy/healthcheck.py
+!deploy/smoke.py
 # Even an accidentally copied file inside static must not enter the context.
 **/.env*
 **/.git/**

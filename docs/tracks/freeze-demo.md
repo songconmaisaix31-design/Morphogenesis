@@ -1,5 +1,40 @@
 # D 轨：封板夜 G5 软件链路
 
+## 领域恢复与软件核验（2026-09-23 19:34–19:45 CST）
+
+主控消息 `msg_3b877f1a471c` 明确两前置通过并恢复 D 开发，已消费 ACK；本节取代下文只读阻塞结论，历史记录保留。仍使用同工作区 `codex/morphogenesis-mainline`，未切分支；E 的报告和 Hub 代码改动完整保留，未暂存。当前进程网关 key 只检查存在性，结果 false；没有读取 Hub node_secret 充作模型 key。
+
+### 实现及边界
+
+- Compose 配置测试兼容序列化省略 false 的 `bind.create_host_path`，同时保留源 YAML 显式 `create_host_path: false` 的约束；没有允许自动创建宿主源目录。
+- `viz.server` 支持 `MORPH_BIND_IP`，缺省 loopback，显式 `--host` 优先。Python 也只允许 GET/HEAD、拒绝请求体/Transfer-Encoding、目录/点文件/非白名单文件/符号链接；日志省略 query/header，返回 nosniff/frame/referrer 头。静态白名单沿用 nginx。公网仍通过 nginx 限流/超时，Python 不替代其流量边界。
+- 审计未发现任务启动、文件写入、模型调用等写路由；三条 API 均只读，没有添加无依据的 token 或控制面。nginx 继续剥离 Authorization/Cookie、禁止上游重试，不暴露 API 容器端口。
+- `validate_dashboard_snapshot` 复用 `Acceptance`、`RehearsalDocument`、`TaskResult`，检查来源/当前结果/验收一致及 passed 所需结果证据；`load_rehearsal`、smoke、healthcheck 共用它。合法历史 live 的 passed 原样传播，mock/replay 的 live 维度保持 not_run，空态三维 not_run；没有改默认值。探针只是契约一致性，不证明新任务或远端文件存在。
+- smoke 使用项目锁定 Python，`--direct` 明确跳过仅 nginx 提供的限流检查。已兼容最终 UI 的 `data:,` 空 favicon，仅该固定 icon 免取网络资源，其它有 scheme/外域资源拒绝。API 镜像包含 smoke，可在容器锁环境核验同源 nginx。
+
+### 命令与证据
+
+本轮本地原件仍为下文第四轮 `rehearsal.json`；没有新网关调用，请求模型/usage 只作历史核对。全部运行产物位于忽略目录 `.runtime/freeze-demo/`。
+
+| 命令 / 核验 | 结果 / 证据 |
+| --- | --- |
+| `orca skills get orca-cli`、`orca skills get orchestration`、`orca skills get orca-cli --reference references/browser.md` | 读取当前 CLI 指南；浏览器由主控允许使用独立 Chromium，避免操作账户窗口 |
+| `netstat -ano -p tcp` + 指定 PID 的 `Get-CimInstance Win32_Process` | 开始仅 7844 listener 44240 / parent 41400，命令仍为历史 worktree 的 replay；未停止或重启 |
+| `.venv/Scripts/python.exe -m pytest tests/deployment tests/t5 -q` | 最终 **85 passed / 16.34s**；`pytest-final.txt`。首次 83 passed / 1 failed 为新测试尝试修改 frozen fixture，已改为重新 model_validate；没有变更共享模型 |
+| `.venv/Scripts/python.exe tools/typecheck.py` | **55 source files / 0 errors**；`typecheck-first.txt` |
+| `Start-Process .venv/Scripts/python.exe -ArgumentList '-u -m viz.server --host 127.0.0.1 --port <7799或7526> --rehearsal <第四轮原件> --replay' -WindowStyle Hidden ...` | 19:41:15 启动；7799 launcher 55676，7526 launcher 13016；`viewer-<port>.json/out.log/err.log`。凭据存在性 false，viewer 不继承任何已知网关秘密；7527 未启动替代品 |
+| `.venv/Scripts/python.exe deploy/smoke.py http://127.0.0.1:7799 --with-fonts --direct`；7526 同命令 | 均 exit 0；`smoke-local-7799.json`、`smoke-replay-7526.json`，provenance=replay / passed,not_run,not_run。首次因最终 UI favicon data URI 不属 HTTP 而失败，已补有界解析和回归测试 |
+| `node .runtime/freeze-demo/browser.cjs http://127.0.0.1:7799 .runtime/freeze-demo/browser-local-7799-v2` | exit 0；1366×768、1920×1080、375×812 各 5 视图＋验收详情实图；零 pageerror、零实际 HTTP 失败、无横向溢出、字体已加载，三态等于真实 API |
+| 上述浏览器命令改为 7526 / `browser-replay-7526` | exit 0；同样 15 视图，真实 replay API。浏览器自动只读 GET 已按协调消息 `msg_64efbecf0954` route abort，每个服务一次；没有 fulfill 假回执，没有 Hub 请求，EvoMap 错误态/未验收单列 |
+| 实际查看 `1366-task.png`、`1920-topology.png`、`375-acceptance.png` | 桌面任务/拓扑与手机验收弹层可读；回放和 not_run 明确。属于本机浏览器证据，不是手机或投影实测。初版等待条件误写为 replay 而非“来源：replay”，超时保留于 `browser-local-7799.log`，修正 helper 后通过 |
+| `.venv/Scripts/python.exe -B -` 只读调用原件 `load_rehearsal` / `validate_dashboard_snapshot` | `historical-contract-check.json`：live 三态 passed；replay 为 passed/not_run/not_run；原件 bytes/mtime 不变；历史请求模型 evomap-gpt-5.6-luna，calls=2，tokens=887+1348，费用 null；新调用 0 |
+| `ssh -o BatchMode=yes -o ConnectTimeout=10 gongzhi-ecs` 执行 `uname -n` / `docker ps` / `ss -ltnp` / `ls -ld` / `docker image ls` / `df -h /opt` | 服务器身份吻合，共治四容器 healthy，7799 空闲，项目目录尚不存在，9.7G 可用；`remote-preflight.txt`。未创建远端目录或改变容器 |
+| `docker version --format '{{.Server.Version}}'` | 本机 Docker daemon 仍不存在 npipe，未启动 Docker Desktop或修改全局配置 |
+
+### 本阶段剩余项
+
+尚未 commit/push、远端构建或公网部署；待主控串行提交时段及外部写命令协调。7527 新 live 缺模型网关凭据，未发 Enter、未请求模型、未重试。EvoMap 正常公开只读入口待 E 写链结束后串行核验。热点、第二设备和物理投影未执行；不将本机监听、截图或历史 passed 当公网/新 live/现场通过。
+
 ## 当前状态（2026-09-23 18:32，北京时间）
 
 **只读核查完成，领域实现、live 演示与部署尚未开始。** 工作区为 `C:/Users/DW/orca/Morphogenesis`，分支 `codex/morphogenesis-mainline`；核查时 HEAD 为 `2b58b5923286af8e11e556a1579e239bceee539b`，开始时 `git status --short`、`git diff` 均为空。本报告不把历史结果计作本轮验收。

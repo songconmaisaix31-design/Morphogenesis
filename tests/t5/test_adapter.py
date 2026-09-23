@@ -14,7 +14,7 @@ from contracts.results import TaskResult, Verification
 from metabolism import GeneView, UseRecord
 from orchestration.events import export_events
 from orchestration.rehearsal_models import MemberAvailability, RehearsalDocument, RehearsalSnapshot, RoutingFact
-from viz.adapter import DashboardInputError, empty_dashboard, load_dashboard, load_rehearsal, load_runtime_export
+from viz.adapter import DashboardInputError, empty_dashboard, load_dashboard, load_rehearsal, load_runtime_export, validate_dashboard_snapshot
 
 
 class DashboardAdapterTests(unittest.TestCase):
@@ -103,6 +103,51 @@ class DashboardAdapterTests(unittest.TestCase):
         self.assertEqual("replay", replay.provenance)
         self.assertEqual("not_run", replay.acceptance["task_live"])
         self.assertEqual("固定彩排 rehearsal.json（回放视图）", replay.source_label)
+
+        # Synthetic contract fixtures only; these tests do not prove a live run.
+        result = TaskResult(
+            run_id="fixture", task_id=snapshot.task_id,
+            attempt=AttemptId(task_id=snapshot.task_id, agent=agent, attempt=0),
+            status="succeeded", artifact_uri="file:///fixture/sample.py",
+            verdict=Verification(passed=True, reviewer=AgentId(role="reviewer", instance=0),
+                                 evidence=["file:///fixture/check.txt"], exit_code=0),
+            acceptance=Acceptance(contract_local="passed", interface_live="passed", task_live="passed"),
+        )
+        completed = RehearsalSnapshot.model_validate({
+            **snapshot.model_dump(), "stage": "completed", "results": [result.model_dump()],
+            "acceptance": result.acceptance.model_dump(), "model_calls_started": 1,
+        })
+        document = RehearsalDocument(rehearsal_id="fixture", mode="live", current=completed, history=[completed])
+        path.write_text(document.model_dump_json(), encoding="utf-8")
+        live = load_rehearsal(path)
+        self.assertEqual("passed", live.acceptance["task_live"])
+        validate_dashboard_snapshot(live.as_dict())
+        replay = load_rehearsal(path, replay=True)
+        self.assertEqual("not_run", replay.acceptance["interface_live"])
+        self.assertEqual("not_run", replay.acceptance["task_live"])
+        validate_dashboard_snapshot(replay.as_dict())
+        self.assertIsNone(live.result["usage"]["cost_usd"] if live.result else "missing")
+
+        completed = RehearsalSnapshot.model_validate({**completed.model_dump(), "results": []})
+        path.write_text(RehearsalDocument(rehearsal_id="fixture", mode="live", current=completed, history=[completed]).model_dump_json(), encoding="utf-8")
+        with self.assertRaisesRegex(DashboardInputError, "TaskResult evidence"):
+            load_rehearsal(path)
+
+    def test_probe_rejects_empty_upgrades_and_invalid_states(self) -> None:
+        data = empty_dashboard().as_dict()
+        validate_dashboard_snapshot(data)
+        for state in ("passed", "success", "failed"):
+            data["acceptance"]["task_live"] = state
+            with self.assertRaises(DashboardInputError):
+                validate_dashboard_snapshot(data)
+
+    def test_probe_accepts_mock_without_promoting_it(self) -> None:
+        root = Path(__file__).parents[2]
+        data = load_dashboard(root / "demo/data/mock-run.json", root).as_dict()
+        validate_dashboard_snapshot(data)
+        data["acceptance"]["task_live"] = "passed"
+        with self.assertRaises(DashboardInputError):
+            validate_dashboard_snapshot(data)
 
     def test_rehearsal_requires_r_canonical_filename(self) -> None:
         other = self.root / "runtime_exports" / "other.json"

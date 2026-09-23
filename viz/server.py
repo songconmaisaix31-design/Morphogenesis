@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import re
 import socket
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -56,6 +58,42 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         self.echarts_asset = echarts_asset
         self.evomap_service = evomap_service
         super().__init__(request, client_address, server, directory=directory, **kwargs)
+
+    def parse_request(self) -> bool:
+        if not super().parse_request():
+            return False
+        if self.command not in {"GET", "HEAD"}:
+            self.send_error(405, "Read-only endpoint")
+            return False
+        lengths = self.headers.get_all("Content-Length", [])
+        if self.headers.get("Transfer-Encoding") is not None or any(value != "0" for value in lengths):
+            self.send_error(413, "Request bodies are not accepted")
+            return False
+        return True
+
+    def end_headers(self) -> None:
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Referrer-Policy", "no-referrer")
+        super().end_headers()
+
+    def send_head(self) -> Any:
+        route = urlsplit(self.path).path
+        allowed = {
+            "/", "/index.html", "/app.js", "/style.css",
+            "/assets/finals-shell.js", "/assets/finals-shell.css",
+            "/fonts/Jost-latin.woff2", "/fonts/InterVariable.woff2",
+        }
+        license_file = re.fullmatch(r"/licenses/[A-Za-z0-9_./-]+\.(txt|md)", route)
+        path = Path(self.directory) / ("index.html" if route == "/" else route.lstrip("/"))
+        root = Path(self.directory).resolve()
+        if (route not in allowed and not license_file) or any(part.startswith(".") for part in path.relative_to(Path(self.directory)).parts):
+            self.send_error(404)
+            return None
+        if not path.resolve().is_relative_to(root) or not path.is_file() or any(p.is_symlink() for p in (path, *path.parents) if p != root and p.is_relative_to(root)):
+            self.send_error(404)
+            return None
+        return super().send_head()
 
     def _json_response(self, status: int, body: bytes) -> None:
         self.send_response(status)
@@ -141,13 +179,13 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         self._json_response(200, dumps_asset_view(view))
 
     def log_message(self, format: str, *args: object) -> None:
-        # Keep demo output concise; request data never enters a shell or HTML.
-        print("dashboard:", format % args)
+        # Never log query strings, credentials, headers or an untrusted raw line.
+        print("dashboard:", self.command, urlsplit(getattr(self, "path", "")).path, args[1] if len(args) > 1 else "")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Serve the Morphogenesis T5 dashboard locally.")
-    parser.add_argument("--host", default="127.0.0.1", help="Listen address; containers must explicitly use 0.0.0.0")
+    parser.add_argument("--host", default=os.environ.get("MORPH_BIND_IP", "127.0.0.1"), help="Listen address; defaults to MORPH_BIND_IP or loopback")
     parser.add_argument("--port", type=int, default=7500)
     source = parser.add_mutually_exclusive_group()
     source.add_argument("--input", type=Path, help="Allowlisted mock document or Envelope JSONL")

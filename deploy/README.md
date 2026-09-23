@@ -1,6 +1,8 @@
 # 北京 ECS：独立只读页面和 Python API
 
-目标：`47.93.118.110:7799`，Compose project 固定 `morphogenesis`，版本目录 `/opt/morphogenesis/releases/<完整提交 SHA>`。共治现有 80/443/8080、容器、数据与 Docker 配置不变。本目录只提供部署材料；远端写入、安全组与正式上线由主控 / 独立 I 执行。
+目标：`47.93.118.110:7799`，Compose project 固定 `morphogenesis`，版本目录 `/opt/morphogenesis/releases/<完整提交 SHA>`。共治现有 80/443/8080、容器、数据与 Docker 配置不变。2026-09-23 封板夜由 D 唯一操作本项目部署，主控协调每次外部写入；独立 I 最后复验。
+
+探针使用项目锁定 Python 环境及真实 `Acceptance` / `RehearsalDocument` / `TaskResult` 契约，校验快照、来源与结果一致性；合法 live 证据可为 `passed`，空态、mock、replay 不升级。探针通过不等于新模型调用、真实公网或现场演示通过。Python 直接服务也限制 GET/HEAD、拒绝请求体和目录枚举、使用静态文件白名单；`MORPH_BIND_IP` 默认为 loopback，显式 `--host` 优先。公网使用 nginx 的限流与超时边界，Python 不提供任务写入路由，因此没有新增 token 机制。
 
 ## 内容与来源
 
@@ -22,7 +24,7 @@ tar -tzf "$env:TEMP\morphogenesis-$release.tar.gz"
 
 正式发布前 I 必须确认这个 HEAD 已含 F + D 精确提交，不能把 D 分支的旧 UI 当 F 候选。API secret 无需配置，Compose 不透传主机环境；不要添加密钥 build args、`.env` 或前端配置。
 
-## 首次部署与更新（仅主控 / I 执行）
+## 首次部署与更新（本轮 D 执行，主控协调）
 
 1. 复核 `gongzhi-ecs` 主机身份、7799 空闲、磁盘与共治容器健康。目录必须尚未存在；旧版本保留作回滚。
 2. `scp` 标准包到服务器 `/tmp/`，在 `/opt/morphogenesis/releases` 下解压；包内已包含 `<SHA>/` 前缀。只创建本项目目录，不覆盖旧版本。
@@ -35,7 +37,7 @@ export MORPH_BIND_IP=127.0.0.1
 docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml config --quiet
 docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml build
 docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml up -d --no-build --force-recreate --wait --wait-timeout 120
-python3 deploy/smoke.py http://127.0.0.1:7799 --with-fonts
+docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml exec -T api python deploy/smoke.py http://web:8080 --with-fonts
 docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml ps
 ```
 
@@ -54,7 +56,7 @@ docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml ps
 export MORPH_REPLAY_FILE=/opt/morphogenesis/data/rehearsal.json
 docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml -f deploy/compose.replay.yaml config --quiet
 docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml -f deploy/compose.replay.yaml up -d --no-build --force-recreate --wait --wait-timeout 120
-python3 deploy/smoke.py http://127.0.0.1:7799 --with-fonts
+docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml -f deploy/compose.replay.yaml exec -T api python deploy/smoke.py http://web:8080 --with-fonts
 ```
 
 文件必须存在且 UID 10001 可读；`create_host_path: false` 防止路径错写创建目录，`--replay` 强制沿用现有降级读取语义。源文件无写入、无模型调用，数据只是历史 replay。重新启动默认 mock 时仅使用基础 Compose 文件；保留先前实际使用的数据模式和路径作回滚记录。
