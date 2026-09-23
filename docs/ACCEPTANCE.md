@@ -1,5 +1,42 @@
 # 验收矩阵
 
+## 前置二真实通过与领域放行（2026-09-23 19:32 CST）
+
+在主线 `8d0893f957acd0ba463ecc9ec2a8dbac20ad4512` 上，使用用户提供的原节点凭据运行 `node .runtime/freeze-evolver/authenticated-preflight.mjs --live`。真实过程为 **2026-09-23T11:31:11.257Z–11:31:14.845Z / 北京时间 19:31:11–19:31:14**，晚于服务端最早重试时间；主控已独立读取下列脱敏证据核对。
+
+| 环节 | 真实回执 |
+|---|---|
+| authenticated hello | HTTP 200，`acknowledged`，`your_node_id=node_e2ad48c0d0d63625`；请求 `msg_1790163071257_4eff132f`，Hub 响应 `msg_1790163073002_6cad4984`、时间 `2026-09-23T11:31:13.002Z`，HTTP request ID `1cbd6886-e510-4ada-a356-877ec0b2e183` |
+| heartbeat | 唯一一次 POST，HTTP 200 / `ok`，同一节点；请求时间 `2026-09-23T11:31:13.234Z`，结束 `11:31:13.616Z`，HTTP request ID `253de986-5a0a-4209-a3bc-b018ea6a4b8b`。REST 回执没有 GEP message ID，保持 null |
+| Proxy | `http://127.0.0.1:19820`，`running=true / hub_auth_status=ok`，出入队列均 0；官方 settings 写入本项目真实证据目录 |
+| 官方 MCP 进程 | npm 包 2.0.38，握手 `evolver-mcp / 0.0.0`，23 tools，`evolver_proxy_status` 返回同一节点及 running=true，子进程 exit 0 |
+
+两次回执均无 CAPTCHA、secret 返回或 force update，credit_balance=0；不推断零余额下资产接口的可用性。hello=1、heartbeat=1，无网络 tick、重试或 secret 轮换；前置进程 PID 47272 随 stdin EOF 正常 stop/退出，以上是成功运行证据，不是持续在线声明。原件保存在 `.runtime/freeze-evolver/recovery-evidence/authenticated-20260923-01/` 的 `hello-request.json`、`hello-result.json`、`heartbeat-request.json`、`heartbeat-result.json`、`summary.json`；settings 含本地 IPC 凭据，私有忽略、不发布。
+
+**前置一、前置二均通过，领域工作已放行。** G3/G4 的资产 PUBLISH→远端同 ID FETCH→实际使用 REPORT 尚未执行，不能因注册/心跳成功提前翻绿；G5、正式全量回归和最终双平台 CI 也保持待完成。
+
+## G0：三层预算护栏与上游边界（2026-09-23）
+
+采用现有实现的“三层预算护栏：入口参数约束 → 过程超时兜底 → 事后审计留痕”，本条只补文档，不修改执行器或自造在途封顶能力。
+
+1. **入口参数约束**：`orchestration.acceptance` 默认 `--max-tokens 20000 --max-cost-usd 1.0 --timeout 120`，参数进入 `RunConfig` 和执行意图；每个 run 至多一次模型调用、`max_retries=0`。网关请求的输出上限为 `min(max_tokens, 4096)`，不等于输入加输出总量硬限；美元参数表达运行预算，不是上游美元扣费开关。
+2. **过程超时兜底**：CLI 按超时、无进展或人工停止结束自有子进程；网关使用 httpx 分阶段超时，**不提供整个远端请求的绝对在途截止**。中断后的远端执行/消耗可能未知，不据此自动重试。
+3. **事后审计留痕**：保存请求、响应、配置、Attempt 与事件。网关在应用 proposal 前检查实际耗时及上游 reported tokens；超时、超 token 或 usage 不完整则拒绝应用。费用未知保持 null，runtime 标记 unknown_usage，不能把历史任务的未知费用估成 0 或称已证明美元硬封顶。
+
+真实用量沿用已只读复核的第四轮原始记录（2026-09-22 16:12–16:13 CST，入口提交 `7c0bb6a2f7b39a7eb524c0c71bc31c7a110f883c`，报告 `61784b73be6b2a47a3a45f8e206678d4f932ae59`）：请求模型 `evomap-gpt-5.6-luna`，实际返回 `gpt-5.6-luna`。repair 请求 `chatcmpl-EQpuANHdosqb3LPB9d5BwQR7htK71`：544 输入＋343 输出＝887 tokens、8.078 秒；recovery 请求 `chatcmpl-EQpuYs6th4TaCYHgMxMBqm7nNT65Y`：905＋443＝1348 tokens、10.343 秒；均 HTTP 200，两次合计 **2235 tokens，cost_usd=null**。这是两个分别授权的新任务，不是失败重试，本次未为文档追加模型调用。原始证据根及验收命令见下文“第四轮”。
+
+G0 的受控运行叙事已补齐，**上游单次调用的在途 token/美元硬封顶限制仍然存在**，不因此把 G0 硬预算判为充分通过。Chrome 已核实 Free 方案；KG 访问受方案限制，已预留接口，未请求 KG 或购买 Premium。
+
+## 原节点凭据恢复与完整离线前置（2026-09-23 19:14 CST）
+
+用户已提供 Chrome 账户中固定节点 `node_e2ad48c0d0d63625` 的新凭据。仅保存于项目 `.runtime/freeze-evolver/private/node_secret`，Git 忽略和仅当前用户可访问的目录权限已检查；秘密不进入文档、参数、Git 或日志。没有再次 Reset Secret、创建身份或修改全局 settings。主线授权记录为 `8d0893f957acd0ba463ecc9ec2a8dbac20ad4512`；真实请求必须遵守原回执的最早时间 **19:30:52.373 CST**，不是视为 CAPTCHA 已解除。
+
+E 新增的忽略目录前置 runner 使用未修改的官方 2.0.38 Proxy/PublicHubCapability 与受限 transport：hello 补齐真实执行模型 `gpt-6-astra`、名称和官方环境指纹，明确禁止 secret 轮换；仅允许一次 hello 和其确认成功后一次 heartbeat。HTTP 200 rejected、不完整身份、认证错误、断连或未知效果均停止；不开周期 tick、资产同步、自动发布、任务领取、自更新或付费功能。成功时仅在项目目录发布官方 Proxy settings，监听 `127.0.0.1:19820`；之后调用官方 npm `evolver-mcp` 子进程的状态工具，验证发现与认证路径。此处模型是当前接入 Worker 的模型，不覆盖历史资产生成模型。
+
+验证命令：`node --test .runtime/freeze-evolver/authenticated-preflight.test.mjs`。Worker **8 passed / 0 failed / 8956.7705 ms**，证据 `authenticated-offline-uIp41Y`；主控独立复核 **8 passed / 0 failed / 9072.4801 ms**，证据 `authenticated-offline-BLHwNr`。覆盖完整 Proxy/MCP 启停、准确两条注入出站、跨 5.5 秒 verifier 窗口无额外请求、拒绝不生成 settings、错误不重试、诊断脱敏、spawn/EOF 超时有界、原 guard 与用户 settings 不变。全部网络回执为 `mock`；没有将真实本机进程成功等同于真实 Hub 接口成功。
+
+本条记录时真实新增 hello/heartbeat/PUBLISH/FETCH/REPORT 均为 0，前置二仍未通过；等待时限后继续已授权的单次真实恢复，不要求用户重复确认凭据使用。
+
 ## Hub 官方协议与浏览器恢复调查（2026-09-23 18:52 CST）
 
 用户追加要求继续沟通 Hub、核对官方接入材料，必要时 computer-use。本轮在 `3786659dfde536a3b37b571ff0b198821f07aa24` 上继续前置调查，没有再次注册、发送 heartbeat 或发布资产。官方公开文档、Help API 均可访问，说明当前不是整站不可达；这不代表节点认证通过。

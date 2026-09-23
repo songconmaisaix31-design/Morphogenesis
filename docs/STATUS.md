@@ -1,5 +1,15 @@
 # 开发状态
 
+## 当前：两个开工前置通过，恢复进化/演示开发（2026-09-23 19:32 CST）
+
+用户新凭据已对 Chrome 确认的原节点完成真实认证：19:31:11–19:31:14 CST，hello acknowledged、heartbeat ok，官方 Proxy/MCP 状态检查通过。各发一次，没有重试、轮换、领取任务、付费或资产操作；原 Proxy 进程已因 stdin EOF 正常退出，不能称仍在线。主控已放行原 E/D/T 的领域工作，后续 PUBLISH→FETCH→REPORT、G5、完整回归与双平台 CI 仍待完成。完整请求/响应标识和限制见 [ACCEPTANCE](ACCEPTANCE.md)。
+
+## 当前：已接收现有节点新凭据，等待 Hub 重试窗口（2026-09-23 19:14 CST）
+
+用户提供的新节点密钥已保存于项目私有忽略目录，目录 ACL 仅允许当前 Windows 用户；未写入 Git、日志、命令参数或全局配置。原 E Task 已恢复为 `ctx_1866a0f047e4`，固定使用 Chrome 已确认的 `node_e2ad48c0d0d63625`，不再等待 Reset Secret 确认，也没有再次点击重置。最早 **19:30:52.373 CST** 后的一次 authenticated hello 已获授权；只有回执明确 acknowledged 且身份一致才继续一次 heartbeat、loopback Proxy 和官方 MCP 状态冒烟。
+
+完整 Proxy/MCP 进程的离线验证由 Worker 和主控各通过 **8 项**，涵盖拒绝停止、秘密隔离、原 guard/home 不变、无后台额外网络及子进程退出边界。主控证据为 `.runtime/freeze-evolver/recovery-evidence/authenticated-offline-BLHwNr/`；全部仍为 mock 回执，真实请求尚未发送，前置二和 G3/G4 没有转绿。D/T/I 保持原门禁；新网关凭据与热点条件另行待定。
+
 ## 当前：Hub 官方协议调查与账户登录接续（2026-09-23 18:52 CST）
 
 19:00 更新：已按用户指定切到 Chrome，现有登录账户为 Free、1 个绑定节点。`node_e2ad48c0d0d63625 / Codex Agent` 在页面显示 Offline、published=0，无 Activity 记录；不是已完成 Hub 认证。指定本机路径没有原 node_secret，已请求确认官方 Reset Secret 或原凭据文件路径，尚未重置、新注册或发送下一次 hello。E 报告 `04602b6` 已推送，拒绝误判复现与恢复 helper 的 6 组离线测试由 Worker/主控分别通过，完整 E 仍 blocked 并已 release。KG 因实际 Free 方案按受限记录，未请求 KG。此条取代下文等待浏览器登录的状态。

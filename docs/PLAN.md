@@ -2,6 +2,8 @@
 
 ## 封板夜进化链路冲刺（2026-09-23）
 
+19:32 前置放行：主控已核对真实 `authenticated-20260923-01/summary.json`，原节点 authenticated hello、一次 heartbeat、官方 Proxy/MCP 全部通过。**两个开工前置现已满足**，恢复原 E/D/T 的领域范围与最终 I 集成；下文等待门禁的限制已被本条取代。E 继续原 Dispatch，保留已确认身份，不重复注册或轮换；先完成适配与离线验证，再执行任务书已授权的一组 PUBLISH→远端同 ID FETCH→实际使用 REPORT，未知写结果禁止重试。D 负责原部署缺键回归及 G5 软件/7799 公网链路；新模型任务仍需独立网关凭据，热点/物理现场仍需人工。主控串行协调各自 commit/push，业务文件归属不变。
+
 19:04 凭据接续：用户已提供上述绑定节点的新密钥，授权继续既定接入。主控仅将其存入项目 `.runtime/freeze-evolver/private/node_secret`，目录关闭继承并仅授予当前 Windows 用户访问；Git 忽略已验证，秘密值不得进入任何消息、参数、日志或提交。恢复原 E Task 第三次 Dispatch，先离线准备真实 Proxy 前置 runner，**最早 19:30:52.373 CST 后**对固定 `node_e2ad48c0d0d63625` 发一次 authenticated hello，随后仅成功时发一次 heartbeat 并验证 loopback Proxy/settings；允许使用本项目私有凭据文件，不再要求用户重复确认。必须通过官方模块显式 transport 适配补齐 model/name、保留原真实指纹，并对 HTTP 200 rejected 关闭后续动作；无旧 v1 bootstrap、无自动重注册、无 secret 轮换、无失败重试或周期网络 tick。两个前置通过后才开始原 G3/G4 领域改造，并由主控恢复 D/T。任何拒绝或未知效果即留痕通知，不自行循环尝试。
 
 19:00 恢复阶段结算：E 离线前置 helper 与上游拒绝误判复现完成，报告 `04602b6` 已推送，Worker/主控各 6 项离线检查通过，Dispatch `ctx_d51c04d874d6` 完整任务仍 failed/blocked 并已 release。Chrome 现有登录账户已找到绑定节点 `node_e2ad48c0d0d63625`；当前只待原节点凭据恢复决策（复用指定文件或用户批准 Reset Secret），不是等待登录。真实请求尚未继续；不变更原两前置门禁。
