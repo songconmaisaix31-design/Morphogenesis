@@ -43,7 +43,7 @@ docker compose --env-file /dev/null -p morphogenesis -f deploy/compose.yaml ps
 
 北京节点目前 Docker Hub 连接失败的事实由主控预检报告；若仍无法 pull，I 可在本机对**同一最终包**构建 linux/amd64 镜像，然后 `docker save morphogenesis-api:$MORPH_RELEASE morphogenesis-web:$MORPH_RELEASE -o <file.tar>`，`scp`，服务器 `docker load -i <file.tar>` 后执行 `up --no-build`。不要调整全局镜像源或重启 Docker；留意本机镜像与 tar 的磁盘占用，未验收前不清理旧版本，不 prune。
 
-4. 内网通过后，由主控设置 `MORPH_BIND_IP=0.0.0.0`，同一版本再次 `up -d --no-build --force-recreate --wait --wait-timeout 120`，并仅为指定安全组新增 TCP 7799。此包不执行安全组变更。再从外部真实浏览器访问 `http://47.93.118.110:7799/` 核对字体、布局、哈希路由与 API。HTTP 无域名/无 TLS，符合本次 IP 展示范围；不承载账号或秘密。
+4. 本次最终公网选择历史回放：先在 loopback 执行下节完整 replay 命令并验收，再由主控设置 `MORPH_BIND_IP=0.0.0.0`，保留 `MORPH_REPLAY_FILE` 和两份 `-f` 配置，对同一版本再次执行 `up -d --no-build --force-recreate --wait --wait-timeout 120`，并仅为指定安全组新增 TCP 7799。此包不执行安全组变更。再从外部真实浏览器访问 `http://47.93.118.110:7799/` 核对字体、布局、哈希路由与 API。HTTP 无域名/无 TLS，符合本次 IP 展示范围；不承载账号或秘密。
 5. 可选 `python3 deploy/smoke.py <URL> --with-fonts --evomap-live` 只发起一次实际公开只读搜索，不重试。报告里的每块 status/error 才代表上游结果；HTTP 200、mock 数据或页面展示都不是新的 task_live。
 
 ## 数据与历史回放

@@ -40,12 +40,19 @@ SSH `BatchMode=yes` 只读核验 Ubuntu 24.04.4 LTS x86_64，Docker 29.1.3，Com
 | `python deploy/smoke.py http://127.0.0.1:17899 --evomap-live` | 37 项通过：200×14、400×3、404×9、405×5、413×1、429×5；一次公开搜索调用（原服务内部 search + categories 两个 GET），两块均 `state=live`，无 key，无模型调用、不重试 |
 | 挂载原第四轮文件后实际 `up --force-recreate --wait` + `python deploy/smoke.py http://127.0.0.1:17899` | 36 项通过；provenance=replay，contract_local=passed，interface_live/task_live=not_run；两个容器 healthy |
 | README 补入白名单后 `python -m pytest tests/deployment/test_deployment.py -q` | 16 passed（7.55s） |
+| 功能提交 `da393da87036637387bb398689c1b5677c9f5b86` 全量适用复验 `python -m pytest tests/deployment tests/t5 -q` | 67 passed（10.99s） |
+| 同 SHA `python deploy/package.py <SHA> <TEMP archive>`，解包后 `docker compose ... build` | 标准包 87 文件，实际构建通过；不依赖工作树未打包文件 |
+| 从该解包目录 `up --no-build --force-recreate --wait` + 解包内 `smoke.py` | 36 项 replay 检查通过；本机证据 `morph-beijing-d-smoke-package.json` |
 
 首次实际 build 因 `poetry check --lock` 要求 pyproject 声明的根 `README.md` 失败；已补入构建 / 标准归档白名单，未改任何依赖和锁。实际 `nginx -t` 发现只读根目录下默认 FastCGI 临时目录初始化失败；已指定 `/tmp/{client,proxy,fastcgi,uwsgi,scgi}`，保持只读和非 root 约束后通过。不是以配置解析代替容器启动。
 
 本机证据：`C:/Users/DW/AppData/Local/Temp/morph-beijing-d-smoke-mock.txt`（原 stdout 使用 Windows GBK 编码，含真实公开 EvoMap report）和 `morph-beijing-d-smoke-replay.json`（ASCII JSON）。脚本最终输出改用 ASCII 转义以跨平台保留中文，无需重发上游请求。公开 Hub 的费用 / 配额未知；未声称免费或新任务通过。
 
 历史文件使用 F 报告所列第四轮路径，只读挂入 `/data/rehearsal.json`，226,518 bytes；运行前后 SHA-256 都为 `f3639cd4e96edbe04cea63d4522df12cf16d84817bb84650a19885268b61c818`，原 `mtime` 为 2026-09-22 08:13:35 UTC。文件未复制进工作树、镜像或 Git。浏览器注入响应没有参与本次 replay 检查。
+
+容器 inspect 实测：API UID 10001、无宿主 PortBindings，Web UID 101，仅 loopback 17899；两者 read-only、cap_drop=ALL，replay 唯一 bind 的 RW=false。API Python 3.13.7，`node` / `poetry` 不在 PATH，`/app` 无 `.git` / `.env*` / `*.key`。实际镜像体积由 Docker 报告约 API 150.5MB / Web 21.5MB，构建缓存和 save tar 需另外计入磁盘。
+
+验证后已对 `morphogenesis-d-check` 执行 `down`；其两个容器和唯一网络均移除，按 project label 复查为空。只保留本地测试镜像、构建缓存与 TEMP 证据，未删其它项目资源；远端仍没有写入。
 
 ## 边界
 
