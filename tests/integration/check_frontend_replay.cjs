@@ -271,7 +271,9 @@ function fetchJson(u) {
       }
       for (const [tab, panel, name] of [['Gene 池', 'genes', 'genes'], ['证据与指标', 'evidence', 'evidence'], ['EvoMap 只读', 'evomap', 'evomap']]) {
         await page.getByRole('tab', { name: tab, exact: true }).click();
-        await page.waitForTimeout(250); // let the chart resize to its newly visible panel
+        // Gene uses a force layout: capture after its initial movement, not at
+        // the first resize frame where node labels can still cross each other.
+        await page.waitForTimeout(name === 'genes' ? 2000 : 250);
         record(`${width} ${name} view actually visible`, await page.locator(`#backend-${panel}`).isVisible()
           && await page.locator('[role=tabpanel]:visible').count() === 1);
         if (name === 'evomap') {
