@@ -221,6 +221,7 @@ body[data-view='physarum'] .morph-footer { display: none; }
    letter-spacing across the declared font stack. */
 .morph-hero-title {
   margin: 0;
+  user-select: none;
   font-size: clamp(1.5rem, 8.6vw, 9rem);
   font-size: max(1.5rem, min(9rem, 8.6cqw));
   font-weight: 800;

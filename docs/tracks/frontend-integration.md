@@ -84,3 +84,12 @@ live 标注：上表真实出站仅为公开只读 `semantic-search` 与 `catego
 - 发现跨轨接线缺陷：`Hero.jsx` 原先在 P 组件 `onError` 后卸载它，丢失 P 自带 SVG 黄色降级图，显示旧 CSS 占位。I 仅调整组件选择条件，运行时错误保留 P 组件，加载失败仍走页面壳占位。强制 `HTMLCanvasElement.getContext('webgl2')` 返回 null 时，真实浏览器稳定显示 P 的黄色 SVG 分支图与降级说明，截图 `.runtime/physarum-check-v2-20260923/no-webgl-6.png`；没有 pageerror。
 - 真实 Chromium 151 / 1366×768 / 本地 7799 mock server：WebGL canvas 存在、静态降级只在减少动态效果或无 WebGL 时出现；切换 AGENT SWARM 让模拟停止，返回 PHYSARUM 恢复；无 pageerror，浏览器没有外站请求。调试句柄测得平均帧耗时 idle 11.39 ms、趋食 11.50 ms、离开 11.14 ms（本机一次观察，非广泛性能保证）；食物强度 0 → 0.994 → 0.0078。
 - `npm run build` 通过，3906 modules，`finals-shell.js` 259.19 kB、`finals-shell.css` 72.65 kB。最终集成重建资源入库。`python -m pytest tests/t5 tests/integration -q` 为 58 passed、1 failed；失败是本机 `C:\Python313\pyvenv.cfg` 缺失，发生于 `test_demo_environment.py` 夹具复制，与本轮前端文件无关，前文已有基线记录。没有发起付费模型任务；本轮仅使用本地 mock 数据。
+
+## 2026-09-23 用户修正：恢复原始环境背景
+
+- 用户最终要求恢复改黄之前的青白色黏菌环境背景，并取消鼠标/触屏趋食。P 按精确 SHA `f4bafccb7e639a8ebb926d6d6c056a9369a9f4aa` 交付；I 普通 `--no-ff` 合并为 `2582c493efdf9f1d06eb81bceb69adb0331ef401`，无冲突。上一节黄色视觉验收是历史记录，不代表最终页面状态。
+- I 仅给大标题加 `user-select: none`，避免拖动时浏览器选中文字形成青色选区；保留 AGENT SWARM 按钮点击与键盘 1/2 切换。先前 `Hero.jsx` 运行时降级接线修复保留。
+- Chromium 真实页面 `http://127.0.0.1:7799/#/physarum`，1366×768：首屏青白色动态纹理回归，截图 `.runtime/physarum-ambient-20260923/{01-idle,02-move,03-drag-click,07-title-drag-no-selection}.png` 已目视；画面随时间自然变化，截图像素不同不能当作鼠标响应证据。移动、按下拖动、点击、真正移出视口及触屏点按后，调试句柄的 `foodStrength` 始终 0、`food={x:0,y:0}`；无 `.physarum-cursor`。标题拖动后 `window.getSelection().toString()` 为空。按钮可进入 AGENT SWARM，键盘 1 可返回；隐藏模拟停止，返回恢复。
+- `prefers-reduced-motion: reduce` 与模拟 WebGL2 不可用均显示原始青绿色 SVG 静态图、无 canvas；截图 `.runtime/physarum-ambient-20260923/{05-reduced,06-no-webgl}.png`。本轮无 pageerror，浏览器无外站请求。仅本地 mock 数据，未启动付费模型任务或触碰 7526/7527。
+- `npm run build` 通过，3906 modules，`finals-shell.js` 252.28 kB、`finals-shell.css` 72.18 kB。构建产物由 I 重建入库。
+- `python -m pytest tests/t5 tests/integration -q`：58 passed、1 failed；仍为前文已记录的本机 `C:\Python313\pyvenv.cfg` 缺失，失败测试 `test_demo_environment.py::test_demo_excludes_sentinel_from_viewer_and_passes_executor_args`。
