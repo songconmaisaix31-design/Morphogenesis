@@ -1,0 +1,109 @@
+.morph-backend {
+  --accent: #f5d547;
+  --ink: #eceef1;
+  --ink-dim: #a2a5ad;
+  --ink-mute: #767b84;
+  --surface: #17191c;
+  --line: rgba(232, 234, 238, .11);
+  color: var(--ink);
+  background: #0f1012;
+  min-height: 100dvh;
+  font-family: Inter, ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+}
+.morph-backend *, .morph-backend *::before, .morph-backend *::after { box-sizing: border-box; }
+.backend-topbar {
+  position: sticky; top: 0; z-index: 30;
+  min-height: 56px; display: flex; align-items: center; gap: 26px;
+  padding: 0 24px; background: #111214; border-bottom: 1px solid var(--line);
+}
+.backend-brand { display: flex; align-items: center; gap: 9px; min-width: 215px; font-weight: 700; letter-spacing: .02em; }
+.backend-brand-mark { color: var(--accent); font-size: 21px; line-height: 1; }
+.backend-brand small { align-self: end; margin-bottom: 2px; color: var(--ink-mute); font-size: 9px; font-weight: 500; letter-spacing: .12em; }
+.backend-location { display: flex; gap: 11px; color: var(--ink-mute); font-size: 12px; }
+.backend-location strong { color: var(--ink); font-weight: 600; }
+.backend-topbar-right { display: flex; margin-left: auto; align-items: center; gap: 14px; min-width: 0; }
+.backend-return { border: 1px solid var(--line); border-radius: 6px; background: #202225; color: var(--ink); padding: 7px 11px; font: inherit; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.backend-return:hover, .backend-return:focus-visible { border-color: var(--accent); outline: none; }
+.backend-grid { display: grid; grid-template-columns: 206px minmax(0, 1fr) 286px; min-height: calc(100dvh - 56px); }
+.backend-sidebar { position: sticky; top: 56px; align-self: start; min-height: calc(100dvh - 56px); padding: 24px 12px 18px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 28px; background: #131416; }
+.backend-nav-group { display: flex; flex-direction: column; gap: 3px; }
+.backend-nav-caption, .backend-eyebrow { color: var(--ink-mute); font-size: 10px; font-weight: 700; letter-spacing: .16em; }
+.backend-nav-caption { padding: 0 12px 12px; }
+.backend-nav-group button { width: 100%; padding: 9px 12px; display: flex; gap: 10px; align-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--ink-dim); font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
+.backend-nav-group button:first-of-type, .backend-nav-group button:hover, .backend-nav-group button:focus-visible { color: var(--ink); background: #222427; outline: none; }
+.backend-nav-group button span { width: 15px; text-align: center; color: var(--accent); }
+.backend-sidebar-status { gap: 11px; padding: 0 12px; font-size: 11px; color: var(--ink-mute); }
+.backend-sidebar-status .backend-nav-caption { padding: 0 0 2px; }
+.backend-sidebar-status span:not(.backend-nav-caption) { line-height: 1.5; overflow-wrap: anywhere; }
+.backend-sidebar-status b { float: right; color: var(--ink); font-family: var(--mono, ui-monospace, monospace); font-weight: 500; }
+.backend-sidebar-foot { margin: auto 12px 0; padding-top: 12px; border-top: 1px solid var(--line); color: var(--ink-mute); font-size: 10px; line-height: 1.6; }
+.backend-main { min-width: 0; padding: 26px clamp(18px, 3vw, 48px) 48px; }
+.backend-heading { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-bottom: 22px; }
+.backend-heading h1 { font-size: 27px; letter-spacing: -.035em; margin: 5px 0 3px; line-height: 1.2; }
+.backend-heading p { color: var(--ink-mute); font-size: 12px; margin: 0; }
+.backend-heading-tag { border: 1px solid var(--line); border-radius: 5px; color: var(--ink-mute); padding: 5px 8px; white-space: nowrap; font-size: 10px; }
+.backend-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.morph-backend .morph-board.t-card, .morph-backend .morph-panel.t-card { background: var(--surface); border: 1px solid var(--line); border-radius: 7px; box-shadow: none; }
+.morph-backend .morph-board .t-card__header { padding: 12px 14px 0; }
+.morph-backend .morph-board .t-card__body { padding: 0 14px; }
+.morph-backend .morph-board .t-card__footer { padding: 0 14px 10px; }
+.morph-backend .morph-board-count { font-size: clamp(25px, 2.5vw, 39px); line-height: 1.14; }
+.morph-backend .morph-board-title { font-size: 10px; }
+.morph-backend .morph-board-desc { font-size: 10px; }
+.backend-section { margin-bottom: 12px; scroll-margin-top: 72px; }
+.morph-backend .morph-panel .t-card__header { padding: 10px 14px; }
+.morph-backend .morph-panel .t-card__body { padding: 11px 14px; }
+.morph-backend .morph-panel-title { font-size: 12px; }
+.morph-backend .morph-topology-body { flex-direction: column; }
+.morph-backend .morph-topology-chart { min-height: 300px; }
+.morph-backend .swarm-topology-slot { min-height: 300px; }
+.morph-backend .gene-ledger { margin: 0; }
+.morph-backend .morph-secondary { gap: 12px; margin-bottom: 12px; }
+.morph-backend .backend-notes { margin-bottom: 22px; }
+.backend-evomap { scroll-margin-top: 72px; }
+.morph-backend .morph-evomap { max-width: none; padding: 0; }
+.morph-backend .morph-evomap-head { border-top: 1px solid var(--line); padding-top: 22px; }
+.morph-backend .morph-evomap-form input, .morph-backend .morph-evomap-form select { background: #1e2023; }
+.backend-context { position: sticky; top: 56px; height: calc(100dvh - 56px); min-width: 0; border-left: 1px solid var(--line); background: #141517; display: flex; flex-direction: column; }
+.backend-context-head { padding: 19px 16px 15px; border-bottom: 1px solid var(--line); }
+.backend-context-head h2 { font-size: 14px; margin: 5px 0 0; }
+.backend-context-scroll { padding: 12px; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.backend-context .morph-strip { margin: 0; flex-direction: column; }
+.backend-context .morph-strip .states, .backend-context .morph-strip .source { width: 100%; }
+.backend-context .event-feed { max-height: none; }
+.backend-context .morph-panel.t-card { background: #1a1c1f; }
+.morph-backend .morph-badge { color: var(--accent); border-color: rgba(245, 213, 71, .4); }
+@media (max-width: 1199px) {
+  .backend-grid { grid-template-columns: 176px minmax(0, 1fr); }
+  .backend-brand { min-width: 176px; }
+  .backend-context { position: static; height: auto; grid-column: 2; border-left: 0; border-top: 1px solid var(--line); }
+  .backend-context-scroll { display: grid; grid-template-columns: 1fr 1fr; overflow: visible; }
+}
+@media (max-width: 767px) {
+  .backend-topbar { min-height: 52px; padding: 0 12px; gap: 10px; }
+  .backend-brand { min-width: 0; font-size: 12px; }
+  .backend-brand small, .backend-location, .backend-topbar-right .morph-badge { display: none; }
+  .backend-topbar-right { gap: 6px; }
+  .backend-return { padding: 5px 7px; }
+  .backend-grid { display: block; }
+  .backend-sidebar { position: static; min-height: 0; padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .backend-nav-group { flex-direction: row; overflow-x: auto; }
+  .backend-nav-caption, .backend-sidebar-status, .backend-sidebar-foot { display: none; }
+  .backend-nav-group button { width: auto; min-width: max-content; padding: 6px 8px; font-size: 11px; }
+  .backend-main { padding: 20px 12px 30px; }
+  .backend-heading { margin-bottom: 16px; }
+  .backend-heading h1 { font-size: 22px; }
+  .backend-heading-tag { display: none; }
+  .backend-metrics { gap: 6px; }
+  .morph-backend .morph-board .t-card__header { padding: 8px 8px 0; }
+  .morph-backend .morph-board .t-card__body { padding: 0 8px; }
+  .morph-backend .morph-board .t-card__footer { padding: 0 8px 7px; }
+  .morph-backend .morph-board-count { font-size: clamp(18px, 5vw, 28px); }
+  .morph-backend .morph-board-title { font-size: 9px; letter-spacing: 0; }
+  .morph-backend .morph-board-desc { font-size: 9px; }
+  .morph-backend .morph-topology-chart, .morph-backend .swarm-topology-slot { min-height: 220px; }
+  .morph-backend .morph-secondary { grid-template-columns: 1fr; }
+  .morph-backend .morph-secondary-wide { grid-column: auto; }
+  .backend-context-scroll { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .morph-backend * { scroll-behavior: auto !important; } }
