@@ -1,6 +1,8 @@
 # Morphogenesis 接手与核心闭环一页计划
 
-## Kimi 参考包视觉返修（2026-09-23，进行中）
+## Kimi 参考包视觉返修（2026-09-23，受 Kimi 配额阻塞）
+
+实际启动了 Kimi Code 2.0.2 / K3；会话 `session_119fcf87-b6f9-4c7a-9993-1d0abd2c3538` 返回 `[provider.auth_error] 403 You've reached your weekly (7-day) usage limit`，`kimi session list` 确认 `lastTurnReason=failed`。F 尚未读写业务文件，原工作树仍 clean；当前 7799 仍为上一轮 `c68def4` 版本。Orca Run `run_447156e77a56`、Task `task_b5062d326661`、Dispatch `ctx_f43cd1da249a` 已在确认失败后 stop，仅关闭本次创建的 Kimi 终端。恢复额度或用户指定其它执行模型后沿原 Task 继续，不将计划文档算作视觉改版交付。
 
 用户再次明确要求充分参考 `C:\Users\DW\WorkBuddy\2026-09-23-01-19-38\christmas-site.zip` 与同目录 `linear-site.zip` 的页面格式和审美，并指定 Kimi 实现。以已经交付的序幕集成 `c68def4de25cedb48acd258bea614f7dff35cc16` 为业务基线；原 G/B/S 轨已结束，本阶段统一将前端领域所有权交给原 Kimi F 工作树 `morph-frontend-stack`，避免多人分别修改视觉语言。主 Agent 维护计划、设计验收与状态，F 负责实现和领域返修，完成后独立 I 精确 SHA 合并验收。
 
