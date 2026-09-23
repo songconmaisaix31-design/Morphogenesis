@@ -1,4 +1,4 @@
-"""Conservative static checks then bounded commands in a retained Git worktree."""
+"""Fixed literal-file validation; candidate code and arbitrary commands never run."""
 
 from __future__ import annotations
 
@@ -6,11 +6,9 @@ import ast
 import difflib
 import json
 import math
-import os
 from pathlib import Path
 import platform
 import re
-import signal
 import subprocess
 import tempfile
 import time
@@ -18,7 +16,7 @@ from uuid import uuid4
 
 from bridge_node.environment import child_environment
 from local_assets.models import (
-    AssetSafetyError, Candidate, CommandResult, EnvironmentFingerprint, ValidationReport,
+    AssetSafetyError, Candidate, CommandResult, EnvironmentFingerprint, ValidationPolicy, ValidationReport,
 )
 from local_assets.paths import git, no_links, relative_path, safe_join
 from local_assets.store import LocalAssetStore
@@ -117,52 +115,12 @@ def fingerprint(workspace: Path) -> EnvironmentFingerprint:
     )
 
 
-def _stop(process: subprocess.Popen[bytes]) -> None:
-    if os.name == "nt":
-        subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                       capture_output=True, timeout=10, check=False)
-    else:
-        try:
-            getattr(os, "killpg")(process.pid, getattr(signal, "SIGKILL"))
-        except ProcessLookupError:
-            pass
-    if process.poll() is None:
-        process.kill()
-    process.wait(timeout=10)
-
-
-def run_bounded(argv: tuple[str, ...], cwd: Path, env: dict[str, str], *,
-                timeout: float, output_limit: int) -> CommandResult:
-    with tempfile.TemporaryFile() as output:
-        process = subprocess.Popen(
-            argv, cwd=cwd, env=env, stdin=subprocess.DEVNULL,
-            stdout=output, stderr=output, shell=False,
-            start_new_session=os.name != "nt",
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
-        )
-        deadline = time.monotonic() + timeout
-        timed_out = limited = False
-        try:
-            while process.poll() is None:
-                timed_out = time.monotonic() >= deadline
-                limited = os.fstat(output.fileno()).st_size > output_limit
-                if timed_out or limited:
-                    _stop(process)
-                    break
-                time.sleep(0.02)
-            limited = limited or os.fstat(output.fileno()).st_size > output_limit
-        finally:
-            if process.poll() is None:
-                _stop(process)
-        return CommandResult(argv=argv, exit_code=process.returncode,
-                             timed_out=timed_out, output_limited=limited)
-
-
 class AssetValidator:
     def __init__(self, store: LocalAssetStore, repository: Path | str, *,
-                 commands: tuple[tuple[str, ...], ...], timeout_seconds: float = 30,
+                 commands: tuple[tuple[str, ...], ...] = (), policy: ValidationPolicy | None = None,
+                 timeout_seconds: float = 30,
                  report_ttl_seconds: float = 300, output_limit: int = 128 * 1024) -> None:
-        if (not commands or len(commands) > 16 or any(not argv or not argv[0] for argv in commands)
+        if (len(commands) > 16 or any(not argv or not argv[0] for argv in commands)
                 or not 0 < timeout_seconds <= 300 or not math.isfinite(timeout_seconds)
                 or not 0 < report_ttl_seconds <= 86400 or not math.isfinite(report_ttl_seconds)
                 or not 1024 <= output_limit <= 1024 * 1024):
@@ -170,6 +128,7 @@ class AssetValidator:
         self.store = store
         self.repository = Path(repository).resolve()
         self.commands = commands
+        self.policy = policy
         self.timeout_seconds = timeout_seconds
         self.report_ttl_seconds = report_ttl_seconds
         self.output_limit = output_limit
@@ -189,6 +148,18 @@ class AssetValidator:
                         "PYTHONDONTWRITEBYTECODE": "1"})
             try:
                 inspect_candidate(candidate)
+                if self.commands:
+                    raise AssetSafetyError("arbitrary_execution_isolation_unavailable")
+                if self.policy is None:
+                    raise AssetSafetyError("fixed_validation_policy_required")
+                expected_paths = [relative_path(item.path) for item in self.policy.expectations]
+                if len(set(p.casefold() for p in expected_paths)) != len(expected_paths):
+                    raise AssetSafetyError("duplicate_policy_paths")
+                if not {c.path for c in candidate.changes}.issubset(expected_paths):
+                    raise AssetSafetyError("policy_missing_changed_file")
+                if any(item.content is not None and len(item.content.encode("utf-8")) > 256 * 1024
+                       for item in self.policy.expectations):
+                    raise AssetSafetyError("policy_content_limit")
                 no_links(self.repository)
                 # Reject checkout-time links and submodules before materialization.
                 tree = git(self.repository, "ls-tree", "-rz", candidate.base_revision)
@@ -215,20 +186,25 @@ class AssetValidator:
                             remaining = deadline - time.monotonic()
                             if remaining <= 0:
                                 raise AssetSafetyError("validation_timeout")
-                            result = run_bounded(("node", "--check", str(path)), worktree, env,
-                                                 timeout=remaining, output_limit=self.output_limit)
-                            results.append(result)
-                            if result.exit_code != 0 or result.timed_out or result.output_limited:
+                            # Node's parser is fixed, receives bytes on stdin and never evaluates code.
+                            checked = subprocess.run(
+                                ["node", "--check", "--input-type=" + ("module" if path.suffix == ".mjs" else "commonjs")],
+                                input=change.after.encode("utf-8"), capture_output=True,
+                                timeout=remaining, check=False, shell=False,
+                                env=env, cwd=environment_root,
+                            )
+                            if checked.returncode:
                                 raise AssetSafetyError("javascript_syntax")
                 before_tree = self._snapshot(worktree)
-                for command in self.commands:
-                    remaining = deadline - time.monotonic()
-                    if remaining <= 0:
+                for expectation in self.policy.expectations:
+                    if time.monotonic() >= deadline:
                         raise AssetSafetyError("validation_timeout")
-                    result = run_bounded(command, worktree, env, timeout=remaining, output_limit=self.output_limit)
-                    results.append(result)
-                    if result.exit_code != 0 or result.timed_out or result.output_limited:
-                        raise AssetSafetyError("validation_command_failed")
+                    path = safe_join(worktree, expectation.path)
+                    actual = path.read_bytes() if path.is_file() else None
+                    expected = expectation.content.encode("utf-8") if expectation.content is not None else None
+                    if path.is_dir() or actual != expected:
+                        raise AssetSafetyError("fixed_expectation_failed")
+                results.append(CommandResult(argv=("literal-files-v1", self.policy.version), exit_code=0))
                 if (worktree / ".git").read_bytes() != git_marker or self._snapshot(worktree) != before_tree:
                     raise AssetSafetyError("validation_mutated_worktree")
             except (AssetSafetyError, OSError, subprocess.SubprocessError) as error:
@@ -241,6 +217,9 @@ class AssetValidator:
             env_fingerprint=fp, commands=tuple(results),
             worktree_path=str(worktree) if worktree is not None else None,
             created_at=now, expires_at=now + self.report_ttl_seconds,
+            policy_version=self.policy.version if self.policy else "unconfigured",
+            policy_json=self.policy.model_dump_json() if self.policy else "",
+            isolation="non_arbitrary_literal_files",
         )
         self.store._record_validation(report)
         return report

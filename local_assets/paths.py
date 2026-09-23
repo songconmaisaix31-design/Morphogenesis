@@ -10,6 +10,7 @@ import subprocess
 from local_assets.models import AssetSafetyError
 
 FROZEN_MAINLINE = Path("C:/Users/DW/orca/Morphogenesis")
+SWARM_SOURCE = Path(__file__).resolve().parents[1]
 PROTECTED_BRANCHES = frozenset({"main", "master", "codex/morphogenesis-mainline"})
 PROTECTED_FILES = frozenset({"docs/acceptance.md", "docs/plan.md", "docs/status.md"})
 
@@ -30,8 +31,15 @@ def relative_path(value: str, *, allow_root: bool = False) -> str:
             raise AssetSafetyError("reserved_path")
     lowered = value.lower()
     if (lowered in PROTECTED_FILES or lowered.startswith("docs/tracks/")
-            or lowered.startswith("docs/source/")):
+            or lowered.startswith("docs/source/") or lowered.startswith("docs/swarm_")):
         raise AssetSafetyError("protected_document")
+    if (lowered.split("/")[0] in {"swarm", "local_assets", "tests", "bridge_node", "hub_client",
+                                    "orchestration", "metabolism", "contracts", ".github"}
+            or lowered in {"pyproject.toml", "poetry.lock", "package.json", "package-lock.json", "agents.md"}
+            or PurePosixPath(lowered).name in {"executor.py", "worker_loop.py", "budget.py", "validate.py",
+                                               "verifier.py", "verify.py"}
+            or lowered.startswith("tools/")):
+        raise AssetSafetyError("protected_execution_policy")
     return value
 
 
@@ -74,7 +82,7 @@ def git(root: Path, *args: str, timeout: float = 15, input_data: bytes | None = 
 def check_target(root: Path, protected_paths: tuple[Path, ...] = ()) -> Path:
     no_links(root)
     root = root.resolve(strict=True)
-    for protected in (FROZEN_MAINLINE, *protected_paths):
+    for protected in (FROZEN_MAINLINE, SWARM_SOURCE, *protected_paths):
         if root == protected.resolve() or root.is_relative_to(protected.resolve()):
             raise AssetSafetyError("protected_target")
     if Path(git(root, "rev-parse", "--show-toplevel").decode().strip()).resolve() != root:

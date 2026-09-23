@@ -16,7 +16,8 @@ from contracts.resolution import Gene, GeneRef
 from contracts.results import TaskResult, Verification
 from hub_client.assets import build_assets, validate_bundle
 from hub_client.models import CapsuleEvidence, GenePolicy
-from local_assets.models import AssetSafetyError, Candidate, PromotionReceipt, ValidationReport
+from local_assets.models import (AdoptionReceipt, AssetSafetyError, Candidate, ConsumptionExecution,
+                                 PromotionReceipt, ValidationReport)
 from local_assets.paths import FROZEN_MAINLINE, no_links
 
 _OBJECT = TypeAdapter(dict[str, JsonValue])
@@ -43,8 +44,16 @@ class LocalAssetStore:
                 CREATE TABLE IF NOT EXISTS promotions (
                     report_id TEXT PRIMARY KEY, asset_id TEXT NOT NULL,
                     body TEXT NOT NULL, FOREIGN KEY(report_id) REFERENCES reports(report_id));
+                CREATE TABLE IF NOT EXISTS approvals (
+                    asset_id TEXT PRIMARY KEY, report_id TEXT NOT NULL UNIQUE,
+                    body TEXT NOT NULL, FOREIGN KEY(report_id) REFERENCES reports(report_id));
+                CREATE TABLE IF NOT EXISTS consumptions (
+                    execution_id TEXT PRIMARY KEY, body TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS adoptions (
+                    execution_id TEXT PRIMARY KEY, body TEXT NOT NULL,
+                    FOREIGN KEY(execution_id) REFERENCES consumptions(execution_id));
             """)
-            for table in ("assets", "reports", "promotions"):
+            for table in ("assets", "reports", "promotions", "approvals", "consumptions", "adoptions"):
                 for operation in ("UPDATE", "DELETE"):
                     db.execute(f"CREATE TRIGGER IF NOT EXISTS {table}_{operation} "
                                f"BEFORE {operation} ON {table} BEGIN "
@@ -138,15 +147,32 @@ class LocalAssetStore:
     def state(self, asset_id: str) -> str:
         self.fetch(asset_id)
         with self.connection() as db:
-            row = db.execute("SELECT 1 FROM promotions WHERE asset_id=?", (asset_id,)).fetchone()
-        return "promoted" if row else "quarantined"
+            row = db.execute("SELECT 1 FROM approvals WHERE asset_id=?", (asset_id,)).fetchone()
+        return "approved" if row else "quarantined"
+
+    def fetch_approved(self, asset_id: str) -> Candidate:
+        if self.state(asset_id) != "approved":
+            raise AssetSafetyError("asset_not_approved")
+        return self.fetch(asset_id)
+
+    def consumption(self, execution_id: str) -> ConsumptionExecution:
+        with self.connection() as db:
+            row = db.execute("SELECT body FROM consumptions WHERE execution_id=?", (execution_id,)).fetchone()
+        if row is None:
+            raise AssetSafetyError("execution_not_consumed")
+        return ConsumptionExecution.model_validate_json(row[0])
+
+    def adoptions(self) -> list[AdoptionReceipt]:
+        with self.connection() as db:
+            rows = db.execute("SELECT body FROM adoptions ORDER BY rowid").fetchall()
+        return [AdoptionReceipt.model_validate_json(row[0]) for row in rows]
 
     def promotions(self, asset_id: str | None = None) -> list[PromotionReceipt]:
         with self.connection() as db:
             if asset_id:
-                rows = db.execute("SELECT body FROM promotions WHERE asset_id=? ORDER BY rowid", (asset_id,)).fetchall()
+                rows = db.execute("SELECT body FROM approvals WHERE asset_id=? ORDER BY rowid", (asset_id,)).fetchall()
             else:
-                rows = db.execute("SELECT body FROM promotions ORDER BY rowid").fetchall()
+                rows = db.execute("SELECT body FROM approvals ORDER BY rowid").fetchall()
         return [PromotionReceipt.model_validate_json(row[0]) for row in rows]
 
     def promoted_bundle(self, asset_id: str) -> list[dict[str, JsonValue]]:

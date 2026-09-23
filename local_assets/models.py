@@ -27,6 +27,21 @@ class Candidate(Contract):
     declared_lines: int = Field(ge=0, le=100000)
     scope: str = "."
     summary: str = "Local quarantined candidate; validation pending"
+    required_capabilities: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
+
+
+class FileExpectation(Contract):
+    path: str
+    content: str | None
+
+
+class ValidationPolicy(Contract):
+    """Trusted task acceptance data, supplied independently of the candidate."""
+
+    version: str = Field(min_length=1, max_length=120)
+    expectations: tuple[FileExpectation, ...] = Field(min_length=1, max_length=64)
+    executor: Literal["literal-files-v1"] = "literal-files-v1"
 
 
 class EnvironmentFingerprint(Contract):
@@ -58,15 +73,62 @@ class ValidationReport(Contract):
     worktree_path: str | None = None
     created_at: float
     expires_at: float
-    isolation: Literal["git_worktree_not_os_sandbox"] = "git_worktree_not_os_sandbox"
+    policy_version: str = "legacy-unisolated-v0"
+    policy_json: str = ""
+    isolation: Literal["git_worktree_not_os_sandbox", "non_arbitrary_literal_files"] = "git_worktree_not_os_sandbox"
 
 
 class PromotionReceipt(Contract):
     asset_id: str
     report_id: str
+    # Legacy receipt fields remain readable; new approvals have no target.
+    target: str = ""
+    paths: tuple[str, ...] = ()
+    promoted_at: float
+    policy_version: str = "legacy-unisolated-v0"
+
+
+class ApplicationReceipt(Contract):
+    asset_id: str
+    report_id: str
     target: str
     paths: tuple[str, ...]
-    promoted_at: float
+    applied_at: float
+    policy_version: str
+
+
+class ConsumptionContext(Contract):
+    swarm_id: str = Field(min_length=1)
+    task_id: str = Field(min_length=1)
+    worker_id: str = Field(min_length=1)
+    fencing_token: int = Field(ge=1)
+    execution_id: str = Field(min_length=1)
+    scope: str
+    capabilities: tuple[str, ...] = ()
+    completed_dependencies: tuple[str, ...] = ()
+    input_context: str = Field(min_length=1, max_length=65536)
+
+
+class InjectedAsset(Contract):
+    asset_id: str
+    candidate: Candidate
+    context: ConsumptionContext
+
+
+class ConsumptionExecution(Contract):
+    asset_id: str
+    context: ConsumptionContext
+    candidate: Candidate
+    candidate_asset_id: str
+    created_at: float
+
+
+class AdoptionReceipt(Contract):
+    asset_id: str
+    candidate_asset_id: str
+    context: ConsumptionContext
+    result_id: str
+    adopted_at: float
 
 
 class LeaseGuard(Protocol):
