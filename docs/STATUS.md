@@ -1,5 +1,9 @@
 # 开发状态
 
+## 进行中：沉浸式序幕与产品后台重塑（2026-09-23）
+
+基线 `ab87ba17625bf27afdaa840e898d48bb5db0003b`。已用 Orca 建立互斥 worktree/branch：G `morph-story-growth`（Agent `/root/growth_intro`，`viz/frontend/src/intro/**`）、B `morph-story-backend`（`/root/backend_layout`，`viz/frontend/src/backend/**`）、S `morph-story-shell`（`/root/story_shell`，`App.jsx` / `theme.css` / `components/**`）。主控计划提交 `96e1fd6171edd15959ce8027b304909848372203`；GitHub HTTPS 暂时断连，尚未核对远端接收。各轨完成后再派独立 I 集成，当前无完成验收结论。详见 [计划](PLAN.md)。
+
 ## 最新完成：腾讯官方模板决赛版与 7527 交接（2026-09-23）
 
 已按最新要求采用腾讯官方 TDesign React Starter Dashboard，固定 `fce97863edd5d5556f766dd4e342aace31a99487` / MIT。实际复用模板源码与官方组件，完成黏菌黄主题、三大数字及 300ms 动效、真实权重拓扑、Gene 四态与历史事件流。Kimi F `morph-frontend-stack` 最终 `f99d13988465cd7e56db591ec2cdbbbca2bee553`；独立 I `morph-finals-integration` 最终 `c62bab718265580cbe9941bfcb8d6ca9f63828c6`。两分支已推送并核对远端，主线 fast-forward 接收；产品返修均由原 Kimi 完成。实际变更包含展示 DOM/JS 与 React 构建，后端及数据契约未改。
