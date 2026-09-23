@@ -20,6 +20,7 @@ from local_assets import AssetPromoter, AssetValidator, Candidate, FileChange, L
 from local_assets.models import FileExpectation, ValidationPolicy
 from local_assets.paths import git
 from swarm.hub_mirror import HubMirror
+from swarm.observer import read_mirror
 
 
 @pytest.fixture(scope="module")
@@ -70,6 +71,204 @@ def test_mirror_default_disabled_does_not_create_artifacts(promoted, tmp_path):
     assert mirror.enqueue(asset_id) is False
     assert not (tmp_path / "disabled").exists()
     assert mirror._thread is None
+
+
+@pytest.mark.parametrize("fault", ["store", "sdk"])
+def test_accepted_store_failure_is_observable_without_send(promoted, tmp_path, monkeypatch, fault):
+    store, asset_id, _ = promoted
+    calls = []
+    client = HubClient(HubConfig(base_url="http://127.0.0.1:9"),
+                       transport=httpx.MockTransport(lambda request: calls.append(request)))
+    record = local_record(store, asset_id)
+    mirror = HubMirror(store, tmp_path / "mirror", enabled=True, client=client)
+    failures = []
+    def broken_state(_asset_id):
+        failures.append(fault)
+        raise RuntimeError("private-store-exception-do-not-log")
+    monkeypatch.setattr(store if fault == "store" else client.bridge,
+                        "state" if fault == "store" else "canonicalize", broken_state)
+    try:
+        assert mirror.enqueue(asset_id, approval=approved(record, client))
+        drain(mirror)
+        view = read_mirror(tmp_path / "mirror")
+        assert view["state"] == "ok" and len(view["records"]) == 1, view
+        assert view["records"][0]["state"] == "unknown"
+        assert calls == []
+        assert "private-store-exception-do-not-log" not in json.dumps(view)
+        assert all("private-store-exception-do-not-log" not in path.read_text()
+                   for path in (tmp_path / "mirror").glob("*.json"))
+        before = {p.name: p.read_bytes() for p in mirror.directory.glob("*.json")}
+        restarted = HubMirror(store, mirror.directory, enabled=True, client=client)
+        try:
+            assert restarted.enqueue(asset_id, approval=approved(record, client))
+            drain(restarted)
+            assert failures == [fault] and calls == []
+            assert {p.name: p.read_bytes() for p in mirror.directory.glob("*.json")} == before
+        finally:
+            restarted.close(wait_seconds=1)
+    finally:
+        mirror.close(wait_seconds=1)
+        client.close()
+
+
+def test_pending_is_visible_before_store_preparation(promoted, tmp_path, monkeypatch):
+    store, asset_id, _ = promoted
+    client = HubClient(HubConfig(base_url="http://127.0.0.1:9"), transport=httpx.MockTransport(
+        lambda request: pytest.fail("unconfigured mirror must not send")))
+    record = local_record(store, asset_id)
+    entered, release = Event(), Event()
+    original = store.state
+    def paused(value):
+        entered.set()
+        assert release.wait(10)
+        return original(value)
+    monkeypatch.setattr(store, "state", paused)
+    mirror = HubMirror(store, tmp_path / "mirror", enabled=True, client=client)
+    try:
+        before = time.monotonic()
+        assert mirror.enqueue(asset_id, approval=approved(record, client))
+        assert time.monotonic() - before < 0.5 and entered.wait(10)
+        view = read_mirror(mirror.directory)["records"][0]
+        assert view["state"] == "pending" and view["reason"] == "mirror_preparation_pending"
+        assert not view["hub_promoted"] and view["acceptance"]["interface_live"] == "not_run"
+        assert json.loads(next(mirror.directory.glob("*.json")).read_bytes())["payload_json"] == "{}"
+        release.set()
+        drain(mirror)
+    finally:
+        release.set()
+        mirror.close(wait_seconds=1)
+        client.close()
+
+
+@pytest.mark.parametrize("mismatch", ["approval", "publication", "quarantined"])
+def test_preflight_rejections_are_visible_without_payload(promoted, tmp_path, mismatch):
+    store, asset_id, _ = promoted
+    client = HubClient(HubConfig(base_url="http://127.0.0.1:9"), transport=httpx.MockTransport(
+        lambda request: pytest.fail("preflight rejection must not send")))
+    record = local_record(store, asset_id)
+    approval = approved(record, client)
+    if mismatch == "approval":
+        approval = approval.model_copy(update={"payload_json": "private-rejected-payload"})
+    elif mismatch == "publication":
+        record = record.model_copy(update={"state": "unknown", "payload_json": "private-rejected-payload"})
+    else:
+        candidate = store.fetch(asset_id).model_copy(update={"changes": (
+            FileChange(path="example.py", before="answer = 1\n", after="answer = 3\n"),)})
+        asset_id = store.publish(candidate)
+    mirror = HubMirror(store, tmp_path / "mirror", enabled=True, client=client)
+    try:
+        assert mirror.enqueue(asset_id, approval=approval, publication=record)
+        drain(mirror)
+        view = read_mirror(mirror.directory)["records"][0]
+        assert view["state"] == "rejected" and not view["hub_promoted"]
+        assert view["reason"] == {"approval": "mirror_approval_mismatch",
+                                  "publication": "mirror_publication_state_or_source_mismatch",
+                                  "quarantined": "mirror_local_asset_not_approved"}[mismatch]
+        assert all("private-rejected-payload" not in p.read_text() for p in mirror.directory.glob("*.json"))
+    finally:
+        mirror.close(wait_seconds=1)
+        client.close()
+
+
+@pytest.mark.parametrize("state", ["pending", "unknown", "received", "rejected"])
+def test_existing_receipt_is_unchanged_and_skips_preparation(promoted, tmp_path, monkeypatch, state):
+    store, asset_id, _ = promoted
+    client = HubClient(HubConfig(base_url="http://127.0.0.1:9"))
+    record = local_record(store, asset_id)
+    mirror = HubMirror(store, tmp_path / "mirror", enabled=True, client=client)
+    mirror.directory.mkdir()
+    path = mirror.directory / (asset_id[7:] + ".json")
+    path.write_text(record.model_copy(update={"state": state}).model_dump_json(), encoding="utf-8")
+    before = path.read_bytes(), path.stat().st_mtime_ns
+    monkeypatch.setattr(store, "state", lambda value: pytest.fail("existing receipt must skip preparation"))
+    try:
+        assert mirror.enqueue(asset_id, approval=approved(record, client))
+        drain(mirror)
+        assert (path.read_bytes(), path.stat().st_mtime_ns) == before
+        assert mirror.last_error is None
+    finally:
+        mirror.close(wait_seconds=1)
+        client.close()
+
+
+@pytest.mark.parametrize("state", ["unknown", "received"])
+def test_preparation_does_not_overwrite_an_observed_outcome(promoted, tmp_path, monkeypatch, state):
+    store, asset_id, _ = promoted
+    client = HubClient(HubConfig(base_url="http://127.0.0.1:9"))
+    record = local_record(store, asset_id)
+    mirror = HubMirror(store, tmp_path / "mirror", enabled=True, client=client)
+    def changed(value):
+        path = mirror.directory / (value[7:] + ".json")
+        client._save(path, client.read_publication(path), state, "fixture_known_outcome")
+        return "approved"
+    monkeypatch.setattr(store, "state", changed)
+    monkeypatch.setattr(client, "publish", lambda *args, **kwargs: pytest.fail("outcome must not be resent"))
+    try:
+        assert mirror.enqueue(asset_id, approval=approved(record, client))
+        drain(mirror)
+        saved = client.read_publication(next(mirror.directory.glob("*.json")))
+        assert saved.state == state and saved.reason == "fixture_known_outcome"
+    finally:
+        mirror.close(wait_seconds=1)
+        client.close()
+
+
+def test_unwritable_record_has_bounded_process_local_diagnostic(promoted, tmp_path):
+    store, asset_id, _ = promoted
+    client = HubClient(HubConfig(base_url="http://127.0.0.1:9"))
+    record = local_record(store, asset_id)
+    directory = tmp_path / "not-a-directory"
+    directory.write_text("preserve original", encoding="utf-8")
+    mirror = HubMirror(store, directory, enabled=True, client=client)
+    try:
+        assert mirror.enqueue(asset_id, approval=approved(record, client))
+        drain(mirror)
+        assert mirror.last_error == "mirror_record_unavailable"
+        assert directory.read_text() == "preserve original"
+        assert read_mirror(directory)["records"] == []  # Cannot claim durable visibility.
+    finally:
+        mirror.close(wait_seconds=1)
+        client.close()
+
+
+def test_unaccepted_invalid_and_closed_offers_create_nothing(promoted, tmp_path):
+    store, asset_id, _ = promoted
+    client = HubClient(HubConfig(base_url="http://127.0.0.1:9"))
+    record = local_record(store, asset_id)
+    mirror = HubMirror(store, tmp_path / "mirror", enabled=True, client=client)
+    try:
+        assert not mirror.enqueue(asset_id)  # No approval.
+        assert not mirror.enqueue("invalid", approval=approved(record, client))
+        mirror.close()
+        assert not mirror.enqueue(asset_id, approval=approved(record, client))
+        assert not mirror.directory.exists() and mirror._thread is None
+    finally:
+        client.close()
+
+
+@pytest.mark.parametrize("persisted", [None, "unknown", "received"])
+def test_adapter_exception_keeps_outcome_or_marks_unknown(promoted, tmp_path, monkeypatch, persisted):
+    store, asset_id, _ = promoted
+    client = HubClient(HubConfig(base_url="http://127.0.0.1:9"))
+    record = local_record(store, asset_id)
+    mirror = HubMirror(store, tmp_path / "mirror", enabled=True, client=client)
+    def failed_publish(path, **kwargs):
+        if persisted:
+            client._save(path, client.read_publication(path), persisted, "fixture_preserved_outcome")
+        raise RuntimeError("private-adapter-error")
+    monkeypatch.setattr(client, "publish", failed_publish)
+    try:
+        assert mirror.enqueue(asset_id, approval=approved(record, client))
+        drain(mirror)
+        path = next(mirror.directory.glob("*.json"))
+        saved = client.read_publication(path)
+        assert saved.state == (persisted or "unknown")
+        assert saved.reason == ("fixture_preserved_outcome" if persisted else "mirror_adapter_failed")
+        assert "private-adapter-error" not in path.read_text()
+        assert mirror.last_error is None
+    finally:
+        mirror.close(wait_seconds=1)
+        client.close()
 
 
 def test_enabled_mirror_rejects_protected_artifact_directory(promoted):
@@ -181,6 +380,8 @@ def test_official_proxy_mirror_preserves_ids_and_requires_supplied_lineage(promo
         assert receipt["state"] == "received" and receipt["source"] == "evolver_proxy"
         assert receipt["acceptance"]["provenance"] == "mock"
         assert receipt["acceptance"]["interface_live"] == "not_run"
+        view = read_mirror(mirror.directory)["records"][0]
+        assert view["state"] == "confirmed" and not view["hub_promoted"]
     finally:
         mirror.close(wait_seconds=1)
         client.close()
@@ -199,6 +400,12 @@ def test_unpromoted_asset_and_mock_to_live_do_not_send(promoted, tmp_path):
         assert mirror.enqueue(asset_id, approval=approved(record, client), publication=record)
         drain(mirror)
         assert calls == []
+        view = read_mirror(mirror.directory)
+        assert len(view["records"]) == 2
+        # An absent asset makes A's state lookup raise; it is an unknown local
+        # preparation failure, distinct from a known quarantined asset above.
+        assert {(row["state"], row["reason"]) for row in view["records"]} == {
+            ("unknown", "mirror_preparation_failed"), ("rejected", "mirror_provenance_mismatch")}
     finally:
         mirror.close(wait_seconds=1)
         client.close()

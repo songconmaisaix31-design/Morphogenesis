@@ -19,6 +19,15 @@ _TABLES = frozenset({
     "swarm_runs", "task_evidence", "task_attempts", "task_audit", "swarm_budgets",
     "budget_reservations", "preference_config", "pheromones", "pipe_history",
 })
+_MIRROR_REASONS = frozenset({
+    "mirror_preparation_pending", "mirror_preparation_failed", "mirror_prepared", "mirror_adapter_failed",
+    "mirror_local_asset_not_approved", "mirror_publication_state_or_source_mismatch",
+    "mirror_local_gene_mismatch", "mirror_lineage_mismatch", "mirror_validation_mismatch",
+    "mirror_approval_mismatch", "mirror_provenance_mismatch", "awaiting_configuration_or_approval",
+    "send_started_receipt_not_recorded", "connection_failed", "http_rejected", "hub_rejected",
+    "proxy_publish_receipt_unconfirmed", "evolver_proxy_hub_received", "local_stub_reports_promoted",
+    "local_stub_reports_candidate", "local_stub_reports_received", "unrecognized_publish_receipt",
+})
 
 
 def _stamp(path: Path) -> tuple[int, int] | None:
@@ -141,13 +150,25 @@ def read_mirror(directory: Path, *, limit: int = 200) -> dict[str, JsonValue]:
     if isinstance(source, list):
         for row in source:
             if not isinstance(row, dict):
-                continue
-            adapter_state = row.get("state")
+                row = {}  # A malformed existing record remains visible as unknown.
+            adapter_state = _allowed(row.get("state"), {"pending", "unknown", "rejected", "received", "candidate", "promoted"})
             state = ("confirmed" if adapter_state in {"received", "candidate", "promoted"}
                      else adapter_state if adapter_state in {"pending", "unknown", "rejected"}
                      else "unknown")
+            acceptance: dict[str, JsonValue] = {}
+            raw_acceptance = row.get("acceptance")
+            if isinstance(raw_acceptance, dict):
+                for key in ("contract_local", "interface_live", "task_live"):
+                    acceptance[key] = _allowed(raw_acceptance.get(key), {"not_run", "passed", "failed", "blocked"})
+                acceptance["provenance"] = _allowed(raw_acceptance.get("provenance"), {"live", "replay", "mock"})
             records.append({"state": state, "adapter_state": adapter_state,
-                            "provenance": row.get("provenance"), "source": row.get("source"),
+                            "provenance": _allowed(row.get("provenance"), {"live", "replay", "mock"}),
+                            "source": _allowed(row.get("source"), {"local_stub", "evolver_proxy"}),
+                            "reason": _allowed(row.get("reason"), _MIRROR_REASONS),
                             "hub_promoted": adapter_state == "promoted",
-                            "acceptance": row.get("acceptance")})
+                            "acceptance": acceptance})
     return {"state": view["state"], "records": records, "row_limit": limit}
+
+
+def _allowed(value: JsonValue, choices: set[str] | frozenset[str]) -> str | None:
+    return value if isinstance(value, str) and value in choices else None

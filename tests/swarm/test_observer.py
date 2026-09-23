@@ -64,3 +64,32 @@ def test_mirror_states_are_readonly_and_do_not_expose_payload(tmp_path: Path) ->
     assert "not-for-display" not in json.dumps(view)
     assert not any(row["hub_promoted"] for row in view["records"])
     assert snapshot(tmp_path) == before
+
+
+def test_mirror_preparation_reason_and_acceptance_are_allowlisted(tmp_path: Path) -> None:
+    import json
+    from swarm.observer import read_mirror
+    (tmp_path / "preparation.json").write_text(json.dumps({
+        "state": "pending", "reason": "mirror_preparation_pending", "source": "local_stub",
+        "provenance": "mock", "payload_json": "private-payload",
+        "acceptance": {"provenance": "mock", "interface_live": "not_run",
+                       "task_live": "private-acceptance", "original_run_uri": "private-uri",
+                       "extra": "private-field"},
+    }), encoding="utf-8")
+    (tmp_path / "malformed.json").write_text(json.dumps({
+        "state": {"bad": "private-state"}, "reason": "private-reason", "source": "private-source",
+        "provenance": "private-provenance", "acceptance": "private-acceptance",
+    }), encoding="utf-8")
+    (tmp_path / "scalar.json").write_text('"private-scalar"', encoding="utf-8")
+    (tmp_path / "promoted.json").write_text('{"state":"promoted"}', encoding="utf-8")
+    before = snapshot(tmp_path)
+    view = read_mirror(tmp_path)
+    assert len(view["records"]) == 4 and "private-" not in json.dumps(view)
+    assert sum(row["state"] == "unknown" for row in view["records"]) == 2
+    pending = next(row for row in view["records"] if row["state"] == "pending")
+    assert pending["reason"] == "mirror_preparation_pending"
+    assert pending["acceptance"]["interface_live"] == "not_run"
+    assert pending["acceptance"]["task_live"] is None
+    promoted = next(row for row in view["records"] if row["adapter_state"] == "promoted")
+    assert promoted["state"] == "confirmed" and promoted["hub_promoted"]
+    assert snapshot(tmp_path) == before
