@@ -566,7 +566,7 @@ html.morph-custom-cursor, html.morph-custom-cursor * { cursor: none !important; 
   margin-top: clamp(2.5rem, 6vh, 5rem); min-height: 44px; padding: 0.8rem 1.3rem;
   border: 1px solid rgba(245, 213, 71, 0.75); border-radius: 0; background: transparent;
   color: #f5d547; font-family: inherit; font-size: 0.85rem; font-weight: 500; line-height: 1.2; letter-spacing: 0.2em;
-  opacity: 0; transform: translateY(10px); transition: opacity 1.5s ease, transform 1.5s ease, background 0.25s ease;
+  opacity: 0; transform: translateY(10px); transition: background 0.25s ease;
 }
 .story-enter.is-visible { opacity: 1; transform: none; cursor: pointer; }
 .story-enter:hover { background: rgba(245, 213, 71, 0.1); }
