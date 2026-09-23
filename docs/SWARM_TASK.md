@@ -1,29 +1,53 @@
-# Decentralized Swarm v0.2 任务与不变量
+# Decentralized Swarm v0.2 修正版任务书
 
-用户任务时间 2026-09-23 21:56，9/24 中午封板；决赛演示固定用主线。当前分支从 `605cf48` 拉出，所有工作只在 `decentralized-swarm`。
+事实源：用户 2026-09-23 23:33 修正版，续接终端 term_d00db8e6-745d-4e13-b787-426319b1a019。本文件替代此前 SWARM_TASK 的相冲突规划，不改冻结开发包和历史验收。
+基线 codex/morphogenesis-mainline @ 605cf48b8b05baf86fd68e5d63f495ba3e5d7e69，决赛只读。仅在既有 decentralized-swarm 分支与工作树开发；检查点 e9a3836e03ef022e9a5f0986cd82cea4593a5492 保留。不得合回主线、改变演示运行状态或用绿色 CI 解除冻结。
+定位：同机多进程、可信 Worker、共享持久化环境、无常驻任务派发者。SQLite WAL 不承诺跨机器一致性。
 
-目标：由主控星型派发改成环境沉积信号、Worker 局部觅食、自主执行和反馈的 stigmergy 群体；主控只读审计；Hub 可选且离线全循环可用。环境（信息素场和本地资产库）是唯一 Worker 协调通道；局部相邻信号、管道历史和自身能力决定行为；成功正反馈，失败负反馈和挥发配对；预算熔断先于自主运行。O(n) 是协调结构目标，不冒充未经测量的运行时复杂度证明。
+## 认账清单
 
-M1 `local_assets/store.py` 复用 `hub_client/` 和 `bridge_node/` 已验证 GEP envelope/官方 SHA-256 地址（4938bb9），保留 asset_id 和 PUBLISH/FETCH/REPORT 语义；不得另写哈希规范。`validate.py` 静态语法、危险模式、声明边界与实际 blast_radius 一致性检查，随后隔离 worktree 有界 dry-run，产生含 node_version/arch/platform 的 ValidationReport。`promote.py` 仅将绑定通过报告的原候选晋级到显式本地非保护工作树；失败保留隔离区及原因。不得改/删 hub_client。
+1. Physarum 的 Qij=Dij/Lij*(pi-pj)，适应方程更新 D 而非 Q。本实现采用受 Physarum 管道适应与蚁群环境记忆启发的局部奖励路由，不是原求解器离散实现，不继承论文收敛保证。
+2. metabolism/service.py 的 0.05 是 archive_threshold。rho(dt)=1-exp(-dt/tau)，默认 tau_seconds=86400.0；半衰期=tau*ln(2)。奖励学习率 alpha 独立设置。
+3. 减少显式点对点协调和对主控持续在线的依赖，通过有界局部查询控制协调开销；不宣称 O(n²) 到 O(n)。局部性由后端 scope 权限、模块归属或任务依赖邻域定义，不使用前端画布坐标。
+4. 历史路由权重必须实际参与下一次抽样，保存信号、过滤约束、权重和概率。
+5. 资产晋级只改 quarantine → approved 索引；任务补丁落地是独立动作，只能写显式隔离目标库。禁止修改 swarm 自身执行器、预算规则、验证器、冻结文档和决赛树。
+6. 原子认领 + TTL/续租 + 递增 fencing token + 幂等提交统一使用 SQLite 短事务；模型调用不在写事务内。
+7. 先预算预留、后执行、再结算。未知 usage/cost/远端效果保留预留、停止新付费调用。历史 usage 估计本身不是可信上界。熔断是本 swarm 运行级，不是账户级或上游在途硬保证。
+8. 经验沉积后必须有 FETCH approved → 适用性检查 → 注入 → 真实采用记录；仅注入不算采用。
+9. Hub 镜像 pending/confirmed/rejected/unknown 可见；本地批准不等于 Hub promoted。Hub 不在关键路径，未知写效果不重发。
+10. 任务事实、依赖、尝试、结果及追加审计不参与遗忘；信息素和历史权重独立可衰减。重复错误合并已有任务证据，失败不抹掉任务。
+11. observer 严格只读，不创建、认领或推进任务。
+12. Docker 健康检查 53bb52c 已由 5 秒改为 15 秒，若后续部署须包含该修改的精确 SHA。本轮不改变已有部署。
 
-M2 `swarm/pheromone.py` SQLite/JSONL 持久化恢复，信号 error_pattern/timeout_storm/retry_flood/opportunity 对应 repair/optimize/innovation。更新 sigma_next=(1-rho)*sigma+delta；lambda=0.05，复用既有代谢指数衰减，明确时间尺度和 rho 换算，不复制第二套衰减。
+## 模块要求
 
-M3 `swarm/router.py` 管道 w_next=0.95*w+0.05*r，r 来源成功/加速/省 token。局部任务按 softmax(beta*浓度*能力匹配*紧迫度) 加权抽样，不取 argmax。能力矩阵与自身管道历史均有效参与决策；只读自身工作区半径内信号，避免全表读后伪装局部。
+M1 local_assets/store.py 复用基线 NodeAssetBridge 与官方 SDK canonicalize/computeAssetId/verifyAssetId/schema，不自写 Python JSON 哈希。不可变正文与验证、晋级、镜像等可变状态分离。
+validate.py 为限定行为/环境的本地验证：测试和验证器不能由被测 Worker 修改；报告绑定 exact asset_id、目标 baseline 和验证策略版本。路径、网络与秘密访问由实际执行环境限制，静态扫描和普通 worktree 不作为安全隔离证据；缺隔离时拒绝任意代码执行并明确未验收。promote.py 只改 approved 可用状态。补丁应用另设受提交端 fencing 约束的隔离目标入口。消费检查依赖/能力/scope，采用绑定 asset_id、输入上下文和执行记录。
 
-M4 `swarm/lease.py` 文件锁+TTL，包含 worker_id/到期时间；同 scope 静默跳过，过期可恢复。并发 acquire/renew/release 必须有原子保护；旧持有者不能释放新租约或过期后继续晋级；父子/别名 scope 冲突需覆盖，不能靠中心仲裁。
+M2 swarm/task_ledger.py 持久保存任务身份/状态/依赖/尝试/验收/结果及去重错误证据。路由偏好另表，JSONL 仅导出，不作权威账本。
 
-M5 `swarm/worker_loop.py` while energy>0 and budget_remaining: sense(local); weighted sample; acquire lease or continue; execute isolated; validate; passed→promote+positive deposit, failed→quarantine+negative deposit; audit result/report/env_fingerprint; release in finally。异常、无任务、竞争跳过均须有界退出/休眠，避免自旋。审计身份使用现有 Pydantic AttemptId，不创建自研 Attempt 基建。
+M3 swarm/router.py 更新 w_next=(1-alpha)*w+alpha*r。先过滤无权限、能力不符、依赖未完成、已完成、不可认领任务，再 softmax(beta*w_history*pheromone*capability_match*urgency) 加权抽样。记录归一化概率及输入信号，使用探索或 aging 避免热门竞争/饥饿，查询有界。
 
-M6 `swarm/budget.py` 必须先于 M5 接入：每任务默认 max_tokens=20000；Worker 单位时间 burn rate 超限休眠；账户累计消耗超过 --max-cost-usd 折算值则全群休眠并持久化现场。真实 usage 解析复用网关规则，可配置输入/输出单价本地估算，明确估算标签。未知 usage/cost 不能当零。并发预留和结算须原子化，先计量即使验证失败；不能用事后检查宣称上游在途硬封顶，无可靠边界的执行器不得启用无人值守。
+M4 swarm/lease.py 以同一 SQLite 事务更新 available → claimed，写 worker_id/expiry/递增 token。提交端核验 task_id+token+owner+TTL；同一结果幂等，旧代次和冲突提交拒绝。覆盖父子/别名 scope 重叠；旧 Worker 不能释放新租约。必测 A(token=1)暂停，B(token=2)接续完成，A恢复提交被拒绝。finally 清理、续租、退避均有界。
 
-M7 `swarm/observer.py` 只读场、租约、审计、ValidationReport 输出健康视图，不依赖旧 orchestration 派发器；旧模式完整保留。`swarm/hub_mirror.py` 复用 4938bb9 官方直连适配，只镜像本地已晋级资产，异步可选，离线/失败不阻塞循环，未知写效果不自动重试。
+M6 swarm/budget.py 先于 M5：默认每任务 max_tokens=20000，共享账本原子预留；Worker burn rate 休眠；swarm 已结算+在途预留+新预留不超准入上限。有可信请求费用上界才可主张相应保证；可靠限额缺失、隐藏调用/自动重试时仅是准入控制。持久字段 usage_metering=verified/unknown，request_bound=verified/unbounded，admission_control=enabled/disabled，cost=estimated/billed/unknown。未知请求不释放，不盲目重发。增加 max_tasks/max_attempts/运行时长/派生任务上限。
 
-算法先读全文并记录来源与适用范围：
-- https://arxiv.org/abs/2010.09280 The Capacity Constraint Physarum Solver
-- https://arxiv.org/abs/2009.01498 Physarum-Inspired Multi-Commodity Flow Dynamics
-- https://arxiv.org/abs/2103.00172 A Survey on Physarum Polycephalum Intelligent Foraging Behaviour and Bio-Inspired Applications
-- ACO 信息素沉积/挥发模型、stigmergy 环境记忆（用户提到 nottldr，但未给精确 URL，优先可核查原始论文）。
+M5 swarm/worker_loop.py：循环顶部 admission/能量/运行界限 → 局部账本 → 路由 → 原子租约 → 预算预留 → FETCH/检查/注入经验 → 隔离执行 → 固定验证 → fencing 提交 → 本地批准与隔离成果落地 → 正负反馈/真实采用审计 → finally 按 token 释放。空闲与竞争指数退避+抖动；定期续租；完成状态持久化后其它 Worker 排除，重启不重复晋级/未知调用。
 
-该实现是任务书指定的离散启发式，不能套用原文连续系统的收敛定理。当前库 metabolism 使用 exp(-elapsed/tau)，tau 不是半衰期；允许只抽取共享 helper 并保持旧行为。旧 topology 默认 lambda=0.1，本轮 swarm 明确为 0.05，不改旧默认。
+M7 observer.py 只读账本、租约、审计、ValidationReport。hub_mirror.py 复用 E 直连实现，默认关闭、异步可选且四态可见，不调用生产 Hub/付费模型或搜索秘密。
 
-测试与纪律详见 SWARM_PLAN。锁文件、保护文档、hub_client/、bridge_node/、旧 orchestration 均只读。每阶段 commit+push 开发分支，禁止主线 push/merge，禁止 force。所有真实限制和未执行人工步骤如实结算。
+## 顺序与验收
+
+先锁任务/租约/资产/预算契约与包声明，再并行 M1/M6 和 M2/M4；路由依赖账本，M5 等安全底座，最后 M7/独立 I。沿用 pytest、strict、build、SDK/分发；pyproject.toml 与 tools/typecheck.py 纳入新增包。成熟实现优先，记录来源/版本/许可证，不建新调度器、Attempt、Manifest、哈希/证明设施。
+
+| 场景 | 必须证明 |
+|---|---|
+| 无派发者 | 三个独立 Worker 进程完成至少五个不同任务；observer 不推进 |
+| 在途故障 | 杀持租约 Worker，其他成员接续；旧代次恢复提交拒绝 |
+| 跨成员复用 | A 已验证资产被 B 新任务/新会话真实采用；asset_id、上下文、执行记录一致 |
+| 预算竞争 | 多进程争最后额度不重复预留；缺失 usage 不变零成本 |
+| 重启边界 | 完成任务不重复晋级；未知请求不重发；冻结树/分支/演示状态不变 |
+| Hub 离线 | 模型网关仍可用的真实证据单列，不能以完全断网 fake 替代 |
+| 完全断网 | 仅本地执行器/模型或显式 fake，不冒充远程模型 task_live |
+
+contract_local/interface_live/task_live 分开。没有真实证据保留 not_run。最终报告完成内容、分支/SHA、验证命令结果、真实限制及未执行/人工操作。
