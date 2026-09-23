@@ -1,5 +1,37 @@
 # 验收矩阵
 
+## G3/G4：真实候选已入 Hub，FETCH 被余额确认门禁阻止（2026-09-23 21:03 CST）
+
+官方 Proxy 2.0.38 与最新 GEP SDK 1.14.0 的 Capsule schema 不支持当前 Hub 必填的 `validation` 字段；原 `local_only` 校验器、SDK/schema、锁文件均未修改。按任务书允许的直连路线，复用官方 HubFetch、GEP envelope 与 SDK 内容寻址，以固定原节点发布一次 Gene/Capsule/EvolutionEvent；所有资产记录真实模型 `evomap-gpt-5.6-luna`、实际 blast_radius=1 file/17 lines，`kg_enrich=false`。基础 schema 投影通过不等同于完整 wire schema 通过；Python 独立行为验收与自包含 Node 结构检查分别记录，后者不冒称执行 Python。
+
+| 真实阶段 | 回执及结论 |
+|---|---|
+| PUBLISH | `2026-09-23T12:42:12.977Z` 发出，HTTP 200；请求 `msg_1790167332976_8501df49`，HTTP ID `a2b3a3d7-d1ef-44c6-b687-8c233a45262c`，响应 `msg_1790167338046_00f46f86` / `12:42:18.046Z`。明确 **quarantine / newcomer_candidate**，bundle `bundle_d4f8d679b30b5974`；没有正常 accepted receipt，未重发。 |
+| 同一 Gene | `sha256:c3862d97f0f2e93f06b250b9046b2f56fa6858afaa29102fe22d59ae934f9b6e`；Capsule `sha256:a372fba521210354bdfcf22fcf499478f8a46a5ee8634b0da0c157edfcca0f78`；EvolutionEvent `sha256:cd57f8d2a15363f8c6ae4af32799ab6705fedd396d72653ed8f5b2ef1be036ae`。三个 ID 与官方 SDK 完整内容哈希一致。 |
+| 认证详情 GET | `12:47:31.850Z`，HTTP ID `cc914342-b983-45e9-a8fb-3481d70d2bf8`；candidate，validation_status=noop、validation_credible=false、payload_ready=false、callable=false。返回摘要缺正文，不能以本地候选补齐或视为完整 FETCH。 |
+| 精确 POST FETCH | `12:56:30.491Z`，HTTP 200，HTTP ID `5afdf2ed-b399-4081-9ca0-dad626ebcaa6`，响应 `msg_1790168190181_c4fa12da`；**confirm_required**，1 项资产预览 **3.36 credits，余额 0**，result_count=0。没有确认付费、充值或重复请求，确认 token 脱敏。 |
+| 实际使用 / REPORT | **NOT_RUN**。没有取得可验证的远端完整资产，不能拿本地副本、离线运行或 HTTP 200 代替闭环。 |
+
+源码基于发送时主线 `78dfdd9e39a513cd6c602dc78d4b3f3c76d2ee13` 加 E 待提交修改，不能冒称当时已有 E 提交 SHA；E 最终实现及报告随后提交推送为 **`4938bb9230cf3acaf2cff63774f743a8a20d5bad`**。证据分别在 `.runtime/freeze-evolver/direct-live-20260923-01/`、`candidate-status-20260923-01/`、`candidate-fetch-status-20260923-01/`；原 runner 的 unknown 保留，单独 disposition 解释明确候选回执。前三次 Proxy HTTP 400、一次发送前 MemoryError、离线 mock 结果均保留于 [E 报告](tracks/freeze-evolution.md)。E 最终领域回归 66 passed，尚待 I 全量复核。
+
+21:00 前后主控通过用户指定 Chrome 读取官方节点页面：固定节点 Online、Published=1、Promoted=0、Rejected=0，三个精确资产链接均已出现。这证明平台展示了候选，不等于 promoted、可调用或成功 FETCH。官方[可信验证框架](https://evomap.ai/wiki/13-verifiable-trust)和 [FETCH 说明](https://evomap.ai/a2a/skill?topic=fetch)支持按正常候选审核流程继续；没有更换身份、修改信号、提升信誉、调用 Hub sandbox 或改变账户开关。**G3/G4 仍未通过：需满足平台可信验证/晋升条件，并解决真实 FETCH 余额与确认门禁，再验证同 ID 内容、实际使用和 REPORT。**
+
+## G5 网络切换后的只读复验（2026-09-23 21:01 CST）
+
+主机 WLAN 从 `192.168.60.54` 变为 `172.20.10.2`、网关 `172.20.10.1`。旧地址恢复 viewer 时返回 WinError 10049；该失败日志保留，没有修改网络配置。主控核实新接口及空闲端口后，以进程环境 `MORPH_BIND_IP=172.20.10.2` 恢复 7799，7526 保持 loopback 历史 replay；局部 BLAS/OMP/MKL 线程数为 1，未改全局设置。7527 未启动，仍缺独立模型网关凭据。沿用 DECISIONS 已记录的“本机单屏运行，无需外接投影”决定；不把投影接线重新加入前置，现场人工观看仍与浏览器自动检查分开。
+
+在新网络配置下运行 `python deploy/smoke.py http://172.20.10.2:7799 --direct --with-fonts` 及 `python deploy/smoke.py http://47.93.118.110:7799 --with-fonts`，分别 32 / 38 项检查、两者 exit 0；未调用 Hub 或模型。日志与网络元数据位于 `.runtime/freeze-demo/coordinator-network-*`，三态仍为 replay / passed,not_run,not_run。系统仍有 Mihomo 虚拟网卡；热点身份尚待操作者确认，不能据私网地址推断已经完成无代理热点、第二设备或现场人工验收。
+
+## G5 公网只读软件链路通过（2026-09-23 20:39 CST）
+
+公网入口：[http://47.93.118.110:7799/](http://47.93.118.110:7799/)。实际部署代码为主线 **`53bb52c31ab68655e2bca620508488d7f95e00e6`**：在本机按标准89文件白名单构建 linux/amd64 API/Web，容器 healthy 后完成包含限流/方法/请求体/字体的 nginx smoke，再 `docker save` → SCP → `docker load`。镜像归档 **172410880 bytes**，SHA-256 `4f732b04d365531d192b3235a9882b4b53c1fb4581f43ec47313161267088040`；远端独立目录 `/opt/morphogenesis/releases/53bb52c31ab68655e2bca620508488d7f95e00e6`，只挂载前述第四轮单个 `rehearsal.json`，强制 replay，不含节点或模型凭据。
+
+先验证 loopback 两容器健康与 smoke，再按环境变量将 Web 7799 绑定到 `0.0.0.0`。20:35:18 的唯一安全组新增请求 `01A0CE43-6F8C-5D25-B744-43AD24C15E7F` 成功，规则 `sgr-2ze0gdv6v5l8uvesxy6p` 仅开放 TCP `7799/7799`；原五条规则保持，共治四容器 healthy，80/443/8080 映射未改。公开脚本尾部 CRLF 空行曾报错，前面的 up 已成功；仅只读确认状态后接续，未重放整个 recreate 脚本。
+
+从本机经真实公网地址执行 `node tests/integration/check_frontend_replay.cjs`，**72 passed / 0 failed**，覆盖1366、1920、375三个视口、同源API、字体、拓扑、详情及三态；无 pageerror、console error、HTTP failure。原件 `.runtime/freeze-demo/browser-public-53bb52c/summary-replay.json` 与实图已由主控复核。一次正常页面读取真实 Hub 公共数据，`evomap.json` 显示 `/a2a/assets/semantic-search`、`public_read_observed_no_credentials_sent`；它是公开只读区的 live 证据，不是当前 Gene 发布或执行闭环。主任务仍为 **replay / passed,not_run,not_run**。
+
+本次解决公网部署与软件显示/探针链路；**G5 整体现场验收仍未通过**：新7527网关演示缺独立模型凭据，热点/第二设备和现场单屏人工见证未执行。G0 上游硬预算限制不变。G3/G4 的 Proxy 发布因最新官方SDK与远端结构契约不兼容仍未通过，正在按任务书允许的官方HTTP直连准备真实证据，不把公开搜索、回放或本地测试换算成发布成功。
+
 ## 封板夜适配、回归与首次发布结果（2026-09-23 19:54 CST）
 
 D 实现 `25968dc8440a25f2472df8cfb7ff62eb3302366d` 已推送：探针复用有类型的验收证据，合法 live 可以通过，空态/mock/replay 保持原三态；只读 viewer 收紧方法、请求体和静态路径。适用测试 **85 passed**，strict **55 files / 0 errors**。[该精确提交 CI](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35856386250) 的 Windows 与 Ubuntu 均 success，包含 pytest、类型、构建、SDK 和分发检查，修复了之前 Compose 输出省略 false 键导致的失败。此结论不覆盖尚未提交的 E 适配。

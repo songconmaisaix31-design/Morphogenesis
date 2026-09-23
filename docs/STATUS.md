@@ -1,5 +1,19 @@
 # 开发状态
 
+## 当前：公网软件通过，真实 Hub 候选与付费 FETCH 门禁已确认（2026-09-23 21:04 CST）
+
+固定节点认证、官方 Proxy/MCP 前置通过。E 适配最终 66 项领域测试与 strict 通过，已提交推送 `4938bb9230cf3acaf2cff63774f743a8a20d5bad`，远端一致，按外部门禁 failed 结算并释放；三次 Proxy 明确拒绝后，任务书允许的官方直连唯一发布收到 quarantine/newcomer_candidate，三个 SDK 内容地址被 Hub 记录。认证详情仍为 candidate/noop/not-callable；精确 FETCH 返回 confirm_required，需 3.36 credits、余额 0、零正文。未确认付费、充值、使用或 REPORT；G3/G4 不翻绿。Chrome 节点页显示 Published=1、Promoted=0。完整请求和响应 ID 见 ACCEPTANCE。
+
+D 完成公网 `http://47.93.118.110:7799/`，部署 SHA `53bb52c31ab68655e2bca620508488d7f95e00e6`，公开只读 smoke 与三尺寸浏览器 72 项通过；最终报告 `78dfdd9e39a513cd6c602dc78d4b3f3c76d2ee13` 已推送，D 已结算释放。T 报告 `0d7191a` 已推送释放，56 项 T2 通过，无需再改竞态测试。主控恢复 7526 及新 WLAN `172.20.10.2:7799`，新网络下 LAN/公网 smoke 均 exit 0；热点人工确认、第二设备、现场单屏人工观看和新7527网关任务仍未完成；沿用无需外接投影的既有决定。原 7844 未操作。
+
+独立 I Task `task_da329478b069` 接手累计主线全量回归、类型、构建、SDK/分发与精确 SHA 双平台 CI。根文档不代替领域实现验收；最终累计结果尚待 I。所有新进程仅局部限制科学库线程数，未改变全局配置或重发未知请求。
+
+## 当前：真实 Hub 字段兼容修复与容器转运（2026-09-23 20:27 CST）
+
+E 已完成 65 项适用回归与 strict；三次真实发布均为 HTTP 400 明确拒绝，分别是 Gene.summary、可执行 validation、Capsule 正文缺失，未成功 FETCH/REPORT。第三候选曾有一次发送前 MemoryError（0/0/0），与第三次真实发布分开留痕。正在按官方远端结构规则补齐真实 Capsule.strategy 后继续有界闭环。
+
+D 已恢复原安装 Docker、成功构建标准白名单镜像；发现真实 healthcheck 耗时超过 5 秒，最小修复到 15 秒已提交 `53bb52c`，32 项部署测试及双平台 CI 通过。新版镜像转运和远端只读服务尚在执行。主机内存压力已通过正常退出本轮两个重复 viewer 缓解，释放约 10.94 GiB private commit；WLAN `192.168.60.54:7799` 和旧 7844 保留，loopback 7799/7526 暂停。Orca 应用重启后原 Worker 保留，没有重复派发。全部全局配置未改，其余容器未停止；Docker 启动触发原容器 restart 策略的副作用如实保留。
+
 ## 当前：本地回归与双平台恢复，Hub 发布补齐 schema（2026-09-23 19:54 CST）
 
 D `25968dc` 已推送，85 项适用测试与 strict 通过，该精确 SHA 双平台 CI success。本地 7799/7526 replay 已启动并完成三尺寸浏览器检查；远端标准归档与单个历史快照已送达，但唯一 Docker build 被 Docker Hub metadata 超时阻塞，未启动公网服务或修改安全组。T `0d7191a` 报告已推送，正式 T2 回归 56 passed，原竞态修复有效，无测试源码变更。
