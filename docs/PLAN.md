@@ -1,5 +1,21 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 封板夜进化链路冲刺（2026-09-23）
+
+本轮用户任务书优先：不开新功能分支，所有提交直接进入 `codex/morphogenesis-mainline` 并推送。基线 `bd10f37c0ad378955210a1a76bd431f31a25ffee`，开工工作区 clean。采用同一 Orca 主线工作区内的互斥文件所有权，替代历史每轨新 worktree/branch 规则；主控只写治理文档。Worker 不得自行切分支、暂存他人文件或并发提交；完成领域开发后向主控申请串行提交时段，由原 Worker 显式暂存自有路径、commit + push。最后独立 I 复验累计主线，领域问题退原 Worker，不制造无意义合并。
+
+前置一已核实：网关 `94b7081`、第四轮报告 `61784b7` 均为 HEAD 祖先，ACCEPTANCE 保存两个真实网关任务通过的记录。前置二待 E 完成：当前无 Evolver CLI、19820 listener 或用户 Proxy settings。用户禁止全局配置修改；仅允许项目 `.runtime/freeze-evolver/` 内安装与官方支持的状态重定向，不写真实用户 home、不启动持续进化/领任务/付费验证。E 完成一次 hello/heartbeat 并报告证据前，D/T 只读核查，不进入领域开发。
+
+| 轨道 | 独占 write_paths | 验收与边界 |
+|---|---|---|
+| E / Evolver 与 G3/G4 | `hub_client/**`, `tests/t1/hub/**`, `docs/tracks/freeze-evolution.md`, `.runtime/freeze-evolver/**` | 官方 Proxy 本机冒烟；保持 local_only 校验器；官方 SDK 内容寻址；真实来源单列；一次 PUBLISH→FETCH→实际使用 REPORT，无未知效果重试，无 Hub sandbox/T4 |
+| D / G5 软件链路 | `deploy/**`, `viz/adapter.py`, `viz/server.py`, `tests/deployment/**`, `tests/t5/test_adapter.py`, `docs/tracks/freeze-demo.md`, `.runtime/freeze-demo/**` | 审计只读接口后按环境绑定；7799/7526/7527 身份与健康；真实网关证据决定三态，不改变空态或 replay 为 passed；热点/物理现场单列 |
+| T / 竞态与验证准备 | `tests/t2/test_rehearsal.py`, `docs/tracks/freeze-race.md`, `.runtime/freeze-test/**`, `.venv/**`, `node_modules/**` | 最小确定性竞态修复与延迟回归，复用锁依赖；全量回归与双平台 CI 由 I 在累计提交复核 |
+| 主控 | `docs/PLAN.md`, `docs/STATUS.md`, `docs/DECISIONS.md`, `docs/ACCEPTANCE.md` | 串行提交协调；G0 三层预算护栏与真实历史用量复核；只据真实回执更新 G3/G4/G5 |
+| I / 最后独立集成 | `tests/integration/**`, `docs/tracks/freeze-integration.md`, `.runtime/freeze-integration/**` | E/D/T 完成后复核确切 SHA、全量测试/类型/构建/双平台 CI；少量接线需先归属协调 |
+
+统一约束：沿用 `Acceptance` 的 `passed` 状态与 live/replay/mock 语义；来源细分类用适配器字段表示，不能擅改共享 Provenance 契约。模型标识记录请求和实际返回两者，费用未知保持 null。仅授权本轮一组 Hub 发布/回收/效果报告及必要的一轮有界网关演示；任何未知写结果停止重试。不存在可用 Premium 凭据时不探测 KG。G0 仍有上游在途硬封顶限制，G5 软件、异网可达、物理展示分别记录。
+
 ## Linear 后台结构返修（2026-09-23）
 
 本地交付已完成：F `d0724a6`、独立 I `7c24398` 已推送，主线 fast-forward 接收。实际源码移植、67 项适用 Python 测试、131 项参考布局检查、原序幕链、72 项真实服务端回放检查通过；只读预览为 `http://127.0.0.1:7844/#/workspace`。公网部署仍未执行：部署交接说明命令被自动审批拒绝，本轮后续限定为本地集成，不能把 D 单轨容器结果当最终公网验收。
