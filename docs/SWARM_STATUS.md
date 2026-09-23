@@ -45,3 +45,13 @@
 - A 的 Docker 探测失败（dockerDesktopLinuxEngine named pipe missing），不启动可能恢复其它项目容器的 daemon。采用限制为声明式固定文件操作的本地路径，拒绝无强制隔离的任意命令；此范围不等于通用代码安全验证或真实模型验收。
 - 旧代码精确 SHA f1a0209 CI run35883583313 的 Ubuntu strict 报 local_assets/validate.py:141 CREATE_NEW_PROCESS_GROUP attr-defined；交 A 原领域返修。前次本地全量测试只有中断输出，不能算通过。修正版全量门禁由独立 I 后续执行。
 - observer 采用标准 SQLite mode=ro + query_only 读取已提交 WAL；不创建、认领、推进任务，不更新租约/审计/验证结果或调用 checkpoint。SQLite 读者的 SHM 锁/读标记属于原生协调元数据，不等于业务写入；测试检查权威业务行和 DB 内容，不要求锁文件字节不变。依据 https://sqlite.org/wal.html 的 Read-Only Databases 与并发语义，不自造 WAL 解析/复制系统。
+
+## 修正版领域交付（2026-09-24 00:08 CST）
+
+- A 已推送 b83c2744c1f4d1962f4b4ff267fe47f60a849a26：资产批准仅状态、隔离目标应用独立、固定版本声明式验证策略、SDK 地址不变、approved 消费/真实字节采用。56 项完整资产测试通过（110.75s）；后续历史采用幂等修复另跑1项通过（39.83s，55 deselected），Windows/Linux目标 strict 均9文件通过。不是声称最终又跑一遍完整56项。
+- B 已推送313a902d1a17111078770b61fedc4958e408076e及普通返修6fd611e7a23ee88e56625ca6e224da24cde3a26d：WAL任务事实/租约/fencing/提交，scope局部与实际历史权重抽样；tau86400、独立alpha；保守swarm预算。原60项领域+旧代谢通过21.37s，追加26项预算通过8.19s，最终34项预算/账本通过10.22s；对应strict Windows/Linux目标通过，数量为不同阶段覆盖，不相加为总测试数。
+- 主控发现无可信上界分支会释放估算差额，交B修为所有无账单结算均占用max(原预留,用量估计)，展示admission_charged_usd/unreconciled_reservations；实际费用保持None。新测试覆盖低用量不会释放额度及重启一致性。预算违约优先级unknown > bound violation > exhaustion，防止运行时把违约误作准入耗尽。
+- 跨轨返修均回原所有者：C在读preimage前做scope与256KiB检查；B将相对scope保存POSIX格式而绝对lease路径保留原生；A历史采用回放不因后续合法文件改动失效；B提供有界pending(worker_id,limit=100)以恢复预留已落盘但Worker状态未写的崩溃窗口。
+- C首轮运行/自增长19项通过183.28s，observer/mirror9项通过18.55s。随后两个新增预算恢复反例先实际失败，再由C修复；最新完整C领域测试尚在运行，未宣称总体通过。
+- A/B已分别worker_done succeeded，按用户同一Worker持续负责返修的约定暂保留原会话，供独立I缺陷回派；验收结束后释放。C仍原Task开发，无额外业务Agent。
+- 独立I Task task_966c65aed2e9 已登记，真实依赖A/B/C完成后才派发；只负责SWARM_REVIEW、必要独立集成反例与少量批准胶水。冻结主线不合并，付费模型/生产Hub/任意代码沙箱仍未执行。
