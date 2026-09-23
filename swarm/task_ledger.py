@@ -95,9 +95,12 @@ class TaskLedger:
                        "workspace TEXT NOT NULL, scope TEXT NOT NULL, module TEXT NOT NULL, capability TEXT NOT NULL, "
                        "signal TEXT NOT NULL, status TEXT NOT NULL, acceptance TEXT NOT NULL, attempts INTEGER NOT NULL, "
                        "token INTEGER NOT NULL, owner TEXT, expiry REAL, created_at REAL NOT NULL, updated_at REAL NOT NULL, "
-                       "derived_from TEXT, result_id TEXT, result TEXT, effect_applied INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(swarm_id,task_id))")
+                       "derived_from TEXT, result_id TEXT, result TEXT, effect_applied INTEGER NOT NULL DEFAULT 0, "
+                       "condition_fail_count INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(swarm_id,task_id))")
             if "effect_applied" not in {r[1] for r in db.execute("PRAGMA table_info(tasks)")}:
                 db.execute("ALTER TABLE tasks ADD COLUMN effect_applied INTEGER NOT NULL DEFAULT 0")
+            if "condition_fail_count" not in {r[1] for r in db.execute("PRAGMA table_info(tasks)")}:
+                db.execute("ALTER TABLE tasks ADD COLUMN condition_fail_count INTEGER NOT NULL DEFAULT 0")
             db.execute("CREATE INDEX IF NOT EXISTS tasks_locality ON tasks(swarm_id,workspace,scope,status,created_at)")
             db.execute("CREATE INDEX IF NOT EXISTS tasks_claims ON tasks(swarm_id,status,expiry,scope)")
             db.execute("CREATE TABLE IF NOT EXISTS dependencies (swarm_id TEXT NOT NULL, task_id TEXT NOT NULL, "
@@ -150,7 +153,8 @@ class TaskLedger:
                                                 "AND task_id=? ORDER BY dependency_id", (self.swarm_id, row["task_id"])))
         return TaskRecord(swarm_id=self.swarm_id, signal=Signal.model_validate_json(row["signal"]),
                           status=row["status"], dependencies=deps, acceptance=_OBJECT.validate_json(row["acceptance"]),
-                          attempts=row["attempts"], token=row["token"], owner=row["owner"], expires_at=row["expiry"],
+                          attempts=row["attempts"], condition_fail_count=int(row["condition_fail_count"]),
+                          token=row["token"], owner=row["owner"], expires_at=row["expiry"],
                           created_at=row["created_at"], updated_at=row["updated_at"], derived_from=row["derived_from"],
                           result_id=row["result_id"], result=_OBJECT.validate_json(row["result"]) if row["result"] else None,
                           effect_applied=bool(row["effect_applied"]))
@@ -212,7 +216,7 @@ class TaskLedger:
                     raise RunLimitReached("max_derived_tasks")
             for dependency in deps:
                 self._row(db, dependency)
-            db.execute("INSERT INTO tasks VALUES (?,?,?,?,?,?,?,'available',?,0,0,NULL,NULL,?,?,?,NULL,NULL,0)",
+            db.execute("INSERT INTO tasks VALUES (?,?,?,?,?,?,?,'available',?,0,0,NULL,NULL,?,?,?,NULL,NULL,0,0)",
                        (self.swarm_id, signal.task_id, signal.workspace, scope, signal.module,
                         signal.required_capability or signal.task_kind, signal.model_dump_json(),
                         _OBJECT.dump_json(acceptance).decode(), now, now, derived_from))
@@ -249,7 +253,7 @@ class TaskLedger:
 
     @staticmethod
     def _eligible() -> str:
-        return ("(t.status='available' OR (t.status='claimed' AND t.expiry<=?)) AND t.attempts<? "
+        return ("(t.status IN ('available','partial','handoff') OR (t.status='claimed' AND t.expiry<=?)) AND t.attempts<? "
                 "AND NOT EXISTS (SELECT 1 FROM dependencies d LEFT JOIN tasks p ON p.swarm_id=d.swarm_id "
                 "AND p.task_id=d.dependency_id WHERE d.swarm_id=t.swarm_id AND d.task_id=t.task_id "
                 "AND (p.status IS NULL OR p.status!='completed')) "
@@ -362,6 +366,55 @@ class TaskLedger:
         with self.transaction() as db:
             row = self._owned(db, lease)
             self._finish_attempt(db, lease, row, "failed", evidence)
+            return self._record(db, self._row(db, lease.task_id))
+
+    def record_condition_failure(self, task_id: str) -> TaskRecord:
+        """Count one unsatisfied precondition; block once it exhausts its budget.
+
+        A task whose reuse dependency is never satisfied stays claimable, so the
+        router would keep selecting it and burn polling. Each failed
+        precondition check increments ``condition_fail_count``; at
+        ``max_attempts_per_task`` the task is blocked and leaves the candidate set.
+        """
+
+        with self.transaction() as db:
+            row = self._row(db, task_id)
+            if row["status"] in ("completed", "failed", "blocked"):
+                return self._record(db, row)
+            count = int(row["condition_fail_count"]) + 1
+            status = "blocked" if count >= self.limits.max_attempts_per_task else row["status"]
+            db.execute("UPDATE tasks SET condition_fail_count=?,status=?,updated_at=? WHERE swarm_id=? AND task_id=?",
+                       (count, status, self.now(), self.swarm_id, task_id))
+            self._event(db, task_id, "blocked" if status == "blocked" else "condition_failed",
+                        {"condition_fail_count": count})
+            return self._record(db, self._row(db, task_id))
+
+    def handoff(self, lease: Lease, next_worker_id: str, *, partial: dict[str, JsonValue] | None = None) -> TaskRecord:
+        """Voluntarily yield a held task to another worker (the missing primitive).
+
+        Only the current holder may hand off: ``_owned`` rejects any stale or
+        fenced holder, so a resumed former holder can never extend, submit, or
+        re-hand-off. The task becomes ``handoff`` (or ``partial`` when partial
+        work is preserved in ``result``), its owner and expiry are cleared, and
+        the next worker claims it through the normal candidate path.
+        """
+
+        if not next_worker_id.strip():
+            raise ValueError("next_worker_id required")
+        partial_body = _OBJECT.validate_python(partial) if partial is not None else None
+        with self.transaction() as db:
+            row = self._owned(db, lease)
+            if row["owner"] == next_worker_id:
+                raise TaskConflict("handoff target already owns the task")
+            status = "partial" if partial_body is not None else "handoff"
+            db.execute("UPDATE tasks SET status=?,owner=NULL,expiry=NULL,"
+                       "result=COALESCE(?,result),updated_at=? WHERE swarm_id=? AND task_id=?",
+                       (status, json.dumps(partial_body, sort_keys=True) if partial_body is not None else None,
+                        self.now(), self.swarm_id, lease.task_id))
+            db.execute("UPDATE task_attempts SET finished_at=?,outcome=? WHERE swarm_id=? AND task_id=? AND token=?",
+                       (self.now(), status, self.swarm_id, lease.task_id, lease.token))
+            self._event(db, lease.task_id, status,
+                        {"from": lease.worker_id, "to": next_worker_id, "token": lease.token})
             return self._record(db, self._row(db, lease.task_id))
 
     def submit(self, lease: Lease, result_id: str, result: dict[str, JsonValue], *, apply: Apply | None = None) -> TaskRecord:

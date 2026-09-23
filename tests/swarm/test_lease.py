@@ -166,3 +166,34 @@ def test_fabricated_effect_boolean_has_no_authority(tmp_path):
     lease=leases.acquire('a','A',locality=locality)
     record=ledger.submit(lease,'fake',{'applied':True})
     assert record.status=='completed' and not record.effect_applied
+
+
+def test_handoff_fences_former_holder_and_next_claims(tmp_path):
+    ledger,leases,locality,now=setup(tmp_path)
+    a=leases.acquire('a','A',locality=locality)
+    assert a.token==1
+    record=ledger.handoff(a,'B')
+    assert record.status=='handoff' and record.owner is None
+    # The former holder is fenced: release is a no-op, submit/renew are rejected.
+    assert not leases.release(a)
+    with pytest.raises(LeaseLost):
+        leases.submit(a,'r1',{})
+    assert leases.renew(a,ttl_seconds=40) is None
+    # The designated next worker claims through the normal candidate path.
+    b=leases.acquire('a','B',locality=locality)
+    assert b is not None and b.token==2 and b.worker_id=='B'
+
+
+def test_handoff_preserves_partial_result_for_next_worker(tmp_path):
+    ledger,leases,locality,now=setup(tmp_path)
+    a=leases.acquire('a','A',locality=locality)
+    record=ledger.handoff(a,'B',partial={'done':True,'asset_id':'x'})
+    assert record.status=='partial'
+    assert record.result=={'done':True,'asset_id':'x'}
+    b=leases.acquire('a','B',locality=locality)
+    assert b is not None
+    assert ledger.get('a').result=={'done':True,'asset_id':'x'}
+    # Handing off to the current owner is rejected (use a non-conflicting task).
+    c=leases.acquire('c','C',locality=locality)
+    with pytest.raises(TaskConflict):
+        ledger.handoff(c,'C')

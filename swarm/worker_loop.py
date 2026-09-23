@@ -746,6 +746,7 @@ class Worker:
                     return result
                 continue
             if not self._reuse_ready(signal):
+                self.ledger.record_condition_failure(signal.task_id)
                 idle += 1
                 result = self._status("waiting", "dependency_asset_not_approved")
                 self._backoff(idle)

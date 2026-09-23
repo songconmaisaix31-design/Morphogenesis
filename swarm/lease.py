@@ -19,6 +19,9 @@ class LeaseManager:
     def release(self, lease: Lease) -> bool:
         return self.ledger.release(lease)
 
+    def handoff(self, lease: Lease, next_worker_id: str, *, partial: dict[str, JsonValue] | None = None) -> TaskRecord:
+        return self.ledger.handoff(lease, next_worker_id, partial=partial)
+
     def is_valid(self, lease: Lease) -> bool:
         return self.ledger.is_valid(lease)
 

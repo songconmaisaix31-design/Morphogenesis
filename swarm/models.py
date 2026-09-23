@@ -79,10 +79,11 @@ class RunLimits(Model):
 class TaskRecord(Model):
     swarm_id: str
     signal: Signal
-    status: Literal["available", "claimed", "submitting", "completed", "failed"]
+    status: Literal["available", "claimed", "submitting", "partial", "handoff", "completed", "failed", "blocked"]
     dependencies: tuple[str, ...] = ()
     acceptance: dict[str, JsonValue] = Field(default_factory=dict)
     attempts: int = 0
+    condition_fail_count: int = Field(default=0, ge=0)
     token: int = 0
     owner: str | None = None
     expires_at: float | None = None

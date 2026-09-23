@@ -110,3 +110,16 @@ def test_nested_scope_stays_portable_through_claim_candidate_boundary(tmp_path):
                         declared_files=1,declared_lines=1)
     inspect_candidate(candidate)
     assert Path(record.signal.workspace)/candidate.scope==Path(lease.scope)
+
+
+def test_condition_failure_counts_and_blocks_at_threshold(tmp_path):
+    limits=RunLimits(max_attempts_per_task=2)
+    ledger=TaskLedger(tmp_path/'ledger.db','run',limits=limits)
+    ledger.enqueue(s(tmp_path,'a'))
+    loc=Locality(workspace=str(tmp_path),authorized_scopes=('.',))
+    assert ledger.record_condition_failure('a').condition_fail_count==1
+    assert ledger.record_condition_failure('a').status=='blocked'
+    assert ledger.get('a').condition_fail_count==2
+    assert ledger.candidates(loc)==[]
+    # Terminal/completed tasks are idempotent under repeated condition checks.
+    assert ledger.record_condition_failure('a').condition_fail_count==2
