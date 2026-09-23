@@ -1,5 +1,31 @@
 # 开发状态
 
+## 当前：终端更新完成，部署容器验证通过，F 等待命令权限确认（2026-09-23）
+
+用户更新后已核验 Codex 0.156.1，更新提示不再是阻塞。原 Run 沿用 `run_9e3490b7a7c0`，协调终端为 `term_88f69376-8035-4b15-bd13-7b1233427f41`。D 在原 worktree / branch 以 `ctx_3ece065caa25` 恢复开发；F 原 provider session 以 `ctx_083902b49b4d` 恢复，既有实现和 80 项浏览器检查保留。
+
+D 已完成独立 Compose、同源只读 Nginx 代理、Python host/HEAD 与标准归档白名单，67 项部署/T5 测试通过；本机 `morphogenesis-d-check` 两容器实际 healthy，公开 EvoMap 只读查询 37 项和第四轮历史文件的真实容器读取 36 项通过。最终分支 `songconmaisaix31-design/morph-beijing-deploy` 已推送，远端精确 SHA 为 `50d13530a7a9c7b8d1e0cc4c258dc0186710b567`；其中功能提交 `da393da` 的标准归档亦独立构建与复验通过。D 已成功结算，临时容器/网络清理，原工作树与证据保留。北京 Docker Hub 直连超时，最终采用本机构建、标准 docker save/scp/load，不修改服务器 Docker 配置。
+
+最终公网数据明确选择第四轮单个 `rehearsal.json`（226,518 bytes），仅私有只读挂载，并强制现有 `--replay` 加载；容器返回 `provenance=replay / contract_local=passed / interface_live=not_run / task_live=not_run`。本轮没有新模型任务或 Hub 写入。
+
+F 的恢复会话现停在读取前端差异的 `Yes, proceed` 命令权限弹窗，已请求用户在终端处理；已要求后续必要提交推送合并为一次确认，不能代替用户批准或绕过该门。F 尚未提交，独立 I 必须等待 F/D 精确提交后合并。远端文件、容器与安全组仍未修改，7799 尚未公开；下文旧更新提示与旧 PID 为历史记录。
+
+## 当前：北京 ECS 已连接，公网发布待 GPT 启动交互解除（2026-09-23）
+
+已用本机 Aliyun CLI 3.4.11 实查北京 ECS `i-2ze2nztd89vevmw21wif`（`cn-beijing`、Running、Ubuntu 24.04、公网 `47.93.118.110`），SSH 别名 `gongzhi-ecs` 可只读访问。服务器 Docker 29.1.3 / Compose 2.40.3，80/443 和 loopback 8080 为既有共治容器；Morphogenesis 计划使用独立 `/opt/morphogenesis` 与 TCP 7799。安全组 `sg-2zeedkqp6urfm9c29ghm` 尚未开放 7799；没有修改远端文件、容器、防火墙或域名，也没有公网部署成功声明。计划提交 `2b71d63` 已推送。
+
+用户随后重启 Orca：原 F `ctx_504329bc5c5a` 与 D `ctx_bf6133afa807` 均由运行时明确判为 `terminal_missing / failed`，按返回指令 release，保留全部工作树文件。协调者已将原 Run `run_9e3490b7a7c0` 绑定到恢复后的协调终端；原 F provider session `01a0cce1-3e9f-7061-a005-d9a8d538cab9` 已在原工作树恢复，但停在 Codex 0.155.1→0.156.1 更新弹窗。D 的同 Task 重启 `ctx_83e36987b2bc` 亦在 `agent_readiness` 被 `codex-update-prompt` 阻塞，任务未执行，已按回执 release。
+
+Orca 拒绝代选 Skip（`agent_prompt_blocked`）；已切到 F 恢复终端并请求用户选择 `Skip until next version`，如随后出现额度提醒则保留当前 GPT。不绕过原 Worker 所有权或启动交互门，不代替 F 提交。解除后恢复同 Task 的 D、F 提交与独立 I 集成，再运行经过审查的部署并从公网浏览器验收。D 工作树目前仍为干净基线 `c68def4`，部署代码与云端发布均未执行；上一节本地端口存活记录在此次 Orca 重启后已失效。
+
+## 当前：双包设计语言移植已通过 F 检查，等待提交与独立集成（2026-09-23）
+
+最新用户授权 GPT 和 EvoMap 高级模型，使用两个本地网页包直接开发。F 工作树 `morph-gpt-reference` 已实际复用 Jost/Inter 字体、Christmas 黑底章节排版及 Linear 导航/文档/上下文结构；主控已目视通过最终桌面标题、后台和手机布局。`npm run build`、T5 51 项、原序幕浏览器检查和扩展 80 项均通过；详细来源与证据已写入 F 轨报告，尚未提交，不能视为最终集成交付。
+
+Orca Run `run_9e3490b7a7c0` / F dispatch `ctx_504329bc5c5a` 的 Codex 终端目前停在“Switch to gpt-5.6-luna / Keep current model”的额度提醒。`terminal send` 选择保留当前模型被 Orca 以 `agent_prompt_blocked` 拒绝；已向用户请求在该终端选择 Keep current model，未改模型、未绕过交互门。解除后由原 F 完成 commit + push，再由独立 I 精确合并验收。开发预览为 [7841](http://127.0.0.1:7841/#/physarum)，[7799](http://127.0.0.1:7799/#/physarum) 仍是此前验收版，7526/7527 未操作。
+
+设计 API 审查实际成功一次：请求 `evomap-gpt-5.6-sol`、返回 `gpt-5.6-sol`，HTTP 200，3520 tokens，费用未知；此前独立设计请求 `RemoteDisconnected`，输出/usage/费用未知且未重试。两次不能合计为已知总消耗，也不计为新的项目 task_live。凭据未入库。详见 [本轮计划](PLAN.md)。
+
 ## 进行中：沉浸式序幕与产品后台重塑（2026-09-23）
 
 基线 `ab87ba17625bf27afdaa840e898d48bb5db0003b`。已用 Orca 建立互斥 worktree/branch：G `morph-story-growth`（Agent `/root/growth_intro`，`viz/frontend/src/intro/**`）、B `morph-story-backend`（`/root/backend_layout`，`viz/frontend/src/backend/**`）、S `morph-story-shell`（`/root/story_shell`，`App.jsx` / `theme.css` / `components/**`）。主控计划提交 `96e1fd6171edd15959ce8027b304909848372203`；GitHub HTTPS 暂时断连，尚未核对远端接收。各轨完成后再派独立 I 集成，当前无完成验收结论。详见 [计划](PLAN.md)。
