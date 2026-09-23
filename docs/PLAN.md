@@ -1,5 +1,20 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## GPT + EvoMap API：双包设计语言直接移植（2026-09-23，进行中）
+
+用户解除 Kimi 限制，明确使用 GPT 与本轮提供的 EvoMap API，并授权高级模型；要求对照 `christmas-site.zip`、`linear-site.zip` 一比一改造成项目页面，使用包体开发。该最新指令取代历史“只观察、不复用包内样式/资源”的限制。基线为已验收序幕 `c68def4de25cedb48acd258bea614f7dff35cc16`。主 Agent 只做计划、设计对照与验收；API 中已实时核验的 `evomap-gpt-5.6-sol` 接收参考/现有截图做具体设计审查，GPT 开发 Worker 直接读取两个包实现，另一个 GPT Worker 独立集成。凭据只注入单次调用的进程内存，不入 Git、日志、页面或 Worker prompt；调用次数/usage 如实记录，费用未知不估算。
+
+验收以源页面的布局和实际 CSS 为准：直接移植适用字体/字体声明、颜色与间距变量、全屏 section 排版、细边界、控件比例及动效结构，保留来源路径和实际版本/许可证信息，不把快照称为官方开源模板。包中的品牌文案/圣诞模型映射为 Morphogenesis 内容，分析跟踪、营销远端请求和离线抓取修补不得进入产品。Christmas 包抓取的 canvas 高度 100000 与 offline-reveal-fix 属快照缺陷，先核对真实章节后修正；Linear 包实际营销页和嵌入应用视图分清，产品后台按其应用视图密度/排版复刻，保留可用真实功能。
+
+固定流程继续是原生黄色黏菌与中英文小字 → 黑底自生长拓扑与 Agent swarm 小字 → 中英产品大字慢显 → 点击后台。无鼠标/触屏趋食。后台保留 API/真实数据、来源、验收三态、未知值、错误/空态及只读 EvoMap。响应式、Tab/焦点、reduced-motion、深链和隐藏暂停必须可用。不能再交付只换配色、粗重标题盖满拓扑、大块空卡片的近似模仿。
+
+| 轨 | 固定工作树与独占 write_paths | 交付 |
+|---|---|---|
+| F / GPT | `morph-gpt-reference`；`viz/frontend/**`, `viz/static/**`, `tests/t5/**`, `docs/tracks/frontend-gpt-reference.md`, `THIRD_PARTY_NOTICES.md` | 包体实读、实图对照、具体资源/样式复用映射；适用构建/T5、桌面手机实图与交互；原有锁文件仅确有需要时向主控 Handoff；领域返修和 commit+push 由本轨负责 |
+| I / GPT | `morph-gpt-reference-integration`；普通精确 SHA 合并、`tests/integration/**`, `docs/tracks/frontend-gpt-reference-integration.md` 与必要少量接线胶水 | 1366/1920/375 三视口对照参考，检查真实内容、核心流程和无意外远端请求；领域缺陷交回 F；commit+push；通过后才更新 7799 |
+
+开发端口独立，7799 更新前核验进程身份；7526/7527 不属于本轮。此次 API 调用用于设计开发与审查，不增加项目任务彩排，不代表 task_live、真实 Hub 或物理展示完成。
+
 ## Kimi 参考包视觉返修（2026-09-23，受 Kimi 配额阻塞）
 
 实际启动了 Kimi Code 2.0.2 / K3；会话 `session_119fcf87-b6f9-4c7a-9993-1d0abd2c3538` 返回 `[provider.auth_error] 403 You've reached your weekly (7-day) usage limit`，`kimi session list` 确认 `lastTurnReason=failed`。F 尚未读写业务文件，原工作树仍 clean；当前 7799 仍为上一轮 `c68def4` 版本。Orca Run `run_447156e77a56`、Task `task_b5062d326661`、Dispatch `ctx_f43cd1da249a` 已在确认失败后 stop，仅关闭本次创建的 Kimi 终端。恢复额度或用户指定其它执行模型后沿原 Task 继续，不将计划文档算作视觉改版交付。
