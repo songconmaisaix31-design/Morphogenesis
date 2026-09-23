@@ -35,6 +35,48 @@
 
 尚未 commit/push、远端构建或公网部署；待主控串行提交时段及外部写命令协调。7527 新 live 缺模型网关凭据，未发 Enter、未请求模型、未重试。EvoMap 正常公开只读入口待 E 写链结束后串行核验。热点、第二设备和物理投影未执行；不将本机监听、截图或历史 passed 当公网/新 live/现场通过。
 
+### 19:45–19:49 提交及一次远端部署尝试
+
+主控授予独占 Git 时段后，只暂存 10 个 D 文件，`git diff --cached --name-only` 和 `git diff --cached --check` 通过。实现提交 **`25968dc8440a25f2472df8cfb7ff62eb3302366d`**，`git push origin codex/morphogenesis-mainline` 成功，`git ls-remote origin refs/heads/codex/morphogenesis-mainline` 同 SHA；随即释放 Git 时段。E 和主控的未提交文件未触碰。
+
+主控另经 `orchestration ask` 放行以下确切版本的远端写入，要求 loopback 先验收、镜像构建总 deadline 600 秒、不自动重试。部署只用标准白名单包，不读并行工作区：
+
+```powershell
+.venv/Scripts/python.exe deploy/package.py 25968dc8440a25f2472df8cfb7ff62eb3302366d .runtime/freeze-demo/morphogenesis-25968dc8440a25f2472df8cfb7ff62eb3302366d.tar.gz
+scp -o BatchMode=yes -o ConnectTimeout=10 .runtime/freeze-demo/morphogenesis-25968dc8440a25f2472df8cfb7ff62eb3302366d.tar.gz gongzhi-ecs:/tmp/morphogenesis-25968dc8440a25f2472df8cfb7ff62eb3302366d.tar.gz
+scp -o BatchMode=yes -o ConnectTimeout=10 C:/Users/DW/AppData/Local/Temp/morph-live4-98b36399c0324192b5af81f8077bc11d/morph-rehearsal-86e5351d49fe49a1b60ba0a4bb4c4e4e/rehearsal.json gongzhi-ecs:/tmp/morphogenesis-rehearsal-25968dc8440a25f2472df8cfb7ff62eb3302366d.json
+Get-Content -Raw .runtime/freeze-demo/remote-install.sh | ssh -o BatchMode=yes -o ConnectTimeout=10 gongzhi-ecs 'bash -s'
+```
+
+包为 **89 个已提交白名单普通文件 / 109 项含目录条目**，`archive-members.txt` 保存清单；审计绝对路径、`..`、symlink、点文件及每个文件 `deploy.package.allowed`，均通过。首次辅助检查误将 tar 根目录名要求带尾斜线而触发 assertion，只进行了传包，未据此解包；更正标准根目录判定且完成完整白名单检查后才执行远端脚本。没有改写、绕过打包白名单。
+
+远端脚本先确认 release/data 文件和 Compose project 不存在、7799 无监听，再仅创建 `/opt/morphogenesis/releases/25968dc8440a25f2472df8cfb7ff62eb3302366d` 与 `/opt/morphogenesis/data`，解包版本并安装单个 `rehearsal.json`。原件、本机传输前、远端 `/tmp`、最终 data 文件的标准 SHA256 均为 **`f3639cd4e96edbe04cea63d4522df12cf16d84817bb84650a19885268b61c818`**，未传运行根/数据库/账户配置/密钥。
+
+远端命令的环境固定为 `MORPH_RELEASE=25968dc...`、`MORPH_BIND_IP=127.0.0.1`、`MORPH_REPLAY_FILE=/opt/morphogenesis/data/rehearsal.json`，Compose 固定 `--env-file /dev/null -p morphogenesis -f deploy/compose.yaml -f deploy/compose.replay.yaml`。`config --quiet` 通过；唯一 `timeout 600 docker compose ... build` 返回 **exit 1**，三个固定基础镜像都在 metadata HEAD 阶段失败：
+
+```text
+failed to do request: Head https://registry-1.docker.io/v2/library/<python|node|nginx>/manifests/sha256:<Dockerfile固定digest>
+dial tcp 103.200.31.172:443: i/o timeout
+target web: failed to solve: DeadlineExceeded ... failed to resolve source metadata
+```
+
+完整原错误保留 `remote-install.log`，未重试、未改镜像源、未启动本机 Docker Desktop、未操作全局 daemon。脚本 `set -eu` 在构建失败处停止，**没有执行 up、远端 smoke/healthcheck 或 0.0.0.0 公开步骤，未新增安全组规则**。归档、远端版本/data 和失败日志保留可复核，没有自动删除。
+
+失败后 `docker ps`、`docker ps -aq --filter label=com.docker.compose.project=morphogenesis`、`ss -ltnp` 复核：本项目无容器、远端 7799 无监听，共治四容器仍 healthy，80/443/8080 保持原映射。证据 `remote-after-failed-build.txt`；`.runtime/freeze-demo/listener-identities.json` 记录本机 7799 listener 55020/parent 55676、7526 listener 53392/parent 13016，7844 listener 44240/parent 41400 仍不变。公网仍 **blocked / not_run**，不是部署 passed。
+
+已向主控发送 `msg_ebae5db384b7` 升级：可由主控协调已有构建环境与同 SHA 镜像转运路径；本机 daemon 当前不可用，不自行通过全局改动绕过。7527 新 live、EvoMap 正常公开只读核验、热点/第二设备/物理项仍保留前述限制，本轮模型新增调用/usage 为 0 / 无新增记录，未知费用仍 null。
+
+### 19:53–19:55 WLAN 与既有产物核查
+
+主控要求不重试远端，先只读查已有构建/转运物并完成特定 WLAN 绑定。`Get-CimInstance Win32_NetworkAdapterConfiguration -Filter 'IPEnabled=true'` 返回 MediaTek Wi-Fi 7 MT7925 无线网卡 IPv4 **192.168.60.54**、网关 192.168.60.1；另一个 Meta Tunnel 的 198.18.0.1 未选。先通过 `msg_3ebdca9d9503` 明确地址/端口，随后以仅当前子进程环境 `MORPH_BIND_IP=192.168.60.54`、清除 `MORPH_EVOMAP_API_KEY`，`Start-Process -WindowStyle Hidden` 启动原命令但不传 `--host`，验证环境绑定实际生效。
+
+- 地址 `http://192.168.60.54:7799/`；launcher **56004**、listener **51992**。`netstat` 与 CIM 复核准确监听和父子命令；原 127.0.0.1:7799、7526、7844 均保持，7527 仍无替代服务。没有系统网络/防火墙/代理配置修改。
+- `.venv/Scripts/python.exe deploy/smoke.py http://192.168.60.54:7799 --with-fonts --direct`：exit 0，`smoke-wlan-7799.json`；`curl.exe --noproxy '*' --max-time 10 --silent --show-error --head http://192.168.60.54:7799/api/dashboard`：200 与 nosniff/frame/referrer/no-store 头。
+- `node .runtime/freeze-demo/browser.cjs http://192.168.60.54:7799 .runtime/freeze-demo/browser-wlan-7799`：exit 0，三视口 15 视图及验收弹层，零 pageerror/实际 HTTP 失败、真实 replay API 和三态匹配。仍按主控要求 abort 一次自动 `/api/evomap`，该模块未验收；实际查看 WLAN 375-task 与 7526 1366-topology 截图。**这只证明本机访问真实 WLAN 地址，不是第二设备、异网或公网可达证明**。
+- 已读 `docs/tracks/beijing-deployment.md` 和 integration 报告，并仅列其指向的 `%TEMP%/morph-beijing*`、原 `morph-beijing-deploy` 根 tar 与 `.runtime`。找到 `morph-beijing-d-package-check/da393da87036637387bb398689c1b5677c9f5b86/` 源码解包及 smoke 记录；没有已记录的 save/OCI 转运文件或当前 `25968dc` 成品镜像路径。历史报告曾保留 Docker daemon 内旧 Linux 镜像/缓存，但 daemon 当前不可用，不能声称它们仍在或冒充最终 SHA。
+
+已发 `msg_a06a99a14f5f` 回传以上结果。后续需可用的同版本构建/镜像转运环境；本轮没有配置全局 Docker、启动 Desktop 或重试远端失败构建。新网关 key、正常公开 Hub 面板一次读取窗口、热点/第二设备/现场条件仍由主控协调。
+
 ## 当前状态（2026-09-23 18:32，北京时间）
 
 **只读核查完成，领域实现、live 演示与部署尚未开始。** 工作区为 `C:/Users/DW/orca/Morphogenesis`，分支 `codex/morphogenesis-mainline`；核查时 HEAD 为 `2b58b5923286af8e11e556a1579e239bceee539b`，开始时 `git status --short`、`git diff` 均为空。本报告不把历史结果计作本轮验收。
