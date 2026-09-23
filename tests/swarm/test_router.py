@@ -42,6 +42,22 @@ def test_history_literally_multiplies_score_changes_next_selection(tmp_path):
     assert router.choose('other',locality,{'repair':1.,'innovation':1.}).task_id == 'b'
 
 
+def test_retained_fresh_and_replacement_history_are_distinct(tmp_path):
+    ledger, field, _, _, locality, now = setup(tmp_path)
+    for _ in range(30):
+        field.reinforce('retained', 'repair', 1)
+
+    retained = field.pipe_history('retained', 'repair')
+    replacement = field.pipe_history('replacement', 'repair')
+    fresh = PheromoneField(tmp_path / 'fresh.db', ledger=ledger, clock=lambda: now[0])
+    fresh_history = fresh.pipe_history('retained', 'repair')
+
+    assert retained.samples == 30 and retained.weight > .25
+    assert replacement.samples == 0 and replacement.weight == .25
+    assert fresh_history.samples == 0 and fresh_history.weight == .25
+    assert {record.signal.task_id for record in ledger.snapshot()} == {'a', 'b'}
+
+
 def test_scope_dependency_completion_claim_capability_filters(tmp_path):
     ledger,field,a,b,locality,_=setup(tmp_path)
     ledger.enqueue(Signal(task_id='c',workspace=str(tmp_path),scope='c',kind='error_pattern'),dependencies=('a',))
