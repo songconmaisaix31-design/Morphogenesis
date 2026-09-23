@@ -129,3 +129,32 @@
 .swarm-reduced .swarm-layer,
 .swarm-reduced .swarm-edge,
 .swarm-reduced .swarm-node-disc { transition: none; }
+
+/* Decentralized swarm (/api/swarm) facts. */
+.swarm-node-pipe .swarm-node-disc { stroke: var(--swarm-dim); fill: #0b1012; }
+.swarm-node-pipe .swarm-node-label { font-size: 13px; }
+
+.swarm-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
+.swarm-fact { border: 1px solid var(--swarm-line); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: var(--swarm-ink); min-width: 0; }
+.swarm-fact h4 { margin: 0 0 6px; font-size: 12px; color: var(--swarm-teal); letter-spacing: 0.06em; }
+.swarm-fact ul { margin: 0; padding-left: 16px; }
+.swarm-fact li { margin: 3px 0; overflow-wrap: anywhere; }
+
+.swarm-task-list { list-style: none; padding-left: 0 !important; display: flex; flex-direction: column; gap: 4px; }
+.swarm-task-list li { display: grid; grid-template-columns: auto auto 1fr; gap: 4px 10px; border-bottom: 1px solid var(--swarm-line); padding: 4px 0; align-items: baseline; }
+.swarm-task-id { font-family: Consolas, monospace; color: var(--swarm-ink); }
+.swarm-task-lease { color: var(--swarm-teal); }
+.swarm-task-completed .swarm-task-lease, .swarm-task-failed .swarm-task-lease { color: var(--swarm-dim); }
+.swarm-task-meta { color: var(--swarm-dim); grid-column: 3; }
+
+.swarm-reservation-list { list-style: none; padding-left: 0 !important; }
+.swarm-reservation-state { display: inline-block; min-width: 44px; border-radius: 999px; padding: 0 7px; border: 1px solid var(--swarm-line); color: var(--swarm-dim); margin-right: 6px; font-size: 11px; }
+.swarm-reservation-reserved { border-color: var(--swarm-teal); color: var(--swarm-teal); }
+.swarm-reservation-unknown { border-color: #e88a8a; color: #e88a8a; }
+
+.swarm-audit-list, .swarm-asset-list { max-height: 220px; overflow: auto; }
+.swarm-asset-list li { font-family: Consolas, monospace; font-size: 11px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .swarm-facts { grid-template-columns: 1fr; }
+}

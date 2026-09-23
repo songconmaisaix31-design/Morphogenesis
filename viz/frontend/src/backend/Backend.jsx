@@ -18,14 +18,14 @@ const Property = ({ icon, label, children }) => <div className='KFZpfa_propertyR
   <Icon name={icon} /><span className='property-label'>{label}</span><span className='property-value'>{children}</span>
 </div>;
 
-function TopologyPanel({ dashboard, active, reducedMotion }) {
+function TopologyPanel({ dashboard, swarm, active, reducedMotion }) {
   const { Component: SwarmTopology, error } = useTrackComponent('swarm');
   useEffect(() => { document.body.dataset.swarmModule = SwarmTopology && !error ? 'loaded' : 'fallback'; }, [SwarmTopology, error]);
   return <>
     <div className='backend-page-heading'><h1>蜂群拓扑</h1><span id='story-offline-member'>未发生 / 未加载</span></div>
     <p className='backend-description' id='story-offline-reason'>尚无运行快照。</p>
     <div className={`morph-topology-body${SwarmTopology && !error ? ' has-swarm-module' : ''}`}>
-      {SwarmTopology && !error && <SwarmTopology dashboard={dashboard} active={active} reducedMotion={reducedMotion} />}
+      {SwarmTopology && !error && <SwarmTopology dashboard={dashboard} swarm={swarm} active={active} reducedMotion={reducedMotion} />}
       <div id='story-pipe-chart' className='story-pipe-chart' style={SwarmTopology && !error ? { display: 'none' } : undefined} />
       <div id='story-pipe-empty' className='empty pipe-empty' hidden />
       <details className='backend-pipe-details'><summary>管道权重详情</summary><div id='story-pipes' className='pipe-list'><p>尚无管道快照</p></div></details>
@@ -33,7 +33,7 @@ function TopologyPanel({ dashboard, active, reducedMotion }) {
   </>;
 }
 
-function Backend({ dashboard, active = true, reducedMotion = false, evomap, evomapDetail, onSearch, onOpenAsset, onReturn }) {
+function Backend({ dashboard, swarm = null, active = true, reducedMotion = false, evomap, evomapDetail, onSearch, onOpenAsset, onReturn }) {
   const [selected, setSelected] = useState(() => window.location.hash === '#/swarm' ? 'topology' : 'overview');
   const [detailsOpen, setDetailsOpen] = useState(false);
   const detailTrigger = useRef(null);
@@ -114,7 +114,7 @@ function Backend({ dashboard, active = true, reducedMotion = false, evomap, evom
               </div>
             </aside>
           </section>
-          <section {...panelProps('topology')} className='backend-document'><TopologyPanel dashboard={dashboard} active={active && selected === 'topology'} reducedMotion={reducedMotion} /></section>
+          <section {...panelProps('topology')} className='backend-document'><TopologyPanel dashboard={dashboard} swarm={swarm} active={active && selected === 'topology'} reducedMotion={reducedMotion} /></section>
           <section {...panelProps('genes')} className='backend-document'><div className='backend-page-heading'><h1>Gene 池</h1></div><div id='story-genes' className='gene-ledger-list'><p>尚无 Gene 快照</p></div><h2>谱系</h2><div id='gene-chart' className='chart' /><div id='gene-empty' className='empty' hidden /></section>
           <section {...panelProps('evidence')} className='backend-document'><div className='backend-page-heading'><h1>证据与指标</h1></div><h2>消息流</h2><div id='message-chart' className='chart' /><div id='message-empty' className='empty' hidden /><h2>历史指标</h2><div id='metric-chart' className='chart' /><div id='metric-empty' className='empty' hidden /></section>
           <section {...panelProps('evomap')} className='backend-document'><EvoMapPanel evomap={evomap} detail={evomapDetail} onSearch={onSearch} onOpenAsset={onOpenAsset} /></section>
