@@ -18,20 +18,20 @@ def example(dataset="gsm8k"):
 
 
 def test_gsm8k_numeric_normalization_and_strict_json_contract():
-    correct = score_response(example(), '{"answer":"42.0"}')
+    correct = score_response(example(), '{"answer":"42.0","adopted_asset_ids":[]}')
     malformed = score_response(example(), '{"answer":42}')
     assert correct.status == "correct" and correct.strict_json and correct.normalized_correct
     assert malformed.status == "malformed" and not malformed.strict_json
 
 
 def test_bbh_uses_exact_case_sensitive_target_after_whitespace_normalization():
-    assert score_response(example("bbh"), '{"answer":" True "}').status == "correct"
-    assert score_response(example("bbh"), '{"answer":"true"}').status == "incorrect"
+    assert score_response(example("bbh"), '{"answer":" True ","adopted_asset_ids":[]}').status == "correct"
+    assert score_response(example("bbh"), '{"answer":"true","adopted_asset_ids":[]}').status == "incorrect"
 
 
 def test_missing_duplicate_and_malformed_are_in_requested_denominator():
     scores = [score_response(example(), None), score_response(example(), '{"answer":"42"}', duplicate=True),
-              score_response(example(), "not json"), score_response(example(), '{"answer":"0"}')]
+              score_response(example(), "not json"), score_response(example(), '{"answer":"0","adopted_asset_ids":[]}')]
     assert summarize(scores) == {"requested": 4, "correct": 0, "incorrect": 1, "malformed": 1,
                                  "missing": 1, "duplicate": 1, "accuracy": 0.0, "strict_json_rate": 0.25}
 
@@ -53,3 +53,8 @@ def test_revision_guard_rejects_nonmatching_checkout(tmp_path, monkeypatch):
         assert str(error) == "dataset_revision_mismatch"
     else:
         raise AssertionError("revision mismatch accepted")
+
+
+def test_nonfinite_numeric_answers_are_incorrect_not_equal():
+    response = '{"answer":"NaN","adopted_asset_ids":[]}'
+    assert score_response(example(), response).status == "incorrect"

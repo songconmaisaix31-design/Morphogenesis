@@ -51,6 +51,10 @@ def _require_revision(root: Path, revision: str) -> None:
                             capture_output=True, text=True).stdout.strip()
     if actual != revision:
         raise ValueError("dataset_revision_mismatch")
+    dirty = subprocess.run(["git", "-C", str(root), "status", "--porcelain", "--untracked-files=all"],
+                           check=True, capture_output=True, text=True).stdout.strip()
+    if dirty:
+        raise ValueError("dataset_checkout_dirty")
 
 
 def download_sources(directory: Path) -> tuple[Path, Path]:
@@ -122,6 +126,19 @@ def select_examples(gsm8k_root: Path, bbh_root: Path, *, seed: int = DEFAULT_SEE
     return selected
 
 
+def select_extension(gsm8k_root: Path, bbh_root: Path, *, seed: int = DEFAULT_SEED) -> tuple[list[BenchmarkExample], list[BenchmarkExample]]:
+    """Return 48 baseline rows and 48 disjoint additions with baseline IDs preserved."""
+    baseline = select_examples(gsm8k_root, bbh_root, seed=seed)
+    all_rows = _load_gsm8k(gsm8k_root)
+    for task in BBH_TASKS:
+        all_rows.extend(_load_bbh_task(bbh_root, task))
+    used = {row.sample_id for row in baseline}
+    additions = [row for row in all_rows if row.sample_id not in used]
+    if len(additions) < 48:
+        raise ValueError("dataset_too_small_for_extension")
+    return baseline, _choose(additions, 48, random.Random(seed + 1))
+
+
 def public_manifest(examples: Iterable[BenchmarkExample], *, seed: int) -> dict[str, Any]:
     """Public run metadata deliberately excludes targets and questions."""
     rows = list(examples)
@@ -132,14 +149,16 @@ def public_manifest(examples: Iterable[BenchmarkExample], *, seed: int) -> dict[
 
 
 def benchmark_instruction(example: BenchmarkExample) -> str:
-    return ("Solve the official benchmark question below. Return exactly one JSON object with one string field "
-            "named answer, no Markdown, explanation, tools, or extra fields.\n\nQuestion:\n" + example.question)
+    return ("Solve the official benchmark question below. Return exactly one JSON object with string field answer "
+            "and adopted_asset_ids set to an empty array. Do not use Markdown, explanation, or tools.\n\nQuestion:\n"
+            + example.question)
 
 
 def _gsm_number(value: str) -> Decimal | None:
     cleaned = value.strip().replace(",", "").replace("$", "")
     try:
-        return Decimal(cleaned)
+        value = Decimal(cleaned)
+        return value if value.is_finite() else None
     except InvalidOperation:
         return None
 
@@ -160,7 +179,8 @@ def score_response(example: BenchmarkExample, response: str | None, *, duplicate
         value = json.loads(response)
     except (TypeError, json.JSONDecodeError):
         return Score("malformed", False, False)
-    strict_json = isinstance(value, dict) and set(value) == {"answer"} and isinstance(value.get("answer"), str)
+    strict_json = (isinstance(value, dict) and set(value) == {"answer", "adopted_asset_ids"}
+                   and isinstance(value.get("answer"), str) and value.get("adopted_asset_ids") == [])
     if not strict_json:
         return Score("malformed", False, False)
     correct = normalized_correct(example, value["answer"])
