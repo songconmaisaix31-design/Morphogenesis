@@ -10,6 +10,8 @@ F 已完成原任务并推送 `2df313857d716a27113c47709342c8d57fb6405f`，原 `
 
 17:03 Orca 再次重启，旧返修 Dispatch `ctx_eb0b56092f6f` 被运行时结算为 `terminal_missing / failed`，Task 恢复 ready，工作树 WIP 保留。主控将原 Run 绑定当前终端 `term_e3377ef4-b845-40c3-8b7e-a55ae9632243`，在原工作树恢复原 provider session `01a0cce1-3e9f-7061-a005-d9a8d538cab9`，同 Task 续接 `ctx_36490c2cd445`；没有新建实现轨、改变权限设置或代批。后续活动行返修、重新构建、三视口与交互验收、commit/push、独立 I 集成仍待完成。
 
+恢复后第一批命令经用户在原终端批准，前端构建完成，`python -m pytest tests/t5 -q` 为 51 passed / 15.93s。F 随后继续修正隐藏图表和未知状态；当前第二批命令（Hidden 启动 7841、重建、三尺寸浏览器验收）仍停在该会话的单次命令确认。主控已展示原终端并请求用户处理，未代批；尚无新截图、最终前端提交或上线。主控另一次写入部署交接说明的命令被自动审批以 `blocked by policy` 拒绝，未执行，未换工具重试。
+
 新鲜对照证据位于 `C:/Users/DW/AppData/Local/Temp/morph-linear-structure-audit`：源应用完整画框 `source-app-issue.png`、同视口源页 `reference-1366.png`、修改前后台 `product-before-1366.png`、实际尺寸 `observations.json`。源包页面中点击 tasks/insights/project 未实际切换，不将对应重复截图计为交互成功。7841/7843/7799 已在此次重启后核实无监听，旧 PID 记录失效；F 将在端口身份核验后恢复其独立测试预览。D 已交付 `50d1353` 保留，I 和公网部署等待新 F 视觉返修验收。
 
 ## 当前：终端更新完成，部署容器验证通过，F 等待命令权限确认（2026-09-23）
