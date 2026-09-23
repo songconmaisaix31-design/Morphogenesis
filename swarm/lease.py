@@ -40,10 +40,14 @@ class LeaseLost(RuntimeError):
 
 
 class LeaseManager:
-    def __init__(self, directory: str | Path, *, clock: Callable[[], float] = time.time) -> None:
+    def __init__(self, directory: str | Path, *, clock: Callable[[], float] = time.time,
+                 lock_timeout_seconds: float = 10.0) -> None:
+        if not math.isfinite(lock_timeout_seconds) or not 0 <= lock_timeout_seconds <= 60:
+            raise ValueError("lock_timeout_seconds must be finite and between zero and 60")
         self.directory = Path(directory).resolve()
         self.directory.mkdir(parents=True, exist_ok=True)
         self.clock = clock
+        self.lock_timeout_seconds = lock_timeout_seconds
         self.state_path = self.directory / "leases.json"
         self.lock_path = self.directory / "leases.lock"
 
@@ -67,7 +71,7 @@ class LeaseManager:
                     handle.write(b"\0")
                     handle.flush()
             acquired = False
-            deadline = time.monotonic() + 10
+            deadline = time.monotonic() + self.lock_timeout_seconds
             try:
                 while not acquired:
                     try:

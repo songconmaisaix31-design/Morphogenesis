@@ -154,3 +154,29 @@ print('changed' if result else 'fenced')
     results = [child.communicate(timeout=30) for child in children]
     assert all(child.returncode == 0 for child in children), results
     assert sum(out.strip() == "changed" for out, _ in results) == 1
+
+
+def test_configured_os_lock_timeout_is_bounded_and_preserves_holder(tmp_path: Path) -> None:
+    manager = LeaseManager(tmp_path / "locks")
+    lease = manager.acquire(tmp_path / "project", "owner")
+    assert lease is not None
+    script = '''
+import sys, time
+from swarm.lease import LeaseManager
+started=time.monotonic()
+try:
+    LeaseManager(sys.argv[1],lock_timeout_seconds=.05).acquire(sys.argv[2],'contender')
+except TimeoutError:
+    print(time.monotonic()-started)
+else:
+    raise AssertionError('contender bypassed OS guard')
+'''
+    with manager.guard(lease) as assert_owned:
+        result = subprocess.run([sys.executable, "-c", script, str(manager.directory), lease.scope],
+                                capture_output=True, text=True, timeout=20, check=True)
+        assert .04 <= float(result.stdout) < 5
+        assert_owned()
+    assert manager.is_valid(lease)
+    for invalid in (-1, 61, float("nan")):
+        with pytest.raises(ValueError):
+            LeaseManager(tmp_path / "locks", lock_timeout_seconds=invalid)
