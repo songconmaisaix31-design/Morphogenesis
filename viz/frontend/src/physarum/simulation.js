@@ -350,9 +350,16 @@ export class PhysarumSim {
       }
       // The anterior margin advances over time; the posterior anchor stays
       // connected, rather than teleporting the entire mass with the cursor.
-      const frontEase = 1 - Math.exp(-1.25 * (dt / 1000));
-      const targetX = this.food.strength * this.food.x + (1 - this.food.strength) * this.viewWidth * 0.2;
-      const targetY = this.food.strength * this.food.y + (1 - this.food.strength) * this.viewHeight * 0.08;
+      const frontEase = 1 - Math.exp(-(this.food.target ? 1.7 : 3.8) * (dt / 1000));
+      // Departure immediately changes the destination to the home position.
+      // Only the visual position is eased; old food coordinates cannot hold
+      // the organism offscreen during the recovery interval.
+      const targetX = this.food.target
+        ? Math.max(-this.viewWidth * 0.15, Math.min(this.viewWidth * 0.35, this.food.x))
+        : this.viewWidth * 0.2;
+      const targetY = this.food.target
+        ? Math.max(-this.viewHeight * 0.2, Math.min(this.viewHeight * 0.2, this.food.y))
+        : this.viewHeight * 0.08;
       this.front.x += (targetX - this.front.x) * frontEase;
       this.front.y += (targetY - this.front.y) * frontEase;
     }

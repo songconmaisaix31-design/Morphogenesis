@@ -15,9 +15,10 @@ const REASON_LABELS = {
 
 const PhysarumFallback = ({ reason }) => (
   <div className='physarum-fallback' role='img' aria-label='黏菌网络静态视图（动画已停用）'>
-    <svg viewBox='0 0 100 100' preserveAspectRatio='xMidYMid slice'>
-      <path className='physarum-fallback-sheet' d='M38 48 C48 45 55 38 63 26 Q75 18 88 30 Q94 40 91 52 Q88 70 76 72 Q65 72 60 61 C52 56 46 55 38 53 Z' />
-      <path className='physarum-fallback-vein' d='M4 55 C17 52 22 48 38 50 C50 50 58 49 68 46 C77 43 85 38 90 31 M18 73 C27 61 35 56 49 51 M30 28 C35 39 43 44 52 48 M51 51 C61 54 73 59 83 68 M59 49 C67 39 74 33 83 28' />
+    <svg viewBox='0 0 160 90' preserveAspectRatio='xMidYMid meet'>
+      <path className='physarum-fallback-sheet' d='M83 44 Q89 38 96 34 Q102 29 109 32 Q114 27 120 31 Q127 27 133 33 Q139 30 143 39 Q146 44 141 48 Q146 53 140 57 Q137 63 130 60 Q125 65 118 61 Q113 66 106 60 Q99 62 96 56 Q88 54 83 49 Z' />
+      <path className='physarum-fallback-vein' d='M18 52 C32 49 39 44 53 47 S70 46 86 46 M29 60 C39 54 46 51 56 51 C69 53 75 50 89 47 M39 35 C46 43 49 44 57 46 C68 45 75 42 87 44 M52 66 C56 57 62 54 72 51 C82 49 85 47 93 46 M62 30 C64 38 70 41 78 44 C83 45 90 43 98 42 M70 59 C77 55 81 55 85 52 C92 48 99 45 108 42' />
+      <path className='physarum-fallback-vein physarum-fallback-vein-fine' d='M40 48 C42 52 46 53 50 53 M49 45 C53 40 57 40 63 42 M58 49 C60 45 65 44 70 43 M65 54 C68 58 73 56 78 53 M77 43 C79 39 83 39 87 41 M85 50 C89 56 94 57 100 55 M94 42 Q99 37 107 36 Q114 38 120 34 M94 47 Q100 50 107 47 Q114 45 122 41 Q132 38 140 40 M97 51 Q103 56 111 53 Q120 50 127 54 Q134 56 141 53 M106 59 Q111 56 116 57 Q122 58 127 60 M111 35 Q116 42 119 46 Q124 48 133 47' />
     </svg>
     <span className='physarum-fallback-note'>{REASON_LABELS[reason] || '黏菌模拟已降级为静态视图'}</span>
   </div>
