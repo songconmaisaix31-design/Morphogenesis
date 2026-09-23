@@ -1,5 +1,11 @@
 # P 轨报告：PhysarumField WebGL 黏菌（趋食首页）
 
+## 当前用户覆盖：原生环境动画，仅改黄色（2026-09-23）
+
+在下述无鼠标版本的基础上，仅把三物种显示色改为黏菌黄 `#f5d547` 与两档较暗琥珀色；静态降级的线、点、微弱背景光及说明文字同步改成黄色系。深色背景 `#070b0d`、原生 agent 更新/扩散/合成着色器、参数、种子、性能降质和组件接口保持不变。鼠标及触屏均不会改变食物强度或粒子运动。此前“恢复原背景”的描述仅指原生模拟行为；颜色以此节为准。
+
+隔离 Chromium 1366×768：空闲与移动/按下/拖动后 `foodStrength=0`、`food=(0,0)`、无光标环及 WebGL 错误；触屏点按后同样为 0。截图见未入库 `.runtime/physarum/ambient-{idle,after-pointer,reduced}.png` 与 `yellow-touch.png`。减少动态效果无 canvas、显示黄色静态视图；`--disable-webgl` 报 `webgl2-unavailable` 并显示同一黄色降级图。页面壳 7799 的重建与最终验收由集成轨执行。
+
 ## 当前版本：恢复原背景并取消交互（2026-09-23）
 
 依用户最新指令，动态色彩、粒子运动参数、初始种子、扩散/衰减合成与静态降级外观恢复到 `f5448b8f59ce7a592fc0bf38de002a47b333672d`。后续黄色前缘/脉络提交保留在历史中，本次用新提交回退视觉。下方原始“鼠标趋食”描述是当时的历史交付记录，**不适用于当前运行版本**。
@@ -90,3 +96,4 @@ cd viz/frontend && npx vite build --outDir <临时目录> --emptyOutDir # 3892 m
 
 `viz/frontend/src/physarum/{index.js, PhysarumField.jsx, PhysarumFallback.jsx, simulation.js, shaders.js, physarum.css}`（新增）、`viz/static/licenses/physarum/{Physarum-WebGL.LICENSE.MIT.txt, NOTICE.md}`（新增）、本文档。共享文件零改动（`git status` 仅新增上述路径；`npm ci` 未改锁文件）。
 追加构建结果：`npx esbuild src/physarum/PhysarumField.jsx --bundle --outfile=../../.runtime/physarum/ambient-check.js --loader:.js=jsx` 通过；`npx vite build --outDir ../../.runtime/physarum/ambient-build --emptyOutDir` 通过（3892 modules，33.81s，未写共享静态构建产物）。
+本轮构建：`npx esbuild src/physarum/PhysarumField.jsx --bundle --outfile=../../.runtime/physarum/yellow-check.js --loader:.js=jsx` 通过；`npx vite build --outDir ../../.runtime/physarum/yellow-build --emptyOutDir` 通过（3892 modules，8.96s），未写共享构建产物。

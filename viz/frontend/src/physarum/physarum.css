@@ -1,5 +1,4 @@
-/* PhysarumField styles. Colors come from the shared contract in
-   docs/FRONTEND_REFACTOR_PLAN.md: bg #070b0d, teal #65d9c7, secondary #8ca3a0. */
+/* Ambient Physarum colors: yellow organism on the original dark background. */
 
 .physarum-field {
   position: relative;
@@ -26,8 +25,8 @@
   align-items: flex-end;
   justify-content: flex-end;
   background:
-    radial-gradient(60% 50% at 30% 35%, rgba(101, 217, 199, 0.08), transparent 70%),
-    radial-gradient(45% 40% at 72% 60%, rgba(140, 163, 160, 0.07), transparent 70%),
+    radial-gradient(60% 50% at 30% 35%, rgba(245, 213, 71, 0.08), transparent 70%),
+    radial-gradient(45% 40% at 72% 60%, rgba(199, 140, 37, 0.07), transparent 70%),
     #070b0d;
 }
 
@@ -39,18 +38,18 @@
 }
 
 .physarum-fallback line {
-  stroke: rgba(101, 217, 199, 0.28);
+  stroke: rgba(245, 213, 71, 0.32);
   stroke-width: 0.35;
 }
 
 .physarum-fallback circle {
-  fill: rgba(101, 217, 199, 0.5);
+  fill: rgba(245, 213, 71, 0.55);
 }
 
 .physarum-fallback-note {
   position: relative;
   margin: 8px 10px;
   font-size: 12px;
-  color: #8ca3a0;
+  color: #bd9b50;
   pointer-events: none;
 }
