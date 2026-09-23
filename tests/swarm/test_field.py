@@ -1,85 +1,95 @@
 from pathlib import Path
+import math
 import sqlite3
-import subprocess
-import sys
-
 import pytest
-
-from swarm.models import Locality, Signal
+from swarm.models import Locality, RunLimits, Signal
+from swarm.task_ledger import TaskLedger, TaskConflict
 from swarm.pheromone import PheromoneField
 
 
-def signal(root: Path, **kwargs: object) -> Signal:
-    return Signal.model_validate(dict(task_id="repair-1", workspace=str(root), scope="src",
-                                     kind="error_pattern", **kwargs))
+def setup(tmp_path, now=None, **field_options):
+    now = now or [100.0]
+    ledger = TaskLedger(tmp_path / 'tasks.db', 'run', clock=lambda: now[0],
+                        limits=RunLimits(max_runtime_seconds=1e12))
+    field = PheromoneField(tmp_path / 'field.db', ledger=ledger, clock=lambda: now[0], **field_options)
+    return ledger, field, now
 
 
-def test_restart_decay_time_scale_and_deposition(tmp_path: Path) -> None:
-    now = [100.0]
-    path = tmp_path / "field.db"
-    field = PheromoneField(path, time_step_seconds=10, clock=lambda: now[0])
+def signal(root, task='a', **kwargs):
+    return Signal(task_id=task, workspace=str(root), scope=task, kind='error_pattern', **kwargs)
+
+
+def test_default_tau_daily_decay_and_independent_alpha(tmp_path):
+    ledger, field, now = setup(tmp_path, alpha=.2)
     s = field.deposit(signal(tmp_path, concentration=10.0))
-    now[0] += 10
-    restarted = PheromoneField(path, time_step_seconds=10, clock=lambda: now[0])
-    sensed = restarted.sense(Locality(workspace=str(tmp_path)))[0]
-    assert sensed.concentration == pytest.approx(9.5)
-    updated = restarted.deposit(s, delta=2)
-    assert updated.concentration == pytest.approx(11.5)
-    now[0] += 20
-    assert restarted.sense(Locality(workspace=str(tmp_path)))[0].concentration == pytest.approx(11.5 * .95**2)
-    with pytest.raises(ValueError, match="time step"):
-        PheromoneField(path, time_step_seconds=20)
+    assert field.tau_seconds == 86400
+    assert field.reinforce('w', 'repair', 1).weight == pytest.approx(.8*.25+.2)
+    now[0] += 86400
+    locality = Locality(workspace=str(tmp_path), authorized_scopes=('.',))
+    assert field.sense(locality)[0].concentration == pytest.approx(10/math.e)
+    assert field.sense(locality)[0].concentration == pytest.approx(10/math.e)  # No double decay.
+    assert field.deposit(s, 2).concentration == pytest.approx(10/math.e+2)
+    with pytest.raises(ValueError, match='tau/alpha'):
+        PheromoneField(field.path, ledger=ledger, alpha=.5)
 
 
-def test_radius_query_uses_index_and_never_reads_remote_bodies(tmp_path: Path) -> None:
-    field = PheromoneField(tmp_path / "field.db", clock=lambda: 100.0)
-    near = field.deposit(signal(tmp_path, x=3.0, y=4.0))
-    field.deposit(signal(tmp_path, x=4.0, y=4.0))  # Inside box, outside circle.
-    remote = field.deposit(signal(tmp_path, x=1000.0))
-    other = field.deposit(signal(tmp_path / "elsewhere"))
-    with sqlite3.connect(field.path) as db:
-        # Invalid remote bodies would explode if sense loaded globally then filtered.
-        db.execute("UPDATE signals SET body='not json' WHERE signal_id IN (?,?)",
-                   (remote.signal_id, other.signal_id))
-        plan = db.execute("EXPLAIN QUERY PLAN SELECT body FROM signals INDEXED BY signals_locality "
-                          "WHERE workspace=? AND x BETWEEN ? AND ? AND y BETWEEN ? AND ?",
-                          (str(tmp_path), -5, 5, -5, 5)).fetchall()
-    assert "SEARCH" in str(plan) and "signals_locality" in str(plan)
-    assert [s.signal_id for s in field.sense(Locality(workspace=str(tmp_path), radius=5.0))] == [near.signal_id]
+def test_no_forgetting_tasks_dependencies_attempts_results_audit(tmp_path):
+    ledger, field, now = setup(tmp_path)
+    first = field.deposit(signal(tmp_path))
+    ledger.enqueue(signal(tmp_path, 'b'), dependencies=('a',), acceptance={'policy':'fixed-v1'})
+    locality = Locality(workspace=str(tmp_path), authorized_scopes=('.',))
+    lease = ledger.claim('a','w',locality=locality)
+    ledger.submit(lease,'result',{'accepted':True})
+    field.feedback(first.signal_id, success=False)
+    now[0] += 1e9
+    restarted = TaskLedger(ledger.path,'run',limits=ledger.limits,clock=lambda:now[0])
+    field = PheromoneField(field.path,ledger=restarted,clock=lambda:now[0])
+    assert restarted.get('a').status == 'completed'
+    assert restarted.get('a').result == {'accepted':True}
+    assert restarted.get('a').attempts == 1
+    assert restarted.get('b').dependencies == ('a',)
+    assert restarted.get('b').acceptance == {'policy':'fixed-v1'}
+    assert [s.task_id for s in field.sense(locality)] == ['b']
+    assert field.sense(locality)[0].concentration == 0
+    assert any(e['event']=='completed' for e in restarted.audit())
+    assert not hasattr(field,'complete')
 
 
-def test_failure_accelerates_decay_nonnegative_and_completion_persists(tmp_path: Path) -> None:
-    now = [100.0]
-    field = PheromoneField(tmp_path / "field.db", time_step_seconds=10, clock=lambda: now[0])
+def test_duplicate_error_does_not_inflate_field_or_create_task(tmp_path):
+    ledger, field, _ = setup(tmp_path)
+    first = field.deposit(signal(tmp_path,payload={'error':'same'}))
+    duplicate = signal(tmp_path,payload={'error':'same'}).model_copy(update={'task_id':'duplicate'})
+    assert field.deposit(duplicate, 50).signal_id == first.signal_id
+    assert field.snapshot()[0].concentration == 1
+    assert len(ledger.snapshot()) == 1
+    with sqlite3.connect(ledger.path) as db:
+        assert db.execute('SELECT occurrences FROM task_evidence').fetchone()[0] == 2
+
+
+def test_failure_only_preferences_and_history_worker_scoped(tmp_path):
+    ledger, field, now = setup(tmp_path)
     s = field.deposit(signal(tmp_path))
-    failed = field.feedback(s.signal_id, success=False)
+    failed = field.feedback(s.signal_id,success=False)
     assert failed.concentration == .5 and failed.decay_multiplier == 2
-    now[0] += 10
-    assert field.sense(Locality(workspace=str(tmp_path)))[0].concentration == pytest.approx(.5 * .95**2)
-    for _ in range(100):
-        field.feedback(s.signal_id, success=False)
-    assert field.sense(Locality(workspace=str(tmp_path)))[0].concentration >= 0
-    field.complete(s.signal_id)
-    restarted = PheromoneField(field.path, time_step_seconds=10, clock=lambda: now[0])
-    assert restarted.sense(Locality(workspace=str(tmp_path))) == []
-    assert restarted.snapshot()[0].completed
+    now[0] += 86400
+    assert field.snapshot()[0].concentration == pytest.approx(.5*math.exp(-2))
+    assert ledger.get('a').status == 'available'
+    for _ in range(20):
+        field.reinforce('a','repair',1)
+    assert field.pipe_history('a','repair').weight > .25
+    assert field.pipe_history('b','repair').weight == .25
+    other = TaskLedger(ledger.path,'other',clock=lambda:now[0])
+    assert PheromoneField(field.path,ledger=other,clock=lambda:now[0]).pipe_history('a','repair').weight == .25
 
 
-def test_own_history_exact_update_restart_and_process_visibility(tmp_path: Path) -> None:
-    field = PheromoneField(tmp_path / "field.db")
-    assert field.reinforce("a", "repair", 0).weight == .95 * .25
-    assert field.reinforce("a", "repair", 1).weight == .95 * .95 * .25 + .05
-    assert field.pipe_history("b", "repair").weight == .25
-    script = "from swarm.pheromone import PheromoneField; import sys; print(PheromoneField(sys.argv[1]).pipe_history('a','repair').model_dump_json())"
-    result = subprocess.run([sys.executable, "-c", script, str(field.path)], capture_output=True,
-                            text=True, timeout=30, check=True)
-    assert '"samples":2' in result.stdout
-
-
-def test_scope_escape_and_signal_mutation_rejected(tmp_path: Path) -> None:
-    field = PheromoneField(tmp_path / "field.db")
-    with pytest.raises(ValueError, match="escapes"):
-        field.deposit(signal(tmp_path).model_copy(update={"scope": "../outside"}))
+def test_scope_escape_identity_change_and_legacy_fail_closed(tmp_path):
+    ledger, field, _ = setup(tmp_path)
+    with pytest.raises(ValueError,match='escapes'):
+        field.deposit(signal(tmp_path).model_copy(update={'scope':'../outside'}))
     s = field.deposit(signal(tmp_path))
-    with pytest.raises(ValueError, match="identity"):
-        field.deposit(s.model_copy(update={"payload": {"command": "changed"}}))
+    with pytest.raises(TaskConflict,match='identity'):
+        field.deposit(s.model_copy(update={'payload':{'changed':True}}))
+    with sqlite3.connect(tmp_path/'legacy.db') as db:
+        db.execute('CREATE TABLE signals (body TEXT)')
+    with pytest.raises(ValueError,match='legacy'):
+        PheromoneField(tmp_path/'legacy.db',ledger=ledger)

@@ -35,8 +35,9 @@ def test_default_bound_preflight_prices_enforcement_and_failure_measurement(tmp_
     ledger = BudgetLedger(tmp_path / "budget.db", "account", p)
     with pytest.raises(BudgetBlocked, match="task_token_bound"):
         ledger.reserve("a", "too_large", bound(20000, 1))
-    with pytest.raises(BudgetBlocked, match="not_enforced"):
-        ledger.reserve("a", "unbounded", bound().model_copy(update={"provider_enforced": False}))
+    unbounded = ledger.reserve("a", "unbounded", bound().model_copy(update={"provider_enforced": False}))
+    assert unbounded.request_bound == "unbounded"
+    ledger.settle(unbounded, usage(0, 0))
     with pytest.raises(BudgetBlocked, match="matching_model_prices"):
         ledger.reserve("a", "wrong_model", bound().model_copy(update={"model": "other"}))
     no_prices = BudgetLedger(tmp_path / "unknown.db", "account", BudgetPolicy(max_cost_usd=1))
@@ -117,7 +118,7 @@ def test_measured_high_consumption_trips_durable_shared_breaker(tmp_path: Path) 
     ledger = BudgetLedger(tmp_path / "budget.db", "account", p)
     r = ledger.reserve("a", "high_fake", bound())
     state = ledger.settle(r, usage(200, 400))
-    assert state.reason == "account_cost_estimate_exhausted"
+    assert state.reason == "swarm_cost_estimate_exhausted"
     assert state.tokens == 600 and state.estimated_cost_usd == pytest.approx(0.001)
     for worker in ("a", "b", "c"):
         peer = BudgetLedger(tmp_path / "budget.db", "account", p)
@@ -149,7 +150,7 @@ def test_restart_cannot_reset_policy_or_uncertain_pending_task(tmp_path: Path) -
 
 def test_atomic_reservation_across_processes(tmp_path: Path) -> None:
     path = tmp_path / "budget.db"
-    p = policy(max_cost_usd=0.00025)
+    p = policy(max_cost_usd=0.0001)
     BudgetLedger(path, "account", p)
     script = '''
 import sys
@@ -167,10 +168,10 @@ except BudgetBlocked:
                 for i in range(6)]
     results = [child.communicate(timeout=60) for child in children]
     assert all(child.returncode == 0 for child in children), results
-    assert sum(out.strip() != "blocked" for out, _ in results) == 2
+    assert sum(out.strip() != "blocked" for out, _ in results) == 1
     state = BudgetLedger(path, "account", p).snapshot()
-    assert state.reserved_estimate_usd == pytest.approx(0.0002)
-    assert state.pending_reservations == 2
+    assert state.reserved_estimate_usd == pytest.approx(0.0001)
+    assert state.pending_reservations == 1
     assert all(not err for _, err in results)
 
 
@@ -191,3 +192,89 @@ ledger.settle(Reservation.model_validate_json(sys.argv[3]), {'usage':{'prompt_to
     assert all(child.returncode == 0 for child in children), results
     assert ledger.snapshot().tokens == 30
     assert ledger.snapshot().estimated_cost_usd == pytest.approx(0.00005)
+
+
+def test_explicit_budget_evidence_labels_and_no_boolean_cost_proof(tmp_path):
+    import sqlite3
+    ledger=BudgetLedger(tmp_path/'budget.db','swarm',policy())
+    r=ledger.reserve('A','a',bound())
+    assert r.request_bound=='unbounded' and r.usage_metering=='unknown'
+    before=ledger.snapshot()
+    assert before.cost=='unknown' and before.admission_control=='enabled'
+    after=ledger.settle(r,usage())
+    assert after.usage_metering=='verified' and after.cost=='estimated'
+    assert after.request_bound=='unbounded' and after.actual_cost_usd is None
+    with sqlite3.connect(ledger.path) as db:
+        assert db.execute('PRAGMA journal_mode').fetchone()[0]=='wal'
+        assert db.execute('SELECT usage_metering,request_bound,admission_control,cost FROM budget_reservations').fetchone()==('verified','unbounded','enabled','estimated')
+    with pytest.raises(ValueError,match='executor evidence'):
+        ledger.reserve('A','b',bound().model_copy(update={'request_bound':'verified'}))
+
+
+def test_verified_cost_bound_is_retained_conservatively_without_bill(tmp_path):
+    ledger=BudgetLedger(tmp_path/'budget.db','swarm',policy(max_cost_usd=.001))
+    verified=bound().model_copy(update={'request_bound':'verified','max_cost_usd':.001,'bound_evidence':'local contractual cap fixture'})
+    r=ledger.reserve('A','a',verified)
+    assert r.reserved_estimate_usd==.001
+    ledger.settle(r,usage())
+    with pytest.raises(BudgetBlocked,match='capacity'):
+        ledger.reserve('B','b',bound())
+    assert ledger.snapshot().estimated_cost_usd==pytest.approx(.00005)
+    assert ledger.snapshot().actual_cost_usd is None
+
+
+def test_request_generation_known_settled_retry_and_unknown_no_retry(tmp_path):
+    ledger=BudgetLedger(tmp_path/'budget.db','swarm',policy())
+    r=ledger.reserve('A','task',bound(),request_id='task:1')
+    with pytest.raises(BudgetBlocked,match='no_retry'):
+        ledger.reserve('B','task',bound(),request_id='task:2')
+    ledger.settle(r,usage())
+    r2=ledger.reserve('B','task',bound(),request_id='task:2')
+    with pytest.raises(ValueError,match='conflicting'):
+        ledger.settle(r,usage(9,20))
+    ledger.mark_uncertain(r2)
+    assert ledger.snapshot().reserved_estimate_usd==r2.reserved_estimate_usd
+    with pytest.raises(BudgetBlocked,match='unknown'):
+        ledger.reserve('C','different',bound(),request_id='different:1')
+
+
+def test_budget_run_limits_persist_and_swarm_isolation(tmp_path):
+    from swarm.models import RunLimits
+    now=[100.]
+    p=policy(limits=RunLimits(max_tasks=1,max_attempts=2,max_attempts_per_task=2,max_runtime_seconds=10))
+    ledger=BudgetLedger(tmp_path/'budget.db','one',p,clock=lambda:now[0])
+    r=ledger.reserve('A','a',bound(),request_id='a:1')
+    ledger.settle(r,usage())
+    with pytest.raises(BudgetBlocked,match='max_tasks'):
+        ledger.reserve('A','b',bound())
+    r2=ledger.reserve('A','a',bound(),request_id='a:2')
+    ledger.settle(r2,usage())
+    with pytest.raises(BudgetBlocked,match='max_attempts'):
+        ledger.reserve('A','a',bound(),request_id='a:3')
+    peer=BudgetLedger(ledger.path,'two',p,clock=lambda:now[0])
+    assert peer.snapshot().tokens==0
+    now[0]=110
+    with pytest.raises(BudgetBlocked,match='runtime'):
+        peer.reserve('A','a',bound())
+
+
+def test_disabled_admission_is_visible_not_a_cap_claim(tmp_path):
+    ledger=BudgetLedger(tmp_path/'budget.db','run',policy(max_cost_usd=.000001,admission_control='disabled'))
+    r=ledger.reserve('A','a',bound())
+    assert r.admission_control=='disabled'
+    assert ledger.snapshot().admission_control=='disabled'
+
+
+def test_unbounded_low_usage_never_frees_allowance_across_restart(tmp_path):
+    p=policy(max_cost_usd=.00005)
+    ledger=BudgetLedger(tmp_path/'budget.db','run',p)
+    r=ledger.reserve('A','a',bound())
+    state=ledger.settle(r,usage(0,0))
+    assert state.estimated_cost_usd==0
+    assert state.actual_cost_usd is None and state.cost=='estimated'
+    assert state.request_bound=='unbounded' and state.unreconciled_reservations==1
+    assert state.admission_charged_usd==r.reserved_estimate_usd
+    restarted=BudgetLedger(ledger.path,'run',p)
+    assert restarted.snapshot().admission_charged_usd==r.reserved_estimate_usd
+    with pytest.raises(BudgetBlocked,match='capacity'):
+        restarted.reserve('B','next',bound(1,0))

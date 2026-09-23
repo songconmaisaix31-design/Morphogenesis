@@ -1,43 +1,122 @@
-# Swarm environment and budget contracts
+# Corrected swarm environment, task ledger and budget
 
-Worker B owns this document and `swarm/{models,pheromone,router,lease,budget}.py`.
-Only local execution is authorized in this delivery.
+B owns `swarm/{models,task_ledger,pheromone,router,lease,budget}.py` and this report.
+Current interface authority is [SWARM_CONTRACTS.md](SWARM_CONTRACTS.md), replacing
+all earlier radius, JSON lease, archive-as-decay and account-wide budget claims.
+Historical commits through e9a3836 remain intact. No mainline/deployment changes.
 
-Stable Python interface for Worker C (2026-09-23):
+## Durable facts and local queries
 
-- `swarm.models`: `Signal(task_id, workspace, scope, kind, payload={}, x=0, y=0, concentration=1, urgency=1, required_capability='')`; `Locality(workspace, x=0, y=0, radius=1)`; `Signal.task_kind` maps repair/optimize/innovation. `workspace` is the canonical workspace root; `scope` is a path within it.
-- `PheromoneField(path, *, time_step_seconds=60, clock=time.time)`; `deposit(signal, delta=0) -> Signal`, `sense(locality, *, limit=100) -> list[Signal]`, `feedback(signal_id, *, success, reward=1) -> Signal`, `complete(signal_id)`, `snapshot() -> list[Signal]` (observer only); `pipe_history(worker_id, pipe_key) -> PipeHistory`, `reinforce(worker_id, pipe_key, reward) -> PipeHistory`.
-- `Router(field, *, beta=1, rng=None)`; `choose(worker_id, locality, capabilities: Mapping[str, float]) -> Signal | None`; `reinforce(worker_id, signal, *, success, speedup=0, token_saving=0) -> PipeHistory`. Pipe key is `signal.required_capability or signal.task_kind`.
-- `LeaseManager(directory, *, clock=time.time, lock_timeout_seconds=10)`; `acquire(scope, worker_id, *, ttl_seconds=30) -> Lease | None`; `renew(lease, *, ttl_seconds=30) -> Lease | None`; `release(lease) -> bool`; `is_valid(lease) -> bool`; `guard(lease)` context manager validates under the OS lock, yields `assert_owned()`, and holds the lock across the promotion effect; `snapshot() -> list[Lease]`. Use an absolute scope, e.g. `Path(signal.workspace) / signal.scope`. Promotion MUST execute inside `with leases.guard(lease) as assert_owned: ...` and call the checker immediately before each protected write. Renewal returns a replacement lease; the prior expiration identity becomes stale.
-- `BudgetLedger(path, account_id, policy: BudgetPolicy, *, clock=time.time)`; `reserve(worker_id, task_id, bound: ExecutionBound) -> Reservation` raises `BudgetBlocked` (`reason`, `sleep_seconds`); `settle(reservation, usage: JsonValue) -> BudgetSnapshot` accepts the gateway response shape `{'usage': {'prompt_tokens': int, 'completion_tokens': int, 'total_tokens': int}}`, including failed responses; `mark_uncertain(reservation) -> BudgetSnapshot`; `snapshot(worker_id=None) -> BudgetSnapshot`.
-- `BudgetPolicy(max_cost_usd=..., prices=ModelPrices(provider=..., model=..., input_usd_per_million=..., output_usd_per_million=...), max_tokens=20000, burn_rate_tokens=20000, burn_window_seconds=60)` uses explicit prices only. `ExecutionBound(provider, model, input_tokens, max_output_tokens, provider_enforced=True)` is an executor attestation: the executor must actually enforce input and output bounds before a call. Missing enforcement/prices denies unattended execution. `actual_cost_usd` remains `None`; estimated cost is explicitly labeled.
-- Reserve before execution; settle immediately after execution, including failure, BEFORE validation. On unknown completion or exception use `mark_uncertain`; never auto-retry. Unknown reservations are retained persistently and account breaker is shared. Do not treat a successful validation or absent usage as zero spend.
+`TaskLedger(path, swarm_id)` stores immutable task identity/content, scope, module,
+dependencies, acceptance policy, attempt observations, result and append-only audit.
+Task attempts are plain SQLite records with integer generation, not a new Attempt
+framework; existing runtime `AttemptId` remains unchanged. Error observations use
+literal normalized evidence keys and merge repeated occurrences into one task.
+Failed attempts retain evidence and return available until the attempt limit;
+completed and exhausted tasks remain queryable after restart.
 
-These definitions are data identities, not a new Attempt system.
+Only pheromone/history tables decay. Tasks, dependency edges, attempts, result
+acceptance and task audit never decay. JSONL is an explicit export and changes to
+an export cannot change authority. Old field/account database layouts fail closed
+for explicit migration; no automatic import, deletion, or dropping unknown holds.
 
-M6 P1 gate: `python -m pytest tests/swarm/test_budget.py -q` passed 20 tests after public-boundary revalidation hardening; strict mypy passed both models and budget. Commit `5f6a544feab6b7a1f832189c8007fe2840667e4e`, 2026-09-23T22:46:44+08:00, pushed to `decentralized-swarm`. Gateway `_usage` is imported directly from the existing `orchestration/gateway.py` parser. SQLite uses rollback DELETE journal and FULL synchronous writes; the account policy is immutable across restarts, and the same account must use the same database path. Pending calls retain their maximum reservation and prohibit repeating the task; they do not imply zero measured usage. A crash between reservation and runtime state persistence leaves the pending hold intact. Unknown settlement retains its hold and permanently trips the account breaker; there is no automatic reset, retry, or hold expiry.
+Locality requires explicit `authorized_scopes`; empty means no authorization.
+Resolved workspace/scope paths, module filters and one-hop dependency neighborhoods
+are applied in SQL before task bodies are decoded. Queries use a SQLite B-tree
+workspace/scope index, bounded result limit (default 100, max 1000), at most 64
+scope/module/dependency filters, and capability filtering before LIMIT. This is
+bounded data retrieval, not a constant-complexity or throughput theorem. x/y/radius
+remain compatibility display fields without any authority or routing meaning.
+Tasks beyond the query limit wait behind older eligible work; this is not a
+starvation-free scheduler. Completed dependencies must exist in the same swarm.
 
-Provider enforcement is a trusted executor attestation, not something a boolean proves about a remote provider. Unattended remote use requires an executor that actually bounds prompt and output before submitting; none is enabled or tested here. Budget prices are explicit local configuration and calculated costs are estimates, never invoices. Failed execution is charged with its available usage before validation; malformed or absent usage preserves `None` and stops the account.
+## WAL claims and submit-side fencing
 
-## Field, routing, and time units
+All task/lease authorities share one WAL database. Mutations use short
+`BEGIN IMMEDIATE` transactions, FULL synchronous writes and bounded lock timeout.
+Reads use consistent read transactions. Claim atomically checks authorization,
+dependencies, task status, attempt limits and scope overlap, then increments that
+task's integer fence and persists owner plus expiry. Parent/child scopes collide;
+resolved junction/symlink, dot and Windows case aliases collide. Unrelated siblings
+can proceed. Tokens do not reset on expiry or release.
 
-`signals_locality(workspace,x,y)` is a SQLite B-tree index. `sense` constrains canonical workspace and the bounding box in SQL, then applies the exact Euclidean circle in SQL before returning bodies. It never loads the full field or another worker's history. This is a local indexed query, not a claim of constant work or an R-tree: SQLite may scan the x stripe within a workspace. The default bounded result is 100 signals; callers can request up to 10,000. Coordinates are explicit logical environment coordinates supplied with tasks, not derived from filesystem distance. Capability maps are worker-specific mappings from task kinds or explicit required capability to a match in [0,1].
+Renew/release/submit validate swarm, task, owner, token, current expiry and TTL.
+A stale owner cannot release its successor. The same completed identity/result
+replays idempotently; a conflicting result or stale generation is rejected before
+an effect. Renewal returns a new expiry identity, so callers retain the latest
+lease. Runtime calls, tests, SDK operations, and git snapshot preparation occur
+outside write transactions.
 
-Swarm time step `dt` defaults to 60 seconds and is persisted, preventing restarts with a different decay scale. `tau = -dt / log(0.95)` and the single shared `metabolism.decay.exponential_decay(elapsed,tau)` yield `sigma_next = sigma * exp(-elapsed/tau) + delta`. At one time step this is `0.95 * sigma + delta`; at arbitrary elapsed time `rho = 1 - 0.95**(elapsed/dt)`. Reads evaluate decay without changing anchors, so repeated reads cannot double decay. Legacy metabolism still uses its existing tau/anchor semantics and old topology defaults remain untouched.
+For isolated filesystem effects, submit first commits a `submitting` intent. It
+then checks fencing inside a short transaction while A publishes only prepared
+bytes and checks ownership immediately before each write. Successful callback plus
+final TTL check atomically persists `completed` and `effect_applied=true`. A caller's
+arbitrary result metadata cannot set that flag. A independently verifies actual
+bytes before recording adoption. A no-op callback alone is not proof of useful work.
 
-Failure first evaluates elapsed decay, then multiplies concentration by `1 - 0.5*reward` and future decay multiplier by `1+reward`, capped at 1e6. The same exponential helper uses `tau / multiplier`, so failure accelerates future decay without negative concentrations. Success deposits nonnegative reward. Signal task identity, scope, payload and coordinates are immutable; completed rows remain for audit and are excluded in SQL.
+Crash, expiry or exception after intent leaves `submitting`; it blocks both the
+same task and overlapping scopes, including after restart. No replay/reclaim occurs
+automatically: partial filesystem effects need manual reconciliation. This is
+fail-closed recovery, not a multi-file filesystem transaction or cross-machine
+consistency protocol. Trusted same-machine workers must share the database and
+use reliable clocks; hostile workers with direct file/DB access are out of scope.
 
-Routing uses `score = beta * concentration * capability_match * (0.5 + 0.5*own_pipe_weight) * urgency`, then `exp(score-max_score)` and Python `random.Random.choices`. No greedy branch exists. Unsupported capabilities and zero concentrations are ineligible; equal scores sample uniformly. Extreme score differences can underflow to zero in IEEE floats. Pipe key is explicit capability or task kind; history is persisted under `(worker_id,pipe_key)`. Initial weight 0.25 makes ordinary first success strengthen the pipe and first failure weaken it. Reward is zero on failure, else `0.5 + 0.25*speedup + 0.25*token_saving`, where improvement inputs are measured normalized fractions in [0,1]. The exact update is `w_next = 0.95*w + 0.05*r`. Repeated ordinary success approaches 0.5; measured quality gains can approach 1. After a history of high-quality successes, an ordinary success may lower the quality estimate toward 0.5, while still depositing positive concentration feedback. This is a quality moving average, not unbounded reinforcement. No global history is used.
+## Decay and actual routing influence
 
-## Lease boundary
+The shared `metabolism.decay.exponential_decay` remains unchanged:
+`rho(dt)=1-exp(-dt/tau_seconds)`, default `tau_seconds=86400` and half-life
+`tau_seconds*ln(2)`. `metabolism/service.py`'s 0.05 remains archive_threshold.
+Reward alpha is independently configurable, default 0.05; tau and alpha persist
+per swarm. Reads evaluate from stored anchors and never compound repeated reads.
 
-Python stdlib `msvcrt.locking` on Windows and `fcntl.flock` on POSIX protect one permanent metadata sidecar. There is no lock server, scheduler, or custom OS locking algorithm. JSON TTL records contain canonical absolute scope, worker ID, random fencing identity, and expiration. Replacement metadata is fsynced before atomic `os.replace`. Expired records can be reclaimed; stale acquire/renew/release identities cannot affect a new holder. Scope canonicalization resolves dot components, symlinks/junctions and Windows case aliases; parents conflict with descendants, while siblings can acquire separately. All participants must use the same lease directory and a local filesystem supporting these OS locks; distributed filesystem semantics and hostile directory mutation are not established.
+Failure weakens concentration and increases its future decay multiplier. History
+also decays by elapsed time. Reward is zero for failure, otherwise
+`0.5 + 0.25*speedup + 0.25*token_saving`; alpha updates
+`w_next=(1-alpha)*w+alpha*reward` after elapsed history decay. Initial history is
+0.25. Exact exploitation score is
+`beta*w_history*concentration*capability_match*effective_urgency`.
+Effective urgency is base urgency times `1+min(10,age/aging_seconds)`. Stable
+softmax probabilities mix with normalized age weights using exploration (default
+0.05). Even fully decayed tasks remain eligible for exploration.
 
-The OS lock covers lease metadata operations and guarded snapshot/promotion sequences. It is not held across execution or validation. `guard` prevents a competing reclaim from interleaving with promotion; its callable checks TTL immediately before each write. Expiration or crash before promotion denies writes. A process crash after a partial multi-file promotion is still the promoter's recovery responsibility; a lease is not a filesystem transaction. Wall clocks must be reliable; clock rollback across machines is not addressed. Metadata corruption fails closed. Lock acquisition waits up to configurable `lock_timeout_seconds` (default ten seconds, finite range 0–60), then raises `TimeoutError`. Runtime must treat contention as bounded sleep/skip; callers can increase the wait for measured native Git snapshot duration without changing locking or ownership semantics.
+Routing audits preserve authorization/neighborhood constraints, inspected filtered
+tasks, status/dependencies/attempt/owner inputs, each concentration/history/match/
+urgency/score, normalized exploitation and final probabilities, and selection.
+History changes a seeded next selection in the tests. No greedy branch or
+Physarum pressure/flow solve is claimed; no paper convergence theorem transfers.
+
+## Budget evidence and admission limits
+
+Budget policy and reservations are swarm-run scoped, not account-wide. WAL short
+transactions serialize reserve/settle; policy/start time survive restart. Token
+limits, per-worker burn windows, max tasks, global/per-task attempts, max derived
+tasks (task ledger), and run duration bound autonomous work. Requests carry an
+existing attempt or task/fence identity: a known settled failure permits a new
+identity, while pending/uncertain requests prohibit another request for that task.
+
+Persisted evidence labels are `usage_metering=verified|unknown`,
+`request_bound=verified|unbounded`, `admission_control=enabled|disabled`, and
+`cost=estimated|billed|unknown`. The existing strict gateway usage parser is reused.
+Synthetic usage being well-formed proves only contract_local metering behavior.
+Explicit prices produce estimates; actual cost stays None, and this adapter never
+emits billed. `provider_enforced=True` alone does not establish a verified monetary
+upper bound. Verified bounds additionally require an explicit contractual cost
+ceiling and trusted executor evidence; no remote provider contract is verified here.
+
+Admission checks settled admission charges plus all pending/unknown holds plus the
+new request. Unbounded requests support estimated admission control only; hidden
+calls, retries and other account spend are not covered. Without a bill, every
+request (verified or unbounded) keeps `max(original_reservation,usage_estimate)`
+as a conservative admission debit after usage settlement. Snapshot fields
+`admission_charged_usd` and `unreconciled_reservations` expose this commitment;
+lower observed usage never restores allowance. Unknown usage/cost retains the full hold, trips the shared breaker and
+stops new admission; no expiry, reset or blind retry exists. Disabled admission is
+explicitly labeled and makes no ceiling claim. Identical settlement charges once;
+conflicting known usage is rejected. Unknown evidence is not overwritten later.
 
 ## Read sources, versions, and reuse
 
-The three full texts (including formulas, examples, results, conclusions and references) were read before `router.py` was implemented on 2026-09-23. Papers provide conceptual context; their source code and text were not copied into the package.
+Historical provenance carried from the original B implementation: the three full texts were read in that phase. This corrected phase reuses that attribution; it does not claim a new literature review. Papers provide conceptual context; their source code and text were not copied into the package.
 
 | Source | Applicability and boundary |
 | --- | --- |
@@ -48,16 +127,35 @@ The three full texts (including formulas, examples, results, conclusions and ref
 
 The capacity and multi-commodity papers use the [arXiv non-exclusive distribution license](https://arxiv.org/licenses/nonexclusive-distrib/1.0/license.html). The survey's arXiv record links [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). Scholarpedia retains its published copyright terms. Only short formula attribution and independent implementation are used, with no paper figures or substantial prose vendored. No continuum convergence, global optimality, biological fidelity, or measured O(n) performance is claimed.
 
-Implementation reuse: existing repository gateway parser and metabolism behavior from frozen `605cf48` (repository Apache-2.0); locked Pydantic 2.13.5 (MIT); Python 3.12.13 `sqlite3`, `random`, `pathlib`, `contextlib`, `msvcrt`/`fcntl` are stdlib (PSF); SQLite 3.53.1 is public domain. Versions were read from the actual worktree interpreter. No new dependency, lockfile, GEP schema, hashing convention, Attempt system or completion-proof mechanism was introduced.
+Implementation reuse: existing repository gateway parser and metabolism behavior from frozen `605cf48` (repository Apache-2.0); locked Pydantic 2.13.5 (MIT); Python 3.12.13 `sqlite3`, `random`, `pathlib`, `contextlib` are stdlib (PSF); SQLite 3.53.1 is public domain. Versions were read from the actual worktree interpreter. No new dependency, lockfile, GEP schema, hashing convention, Attempt system or completion-proof mechanism was introduced.
 
 ## Verification scope
 
-Commands run with worktree-local `.venv/Scripts/python.exe`, and `OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=1`. Final B gate, 2026-09-23 22:57 CST:
+Commands use worktree `.venv/Scripts/python.exe`; process-local
+`OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=1` before pytest/type checks.
+Current installed versions verified: Python 3.12.13, SQLite 3.53.1, Pydantic 2.13.5.
 
-- `python -m pytest tests/swarm/test_budget.py tests/swarm/test_field.py tests/swarm/test_router.py tests/swarm/test_lease.py tests/t3/metabolism -q`: **52 passed in 77.33s**. Breakdown: budget 20, field 5, router 5, lease 9, legacy metabolism 13. Two expected Pydantic serializer warnings come from deliberately corrupt `model_copy` input; validation rejects both.
-- `python -m mypy --strict swarm/models.py swarm/budget.py swarm/pheromone.py swarm/router.py swarm/lease.py metabolism`: **10 source files clean**. The same command with `--platform linux` is also clean; this is type validation, not a Linux execution result.
-- `git diff --check`: clean. Full `python tools/typecheck.py` now passes **74 source files**, after A/C fixed the seven domain errors returned to them.
+- Initial corrected domain gate: `python -m pytest tests/swarm/test_ledger.py
+  tests/swarm/test_field.py tests/swarm/test_router.py tests/swarm/test_lease.py
+  tests/swarm/test_budget.py -q`: 47 passed in 11.14s.
+- Final B gate: the same five test files plus `tests/t3/metabolism -q`:
+  **60 passed in 21.37s** (47 swarm + 13 legacy metabolism). Two warnings arise
+  from deliberately invalid `model_copy` token inputs; both are rejected.
+- `python -m mypy --strict swarm/models.py swarm/task_ledger.py swarm/lease.py
+  swarm/budget.py swarm/pheromone.py swarm/router.py metabolism`: **11 files clean**.
+  The same command with `--platform linux`: **11 files clean**. Linux target type
+  checking is not Linux execution evidence.
+- Full suite/build/SDK/distribution belong to I and were not run by B.
+- Coordinator review added the unbounded-request lower-usage/no-release restart
+  regression: `python -m pytest tests/swarm/test_budget.py -q`: **26 passed in
+  8.19s**, with the same two expected warnings. Targeted strict models/budget for
+  Windows and `--platform linux`: **2 files clean each**. This is a targeted
+  follow-up, not a repeated 61-test full gate. B-path `git diff --check` is clean.
 
-Environment phase was committed/pushed as `57f27b6b3689a46e841fb7ba8fa49dfd4d47248a`, 2026-09-23T22:58:16+08:00. C's integration subsequently found that guarded native Git snapshots could exhaust the ten-second metadata wait on a loaded Windows machine. The optional bounded wait parameter was added without changing ownership or fencing. Follow-up evidence: nine existing lease tests passed in 41.75s; `python -m pytest tests/swarm/test_lease.py::test_configured_os_lock_timeout_is_bounded_and_preserves_holder -q` passed in 3.07s. The new test proves that a real competing process times out at its configured bound without bypassing the held OS guard. These are targeted follow-up runs, not a claim that the complete 53-test combination was rerun.
-
-Tests use real SQLite, subprocesses, file locks, Windows junctions and crash exit; model usage remains synthetic. `contract_local` evidence does not establish `interface_live` or `task_live`. No paid model or remote Hub calls were performed. Linux locking, package build/distribution and final two-platform CI require integration verification. The current SQLite B-tree locality and file-lock promotion gate make no throughput guarantee; no runtime complexity benchmark was performed.
+These tests execute real local SQLite and subprocess contention, actual terminated
+lease owners, Windows junctions and local target writes. Executor usage remains
+synthetic; remote Hub/models, provider billing guarantees, Linux process execution,
+physical/production evidence and interface_live/task_live remain not_run. All
+remote requests, mainline mutations, demo services and global configuration are
+outside this delivery. Manual recovery is required for unknown submission effects
+or old persisted formats; no migration or deployment was performed.
