@@ -11,6 +11,7 @@ const viewFromHash = () => ['workspace', 'swarm'].includes(window.location.hash.
 const App = () => {
   const [view, setViewState] = useState(viewFromHash);
   const [dashboard, setDashboard] = useState(null);
+  const [swarm, setSwarm] = useState(null);
   const [connection, setConnection] = useState({ state: 'loading', detail: '' });
   const [phase, setPhase] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 3 : 0);
   const [evomap, setEvomap] = useState({ state: 'idle' });
@@ -67,6 +68,27 @@ const App = () => {
     poll();
     return () => { stopped = true; window.clearTimeout(timer); };
   }, [pushToDataZones]);
+
+  // Same-origin decentralized swarm view. Failures keep the last good snapshot
+  // and the topology falls back to the rehearsal derivation; a missing swarm
+  // state (health=missing) is never treated as a real topology.
+  useEffect(() => {
+    let stopped = false;
+    let timer = 0;
+    const poll = async () => {
+      try {
+        const response = await fetch('/api/swarm', { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (!stopped) setSwarm(data);
+      } catch (error) {
+        // Keep the last good swarm snapshot; the rehearsal topology stays.
+      }
+      if (!stopped) timer = window.setTimeout(poll, POLL_MS);
+    };
+    poll();
+    return () => { stopped = true; window.clearTimeout(timer); };
+  }, []);
 
   // Independent read-only EvoMap explorer; never feeds the runtime topology.
   // Requests fire only on first entry into the info view and on explicit
@@ -233,7 +255,7 @@ const App = () => {
         </section>
         <section className={viewClass('workspace')} aria-label='产品后台'
           aria-hidden={view !== 'workspace'} inert={view === 'workspace' ? undefined : ''}>
-          <Backend dashboard={dashboard} active={view === 'workspace'} reducedMotion={reducedMotion}
+          <Backend dashboard={dashboard} swarm={swarm} active={view === 'workspace'} reducedMotion={reducedMotion}
             evomap={evomap} evomapDetail={evomapDetail} onSearch={searchEvomap}
             onOpenAsset={openEvomapAsset} onReturn={() => setView('physarum')} />
         </section>

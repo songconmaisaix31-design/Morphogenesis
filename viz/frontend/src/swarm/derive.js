@@ -185,3 +185,111 @@ export function deriveSwarm(dashboard) {
     agentEvents, agentResults, agentGenes, agentAdoptions,
   };
 }
+
+// --- Decentralized swarm view (/api/swarm) ---------------------------------
+// Every fact comes from the SwarmView JSON; nothing here invents a worker,
+// route, task, budget hold, audit event or adoption. Absence stays absence.
+
+export const LEASE_LABELS = {
+  available: '待认领', leased: '已租约', completed: '已完成', expired: '已过期',
+  partial: '提交中', handoff: '已交接', failed: '已失败',
+};
+export const LEASE_ORDER = { leased: 0, partial: 1, expired: 2, handoff: 3, available: 4, completed: 5, failed: 6 };
+export const RESERVATION_LABELS = { reserved: '已预留', settled: '已结算', unknown: '未知' };
+
+// Deterministic bipartite layout: workers on the left, capability pipes on the
+// right; a single population falls back to a full-width row.
+export function layoutSwarmNodes(workerIds, pipeIds) {
+  const positions = new Map();
+  const placeColumn = (ids, x) => {
+    const n = ids.length;
+    if (!n) return;
+    ids.forEach((id, i) => {
+      positions.set(id, { x, y: n === 1 ? 0.5 : 0.12 + (i / (n - 1)) * 0.76 });
+    });
+  };
+  const placeRow = (ids) => {
+    const n = ids.length;
+    if (!n) return;
+    ids.forEach((id, i) => {
+      positions.set(id, { x: n === 1 ? 0.5 : 0.12 + (i / (n - 1)) * 0.76, y: 0.5 });
+    });
+  };
+  if (workerIds.length && pipeIds.length) {
+    placeColumn(workerIds, 0.18);
+    placeColumn(pipeIds, 0.82);
+  } else if (workerIds.length) {
+    placeRow(workerIds);
+  } else {
+    placeRow(pipeIds);
+  }
+  return positions;
+}
+
+export function deriveSwarmView(swarm) {
+  if (!swarm || typeof swarm !== 'object') {
+    return { state: 'disconnected', message: '蜂群数据不可用；不保留旧画面。' };
+  }
+  const workers = Array.isArray(swarm.workers) ? swarm.workers : [];
+  const tasks = Array.isArray(swarm.tasks) ? swarm.tasks : [];
+  const routes = Array.isArray(swarm.routes) ? swarm.routes : [];
+  const signals = Array.isArray(swarm.signals) ? swarm.signals : [];
+  const audit = Array.isArray(swarm.audit) ? swarm.audit : [];
+  const workerAudit = Array.isArray(swarm.worker_audit) ? swarm.worker_audit : [];
+  const assets = Array.isArray(swarm.assets) ? swarm.assets : [];
+  const promotions = Array.isArray(swarm.promotions) ? swarm.promotions : [];
+  const budget = swarm.budget ?? null;
+
+  if (!workers.length && !tasks.length && !routes.length && !signals.length && !assets.length && !audit.length) {
+    return {
+      state: 'empty',
+      message: swarm.health === 'missing' ? '未配置蜂群状态目录；/api/swarm 保持空态。' : '尚无蜂群运行快照。',
+      health: swarm.health ?? 'partial',
+      hubStatus: swarm.hub_status ?? '待发布',
+    };
+  }
+
+  const workerIds = workers.map((worker) => worker.worker_id).filter(Boolean);
+  const pipeIds = [...new Set(routes.map((route) => route.pipe_key).filter(Boolean))];
+  const positions = layoutSwarmNodes(workerIds, pipeIds);
+
+  const nodes = [
+    ...workerIds.map((id) => {
+      const worker = workers.find((item) => item.worker_id === id) ?? {};
+      return {
+        key: id, kind: 'worker', position: positions.get(id),
+        state: worker.state ?? 'unknown', remainingEnergy: worker.remaining_energy ?? null,
+        completed: worker.completed ?? null, provenance: worker.provenance ?? null,
+      };
+    }),
+    ...pipeIds.map((id) => ({ key: id, kind: 'pipe', position: positions.get(id), state: 'pipe' })),
+  ];
+
+  const edges = routes.map((route, index) => ({
+    key: `${route.worker_id}→${route.pipe_key}#${index}`,
+    source: route.worker_id, target: route.pipe_key,
+    weight: route.decayed_weight ?? route.weight ?? null,
+    rawWeight: route.weight ?? null,
+    samples: route.samples ?? null,
+    tau: route.tau_seconds ?? null,
+  }));
+
+  const dependsOn = [];
+  tasks.forEach((task) => (task.dependencies ?? []).forEach((dependency) => {
+    dependsOn.push({ taskId: task.task_id, dependency });
+  }));
+
+  return {
+    state: 'ready',
+    schema: swarm.schema,
+    health: swarm.health ?? 'partial',
+    hubStatus: swarm.hub_status ?? '待发布',
+    observedAt: swarm.observed_at ?? null,
+    provenance: swarm.acceptance?.provenance ?? null,
+    acceptance: swarm.acceptance ?? null,
+    nodes, edges, positions,
+    workers, tasks, routes, signals,
+    budget, audit, workerAudit, assets, promotions, dependsOn,
+    boundaries: Array.isArray(swarm.boundaries) ? swarm.boundaries : [],
+  };
+}
