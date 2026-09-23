@@ -2,6 +2,8 @@
 
 ## 封板夜进化链路冲刺（2026-09-23）
 
+19:00 恢复阶段结算：E 离线前置 helper 与上游拒绝误判复现完成，报告 `04602b6` 已推送，Worker/主控各 6 项离线检查通过，Dispatch `ctx_d51c04d874d6` 完整任务仍 failed/blocked 并已 release。Chrome 现有登录账户已找到绑定节点 `node_e2ad48c0d0d63625`；当前只待原节点凭据恢复决策（复用指定文件或用户批准 Reset Secret），不是等待登录。真实请求尚未继续；不变更原两前置门禁。
+
 18:52 Hub 恢复续接：用户要求继续核对官方接入资料，必要时 computer-use。主控已读取官方 `skill.md`、Wiki、Help API 及实际 hello 拒绝协议，浏览器停在官方登录页，等待账户操作者登录。恢复原 E Task，仅修复/离线验证前置脚本和本轨报告，主控负责账户页面与验收；D/T/I 暂不恢复。E 必须先读下述约束：**本次恢复默认禁止任何真实 hello/heartbeat/publish/fetch/report；不得重跑旧 preflight.mjs 或清理其 guard，不得重新生成身份。** 允许在 `.runtime/freeze-evolver/` 新增独立恢复脚本，以可注入 transport 离线验证 request model/name/fingerprint、请求元数据先落盘、HTTP 200 rejected fail-closed、凭据不泄露和一次发送；不改 `hub_client` 业务实现。主控明确放行具体一次网络动作后才执行。官方文档缓存只读位于 `.runtime/hub-discovery/`；`hello-reference.md` 是 JSON，`content` 详述 HTTP 200 的拒绝及最早重试时间。E 还需离线核查已装 v2 adapter 的 hello 返回值是否将 rejected 误判为 ok。原 `retry_after_ms=3600000` 对应最早 **19:30:52.373 CST**；经过时间不是解除 CAPTCHA 的证据。只读检查指定 canonical 凭据是否存在可以做，禁止扫描历史、日志、浏览器存储找密钥；本轮仍只允许项目内写入。
 
 本轮用户任务书优先：不开新功能分支，所有提交直接进入 `codex/morphogenesis-mainline` 并推送。基线 `bd10f37c0ad378955210a1a76bd431f31a25ffee`，开工工作区 clean。采用同一 Orca 主线工作区内的互斥文件所有权，替代历史每轨新 worktree/branch 规则；主控只写治理文档。Worker 不得自行切分支、暂存他人文件或并发提交；完成领域开发后向主控申请串行提交时段，由原 Worker 显式暂存自有路径、commit + push。最后独立 I 复验累计主线，领域问题退原 Worker，不制造无意义合并。

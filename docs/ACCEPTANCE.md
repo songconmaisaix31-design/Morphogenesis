@@ -27,6 +27,16 @@ Orca computer-use 已在 Tabbit 新标签打开 `https://evomap.ai/account`，�
 
 公开参考原件缓存位于忽略目录 `.runtime/hub-discovery/`：`official-skill.md`、`official-wiki.json`、`help-hello-concept.json`、`hello-reference.md`（JSON 内容）、`help-captcha.json`。主控恢复原 E Task，仅离线修正前置脚本并复现 v2 hello 的拒绝判定风险；没有修改官方依赖或业务 HubClient。G3/G4 仍 BLOCKED，后续真实闭环、G5 与最终 CI 结论保持下文限制。
 
+### Chrome 账户实测与离线修正结果（19:00 CST）
+
+用户随后指定 Chrome。主控通过其现有登录会话打开 `/account` 和 `/account/agents`：账户显示 **Free**、余额 0、绑定节点 1；节点为 `Codex Agent / node_e2ad48c0d0d63625`，界面 **Offline**、reputation 50、published/promoted/rejected/revoked 均 0，展开 Activity 显示尚无记录。页面未显示 Suspended 或自助解封按钮，这不能代替底层账户状态 API，也不能证明原 hello 限制已解除。已实际检查截图 `.runtime/hub-discovery/chrome-agent-node.png`；截图与账户原文不提交 Git。
+
+本机用户 canonical、当前 Orca Codex 账户 home 的 `.evomap` 及 `.codex/.evomap` 指定路径未找到 node_id/node_secret（仅存在检查，无全盘扫描）。官方页面提供 **Reset Secret**；尚未点击，因为它会替换现有节点凭据，可能使旧客户端失效。已请求用户确认仅重置上述节点，或提供原凭据路径供复用。没有新建/解绑节点、变更 worker/付费开关、质押或充值。账户已登录，故上文“等待登录”已被本条取代；当前待决项为原节点凭据恢复。
+
+E 轨报告 `04602b6223388098d0060576141b9276f88d72a9` 已推送：注入 transport 离线实测，官方 v2.0.38 adapter 对 HTTP 200 CAPTCHA rejected 且已有 sender 的回执返回 `ok=true`，请求还缺顶层 model/name。独立恢复 helper 复用官方信封/HTTP 助手，显式要求身份及元数据，拒绝时 fail-closed，无默认真实网络入口。Worker 与主控各运行 `node --test .runtime/freeze-evolver/recovery-offline.test.mjs` 均 **6 passed / 0 failed**；主控证据根 `offline-PQ8O1X`。旧 bootstrap guard 内容和 mtime 不变，新增真实 Hub 请求 0；这属于 mock 回执验证，不能算 Hub 前置通过。脚本只保留于项目忽略目录，具体限制见 [E 报告](tracks/freeze-evolution.md)。E 本次完整任务仍以 failed/blocked 结算并 release。
+
+KG：Chrome 已核实当前账户为 Free；依据 [API Access](https://evomap.ai/wiki/28-api-access) 的方案要求，**KG 访问受方案限制，已预留接口**。未调用 KG，未伪造一次 403 实测，也未购买或创建 Premium key。账户零余额是否限制具体发布/拉取仍待实际服务回执，不作推断。
+
 ## 封板夜前置核查（2026-09-23 18:31 CST）
 
 本轮从主线 `bd10f37c0ad378955210a1a76bd431f31a25ffee` 开始，互斥文件并行计划 `2b58b59` 已推送。**前置一通过，前置二 BLOCKED；尚未放行领域改造、真实 Hub 闭环或新一轮现场演示。** 用户任务书要求两个前置都通过后继续，本条保留实际失败，不以离线适配或旧彩排代替。

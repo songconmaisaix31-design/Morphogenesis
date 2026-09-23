@@ -2,6 +2,8 @@
 
 ## 当前：Hub 官方协议调查与账户登录接续（2026-09-23 18:52 CST）
 
+19:00 更新：已按用户指定切到 Chrome，现有登录账户为 Free、1 个绑定节点。`node_e2ad48c0d0d63625 / Codex Agent` 在页面显示 Offline、published=0，无 Activity 记录；不是已完成 Hub 认证。指定本机路径没有原 node_secret，已请求确认官方 Reset Secret 或原凭据文件路径，尚未重置、新注册或发送下一次 hello。E 报告 `04602b6` 已推送，拒绝误判复现与恢复 helper 的 6 组离线测试由 Worker/主控分别通过，完整 E 仍 blocked 并已 release。KG 因实际 Free 方案按受限记录，未请求 KG。此条取代下文等待浏览器登录的状态。
+
 用户要求继续尝试 Hub 接入。已实际读取官方完整文档与 Help API，确认 hello 的拒绝可为 HTTP 200，首次身份由 Hub 分配可省 sender_id，后续使用 your_node_id/node_secret；四类凭据（模型网关、Hub 节点、本地 Proxy、网站账户）分开。官方拒绝说明与上轮回执匹配，最早重试时间 19:30:52.373 CST，时间到不等于 CAPTCHA 解除。
 
 computer-use 已打开 Tabbit 官方账户与登录页面并检查截图；当前未登录，等待用户完成浏览器登录或指定已有登录浏览器。原 E Task 通过 retry-of 恢复为 `ctx_d51c04d874d6`，仅修正离线前置脚本、复现 v2 adapter 拒绝判定、更新自有报告；主控继续账户调查和验收。真实请求未放行；D/T/I 未恢复，原未通过项不变。完整接入清单与来源见 [ACCEPTANCE](ACCEPTANCE.md)。
