@@ -44,12 +44,11 @@ const SETTINGS = {
   attract0: [1.0, -0.15, -0.15],
   attract1: [-0.15, 1.0, -0.15],
   attract2: [-0.15, -0.15, 1.0],
-  // Morphogenesis palette (docs/FRONTEND_REFACTOR_PLAN.md). col1 is the cold
-  // white at reduced luminance: full-strength white sums over trails and dots
-  // into blown-out blobs (feedback from visual review).
-  col0: [0x65 / 255, 0xd9 / 255, 0xc7 / 255], // teal #65d9c7
-  col1: [(0xe8 / 255) * 0.5, (0xef / 255) * 0.5, (0xed / 255) * 0.5], // cold white #e8efed @50%
-  col2: [0x8c / 255, 0xa3 / 255, 0xa0 / 255], // secondary #8ca3a0
+  // Three warm shades retain the original species channels and brightness
+  // balance while making the ambient plasmodium consistently yellow.
+  col0: [0xf5 / 255, 0xd5 / 255, 0x47 / 255], // slime yellow #f5d547
+  col1: [(0xd8 / 255) * 0.75, (0xa8 / 255) * 0.75, (0x33 / 255) * 0.75], // muted amber
+  col2: [(0xc7 / 255) * 0.8, (0x8c / 255) * 0.8, (0x25 / 255) * 0.8], // deep amber
   bgColor: [0x07 / 255, 0x0b / 255, 0x0d / 255], // page background #070b0d
 };
 
