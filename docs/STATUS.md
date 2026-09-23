@@ -141,3 +141,10 @@ P 最初 Task `task_509a8b88e115` / Dispatch `ctx_8e1f19911c90` 在原 terminal 
 T5 与集成 Worker 已逐一核对并清理自有预览进程；协调者复查 7500 / 7501 / 7502 / 7510 均无监听。浏览器截图及本地日志保留。
 
 未重启 Orca 或操作其他项目进程；Git 分支、worktree、原始真实任务和本地验收产物保留。集成没有新增模型调用或外部 Hub 发布。详细命令、早期失败与修复及证据边界见 [集成报告](tracks/integration.md)。
+# Kimi 参考包视觉返修：配额阻塞（2026-09-23）
+
+用户指定 Kimi 充分参考 Christmas / Linear 两个本地包改进版式审美。已重新核对参考截图与 Christmas CSS，并在 `docs/PLAN.md` 记录全屏留白、标题比例、后台灰阶/细边界/信息密度的具体验收要求；计划 `116a7be` 已推送。
+
+实际启动 Kimi Code 2.0.2 / K3 后，`session_119fcf87-b6f9-4c7a-9993-1d0abd2c3538` 返回 `[provider.auth_error] 403 You've reached your weekly (7-day) usage limit`；CLI 会话清单确认 `lastTurnReason=failed`。前端未发生本轮改动，未做新的构建/视觉验收。原 F 工作树 `morph-frontend-stack` 保持 clean，7799 保持上一轮集成 `c68def4de25cedb48acd258bea614f7dff35cc16`。
+
+Orca `run_447156e77a56 / task_b5062d326661 / ctx_f43cd1da249a` 已确认失败后停止其 owned Kimi 终端；未自动重试模型请求、购买额度或改用其他模型。已向用户说明真实限制，待 Kimi 额度恢复或用户指定替代执行方式；设计任务正文保留在 TEMP 与主线计划，后续沿同一 Task 恢复。
