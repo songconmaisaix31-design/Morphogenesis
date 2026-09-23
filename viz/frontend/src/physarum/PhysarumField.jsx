@@ -1,4 +1,4 @@
-// PhysarumField: homepage WebGL slime-mold field with pointer food-seeking.
+// PhysarumField: ambient homepage WebGL slime-mold field.
 //
 // Props (contract from docs/FRONTEND_REFACTOR_PLAN.md):
 //   active        — false pauses the RAF loop and simulation (view hidden)
@@ -11,12 +11,9 @@
 //                   the component always degrades to the static fallback
 //                   itself, onError is purely informational.
 //
-// Behavior: moving the pointer over the field biases chemotaxis and advances
-// a connected feeding front (no key or click needed); leaving the field eases
-// attraction back to zero so the field recovers
-// smoothly. The simulation pauses while the tab is hidden or `active` is
-// false, and all WebGL resources are disposed on unmount. Touch (coarse
-// pointer) devices start at reduced quality and feed on touch-drag;
+// Behavior: pointer input does not affect the background. The simulation
+// pauses while the tab is hidden or `active` is false, and all WebGL resources
+// are disposed on unmount. Touch (coarse pointer) devices start at reduced quality;
 // sustained low frame rates degrade quality once and then fall back.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -32,7 +29,6 @@ const SLOW_CHECKS_NEEDED = 3;
 
 const PhysarumField = ({ active = true, reducedMotion = false, onError }) => {
   const containerRef = useRef(null);
-  const cursorRef = useRef(null);
   const simRef = useRef(null);
   const activeRef = useRef(active);
   const [failure, setFailure] = useState(null);
@@ -99,54 +95,6 @@ const PhysarumField = ({ active = true, reducedMotion = false, onError }) => {
     });
     observer.observe(container);
 
-    // Pointer -> food. Listening at window level because the page shell may
-    // overlay the canvas with a hero title or controls; elements that would
-    // intercept pointermove on the container no longer cut off feeding.
-    // Feeding pauses only over interactive controls (links, buttons, inputs,
-    // or anything marked data-physarum-block) and outside the field rect.
-    // Coordinates are mapped from client space into the simulation's
-    // centered, y-up, backing-pixel space via the live bounding rect, so any
-    // page offset, scroll or DPR stays accurate; the cursor ring uses the
-    // same client->rect mapping.
-    const hideCursor = () => {
-      const cursor = cursorRef.current;
-      if (cursor) cursor.style.opacity = '0';
-    };
-    const isInteractiveTarget = (el) =>
-      !!(el && el.closest && el.closest('a, button, input, select, textarea, [role="button"], [data-physarum-block]'));
-    const onPointerMove = (ev) => {
-      const rect = container.getBoundingClientRect();
-      const inside =
-        ev.clientX >= rect.left && ev.clientX <= rect.right && ev.clientY >= rect.top && ev.clientY <= rect.bottom;
-      if (!inside || rect.width < 1 || rect.height < 1) {
-        sim.setFoodTarget(0);
-        hideCursor();
-        return;
-      }
-      if (isInteractiveTarget(document.elementFromPoint(ev.clientX, ev.clientY))) {
-        sim.setFoodTarget(0);
-        hideCursor();
-        return;
-      }
-      const sx = ((ev.clientX - rect.left) / rect.width) * sim.viewWidth - sim.viewWidth * 0.5;
-      const sy = sim.viewHeight * 0.5 - ((ev.clientY - rect.top) / rect.height) * sim.viewHeight;
-      sim.setFood(sx, sy);
-      sim.setFoodTarget(1);
-      const cursor = cursorRef.current;
-      if (cursor) {
-        cursor.style.opacity = '1';
-        cursor.style.transform = `translate3d(${ev.clientX - rect.left}px, ${ev.clientY - rect.top}px, 0)`;
-      }
-    };
-    const onPointerLeave = () => {
-      sim.setFoodTarget(0);
-      hideCursor();
-    };
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
-    window.addEventListener('pointerdown', onPointerMove, { passive: true });
-    document.documentElement.addEventListener('pointerleave', onPointerLeave);
-    container.addEventListener('pointercancel', onPointerLeave);
-
     const onVisibility = () => {
       if (document.hidden) {
         sim.stop();
@@ -193,10 +141,6 @@ const PhysarumField = ({ active = true, reducedMotion = false, onError }) => {
       clearTimeout(resizeTimer);
       observer.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerdown', onPointerMove);
-      document.documentElement.removeEventListener('pointerleave', onPointerLeave);
-      container.removeEventListener('pointercancel', onPointerLeave);
       sim.dispose();
       simRef.current = null;
       canvas.remove();
@@ -211,11 +155,7 @@ const PhysarumField = ({ active = true, reducedMotion = false, onError }) => {
     );
   }
 
-  return (
-    <div className='physarum-field' ref={containerRef}>
-      <div className='physarum-cursor' ref={cursorRef} aria-hidden='true' />
-    </div>
-  );
+  return <div className='physarum-field' ref={containerRef} />;
 };
 
 export default PhysarumField;

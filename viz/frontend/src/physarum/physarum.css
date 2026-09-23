@@ -1,4 +1,5 @@
-/* PhysarumField: yellow plasmodium on the shared dark background. */
+/* PhysarumField styles. Colors come from the shared contract in
+   docs/FRONTEND_REFACTOR_PLAN.md: bg #070b0d, teal #65d9c7, secondary #8ca3a0. */
 
 .physarum-field {
   position: relative;
@@ -7,8 +8,7 @@
   min-height: 240px;
   overflow: hidden;
   background: #070b0d;
-  /* Vertical page scroll keeps working on touch; horizontal drags feed. */
-  touch-action: pan-y;
+  touch-action: auto;
 }
 
 .physarum-canvas {
@@ -19,33 +19,6 @@
   display: block;
 }
 
-.physarum-cursor {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 28px;
-  height: 28px;
-  margin: -14px 0 0 -14px;
-  border: 1px solid rgba(248, 204, 72, 0.7);
-  border-radius: 50%;
-  box-shadow: 0 0 12px rgba(248, 204, 72, 0.3) inset;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-}
-
-@media (pointer: coarse) {
-  .physarum-cursor {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .physarum-cursor {
-    transition: none;
-  }
-}
-
 .physarum-fallback {
   position: absolute;
   inset: 0;
@@ -53,8 +26,8 @@
   align-items: flex-end;
   justify-content: flex-end;
   background:
-    radial-gradient(60% 50% at 30% 35%, rgba(245, 198, 51, 0.08), transparent 70%),
-    radial-gradient(45% 40% at 72% 60%, rgba(185, 118, 22, 0.07), transparent 70%),
+    radial-gradient(60% 50% at 30% 35%, rgba(101, 217, 199, 0.08), transparent 70%),
+    radial-gradient(45% 40% at 72% 60%, rgba(140, 163, 160, 0.07), transparent 70%),
     #070b0d;
 }
 
@@ -65,23 +38,13 @@
   height: 100%;
 }
 
-.physarum-fallback-sheet {
-  fill: rgba(245, 190, 42, 0.11);
-  stroke: rgba(255, 211, 75, 0.48);
-  stroke-width: 0.45;
+.physarum-fallback line {
+  stroke: rgba(101, 217, 199, 0.28);
+  stroke-width: 0.35;
 }
 
-.physarum-fallback-vein {
-  fill: none;
-  stroke: rgba(255, 211, 75, 0.72);
-  stroke-width: 0.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.physarum-fallback-vein-fine {
-  stroke-width: 0.42;
-  stroke: rgba(255, 211, 75, 0.6);
+.physarum-fallback circle {
+  fill: rgba(101, 217, 199, 0.5);
 }
 
 .physarum-fallback-note {
