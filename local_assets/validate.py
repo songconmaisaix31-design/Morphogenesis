@@ -82,6 +82,9 @@ def static_syntax(path: str, body: str) -> None:
     if suffix == ".py":
         try:
             tree = ast.parse(body, filename=path)
+            # Parsing alone accepts e.g. module-level return/break and duplicate
+            # parameters. Compile validates those contexts without executing.
+            compile(tree, path, "exec")
         except (SyntaxError, ValueError):
             raise AssetSafetyError("python_syntax") from None
         for node in ast.walk(tree):

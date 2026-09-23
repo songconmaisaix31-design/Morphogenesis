@@ -96,6 +96,8 @@ def test_official_address_persistence_actual_worktree_and_promotion(local: Fixtu
 
 @pytest.mark.parametrize(("body", "reason"), [
     ("answer = (\n", "python_syntax"),
+    ("return 2\n", "python_syntax"),
+    ("def function(arg, arg): pass\n", "python_syntax"),
     ("import subprocess\n", "dangerous_import"),
     ("import socket as harmless\n", "dangerous_import"),
     ("eval('danger')\n", "dangerous_pattern"),

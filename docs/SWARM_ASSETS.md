@@ -49,7 +49,7 @@ SQLite `assets.sqlite3` 使用 WAL、外键和事务。`assets`、`reports`、`p
 
 ## 验证与晋级边界
 
-- 静态检查：Python AST、JSON 解析、JavaScript `node --check`；保守危险调用/导入扫描。仅支持 `.py/.js/.mjs/.cjs/.json/.txt/.md` UTF-8 文本；单文件限 256 KiB、最多 64 文件。未知语言、二进制、无变化、重复/大小写别名或父子文件路径拒绝。
+- 静态检查：Python AST 加只编译不执行的上下文语法检查、JSON 解析、JavaScript `node --check`；保守危险调用/导入扫描。仅支持 `.py/.js/.mjs/.cjs/.json/.txt/.md` UTF-8 文本；单文件限 256 KiB、最多 64 文件。未知语言、二进制、无变化、重复/大小写别名或父子文件路径拒绝。
 - 路径检查：绝对路径、`..`、反斜杠、NTFS ADS、控制字符、Windows 保留名称、尾点/空格、`.git` 和冻结文档拒绝；检查现有祖先及文件的 symlink、Windows junction 和 hardlink。基线含 Git symlink/submodule 也拒绝。
 - 真实 `git worktree add --detach` 在提交基线创建隔离副本。先核验每个 before，再物化候选，运行调用方预设的非空 argv 命令；候选内容不决定命令。shell=False，默认累计时间 30 秒（最大 300 秒），每条输出限 128 KiB（最大 1 MiB）。超时或输出超限终止所启动的进程树；20 ms 轮询意味着输出文件可能在终止前短暂超出上限，不是 OS 磁盘配额。
 - 验证环境复用既有 `child_environment`，不继承应用凭据/代理/Node 注入变量；设置三个 BLAS 线程变量为 1，并禁用 Python 字节码。验证前后比较工作树完整文件字节（最多 20000 文件 / 64 MiB）及 `.git` 指针，命令写入额外文件或改写候选即失败。原始命令输出不持久保存，避免意外秘密进入审计。
@@ -89,6 +89,8 @@ Node 本机 v24.16.0。安装命令：`uv venv --python 3.12 .venv`、`uv tool r
 - `python -m mypy --strict local_assets`：新增包严格类型检查。
 - 最终实测数字和 SHA 由协调者写 `SWARM_STATUS`，本文件不预填未发生的成功结果。
 
-2026-09-23 Windows 实测：上述完整 M1 测试 **42 passed in 273.97s**；`mypy --strict local_assets` **Success: no issues found in 7 source files**；自有路径 `git diff --check` 通过。测试调用真实 Node SDK、Git worktree/对象和文件系统，模型任务输入仍是本地 fixture。领域 SHA 在协调者授予串行时段后提交并记录，不以测试工作树状态冒充已推送提交。
+2026-09-23 Windows 实测：M1 主提交 `05cc7f72a4bfd5fb1624b282ff7965cec45022c1` 的完整测试 **42 passed in 273.97s**；`mypy --strict local_assets` **Success: no issues found in 7 source files**；暂存自有路径 `git diff --cached --check` 通过。测试调用真实 Node SDK、Git worktree/对象和文件系统，模型任务输入仍是本地 fixture。
+
+后续上下文语法加固增加模块顶层 `return` 和重复函数参数两项拒绝测试；仅 `ast.parse` 不足以拒绝这两种代码，因此复用 Python `compile(AST, ..., "exec")` 检查但从不执行结果。该变更验证命令 `python -m pytest tests/swarm/test_assets.py -k 'static_failure or official_address or javascript' -q` 得到 **10 passed, 34 deselected in 80.75s**；再跑 strict mypy 仍为 **7 files clean**。定向检查不冒充加固后全量 44 项重跑；全仓最终验收由集成轨记录。
 
 尚未执行：Ubuntu CI、生产 Hub/model、interface_live、task_live；本地测试不能将这些门禁置绿。
