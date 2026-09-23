@@ -32,3 +32,16 @@
 - A 另发现 AST 解析本身不能拒绝所有上下文语法错误，正在原轨补无执行的 compile 检查；B 正在补有界锁等待参数/进程竞争回归。所有修复按原路径所有权、串行提交进行。
 - B 锁等待返修已推送 `da3e18e7cf27070c74933b47c6a20969e384cdaf`（2026-09-23T23:03:46+08:00）：原 lease 9 测试通过，新增真实进程等待上限测试 1 项通过；局部双平台类型目标及全量 strict 74 文件通过。运行轨负责将等待超时转为有界跳过/休眠，仍须完整闭环重验。
 - 误配置的 C 测试曾在 `C:/Users/DW/orca/workspaces/Morphogenesis/forbidden-runtime-state` 生成 assets/、leases/ 及三份 SQLite 文件（各 28672 字节，创建于 22:56:39）。递归清理与随后经过绝对路径核对的非递归精确文件清理都被自动审批审查以 `blocked by policy` 拒绝，未删除任何文件；停止进一步删除尝试，列为人工清理项。被冻结主线未被写入。
+
+## 修正版续接（2026-09-23 23:47 CST）
+
+用户 23:33 修正任务书优先；本节及 SWARM_TASK/PLAN 替代下方/前文旧账户预算、文件租约、画布半径、晋级写入等规划认账，不追溯改写旧测试事实。治理修正版 f1a02093a5ccf844acbfc8731ce338650ecc8125 已推送；原业务 e9a3836 保留，尚未完成修正版验收。
+
+- 接手前实验树 clean；冻结主线仍 605cf48 且 clean。独立记录 `.runtime/swarm-revision-coordinator/frozen-baseline.json` 保存治理文件原始字节哈希；接手时 7526/7527/7799/7844 均无本机监听，本轮不恢复演示进程。
+- 原 Run run_78114f173f9d 已绑定新协调终端 term_4ce39ead-b2e7-4779-aa57-1095c746c88d，generation=2。原 A/B 已 succeeded，但旧终端消失导致两次指定 release 返回 release_unknown，不强杀/广泛清理；C 已因 terminal_missing failed，release 成功后 Task 自动 ready，按实际 ready 状态恢复同一 Task。
+- 新 A：task_fa6fb9291943 / ctx_03499a7a3dee；B：task_1e934e6bf0cf / ctx_f4110e84e8b8；C：task_1883ba1c5300 / ctx_d551d3198d73。三轨 transcript/fleet 均证明 working/live；未另开分支或重复编辑同一路径。
+- B 已发布 SWARM_CONTRACTS，C 确认；A 提案为 index-only promote + 单独 prepare/apply + approved 消费/实际采用。最终提交权统一由 SQLite task/fence/owner/TTL 校验，昂贵验证/模型/Git 均在事务外。
+- 既有锁定 Python3.12.13/Pydantic2.13.5/SQLite3.53.1 可用，npm run check:sdk 通过 schema1.14/address/tamper 检查，published=false；只是环境就绪，不是修正版预算或运行门禁通过。
+- A 的 Docker 探测失败（dockerDesktopLinuxEngine named pipe missing），不启动可能恢复其它项目容器的 daemon。采用限制为声明式固定文件操作的本地路径，拒绝无强制隔离的任意命令；此范围不等于通用代码安全验证或真实模型验收。
+- 旧代码精确 SHA f1a0209 CI run35883583313 的 Ubuntu strict 报 local_assets/validate.py:141 CREATE_NEW_PROCESS_GROUP attr-defined；交 A 原领域返修。前次本地全量测试只有中断输出，不能算通过。修正版全量门禁由独立 I 后续执行。
+- observer 采用标准 SQLite mode=ro + query_only 读取已提交 WAL；不创建、认领、推进任务，不更新租约/审计/验证结果或调用 checkpoint。SQLite 读者的 SHM 锁/读标记属于原生协调元数据，不等于业务写入；测试检查权威业务行和 DB 内容，不要求锁文件字节不变。依据 https://sqlite.org/wal.html 的 Read-Only Databases 与并发语义，不自造 WAL 解析/复制系统。
