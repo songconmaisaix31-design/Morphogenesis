@@ -1,5 +1,4 @@
-/* PhysarumField styles. Colors come from the shared contract in
-   docs/FRONTEND_REFACTOR_PLAN.md: bg #070b0d, teal #65d9c7, secondary #8ca3a0. */
+/* PhysarumField: yellow plasmodium on the shared dark background. */
 
 .physarum-field {
   position: relative;
@@ -27,9 +26,9 @@
   width: 28px;
   height: 28px;
   margin: -14px 0 0 -14px;
-  border: 1px solid rgba(101, 217, 199, 0.55);
+  border: 1px solid rgba(248, 204, 72, 0.7);
   border-radius: 50%;
-  box-shadow: 0 0 12px rgba(101, 217, 199, 0.25) inset;
+  box-shadow: 0 0 12px rgba(248, 204, 72, 0.3) inset;
   opacity: 0;
   transition: opacity 0.25s ease;
   pointer-events: none;
@@ -54,8 +53,8 @@
   align-items: flex-end;
   justify-content: flex-end;
   background:
-    radial-gradient(60% 50% at 30% 35%, rgba(101, 217, 199, 0.08), transparent 70%),
-    radial-gradient(45% 40% at 72% 60%, rgba(140, 163, 160, 0.07), transparent 70%),
+    radial-gradient(60% 50% at 30% 35%, rgba(245, 198, 51, 0.08), transparent 70%),
+    radial-gradient(45% 40% at 72% 60%, rgba(185, 118, 22, 0.07), transparent 70%),
     #070b0d;
 }
 
@@ -66,13 +65,18 @@
   height: 100%;
 }
 
-.physarum-fallback line {
-  stroke: rgba(101, 217, 199, 0.28);
-  stroke-width: 0.35;
+.physarum-fallback-sheet {
+  fill: rgba(245, 190, 42, 0.28);
+  stroke: rgba(255, 211, 75, 0.62);
+  stroke-width: 0.7;
 }
 
-.physarum-fallback circle {
-  fill: rgba(101, 217, 199, 0.5);
+.physarum-fallback-vein {
+  fill: none;
+  stroke: rgba(255, 211, 75, 0.72);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .physarum-fallback-note {

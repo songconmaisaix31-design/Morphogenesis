@@ -5,41 +5,6 @@
 
 import React from 'react';
 
-// Deterministic pseudo-random (mulberry32) so the static network is stable.
-const seeded = (seed) => () => {
-  seed |= 0;
-  seed = (seed + 0x6d2b79f5) | 0;
-  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-};
-
-const NODES = (() => {
-  const rnd = seeded(20260923);
-  const nodes = [];
-  for (let i = 0; i < 14; i++) {
-    nodes.push({ x: 6 + rnd() * 88, y: 10 + rnd() * 80, r: 1.6 + rnd() * 2.6 });
-  }
-  const links = [];
-  for (let i = 0; i < nodes.length; i++) {
-    // Link each node to its nearest earlier neighbour: branching, not a mesh.
-    let best = -1;
-    let bestD = Infinity;
-    for (let j = 0; j < i; j++) {
-      const dx = nodes[i].x - nodes[j].x;
-      const dy = nodes[i].y - nodes[j].y;
-      const d = dx * dx + dy * dy;
-      if (d < bestD) {
-        bestD = d;
-        best = j;
-      }
-    }
-    if (best >= 0) links.push([i, best]);
-    if (rnd() < 0.3 && i > 1) links.push([i, Math.floor(rnd() * i)]);
-  }
-  return { nodes, links };
-})();
-
 const REASON_LABELS = {
   'reduced-motion': '已按减少动态效果设置显示静态视图',
   'webgl2-unavailable': '当前浏览器不支持 WebGL2，已切换静态视图',
@@ -51,18 +16,8 @@ const REASON_LABELS = {
 const PhysarumFallback = ({ reason }) => (
   <div className='physarum-fallback' role='img' aria-label='黏菌网络静态视图（动画已停用）'>
     <svg viewBox='0 0 100 100' preserveAspectRatio='xMidYMid slice'>
-      {NODES.links.map(([a, b], i) => (
-        <line
-          key={`l${i}`}
-          x1={NODES.nodes[a].x}
-          y1={NODES.nodes[a].y}
-          x2={NODES.nodes[b].x}
-          y2={NODES.nodes[b].y}
-        />
-      ))}
-      {NODES.nodes.map((n, i) => (
-        <circle key={`n${i}`} cx={n.x} cy={n.y} r={n.r} />
-      ))}
+      <path className='physarum-fallback-sheet' d='M38 48 C48 45 55 38 63 26 Q75 18 88 30 Q94 40 91 52 Q88 70 76 72 Q65 72 60 61 C52 56 46 55 38 53 Z' />
+      <path className='physarum-fallback-vein' d='M4 55 C17 52 22 48 38 50 C50 50 58 49 68 46 C77 43 85 38 90 31 M18 73 C27 61 35 56 49 51 M30 28 C35 39 43 44 52 48 M51 51 C61 54 73 59 83 68 M59 49 C67 39 74 33 83 28' />
     </svg>
     <span className='physarum-fallback-note'>{REASON_LABELS[reason] || '黏菌模拟已降级为静态视图'}</span>
   </div>

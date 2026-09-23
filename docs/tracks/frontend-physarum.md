@@ -81,3 +81,12 @@ cd viz/frontend && npx vite build --outDir <临时目录> --emptyOutDir # 3892 m
 ## 变更文件
 
 `viz/frontend/src/physarum/{index.js, PhysarumField.jsx, PhysarumFallback.jsx, simulation.js, shaders.js, physarum.css}`（新增）、`viz/static/licenses/physarum/{Physarum-WebGL.LICENSE.MIT.txt, NOTICE.md}`（新增）、本文档。共享文件零改动（`git status` 仅新增上述路径；`npm ci` 未改锁文件）。
+
+## 2026-09-23 黄色黏菌视觉返修（覆盖上文旧聚拢参数）
+
+用户反馈原“聚拢”像光标处堆积的粒子。旧 `foodTurn=0.9`、核心减速至 10%、远处允许占位重叠，加上三物种分离配色，确实会产生中心点团及放射状拖尾。现改为单一黄色菌体的可视表现：低幅趋食偏转（`foodTurn=0.085`）、不在食物核心刹停、不为趋食放开占位；WebGL 合成层显示连通的后部主脉与分叉/汇合支脉，以及由窄变宽、有不规则边缘的前部扇形薄片。前缘以约 1.25/s 的缓动跟随食物坐标，后部保持连接；脉管宽度与亮度缓慢起伏，薄片含局部纹理和亮边。光标环、WebGL 颜色、静态降级均改为黄色系，背景仍遵守共享 `#070b0d`。
+
+形态与运动依据：实验记录黏菌后部的管状网络与前方生长扇形区域（[eLife 2022](https://elifesciences.org/articles/69745)）；体内往返流与后向前传播的蠕动收缩有关（[研究论文](https://pmc.ncbi.nlm.nih.gov/articles/PMC2267142/)）；扇形前缘与后部脉络在细胞骨架研究中分别观察到（[研究论文](https://pmc.ncbi.nlm.nih.gov/articles/PMC4594612/)）。页面是受其形态启发的实时图形模拟，不宣称真实细胞流体模型或真实运动速度。PBS/NOVA 生长前缘照片仅作视觉核对（[图像](https://www.pbs.org/wgbh/nova/media/images/Physarum_growth_front.width-990_ju4eSk5.jpg)），没有复制图像素材。
+
+本轮隔离测试：`npx esbuild src/physarum/PhysarumField.jsx --bundle --outfile=../../.runtime/physarum/refine-check.js --loader:.js=jsx` 通过；`npx vite build --outDir ../../.runtime/physarum/refine-build --emptyOutDir` 通过（3892 modules，53.30s，不写共享构建产物）。Chromium 1234，1280×800，独立 Vite harness：空闲及向 (1100,190) 悬停 5s 的截图见未入库 `.runtime/physarum/refine-{initial,feeding}.png`；实际观测为黄色连通的脉络/扇形前缘，前缘随光标显著前移，平均帧约 10–14ms，无组件 WebGL 错误。`check_physarum_final.cjs` 的卸载清理、DPR=2 坐标映射、触屏质量检查通过。此截图没有页面标题叠层，不等于最终集成页在 7799 的验收；需集成轨在真实页面检查布局与遮挡。GPU 中的粒子路径仍是简化启发式，前缘/脉络由实时 WebGL 合成层呈现，非对真实黏菌的物理求解。
+追加降级检查：Chromium `?reduce` 无 canvas、有黄色 SVG 静态图；`--disable-webgl` 报 `webgl2-unavailable` 并进入同一静态图。均通过。
