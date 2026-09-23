@@ -1,5 +1,13 @@
 # 开发状态
 
+## 当前：北京 ECS 已连接，公网发布待 GPT 启动交互解除（2026-09-23）
+
+已用本机 Aliyun CLI 3.4.11 实查北京 ECS `i-2ze2nztd89vevmw21wif`（`cn-beijing`、Running、Ubuntu 24.04、公网 `47.93.118.110`），SSH 别名 `gongzhi-ecs` 可只读访问。服务器 Docker 29.1.3 / Compose 2.40.3，80/443 和 loopback 8080 为既有共治容器；Morphogenesis 计划使用独立 `/opt/morphogenesis` 与 TCP 7799。安全组 `sg-2zeedkqp6urfm9c29ghm` 尚未开放 7799；没有修改远端文件、容器、防火墙或域名，也没有公网部署成功声明。计划提交 `2b71d63` 已推送。
+
+用户随后重启 Orca：原 F `ctx_504329bc5c5a` 与 D `ctx_bf6133afa807` 均由运行时明确判为 `terminal_missing / failed`，按返回指令 release，保留全部工作树文件。协调者已将原 Run `run_9e3490b7a7c0` 绑定到恢复后的协调终端；原 F provider session `01a0cce1-3e9f-7061-a005-d9a8d538cab9` 已在原工作树恢复，但停在 Codex 0.155.1→0.156.1 更新弹窗。D 的同 Task 重启 `ctx_83e36987b2bc` 亦在 `agent_readiness` 被 `codex-update-prompt` 阻塞，任务未执行，已按回执 release。
+
+Orca 拒绝代选 Skip（`agent_prompt_blocked`）；已切到 F 恢复终端并请求用户选择 `Skip until next version`，如随后出现额度提醒则保留当前 GPT。不绕过原 Worker 所有权或启动交互门，不代替 F 提交。解除后恢复同 Task 的 D、F 提交与独立 I 集成，再运行经过审查的部署并从公网浏览器验收。D 工作树目前仍为干净基线 `c68def4`，部署代码与云端发布均未执行；上一节本地端口存活记录在此次 Orca 重启后已失效。
+
 ## 当前：双包设计语言移植已通过 F 检查，等待提交与独立集成（2026-09-23）
 
 最新用户授权 GPT 和 EvoMap 高级模型，使用两个本地网页包直接开发。F 工作树 `morph-gpt-reference` 已实际复用 Jost/Inter 字体、Christmas 黑底章节排版及 Linear 导航/文档/上下文结构；主控已目视通过最终桌面标题、后台和手机布局。`npm run build`、T5 51 项、原序幕浏览器检查和扩展 80 项均通过；详细来源与证据已写入 F 轨报告，尚未提交，不能视为最终集成交付。
