@@ -122,6 +122,55 @@ priority preserves unknown usage above bound violation above ordinary exhaustion
 valid work using the final allowance can finish, while a bound violation still
 rejects effects even when it simultaneously exhausts the budget.
 
+## EvoMap unbounded admission correction (2026-09-24)
+
+The user now authorizes bounded EvoMap algorithm experiments, and C owns the model
+adapter. B does not read credentials or send requests. The budget models already
+permitted `ExecutionBound(provider_enforced=False, request_bound='unbounded')`;
+the remaining unconditional runtime boolean gate belongs to C and must delegate
+to `BudgetLedger.reserve`. A boolean, output max_tokens parameter, historical
+usage or local fixture price is not a provider-enforced monetary ceiling.
+
+Minimal new policy field: `unbounded_reservation_usd: float | None = None`. A
+positive finite value is the operator's explicit per-request admission allocation,
+requires `admission_control='enabled'`, and is never represented as model pricing.
+Every unbounded request without this opt-in is denied, even if provider_enforced
+was set true. Existing verified local fixtures retain their explicit fixture
+evidence; tests never attribute those prices to EvoMap. Live experiment policy is
+immutable per swarm and uses max_attempts=6/max_attempts_per_task=1 as directed by
+the coordinator, along with explicit operator total and per-request allowances,
+tokens/output limits and runtime. No real price was supplied or guessed.
+
+With explicit matching prices the reservation is max(operator allowance, token
+price estimate); estimates never release original allowance. Without prices the
+operator allowance alone is reserved, and snapshot cost/estimated/actual values
+stay unknown/None/None. Valid response usage is parsed by the existing gateway
+parser and persisted independently: known token count and usage_metering=verified
+can coexist with cost=unknown, status=uncertain and a full original monetary hold.
+This sets the persistent unknown_cost breaker; subsequent paid admission stops.
+
+Breaker priority is unknown_usage > provider_bound_violated or
+request_token_limit_exceeded > unknown_cost > admission exhaustion. Local token
+limits without provider enforcement use request_token_limit_exceeded. Unknown
+cost alone does not invalidate already-returned, known-valid data: C may run its
+fixed verifier and fenced submit, then stop new requests. Unknown usage/remote
+effects or exceeded bounds still prohibit submission. Aggregate snapshot usage
+may be unknown because a different request remains pending; C checks the current
+response's evidence as well. No hold expires, no uncertainty is reset on restart,
+and no lower-cost estimate, changed policy or replay releases that hold.
+
+Current verification: `python -m pytest tests/swarm/test_budget.py
+tests/swarm/test_budget_evomap.py -q` with BLAS/OMP/MKL=1: **43 passed in 10.59s**,
+two expected invalid-model-copy serializer warnings. Targeted `python -m mypy
+--strict swarm/models.py swarm/budget.py`, also with `--platform linux`: **2 files
+clean each**. Tests use actual SQLite persistence, restart and existing process
+contention; all response bodies and explicit prices are synthetic local fixtures.
+The new counterexample demonstrates that valid usage with missing prices preserves
+known tokens, unknown money, the full allowance and the next-call blocker after
+restart. It is contract_local, not real API acceptance. Live model execution,
+provider pricing/billing proof and independent I full-suite acceptance remain
+outside this B phase.
+
 ## Read sources, versions, and reuse
 
 Historical provenance carried from the original B implementation: the three full texts were read in that phase. This corrected phase reuses that attribution; it does not claim a new literature review. Papers provide conceptual context; their source code and text were not copied into the package.

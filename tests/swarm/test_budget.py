@@ -21,7 +21,9 @@ def policy(**updates: object) -> BudgetPolicy:
 
 def bound(input_tokens: int = 10, output: int = 20) -> ExecutionBound:
     return ExecutionBound(provider="fake", model="measured", input_tokens=input_tokens,
-                          max_output_tokens=output, provider_enforced=True)
+                          max_output_tokens=output, provider_enforced=True, request_bound="verified",
+                          max_cost_usd=(input_tokens + 2 * output) / 1_000_000,
+                          bound_evidence="deterministic local fake cost fixture")
 
 
 def usage(prompt: int = 10, completion: int = 20) -> dict[str, object]:
@@ -35,9 +37,6 @@ def test_default_bound_preflight_prices_enforcement_and_failure_measurement(tmp_
     ledger = BudgetLedger(tmp_path / "budget.db", "account", p)
     with pytest.raises(BudgetBlocked, match="task_token_bound"):
         ledger.reserve("a", "too_large", bound(20000, 1))
-    unbounded = ledger.reserve("a", "unbounded", bound().model_copy(update={"provider_enforced": False}))
-    assert unbounded.request_bound == "unbounded"
-    ledger.settle(unbounded, usage(0, 0))
     with pytest.raises(BudgetBlocked, match="matching_model_prices"):
         ledger.reserve("a", "wrong_model", bound().model_copy(update={"model": "other"}))
     no_prices = BudgetLedger(tmp_path / "unknown.db", "account", BudgetPolicy(max_cost_usd=1))
@@ -158,7 +157,7 @@ from swarm.budget import BudgetLedger, BudgetBlocked
 from swarm.models import BudgetPolicy, ExecutionBound
 ledger=BudgetLedger(sys.argv[1], 'account', BudgetPolicy.model_validate_json(sys.argv[2]))
 try:
-    r=ledger.reserve(sys.argv[3], sys.argv[3], ExecutionBound(provider='fake',model='measured',input_tokens=100,max_output_tokens=0,provider_enforced=True))
+    r=ledger.reserve(sys.argv[3], sys.argv[3], ExecutionBound(provider='fake',model='measured',input_tokens=100,max_output_tokens=0,provider_enforced=True,request_bound='verified',max_cost_usd=.0001,bound_evidence='local fake'))
     print(r.model_dump_json())
 except BudgetBlocked:
     print('blocked')
@@ -196,8 +195,9 @@ ledger.settle(Reservation.model_validate_json(sys.argv[3]), {'usage':{'prompt_to
 
 def test_explicit_budget_evidence_labels_and_no_boolean_cost_proof(tmp_path):
     import sqlite3
-    ledger=BudgetLedger(tmp_path/'budget.db','swarm',policy())
-    r=ledger.reserve('A','a',bound())
+    ledger=BudgetLedger(tmp_path/'budget.db','swarm',policy(unbounded_reservation_usd=.00005))
+    unbounded=bound().model_copy(update={'request_bound':'unbounded','max_cost_usd':None,'bound_evidence':None})
+    r=ledger.reserve('A','a',unbounded)
     assert r.request_bound=='unbounded' and r.usage_metering=='unknown'
     before=ledger.snapshot()
     assert before.cost=='unknown' and before.admission_control=='enabled'
@@ -208,7 +208,7 @@ def test_explicit_budget_evidence_labels_and_no_boolean_cost_proof(tmp_path):
         assert db.execute('PRAGMA journal_mode').fetchone()[0]=='wal'
         assert db.execute('SELECT usage_metering,request_bound,admission_control,cost FROM budget_reservations').fetchone()==('verified','unbounded','enabled','estimated')
     with pytest.raises(ValueError,match='executor evidence'):
-        ledger.reserve('A','b',bound().model_copy(update={'request_bound':'verified'}))
+        ledger.reserve('A','b',unbounded.model_copy(update={'request_bound':'verified'}))
 
 
 def test_verified_cost_bound_is_retained_conservatively_without_bill(tmp_path):
@@ -266,9 +266,9 @@ def test_disabled_admission_is_visible_not_a_cap_claim(tmp_path):
 
 
 def test_unbounded_low_usage_never_frees_allowance_across_restart(tmp_path):
-    p=policy(max_cost_usd=.00005)
+    p=policy(max_cost_usd=.00005,unbounded_reservation_usd=.00005)
     ledger=BudgetLedger(tmp_path/'budget.db','run',p)
-    r=ledger.reserve('A','a',bound())
+    r=ledger.reserve('A','a',bound().model_copy(update={'request_bound':'unbounded','provider_enforced':False}))
     state=ledger.settle(r,usage(0,0))
     assert state.estimated_cost_usd==0
     assert state.actual_cost_usd is None and state.cost=='estimated'

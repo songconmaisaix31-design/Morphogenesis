@@ -109,6 +109,14 @@ class BudgetPolicy(Model):
     prices: ModelPrices | None = None
     limits: RunLimits = Field(default_factory=RunLimits)
     admission_control: Literal["enabled", "disabled"] = "enabled"
+    # Operator allowance, never a provider price or a contractual request ceiling.
+    unbounded_reservation_usd: float | None = Field(default=None, gt=0)
+
+    @model_validator(mode="after")
+    def unbounded_requires_admission(self) -> BudgetPolicy:
+        if self.unbounded_reservation_usd is not None and self.admission_control != "enabled":
+            raise ValueError("unbounded allowance requires enabled admission control")
+        return self
 
 
 class ExecutionBound(Model):

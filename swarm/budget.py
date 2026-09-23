@@ -75,13 +75,15 @@ class BudgetLedger:
 
     def _snapshot(self, db: sqlite3.Connection, worker_id: str | None, now: float) -> BudgetSnapshot:
         swarm = db.execute("SELECT breaker FROM swarm_budgets WHERE swarm_id=?", (self.swarm_id,)).fetchone()
-        rows = db.execute("SELECT status,tokens,estimate_usd,reserved_usd,request_bound,admitted_usd FROM budget_reservations "
+        rows = db.execute("SELECT status,tokens,estimate_usd,reserved_usd,request_bound,admitted_usd,usage_metering,cost FROM budget_reservations "
                           "WHERE swarm_id=?", (self.swarm_id,)).fetchall()
         uncertain = sum(row["status"] == "uncertain" for row in rows)
         pending = sum(row["status"] == "pending" for row in rows)
         holds = sum(float(row["reserved_usd"]) for row in rows if row["status"] != "settled")
         spent = sum(float(row["estimate_usd"]) for row in rows if row["estimate_usd"] is not None)
         tokens = sum(int(row["tokens"]) for row in rows if row["tokens"] is not None)
+        usage_unknown = any(row["usage_metering"] == "unknown" for row in rows)
+        cost_unknown = any(row["cost"] == "unknown" for row in rows) or self.policy.prices is None
         reason = swarm["breaker"]
         sleep = self.policy.burn_window_seconds if reason else 0.0
         if worker_id is not None and reason is None:
@@ -97,14 +99,14 @@ class BudgetLedger:
             if burn >= self.policy.burn_rate_tokens:
                 reason, sleep = "worker_burn_rate", self.policy.burn_window_seconds
         return BudgetSnapshot(swarm_id=self.swarm_id, sleeping=reason is not None,
-                              reason=reason, sleep_seconds=sleep, tokens=None if uncertain or pending else tokens,
-                              estimated_cost_usd=None if uncertain or pending else spent,
+                              reason=reason, sleep_seconds=sleep, tokens=None if usage_unknown else tokens,
+                              estimated_cost_usd=None if cost_unknown else spent,
                               reserved_estimate_usd=holds, uncertain_reservations=uncertain,
                               pending_reservations=pending,
-                              usage_metering="unknown" if uncertain or pending else "verified",
+                              usage_metering="unknown" if usage_unknown else "verified",
                               request_bound="verified" if rows and all(r["request_bound"] == "verified" for r in rows) else "unbounded",
                               admission_control=self.policy.admission_control,
-                              cost="unknown" if uncertain or pending else "estimated",
+                              cost="unknown" if cost_unknown else "estimated",
                               admission_charged_usd=sum(float(r["admitted_usd"] or 0) for r in rows),
                               unreconciled_reservations=len(rows))
 
@@ -130,17 +132,25 @@ class BudgetLedger:
         if not worker_id.strip() or not task_id.strip():
             raise ValueError("worker_id and task_id are required")
         prices = self.policy.prices
-        if prices is None or (prices.provider, prices.model) != (bound.provider, bound.model):
+        allowance = self.policy.unbounded_reservation_usd
+        if bound.request_bound == "unbounded" and (allowance is None or self.policy.admission_control != "enabled"):
+            raise BudgetBlocked("explicit_unbounded_admission_required")
+        if prices is not None and (prices.provider, prices.model) != (bound.provider, bound.model):
             raise BudgetBlocked("explicit_matching_model_prices_required")
         total_bound = bound.input_tokens + bound.max_output_tokens
         if total_bound > self.policy.max_tokens:
             raise BudgetBlocked("task_token_bound_exceeded")
-        estimate = self._estimate(bound.input_tokens, bound.max_output_tokens)
+        estimate = self._estimate(bound.input_tokens, bound.max_output_tokens) if prices is not None else None
         if bound.request_bound == "verified":
             assert bound.max_cost_usd is not None
+            if estimate is None:
+                raise BudgetBlocked("explicit_matching_model_prices_required")
             if bound.max_cost_usd < estimate:
                 raise BudgetBlocked("request_cost_bound_below_estimate")
-            estimate = bound.max_cost_usd
+            reservation_amount = bound.max_cost_usd
+        else:
+            assert allowance is not None
+            reservation_amount = max(allowance, estimate) if estimate is not None else allowance
         request_id = task_id if request_id is None else request_id
         if not request_id.strip():
             raise ValueError("request_id is required")
@@ -175,15 +185,15 @@ class BudgetLedger:
                 raise BudgetBlocked("worker_burn_rate", self.policy.burn_window_seconds)
             spent = float(db.execute("SELECT COALESCE(SUM(admitted_usd),0) FROM budget_reservations "
                                      "WHERE swarm_id=?", (self.swarm_id,)).fetchone()[0])
-            if self.policy.admission_control == "enabled" and spent + state.reserved_estimate_usd + estimate > self.policy.max_cost_usd:
+            if self.policy.admission_control == "enabled" and spent + state.reserved_estimate_usd + reservation_amount > self.policy.max_cost_usd:
                 raise BudgetBlocked("swarm_reservation_capacity", self.policy.burn_window_seconds)
             reservation = Reservation(reservation_id=uuid4().hex, swarm_id=self.swarm_id,
                                       worker_id=worker_id, task_id=task_id, bound=bound,
-                                      reserved_estimate_usd=estimate, created_at=now, request_id=request_id,
+                                      reserved_estimate_usd=reservation_amount, created_at=now, request_id=request_id,
                                       request_bound=bound.request_bound, admission_control=self.policy.admission_control)
             db.execute("INSERT INTO budget_reservations VALUES (?,?,?,?,?,'pending',?,NULL,NULL,NULL,?,?,'unknown',?,?,'unknown',NULL,NULL)",
                        (reservation.reservation_id, self.swarm_id, worker_id, task_id,
-                        reservation.model_dump_json(), now, estimate, request_id, bound.request_bound,
+                        reservation.model_dump_json(), now, reservation_amount, request_id, bound.request_bound,
                         self.policy.admission_control))
             return reservation
 
@@ -197,6 +207,13 @@ class BudgetLedger:
     def mark_uncertain(self, reservation: Reservation) -> BudgetSnapshot:
         return self.settle(reservation, None)
 
+    def _trip(self, db: sqlite3.Connection, reason: str) -> None:
+        priorities = {"swarm_cost_estimate_exhausted": 1, "unknown_cost": 2,
+                      "provider_bound_violated": 3, "request_token_limit_exceeded": 3, "unknown_usage": 4}
+        previous = db.execute("SELECT breaker FROM swarm_budgets WHERE swarm_id=?", (self.swarm_id,)).fetchone()[0]
+        if previous is None or priorities[reason] > priorities.get(previous, 4):
+            db.execute("UPDATE swarm_budgets SET breaker=? WHERE swarm_id=?", (reason, self.swarm_id))
+
     def settle(self, reservation: Reservation, usage: JsonValue) -> BudgetSnapshot:
         reservation = Reservation.model_validate(reservation.model_dump())
         reported = _usage(usage)  # Same strict nonnegative integer + consistent-total gateway parser.
@@ -207,7 +224,7 @@ class BudgetLedger:
         with self._transaction() as db:
             row = self._stored(db, reservation)
             if row["status"] != "pending":
-                if row["status"] == "settled" and settlement is not None and row["settlement"] != settlement:
+                if row["settlement"] is not None and settlement is not None and row["settlement"] != settlement:
                     raise ValueError("conflicting usage settlement")
                 # Idempotent replay does not overwrite unknown evidence or charge twice.
                 return self._snapshot(db, reservation.worker_id, now)
@@ -217,34 +234,36 @@ class BudgetLedger:
                 estimate = (self._estimate(reported.prompt_tokens, reported.completion_tokens)
                             if reported is not None else None)
             except (BudgetBlocked, OverflowError):
-                reported, estimate = None, None
+                estimate = None  # Keep valid observed tokens even if monetary evidence is missing.
             if reported is None:
                 db.execute("UPDATE budget_reservations SET status='uncertain',settled_at=? WHERE reservation_id=?",
                            (now, reservation.reservation_id))
-                db.execute("UPDATE swarm_budgets SET breaker='unknown_usage' WHERE swarm_id=?",
-                           (self.swarm_id,))
+                self._trip(db, "unknown_usage")
             else:
-                assert estimate is not None
-                # Usage plus local prices is not a bill. Never free committed
-                # allowance on a lower estimate, even for an unbounded request.
-                admitted = max(estimate, reservation.reserved_estimate_usd)
-                db.execute("UPDATE budget_reservations SET status='settled',usage_metering='verified',cost='estimated',settled_at=?,tokens=?,estimate_usd=?,settlement=?,admitted_usd=? "
-                           "WHERE reservation_id=?", (now, reported.total_tokens, estimate, settlement, admitted,
-                                                      reservation.reservation_id))
+                if estimate is None:
+                    # Operator admission allowance is not a model price. Preserve
+                    # the full hold while recording the independently known usage.
+                    db.execute("UPDATE budget_reservations SET status='uncertain',usage_metering='verified',cost='unknown',"
+                               "settled_at=?,tokens=?,settlement=? WHERE reservation_id=?",
+                               (now, reported.total_tokens, settlement, reservation.reservation_id))
+                    self._trip(db, "unknown_cost")
+                else:
+                    # Usage plus local prices is not a bill. Never free committed
+                    # allowance on a lower estimate, even for an unbounded request.
+                    admitted = max(estimate, reservation.reserved_estimate_usd)
+                    db.execute("UPDATE budget_reservations SET status='settled',usage_metering='verified',cost='estimated',settled_at=?,tokens=?,estimate_usd=?,settlement=?,admitted_usd=? "
+                               "WHERE reservation_id=?", (now, reported.total_tokens, estimate, settlement, admitted,
+                                                          reservation.reservation_id))
                 spent = db.execute("SELECT COALESCE(SUM(estimate_usd),0) FROM budget_reservations WHERE swarm_id=?",
                                    (self.swarm_id,)).fetchone()[0]
                 violated = (reported.prompt_tokens > reservation.bound.input_tokens or
                             reported.completion_tokens > reservation.bound.max_output_tokens or
                             reported.total_tokens > self.policy.max_tokens)
-                violated = violated or (reservation.bound.request_bound == "verified" and estimate > reservation.reserved_estimate_usd)
-                reason = "provider_bound_violated" if violated else None
-                if spent >= self.policy.max_cost_usd and reason is None:
-                    reason = "swarm_cost_estimate_exhausted"
-                if reason:
-                    if reason == "provider_bound_violated":
-                        db.execute("UPDATE swarm_budgets SET breaker=CASE WHEN breaker='unknown_usage' THEN breaker ELSE ? END "
-                                   "WHERE swarm_id=?", (reason, self.swarm_id))
-                    else:
-                        db.execute("UPDATE swarm_budgets SET breaker=COALESCE(breaker,?) WHERE swarm_id=?",
-                                   (reason, self.swarm_id))
+                violated = violated or (reservation.bound.request_bound == "verified" and estimate is not None
+                                        and estimate > reservation.reserved_estimate_usd)
+                if violated:
+                    self._trip(db, "provider_bound_violated" if reservation.bound.provider_enforced
+                               else "request_token_limit_exceeded")
+                elif estimate is not None and spent >= self.policy.max_cost_usd:
+                    self._trip(db, "swarm_cost_estimate_exhausted")
             return self._snapshot(db, reservation.worker_id, now)

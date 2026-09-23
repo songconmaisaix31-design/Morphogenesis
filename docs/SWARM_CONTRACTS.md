@@ -90,11 +90,19 @@ radius/file-lock/account contract, while preserving the historical implementatio
   reserved again. A pending/uncertain request for that task blocks a new identity.
 - `BudgetPolicy` retains explicit prices, token and burn limits, adds `limits:
   RunLimits` and `admission_control: enabled|disabled` (default enabled).
+  `unbounded_reservation_usd: float | None` defaults to None. A positive finite
+  operator allowance explicitly enables unbounded admission and requires enabled
+  admission control. Without it, every unbounded request is denied regardless of
+  the provider_enforced boolean. The allowance is not a price or cost ceiling.
 - `ExecutionBound` retains token fields; adds `request_bound: verified|unbounded`
   (default unbounded), `max_cost_usd: float | None`, `bound_evidence: str | None`.
   A verified request bound requires explicit trusted executor evidence and a
   contractual monetary upper bound, not just `provider_enforced=True` or prices.
-  Unbounded requests can only make an estimated admission-control claim.
+  EvoMap without that evidence uses `provider_enforced=False` and
+  `request_bound=unbounded`. C delegates admission to `reserve` instead of requiring
+  provider_enforced unconditionally. Unbounded requests only claim local admission
+  control. Explicit matching prices, when available, remain estimates; missing
+  prices are permitted only through the explicit unbounded allowance.
 - Persist and expose `usage_metering: verified|unknown`, `request_bound:
   verified|unbounded`, `admission_control: enabled|disabled`, `cost:
   estimated|billed|unknown`. Parsed synthetic usage is contract-local evidence;
@@ -106,10 +114,27 @@ radius/file-lock/account contract, while preserving the historical implementatio
   as its conservative admission debit, including unbounded requests. Snapshot
   `admission_charged_usd` and `unreconciled_reservations` expose this separately from
   pending holds and measured usage estimates. A lower estimate never creates new
-  allowance. The current adapter never emits `billed` or a non-null actual cost.
-  Breaker priority is unknown usage, then request-bound violation, then admission
-  exhaustion. A known valid final-credit request may complete its fenced result;
-  a simultaneous/later bound violation is never hidden behind exhaustion.
+  allowance. With no price evidence, known usage is still recorded but estimate
+  and actual cost stay None, cost stays unknown, and the original reservation
+  remains held (not converted into an estimated settled cost). `unknown_cost`
+  stops subsequent paid admission persistently. The current adapter never emits
+  `billed` or a non-null actual cost.
+  Breaker priority is `unknown_usage`, then `provider_bound_violated` or
+  `request_token_limit_exceeded`, then `unknown_cost`, then admission exhaustion.
+  Without provider enforcement, exceeded local token limits use the latter token
+  reason, not a claim that a provider guarantee existed. A known valid returned
+  candidate may finish validation/fenced submission despite unknown monetary cost
+  or final-credit exhaustion; missing usage, unknown remote effects and token/bound
+  violations prohibit submission. No automatic retry/reconciliation is introduced.
+
+  Snapshot `uncertain_reservations` includes monetary-only uncertainty. Aggregate
+  `usage_metering` can be unknown while another request is pending; C must also
+  inspect the current response's actual usage and remote-effect evidence rather
+  than treating this aggregate count as proof that the current response is unknown.
+
+  The authorized EvoMap experiment config uses `limits.max_attempts=6` and
+  `limits.max_attempts_per_task=1`, plus explicit operator total/per-request
+  allowance, token/output limits and runtime. B supplies no invented model prices.
 
 ## A/C integration agreement
 
