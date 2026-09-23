@@ -1,5 +1,17 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 项目 review、部署恢复与 computer-use 验收（2026-09-24）
+
+用户要求审查当前项目、部署 swarm 并进行 computer-use 可用性验收。基线 `605cf48`，开始时工作区 clean。用户随后强调 Ghost in the Swarm：以关系与历史中的集体策略为核心，跨机器不是概念成立的必要条件；分别验收成员替换后的策略延续、反馈选路、经验采用/代谢和外部继承。不扩建调度或身份基础设施。
+
+由单 Agent 完成只读源码审查、已有部署入口恢复和验收；没有可并行的业务开发写入，暂不派 Worker。主控仅修改 `docs/PLAN.md`、`docs/STATUS.md`、`docs/ACCEPTANCE.md`、`docs/DECISIONS.md`，本轮原始日志/截图写入忽略目录 `.runtime/review-20260924/`；领域缺陷先给出精确定位与复现，需修复时再交领域 Worker。
+
+顺序：核对架构与当前部署身份 → 项目锁环境测试、类型、构建及 SDK → 恢复本机可访问入口并复核公网现有只读部署 → 通过真实 Chrome 窗口完成导航、成员/拓扑/经验/证据及异常恢复操作 → 记录真实限制、commit + push。现有 Codex 执行入口如可用，运行一次最多两个任务的有界新彩排；不自动重试未知调用，不调用付费 Hub FETCH 或重新发布资产。模型网关凭据仅检查是否已配置，禁止把 Hub 节点密钥当模型密钥。
+
+验收分别记录 contract_local、interface_live、task_live；历史 replay、公网 HTTP、模型执行和 computer-use 交互不能相互替代。保留其他项目容器、现有运行数据与全局配置。公网当前部署已只读核实为 `53bb52c` 两个 healthy 容器，跨机器自治及无人值守恢复未实现。
+
+本轮结果：294测试、55文件strict、Python/前端构建、SDK/安装态通过；用户指定的EvoMap `evomap-gpt-5.6-sol` 两次新任务成功、2018tokens、费用未知。本机7527已恢复为本轮真实完成快照；公网历史replay浏览器72项、本机Sol浏览器30项通过。computer-use最终通过已运行Tabbit窗口完成，Chrome provider故障另存。概念差距、产品缺口和旧序幕脚本失败均见ACCEPTANCE首节；无业务代码改动，不把有限证据提升为策略涌现的充分证明。
+
 ## 封板夜进化链路冲刺（2026-09-23）
 
 21:30 本轮开发及独立复验结算：I `07809ce5fcc2679e6023a6816a8a166fbdc57b79` 已推送并 succeeded，主控复核原始日志与远端 SHA 后释放，Run 无待处理/reclaimable Worker。E/D 的完整外部门禁未完成如实保留，T/I 的适用验证通过。治理提交与最终精确 SHA CI 收口由主控完成，剩余候选可信验证、费用确认、网关凭据和现场人工步骤不自动执行或伪造通过。

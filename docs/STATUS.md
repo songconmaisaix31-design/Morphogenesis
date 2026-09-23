@@ -1,5 +1,13 @@
 # 开发状态
 
+## Ghost in the Swarm review 与 Sol 验收（2026-09-24）
+
+基线605cf48，无业务实现改动。294测试、55文件strict、Python/前端构建、SDK/11包安装态通过。用户指定的EvoMap Sol两次新任务均成功，返回均为gpt-5.6-sol，2018tokens，费用未知；live/passed,passed,passed仅限固定样例。用户限定前的Luna结果另存。
+
+本机7527恢复为Sol完成快照，launcher47220/listener32064，loopback、不保证跨宿主常驻。公网53bb52c两容器healthy，仍为历史replay；展示/部署/编排代码相对基线无差异。公网浏览器72项、本机Sol浏览器30项通过；computer-use通过Tabbit完成成员、详情、Gene、证据、公开数据与序幕往返。
+
+按用户强调的Ghost概念修正验收：多机不是必要条件；现有证据证明经验跨成员延续及代谢，尚缺对照与外部继承。“Ghost已离开”概念文案及彩排证据页未接Envelope列为差距。旧mock序幕脚本在本轮live第43行失败，未宣称全通过。完整review、命令、失败原件与限制见ACCEPTANCE首节。密钥仅内存使用，无Hub付费/发布或未知重试。
+
 ## 封板累计复验：代码通过，外部门禁保留（2026-09-23 21:30 CST）
 
 I `ctx_3881542562f6` 已 succeeded 结算并 release；E/D 以完整外部门禁未达成 failed 结算，T succeeded，全部对应 Worker 已释放。当前 Run 的资源清单为 released=8（包含前置/恢复历史 Dispatch）、reclaimable=0，收件箱已处理并 ACK。主控保留的 viewer 不属于已释放 Worker，公网运行资源保持。
