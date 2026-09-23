@@ -77,6 +77,23 @@ target web: failed to solve: DeadlineExceeded ... failed to resolve source metad
 
 已发 `msg_a06a99a14f5f` 回传以上结果。后续需可用的同版本构建/镜像转运环境；本轮没有配置全局 Docker、启动 Desktop 或重试远端失败构建。新网关 key、正常公开 Hub 面板一次读取窗口、热点/第二设备/现场条件仍由主控协调。
 
+### 19:56–20:16 Docker 接续与健康检查修复
+
+主控 `msg_7d2e5d52a82a` 澄清：在既有部署/容器构建授权下，允许可逆启动已安装 Docker Desktop 一次，但仍禁止全局配置、镜像源、安装升级、系统提权或结束他人进程。核对 `C:/Program Files/Docker/Docker/Docker Desktop.exe` 存在且 Desktop/backend 无进程后，19:56:55 使用 `Start-Process -WindowStyle Hidden` 启动 PID 55260；`docker-desktop-start.json` 留存。分段探针早期 npipe 不存在，一次有界 10 秒查询超时，随后在启动后 90 秒内 `docker version` 返回 **29.5.3**，平台 **linux/x86_64**。
+
+Docker 自身 restart 策略恢复了既有本机多个项目容器；D 没有逐个启动、停止或改配置，此副作用已通过 `msg_42b7da66113e` 如实通知主控，不声称启动 daemon 对其它本机容器毫无影响。远端共治容器未改变。后续主控发现机器内存压力及 Orca 重启（运行时变为 `86d3a6fa`），要求 E/D/I 重验证串行；D 已接受，不并发继续构建或重浏览器。
+
+主控 `msg_5057cef2e155` 放行同 SHA 本地构建→17899验证→save/scp/load 方案。`25968dc` 白名单包在 `.runtime/freeze-demo/release-source/25968dc8440a25f2472df8cfb7ff62eb3302366d` 解包，20:13:18–20:13:24.812，以 `MORPH_RELEASE=25968dc...`、`DOCKER_DEFAULT_PLATFORM=linux/amd64`，执行 `docker compose --env-file NUL -p morphogenesis-freeze-check -f deploy/compose.yaml build`，Python `subprocess.run(timeout=600)` 包围：**exit 0 / 6.81 秒**。没有重试远端构建或覆盖旧镜像标签。日志 `local-image-build.log`；Docker 实际记录：
+
+- API image `sha256:bbe239d85ca565ac4049cc08bd7f308028b408572af1953698e1d53cd7658acb`，linux/amd64，150506639 bytes。
+- Web image `sha256:40a8ab77ae8b8915a70abb1d529d20e522cf7becb910d8aeb06854ec3463677d`，linux/amd64，21868210 bytes。
+
+用该解包内两份 Compose + 本项目 `tests/deployment/compose.local.yaml` 的唯一 127.0.0.1:17899 override，指定单个历史 snapshot，执行 `up -d --no-build --force-recreate --wait --wait-timeout 120`。Web 曾 healthy，但 API 在多个 healthcheck 中超原 5 秒，整个 up **exit 1 / api unhealthy**，没有把 Web healthy 当整体通过。独立 `docker exec morphogenesis-freeze-check-api-1 python /app/deploy/healthcheck.py` 真正 **exit 0 / 6.547 秒**，说明在 one-CPU 配额及当前负载下共享契约导入成本超过5秒，而非接受了无证据状态。
+
+最小修复仅 `deploy/compose.yaml` API health timeout **5→15秒**；所有 Pydantic/证据断言、HTTP 请求超时、限流和无写路由保持。`.venv/Scripts/python.exe -m pytest tests/deployment -q`：**32 passed / 13.84秒**，`pytest-health-timeout.txt`。主控 `msg_9d0027d565b3` 接受修复与串行提交；新确切 SHA 将替代25968dc用于下一包，不重写旧提交或镜像标签。
+
+只保留 D 本轮两个 `morphogenesis-freeze-check-{api,web}-1` 的 ID、project label、镜像和 health log 到 `local-container-health-before-stop.json`；确认名称/标签后仅 `docker stop --time 10 <这两个准确ID>`，按主控许可减少本轨负载，保留镜像/容器/日志。没有停止 Desktop、7844、局域网viewer或其它项目。此时尚未 save/scp/load 新镜像、远端 up 或公网开放；新版容器复验与正常 Hub 只读页面窗口等待 E 写链结束后主控放行。
+
 ## 当前状态（2026-09-23 18:32，北京时间）
 
 **只读核查完成，领域实现、live 演示与部署尚未开始。** 工作区为 `C:/Users/DW/orca/Morphogenesis`，分支 `codex/morphogenesis-mainline`；核查时 HEAD 为 `2b58b5923286af8e11e556a1579e239bceee539b`，开始时 `git status --short`、`git diff` 均为空。本报告不把历史结果计作本轮验收。

@@ -19,7 +19,8 @@ services:
     healthcheck:
       test: [CMD, python, /app/deploy/healthcheck.py]
       interval: 30s
-      timeout: 5s
+      # Shared Pydantic/runtime imports exceed 5s under the API's one-CPU quota.
+      timeout: 15s
       retries: 3
       start_period: 30s
     logging:
