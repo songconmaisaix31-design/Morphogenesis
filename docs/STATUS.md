@@ -1,5 +1,13 @@
 # 开发状态
 
+## 当前：双包设计语言移植已通过 F 检查，等待提交与独立集成（2026-09-23）
+
+最新用户授权 GPT 和 EvoMap 高级模型，使用两个本地网页包直接开发。F 工作树 `morph-gpt-reference` 已实际复用 Jost/Inter 字体、Christmas 黑底章节排版及 Linear 导航/文档/上下文结构；主控已目视通过最终桌面标题、后台和手机布局。`npm run build`、T5 51 项、原序幕浏览器检查和扩展 80 项均通过；详细来源与证据已写入 F 轨报告，尚未提交，不能视为最终集成交付。
+
+Orca Run `run_9e3490b7a7c0` / F dispatch `ctx_504329bc5c5a` 的 Codex 终端目前停在“Switch to gpt-5.6-luna / Keep current model”的额度提醒。`terminal send` 选择保留当前模型被 Orca 以 `agent_prompt_blocked` 拒绝；已向用户请求在该终端选择 Keep current model，未改模型、未绕过交互门。解除后由原 F 完成 commit + push，再由独立 I 精确合并验收。开发预览为 [7841](http://127.0.0.1:7841/#/physarum)，[7799](http://127.0.0.1:7799/#/physarum) 仍是此前验收版，7526/7527 未操作。
+
+设计 API 审查实际成功一次：请求 `evomap-gpt-5.6-sol`、返回 `gpt-5.6-sol`，HTTP 200，3520 tokens，费用未知；此前独立设计请求 `RemoteDisconnected`，输出/usage/费用未知且未重试。两次不能合计为已知总消耗，也不计为新的项目 task_live。凭据未入库。详见 [本轮计划](PLAN.md)。
+
 ## 进行中：沉浸式序幕与产品后台重塑（2026-09-23）
 
 基线 `ab87ba17625bf27afdaa840e898d48bb5db0003b`。已用 Orca 建立互斥 worktree/branch：G `morph-story-growth`（Agent `/root/growth_intro`，`viz/frontend/src/intro/**`）、B `morph-story-backend`（`/root/backend_layout`，`viz/frontend/src/backend/**`）、S `morph-story-shell`（`/root/story_shell`，`App.jsx` / `theme.css` / `components/**`）。主控计划提交 `96e1fd6171edd15959ce8027b304909848372203`；GitHub HTTPS 暂时断连，尚未核对远端接收。各轨完成后再派独立 I 集成，当前无完成验收结论。详见 [计划](PLAN.md)。
