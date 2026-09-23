@@ -10,9 +10,11 @@ F 已完成原任务并推送 `2df313857d716a27113c47709342c8d57fb6405f`，原 `
 
 17:03 Orca 再次重启，旧返修 Dispatch `ctx_eb0b56092f6f` 被运行时结算为 `terminal_missing / failed`，Task 恢复 ready，工作树 WIP 保留。主控将原 Run 绑定当前终端 `term_e3377ef4-b845-40c3-8b7e-a55ae9632243`，在原工作树恢复原 provider session `01a0cce1-3e9f-7061-a005-d9a8d538cab9`，同 Task 续接 `ctx_36490c2cd445`；没有新建实现轨、改变权限设置或代批。后续活动行返修、重新构建、三视口与交互验收、commit/push、独立 I 集成仍待完成。
 
-恢复后第一批命令经用户在原终端批准，前端构建完成，`python -m pytest tests/t5 -q` 为 51 passed / 15.93s。F 随后继续修正隐藏图表和未知状态；当前第二批命令（Hidden 启动 7841、重建、三尺寸浏览器验收）仍停在该会话的单次命令确认。主控已展示原终端并请求用户处理，未代批；尚无新截图、最终前端提交或上线。主控另一次写入部署交接说明的命令被自动审批以 `blocked by policy` 拒绝，未执行，未换工具重试。
+恢复后第一批命令经用户在原终端批准，前端构建完成，`python -m pytest tests/t5 -q` 为 51 passed / 15.93s。F 随后修正隐藏图表和未知状态；第二批命令也已实际执行，新 7841 服务 PID 39204 使用本轨源码和只读 mock，重新构建与三尺寸浏览器验收 125 项通过，错误/非同源/非 GET 请求均为 0。主控亲看 `structure-checks-v1/replay-task-1366.png`、`workspace-375.png`、`details-375.png`，确认活动行密度与源应用结构通过本轮视觉检查，并以 `msg_1fada091dfb0` 要求完成已有收尾后提交。原序幕链由 F 报告通过；补充成员截图可见性检查仍在收尾，最终前端提交和独立集成尚未完成。
 
-新鲜对照证据位于 `C:/Users/DW/AppData/Local/Temp/morph-linear-structure-audit`：源应用完整画框 `source-app-issue.png`、同视口源页 `reference-1366.png`、修改前后台 `product-before-1366.png`、实际尺寸 `observations.json`。源包页面中点击 tasks/insights/project 未实际切换，不将对应重复截图计为交互成功。7841/7843/7799 已在此次重启后核实无监听，旧 PID 记录失效；F 将在端口身份核验后恢复其独立测试预览。D 已交付 `50d1353` 保留，I 和公网部署等待新 F 视觉返修验收。
+主控一次写入部署交接说明的命令被自动审批以 `blocked by policy` 拒绝，未执行，未换工具重试。公网尚未上线。Orca 成功创建预览浏览器页，但 snapshot/console helper 返回 `runtime_unavailable`；随后核验 Orca runtime 仍为同一实例且正常，未因此重启。视觉验收使用 F 的实际 Chromium 产物与主控图片检查，HTTP 200 仅证明服务可达。
+
+新鲜对照证据位于 `C:/Users/DW/AppData/Local/Temp/morph-linear-structure-audit`：源应用完整画框 `source-app-issue.png`、同视口源页 `reference-1366.png`、修改前后台 `product-before-1366.png`、实际尺寸 `observations.json`。源包页面中点击 tasks/insights/project 未实际切换，不将对应重复截图计为交互成功。7841 已由 F 核验空闲后恢复，7843/7799 未操作。D 已交付 `50d1353` 保留，I 等待新 F 精确提交。
 
 ## 当前：终端更新完成，部署容器验证通过，F 等待命令权限确认（2026-09-23）
 
