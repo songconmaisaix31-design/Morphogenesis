@@ -35,7 +35,17 @@ SSH `BatchMode=yes` 只读核验 Ubuntu 24.04.4 LTS x86_64，Docker 29.1.3，Com
 | `python -m mypy --strict viz/server.py`（同锁环境） | Success，1 source file |
 | `docker compose -p morphogenesis-d-check -f deploy/compose.yaml config --quiet` | 通过；Compose 本机 v5.1.4，合并 replay 配置另由测试实际解析 |
 | `git diff --check` | 通过；Windows LF/CRLF 提示，无空白错误 |
-| 本机 Linux 镜像 build / HTTP / replay | 实施提交时构建进行中，最终验证记录待追加 |
+| 本机 Linux 镜像 build | 通过；Python main 70 packages，非 root API 与 Web 均 healthy |
+| Nginx `-t`（实际非 root / read-only / tmpfs） | 通过；首次暴露默认 fastcgi 临时目录不可写，已将全部临时目录放入 `/tmp` tmpfs |
+| `python deploy/smoke.py http://127.0.0.1:17899 --evomap-live` | 37 项通过：200×14、400×3、404×9、405×5、413×1、429×5；一次公开搜索调用（原服务内部 search + categories 两个 GET），两块均 `state=live`，无 key，无模型调用、不重试 |
+| 挂载原第四轮文件后实际 `up --force-recreate --wait` + `python deploy/smoke.py http://127.0.0.1:17899` | 36 项通过；provenance=replay，contract_local=passed，interface_live/task_live=not_run；两个容器 healthy |
+| README 补入白名单后 `python -m pytest tests/deployment/test_deployment.py -q` | 16 passed（7.55s） |
+
+首次实际 build 因 `poetry check --lock` 要求 pyproject 声明的根 `README.md` 失败；已补入构建 / 标准归档白名单，未改任何依赖和锁。实际 `nginx -t` 发现只读根目录下默认 FastCGI 临时目录初始化失败；已指定 `/tmp/{client,proxy,fastcgi,uwsgi,scgi}`，保持只读和非 root 约束后通过。不是以配置解析代替容器启动。
+
+本机证据：`C:/Users/DW/AppData/Local/Temp/morph-beijing-d-smoke-mock.txt`（原 stdout 使用 Windows GBK 编码，含真实公开 EvoMap report）和 `morph-beijing-d-smoke-replay.json`（ASCII JSON）。脚本最终输出改用 ASCII 转义以跨平台保留中文，无需重发上游请求。公开 Hub 的费用 / 配额未知；未声称免费或新任务通过。
+
+历史文件使用 F 报告所列第四轮路径，只读挂入 `/data/rehearsal.json`，226,518 bytes；运行前后 SHA-256 都为 `f3639cd4e96edbe04cea63d4522df12cf16d84817bb84650a19885268b61c818`，原 `mtime` 为 2026-09-22 08:13:35 UTC。文件未复制进工作树、镜像或 Git。浏览器注入响应没有参与本次 replay 检查。
 
 ## 边界
 

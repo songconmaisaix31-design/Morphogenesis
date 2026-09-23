@@ -31,14 +31,15 @@ def main() -> None:
     assert urlsplit(base).scheme in {"http", "https"}
     checks: list[dict[str, object]] = []
 
-    def request(path: str, status: int = 200, method: str = "GET", data: bytes | None = None) -> bytes:
+    def request(path: str, status: int | set[int] = 200, method: str = "GET", data: bytes | None = None) -> bytes:
         try:
             response = urlopen(Request(urljoin(base, path), method=method, data=data), timeout=65)
         except HTTPError as error:
             response = error
         with response:
             body = response.read()
-            assert response.status == status, (path, method, response.status, status)
+            expected = status if isinstance(status, set) else {status}
+            assert response.status in expected, (path, method, response.status, status)
             assert response.headers.get("X-Content-Type-Options") == "nosniff"
             if method == "HEAD":
                 assert not body
@@ -68,8 +69,12 @@ def main() -> None:
     if args.evomap_live:
         report = json.loads(request("/api/evomap?q=repair&limit=1"))
         # HTTP 200 alone is not upstream success; preserve the full report.
-        print(json.dumps({"evomap_report": report}, ensure_ascii=False))
-    print(json.dumps({"checks": checks, "provenance": dashboard["provenance"], "acceptance": dashboard["acceptance"]}, ensure_ascii=False, indent=2))
+        print(json.dumps({"evomap_report": report}, ensure_ascii=True))
+    # Exercise the shared EvoMap rate limit without ever querying the Hub.
+    for _ in range(6):
+        request("/api/evomap/asset?id=invalid", {400, 429})
+    assert any(check["status"] == 429 for check in checks)
+    print(json.dumps({"checks": checks, "provenance": dashboard["provenance"], "acceptance": dashboard["acceptance"]}, ensure_ascii=True, indent=2))
 
 
 if __name__ == "__main__":

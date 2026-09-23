@@ -14,7 +14,7 @@ PYTHON_PACKAGES = {
 }
 FILES = {
     "pyproject.toml", "poetry.lock", "package.json", "package-lock.json",
-    "LICENSE", "THIRD_PARTY_NOTICES.md", "demo/data/mock-run.json",
+    "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "demo/data/mock-run.json",
     "deploy/Dockerfile", "deploy/Dockerfile.dockerignore", "deploy/compose.yaml",
     "deploy/compose.replay.yaml", "deploy/nginx.conf", "deploy/proxy.conf",
     "deploy/healthcheck.py", "deploy/package.py", "deploy/smoke.py", "deploy/README.md",

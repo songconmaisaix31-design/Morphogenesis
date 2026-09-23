@@ -11,7 +11,7 @@ FROM python-base AS dependencies
 RUN pip install --no-cache-dir poetry==2.5.1
 WORKDIR /app
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true POETRY_NO_INTERACTION=1
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml poetry.lock README.md ./
 RUN poetry check --lock && poetry install --only main --no-root --no-directory --no-ansi
 
 FROM python-base AS api
@@ -32,6 +32,7 @@ COPY viz/*.py viz/
 COPY demo/data/mock-run.json demo/data/mock-run.json
 COPY --from=charts /build/node_modules/echarts/dist/echarts.min.js node_modules/echarts/dist/echarts.min.js
 COPY LICENSE THIRD_PARTY_NOTICES.md /app/notices/
+COPY --from=charts /build/node_modules/echarts/LICENSE /app/notices/LICENSE-echarts.txt
 COPY deploy/healthcheck.py /app/deploy/healthcheck.py
 USER 10001:10001
 EXPOSE 7500
