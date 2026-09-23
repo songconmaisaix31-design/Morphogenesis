@@ -4,7 +4,9 @@
 
 F 已完成原任务并推送 `2df313857d716a27113c47709342c8d57fb6405f`，原 `ctx_083902b49b4d` 成功结算。随后用户指出后台与 Linear 不像，并两次明确使用 `linear-site.zip` 的前端直接修改。主控实际打开 ZIP（686 项、8,774,425 bytes）及本地页面重新截图，确认现有版主要复用字体/数值，尚未复刻原应用结构；撤回此前视觉通过结论。
 
-原 F 会话/工作树/分支立即续接 `task_1b8cd2d6f0b5 / ctx_eb0b56092f6f`，必须直接复用实际 DOM/组件结构、SVG 和样式，再接现有业务数据。当前原恢复会话的沙箱拒绝部分参考资源读取和 Git 元数据操作，已弹出批量读资料与合并规划的权限确认；已请用户在终端允许，未代为批准。返修尚未发生业务文件修改，不能将旧构建/80 项检查称为新版通过。
+原 F 会话/工作树/分支立即续接 `task_1b8cd2d6f0b5 / ctx_eb0b56092f6f`，必须直接复用实际 DOM/组件结构、SVG 和样式，再接现有业务数据。用户随后要求托管前端开发；当前任务持续由主控监督。资料读取确认解除后，F 普通合并规划至 `e24c68feff2e953e30661552d12180b16814a487`，已实际修改 Backend.jsx、backend.css、静态数据 bridge，新增 linear-package.css 和 LinearIcons.jsx：直接来源类名、11 个 SVG、侧栏/内容区工具栏、任务正文与属性、五个独立视图和隐藏图表处理均已形成未提交候选。
+
+首次候选 `npm run build` 被恢复会话沙箱拒绝，Vite/esbuild 返回 `Cannot read directory ../../../../../..: Access is denied` 和配置文件解析失败；尚未产出新版静态包。F 已请求批量构建/截图命令确认，需人工在终端处理，主控未代批或切换审批模式。源码审查发现手机成员按钮 min-height 被后置基础规则覆盖，已以 `msg_984bd385a5a5` 交回 F；修复、构建、实际浏览器验收、commit/push 和 I 集成均仍待完成。旧 51/80 项通过不代表当前未构建候选通过。
 
 新鲜对照证据位于 `C:/Users/DW/AppData/Local/Temp/morph-linear-structure-audit`：源应用完整画框 `source-app-issue.png`、同视口源页 `reference-1366.png`、修改前后台 `product-before-1366.png`、实际尺寸 `observations.json`。参考服务 7843 / PID 32828 与产品预览 7841 / PID 28604 均为协调者启动。源包页面中点击 tasks/insights/project 未实际切换，不将对应重复截图计为交互成功。D 已交付 `50d1353` 保留，I 和公网部署等待新 F 视觉返修验收。
 
