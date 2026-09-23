@@ -34,7 +34,7 @@ function fetchJson(u) {
       const chunks = [];
       res.on('data', (c) => chunks.push(c));
       res.on('end', () => {
-        try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf-8'))); }
+        try { assert.equal(res.statusCode, 200); resolve(JSON.parse(Buffer.concat(chunks).toString('utf-8'))); }
         catch (error) { reject(error); }
       });
     }).on('error', reject);
@@ -43,18 +43,26 @@ function fetchJson(u) {
 
 (async () => {
   const dashboard = await fetchJson(`${url}/api/dashboard`);
+  fs.writeFileSync(path.join(output, 'dashboard.json'), JSON.stringify(dashboard, null, 2));
   const browser = await chromium.launch({ headless: true, executablePath: process.env.MORPH_CHROMIUM, env: withoutGatewayKey(process.env) });
   try {
     const page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
-    const errors = [], external = [];
+    const errors = [], external = [], consoleErrors = [], requests = [], httpFailures = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.route('**/*', (route) => {
-      const request = new URL(route.request().url());
-      if (request.origin !== url) { external.push(request.href); return route.abort(); }
-      return route.continue();
+    page.on('console', message => {
+      if (message.type() === 'error') consoleErrors.push({ text: message.text(), url: message.location().url });
     });
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('.morph-hero-title', { timeout: 20000 });
+    // Observe the real server only: no browser routes, response injection or retries.
+    page.on('request', request => {
+      requests.push({ url: request.url(), method: request.method() });
+      if (new URL(request.url()).origin !== new URL(url).origin) external.push(request.url());
+    });
+    page.on('response', response => {
+      if (response.status() >= 400) httpFailures.push({ url: response.url(), status: response.status() });
+    });
+    const evomapResponse = page.waitForResponse(response => new URL(response.url()).pathname === '/api/evomap', { timeout: 60000 });
+    await page.goto(`${url}/#/workspace`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.backend-main', { timeout: 20000 });
     await page.waitForFunction(() => document.getElementById('provenance')?.textContent !== '加载中', null, { timeout: 15000 });
 
     // Provenance labelling must match the server's own fields.
@@ -71,8 +79,8 @@ function fetchJson(u) {
       `${header.provenance} vs ${expectedHeaderProvenance}`);
     record('header source_label matches server', header.sourceLabel === dashboard.source_label, header.sourceLabel);
 
-    await page.click('.morph-hero-markers .morph-marker:text-is("AGENT SWARM")');
-    await page.waitForFunction(() => document.body.dataset.view === 'swarm', null, { timeout: 10000 });
+    await page.getByRole('tab', { name: '蜂群拓扑', exact: true }).click();
+    await page.waitForFunction(() => document.body.dataset.view === 'workspace', null, { timeout: 10000 });
     await page.waitForSelector('section[aria-label="Agent Swarm 拓扑"]', { timeout: 10000 });
 
     const current = dashboard.rehearsal?.current ?? null;
@@ -90,6 +98,9 @@ function fetchJson(u) {
 
       record('replay label: badge 回放视图 + 只读', /回放视图/.test(header.rehearsalMode) && /原始证据只读/.test(header.rehearsalMode), header.rehearsalMode);
       record('replay acceptance never claims task_live', (dashboard.acceptance?.task_live ?? 'not_run') !== 'passed', JSON.stringify(dashboard.acceptance));
+      record('real API replay and all three acceptance states', dashboard.provenance === 'replay'
+        && dashboard.acceptance.contract_local === 'passed' && dashboard.acceptance.interface_live === 'not_run'
+        && dashboard.acceptance.task_live === 'not_run', JSON.stringify(dashboard.acceptance));
 
       await page.waitForSelector('.swarm-svg .swarm-node-label', { timeout: 10000 });
       const topo = await page.evaluate(() => ({
@@ -221,13 +232,68 @@ function fetchJson(u) {
       await page.screenshot({ path: path.join(output, 'nodata-swarm.png'), fullPage: true });
     }
 
+    const evomapWire = await evomapResponse;
+    const evomap = await evomapWire.json();
+    fs.writeFileSync(path.join(output, 'evomap.json'), JSON.stringify(evomap, null, 2));
+    await page.waitForFunction(() => document.querySelector('.morph-evomap-form button[type=submit]')?.disabled === false);
+    const screenshots = [];
+    for (const [width, height] of [[1366, 768], [1920, 1080], [375, 812]]) {
+      await page.setViewportSize({ width, height });
+      const shot = async name => {
+        const file = `${mode}-${width}-${name}.png`;
+        await page.screenshot({ path: path.join(output, file) }); screenshots.push(file);
+      };
+      await page.getByRole('tab', { name: '当前任务', exact: true }).click();
+      await page.evaluate(() => document.fonts.ready);
+      record(`${width} local Inter font loaded`, await page.evaluate(() => [...document.fonts].some(font => font.family === 'Inter Variable' && font.status === 'loaded')));
+      record(`${width} task and provenance from real API`, await page.locator('#provenance').innerText() === expectedHeaderProvenance
+        && (!current || (await page.locator('.backend-breadcrumb-task').innerText()) === current.task_id));
+      await shot('task');
+      await page.getByRole('button', { name: '验收详情', exact: true }).click();
+      for (const state of ['contract_local', 'interface_live', 'task_live']) {
+        record(`${width} visible ${state} equals API`, await page.locator(`#${state}`).isVisible()
+          && await page.locator(`#${state}`).innerText() === dashboard.acceptance[state]);
+      }
+      await shot('details');
+      await page.keyboard.press('Escape');
+      await page.getByRole('tab', { name: '蜂群拓扑', exact: true }).click();
+      if (await page.locator('.swarm-detail-close').isVisible()) await page.locator('.swarm-detail-close').click();
+      await shot('topology');
+      if (current?.members.length) {
+        await page.locator('.swarm-member-list button').first().click();
+        await page.locator('.swarm-detail').evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+        record(`${width} member detail visible in content viewport`, await page.locator('.swarm-detail').evaluate(el => {
+          const r = el.getBoundingClientRect(), frame = document.querySelector('.backend-content-scroll').getBoundingClientRect();
+          return r.top >= frame.top && r.bottom <= frame.bottom;
+        }));
+        await shot('member');
+        await page.locator('.swarm-detail-close').click();
+      }
+      for (const [tab, panel, name] of [['Gene 池', 'genes', 'genes'], ['证据与指标', 'evidence', 'evidence'], ['EvoMap 只读', 'evomap', 'evomap']]) {
+        await page.getByRole('tab', { name: tab, exact: true }).click();
+        await page.waitForTimeout(250); // let the chart resize to its newly visible panel
+        record(`${width} ${name} view actually visible`, await page.locator(`#backend-${panel}`).isVisible()
+          && await page.locator('[role=tabpanel]:visible').count() === 1);
+        if (name === 'evomap') {
+          const text = await page.locator('#backend-evomap').innerText();
+          for (const key of ['community_search', 'community_categories', 'local_pool']) {
+            if (evomap[key]) record(`${width} EvoMap ${key} state matches real response`, text.includes(evomap[key].state));
+          }
+        }
+        record(`${width} ${name} no horizontal overflow`, await page.evaluate(() => document.documentElement.scrollWidth === innerWidth));
+        await shot(name);
+      }
+    }
+    record('only read-only browser requests', requests.every(request => request.method === 'GET'));
+    record('no unexpected HTTP failures', httpFailures.every(response => new URL(response.url).pathname.startsWith('/api/evomap')), JSON.stringify(httpFailures));
+    record('no unexpected console errors', consoleErrors.every(error => error.url.includes('/api/evomap') && /Failed to load resource/.test(error.text)), JSON.stringify(consoleErrors));
     record('no pageerror', errors.length === 0, errors.slice(0, 3).join(' | '));
     record('browser stayed same-origin', external.length === 0, external.slice(0, 3).join(' | '));
 
     const summary = {
       url, mode, when: new Date().toISOString(),
       provenance: dashboard.provenance, source_label: dashboard.source_label,
-      pageerrors: errors, externalRequests: external, results,
+      pageerrors: errors, externalRequests: external, consoleErrors, httpFailures, requests, screenshots, results,
       passed: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok).length,
     };
     fs.writeFileSync(path.join(output, `summary-${mode}.json`), JSON.stringify(summary, null, 2));
