@@ -1,5 +1,19 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 北京 ECS 公网部署与后端接入（2026-09-23，进行中）
+
+用户明确授权连接项目后端，使用已配置的阿里云 CLI 部署到北京服务器，不绑定域名，直接暴露公网。已实时核验 ECS `i-2ze2nztd89vevmw21wif` / `47.93.118.110` / `cn-beijing` / Ubuntu 24.04，SSH 别名 `gongzhi-ecs` 可连接；80/443 为现有共治项目，保持其容器、数据和代理配置。新项目采用独立 `/opt/morphogenesis`、Compose project 与公网 TCP 7799；前端静态资源和 `/api/dashboard`、只读 `/api/evomap` 同源，由 Web 代理提供，Python 后端仅容器网络可达。不开数据库、模型凭据或控制接口公网端口。
+
+延续 F 的前端所有权，新增不冲突的 D 部署轨：
+
+| 轨 | 固定工作树 / write_paths | 交付 |
+|---|---|---|
+| F | `morph-gpt-reference`，原 write_paths 不变 | 完成前端原任务；当前停在 Codex 交互提醒，不能代替原 F 提交或绕过门禁 |
+| D | `morph-beijing-deploy`；`deploy/**`, `viz/server.py`, `tests/deployment/**`, `docs/tracks/beijing-deployment.md` | 基于 c68def4 + 最新主控治理提交，保留现有栈，为 Python 服务增加保持 loopback 默认的明确监听配置；制作隔离容器/代理/部署说明与必需测试；构建只用锁定依赖，不改锁；commit + push |
+| I | `morph-gpt-reference-integration`；原集成 write_paths、`docs/tracks/beijing-deployment-integration.md` | F/D 完成后精确 SHA 普通合并，复验前端流程和真实同源后端，容器构建/HTTP/浏览器通过；领域缺陷退原 Worker；commit + push |
+
+部署使用验收后的集成提交、可回滚版本目录与既有 Docker，不升级或重启其它项目。先内网验证，再只开放 7799 安全组规则，最后从本机真实浏览器经公网 IP 检查。仅复制项目代码、构建产物及明确的演示数据，不复制工作站凭据、私钥、CLI 配置或运行目录。数据默认空态或明确 mock；若使用现有历史运行记录，保持 replay 标识，不声称新 task_live。用户尚未要求新任务执行 API，本轮不扩建控制面或运行付费任务。
+
 ## GPT + EvoMap API：双包设计语言直接移植（2026-09-23，进行中）
 
 用户解除 Kimi 限制，明确使用 GPT 与本轮提供的 EvoMap API，并授权高级模型；要求对照 `christmas-site.zip`、`linear-site.zip` 一比一改造成项目页面，使用包体开发。该最新指令取代历史“只观察、不复用包内样式/资源”的限制。基线为已验收序幕 `c68def4de25cedb48acd258bea614f7dff35cc16`。主 Agent 只做计划、设计对照与验收；API 中已实时核验的 `evomap-gpt-5.6-sol` 接收参考/现有截图做具体设计审查，GPT 开发 Worker 直接读取两个包实现，另一个 GPT Worker 独立集成。凭据只注入单次调用的进程内存，不入 Git、日志、页面或 Worker prompt；调用次数/usage 如实记录，费用未知不估算。
