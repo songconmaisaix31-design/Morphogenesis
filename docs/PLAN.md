@@ -4,7 +4,7 @@
 
 本轮用户任务书优先：不开新功能分支，所有提交直接进入 `codex/morphogenesis-mainline` 并推送。基线 `bd10f37c0ad378955210a1a76bd431f31a25ffee`，开工工作区 clean。采用同一 Orca 主线工作区内的互斥文件所有权，替代历史每轨新 worktree/branch 规则；主控只写治理文档。Worker 不得自行切分支、暂存他人文件或并发提交；完成领域开发后向主控申请串行提交时段，由原 Worker 显式暂存自有路径、commit + push。最后独立 I 复验累计主线，领域问题退原 Worker，不制造无意义合并。
 
-前置一已核实：网关 `94b7081`、第四轮报告 `61784b7` 均为 HEAD 祖先，ACCEPTANCE 保存两个真实网关任务通过的记录。前置二待 E 完成：当前无 Evolver CLI、19820 listener 或用户 Proxy settings。用户禁止全局配置修改；仅允许项目 `.runtime/freeze-evolver/` 内安装与官方支持的状态重定向，不写真实用户 home、不启动持续进化/领任务/付费验证。E 完成一次 hello/heartbeat 并报告证据前，D/T 只读核查，不进入领域开发。
+前置一已核实：网关 `94b7081`、第四轮报告 `61784b7` 均为 HEAD 祖先，ACCEPTANCE 保存两个真实网关任务通过的记录。前置二于 18:31 CST 判为 BLOCKED：项目内官方工具已安装，唯一真实 bootstrap hello 被 Hub CAPTCHA 明确拒绝，未取得凭据，heartbeat/19820 Proxy 未执行；详见 ACCEPTANCE 的回执。用户禁止全局配置修改；全部状态限项目 `.runtime/freeze-evolver/`，真实用户 home 未写，不启动持续进化/领任务/付费验证。仍遵守用户“两个前置都过才继续”：E/D/T 只整理核查报告，不进入领域开发；已请求用户是否允许在外部门禁 blocked 时继续独立本地工作，未答复前不视为批准。
 
 | 轨道 | 独占 write_paths | 验收与边界 |
 |---|---|---|
@@ -14,7 +14,7 @@
 | 主控 | `docs/PLAN.md`, `docs/STATUS.md`, `docs/DECISIONS.md`, `docs/ACCEPTANCE.md` | 串行提交协调；G0 三层预算护栏与真实历史用量复核；只据真实回执更新 G3/G4/G5 |
 | I / 最后独立集成 | `tests/integration/**`, `docs/tracks/freeze-integration.md`, `.runtime/freeze-integration/**` | E/D/T 完成后复核确切 SHA、全量测试/类型/构建/双平台 CI；少量接线需先归属协调 |
 
-统一约束：沿用 `Acceptance` 的 `passed` 状态与 live/replay/mock 语义；来源细分类用适配器字段表示，不能擅改共享 Provenance 契约。模型标识记录请求和实际返回两者，费用未知保持 null。仅授权本轮一组 Hub 发布/回收/效果报告及必要的一轮有界网关演示；任何未知写结果停止重试。不存在可用 Premium 凭据时不探测 KG。G0 仍有上游在途硬封顶限制，G5 软件、异网可达、物理展示分别记录。
+统一约束：沿用 `Acceptance` 的 `passed` 状态与 live/replay/mock 语义；来源细分类用适配器字段表示，不能擅改共享 Provenance 契约。模型标识记录请求和实际返回两者，费用未知保持 null。仅授权本轮一组 Hub 发布/回收/效果报告及必要的一轮有界网关演示；任何未知写结果停止重试。不存在可用 Premium 凭据时不探测 KG。G0 仍有上游在途硬封顶限制，G5 软件、异网可达、物理展示分别记录。主控已只读核实既有 `gongzhi-ecs` 可连接；前置放行后 D 是本项目 `/opt/morphogenesis` / 7799 的唯一部署操作者，替代旧部署材料中的主控/I 操作者约定，仍禁止触及共治容器和 80/443。
 
 ## Linear 后台结构返修（2026-09-23）
 

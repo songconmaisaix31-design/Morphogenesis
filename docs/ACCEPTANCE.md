@@ -1,5 +1,21 @@
 # 验收矩阵
 
+## 封板夜前置核查（2026-09-23 18:31 CST）
+
+本轮从主线 `bd10f37c0ad378955210a1a76bd431f31a25ffee` 开始，互斥文件并行计划 `2b58b59` 已推送。**前置一通过，前置二 BLOCKED；尚未放行领域改造、真实 Hub 闭环或新一轮现场演示。** 用户任务书要求两个前置都通过后继续，本条保留实际失败，不以离线适配或旧彩排代替。
+
+| 前置 / 只读核查 | 本轮实测 |
+|---|---|
+| 网关与第四轮合入 | `git merge-base --is-ancestor 94b70816784fcd46ce4f74b8e205bd009b789cc3 HEAD` 与 `61784b73be6b2a47a3a45f8e206678d4f932ae59 HEAD` 均 exit 0；第四轮报告仍在下文 |
+| 历史第四轮原件 | 当前主线 `.venv/Scripts/python.exe -B tests/integration/audit_rehearsal.py <下文第四轮原始根>` exit 0；2 请求、2,235 tokens、21 衰减采样、实际采用和归档一致，29 份文件不变；本轮新增模型调用 0 |
+| Evolver 工具准备 | 项目 `.runtime/freeze-evolver/` 内固定安装官方 2.0.38，并安装 1.94.0 比对官方 bootstrap API；没有全局安装或修改用户 home。2.0.38 Proxy CLI 要求已有节点凭据；旧版默认 start 会启动持续行为，因此采用官方模块的受控组合前置，未修改官方源码 |
+| 唯一真实 hello | UTC `2026-09-23T10:30:49.970Z`–`10:30:52.458Z`，Hub 回执 `msg_1790159452373_c5ed9018`，`status=rejected`、`reason=hello_blocked: bulk-fetch antibody active`、`captcha_required=true`、`retry_after_ms=3600000` |
+| 尚未发生的副作用 | 没有获得节点凭据；v2 authenticated hello、heartbeat、19820 Proxy listener、PUBLISH/FETCH/REPORT 全未执行；没有自动重试、更换身份、升级、领任务或质押 |
+| 本机/远端条件 | 初始仅 7844 本地回放监听；7799/7526/7527 尚未激活。本机 Docker daemon 不可用；已配置 `gongzhi-ecs` 只读连接成功、原共治容器健康，Morphogenesis 公网仍未部署。当前 Worker 进程没有 `MORPH_EVOMAP_API_KEY` |
+| 竞态历史定位 | `e83a816` 失败针对 adopted Gene `weight > 0.5`，已由 `94b7081` 改为实际 elapsed/tau 公式并覆盖 0.2 秒延迟。`pipes[0].weight` 的反馈更新为同步路径，不能靠额外等待改善；T 轨已在未改测试代码下基线 7 passed，正式收尾回归尚未放行 |
+
+脱敏回执位于本项目 `.runtime/freeze-evolver/bootstrap-hello.json`、`preflight-result.json`，不入 Git。外部拦截的 CAPTCHA 需用户在正常官方流程处理；不以换身份或换网络规避。E/D/T 当前只整理前置报告，等待用户是否调整开工门禁。G3/G4 外部部分保持 BLOCKED，G5 新软件演示/陌生网络/物理展示保持 NOT_RUN。
+
 ## Linear 原包直接改造与本地后端集成（2026-09-23）
 
 F `d0724a6a2f32f2f03860bbab06ebb82266abdcaf` 直接复用用户 Linear 包的应用 DOM/组件结构、源 CSS 与 11 个 SVG，形成真实任务、拓扑、Gene、证据、EvoMap 五视图；保留黄色原生黏菌、无鼠标/触屏趋食和双语序幕。独立 I 普通合入 F、D `50d1353` 与治理；最终 `7c24398e99b526b8ca45de077079db9c46de86ed` 已推送并由主线 fast-forward 接收。旧 `2df3138` 后台视觉通过结论仍撤回，不混用旧截图。
