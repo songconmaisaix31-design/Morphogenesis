@@ -340,6 +340,7 @@ def _worker_audit(view: dict[str, Any]) -> list[dict[str, Any]]:
     """Sanitized per-attempt worker audit facts (asset_id, usage class, provenance)."""
     result: list[dict[str, Any]] = []
     for record in _records(view, "audit"):
+        execution = _as_dict(record.get("execution"))
         worker_id = _as_str(record.get("worker_id"))
         task_id = _as_str(record.get("task_id"))
         if not worker_id and not task_id:
@@ -355,8 +356,8 @@ def _worker_audit(view: dict[str, Any]) -> list[dict[str, Any]]:
             "evidence_class": _as_str(record.get("evidence_class")),
             "interface_live": _as_str(record.get("interface_live")),
             "task_live": _as_str(record.get("task_live")),
-            "requested_model": _as_str(record.get("requested_model")),
-            "returned_model": _as_str(record.get("returned_model")),
+            "requested_model": _as_str(execution.get("requested_model")),
+            "returned_model": _as_str(execution.get("returned_model")),
             "created_at": _as_float(record.get("created_at")),
         })
     result.sort(key=lambda item: (item["created_at"] is None, item["created_at"]))

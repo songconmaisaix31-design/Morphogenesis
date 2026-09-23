@@ -232,6 +232,21 @@ class ProjectionTests(unittest.TestCase):
         self.assertEqual("not_run", result["acceptance"]["task_live"])
         self.assertEqual("live", result["worker_audit"][0]["provenance"])
 
+    def test_worker_audit_projects_model_names_from_nested_execution(self) -> None:
+        records = [{
+            "worker_id": "w1", "task_id": "t1", "provenance": "live",
+            "requested_model": "ignore-top-level",
+            "execution": {"requested_model": "gemini-pro", "returned_model": "glm-5.2"},
+        }, {
+            "worker_id": "w2", "task_id": "t2", "provenance": "live",
+            "execution": {},
+        }]
+        audits = project(_view({"audit": _records(records=records)}))["worker_audit"]
+        self.assertEqual("gemini-pro", audits[0]["requested_model"])
+        self.assertEqual("glm-5.2", audits[0]["returned_model"])
+        self.assertIsNone(audits[1]["requested_model"])
+        self.assertIsNone(audits[1]["returned_model"])
+
     def test_source_availability_is_projected_without_raw_rows(self) -> None:
         result = project(_view({"ledger": _db("missing"), "audit": _records("error")}))
         self.assertEqual("missing", result["sources"]["ledger"]["state"])
