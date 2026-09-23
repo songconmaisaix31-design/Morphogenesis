@@ -214,7 +214,7 @@ def seed_benchmark(config: Any, examples: list[BenchmarkExample]) -> tuple[Path,
 def benchmark_config(config: Any) -> Any:
     """Fail closed unless R's generic runtime supplies all benchmark capabilities."""
     required = frozenset(CAPABILITIES.values())
-    if config.tasks not in (48, 96) or config.workers not in (8, 16):
+    if (config.workers, config.tasks) not in {(8, 48), (16, 96)}:
         raise ValueError("benchmark_requires_8x48_or_16x96")
     if not getattr(config, "worker_models", ()) or len(config.worker_models) != config.workers:
         raise ValueError("benchmark_requires_fixed_worker_models")

@@ -84,6 +84,9 @@ def test_benchmark_configuration_requires_fixed_models_and_all_capabilities():
     with pytest.raises(ValueError, match="all_task_capabilities"):
         benchmark_config(SimpleNamespace(tasks=48, workers=8, worker_models=valid.worker_models,
                                          capability_names=("gsm8k_math",)))
+    with pytest.raises(ValueError, match="8x48_or_16x96"):
+        benchmark_config(SimpleNamespace(tasks=96, workers=8, worker_models=valid.worker_models,
+                                         capability_names=valid.capability_names))
 
 
 def test_run_records_keep_missing_tasks_and_deduplicate_request_telemetry(tmp_path):
