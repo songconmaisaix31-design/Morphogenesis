@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 
 PACKAGES = (
     "contracts", "persistence", "bootstrap", "bridge_node", "hub_client", "orca_provision",
-    "orchestration", "topology", "metabolism", "mocks", "viz",
+    "orchestration", "topology", "metabolism", "mocks", "viz", "swarm", "local_assets",
 )
 
 
@@ -25,6 +25,12 @@ def main() -> int:
     source = Path(__file__).resolve().parents[1]
     sys.path[:] = [str(target)] + [entry for entry in sys.path if Path(entry).resolve() != source]
     for name in PACKAGES:
+        module = importlib.import_module(name)
+        if module.__file__ is None or not Path(module.__file__).resolve().is_relative_to(target):
+            raise AssertionError(f"{name} did not import from installed wheel target")
+    for name in ("swarm.worker_loop", "swarm.observer", "swarm.hub_mirror", "swarm.cli",
+                 "swarm.budget", "swarm.lease", "swarm.pheromone", "swarm.router",
+                 "local_assets.store", "local_assets.validate", "local_assets.promote", "local_assets.snapshot"):
         module = importlib.import_module(name)
         if module.__file__ is None or not Path(module.__file__).resolve().is_relative_to(target):
             raise AssertionError(f"{name} did not import from installed wheel target")
