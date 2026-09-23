@@ -1,5 +1,22 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 沉浸式序幕与产品后台重塑（2026-09-23，进行中）
+
+用户最新目标：保留已验收的原生黄色 Physarum 自动背景且不恢复鼠标/触屏趋食；首屏依次显示小字「黏菌 / PHYSARUM」、同黑底下自生长的拓扑概念动画及小字「自生长 / AGENT SWARM」、再缓慢显示大字「形态发生 / MORPHOGENESIS」，最后由用户点击「进入产品后台」。中文产品名按 Morphogenesis 的直译暂定为「形态发生」。后台参考用户提供的 `linear-site.zip` 的深色三栏密度与层级；序幕参考 `christmas-site.zip` 的黑底大字留白和时间节奏。两包只作本地视觉观察，不复制模型、字体、脚本、图片、文案或站点源码。已在隔离本地服务实际截图核对：前者为居中大字黑底，后者的应用示例为顶栏、左导航、中内容、右详情。
+
+序幕拓扑是**标明“概念动画”**的视觉叙事，不能伪装成 `/api/dashboard` 的真实节点或任务；后台拓扑、事件、Gene、验收三态和来源字段仍取现有只读数据契约，无数据如实空态。保留 `#/physarum` 入口；`#/swarm` 作为旧链接进入后台，新 `#/workspace` 为后台入口。减少动态效果时立即显示完整序幕与进入按钮；切换视图暂停隐藏的高负载动画。只读 mock/回放/真实任务验收分列，不新增付费彩排或 Hub 写操作。
+
+从已推送集成基线 `ab87ba17625bf27afdaa840e898d48bb5db0003b` 建三条互斥开发轨，每轨一个 Agent / Orca worktree / branch，固定所有权；各轨开发、测试、文档、返修后 commit + push。主控只维护本计划、状态与验收。集成 Agent 最后普通精确 SHA 合并，只补少量接线胶水并重建产物，领域问题交回原轨。
+
+| 轨 | 独占 write_paths | 交付与验收 |
+|---|---|---|
+| G 序幕拓扑 | `viz/frontend/src/intro/**`, `docs/tracks/frontend-growth.md`, `tests/t5/intro/**` | 导出 `GrowthIntro({active,reducedMotion})`；不读取或伪造运行数据，标注概念动画；黑底逐段生长、移动端和 reduced-motion；隐藏时暂停 |
+| B 产品后台 | `viz/frontend/src/backend/**`, `docs/tracks/frontend-backend.md`, `tests/t5/backend/**` | 导出 `Backend({dashboard,active,reducedMotion,evomap,evomapDetail,onSearch,onOpenAsset,onReturn})`；三栏响应式布局；从现有 App 迁入数据区并保留全部 DOM ID、真实拓扑和来源/错误/空态，不引入参考包资产 |
+| S 页面编排 | `viz/frontend/src/App.jsx`, `viz/frontend/src/theme.css`, `viz/frontend/src/components/**`, `docs/tracks/frontend-story.md`, `tests/t5/story/**` | 接入 G/B；Physarum 小字→拓扑小字→双语产品名→显式进入按钮；定时/键盘/深链/减少动态效果；沿用同源轮询及 EvoMap 只读边界；不修改 G/B 文件 |
+| I 独立集成 | 精确合并、`viz/static/assets/finals-shell.*`, `tests/integration/**`, `docs/tracks/frontend-story-integration.md` 与必要少量导入/路由胶水 | 重建静态资源；浏览器核对 1366×768、1920×1080、375×812 的关键帧和后台；原适用测试与构建通过后提交推送；领域返修退 G/B/S |
+
+视觉验收：首屏与各阶段文字大小、出现顺序、黑背景、黄色黏菌、拓扑生长、产品名和 CTA 均在真实浏览器截图中核对；进入后台后核对 Linear 风格的层级与三栏、现有数据区的真实语义、窄屏、错误态、reduced-motion、前后切换、无控制台错误。7799 为现有本地 mock 预览服务，先核对进程身份再替换静态资源；不触碰 7526/7527。
+
 ## 决赛前端重建（2026-09-23，已完成）
 
 已完成并接收：Kimi F `f99d13988465cd7e56db591ec2cdbbbca2bee553`，独立 I `c62bab718265580cbe9941bfcb8d6ca9f63828c6`；两分支已推送，主线 fast-forward。原 11 项 T5 / 31 项 Node、20 快照三视口 60 帧、8 张关键截图、动效/错误复位、构建和安装包资源检查通过。7527 已切换到新模板只读回放，并通过实际入口三视口检查；详见 [视觉改版验收](ACCEPTANCE.md)。以下保留执行范围与所有权。F 补充任务 `task_ab7ca1d9550f / ctx_fcf86da4cc82` 处理数字动效与实际依赖许可证；F、I 均已结算并执行 worker-release，F 为原有外部终端保留，I owned terminal 已释放。
