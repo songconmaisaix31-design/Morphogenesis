@@ -1,5 +1,11 @@
 # 开发状态
 
+## 当前：本地回归与双平台恢复，Hub 发布补齐 schema（2026-09-23 19:54 CST）
+
+D `25968dc` 已推送，85 项适用测试与 strict 通过，该精确 SHA 双平台 CI success。本地 7799/7526 replay 已启动并完成三尺寸浏览器检查；远端标准归档与单个历史快照已送达，但唯一 Docker build 被 Docker Hub metadata 超时阻塞，未启动公网服务或修改安全组。T `0d7191a` 报告已推送，正式 T2 回归 56 passed，原竞态修复有效，无测试源码变更。
+
+E 固定身份 hello/heartbeat 已通过；Chrome 实际显示 Online。第一次发布被 HTTP 400 明确拒绝，缺服务端必填 Gene.summary，未 FETCH/REPORT；正在修正官方 SDK 与远端 schema 差异后执行一次有界闭环。账户开关未改，单次发布显式 kg_enrich=false。最终 E 实现、独立 I 累计复验、新网关 live、热点/物理现场仍待完成；历史失败与限制保留于 ACCEPTANCE。
+
 ## 当前：两个开工前置通过，恢复进化/演示开发（2026-09-23 19:32 CST）
 
 用户新凭据已对 Chrome 确认的原节点完成真实认证：19:31:11–19:31:14 CST，hello acknowledged、heartbeat ok，官方 Proxy/MCP 状态检查通过。各发一次，没有重试、轮换、领取任务、付费或资产操作；原 Proxy 进程已因 stdin EOF 正常退出，不能称仍在线。主控已放行原 E/D/T 的领域工作，后续 PUBLISH→FETCH→REPORT、G5、完整回归与双平台 CI 仍待完成。完整请求/响应标识和限制见 [ACCEPTANCE](ACCEPTANCE.md)。

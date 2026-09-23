@@ -1,5 +1,15 @@
 # 验收矩阵
 
+## 封板夜适配、回归与首次发布结果（2026-09-23 19:54 CST）
+
+D 实现 `25968dc8440a25f2472df8cfb7ff62eb3302366d` 已推送：探针复用有类型的验收证据，合法 live 可以通过，空态/mock/replay 保持原三态；只读 viewer 收紧方法、请求体和静态路径。适用测试 **85 passed**，strict **55 files / 0 errors**。[该精确提交 CI](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/35856386250) 的 Windows 与 Ubuntu 均 success，包含 pytest、类型、构建、SDK 和分发检查，修复了之前 Compose 输出省略 false 键导致的失败。此结论不覆盖尚未提交的 E 适配。
+
+T 正式回归在同一代码基线运行 `tests/t2`，**56 passed in 68.94s**，报告提交 `0d7191a43bbc783b2586baa33067269501c08562` 已推送。原竞态修复已在主线：人为延迟 0.217553139 秒时 Gene 权重 0.113547800 仍严格满足实际时间衰减公式，管道反馈权重 1.0→1.9；无需新增 sleep 或改动测试/锁文件。最终累计实现仍交独立 I 完整复验。
+
+E 第一次真实发布在 **2026-09-23T11:50:35.072Z–11:50:38.314Z** 收到 HTTP **400 / validation_error**，明确缺少 `payload.assets[0].summary`。官方 SDK 1.14.0 接受缺少该字段的 Gene，但当前远端 schema 不接受；不能把 SDK 校验通过当作发布成功。请求 ID `msg_idem_4f6c68d8bd882450819e8ecfa014e81eab34cac2`，HTTP 请求 ID `fda29001-ead0-4b4f-accb-6a7ef9874a63`，无响应 message ID。脱敏原件 `.runtime/freeze-evolver/asset-cycle-live-20260923-01/`；publish/fetch/report 次数 **1/0/0**，`kg_enrich=false`，无新增 hello/heartbeat、后台 tick 或自动重试。该候选 Gene 为 `sha256:76c7584dfb2c59c77a8577fd6a23306ae623eef7fa77fb032f42b81cb41d1574`，未发布成功。主控已按原闭环授权安排补齐 schema、生成新不可变候选并验证后执行一次修正请求；G3/G4 仍未通过。
+
+G5：本机 7799 与 7526 的第四轮只读 replay 已经 smoke、healthcheck 和真实 Chromium 三尺寸检查；三态为 passed/not_run/not_run，不算新 live 演示。远端只发送标准白名单代码归档及单个已授权历史快照，后者 SHA-256 与本机一致。唯一 Docker build 因 `registry-1.docker.io:443` metadata 超时失败，未进入 up、没有远端 Morphogenesis 容器或 7799 listener，安全组未改；共治四容器保持 healthy。公网仍 blocked；新网关演示缺独立模型凭据，热点/第二设备与物理展示尚未执行。详见 [D 报告](tracks/freeze-demo.md)。
+
 ## 前置二真实通过与领域放行（2026-09-23 19:32 CST）
 
 在主线 `8d0893f957acd0ba463ecc9ec2a8dbac20ad4512` 上，使用用户提供的原节点凭据运行 `node .runtime/freeze-evolver/authenticated-preflight.mjs --live`。真实过程为 **2026-09-23T11:31:11.257Z–11:31:14.845Z / 北京时间 19:31:11–19:31:14**，晚于服务端最早重试时间；主控已独立读取下列脱敏证据核对。
@@ -14,6 +24,10 @@
 两次回执均无 CAPTCHA、secret 返回或 force update，credit_balance=0；不推断零余额下资产接口的可用性。hello=1、heartbeat=1，无网络 tick、重试或 secret 轮换；前置进程 PID 47272 随 stdin EOF 正常 stop/退出，以上是成功运行证据，不是持续在线声明。原件保存在 `.runtime/freeze-evolver/recovery-evidence/authenticated-20260923-01/` 的 `hello-request.json`、`hello-result.json`、`heartbeat-request.json`、`heartbeat-result.json`、`summary.json`；settings 含本地 IPC 凭据，私有忽略、不发布。
 
 **前置一、前置二均通过，领域工作已放行。** G3/G4 的资产 PUBLISH→远端同 ID FETCH→实际使用 REPORT 尚未执行，不能因注册/心跳成功提前翻绿；G5、正式全量回归和最终双平台 CI 也保持待完成。
+
+19:42–19:43 CST，主控通过 Chrome 正常地址栏重新打开官方 `/account/agents`，已在实际视口确认同一 `Codex Agent / node_e2ad48c0d0d63625` 为 **Online**、reputation=50、published=0；截图 `.runtime/hub-discovery/chrome-agent-node-after-hello-20260923-1942.png` 已查看，仅留本地。Online 是网页对近期心跳的状态展示，不覆盖前置进程已正常退出的事实，也不表示已发布资产。窗口变化后的导航使用现有 Chrome 的 computer-use 完成，未改账户开关、重置凭据、质押或领取任务。
+
+页面同时显示“Auto-enrich Genes via Knowledge Graph on publish”开启。当前 [官方 KG 说明](https://evomap.ai/wiki/20-knowledge-graph) 明确支持单次 publish payload `kg_enrich: false`；E 已核对并将在实际 Hub 出站信封中显式设置、以离线 transport 观测验证，避免官方 Proxy/adapter 只透传 assets 而丢失该字段。保持账户设置原样；这属于原任务不调用 KG 的实现约束，不追加付费动作。
 
 ## G0：三层预算护栏与上游边界（2026-09-23）
 
