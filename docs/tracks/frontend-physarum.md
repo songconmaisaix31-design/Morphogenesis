@@ -90,3 +90,11 @@ cd viz/frontend && npx vite build --outDir <临时目录> --emptyOutDir # 3892 m
 
 本轮隔离测试：`npx esbuild src/physarum/PhysarumField.jsx --bundle --outfile=../../.runtime/physarum/refine-check.js --loader:.js=jsx` 通过；`npx vite build --outDir ../../.runtime/physarum/refine-build --emptyOutDir` 通过（3892 modules，53.30s，不写共享构建产物）。Chromium 1234，1280×800，独立 Vite harness：空闲及向 (1100,190) 悬停 5s 的截图见未入库 `.runtime/physarum/refine-{initial,feeding}.png`；实际观测为黄色连通的脉络/扇形前缘，前缘随光标显著前移，平均帧约 10–14ms，无组件 WebGL 错误。`check_physarum_final.cjs` 的卸载清理、DPR=2 坐标映射、触屏质量检查通过。此截图没有页面标题叠层，不等于最终集成页在 7799 的验收；需集成轨在真实页面检查布局与遮挡。GPU 中的粒子路径仍是简化启发式，前缘/脉络由实时 WebGL 合成层呈现，非对真实黏菌的物理求解。
 追加降级检查：Chromium `?reduce` 无 canvas、有黄色 SVG 静态图；`--disable-webgl` 报 `webgl2-unavailable` 并进入同一静态图。均通过。
+
+## 集成页目视返修（第二轮）
+
+集成轨在 7799 页面对第一轮 `2a501ad` 做真实 Chromium 目视检查，发现后部是几条平行平滑金色线、前缘像整块半透明叶片，减少动态效果的 SVG 也像被放大的叶片。第二轮把前缘片体亮度降到只作薄膜背景，并用两组交错、弯曲的细脉构成可见网状结构；后部改成七条起点、汇点、宽度和弯曲程度各异的脉络。SVG 静态图改为固定 160×90 视图内的多脉络网络，避免全屏巨型轮廓。
+
+前缘坐标现被限制在视区内的安全范围，收到真正的 `pointerleave` 后立即将默认位置设为目标、平滑回位。集成轨先前标作“回位失败”的截图实际上是鼠标仍位于全屏黏菌区域内，因此它证明的是持续投喂到左上角，不是离开事件失败。本轮仍验证了明确派发 `pointerleave` 后 2.2 秒返回默认位置。
+
+隔离 Chromium 1366×768 截图：`.runtime/physarum/rework-{idle,hover,recovery,reduced}.png`。实测 WebGL 无错误、平均帧约 21.8ms；`npx esbuild src/physarum/PhysarumField.jsx --bundle --outfile=../../.runtime/physarum/rework-check.js --loader:.js=jsx` 通过，临时目录 Vite build 3892 modules 通过；卸载、DPR2 坐标、触屏质量检查通过；减少动态效果和禁用 WebGL 均显示无 canvas 的静态网状视图。最终集成页叠层与真实 7799 仍需集成轨以本次 SHA 复核。

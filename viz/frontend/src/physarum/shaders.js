@@ -216,35 +216,37 @@ void main() {
     vec2 across = vec2(-along.y, along.x);
     float t = dot(p - rear, along) / len;
     float side = dot(p - rear, across);
-    float bend = 24.0 * sin(t * 3.1 + 0.4);
+    float bend = 14.0 * sin(t * 5.1 + 0.4) + 8.0 * sin(t * 12.7);
     float y = side - bend;
     float flow = sin(time * 0.045 - t * 8.0);
 
     // A wide, irregular anterior sheet grows from a narrow rear trunk.
-    float fanWidth = min(resolution.y * 0.18, 118.0) * smoothstep(0.42, 0.88, t)
-        * mix(1.15, 0.78, step(0.0, y));
-    float ripple = 7.5 * sin(y * 0.052 + time * 0.016) + 4.0 * sin(y * 0.12 - t * 9.0);
-    float frontEdge = 1.045 + 0.055 * sin(y * 0.036 + 0.7) + 0.025 * sin(y * 0.09);
+    float fanWidth = min(resolution.y * 0.17, 110.0) * smoothstep(0.44, 0.84, t)
+        * mix(1.1, 0.84, step(0.0, y));
+    float ripple = 8.0 * sin(y * 0.046 + time * 0.012) + 5.0 * sin(y * 0.13 - t * 12.0);
+    float frontEdge = 1.01 + 0.07 * sin(y * 0.044 + 0.7) + 0.04 * sin(y * 0.11);
     float sheet = smoothstep(0.43, 0.7, t) * (1.0 - smoothstep(frontEdge - 0.04, frontEdge + 0.035, t))
-        * (1.0 - smoothstep(fanWidth - 5.0 + ripple, fanWidth + 4.0 + ripple, abs(y)));
+        * (1.0 - smoothstep(fanWidth - 4.0 + ripple, fanWidth + 4.0 + ripple, abs(y)));
 
     // Posterior veins join the same trunk and gradually enter the fan.
-    float trunk = (1.0 - smoothstep(3.0 + 3.0 * t, 6.0 + 3.0 * t, abs(y)))
-        * smoothstep(-0.05, 0.04, t) * (1.0 - smoothstep(0.84, 1.0, t));
+    float trunkWidth = 3.0 + 1.5 * sin(t * 18.0) + 2.0 * smoothstep(0.2, 0.8, t);
+    float trunk = (1.0 - smoothstep(trunkWidth, trunkWidth + 2.2, abs(y)))
+        * smoothstep(-0.05, 0.04, t) * (1.0 - smoothstep(0.86, 1.0, t));
     float branches = 0.0;
-    for (int i = 1; i <= 3; i++) {
+    for (int i = 0; i < 7; i++) {
         float q = float(i);
-        float split = 0.01 + 0.07 * q;
-        float join = 0.72 + 0.04 * q;
-        float reach = smoothstep(split, split + 0.045, t) * (1.0 - smoothstep(join - 0.08, join, t));
+        float split = 0.035 + 0.048 * q;
+        float join = 0.6 + 0.045 * mod(q * 3.0, 5.0);
+        float reach = smoothstep(split, split + 0.035, t) * (1.0 - smoothstep(join - 0.07, join, t));
         float progress = clamp((t - split) / (join - split), 0.0, 1.0);
-        float lane = (11.0 + q * 17.0) * sin(progress * 3.14159265)
-            + (5.5 * sin(t * (15.0 + q * 3.0) + q * 1.7)
-            + 2.7 * sin(t * 31.0 + q * 4.2)) * sin(progress * 3.14159265);
-        float width = max(0.9, 2.0 + q * 0.4 + 0.8 * sin(time * 0.045 - t * 8.0 + q)
-            + 1.1 * sin(t * 23.0 + q * 2.7));
-        branches = max(branches, reach * (1.0 - smoothstep(width, width + 3.0, abs(y - lane))));
-        branches = max(branches, reach * (1.0 - smoothstep(width, width + 3.0, abs(y + lane * 0.78))));
+        float sign = mod(q, 2.0) < 0.5 ? 1.0 : -1.0;
+        float lane = sign * (16.0 + q * 9.0) * sin(progress * 3.14159265)
+            + (6.0 * sin(t * (17.0 + q * 2.7) + q * 1.9)
+            + 3.2 * sin(t * 43.0 + q * 3.4)) * sin(progress * 3.14159265);
+        float width = max(0.8, 1.8 + 0.35 * mod(q * 3.0, 4.0)
+            + 0.6 * sin(time * 0.045 - t * 8.0 + q)
+            + 1.25 * sin(t * (24.0 + q) + q * 2.7));
+        branches = max(branches, reach * (1.0 - smoothstep(width, width + 2.0, abs(y - lane))));
     }
     // Short transverse anastomoses connect neighboring veins.
     float crossA = (1.0 - smoothstep(0.31, 0.335, t)) * smoothstep(0.26, 0.285, t)
@@ -253,13 +255,17 @@ void main() {
         * (1.0 - smoothstep(1.3, 3.0, abs(y + (t - 0.51) * 650.0 + 27.0)));
     float veins = max(trunk, max(branches, max(crossA, crossB) * 0.65));
     float trail = dot(texture(diffuseTexture, vUv).rgb, vec3(0.3333));
-    float mottling = sin(p.x * 0.052 + sin(p.y * 0.023) * 2.0) * sin(p.y * 0.065 - t * 5.0);
-    float grain = 0.66 + 0.21 * mottling + 0.13 * smoothstep(0.02, 0.4, trail);
-    float ribs = sheet * smoothstep(0.6, 0.78, t)
-        * pow(max(0.0, sin(y * 0.16 + t * 19.0 + 3.0 * sin(t * 10.0))), 10.0);
-    float lip = sheet * smoothstep(frontEdge - 0.12, frontEdge - 0.015, t);
-    float fill = sheet * (0.47 + 0.04 * flow) + veins * (0.55 + 0.11 * flow)
-        + ribs * 0.16 + lip * 0.18;
+    float mottling = sin(p.x * 0.067 + sin(p.y * 0.027) * 2.0) * sin(p.y * 0.075 - t * 7.0);
+    float grain = 0.7 + 0.18 * mottling + 0.12 * smoothstep(0.02, 0.4, trail);
+    // Within the thin fan, two warped vein families intersect repeatedly.
+    // The darker open spaces prevent it reading as a solid painted leaf.
+    float warp = 7.0 * sin(t * 17.0 + y * 0.025) + 3.0 * sin(t * 31.0 - y * 0.046);
+    float ribA = 1.0 - smoothstep(0.08, 0.3, abs(sin((y + warp) * 0.115 + t * 5.0)));
+    float ribB = 1.0 - smoothstep(0.055, 0.24, abs(sin((y - warp) * 0.14 - t * 8.0)));
+    float fanWeb = sheet * max(ribA * 0.35, ribB * 0.25);
+    float lip = sheet * smoothstep(frontEdge - 0.095, frontEdge - 0.01, t);
+    float fill = sheet * (0.075 + 0.015 * flow) + fanWeb + veins * (0.57 + 0.12 * flow)
+        + lip * 0.19;
     vec3 gold = vec3(0.95, 0.66, 0.07);
     vec3 amber = vec3(1.0, 0.85, 0.26);
     vec3 col = bgColor + mix(gold, amber, veins * 0.72) * clamp(fill * grain, 0.0, 0.88);

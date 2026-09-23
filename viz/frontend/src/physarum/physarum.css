@@ -66,17 +66,22 @@
 }
 
 .physarum-fallback-sheet {
-  fill: rgba(245, 190, 42, 0.28);
-  stroke: rgba(255, 211, 75, 0.62);
-  stroke-width: 0.7;
+  fill: rgba(245, 190, 42, 0.11);
+  stroke: rgba(255, 211, 75, 0.48);
+  stroke-width: 0.45;
 }
 
 .physarum-fallback-vein {
   fill: none;
   stroke: rgba(255, 211, 75, 0.72);
-  stroke-width: 1.4;
+  stroke-width: 0.7;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.physarum-fallback-vein-fine {
+  stroke-width: 0.42;
+  stroke: rgba(255, 211, 75, 0.6);
 }
 
 .physarum-fallback-note {
