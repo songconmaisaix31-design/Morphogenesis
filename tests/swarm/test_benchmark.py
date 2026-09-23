@@ -2,13 +2,19 @@
 
 import json
 import subprocess
+from types import SimpleNamespace
+
+import pytest
 
 from tools.run_swarm_benchmark import (
     BBH_REVISION,
     GSM8K_REVISION,
     BenchmarkExample,
+    benchmark_config,
+    capability_for,
     public_manifest,
     score_response,
+    summarize_run_records,
     summarize,
 )
 
@@ -58,3 +64,39 @@ def test_revision_guard_rejects_nonmatching_checkout(tmp_path, monkeypatch):
 def test_nonfinite_numeric_answers_are_incorrect_not_equal():
     response = '{"answer":"NaN","adopted_asset_ids":[]}'
     assert score_response(example(), response).status == "incorrect"
+
+
+def test_capability_tags_are_specific_to_each_official_stratum():
+    assert capability_for(example()) == "gsm8k_math"
+    logical = BenchmarkExample("fixture:1", "bbh", "logical_deduction_three_objects", "q", "a")
+    assert capability_for(logical) == "bbh_logical_deduction"
+
+
+def test_benchmark_configuration_requires_fixed_models_and_all_capabilities():
+    valid = SimpleNamespace(tasks=48, workers=8, worker_models=("model",) * 8,
+                            capability_names=("gsm8k_math", "bbh_logical_deduction",
+                                              "bbh_multistep_arithmetic", "bbh_boolean"))
+    assert benchmark_config(valid) is valid
+    with pytest.raises(ValueError, match="fixed_worker_models"):
+        benchmark_config(SimpleNamespace(tasks=48, workers=8, worker_models=(),
+                                         capability_names=valid.capability_names))
+    with pytest.raises(ValueError, match="all_task_capabilities"):
+        benchmark_config(SimpleNamespace(tasks=48, workers=8, worker_models=valid.worker_models,
+                                         capability_names=("gsm8k_math",)))
+
+
+def test_run_records_keep_missing_tasks_and_deduplicate_request_telemetry(tmp_path):
+    evidence = tmp_path / "evidence"
+    evidence.mkdir()
+    (evidence / "response.json").write_text('{"content":"{\\"answer\\":\\"42\\",\\"adopted_asset_ids\\":[]}"}', encoding="utf-8")
+    rows = [{"task_id": "benchmark-0", "outcome": "promoted", "usage": {"total_tokens": 10},
+             "execution": {"request_id": "request-1", "requested_model": "requested", "returned_model": "returned",
+                           "http_status": 200, "elapsed_seconds": 1.5, "actual_cost_usd": None,
+                           "evidence_uri": evidence.as_uri()}},
+            {"task_id": "unrelated", "outcome": "execution_failed", "execution": {"request_id": "request-1"}}]
+    report = summarize_run_records([example(), BenchmarkExample("fixture:1", "bbh", "fixture", "q", "True")], rows)
+    assert report["benchmark"]["correct"] == 1
+    assert report["benchmark"]["missing"] == 1
+    assert report["request_count"] == 1
+    assert report["tokens"] == {"known_requests": 1, "known_total": 10, "total": 10}
+    assert report["cost"] == {"known_requests": 0, "billed_usd": None}
