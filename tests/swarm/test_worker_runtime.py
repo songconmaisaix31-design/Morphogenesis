@@ -25,6 +25,15 @@ def events(config):
     return [json.loads(path.read_bytes()) for path in (config.state / "audit").rglob("*.json")]
 
 
+def require_completed(worker, result, *, renewals=None):
+    if result["state"] != "exhausted" or result["completed"] != 1:
+        # pytest truncates rewritten assertion dictionaries; print the complete
+        # safe runtime record as the failure message, including phase and fence.
+        pytest.fail("worker did not complete:\n" + json.dumps(
+            {"status": result, "audit": events(worker.config), "renewals": renewals},
+            indent=2, ensure_ascii=True), pytrace=False)
+
+
 def test_atomic_status_sharing_conflict_is_locally_bounded(tmp_path, monkeypatch):
     import os
     from swarm.worker_loop import _write_json
@@ -176,7 +185,10 @@ def test_failed_execution_settles_usage_keeps_task_and_negative_feedback(tmp_pat
 def test_failed_validation_retains_quarantine_and_accounts_usage(tmp_path):
     config = configured(tmp_path, energy=1)
     worker = Worker(config, WrongAnswer())
-    assert worker.run()["state"] == "stopped"
+    result = worker.run()
+    assert result["state"] == "stopped"
+    assert result["failure"]["failure_stage"] == "validate"
+    assert result["failure"]["validation_reasons"] == ["fixed_expectation_failed"]
     report = worker.assets.reports()[0]
     assert not report.passed and Path(report.worktree_path).exists()
     assert worker.assets.state(report.asset_id) == "quarantined"
@@ -330,7 +342,7 @@ def test_renewal_keeps_slow_local_execution_owned(tmp_path, monkeypatch):
         return result
     monkeypatch.setattr(worker.leases, "renew", record)
     outcome = worker.run()
-    assert outcome["state"] == "exhausted", {"status": outcome, "audit": events(config)}
+    require_completed(worker, outcome, renewals=renewals)
     assert sum(after > before for before, after in renewals) >= 3
     assert len(worker.assets.promotions()) == 1
     assert worker.leases.snapshot() == []
@@ -352,10 +364,105 @@ def test_real_wall_clock_renewal_outlives_initial_ttl(tmp_path, monkeypatch):
         return result
     monkeypatch.setattr(worker.leases, "renew", record)
     result = worker.run()
-    assert result["state"] == "exhausted", {"status": result, "audit": events(config)}
+    require_completed(worker, result, renewals=renewed)
     assert result["completed"] == 1 and len(renewed) >= 2
     assert all(new > old for old, new in renewed)
     assert len(worker.assets.promotions()) == 1 and worker.leases.snapshot() == []
+
+
+def test_slow_submission_status_keeps_lease_alive(tmp_path, monkeypatch):
+    """Durable status IO is preparation and must retain background renewal."""
+    config = configured(tmp_path, energy=1, lease_seconds=2)
+    worker = Worker(config)
+    original = worker._status
+    writes = []
+    def delayed(state, reason=""):
+        if state == "submitting":
+            writes.append(worker._pending["lease"]["expires_at"])
+            time.sleep(2.5)  # Longer than TTL, using real clock/SQLite/fencing.
+        return original(state, reason)
+    monkeypatch.setattr(worker, "_status", delayed)
+    result = worker.run()
+    require_completed(worker, result)
+    assert len(writes) == 1
+    audit = events(config)[0]
+    task = worker.ledger.get(audit["task_id"])
+    assert audit["lease"]["expires_at"] == task.expires_at > writes[0]
+    assert len(worker.assets.promotions()) == 1 and worker.leases.snapshot() == []
+
+
+def test_expiry_after_handoff_still_rejects_submit(tmp_path, monkeypatch):
+    config = configured(tmp_path, energy=1, lease_seconds=2)
+    worker = Worker(config)
+    original = worker.leases.submit
+    def expired(lease, *args, **kwargs):
+        assert worker.leases.is_valid(lease)
+        time.sleep(2.5)  # No renewal once short publication has taken ownership.
+        return original(lease, *args, **kwargs)
+    monkeypatch.setattr(worker.leases, "submit", expired)
+    result = worker.run()
+    assert result["state"] == "stopped"
+    failure = result["failure"]
+    assert failure["failure_stage"] == "submit"
+    assert failure["failure_reason"] == "lease_expired_changed_or_fenced"
+    facts = failure["lease_diagnostics"]
+    assert facts["owner_matches"] and facts["expiry_matches"] and not facts["effect_applied"]
+    assert facts["observed_at"] > facts["lease_expires_at"]
+    assert not worker.assets.promotions()
+    assert not any(event["outcome"] == "promoted" for event in events(config))
+    assert all("return -1" in path.read_text() for path in config.target.rglob("task_*.py"))
+
+
+def test_final_handoff_never_revives_expired_or_replaced_holder(tmp_path, monkeypatch):
+    from swarm.worker_loop import _Renewal
+    config = configured(tmp_path)
+    worker = Worker(config)
+    signal = worker.field.sense(config.locality)[0]
+    old = worker.leases.acquire(signal.task_id, worker.worker_id, ttl_seconds=2, locality=config.locality)
+    clock = old.expires_at + 0.01
+    monkeypatch.setattr(worker.ledger, "now", lambda: clock)
+    with pytest.raises(AssetSafetyError, match="stale_lease"):
+        _Renewal(worker.leases, old, 2).handoff()
+    successor = worker.leases.acquire(signal.task_id, "builder-9", ttl_seconds=2, locality=config.locality)
+    assert successor.token > old.token
+    with pytest.raises(AssetSafetyError, match="stale_lease"):
+        _Renewal(worker.leases, old, 2).handoff()
+    assert worker.leases.is_valid(successor)
+
+
+def test_crash_after_submit_recovers_final_expiry_from_authority(tmp_path, monkeypatch):
+    config = configured(tmp_path, energy=1, lease_seconds=2)
+    worker = Worker(config)
+    def crash():
+        # No finalizing/stopped status is written: retain the actual pre-handoff
+        # durable preparation record, as after loss of the process.
+        raise SystemExit("fixture crash before finalization")
+    monkeypatch.setattr(worker, "_finalize", crash)
+    with pytest.raises(SystemExit):
+        worker.run()
+    pending = json.loads(worker.status_path.read_bytes())["pending_finalization"]
+    task = worker.ledger.get(pending["lease"]["task_id"])
+    assert task.status == "completed" and task.effect_applied
+    assert pending["lease"]["expires_at"] < task.expires_at
+    resumed = Worker(config, Unbounded())
+    require_completed(resumed, resumed.run())
+    promoted = [event for event in events(config) if event["outcome"] == "promoted"]
+    assert len(promoted) == 1 and promoted[0]["lease"]["expires_at"] == task.expires_at
+    assert resumed.ledger.get(task.signal.task_id).attempts == 1
+    assert not resumed.executor.called and resumed.budget.snapshot().tokens == 2
+
+
+def test_failure_diagnostics_exclude_exception_text(tmp_path):
+    class SecretFailure(FixtureExecutor):
+        def execute(self, *args, **kwargs):
+            raise RuntimeError("Bearer private-fixture-credential /private/provider/response")
+    config = configured(tmp_path, energy=1)
+    result = Worker(config, SecretFailure()).run()
+    failure = result["failure"]
+    assert failure["failure_stage"] == "execute" and failure["failure_kind"] == "RuntimeError"
+    assert failure["failure_reason"] == "exception_details_withheld"
+    evidence = json.dumps({"result": result, "audit": events(config)})
+    assert "private-fixture-credential" not in evidence and "/private/provider" not in evidence
 
 
 def test_restart_completed_before_approval_does_not_reexecute(tmp_path, monkeypatch):

@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import random
+import sqlite3
 from threading import Event, Lock, Thread
 import time
 from typing import Literal, Protocol
@@ -35,12 +36,48 @@ from swarm.lease import LeaseManager
 from swarm.models import BudgetPolicy, ExecutionBound, Lease, Locality, Reservation, Signal
 from swarm.pheromone import PheromoneField
 from swarm.router import Router
-from swarm.task_ledger import RunLimitReached, TaskLedger
+from swarm.task_ledger import LeaseLost, RunLimitReached, TaskLedger
 
 _JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 _CHANGES = TypeAdapter(tuple[FileChange, ...])
 _SOURCE = Path(__file__).resolve().parents[1]
 _FIXTURE_USAGE: JsonValue = {"usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}}
+
+
+def _safe_failure(error: Exception) -> dict[str, JsonValue]:
+    # Never persist arbitrary exception text (adapters may include credentials).
+    reasons = {
+        "stale_lease", "lease_renewal_did_not_stop", "stale_report", "environment_changed",
+        "tampered_report", "report_candidate_mismatch", "validation_policy_mismatch",
+        "report_not_passed", "target_revision_changed", "target_changed_after_preparation",
+        "target_preimage_changed_during_application", "target_preimage_mismatch",
+        "target_changed_during_preparation", "snapshot_target_changed", "application_scope_limit",
+        "execution_provenance_mismatch", "executor_identity_or_scope_mismatch",
+        "application_scope_mismatch", "finalization_requires_completed_effect",
+        "finalization_identity_mismatch", "feedback_incomplete_requires_review",
+        "arbitrary_execution_isolation_unavailable", "fixed_validation_policy_required",
+        "duplicate_policy_paths", "policy_missing_changed_file", "policy_content_limit",
+        "baseline_links_or_submodules", "baseline_preimage_mismatch", "validation_timeout",
+        "javascript_syntax", "python_syntax", "json_syntax", "fixed_expectation_failed",
+        "validation_mutated_worktree", "validation_tree_limit", "dangerous_pattern",
+        "dangerous_import", "unsupported_static_language", "duplicate_or_overlapping_paths",
+        "scope_mismatch", "unchanged_file", "unsupported_binary_or_large_file", "blast_radius_mismatch",
+    }
+    reason = "exception_details_withheld"
+    if isinstance(error, AssetSafetyError):
+        reason = str(error) if str(error) in reasons else "asset_safety_rejected"
+    elif isinstance(error, LeaseLost):
+        reason = "lease_expired_changed_or_fenced"
+    elif isinstance(error, sqlite3.Error):
+        reason = "sqlite_error"
+    elif isinstance(error, OSError):
+        reason = "os_error"
+    result: dict[str, JsonValue] = {"failure_kind": type(error).__name__, "failure_reason": reason}
+    if isinstance(error, OSError):
+        result["os_errno"] = error.errno
+    if isinstance(error, sqlite3.Error):
+        result["sqlite_errorcode"] = getattr(error, "sqlite_errorcode", None)
+    return result
 
 
 class WorkerConfig(BaseModel):
@@ -196,20 +233,39 @@ class _Renewal:
         self.manager, self.current, self.ttl = manager, lease, ttl
         self.stop_event, self.lock = Event(), Lock()
         self.failed = False
+        self.renewals = 0
+        self.last_finished: float | None = None
+        self.max_renew_seconds = 0.0
+        self.max_schedule_gap_seconds = 0.0
+        self.last_failure: dict[str, JsonValue] = {}
+        self.stopped_at: float | None = None
         self.thread = Thread(target=self._run, name="scope-lease-renewal", daemon=True)
 
     def _run(self) -> None:
         while not self.stop_event.wait(max(0.001, min(1.0, self.ttl / 3))):
             with self.lock:
-                try:
-                    renewed = self.manager.renew(self.current, ttl_seconds=self.ttl)
-                    if renewed is None:
-                        self.failed = True
-                        return
-                    self.current = renewed
-                except Exception:
-                    self.failed = True
+                self._renew_locked()
+                if self.failed:
                     return
+
+    def _renew_locked(self) -> None:
+        started = time.monotonic()
+        if self.last_finished is not None:
+            self.max_schedule_gap_seconds = max(self.max_schedule_gap_seconds, started - self.last_finished)
+        try:
+            renewed = self.manager.renew(self.current, ttl_seconds=self.ttl)
+            if renewed is None:
+                self.failed = True
+                self.last_failure = {"failure_reason": "renewal_rejected"}
+                return
+            self.current = renewed
+            self.renewals += 1
+        except Exception as error:
+            self.failed = True
+            self.last_failure = _safe_failure(error)
+        finally:
+            self.last_finished = time.monotonic()
+            self.max_renew_seconds = max(self.max_renew_seconds, self.last_finished - started)
 
     def start(self) -> None:
         self.check()
@@ -226,7 +282,45 @@ class _Renewal:
             self.thread.join(timeout=11)
         if self.thread.is_alive():
             raise AssetSafetyError("lease_renewal_did_not_stop")
+        if self.stopped_at is None:
+            self.stopped_at = time.monotonic()
         return self.current
+
+    def handoff(self) -> Lease:
+        """End renewal races and obtain one fresh, fenced lease for short submit."""
+        self.stop()
+        with self.lock:
+            if not self.failed:
+                # Same configured TTL, no retry: expired/stale holders cannot
+                # extend it. Do no status IO, Git or SDK work after this point.
+                self._renew_locked()
+            if self.failed:
+                raise AssetSafetyError("stale_lease")
+            return self.current
+
+    def diagnostics(self) -> dict[str, JsonValue]:
+        with self.lock:
+            lease = self.current
+            result: dict[str, JsonValue] = {
+                "ttl_seconds": self.ttl, "renewals": self.renewals, "renewal_failed": self.failed,
+                "renewal_error": self.last_failure, "lease_token": lease.token,
+                "lease_expires_at": lease.expires_at, "observed_at": time.time(),
+                "max_renew_seconds": self.max_renew_seconds,
+                "max_schedule_gap_seconds": self.max_schedule_gap_seconds,
+                "seconds_since_renewal": time.monotonic() - self.last_finished
+                if self.last_finished is not None else None,
+                "seconds_since_stop": time.monotonic() - self.stopped_at if self.stopped_at is not None else None,
+            }
+        try:
+            # Only this task, never a global snapshot or a decision input.
+            task = self.manager.ledger.get(lease.task_id)
+            result.update({"task_status": task.status, "task_token": task.token,
+                           "task_expires_at": task.expires_at, "owner_matches": task.owner == lease.worker_id,
+                           "expiry_matches": task.expires_at == lease.expires_at,
+                           "effect_applied": task.effect_applied})
+        except Exception as error:
+            result["observation_error"] = _safe_failure(error)
+        return result
 
 
 class Worker:
@@ -257,6 +351,7 @@ class Worker:
         self.completed = 0
         self._active: Reservation | None = None
         self._pending: dict[str, JsonValue] | None = None
+        self._last_failure: dict[str, JsonValue] | None = None
 
     def _status(self, state: str, reason: str = "") -> dict[str, JsonValue]:
         result: dict[str, JsonValue] = {
@@ -268,6 +363,7 @@ class Worker:
             "active_reservation": _JSON.validate_python(self._active.model_dump(mode="json"))
             if self._active is not None else None,
             "pending_finalization": self._pending,
+            "failure": self._last_failure,
         }
         _write_json(self.status_path, result)
         return result
@@ -349,12 +445,19 @@ class Worker:
         result_id = pending.get("result_id")
         if (task.status != "completed" or task.owner != self.worker_id or task.token != lease.token
                 or task.result_id != result_id or not isinstance(result_id, str) or task.result is None
-                or not task.effect_applied):
+                or not task.effect_applied or task.expires_at is None
+                or lease.swarm_id != task.swarm_id or lease.worker_id != task.owner
+                or Path(lease.scope).resolve() != (self.target / task.signal.scope).resolve()):
             raise AssetSafetyError("finalization_requires_completed_effect")
         asset_id, report_id = pending.get("asset_id"), pending.get("report_id")
         if (not isinstance(asset_id, str) or not isinstance(report_id, str)
                 or task.result.get("candidate_asset_id") != asset_id or task.result.get("report_id") != report_id):
             raise AssetSafetyError("finalization_identity_mismatch")
+        # The durable preparation record predates the final renewal. It binds
+        # stable identity, not authorization to submit. Only completed authority
+        # supplies the final expiry for audit; recovery never renews or submits.
+        lease = lease.model_copy(update={"expires_at": task.expires_at})
+        pending["lease"] = _JSON.validate_python(lease.model_dump(mode="json"))
         report = self.assets.get_report(report_id)
         if self.assets.state(asset_id) != "approved":
             AssetPromoter(self.assets, policy_version=report.policy_version).promote(asset_id, report_id)
@@ -445,6 +548,21 @@ class Worker:
         asset_id: str | None = None
         result_id: str | None = None
         phase = "lease_check"
+        phase_started = time.monotonic()
+        durations: dict[str, JsonValue] = {}
+        self._last_failure = None
+
+        def enter_phase(name: str) -> None:
+            nonlocal phase, phase_started
+            now = time.monotonic()
+            durations[phase] = now - phase_started
+            phase, phase_started = name, now
+
+        def failure_details(details: dict[str, JsonValue]) -> dict[str, JsonValue]:
+            return {"failure_stage": phase, **details,
+                    "phase_seconds": {**durations, phase: time.monotonic() - phase_started},
+                    "lease_diagnostics": keeper.diagnostics()}
+
         failure: dict[str, JsonValue] = {}
         outcome = "execution_unknown"
         usage: JsonValue = None
@@ -452,7 +570,7 @@ class Worker:
             keeper.start()
             # Acceptance comes from immutable operator-seeded task facts.
             policy = ValidationPolicy.model_validate(self.ledger.get(signal.task_id).acceptance.get("validation_policy"))
-            phase = "reserve"
+            enter_phase("reserve")
             bound = self.executor.bound(signal)
             keeper.check()
             self._active = self.budget.reserve(self.worker_id, signal.task_id, bound,
@@ -460,13 +578,13 @@ class Worker:
             self._status("executing")
             try:
                 keeper.check()
-                phase = "snapshot"
+                enter_phase("snapshot")
                 revision, head = snapshot_revision(self.target, signal.scope, self.state / "snapshots")
                 keeper.check()
                 execution_id = uuid4().hex
                 directory = self.state / "execution" / execution_id
                 consumption = self._consume(signal, keeper.current, attempt, revision, head, execution_id)
-                phase = "execute"
+                enter_phase("execute")
                 result = self.executor.execute(signal, attempt, self.target, directory,
                                                base_revision=revision, base_head=head, experience=consumption)
                 if consumption is not None and (
@@ -478,7 +596,7 @@ class Worker:
                 self._active = None
                 raise
             usage = result.usage
-            phase = "settle"
+            enter_phase("settle")
             settled = (self.budget.mark_uncertain(self._active) if result.uncertain else
                        self.budget.settle(self._active, usage))
             self._active = None
@@ -502,12 +620,20 @@ class Worker:
                 candidate = result.candidate
                 if candidate.attempt != attempt or candidate.scope != signal.scope:
                     raise AssetSafetyError("executor_identity_or_scope_mismatch")
+                enter_phase("publish_asset")
                 asset_id = self.assets.publish(candidate)
-                phase = "validate"
+                enter_phase("validate")
                 report = AssetValidator(self.assets, self.target, policy=policy,
                                         timeout_seconds=self.config.validation_seconds).validate(asset_id)
                 outcome = "quarantined"
             if report is None or not report.passed:
+                failure = failure_details({
+                    "failure_kind": "ValidationRejected" if report else "ExecutionRejected",
+                    "failure_reason": "validation_rejected" if report else "candidate_missing",
+                    "validation_reasons": [_safe_failure(AssetSafetyError(reason))["failure_reason"]
+                                           for reason in report.reasons] if report else [],
+                })
+                self._last_failure = failure
                 lease = keeper.stop()
                 self.ledger.fail(lease, {"outcome": outcome, "asset_id": asset_id})
                 self.field.feedback(signal.signal_id, success=False)
@@ -515,13 +641,12 @@ class Worker:
                 return "failed"
             if asset_id is None:
                 raise AssetSafetyError("missing_validated_asset")
-            phase = "prepare_application"
+            enter_phase("prepare_application")
             prepared = AssetApplicator(self.assets, self.target, policy_version=policy.version,
                                        protected_paths=(_SOURCE,)).prepare(asset_id, report.report_id)
             if Path(prepared.scope).resolve() != Path(lease.scope).resolve():
                 raise AssetSafetyError("application_scope_mismatch")
-            lease = keeper.stop()
-            keeper.check()
+            enter_phase("persist_submission")
             result_id = uuid4().hex
             result_data: dict[str, JsonValue] = {
                 "candidate_asset_id": asset_id, "report_id": report.report_id, "applied": True,
@@ -547,9 +672,12 @@ class Worker:
                 if parsed_usage else None,
             }
             self._status("submitting")
-            phase = "submit"
+            enter_phase("lease_handoff")
+            lease = keeper.handoff()
+            self._pending["lease"] = _JSON.validate_python(lease.model_dump(mode="json"))
+            enter_phase("submit")
             self.leases.submit(lease, result_id, result_data, apply=apply)
-            phase = "finalize"
+            enter_phase("finalize")
             self._finalize()
             outcome = "promoted"
             if self.mirror is not None:
@@ -562,7 +690,8 @@ class Worker:
             outcome = error.reason
             return "sleeping"
         except Exception as error:
-            failure = {"failure_stage": phase, "failure_kind": type(error).__name__}
+            failure = failure_details(_safe_failure(error))
+            self._last_failure = failure
             try:
                 owned = self.leases.is_valid(keeper.current)
             except Exception:
