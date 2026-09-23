@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useTrackComponent } from './hooks';
 
-// Placeholder drift field shown until the P track merges its WebGL
-// PhysarumField, or when that module reports an error via onError. Pure CSS,
-// no simulation — the honest stand-in, labelled as such in the track doc.
+// Placeholder field for a module load failure. PhysarumField handles its own
+// runtime failures and renders the yellow static network in that case.
 const FallbackField = () => (
   <div className='physarum-fallback' aria-hidden='true'>
     <i /><i /><i /><i /><i />
@@ -20,7 +19,7 @@ const Hero = ({ active, reducedMotion, onEnterSwarm }) => {
   return (
     <div className='morph-hero'>
       <div className='morph-hero-field'>
-        {PhysarumField && !failed
+        {PhysarumField
           ? <PhysarumField active={active} reducedMotion={reducedMotion} onError={setRuntimeError} />
           : <FallbackField />}
       </div>
