@@ -93,3 +93,10 @@ live 标注：上表真实出站仅为公开只读 `semantic-search` 与 `catego
 - `prefers-reduced-motion: reduce` 与模拟 WebGL2 不可用均显示原始青绿色 SVG 静态图、无 canvas；截图 `.runtime/physarum-ambient-20260923/{05-reduced,06-no-webgl}.png`。本轮无 pageerror，浏览器无外站请求。仅本地 mock 数据，未启动付费模型任务或触碰 7526/7527。
 - `npm run build` 通过，3906 modules，`finals-shell.js` 252.28 kB、`finals-shell.css` 72.18 kB。构建产物由 I 重建入库。
 - `python -m pytest tests/t5 tests/integration -q`：58 passed、1 failed；仍为前文已记录的本机 `C:\Python313\pyvenv.cfg` 缺失，失败测试 `test_demo_environment.py::test_demo_excludes_sentinel_from_viewer_and_passes_executor_args`。
+
+## 2026-09-23 最新用户更正：原生环境模拟改为黄色
+
+- 最终要求为保留原生粒子状 Physarum 环境模拟与无鼠标/触屏投喂，仅将菌体、拖尾和静态降级图改为黄色；本节覆盖上一节青白配色，其他无交互验收仍适用。P 精确 SHA `af0eb32435d922dd7e5f654a54424676fd785ae4` 普通 `--no-ff` 合并为 `383615724ea6f72e8658fc4c397d608039133dc9`；主线最新约定精确 SHA `5c3591f4c3f3d06d3ee02d0d3c8f8a020586ca33` 普通合并为 `40aea5aaa0c95cda32a27aa42eed265b5e32c17f`。均无冲突；I 未改 P 领域代码。
+- 真实 Chromium / 1366×768 / `http://127.0.0.1:7799/#/physarum`：原始粒子状环境动效可见，菌体/拖尾为黄及琥珀色，无前一版几何叶片遮罩。截图 `.runtime/physarum-ambient-yellow-20260923/{01-idle,02-move,05-reduced,06-no-webgl,07-title-drag-no-selection}.png` 已目视。画面随时间演化，截图变化不能单独证明指针响应。
+- 鼠标移动、按下拖动、点击、离开视口和移动端触屏点按后，`foodStrength=0`、`food={x:0,y:0}` 始终不变，`.physarum-cursor` 不存在。标题拖动没有文本选区；AGENT SWARM 按钮与键盘 1 返回正常；隐藏时模拟暂停，返回后恢复。减少动态效果及模拟 WebGL2 不可用均显示黄色 SVG 静态图。无 pageerror、无浏览器外站请求。
+- `npm run build` 通过：3906 modules，`finals-shell.js` 252.29 kB / `finals-shell.css` 72.17 kB；`python -m pytest tests/t5 -q`：51 passed。旧整套 Python 测试的本机 `pyvenv.cfg` 失败与本次配色无关，本轮不重复扩大测试。仅本地 mock 数据；未发起付费任务或触碰 7526/7527。
