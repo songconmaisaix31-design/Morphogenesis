@@ -369,17 +369,20 @@ class TaskLedger:
             return self._record(db, self._row(db, lease.task_id))
 
     def record_condition_failure(self, task_id: str) -> TaskRecord:
-        """Count one unsatisfied precondition; block once it exhausts its budget.
+        """Count a *definitively unsatisfiable* precondition; block at threshold.
 
-        A task whose reuse dependency is never satisfied stays claimable, so the
-        router would keep selecting it and burn polling. Each failed
-        precondition check increments ``condition_fail_count``; at
-        ``max_attempts_per_task`` the task is blocked and leaves the candidate set.
+        A task a worker currently holds (``claimed`` or ``submitting``) is owned
+        and must never be rewritten by a stale, unowned precondition
+        observation — its owner, token and protected submission state stay
+        intact. Terminal tasks are no-ops. Only unclaimed states
+        (``available``/``partial``/``handoff``) may be blocked. Transient
+        preconditions must not call this at all; they wait without consuming an
+        attempt (see ``worker_loop._reuse_verdict``).
         """
 
         with self.transaction() as db:
             row = self._row(db, task_id)
-            if row["status"] in ("completed", "failed", "blocked"):
+            if row["status"] in ("completed", "failed", "blocked", "claimed", "submitting"):
                 return self._record(db, row)
             count = int(row["condition_fail_count"]) + 1
             status = "blocked" if count >= self.limits.max_attempts_per_task else row["status"]

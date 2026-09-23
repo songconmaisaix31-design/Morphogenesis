@@ -489,16 +489,35 @@ class Worker:
         self._pending = None
         self._status("active")
 
-    def _reuse_ready(self, signal: Signal) -> bool:
+    def _reuse_verdict(self, signal: Signal) -> str:
+        """Classify a reuse task's precondition before claiming it.
+
+        ``ready`` lets the task be claimed. ``wait`` is a transient, expected
+        gap (the source asset is still being published or approved, or the
+        source is still running) and must back off without consuming an
+        attempt. ``unsatisfiable`` means the source is terminally failed or
+        inconsistent, so the reuse can never proceed and may be blocked.
+        """
+
         source_task = signal.payload.get("reuse_task_id")
         if source_task is None:
-            return True
+            return "ready"
         task = self.ledger.get(signal.task_id)
         if not isinstance(source_task, str) or source_task not in task.dependencies:
             raise AssetSafetyError("reuse_requires_declared_dependency")
         source = self.ledger.get(source_task)
+        if source.status in ("failed", "blocked"):
+            return "unsatisfiable"
+        if source.status != "completed":
+            return "wait"
         asset_id = source.result.get("candidate_asset_id") if source.result else None
-        return source.status == "completed" and isinstance(asset_id, str) and self.assets.state(asset_id) == "approved"
+        if not isinstance(asset_id, str):
+            return "unsatisfiable"
+        try:
+            approved = self.assets.state(asset_id) == "approved"
+        except AssetSafetyError:
+            approved = False  # Not yet published or approved: a transient gap.
+        return "ready" if approved else "wait"
 
     def _consume(self, signal: Signal, lease: Lease, attempt: AttemptId, revision: str,
                  head: str, execution_id: str) -> ConsumptionExecution | None:
@@ -745,10 +764,15 @@ class Worker:
                 if idle >= self.config.max_idle:
                     return result
                 continue
-            if not self._reuse_ready(signal):
-                self.ledger.record_condition_failure(signal.task_id)
+            verdict = self._reuse_verdict(signal)
+            if verdict != "ready":
+                # A transient approval gap waits without consuming an attempt;
+                # only a terminally failed source may count toward blocking.
+                if verdict == "unsatisfiable":
+                    self.ledger.record_condition_failure(signal.task_id)
                 idle += 1
-                result = self._status("waiting", "dependency_asset_not_approved")
+                result = self._status("waiting", "dependency_source_failed" if verdict == "unsatisfiable"
+                                      else "dependency_asset_not_approved")
                 self._backoff(idle)
                 if idle >= self.config.max_idle:
                     return result

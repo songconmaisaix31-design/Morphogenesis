@@ -123,3 +123,18 @@ def test_condition_failure_counts_and_blocks_at_threshold(tmp_path):
     assert ledger.candidates(loc)==[]
     # Terminal/completed tasks are idempotent under repeated condition checks.
     assert ledger.record_condition_failure('a').condition_fail_count==2
+
+
+def test_condition_failure_never_blocks_an_owned_task(tmp_path):
+    ledger=TaskLedger(tmp_path/'ledger.db','run',limits=RunLimits(max_attempts_per_task=1))
+    ledger.enqueue(s(tmp_path,'a'))
+    loc=Locality(workspace=str(tmp_path),authorized_scopes=('.',))
+    lease=ledger.claim('a','A',locality=loc)
+    assert ledger.get('a').status=='claimed'
+    # A stale, unowned condition observation must not rewrite an owned task.
+    assert ledger.record_condition_failure('a').status=='claimed'
+    assert ledger.get('a').condition_fail_count==0
+    assert ledger.get('a').owner=='A' and ledger.get('a').token==1
+    # The holder can still submit normally; its protected state is intact.
+    ledger.submit(lease,'r',{})
+    assert ledger.get('a').status=='completed'

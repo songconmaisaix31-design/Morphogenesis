@@ -181,3 +181,42 @@ def test_approved_content_adopted_by_different_worker_in_new_process(tmp_path):
     events = [json.loads(p.read_bytes()) for p in (state / "audit").rglob("*.json")]
     assert len({row["pid"] for row in events if row["outcome"] == "promoted"}) == 2
     assert next(row for row in events if row["task_id"] == signal.task_id)["consumed_asset_ids"] == [source_id]
+
+
+def test_reuse_verdict_distinguishes_transient_wait_from_failed_source(tmp_path):
+    from swarm.models import Locality, Signal
+    from swarm.worker_loop import Worker, WorkerConfig
+    from swarm.cli import demo_config, seed_demo
+
+    target, state = seed_demo(tmp_path / "verdict")
+    worker = Worker(WorkerConfig.model_validate_json(demo_config(target, state, 0, 1.0)))
+    ledger = worker.ledger
+    locality = Locality(workspace=str(target), authorized_scopes=(".",))
+
+    # Completed source whose asset is not yet approved -> transient wait.
+    src = Signal(task_id="src-wait", workspace=str(target), scope="module_0",
+                 kind="opportunity", required_capability="repair")
+    ledger.enqueue(src)
+    lease = ledger.claim("src-wait", "builder-0", locality=locality)
+    assert lease is not None
+    ledger.submit(lease, "r-src-wait", {"candidate_asset_id": "pending-approval"})
+    reuse = Signal(task_id="reuse-wait", workspace=str(target), scope="module_0", kind="opportunity",
+                   required_capability="repair",
+                   payload={"reuse_task_id": "src-wait", "path_map": {"a.py": "b.py"}})
+    ledger.enqueue(reuse, dependencies=("src-wait",))
+    assert worker._reuse_verdict(reuse) == "wait"
+
+    # A terminally failed source -> unsatisfiable (may be blocked).
+    src2 = Signal(task_id="src-fail", workspace=str(target), scope="module_1",
+                  kind="opportunity", required_capability="repair")
+    ledger.enqueue(src2)
+    for _ in range(3):  # Default max_attempts_per_task makes the third fail terminal.
+        held = ledger.claim("src-fail", "builder-0", locality=locality)
+        assert held is not None
+        ledger.fail(held, {"error": "validation"})
+    assert ledger.get("src-fail").status == "failed"
+    reuse2 = Signal(task_id="reuse-fail", workspace=str(target), scope="module_1", kind="opportunity",
+                    required_capability="repair",
+                    payload={"reuse_task_id": "src-fail", "path_map": {"a.py": "b.py"}})
+    ledger.enqueue(reuse2, dependencies=("src-fail",))
+    assert worker._reuse_verdict(reuse2) == "unsatisfiable"
