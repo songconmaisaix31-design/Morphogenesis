@@ -15,7 +15,7 @@
   --td-component-border: rgba(232, 239, 237, 0.08);
   --td-border-level-1-color: rgba(232, 239, 237, 0.08);
   --td-border-level-2-color: rgba(232, 239, 237, 0.12);
-  --td-brand-color: #65d9c7;
+  --td-brand-color: #f5d547;
   --td-brand-color-hover: rgba(101, 217, 199, 0.85);
   --td-brand-color-active: rgba(101, 217, 199, 0.7);
   --td-brand-color-focus: rgba(101, 217, 199, 0.25);
@@ -30,7 +30,7 @@
   --td-shadow-1: none;
   --td-shadow-2: none;
 
-  --accent: #65d9c7;
+  --accent: #f5d547;
   --ink: #e8efed;
   --ink-dim: #8ca3a0;
   --ink-mute: #5c6f6c;
@@ -533,4 +533,53 @@ html.morph-custom-cursor, html.morph-custom-cursor * { cursor: none !important; 
   .physarum-fallback i { animation: none; }
   .crt-overlay { animation: none; }
   .cursor-ring { transition: none; }
+}
+
+/* Intro: the yellow field yields to a black conceptual topology; the product
+   name follows its growth and stays quiet until the explicit entry action. */
+.morph-stage { min-height: 100vh; }
+.morph-view-physarum { min-height: 100vh; background: #070809; isolation: isolate; }
+.story-physarum-scene,
+.story-growth-scene { position: absolute; inset: 0; min-height: 100vh; }
+.story-physarum-scene { z-index: 2; opacity: 1; visibility: visible; transition: opacity 1.2s ease, visibility 0s linear 1.2s; }
+.story-physarum-scene.is-past { opacity: 0; visibility: hidden; pointer-events: none; }
+.story-growth-scene { z-index: 1; opacity: 0; visibility: hidden; pointer-events: none; background: #070809; transition: opacity 1.2s ease, visibility 0s linear 1.2s; }
+.story-growth-scene.is-visible { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 1.2s ease; }
+.story-physarum-label {
+  position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 0.65rem; color: #f2e9b5; opacity: 0; transform: translateY(12px);
+  transition: opacity 1.8s ease, transform 1.8s ease; user-select: none;
+}
+.story-physarum-label.is-visible { opacity: 1; transform: none; }
+.story-physarum-label [lang='zh-CN'] { font-size: clamp(1.3rem, 3vw, 2.15rem); font-weight: 500; letter-spacing: 0.28em; padding-left: 0.28em; }
+.story-physarum-label [lang='en'] { font: 500 0.72rem/1.4 var(--mono); letter-spacing: 0.46em; padding-left: 0.46em; color: #d7c779; }
+.story-product {
+  position: absolute; z-index: 3; top: 51%; left: 50%; width: min(94vw, 1300px);
+  transform: translate(-50%, -43%); text-align: center; opacity: 0; pointer-events: none;
+  transition: opacity 2.2s ease, transform 2.2s ease;
+}
+.story-product.is-visible { opacity: 1; transform: translate(-50%, -50%); pointer-events: auto; }
+.story-product h1 { margin: 0; display: flex; flex-direction: column; align-items: center; gap: clamp(0.6rem, 2vw, 1.5rem); font-weight: 800; line-height: 1; user-select: none; }
+.story-product h1 [lang='zh-CN'] { color: #f7f2e8; font-size: clamp(3.2rem, 10.6vw, 10rem); letter-spacing: 0.1em; padding-left: 0.1em; white-space: nowrap; }
+.story-product h1 [lang='en'] { color: #f7f2e8; font-size: clamp(1.55rem, 7.2vw, 7.5rem); letter-spacing: 0.045em; white-space: nowrap; }
+.story-enter {
+  margin-top: clamp(2.5rem, 6vh, 5rem); min-height: 44px; padding: 0.8rem 1.3rem;
+  border: 1px solid rgba(245, 213, 71, 0.75); border-radius: 0; background: transparent;
+  color: #f5d547; font-family: inherit; font-size: 0.85rem; font-weight: 500; line-height: 1.2; letter-spacing: 0.2em;
+  opacity: 0; transform: translateY(10px); transition: opacity 1.5s ease, transform 1.5s ease, background 0.25s ease;
+}
+.story-enter.is-visible { opacity: 1; transform: none; cursor: pointer; }
+.story-enter:hover { background: rgba(245, 213, 71, 0.1); }
+.story-enter:disabled { pointer-events: none; }
+.story-enter span { margin-left: 1.5em; }
+.story-connection { position: absolute; z-index: 5; bottom: 1rem; left: 1rem; margin: 0; color: #d7c779; font-size: 0.75rem; }
+.physarum-fallback i { background: radial-gradient(circle, rgba(245, 213, 71, 0.16) 0%, rgba(245, 213, 71, 0) 68%); }
+@media (max-width: 600px) {
+  .story-product h1 [lang='zh-CN'] { font-size: clamp(2.9rem, 12vw, 5rem); }
+  .story-product h1 [lang='en'] { font-size: clamp(1.15rem, 6.9vw, 2.5rem); }
+  .story-enter { margin-top: 3rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-physarum-scene, .story-growth-scene, .story-physarum-label,
+  .story-product, .story-enter { transition: none; }
 }
