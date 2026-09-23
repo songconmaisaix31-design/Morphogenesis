@@ -2,6 +2,10 @@
 
 ## 封板夜进化链路冲刺（2026-09-23）
 
+20:19 资源串行决策：Docker 已用原安装启动、缓存镜像构建成功；其既有 restart 策略同时恢复了原容器，未改配置。随后 E/主控分别出现 MemoryError/Stack overflow，Orca 应用重启但原 daemon/Worker 保留，不新建 Dispatch 或重发未知网络请求。第三个 live runner 在任何请求前失败，publish/fetch/report=0/0/0，保留目录后才可在资源恢复时接续。只读核查发现本轮三个 Python viewer 各约 5.9 GB private commit；优先停止本轮两个重复预览，保留 WLAN 和旧 7844，不操作其它项目。新子进程可设置局部 OPENBLAS_NUM_THREADS/OMP_NUM_THREADS/MKL_NUM_THREADS=1，不改全局环境。Docker 正常退出的中间方案暂缓，以较小范围回收优先；重验证与容器构建顺序执行。D 已将真实健康检查超时从 5 秒改为 15 秒，提交 `53bb52c31ab68655e2bca620508488d7f95e00e6`，新部署须用此后确切 SHA。
+
+19:56 接续决策：E 前两次发布均为明确 HTTP 400 schema/validation 拒绝，远端效果不存在歧义；按用户完成一轮闭环的原授权，修正映射和验证后以新不可变候选继续单次发送，禁止未知效果重试。官方 Node 验证须为真实只读结构检查，并分别证明坏样本失败/修复通过；Python SampleVerifier 的行为结果单列，不套壳绕过验证门或假造历史模型产物。D 已完成局域网特定接口 `192.168.60.54:7799`，公网唯一 build 因镜像拉取超时失败。允许启动已安装 Docker Desktop 一次以使用既有本机构建/转运路径，这是已授权部署的可逆运行前置，不得安装/升级、改全局配置/镜像源、提权或操作他人进程；分段观察最多 90 秒，失败不自动重试。主控此前仅因它是全局程序而暂缓启动的保守限制由此取代。T 已通过并释放，最终 I 等 E/D 完成。
+
 19:32 前置放行：主控已核对真实 `authenticated-20260923-01/summary.json`，原节点 authenticated hello、一次 heartbeat、官方 Proxy/MCP 全部通过。**两个开工前置现已满足**，恢复原 E/D/T 的领域范围与最终 I 集成；下文等待门禁的限制已被本条取代。E 继续原 Dispatch，保留已确认身份，不重复注册或轮换；先完成适配与离线验证，再执行任务书已授权的一组 PUBLISH→远端同 ID FETCH→实际使用 REPORT，未知写结果禁止重试。D 负责原部署缺键回归及 G5 软件/7799 公网链路；新模型任务仍需独立网关凭据，热点/物理现场仍需人工。主控串行协调各自 commit/push，业务文件归属不变。
 
 19:04 凭据接续：用户已提供上述绑定节点的新密钥，授权继续既定接入。主控仅将其存入项目 `.runtime/freeze-evolver/private/node_secret`，目录关闭继承并仅授予当前 Windows 用户访问；Git 忽略已验证，秘密值不得进入任何消息、参数、日志或提交。恢复原 E Task 第三次 Dispatch，先离线准备真实 Proxy 前置 runner，**最早 19:30:52.373 CST 后**对固定 `node_e2ad48c0d0d63625` 发一次 authenticated hello，随后仅成功时发一次 heartbeat 并验证 loopback Proxy/settings；允许使用本项目私有凭据文件，不再要求用户重复确认。必须通过官方模块显式 transport 适配补齐 model/name、保留原真实指纹，并对 HTTP 200 rejected 关闭后续动作；无旧 v1 bootstrap、无自动重注册、无 secret 轮换、无失败重试或周期网络 tick。两个前置通过后才开始原 G3/G4 领域改造，并由主控恢复 D/T。任何拒绝或未知效果即留痕通知，不自行循环尝试。
