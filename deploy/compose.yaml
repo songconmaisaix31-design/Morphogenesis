@@ -1,0 +1,56 @@
+name: morphogenesis
+services:
+  api:
+    image: morphogenesis-api:${MORPH_RELEASE:?Set the reviewed full commit SHA}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: api
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 128
+    healthcheck:
+      test: [CMD, python, /app/deploy/healthcheck.py]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+  web:
+    image: morphogenesis-web:${MORPH_RELEASE:?Set the reviewed full commit SHA}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: web
+    ports:
+      - "${MORPH_BIND_IP:-127.0.0.1}:7799:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m,uid=101,gid=101
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 64
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8080/api/dashboard]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}

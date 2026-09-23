@@ -1,0 +1,11 @@
+# Explicit opt-in only. Mount a single reviewed snapshot, never its evidence root.
+services:
+  api:
+    command: [--rehearsal, /data/rehearsal.json, --replay]
+    volumes:
+      - type: bind
+        source: ${MORPH_REPLAY_FILE:?Set an absolute reviewed rehearsal.json path}
+        target: /data/rehearsal.json
+        read_only: true
+        bind:
+          create_host_path: false
