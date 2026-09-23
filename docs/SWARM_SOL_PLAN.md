@@ -8,10 +8,13 @@
 |---|---|---|---|
 | V | morph-swarm-viz / songconmaisaix31-design/morph-swarm-viz | viz/**, tests/t5/**, tests/integration/check_swarm*.cjs, docs/tracks/swarm-viz.md | 同步 d3cb391；以 /api/swarm 真实事实重构拓扑，去掉 planner 回退和旧彩排说明；Ghost 为成员更替后保留的关系与经验；明确空、错误、陈旧、未知状态；构建及三视口浏览器 |
 | R | morph-sol-scale / songconmaisaix31-design/morph-sol-scale | swarm/{cli,evomap_executor,models,budget}.py, tests/swarm/test_{worker_evomap,budget}.py, tests/swarm/test_scale*.py, tools/run_swarm*.py, docs/SWARM_SOL_EXPERIMENT.md | 复用 Worker/账本/路由，将固定三进程六任务入口参数化；异构模型 3→8→16 进程、6→48→96 任务；本轮显式未知费用许可，默认保护保持；未知调用停止、一次尝试和实际采用证明；规模受资源与成功门禁约束 |
-| I（两轨后） | decentralized-swarm / decentralized-swarm | 精确 SHA 普通合并，deploy/** 与 tests/deployment/** 的必要配置胶水，docs/SWARM_SOL_ACCEPTANCE.md | 完整测试/类型/构建/分发，真实状态 viewer、computer-use；领域缺陷退原 Worker |
+| B | morph-swarm-benchmark / songconmaisaix31-design/morph-swarm-benchmark | tools/run_swarm_benchmark.py, tests/swarm/test_benchmark.py, docs/SWARM_BENCHMARK.md（从 R 的 tools 通配范围中排除） | 按用户追加要求使用官方 GSM8K / BBH 固定测试子集，版本/许可/抽样/答案隔离/评分；复用 R 入口运行同题单模型成员池与异构蜂群，独立统计各模型、吞吐和用量；本轨开发使用 EvoMap Terra |
+| I（三轨后） | decentralized-swarm / decentralized-swarm | 精确 SHA 普通合并，deploy/** 与 tests/deployment/** 的必要配置胶水，docs/SWARM_SOL_ACCEPTANCE.md | 完整测试/类型/构建/分发，真实状态 viewer、computer-use；领域缺陷退原 Worker |
 | 主控 | 主线工作区 | 本计划、状态与验收记录 | 监督、凭据配置、运行/部署操作、独立验收；不写业务代码 |
 
 实验记录独立 OS PID、成员请求模型与网关实际返回模型、唯一任务接受数、源/目标成员、跨模型实际采用、路由概率与权重、用量、估算和未知实际费用。三成员阶段使用三个不同文本模型，八与十六成员覆盖全部七种文本模型；每成员运行前固定型号，失败或未知效果不得自动换模型重试。对比为保留历史、清除历史、成员替换的可重复局部机制检验；简单数据题不能宣称普适算法优势或论文收敛。Hub 不进入关键路径，不发生产发布/付费 FETCH。
+
+用户追加“用常见的benchmark做检验”：排序等合成题仅作三成员冒烟，48/96 规模实验改用官方 GSM8K test 与 BBH 推理任务子集，固定仓库 SHA、抽样种子、样本身份与答案评分。相同样本、提示、输出上限比较单模型成员池与异构成员池；此比较不等于单 Agent 或路由算法因果优势。重复的资产复用探针单列、排除 benchmark 正确率；金标准只在独立验收策略中，不进入模型输入。报告零样本/格式约束与官方完整榜单协议的差别，不将子集成绩冒充完整基准分数。
 
 先核对网关模型/计价元数据；没有价格不冒充已知费用。当前用户明确授权“尽情用，用光为止”，优先于旧文档的缺价停止规则：允许增加默认关闭的 `allow_unknown_cost`，本轮有限实验显式打开。仅在真实 usage 已知且未越限时继续，费用始终 unknown/null、完整准入预留不释放、仍累计计入运行 allowance。未知 usage、未知远端效果、越限和额度拒绝停止，不重发或换根绕过。总请求/单请求输出/每任务尝试/时长必须有限；运行 allowance 不声称为提供商账单上限。所有写入与有限 API 调用已由用户授权，无需重复确认。每轨 commit + push，独立 I 普通 exact-SHA merge，最终记录不可完成的外部限制。Computer-use 与 Playwright、单测、真实模型三类证据分开。
 
