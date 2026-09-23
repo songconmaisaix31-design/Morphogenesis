@@ -22,6 +22,9 @@ class HubConfig(Model):
     sender_id: str = Field(default="node_morphogenesis_local", pattern=r"^node_[A-Za-z0-9_-]+$")
     node_secret: SecretStr | None = Field(default=None, repr=False, exclude=True)
     timeout_seconds: float = Field(default=10, gt=0, allow_inf_nan=False)
+    source: Literal["local_stub", "evolver_proxy"] = "local_stub"
+    transport_provenance: Literal["mock", "live"] = "mock"
+    proxy_token: SecretStr | None = Field(default=None, repr=False, exclude=True)
 
     @model_validator(mode="after")
     def local_only(self) -> Self:
@@ -36,11 +39,20 @@ class HubConfig(Model):
                 raise ValueError("only literal loopback Hub origins are currently enabled")
         return self
 
+    @model_validator(mode="after")
+    def separate_credentials(self) -> Self:
+        if self.source == "local_stub" and self.transport_provenance != "mock":
+            raise ValueError("local_stub cannot establish live provenance")
+        if self.source == "evolver_proxy" and self.node_secret is not None:
+            raise ValueError("Proxy requires its IPC token, not the Hub node secret")
+        return self
+
 
 class GenePolicy(Model):
     category: Literal["repair", "optimize", "innovate", "explore"]
     max_files: int = Field(ge=1)
     forbidden_paths: list[str] = Field(min_length=1)
+    validation_commands: list[str] | None = Field(default=None, min_length=1)
 
 
 class CapsuleEvidence(Model):
@@ -55,6 +67,10 @@ class CapsuleEvidence(Model):
     result: TaskResult
     env_fingerprint: dict[str, JsonValue]
     content: dict[str, JsonValue]
+    model_name: str | None = Field(default=None, min_length=1)
+    returned_model_name: str | None = Field(default=None, min_length=1)
+    gateway_response_id: str | None = Field(default=None, min_length=1)
+    event_id: str | None = Field(default=None, min_length=1)
 
 
 PublicationState = Literal["pending", "unknown", "received", "candidate", "promoted", "rejected"]
@@ -67,6 +83,8 @@ class PublicationRecord(Model):
     state: PublicationState = "pending"
     reason: str = "awaiting_configuration_or_approval"
     acceptance: Acceptance
+    source: Literal["local_stub", "evolver_proxy"] = "local_stub"
+    receipt_id: str | None = None
 
 
 class PublishApproval(Model):
@@ -89,6 +107,7 @@ class HelloResult(Model):
     reason: str
     secret_updated: bool = False
     acceptance: Acceptance = Field(default_factory=lambda: Acceptance(provenance="mock"))
+    source: Literal["local_stub", "evolver_proxy"] = "local_stub"
 
 
 class FetchResult(Model):
@@ -96,3 +115,14 @@ class FetchResult(Model):
     reason: str
     assets: list[dict[str, JsonValue]] = Field(default_factory=list)
     acceptance: Acceptance = Field(default_factory=lambda: Acceptance(provenance="mock"))
+    source: Literal["local_stub", "evolver_proxy"] = "local_stub"
+
+
+class ReuseRecord(Model):
+    asset_id: str = Field(pattern=r"^sha256:[a-f0-9]{64}$")
+    task_id: str
+    state: Literal["pending", "unknown", "recorded"]
+    reason: str
+    source: Literal["evolver_proxy"] = "evolver_proxy"
+    receipt_id: str | None = None
+    acceptance: Acceptance
