@@ -44,5 +44,43 @@ The synthetic tasks are smoke and contention evidence, not benchmark evidence. O
 test and BIG-Bench Hard subsets are separately pinned, sampled, and scored on the same tasks for
 homogeneous and heterogeneous pools; the duplicate asset-reuse probe is excluded from accuracy.
 
+## Heterogeneous Smoke Result
+
+Two immutable `3 workers / 6 tasks` live smokes used fixed DeepSeek v4 Flash, Gemini 3.1 Pro
+Preview, and GLM 5.1 workers. Both runs passed the live interface gate but blocked the task-live
+gate with four promoted tasks. They are structured-output compliance findings, not benchmark
+accuracy results. Neither run retried, changed a worker's model, reset state, called Hub, or
+published an asset.
+
+The first run recorded five audited requests and 2,176 provider-reported tokens. GLM 5.1 returned
+HTTP 200 and a semantically valid `DataProposal` wrapped in a complete Markdown `json` fence. The
+then-current bare-JSON parser rejected it as `data_proposal_rejected` / `candidate_missing`, so
+`data-4` failed after its only attempt and dependent reuse task `data-5` remained unavailable.
+The result was 4/6 promotions, process exit codes `[0, 0, 1]`, and no adoption. Its state is:
+
+`C:/Users/DW/AppData/Local/Temp/morph-hetero-smoke-20260924/state`
+
+Commit `b60d507` accepts only a complete fenced JSON document, with an optional `json` tag and no
+surrounding prose. It does not extract arbitrary substrings. The authorized patched smoke then
+recorded five audited requests and 1,659 provider-reported tokens. The fence case passed, but
+DeepSeek v4 Flash returned HTTP 200 with three concatenated JSON values: a valid `DataProposal`,
+an empty array, and the same `DataProposal` again. The exactly-one-document parser correctly
+rejected this ambiguous output as `data_proposal_rejected` / `candidate_missing`; `data-0` failed
+after its only attempt and dependent `data-5` did not run. The final result was 4/6 promotions,
+process exit codes `[1, 0, 0]`, participation by all three worker PIDs, and no adoption. Its state
+is:
+
+`C:/Users/DW/AppData/Local/Temp/morph-hetero-smoke-patched-20260924/state`
+
+The accepted conclusion is to retain this second 4/6 result as the honest heterogeneous-model
+structured-output compliance finding. Selecting one value from concatenated documents could hide
+conflicting outputs and would weaken the exact `DataProposal` boundary. No further paid smoke is
+part of this track.
+
+Commit `05175d8` contains the optional validated `capability_names` override and effective-model
+price binding. Mixed-model runs cannot apply the configured model's prices to different effective
+worker models; without verified per-model EvoMap prices they require explicit unknown-cost
+authorization and retain every financial admission hold.
+
 Runtime roots and immutable outputs belong under `C:/Users/DW/AppData/Local/Temp/` and are not
 committed. Set `OPENBLAS_NUM_THREADS=1`, `OMP_NUM_THREADS=1`, and `MKL_NUM_THREADS=1`.
