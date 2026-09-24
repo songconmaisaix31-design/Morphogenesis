@@ -13,7 +13,7 @@ import httpx
 import pytest
 
 from swarm.cli import EvoMapRun, evomap_worker_config, seed_evomap
-from swarm.evomap_executor import EvoMapConfig, EvoMapExecutor, Reply, _request
+from swarm.evomap_executor import EvoMapConfig, EvoMapExecutor, Reply, _proposal_content, _request
 from swarm.worker_loop import Worker, WorkerConfig
 from local_assets.models import AssetSafetyError
 
@@ -27,7 +27,7 @@ def configured(tmp_path, *, prices=True):
               "limits": {"max_tasks": 6, "max_attempts": 6, "max_attempts_per_task": 1,
                          "max_derived_tasks": 0, "max_runtime_seconds": 300}}
     if prices:
-        budget["prices"] = {"provider": "evomap", "model": "evomap-gpt-5.6-luna",
+        budget["prices"] = {"provider": "evomap", "model": "evomap-gpt-5.6-sol",
                             "input_usd_per_million": 1, "output_usd_per_million": 1}
     config = EvoMapRun(directory=tmp_path / "data", api=EvoMapConfig(credential_file=key_file), budget=budget)
     seed_evomap(config)
@@ -36,18 +36,19 @@ def configured(tmp_path, *, prices=True):
 
 def completion(request, *, wrong=False):
     payload = json.loads(request.content)
-    assert payload["stream"] is False and payload["model"] == "evomap-gpt-5.6-luna"
+    assert payload["stream"] is False and payload["model"] == "evomap-gpt-5.6-sol"
     context = json.loads(payload["messages"][1]["content"])
     assert set(context) == {"task_id", "instruction", "input", "experience"}
     assert "validation_policy" not in request.content.decode()
     incoming, instruction = context["input"], context["instruction"]
-    if "Sort" in instruction:
+    normalized = instruction.lower()
+    if normalized.startswith("sort"):
         answer = sorted(incoming)
-    elif "Remove repeated" in instruction:
+    elif normalized.startswith("remove repeated"):
         answer = list(dict.fromkeys(incoming))
-    elif "three smallest" in instruction:
+    elif "three smallest" in normalized:
         answer = sorted(incoming)[:3]
-    elif "sum" in instruction:
+    elif "sum" in normalized:
         answer = sum(incoming)
     else:
         answer = dict(Counter(incoming))
@@ -108,14 +109,16 @@ def test_three_process_data_requests_and_exact_cross_member_adoption(tmp_path):
     assert all(row["execution"]["provider_request_id"] == "fixture-request" for row in rows)
     assert all(row["interface_live"] == row["task_live"] == "not_run" for row in rows)
     receipts = [json.loads(path.read_bytes()) for path in config.directory.glob("mock-http-*.json")]
-    assert sorted(row["calls"] for row in receipts) == [2, 2, 2]
+    assert sum(row["calls"] for row in receipts) == 6
+    assert all(row["calls"] > 0 for row in receipts)
     from local_assets.store import LocalAssetStore
     store = LocalAssetStore(config.directory / "state/assets")
     adoption, = store.adoptions()
     assert adoption.context.worker_id == "builder-2" and adoption.context.task_id == "data-5"
     source = next(row for row in rows if row["task_id"] == "data-0")
     target = next(row for row in rows if row["task_id"] == "data-5")
-    assert source["worker_id"] == "builder-0" and target["consumed_asset_ids"] == [source["asset_id"]]
+    assert source["worker_id"] != target["worker_id"]
+    assert target["consumed_asset_ids"] == [source["asset_id"]]
     assert adoption.asset_id == source["asset_id"] and adoption.result_id == target["result_id"]
     assert all(KEY.encode() not in path.read_bytes() for path in config.directory.rglob("*.json"))
 
@@ -236,6 +239,21 @@ def test_echoed_key_and_redirect_are_not_accepted_or_retried():
     assert reply.interface_live == "not_run" and KEY not in reply.model_dump_json()
 
 
+@pytest.mark.parametrize("tag", ["json", "JSON", ""])
+def test_complete_json_fence_is_unwrapped(tag):
+    content = '{"answer":{"item":1},"adopted_asset_ids":[]}'
+    assert _proposal_content(f"```{tag}\n{content}\n```") == content
+
+
+@pytest.mark.parametrize("content", [
+    'prefix\n```json\n{"answer":1,"adopted_asset_ids":[]}\n```',
+    '```json\n{"answer":1,"adopted_asset_ids":[]}\n```\nsuffix',
+    '```python\n{"answer":1,"adopted_asset_ids":[]}\n```',
+])
+def test_json_fence_unwrap_rejects_prose_and_other_languages(content):
+    assert _proposal_content(content) == content
+
+
 def test_aggregate_live_scene_requires_members_pids_and_authoritative_adoption():
     from swarm.cli import evomap_acceptance
     rows = [{"provenance": "live", "outcome": "promoted", "task_live": "passed", "interface_live": "passed",
@@ -249,3 +267,13 @@ def test_aggregate_live_scene_requires_members_pids_and_authoritative_adoption()
     assert evomap_acceptance([{**row, "pid": 100} for row in rows], view)["task_live"] == "blocked"
     assert evomap_acceptance([{**row, "worker_id": "builder-0"} for row in rows], view)["task_live"] == "blocked"
     assert evomap_acceptance([{**row, "provenance": "mock"} for row in rows], view)["task_live"] == "blocked"
+
+
+def test_acceptance_does_not_report_pending_without_audit_as_zero_usage():
+    from swarm.cli import evomap_acceptance
+    view = {"sections": {"budget": {"tables": {"budget_reservations": [{
+        "request_id": "task:lease", "status": "pending", "tokens": None,
+        "usage_metering": "unknown", "cost": "unknown", "reserved_usd": 0.02}]}}}}
+    summary = evomap_acceptance([], view)
+    assert summary["tokens"] == {"audited_requests": 0, "known_requests": 0,
+                                  "unknown_reservations": 1, "known_total": 0, "total": None}

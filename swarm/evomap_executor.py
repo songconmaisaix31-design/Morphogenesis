@@ -24,17 +24,27 @@ from local_assets.models import AssetSafetyError, Candidate, ConsumptionExecutio
 from local_assets.paths import FROZEN_MAINLINE, no_links, safe_join
 from local_assets.validate import blast_radius
 from orchestration.gateway import _Completion, _usage
-from orchestration.gateway_transport import EVOMAP_MODEL, single_request
+from orchestration.gateway_transport import single_request
 from swarm.models import ExecutionBound, Signal
 from swarm.worker_loop import ExecutionResult, FixtureExecutor, _write_json
 
 _JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 _KEY_ENV = "MORPH_EVOMAP_API_KEY"
+EvoMapTextModel = Literal[
+    "evomap-deepseek-v4-flash",
+    "evomap-gemini-3.1-pro-preview",
+    "evomap-glm-5.1",
+    "evomap-glm-5.2",
+    "evomap-gpt-5.6-luna",
+    "evomap-gpt-5.6-sol",
+    "evomap-gpt-5.6-terra",
+]
+SOL_MODEL: EvoMapTextModel = "evomap-gpt-5.6-sol"
 
 
 class EvoMapConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
-    model: str = Field(default=EVOMAP_MODEL, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
+    model: EvoMapTextModel = SOL_MODEL
     credential_file: Path
     max_input_bytes: int = Field(default=12000, gt=0, le=16000)
     max_output_tokens: int = Field(default=1024, gt=0, le=4096)
@@ -71,6 +81,12 @@ class Reply(BaseModel):
 
 def canonical_answer(value: JsonValue) -> str:
     return json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")) + "\n"
+
+
+def _proposal_content(content: str) -> str:
+    stripped = content.strip()
+    match = re.fullmatch(r"```(?:json)?\s*\r?\n([\s\S]*?)\r?\n```", stripped, flags=re.IGNORECASE)
+    return match.group(1).strip() if match else stripped
 
 
 def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
@@ -243,7 +259,7 @@ class EvoMapExecutor:
         consumed: tuple[str, ...] = ()
         if not reply.error_kind and not reply.uncertain and reply.content is not None:
             try:
-                proposal = DataProposal.model_validate_json(reply.content)
+                proposal = DataProposal.model_validate_json(_proposal_content(reply.content))
                 after = canonical_answer(proposal.answer)
                 if len(after.encode("utf-8")) > 65536:
                     raise ValueError("answer_limit")
