@@ -9,7 +9,7 @@ budget hold, audit record or verification report, and never calls a model.
 The observer exposes raw tables; this adapter projects them into a bounded,
 JSON-only ``SwarmView`` the static page renders. All numbers are read, never
 invented: route weights are decayed at read time (``exp(-dt/tau)``, matching
-``swarm/pheromone.py``), acceptance stays ``not_run``, and Hub status stays
+``swarm/pheromone.py``), aggregate acceptance stays ``not_run``, and Hub status stays
 "待发布" until a real Hub sandbox is configured.
 """
 
@@ -272,11 +272,15 @@ def _budget(view: dict[str, Any]) -> dict[str, Any]:
         breaker = _as_str(row.get("breaker"))
         policy = _as_dict(row.get("policy_json"))
         admission_control = _as_str(policy.get("admission_control"))
+        allow_unknown_cost = policy.get("allow_unknown_cost") is True
         break
+    else:
+        allow_unknown_cost = False
     reservations: list[dict[str, Any]] = []
     for row in tables.get("budget_reservations", []):
         status = _as_str(row.get("status"))
-        state = {"pending": "reserved", "settled": "settled", "uncertain": "unknown"}.get(status or "", "unknown")
+        state = {"pending": "reserved", "settled": "settled", "uncertain": "unknown",
+                 "unknown_cost_allowed": "unknown_cost_allowed"}.get(status or "", "unknown")
         reservations.append({
             "reservation_id": _as_str(row.get("reservation_id")),
             "worker_id": _as_str(row.get("worker_id")),
@@ -300,15 +304,18 @@ def _budget(view: dict[str, Any]) -> dict[str, Any]:
     return {
         "breaker": breaker,
         "admission_control": admission_control,
+        "allow_unknown_cost": allow_unknown_cost,
         "reservations": reservations,
         "totals": {
             "pending_hold_usd": pending_hold,
             "unknown_hold_usd": unknown_hold,
-            "total_hold_usd": pending_hold + unknown_hold,
+            "allowed_unknown_cost_hold_usd": sum((r["reserved_usd"] or 0.0) for r in reservations if r["state"] == "unknown_cost_allowed"),
+            "total_hold_usd": sum((r["reserved_usd"] or 0.0) for r in reservations if r["state"] != "settled"),
             "admitted_usd": admitted,
             "reserved": sum(1 for r in reservations if r["state"] == "reserved"),
             "settled": sum(1 for r in reservations if r["state"] == "settled"),
             "unknown": sum(1 for r in reservations if r["state"] == "unknown"),
+            "unknown_cost_allowed": sum(1 for r in reservations if r["state"] == "unknown_cost_allowed"),
         },
     }
 
@@ -333,6 +340,7 @@ def _worker_audit(view: dict[str, Any]) -> list[dict[str, Any]]:
     """Sanitized per-attempt worker audit facts (asset_id, usage class, provenance)."""
     result: list[dict[str, Any]] = []
     for record in _records(view, "audit"):
+        execution = _as_dict(record.get("execution"))
         worker_id = _as_str(record.get("worker_id"))
         task_id = _as_str(record.get("task_id"))
         if not worker_id and not task_id:
@@ -348,6 +356,8 @@ def _worker_audit(view: dict[str, Any]) -> list[dict[str, Any]]:
             "evidence_class": _as_str(record.get("evidence_class")),
             "interface_live": _as_str(record.get("interface_live")),
             "task_live": _as_str(record.get("task_live")),
+            "requested_model": _as_str(execution.get("requested_model")),
+            "returned_model": _as_str(execution.get("returned_model")),
             "created_at": _as_float(record.get("created_at")),
         })
     result.sort(key=lambda item: (item["created_at"] is None, item["created_at"]))
@@ -390,17 +400,32 @@ def _adoption_chain(view: dict[str, Any]) -> tuple[list[dict[str, Any]], list[di
 
 
 def _acceptance(view: dict[str, Any]) -> dict[str, str]:
-    # The dashboard never upgrades a local swarm snapshot to a live claim, so
-    # provenance is always mock and every acceptance dimension stays not_run.
+    """Classify explicit audit provenance without promoting global acceptance."""
+    records = _worker_audit(view)
+    provenances = {record["provenance"] for record in records if record.get("provenance") in {"live", "mock"}}
+    provenance = next(iter(provenances)) if len(provenances) == 1 else "unverified"
+
     return {
-        "provenance": "mock",
+        "provenance": provenance,
         "contract_local": "not_run",
         "interface_live": "not_run",
         "task_live": "not_run",
     }
 
 
-def project(view: dict[str, Any], *, now: float | None = None) -> dict[str, Any]:
+def _source_sections(view: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    for name, raw in _as_dict(view.get("sections")).items():
+        section = _as_dict(raw)
+        result[str(name)] = {
+            "state": _as_str(section.get("state")) or "unavailable",
+            "reason": _as_str(section.get("reason")),
+            "row_limit": _as_int(section.get("row_limit")),
+        }
+    return result
+
+
+def project(view: dict[str, Any], *, now: float | None = None, replay: bool = False) -> dict[str, Any]:
     """Project one ``observe`` result into a JSON-only SwarmView dict."""
     observed_at = _as_float(view.get("observed_at")) if now is None else now
     if observed_at is None:
@@ -408,13 +433,17 @@ def project(view: dict[str, Any], *, now: float | None = None) -> dict[str, Any]
     health = _as_str(view.get("health")) or "partial"
     tau = _tau_of(view)
     adoptions, promotions = _adoption_chain(view)
+    acceptance = _acceptance(view)
+    if replay:
+        acceptance = {**acceptance, "provenance": "replay", "interface_live": "not_run", "task_live": "not_run"}
     return {
         "schema": SWARM_SCHEMA,
         "observed_at": observed_at,
         "readonly": True,
         "health": health,
+        "sources": _source_sections(view),
         "hub_status": HUB_STATUS,
-        "acceptance": _acceptance(view),
+        "acceptance": acceptance,
         "workers": _workers(view),
         "tasks": _tasks(view, observed_at),
         "routes": _routes(view, observed_at, tau),
@@ -436,8 +465,9 @@ def empty_swarm(note: str = "未配置蜂群状态目录；/api/swarm 保持空�
         "readonly": True,
         "health": "missing",
         "hub_status": HUB_STATUS,
-        "acceptance": {"provenance": "mock", "contract_local": "not_run",
+        "acceptance": {"provenance": "unverified", "contract_local": "not_run",
                        "interface_live": "not_run", "task_live": "not_run"},
+        "sources": {},
         "workers": [],
         "tasks": [],
         "routes": [],
@@ -455,8 +485,10 @@ def empty_swarm(note: str = "未配置蜂群状态目录；/api/swarm 保持空�
     }
 
 
-def load_swarm(state: Path, *, limit: int = 200) -> dict[str, Any]:
+def load_swarm(state: Path, *, limit: int = 200, replay: bool = False) -> dict[str, Any]:
     """Read the swarm state through the observer and project it for the page."""
     if not 1 <= limit <= 1000:
         raise ValueError("observer_limit_out_of_range")
-    return project(observe(state, limit=limit))
+    if not state.is_dir():
+        return empty_swarm("已配置的蜂群状态目录不存在。")
+    return project(observe(state, limit=limit), replay=replay)

@@ -11,7 +11,7 @@ const viewFromHash = () => ['workspace', 'swarm'].includes(window.location.hash.
 const App = () => {
   const [view, setViewState] = useState(viewFromHash);
   const [dashboard, setDashboard] = useState(null);
-  const [swarm, setSwarm] = useState(null);
+  const [swarm, setSwarm] = useState({ state: 'loading', data: null, detail: '', lastSuccessAt: null });
   const [connection, setConnection] = useState({ state: 'loading', detail: '' });
   const [phase, setPhase] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 3 : 0);
   const [evomap, setEvomap] = useState({ state: 'idle' });
@@ -69,20 +69,19 @@ const App = () => {
     return () => { stopped = true; window.clearTimeout(timer); };
   }, [pushToDataZones]);
 
-  // Same-origin decentralized swarm view. Failures keep the last good snapshot
-  // and the topology falls back to the rehearsal derivation; a missing swarm
-  // state (health=missing) is never treated as a real topology.
+  // Same-origin decentralized swarm view. Old facts survive a transport error
+  // only as an explicitly stale snapshot; rehearsal data is never substituted.
   useEffect(() => {
     let stopped = false;
     let timer = 0;
     const poll = async () => {
       try {
         const response = await fetch('/api/swarm', { cache: 'no-store' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        if (!stopped) setSwarm(data);
+        const data = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(data?.notes?.[0] ?? `HTTP ${response.status}`);
+        if (!stopped) setSwarm({ state: data?.health === 'missing' ? 'missing' : data?.health === 'error' ? 'error' : 'ready', data, detail: '', lastSuccessAt: Date.now() });
       } catch (error) {
-        // Keep the last good swarm snapshot; the rehearsal topology stays.
+        if (!stopped) setSwarm((previous) => ({ ...previous, state: previous.data ? 'stale' : 'error', detail: error.message }));
       }
       if (!stopped) timer = window.setTimeout(poll, POLL_MS);
     };

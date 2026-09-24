@@ -117,7 +117,7 @@ class ProjectionTests(unittest.TestCase):
 
     def test_budget_reservations_map_to_reserved_settled_unknown(self) -> None:
         budget = {
-            "swarm_budgets": [{"swarm_id": "swarm", "policy_json": {"admission_control": "enabled"},
+            "swarm_budgets": [{"swarm_id": "swarm", "policy_json": {"admission_control": "enabled", "allow_unknown_cost": True},
                                "breaker": None, "started_at": 0.0}],
             "budget_reservations": [
                 {"reservation_id": "r1", "swarm_id": "swarm", "worker_id": "w1", "task_id": "t1",
@@ -135,20 +135,28 @@ class ProjectionTests(unittest.TestCase):
                  "estimate_usd": None, "reserved_usd": 1.0, "request_id": "t3:1", "usage_metering": "unknown",
                  "request_bound": "unbounded", "admission_control": "enabled", "cost": "unknown",
                  "settlement": None, "admitted_usd": None},
+                {"reservation_id": "r4", "swarm_id": "swarm", "worker_id": "w2", "task_id": "t4",
+                 "body": "{}", "status": "unknown_cost_allowed", "created_at": 4.0, "settled_at": 5.0, "tokens": 9,
+                 "estimate_usd": None, "reserved_usd": 4.0, "request_id": "t4:1", "usage_metering": "verified",
+                 "request_bound": "verified", "admission_control": "enabled", "cost": "unknown",
+                 "settlement": "[3,6,9]", "admitted_usd": None},
             ],
         }
         view = _view({"budget": _db(tables=budget)})
         result = project(view, now=1000.0)
         states = {r["reservation_id"]: r["state"] for r in result["budget"]["reservations"]}
-        self.assertEqual({"r1": "reserved", "r2": "settled", "r3": "unknown"}, states)
+        self.assertEqual({"r1": "reserved", "r2": "settled", "r3": "unknown", "r4": "unknown_cost_allowed"}, states)
         totals = result["budget"]["totals"]
+        self.assertIs(True, result["budget"]["allow_unknown_cost"])
         self.assertEqual(1, totals["reserved"])
         self.assertEqual(1, totals["settled"])
         self.assertEqual(1, totals["unknown"])
+        self.assertEqual(1, totals["unknown_cost_allowed"])
         # pending hold (r1=2.0), unknown hold (r3=1.0), total occupation, debit.
         self.assertAlmostEqual(2.0, totals["pending_hold_usd"])
         self.assertAlmostEqual(1.0, totals["unknown_hold_usd"])
-        self.assertAlmostEqual(3.0, totals["total_hold_usd"])
+        self.assertAlmostEqual(4.0, totals["allowed_unknown_cost_hold_usd"])
+        self.assertAlmostEqual(7.0, totals["total_hold_usd"])
         self.assertAlmostEqual(0.5, totals["admitted_usd"])
 
     def test_adoption_chain_and_promotions_are_traceable_by_asset_id(self) -> None:
@@ -185,16 +193,65 @@ class ProjectionTests(unittest.TestCase):
         ids = {worker["worker_id"] for worker in result["workers"]}
         self.assertEqual({"w1", "w2", "w3", "w4"}, ids)
 
-    def test_acceptance_never_promotes_a_live_claim(self) -> None:
+    def test_acceptance_never_promotes_a_sparse_live_claim(self) -> None:
         view = _view({"ledger": _db(tables={"tasks": [_task("t1", "completed", attempts=1)]})})
-        view["acceptance"] = {"provenance": "live", "contract_local": "passed",
-                              "interface_live": "passed", "task_live": "passed"}
+        view["sections"]["audit"] = _records(records=[{
+            "worker_id": "w1", "task_id": "t1", "provenance": "live",
+            "interface_live": "passed", "task_live": "passed",
+        }])
         result = project(view, now=1000.0)
         self.assertEqual("not_run", result["acceptance"]["interface_live"])
         self.assertEqual("not_run", result["acceptance"]["task_live"])
-        self.assertEqual("mock", result["acceptance"]["provenance"])
+        self.assertEqual("live", result["acceptance"]["provenance"])
         self.assertEqual(SWARM_SCHEMA, result["schema"])
         json.dumps(result)
+
+    def test_mock_passed_audit_cannot_promote_acceptance(self) -> None:
+        view = _view({"audit": _records(records=[{
+            "worker_id": "w1", "task_id": "t1", "provenance": "mock",
+            "interface_live": "passed", "task_live": "passed",
+        }])})
+        acceptance = project(view)["acceptance"]
+        self.assertEqual("mock", acceptance["provenance"])
+        self.assertEqual("not_run", acceptance["interface_live"])
+        self.assertEqual("not_run", acceptance["task_live"])
+
+    def test_mixed_audit_provenance_is_unverified(self) -> None:
+        records = [
+            {"worker_id": "w1", "task_id": "t1", "provenance": "live", "task_live": "passed"},
+            {"worker_id": "w2", "task_id": "t2", "provenance": "mock", "task_live": "passed"},
+        ]
+        acceptance = project(_view({"audit": _records(records=records)}))["acceptance"]
+        self.assertEqual("unverified", acceptance["provenance"])
+        self.assertEqual("not_run", acceptance["task_live"])
+
+    def test_replay_downgrades_current_claim_but_retains_audit(self) -> None:
+        records = [{"worker_id": "w1", "task_id": "t1", "provenance": "live", "task_live": "passed"}]
+        result = project(_view({"audit": _records(records=records)}), replay=True)
+        self.assertEqual("replay", result["acceptance"]["provenance"])
+        self.assertEqual("not_run", result["acceptance"]["task_live"])
+        self.assertEqual("live", result["worker_audit"][0]["provenance"])
+
+    def test_worker_audit_projects_model_names_from_nested_execution(self) -> None:
+        records = [{
+            "worker_id": "w1", "task_id": "t1", "provenance": "live",
+            "requested_model": "ignore-top-level",
+            "execution": {"requested_model": "gemini-pro", "returned_model": "glm-5.2"},
+        }, {
+            "worker_id": "w2", "task_id": "t2", "provenance": "live",
+            "execution": {},
+        }]
+        audits = project(_view({"audit": _records(records=records)}))["worker_audit"]
+        self.assertEqual("gemini-pro", audits[0]["requested_model"])
+        self.assertEqual("glm-5.2", audits[0]["returned_model"])
+        self.assertIsNone(audits[1]["requested_model"])
+        self.assertIsNone(audits[1]["returned_model"])
+
+    def test_source_availability_is_projected_without_raw_rows(self) -> None:
+        result = project(_view({"ledger": _db("missing"), "audit": _records("error")}))
+        self.assertEqual("missing", result["sources"]["ledger"]["state"])
+        self.assertEqual("error", result["sources"]["audit"]["state"])
+        self.assertNotIn("tables", result["sources"]["ledger"])
 
     def test_empty_swarm_is_degraded_not_claimed(self) -> None:
         view = empty_swarm()
@@ -224,10 +281,19 @@ class LoadSwarmTests(unittest.TestCase):
     def test_observing_missing_state_never_creates_it(self) -> None:
         state = self.root / "missing"
         view = load_swarm(state)
-        self.assertEqual("partial", view["health"])
+        self.assertEqual("missing", view["health"])
         self.assertEqual([], view["workers"])
         self.assertEqual([], view["tasks"])
         self.assertFalse(state.exists())
+
+    def test_load_swarm_replay_preserves_facts_and_marks_history(self) -> None:
+        workers = self.root / "workers"
+        workers.mkdir()
+        workers.joinpath("w1.json").write_text(json.dumps({"worker_id": "w1", "state": "done"}), encoding="utf-8")
+        view = load_swarm(self.root, replay=True)
+        self.assertEqual("replay", view["acceptance"]["provenance"])
+        self.assertEqual("w1", view["workers"][0]["worker_id"])
+        self.assertEqual("not_run", view["acceptance"]["task_live"])
 
     def test_load_swarm_projects_real_sqlite_and_mutates_nothing(self) -> None:
         field = self.root / "field.sqlite3"
@@ -381,6 +447,36 @@ class SwarmRouteTests(unittest.TestCase):
         status, body = self._get("/api/swarm?secret=do-not-log")
         self.assertEqual(200, status)
         self.assertEqual(SWARM_SCHEMA, body["schema"])
+
+    def test_swarm_route_returns_stable_json_on_observer_error(self) -> None:
+        root = Path(self.temp_dir.name)
+
+        def broken() -> dict[str, Any]:
+            raise RuntimeError("private detail")
+
+        def handler(*args: Any, **kwargs: Any) -> DashboardHandler:
+            return DashboardHandler(
+                *args, directory=str(root), dashboard_loader=empty_dashboard,
+                echarts_asset=root / "missing.js", evomap_service=None,
+                swarm_loader=broken, **kwargs,
+            )
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        request = urllib.request.Request(f"http://127.0.0.1:{server.server_address[1]}/api/swarm")
+        try:
+            with self.assertRaises(urllib.error.HTTPError) as raised:
+                urllib.request.urlopen(request, timeout=10)
+            self.assertEqual(503, raised.exception.code)
+            body = json.loads(raised.exception.read())
+            self.assertEqual("error", body["health"])
+            self.assertEqual("unverified", body["acceptance"]["provenance"])
+            self.assertNotIn("private detail", json.dumps(body))
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
 
 
 if __name__ == "__main__":
