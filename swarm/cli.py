@@ -28,6 +28,7 @@ class EvoMapRun(BaseModel):
     tasks: int = 6
     worker_models: tuple[EvoMapTextModel, ...] = ()
     capability_names: tuple[str, ...] = ()
+    continue_on_rejection: bool = False
 
     @model_validator(mode="after")
     def bounded_experiment(self) -> Self:
@@ -162,7 +163,8 @@ def evomap_worker_config(config: EvoMapRun, instance: int) -> str:
                         locality=Locality(workspace=str(target),
                             authorized_scopes=scopes, modules=modules),
                         budget=config.budget, capabilities=capabilities, seed=instance, max_idle=100, energy=150,
-                        lease_seconds=min(300, config.budget.limits.max_runtime_seconds)).model_dump_json()
+                        lease_seconds=min(300, config.budget.limits.max_runtime_seconds),
+                        continue_on_rejection=config.continue_on_rejection).model_dump_json()
 
 
 def _evomap_process(config_json: str, worker_json: str, instance: int) -> None:

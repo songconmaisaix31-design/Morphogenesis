@@ -96,6 +96,7 @@ class WorkerConfig(BaseModel):
     lease_seconds: float = Field(default=300, gt=0, le=3600)
     validation_seconds: float = Field(default=15, gt=0, le=300)
     seed: int | None = None
+    continue_on_rejection: bool = False
 
     @property
     def worker_id(self) -> str:
@@ -624,8 +625,10 @@ class Worker:
                     or result.usage_source != self.executor.usage_source
                     or result.original_run_uri != self.executor.original_run_uri):
                 raise AssetSafetyError("execution_provenance_mismatch")
-            if settled.uncertain_reservations and settled.reason != "unknown_cost":
+            if result.uncertain:
                 outcome = "unknown_usage"
+                if self.config.continue_on_rejection:
+                    return "rejected"
                 return "sleeping"
             if settled.sleeping and settled.reason not in {
                 "worker_burn_rate", "swarm_cost_estimate_exhausted", "unknown_cost",
@@ -657,7 +660,7 @@ class Worker:
                 self.ledger.fail(lease, {"outcome": outcome, "asset_id": asset_id})
                 self.field.feedback(signal.signal_id, success=False)
                 self.router.reinforce(self.worker_id, signal, success=False)
-                return "failed"
+                return "rejected"
             if asset_id is None:
                 raise AssetSafetyError("missing_validated_asset")
             enter_phase("prepare_application")
@@ -794,6 +797,8 @@ class Worker:
                 time.sleep(self.config.sleep_seconds)
                 return result
             if outcome == "failed":
+                return self._status("stopped", "execution_or_validation_failed")
+            if outcome == "rejected" and not self.config.continue_on_rejection:
                 return self._status("stopped", "execution_or_validation_failed")
             self._status("active")
         return self._status("exhausted", "energy_limit")
