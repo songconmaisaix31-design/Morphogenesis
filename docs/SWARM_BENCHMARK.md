@@ -33,3 +33,35 @@ GSM8K gold is extracted only from the official final `####` marker and scored wi
 Report standard normalized correctness and strict JSON-contract compliance separately when relevant. Accuracy always uses every requested sample as denominator: correct, incorrect, malformed, missing, and duplicate responses are distinct counts. Do not report completed-only accuracy. Request IDs are deduplicated before aggregation; report requested/returned model, HTTP status, latency, stop reason, token total when known plus known subtotal otherwise, and billed cost as `null` when unavailable. Preserve unknown usage and cost as unknown rather than zero.
 
 The protocol is a zero-shot, JSON-constrained subset and therefore differs from original GSM8K/BBH papers and leaderboard protocols. A runtime acceptance rule that requires cross-member asset adoption can be blocked for independently scored benchmark tasks; benchmark accuracy must still be reported independently and must not fake adoption.
+
+## Executed 8x48 Evidence
+
+On 2026-09-24, after the bounded live interface had been authorized, two fresh 8-worker, 48-task, one-attempt conditions ran against the pinned 48-item selection. Both used `allow_unknown_cost=true`, explicit unbounded reservation admission, the same private credential-file route, no retries, no model fallback, and no task adoption. All eight worker processes exited `0` in each condition. The source state and aggregate results are retained outside Git; the paths below contain request/response evidence, audit records, and immutable acceptance records, including the gold values that must not be published.
+
+| Condition | Correct | Incorrect | Malformed | Missing | Duplicate | Accuracy | Strict JSON rate | Requests | Known provider tokens | Billed cost |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Eight fixed Sol workers | 25 | 21 | 0 | 2 | 0 | 52.08% | 95.83% | 48 | 12,304 of 46 known-usage requests | `null` / unknown |
+| Eight fixed heterogeneous workers | 30 | 15 | 2 | 1 | 0 | 62.50% | 93.75% | 48 | 18,454 of 48 requests | `null` / unknown |
+
+The heterogeneous pool used DeepSeek V4 Flash, Gemini 3.1 Pro Preview, GLM 5.1, GLM 5.2, GPT 5.6 Luna, Sol, Terra, and a second fixed Sol worker. Assignment is decentralized and unequal, so these rows are descriptive rather than a balanced model comparison. Names below are the returned provider model identifiers when available.
+
+| Returned model | Requested samples | Correct | Incorrect | Malformed | Missing | Accuracy | Strict JSON rate |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `deepseek-v4-flash-0731` | 6 | 3 | 2 | 0 | 1 | 50.00% | 83.33% |
+| `gemini-3.1-pro-preview` | 5 | 5 | 0 | 0 | 0 | 100.00% | 100.00% |
+| `glm-5.1` | 5 | 3 | 0 | 2 | 0 | 60.00% | 60.00% |
+| `glm-5.2` | 5 | 5 | 0 | 0 | 0 | 100.00% | 100.00% |
+| `gpt-5.6-luna` | 7 | 6 | 1 | 0 | 0 | 85.71% | 100.00% |
+| `gpt-5.6-sol` | 14 | 5 | 9 | 0 | 0 | 35.71% | 100.00% |
+| `gpt-5.6-terra` | 6 | 3 | 3 | 0 | 0 | 50.00% | 100.00% |
+
+The two malformed heterogeneous responses came from `glm-5.1`; they remain malformed under the strict response contract and were not repaired or retried. The Sol condition's two missing responses had no returned model or provider usage, so they remain in its full 48-sample denominator rather than in the 46 returned-Sol descriptive rows. No provider billed-cost field was supplied, so cost is retained as unknown rather than estimated or zero.
+
+Aggregate outputs and state roots are:
+
+| Condition | Aggregate output | State root |
+| --- | --- | --- |
+| Eight fixed Sol workers | `C:/Users/DW/AppData/Local/Temp/morph-benchmark-8x48-sol-result.json` | `C:/Users/DW/AppData/Local/Temp/morph-benchmark-8x48-sol/state` |
+| Eight fixed heterogeneous workers | `C:/Users/DW/AppData/Local/Temp/morph-benchmark-8x48-hetero-result.json` | `C:/Users/DW/AppData/Local/Temp/morph-benchmark-8x48-hetero/state` |
+
+The first direct invocation stopped before configuration parsing or any provider request because the workspace was absent from `PYTHONPATH` (`ModuleNotFoundError: swarm`). The authorized live invocations were then run once with `PYTHONPATH` explicitly set to the workspace. This was a local launch correction, not a remote retry; the two reported conditions are the only paid benchmark executions. The optional 16x96 extension was not run.
