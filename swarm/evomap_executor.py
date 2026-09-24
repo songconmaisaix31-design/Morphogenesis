@@ -83,6 +83,12 @@ def canonical_answer(value: JsonValue) -> str:
     return json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")) + "\n"
 
 
+def _proposal_content(content: str) -> str:
+    stripped = content.strip()
+    match = re.fullmatch(r"```(?:json)?\s*\r?\n([\s\S]*?)\r?\n```", stripped, flags=re.IGNORECASE)
+    return match.group(1).strip() if match else stripped
+
+
 def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
              transport: httpx.MockTransport | None = None, provenance: Provenance = "live") -> Reply:
     """Called in the credential child; explicit mock transport is test-only."""
@@ -253,7 +259,7 @@ class EvoMapExecutor:
         consumed: tuple[str, ...] = ()
         if not reply.error_kind and not reply.uncertain and reply.content is not None:
             try:
-                proposal = DataProposal.model_validate_json(reply.content)
+                proposal = DataProposal.model_validate_json(_proposal_content(reply.content))
                 after = canonical_answer(proposal.answer)
                 if len(after.encode("utf-8")) > 65536:
                     raise ValueError("answer_limit")

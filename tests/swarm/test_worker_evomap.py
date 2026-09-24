@@ -13,7 +13,7 @@ import httpx
 import pytest
 
 from swarm.cli import EvoMapRun, evomap_worker_config, seed_evomap
-from swarm.evomap_executor import EvoMapConfig, EvoMapExecutor, Reply, _request
+from swarm.evomap_executor import EvoMapConfig, EvoMapExecutor, Reply, _proposal_content, _request
 from swarm.worker_loop import Worker, WorkerConfig
 from local_assets.models import AssetSafetyError
 
@@ -237,6 +237,21 @@ def test_echoed_key_and_redirect_are_not_accepted_or_retried():
                      transport=httpx.MockTransport(handle), provenance="mock")
     assert len(calls) == 1 and reply.uncertain and reply.content is None
     assert reply.interface_live == "not_run" and KEY not in reply.model_dump_json()
+
+
+@pytest.mark.parametrize("tag", ["json", "JSON", ""])
+def test_complete_json_fence_is_unwrapped(tag):
+    content = '{"answer":{"item":1},"adopted_asset_ids":[]}'
+    assert _proposal_content(f"```{tag}\n{content}\n```") == content
+
+
+@pytest.mark.parametrize("content", [
+    'prefix\n```json\n{"answer":1,"adopted_asset_ids":[]}\n```',
+    '```json\n{"answer":1,"adopted_asset_ids":[]}\n```\nsuffix',
+    '```python\n{"answer":1,"adopted_asset_ids":[]}\n```',
+])
+def test_json_fence_unwrap_rejects_prose_and_other_languages(content):
+    assert _proposal_content(content) == content
 
 
 def test_aggregate_live_scene_requires_members_pids_and_authoritative_adoption():
