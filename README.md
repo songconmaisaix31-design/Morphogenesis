@@ -18,6 +18,8 @@ Morphogenesis 对这两个缺陷给出同一个回答：把协调与记忆都交
 
 ## 三、系统架构与算法
 
+![Morphogenesis 海报一](docs/assets/img-20260923-193734.png)
+
 系统经历两代演进，两代代码均以完整证据链存档。
 
 第一代，已归档，为中心化编排下的五机制闭环，包含拓扑生长、经验代谢、权重选路、接续与复核、可视化模块。它验证了机制的生物学自洽逻辑，但仍然保留中心调度器，存在传统多智能体系统的单点瓶颈问题。
@@ -62,7 +64,31 @@ Morphogenesis 主打单机本地自治蜂群，智能体验证、能力晋级、
 
 项目制定严格统一的经验继承验收标准，单个智能体验证通过的有效资产，可被其他智能体复用迭代，全程留存资产编号、上下文输入、执行日志、复用记录，精准区分无效资产堆积与真实经验驱动的能力增长，保障群体智能持续正向进化。
 
-## 七、结语
+## 七、使用入口
+
+所有命令收敛到统一控制台脚本 `morphogenesis`（等价 `python -m bootstrap`）。先安装锁定环境：
+
+```powershell
+$env:POETRY_VIRTUALENVS_IN_PROJECT = 'true'
+uv tool run poetry install
+npm ci --ignore-scripts
+```
+
+| 子命令 | 用途 |
+|---|---|
+| `morphogenesis check` | 本地质量门：全量 pytest + strict mypy |
+| `morphogenesis prepare --workspace <dir>` | 生成固定练习 workspace（不执行模型） |
+| `morphogenesis verify --workspace <dir>` | 独立固定验证器复核 |
+| `morphogenesis acceptance ...` | 单次真实模型运行闭环（转发 `python -m orchestration.acceptance`） |
+| `morphogenesis rehearsal ...` | 两项已授权新任务固定彩排（转发 `python -m orchestration.rehearsal`） |
+| `morphogenesis serve ...` | 只读本地 dashboard（转发 `python -m viz.server`） |
+| `morphogenesis swarm` | 占位：异构蜂群尚未合入主线 |
+
+转发子命令把剩余参数原样交给对应模块，其 `--help`、退出码、阻塞服务与信号处理与 `python -m ...` 完全一致；先看 `morphogenesis <subcommand> --help`。`contract_local`、`interface_live`、`task_live` 相互独立，未知 usage 为 `null`，绝不臆造为零。现场演示见 `demo/run-demo.ps1`，公网部署见 `deploy/README.md`。
+
+## 八、结语
+
+![Morphogenesis 海报二](docs/assets/img-20260924-103304.png)
 
 在《攻壳机动队》的叙事中，素子融入网络，是个体边界的消融，亦是更高维度意志的延续。本项目的设计内核亦是如此，彻底打破传统智能体等待指令、被动执行的运行模式，摆脱中心化调度器的桎梏。
 
