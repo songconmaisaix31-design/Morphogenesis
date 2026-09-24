@@ -189,9 +189,9 @@ def seed_benchmark(config: Any, examples: list[BenchmarkExample]) -> tuple[Path,
     target.mkdir(parents=True)
     git(target, "init", "-b", "swarm-benchmark-data")
     for number in range(config.tasks):
-        path = target / f"module_{number % config.workers}" / f"result_{number}.json"
-        path.parent.mkdir(exist_ok=True)
-        path.write_text("null\n", encoding="utf-8", newline="\n")
+        initial_path = target / f"module_{number % config.workers}" / f"result_{number}.json"
+        initial_path.parent.mkdir(exist_ok=True)
+        initial_path.write_text("null\n", encoding="utf-8", newline="\n")
     git(target, "add", "--", *(f"module_{number}" for number in range(config.workers)))
     git(target, "-c", "user.name=Swarm Benchmark", "-c", "user.email=benchmark@localhost",
         "commit", "-m", "Seed pinned benchmark task outputs")
@@ -249,28 +249,31 @@ def summarize_run_records(examples: list[BenchmarkExample], rows: Iterable[dict[
     stop_reasons: dict[str, int] = {}
     for number, example in enumerate(examples):
         task_rows = by_task.get(f"benchmark-{number}", [])
-        row = task_rows[-1] if len(task_rows) == 1 else None
-        score = score_response(example, _response_from_row(row) if row else None, duplicate=len(task_rows) > 1)
+        record = task_rows[-1] if len(task_rows) == 1 else None
+        score = score_response(example, _response_from_row(record) if record is not None else None,
+                               duplicate=len(task_rows) > 1)
         scores.append(score)
-        execution = row.get("execution") if isinstance(row, dict) else None
-        model = execution.get("returned_model") if isinstance(execution, dict) else None
+        execution = record.get("execution") if isinstance(record, dict) else None
+        if not isinstance(execution, dict):
+            execution = None
+        model = execution.get("returned_model") if execution is not None else None
         if not isinstance(model, str):
-            model = execution.get("requested_model") if isinstance(execution, dict) else "unknown"
+            model = execution.get("requested_model") if execution is not None else "unknown"
         per_model.setdefault(model if isinstance(model, str) else "unknown", []).append(score)
-        if isinstance(row, dict):
-            outcome = row.get("outcome")
+        if isinstance(record, dict):
+            outcome = record.get("outcome")
             if isinstance(outcome, str):
                 stop_reasons[outcome] = stop_reasons.get(outcome, 0) + 1
-            request_id = execution.get("request_id") if isinstance(execution, dict) else None
+            request_id = execution.get("request_id") if execution is not None else None
             if isinstance(request_id, str) and request_id not in requests:
-                usage = row.get("usage")
+                usage = record.get("usage")
                 requests[request_id] = {
-                    "requested_model": execution.get("requested_model"),
-                    "returned_model": execution.get("returned_model"),
-                    "http_status": execution.get("http_status"),
-                    "latency_seconds": execution.get("elapsed_seconds"),
+                    "requested_model": execution.get("requested_model") if execution is not None else None,
+                    "returned_model": execution.get("returned_model") if execution is not None else None,
+                    "http_status": execution.get("http_status") if execution is not None else None,
+                    "latency_seconds": execution.get("elapsed_seconds") if execution is not None else None,
                     "total_tokens": usage.get("total_tokens") if isinstance(usage, dict) else None,
-                    "billed_cost_usd": execution.get("actual_cost_usd"),
+                    "billed_cost_usd": execution.get("actual_cost_usd") if execution is not None else None,
                 }
     latencies = [entry["latency_seconds"] for entry in requests.values()
                  if isinstance(entry["latency_seconds"], (int, float)) and not isinstance(entry["latency_seconds"], bool)]
@@ -299,6 +302,8 @@ def run_benchmark(config: Any, gsm8k_root: Path, bbh_root: Path, *, seed: int = 
     from swarm.observer import read_records
 
     benchmark_config(config)
+    config = config.model_copy(update={"continue_on_rejection": True,
+                                       "budget": config.budget.model_copy(update={"allow_unknown_usage": True})})
     baseline, additions = select_extension(gsm8k_root, bbh_root, seed=seed)
     examples = baseline if config.tasks == 48 else baseline + additions
     _, state = seed_benchmark(config, examples)
@@ -313,8 +318,8 @@ def run_benchmark(config: Any, gsm8k_root: Path, bbh_root: Path, *, seed: int = 
 def _gsm_number(value: str) -> Decimal | None:
     cleaned = value.strip().replace(",", "").replace("$", "")
     try:
-        value = Decimal(cleaned)
-        return value if value.is_finite() else None
+        number = Decimal(cleaned)
+        return number if number.is_finite() else None
     except InvalidOperation:
         return None
 

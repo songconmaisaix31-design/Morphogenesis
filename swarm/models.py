@@ -114,6 +114,7 @@ class BudgetPolicy(Model):
     unbounded_reservation_usd: float | None = Field(default=None, gt=0)
     # Explicit operator authorization for finite runs; not provider billing evidence.
     allow_unknown_cost: bool = Field(default=False, strict=True)
+    allow_unknown_usage: bool = Field(default=False, strict=True)
 
     @model_validator(mode="after")
     def unbounded_requires_admission(self) -> BudgetPolicy:

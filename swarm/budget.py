@@ -238,7 +238,8 @@ class BudgetLedger:
             if reported is None:
                 db.execute("UPDATE budget_reservations SET status='uncertain',settled_at=? WHERE reservation_id=?",
                            (now, reservation.reservation_id))
-                self._trip(db, "unknown_usage")
+                if not self.policy.allow_unknown_usage:
+                    self._trip(db, "unknown_usage")
             else:
                 if estimate is None:
                     # Operator admission allowance is not a model price. Preserve

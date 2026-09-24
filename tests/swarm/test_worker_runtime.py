@@ -199,6 +199,16 @@ def test_failed_validation_retains_quarantine_and_accounts_usage(tmp_path):
     assert all("return -1" in path.read_text() for path in config.target.rglob("task_*.py"))
 
 
+def test_continue_on_rejection_processes_followup_tasks(tmp_path):
+    config = configured(tmp_path, energy=2, continue_on_rejection=True)
+    worker = Worker(config, WrongAnswer())
+    result = worker.run()
+    assert result["state"] == "exhausted"
+    assert [event["outcome"] for event in events(config)] == ["quarantined", "quarantined"]
+    assert not worker.assets.promotions()
+    assert all("return -1" in path.read_text() for path in config.target.rglob("task_*.py"))
+
+
 def test_expired_scope_lease_blocks_promotion_and_success_audit(tmp_path):
     config = configured(tmp_path, energy=1)
     worker = Worker(config)
