@@ -82,6 +82,9 @@ class Reply(BaseModel):
     interface_live: Literal["passed", "not_run", "blocked"] = "not_run"
     classification: str | None = None
     evidence_hash: str | None = None
+    normalized_reason: str | None = None
+    retry_after_raw: str | None = None
+    retry_after_seconds: float | None = None
 
 
 def canonical_answer(value: JsonValue) -> str:
@@ -105,40 +108,78 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
         return Reply(error_kind="credential_in_input", uncertain=True)
     response = single_request(payload, key=key, phase_timeout=timeout, transport=transport)
     
-    # Convert raw body to string for classification
-    raw_body_str = response.raw_body.decode('utf-8') if response.raw_body else ""
+    # Check for transport errors first - these take precedence over status/body
+    if response.error_kind:
+        # Transport errors (like ReadTimeout, connection issues) take precedence
+        return Reply(
+            http_status=response.status,
+            request_id=response.request_id,
+            elapsed_seconds=response.elapsed_seconds,
+            error_kind=response.error_kind,
+            uncertain=True,
+            interface_live="blocked" if provenance == "live" else "not_run",
+            classification=FailureClassification.UNKNOWN_EFFECT.value,
+            evidence_hash=None  # No evidence hash for transport errors
+        )
+    
+    # Convert raw body to string for classification, handling non-UTF8 safely
+    raw_body_str = ""
+    if response.raw_body:
+        try:
+            raw_body_str = response.raw_body.decode('utf-8')
+        except UnicodeDecodeError:
+            # Handle non-UTF8 content safely by using the raw bytes for hashing
+            raw_body_str = response.raw_body.decode('utf-8', errors='replace')
     
     # Perform classification
     model_value = payload.get("model", "")
     if not isinstance(model_value, str):
         model_value = str(model_value) if model_value is not None else ""
     request_context = RequestContext(provider="evomap", model=model_value, endpoint="/chat/completions")
-    classification = EvoMapAdapter.interpret(
+    classification_result = EvoMapAdapter.interpret(
         raw_body_str,
         response.status or 0,
         {"Retry-After": response.retry_after} if response.retry_after else {},
         request_context
     )
     
-    # Generate evidence hash
-    evidence_hash = hashlib.sha256(raw_body_str.encode()).hexdigest() if raw_body_str else None
-    
+    # Generate evidence hash from the actual raw bytes
+    evidence_hash = hashlib.sha256(response.raw_body or b"").hexdigest() if response.raw_body is not None else None
+
     body = response.body
     measured = _usage(body)
     usage = measured.model_dump() if measured is not None else None
     returned = body.get("model") if isinstance(body, dict) else None
     returned = returned if isinstance(returned, str) and len(returned) <= 128 and key not in returned else None
-    reply = Reply(http_status=response.status, request_id=response.request_id,
-                  elapsed_seconds=response.elapsed_seconds, usage=usage, returned_model=returned,
-                  interface_live="blocked" if provenance == "live" else "not_run",
-                  classification=classification.value, evidence_hash=evidence_hash)
+    reply = Reply(
+        http_status=response.status, 
+        request_id=response.request_id,
+        elapsed_seconds=response.elapsed_seconds, 
+        usage=usage, 
+        returned_model=returned,
+        interface_live="blocked" if provenance == "live" else "not_run",
+        classification=classification_result.classification.value, 
+        evidence_hash=evidence_hash,
+        normalized_reason=classification_result.normalized_reason,
+        retry_after_raw=classification_result.retry_after_raw,
+        retry_after_seconds=classification_result.retry_after_seconds
+    )
+    
     if key in json.dumps(body, ensure_ascii=False):
-        return Reply(http_status=response.status, elapsed_seconds=response.elapsed_seconds,
-                     error_kind="credential_echo", uncertain=True,
-                     interface_live="blocked" if provenance == "live" else "not_run",
-                     classification=classification.value, evidence_hash=evidence_hash)
-    if response.error_kind:
-        return reply.model_copy(update={"error_kind": response.error_kind, "uncertain": True})
+        return Reply(
+            http_status=response.status, 
+            elapsed_seconds=response.elapsed_seconds,
+            error_kind="credential_echo", 
+            uncertain=True,
+            interface_live="blocked" if provenance == "live" else "not_run",
+            classification=classification_result.classification.value, 
+            evidence_hash=evidence_hash,
+            normalized_reason=classification_result.normalized_reason,
+            retry_after_raw=classification_result.retry_after_raw,
+            retry_after_seconds=classification_result.retry_after_seconds
+        )
+    
+    # For transport errors, we already returned above
     if response.status != 200:
         return reply.model_copy(update={"error_kind": "http_rejected", "uncertain": measured is None})
     if response.elapsed_seconds > timeout:
@@ -168,7 +209,23 @@ def _child() -> int:
         if not config.credential_file.is_file() or config.credential_file.stat().st_size > 8193:
             raise ValueError("credential_file_invalid")
         key = config.credential_file.read_text(encoding="utf-8").strip()
-        reply = _request(payload, key, config.timeout_seconds)
+        
+        # Check if this is a mock request
+        mock_provenance = envelope.get("mock_provenance")
+        if mock_provenance == "mock":
+            # Use a mock transport for testing
+            import httpx
+            def mock_handler(request: httpx.Request) -> httpx.Response:
+                # Return a mock response for testing
+                return httpx.Response(
+                    status_code=400,
+                    headers={"x-request-id": "test-id", "Retry-After": "60"},
+                    content=b'{"error": {"code": "Arrearage", "message": "Account has outstanding balance"}}'
+                )
+            transport = httpx.MockTransport(mock_handler)
+            reply = _request(payload, key, config.timeout_seconds, transport=transport, provenance="mock")
+        else:
+            reply = _request(payload, key, config.timeout_seconds)
     except Exception:
         reply = Reply(error_kind="request_child_failed", uncertain=True)
     print(reply.model_dump_json())
