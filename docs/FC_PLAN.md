@@ -6,6 +6,28 @@
 
 ## 接手与已核实状态
 
+### 多 Agent 接续与桌面报告（最新用户指令）
+
+用户要求按总 QWEN.md 继续多 Agent 并行开发，完成后在桌面放任务报告。复用
+原 Run/Worktree/Branch；主控仅计划、状态、决策、验收和报告，领域代码仍由原
+Worker 负责；第一代主线 WIP 不动。
+
+| 轨 | 最新身份 | 本阶段目标 |
+|---|---|---|
+| A / 原 Qwen 会话 | task_5853a2c3a4b9 / ctx_b8e62d8a7999 | 100 轮上限停止已正向确认，原会话 5c97a5dd-8417-4fe3-86c0-c3ca6820980f 保留 WIP，进程参数 400 轮继续；完成全部领域返修 |
+| B / 原 Codex | 已交付 92e1de3 | 维持事实接口；领域缺陷仍退原所有者 |
+| C / 原 Qoder | task_4aef0ca00aef / ctx_0df29cd2f91c | 类型兼容、所有状态转移、多进程唯一探测、全量门禁 |
+| D / 原生 Qwen headless | task_933c44a9cac2 / ctx_7dcc68e5a275 | 六夹具、真实生产路径属性测试、缺注入点精确 Handoff，不伪造 fallback |
+| E / 原生 dsh | task_3209b919995f / ctx_588d14022e7e | 首批 A/B 精确 SHA 审查；WIP 单独标识；最后最终 SHA 全量审查 |
+| 独立集成 I | 待领域最终交付 | 普通 exact-SHA no-ff 合并、必要少量胶水、联合门禁与报告；领域缺陷退原轨 |
+
+D/E 各自只写 QWEN.md 指定测试/报告路径。接口尚未最终交付时仅做合法夹具和
+审查准备，最终不能拿 WIP 或 stand-in 替代生产路径验收。私有凭据仍只由本轮
+本地 launcher 注入进程环境。执行路径窄写权扩展已向用户提出；未授权前仍按
+既有五轨写权执行，不擅自改 worker_loop/budget/attempt。最终桌面报告以现有
+事实为准，区分已交付模块、实际闭环、contract_local/interface_live/task_live，
+保留未知成本和人工审查项，不把部分交付标为总目标完成。
+
 ### FC-A 首次回执复核
 
 FC-A 原 Dispatch 已自报成功并推送 e4396407e87e8745f8bfeff448343ecf6b6edd5f，
