@@ -8,6 +8,11 @@
 
 ### 多 Agent 接续与桌面报告（最新用户指令）
 
+实时阻塞：A/D 原生 Qwen 已明确得到 DashScope HTTP400 欠费拒绝，两个
+Dispatch stopped，Task blocked，WIP 原样保留，不再自动调用；用户引擎替代
+选择待答。E 首轮 dsh 有真实调用但未生成报告、评审质量未通过，已停止；
+C 仍在 Qoder 开发，B 交付保持。详情和全局依赖误安装见 TASKS.md。
+
 用户要求按总 QWEN.md 继续多 Agent 并行开发，完成后在桌面放任务报告。复用
 原 Run/Worktree/Branch；主控仅计划、状态、决策、验收和报告，领域代码仍由原
 Worker 负责；第一代主线 WIP 不动。
@@ -117,6 +122,11 @@ worker_loop.py 或预算/attempt 逻辑。分类、观察与熔断模块单独�
 确认后续接入所有者及窄写权；集成 Agent 不得把它作为少量胶水擅自实现。
 
 ## 验收与停止条件
+
+2026-09-27 最新 C 门禁：569 passed / 2 failed / 1 skipped，不予验收。
+主控另复现同 Worker 过期重领探测后旧结果仍获接受，已退原 C 轨修复。
+宿主磁盘 ENOSPC 曾中断原生 Qoder；保留 WIP、同 Owner 接续，不豁免门禁。
+A/D 已知欠费拒绝仍停止；引擎替代及运行时接入范围均等待用户决定。
 
 沿用每轨本地锁环境、全部适用 pytest、strict 类型检查，以及最终 build/SDK/分发。
 先保留全部五不变量，再进行 A/B/C/D 联合边界验证。未知 usage/cost/远端效果保持

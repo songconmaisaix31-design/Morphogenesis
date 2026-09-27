@@ -170,7 +170,12 @@ class BudgetLedger:
             state = self._snapshot(db, worker_id, now)
             if state.sleeping:
                 raise BudgetBlocked(state.reason or "swarm_sleeping", state.sleep_seconds)
-            if db.execute("SELECT 1 FROM budget_reservations WHERE swarm_id=? AND (request_id=? OR (task_id=? AND status!='settled'))",
+            # Only an in-flight ('pending') hold blocks another reservation for
+            # the same task: it is the one state that means a request may still
+            # be outstanding. Settled and uncertain reservations are terminal
+            # facts; they keep their cumulative holds forever but never block a
+            # new, separately-counted attempt on the same task budget.
+            if db.execute("SELECT 1 FROM budget_reservations WHERE swarm_id=? AND (request_id=? OR (task_id=? AND status='pending'))",
                           (self.swarm_id, request_id, task_id)).fetchone():
                 raise BudgetBlocked("task_already_reserved_no_retry")
             recent = db.execute("SELECT body,tokens FROM budget_reservations WHERE swarm_id=? AND worker_id=? "
@@ -206,6 +211,28 @@ class BudgetLedger:
 
     def mark_uncertain(self, reservation: Reservation) -> BudgetSnapshot:
         return self.settle(reservation, None)
+
+    def mark_unknown_rejection(self, reservation: Reservation) -> BudgetSnapshot:
+        """A confirmed provider rejection whose usage/cost stayed unobserved.
+
+        The hold remains open (status 'uncertain', usage/cost 'unknown') and
+        keeps counting toward admission capacity under the same task budget,
+        but the swarm is not slept: the failure class is a known rejection, so
+        a bounded chain switch stays admittable under cumulative holds. A
+        genuine unknown effect still uses ``mark_uncertain``, which trips the
+        swarm stop. Never fabricates a zero settlement.
+        """
+        reservation = Reservation.model_validate(reservation.model_dump())
+        now = self._now()
+        with self._transaction() as db:
+            row = self._stored(db, reservation)
+            if row["status"] != "pending":
+                return self._snapshot(db, reservation.worker_id, now)
+            if now < reservation.created_at:
+                raise ValueError("time cannot move backwards")
+            db.execute("UPDATE budget_reservations SET status='uncertain',settled_at=? WHERE reservation_id=?",
+                       (now, reservation.reservation_id))
+            return self._snapshot(db, reservation.worker_id, now)
 
     def _trip(self, db: sqlite3.Connection, reason: str) -> None:
         priorities = {"swarm_cost_estimate_exhausted": 1, "unknown_cost": 2,

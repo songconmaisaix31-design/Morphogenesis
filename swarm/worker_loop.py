@@ -2,16 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 import json
+import math
 import os
 from pathlib import Path
 import random
 import sqlite3
 from threading import Event, Lock, Thread
 import time
-from typing import Literal, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, TypeAdapter
@@ -33,15 +34,47 @@ from orchestration.gateway import _usage
 from swarm.budget import BudgetBlocked, BudgetLedger
 from swarm.hub_mirror import HubMirror
 from swarm.lease import LeaseManager
-from swarm.models import BudgetPolicy, ExecutionBound, Lease, Locality, Reservation, Signal
+from swarm.models import (BudgetPolicy, BudgetSnapshot, ExecutionBound, Lease, Locality, Reservation,
+                          Signal)
 from swarm.pheromone import PheromoneField
 from swarm.router import Router
 from swarm.task_ledger import LeaseLost, RunLimitReached, TaskLedger
+
+from swarm.failure_chain import (
+    CONFIRMED_REJECTION,
+    FailureObservationFact,
+    GuardResult,
+    ProbeClaim,
+    SharedBreakerLike,
+    FaultStoreLike,
+    candidate_identity,
+    decide,
+    guard_provider,
+)
+
+if TYPE_CHECKING:
+    from swarm.breaker import BreakerConfig
 
 _JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 _CHANGES = TypeAdapter(tuple[FileChange, ...])
 _SOURCE = Path(__file__).resolve().parents[1]
 _FIXTURE_USAGE: JsonValue = {"usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}}
+_KNOWN_FAILURE_CLASSES = frozenset({"confirmed_rejection", "unknown_effect",
+                                    "budget_exhausted", "capability_mismatch"})
+
+
+def _load_failure_components() -> tuple[Any, Any]:
+    """Import the real FC-B store and FC-C breaker only when present.
+
+    The baseline tree runs without them (no fault observations, no routing
+    guard); a composed tree gets the genuine shared modules, never copies.
+    """
+    try:
+        from swarm.fault_observations import FaultObservationStore
+        from swarm.breaker import SharedBreaker
+        return FaultObservationStore, SharedBreaker
+    except ImportError:
+        return None, None
 
 
 def _safe_failure(error: Exception) -> dict[str, JsonValue]:
@@ -326,7 +359,8 @@ class _Renewal:
 
 class Worker:
     def __init__(self, config: WorkerConfig, executor: Executor | None = None, *,
-                 mirror: HubMirror | None = None) -> None:
+                 mirror: HubMirror | None = None, candidates: Sequence[Executor] | None = None,
+                 breaker_config: "BreakerConfig | None" = None) -> None:
         self.config = config
         self.target = check_target(config.target, (_SOURCE,))
         self.state = check_state_path(config.state)
@@ -337,6 +371,12 @@ class Worker:
         self.worker_id = config.worker_id
         self.executor = executor or FixtureExecutor()
         self.executor.check_paths(self.target, self.state)
+        if candidates is not None:
+            if not candidates:
+                raise ValueError("candidates must not be empty")
+            self._candidates: tuple[Executor, ...] = tuple(candidates)
+        else:
+            self._candidates = (self.executor,)
         self.mirror = mirror
         Acceptance(provenance=self.executor.provenance, original_run_uri=self.executor.original_run_uri)
         self.ledger = TaskLedger(self.state / "tasks.sqlite3", config.swarm_id, limits=config.budget.limits)
@@ -353,6 +393,15 @@ class Worker:
         self._active: Reservation | None = None
         self._pending: dict[str, JsonValue] | None = None
         self._last_failure: dict[str, JsonValue] | None = None
+        store_cls, breaker_cls = _load_failure_components()
+        self.fault_observation_store: FaultStoreLike | None = None
+        self.shared_breaker: SharedBreakerLike | None = None
+        if store_cls is not None:
+            self.fault_observation_store = cast(FaultStoreLike, store_cls(
+                self.state / "fault_observations.jsonl", config.swarm_id))
+        if breaker_cls is not None and breaker_config is not None:
+            self.shared_breaker = cast(SharedBreakerLike, breaker_cls(
+                self.state / "breaker.sqlite3", config.swarm_id, breaker_config))
 
     def _status(self, state: str, reason: str = "") -> dict[str, JsonValue]:
         result: dict[str, JsonValue] = {
@@ -559,6 +608,82 @@ class Worker:
         return {name: path.read_bytes().decode("utf-8") if path.is_file() else None
                 for name, path in paths.items()}
 
+    def _append_observation(self, fact: FailureObservationFact) -> None:
+        store = self.fault_observation_store
+        if store is not None:
+            store.append(fact)
+
+    @staticmethod
+    def _metadata_retry_after_seconds(metadata: dict[str, JsonValue]) -> float | None:
+        value = metadata.get("retry_after_seconds")
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return None
+        seconds = float(value)
+        if not math.isfinite(seconds) or seconds < 0:
+            return None
+        return seconds
+
+    @staticmethod
+    def _metadata_fact_fields(result: ExecutionResult) -> dict[str, JsonValue]:
+        metadata = result.metadata
+        classification = metadata.get("classification")
+        if not isinstance(classification, str):
+            classification = None
+        reason = metadata.get("normalized_reason")
+        if not isinstance(reason, str) or not reason:
+            reason = classification or "unknown"
+        evidence = metadata.get("evidence_hash")
+        return {
+            "classification": classification,
+            "normalized_reason": reason,
+            "retry_after_seconds": Worker._metadata_retry_after_seconds(metadata),
+            "evidence_ref": evidence if isinstance(evidence, str) and evidence else None,
+        }
+
+    def _report_probe_outcome(self, breaker: SharedBreakerLike | None, claims: Sequence[ProbeClaim], *,
+                              success: bool, retry_after_seconds: float | None,
+                              occurred_at: float) -> None:
+        """Report one request outcome against every probe slot we hold.
+
+        The exact claimed token fences each report: a stale same-worker result
+        can never mutate a reclaimed live slot.
+        """
+        if breaker is None or not claims:
+            return
+        now = time.time()
+        until = occurred_at + retry_after_seconds if retry_after_seconds is not None else None
+        for claim in claims:
+            if success:
+                breaker.report_probe_success(claim.provider, claim.reason, self.worker_id,
+                                             probe_token=claim.token, now=now)
+            else:
+                breaker.report_probe_failure(claim.provider, claim.reason, self.worker_id,
+                                             probe_token=claim.token, retry_after_until=until, now=now)
+
+    def _failure_fact(self, *, task_id: str, request_id: str, index: int, provider: str, model: str,
+                      classification: str, fact_fields: dict[str, JsonValue],
+                      cost_state: Literal["settled", "unknown"], occurred_at: float) -> FailureObservationFact | None:
+        if classification not in _KNOWN_FAILURE_CLASSES:
+            return None
+        retry = fact_fields["retry_after_seconds"]
+        evidence = fact_fields["evidence_ref"]
+        return FailureObservationFact(
+            run_id=self.config.swarm_id, task_id=task_id, request_id=request_id, attempt=index,
+            provider=provider, model=model, failure_class=cast(Any, classification),
+            normalized_reason=str(fact_fields["normalized_reason"]),
+            retry_after_seconds=retry if isinstance(retry, float) else None,
+            switched_to=None, cost_state=cost_state, occurred_at=occurred_at,
+            evidence_ref=evidence if isinstance(evidence, str) else None)
+
+    def _record_failure_fact(self, *, task_id: str, request_id: str, index: int, provider: str, model: str,
+                             classification: str, fact_fields: dict[str, JsonValue],
+                             cost_state: Literal["settled", "unknown"], occurred_at: float) -> None:
+        fact = self._failure_fact(task_id=task_id, request_id=request_id, index=index, provider=provider,
+                                  model=model, classification=classification, fact_fields=fact_fields,
+                                  cost_state=cost_state, occurred_at=occurred_at)
+        if fact is not None:
+            self._append_observation(fact)
+
     def _process(self, signal: Signal, lease: Lease) -> str:
         attempt = AttemptId(task_id=signal.task_id, agent=self.config.agent, attempt=lease.token - 1)
         keeper = _Renewal(self.leases, lease, self.config.lease_seconds)
@@ -571,6 +696,8 @@ class Worker:
         phase_started = time.monotonic()
         durations: dict[str, JsonValue] = {}
         self._last_failure = None
+        deferred: FailureObservationFact | None = None
+        chain_executors = self._candidates
 
         def enter_phase(name: str) -> None:
             nonlocal phase, phase_started
@@ -583,71 +710,205 @@ class Worker:
                     "phase_seconds": {**durations, phase: time.monotonic() - phase_started},
                     "lease_diagnostics": keeper.diagnostics()}
 
+        def reject_task(outcome_name: str) -> str:
+            nonlocal lease
+            self._last_failure = failure
+            lease = keeper.stop()
+            self.ledger.fail(lease, {"outcome": outcome_name, "asset_id": asset_id})
+            self.field.feedback(signal.signal_id, success=False)
+            self.router.reinforce(self.worker_id, signal, success=False)
+            return "rejected"
+
         failure: dict[str, JsonValue] = {}
         outcome = "execution_unknown"
         usage: JsonValue = None
+        settled: BudgetSnapshot | None = None
         try:
             keeper.start()
+
             # Acceptance comes from immutable operator-seeded task facts.
             policy = ValidationPolicy.model_validate(self.ledger.get(signal.task_id).acceptance.get("validation_policy"))
             enter_phase("reserve")
-            bound = self.executor.bound(signal)
-            keeper.check()
-            self._active = self.budget.reserve(self.worker_id, signal.task_id, bound,
-                                              request_id=f"{signal.task_id}:{lease.token}")
-            self._status("executing")
-            try:
+
+            breaker = self.shared_breaker
+            if breaker is not None and self.fault_observation_store is not None:
+                # One genuine FC-B -> FC-C observation cycle before routing.
+                breaker.observe(self.fault_observation_store, now=time.time())
+
+            last_index = len(chain_executors) - 1
+            for index, candidate_executor in enumerate(chain_executors):
+                bound = candidate_executor.bound(signal)
                 keeper.check()
-                enter_phase("snapshot")
-                revision, head = snapshot_revision(self.target, signal.scope, self.state / "snapshots")
-                keeper.check()
-                execution_id = uuid4().hex
-                directory = self.state / "execution" / execution_id
-                consumption = self._consume(signal, keeper.current, attempt, revision, head, execution_id)
-                enter_phase("execute")
-                result = self.executor.execute(signal, attempt, self.target, directory,
-                                               base_revision=revision, base_head=head, experience=consumption)
-                if consumption is not None and (
-                    result.candidate != consumption.candidate or result.consumed_asset_ids != (consumption.asset_id,)
-                ):
-                    consumption = None
-            except BaseException:
-                self.budget.mark_uncertain(self._active)
+                if breaker is not None:
+                    guard = guard_provider(breaker, bound.provider, self.worker_id, now=time.time())
+                else:
+                    guard = GuardResult(routable=True)
+                if not guard.routable:
+                    # No send, no reservation: a skipped candidate is never counted.
+                    failure = failure_details({
+                        "failure_kind": "CandidateBlocked",
+                        "failure_reason": "candidate_suspended_by_breaker",
+                        "blocked_reasons": list(guard.blocked_reasons),
+                        "provider": bound.provider, "model": bound.model, "candidate_index": index,
+                    })
+                    continue
+                # Every real outbound request is admitted and persistently counted
+                # before the send, under the same task/run budget.
+                reservation = self.budget.reserve(self.worker_id, signal.task_id, bound,
+                                                  request_id=f"{signal.task_id}:{lease.token}:{index}")
+                self._active = reservation
+                if deferred is not None:
+                    # A switch factually happened only once the next request was admitted.
+                    self._append_observation(deferred.model_copy(update={
+                        "switched_to": candidate_identity(bound.provider, bound.model)}))
+                    deferred = None
+                self._status("executing")
+                try:
+                    keeper.check()
+                    enter_phase("snapshot")
+                    revision, head = snapshot_revision(self.target, signal.scope, self.state / "snapshots")
+                    keeper.check()
+
+                    execution_id = uuid4().hex
+                    directory = self.state / "execution" / execution_id
+                    consumption = self._consume(signal, keeper.current, attempt, revision, head, execution_id)
+
+                    enter_phase("execute")
+                    result = candidate_executor.execute(signal, attempt, self.target, directory,
+                                                        base_revision=revision, base_head=head,
+                                                        experience=consumption)
+                    if consumption is not None and (
+                        result.candidate != consumption.candidate or result.consumed_asset_ids != (consumption.asset_id,)
+                    ):
+                        consumption = None
+                except BaseException:
+                    self.budget.mark_uncertain(self._active)
+                    self._active = None
+                    raise
+
+                usage = result.usage
+                fact_fields = self._metadata_fact_fields(result)
+                classification = fact_fields["classification"]
+                enter_phase("settle")
+                if result.uncertain and classification == CONFIRMED_REJECTION:
+                    # Known rejection without observed usage: faithful unknown
+                    # cost hold that keeps the chain admittable under it.
+                    settled = self.budget.mark_unknown_rejection(self._active)
+                else:
+                    settled = (self.budget.mark_uncertain(self._active) if result.uncertain else
+                               self.budget.settle(self._active, usage))
                 self._active = None
-                raise
-            usage = result.usage
-            enter_phase("settle")
-            settled = (self.budget.mark_uncertain(self._active) if result.uncertain else
-                       self.budget.settle(self._active, usage))
-            self._active = None
-            self._status("settled")
-            if (result.provenance != self.executor.provenance
-                    or result.usage_source != self.executor.usage_source
-                    or result.original_run_uri != self.executor.original_run_uri):
-                raise AssetSafetyError("execution_provenance_mismatch")
-            if result.uncertain:
-                outcome = "unknown_usage"
-                if self.config.continue_on_rejection:
-                    return "rejected"
+                self._status("settled")
+                occurred_at = time.time()
+
+                if (result.provenance != candidate_executor.provenance
+                        or result.usage_source != candidate_executor.usage_source
+                        or result.original_run_uri != candidate_executor.original_run_uri):
+                    raise AssetSafetyError("execution_provenance_mismatch")
+
+                if result.uncertain and classification != CONFIRMED_REJECTION:
+                    # Unknown effect (or non-rejection class) with unknown usage:
+                    # the original reservation stays unknown/reserved and the
+                    # chain stops; no fabricated zero, no further requests.
+                    self._record_failure_fact(task_id=signal.task_id, request_id=reservation.request_id,
+                                              index=index, provider=bound.provider, model=bound.model,
+                                              classification=str(classification), fact_fields=fact_fields,
+                                              cost_state="unknown", occurred_at=occurred_at)
+                    self._report_probe_outcome(breaker, guard.claims, success=False,
+                                               retry_after_seconds=None, occurred_at=occurred_at)
+                    failure = failure_details({
+                        "failure_kind": "ExecutionUncertain", "failure_reason": "unknown_usage",
+                        "classification": classification,
+                        "normalized_reason": fact_fields["normalized_reason"],
+                        "provider": bound.provider, "model": bound.model, "candidate_index": index,
+                    })
+                    outcome = "unknown_usage"
+                    return "sleeping"
+                if settled.sleeping and settled.reason not in {
+                    "worker_burn_rate", "swarm_cost_estimate_exhausted", "unknown_cost",
+                }:
+                    outcome = "budget_stopped"
+                    return "sleeping"
+                if result.candidate is not None:
+                    self._report_probe_outcome(breaker, guard.claims, success=True,
+                                               retry_after_seconds=None, occurred_at=occurred_at)
+                    break
+
+                # Failure domain: a rejected request whose effect is known
+                # (settled usage, or a confirmed rejection with unknown usage).
+                cost_state: Literal["settled", "unknown"] = "unknown" if result.uncertain else "settled"
+                retry_after = fact_fields["retry_after_seconds"]
+                self._report_probe_outcome(breaker, guard.claims, success=False,
+                                           retry_after_seconds=retry if isinstance(retry, float) else None,
+                                           occurred_at=occurred_at)
+                if classification is None:
+                    failure = failure_details({"failure_kind": "ExecutionRejected",
+                                               "failure_reason": "candidate_missing"})
+                    outcome = "execution_failed"
+                    return reject_task(outcome)
+                decision = decide(str(classification), has_later_candidate=index < last_index)
+                if decision.record_observation:
+                    fact = self._failure_fact(task_id=signal.task_id, request_id=reservation.request_id,
+                                              index=index, provider=bound.provider, model=bound.model,
+                                              classification=str(classification), fact_fields=fact_fields,
+                                              cost_state=cost_state, occurred_at=occurred_at)
+                    if fact is not None:
+                        if decision.action == "switch":
+                            # switched_to is written only when the next candidate is
+                            # actually admitted (see the reservation point above).
+                            deferred = fact
+                        else:
+                            self._append_observation(fact)
+                failure = failure_details({
+                    "failure_kind": "CandidateRejected",
+                    "failure_reason": f"candidate_{classification}",
+                    "classification": classification,
+                    "normalized_reason": fact_fields["normalized_reason"],
+                    "provider": bound.provider, "model": bound.model, "candidate_index": index,
+                    "chain_action": decision.action,
+                })
+                if decision.action == "switch":
+                    continue
+                if decision.action == "stop_capability_mismatch":
+                    outcome = "capability_mismatch"
+                    return reject_task(outcome)
+                if decision.action == "stop_budget_exhausted":
+                    outcome = "budget_exhausted"
+                    return "sleeping"
+                if decision.action == "stop_unknown_effect":
+                    outcome = "unknown_effect"
+                    return "sleeping"
+                outcome = "all_candidates_rejected"
+                return reject_task(outcome)
+
+            if result is None or settled is None:
+                # Every candidate was skipped by the routing guard: bounded exit,
+                # no wraparound, no request was ever sent.
+                failure = failure | {"failure_kind": "CandidatesBlocked",
+                                     "failure_reason": "all_candidates_suspended"}
+                self._last_failure = failure
+                outcome = "all_candidates_suspended"
                 return "sleeping"
+
             if settled.sleeping and settled.reason not in {
                 "worker_burn_rate", "swarm_cost_estimate_exhausted", "unknown_cost",
             }:
                 outcome = "budget_stopped"
                 return "sleeping"
+
             keeper.check()
-            if result.candidate is None:
-                outcome = "execution_failed"
-            else:
-                candidate = result.candidate
-                if candidate.attempt != attempt or candidate.scope != signal.scope:
-                    raise AssetSafetyError("executor_identity_or_scope_mismatch")
-                enter_phase("publish_asset")
-                asset_id = self.assets.publish(candidate)
-                enter_phase("validate")
-                report = AssetValidator(self.assets, self.target, policy=policy,
-                                        timeout_seconds=self.config.validation_seconds).validate(asset_id)
-                outcome = "quarantined"
+            candidate = result.candidate
+            if candidate is None:
+                raise AssetSafetyError("missing_validated_candidate")
+            if candidate.attempt != attempt or candidate.scope != signal.scope:
+                raise AssetSafetyError("executor_identity_or_scope_mismatch")
+            enter_phase("publish_asset")
+            asset_id = self.assets.publish(candidate)
+            enter_phase("validate")
+            report = AssetValidator(self.assets, self.target, policy=policy,
+                                    timeout_seconds=self.config.validation_seconds).validate(asset_id)
+            outcome = "quarantined"
+
             if report is None or not report.passed:
                 failure = failure_details({
                     "failure_kind": "ValidationRejected" if report else "ExecutionRejected",
@@ -655,19 +916,18 @@ class Worker:
                     "validation_reasons": [_safe_failure(AssetSafetyError(reason))["failure_reason"]
                                            for reason in report.reasons] if report else [],
                 })
-                self._last_failure = failure
-                lease = keeper.stop()
-                self.ledger.fail(lease, {"outcome": outcome, "asset_id": asset_id})
-                self.field.feedback(signal.signal_id, success=False)
-                self.router.reinforce(self.worker_id, signal, success=False)
-                return "rejected"
+                outcome = "execution_failed"
+                return reject_task(outcome)
+
             if asset_id is None:
                 raise AssetSafetyError("missing_validated_asset")
+
             enter_phase("prepare_application")
             prepared = AssetApplicator(self.assets, self.target, policy_version=policy.version,
                                        protected_paths=(_SOURCE,)).prepare(asset_id, report.report_id)
             if Path(prepared.scope).resolve() != Path(lease.scope).resolve():
                 raise AssetSafetyError("application_scope_mismatch")
+
             enter_phase("persist_submission")
             result_id = uuid4().hex
             result_data: dict[str, JsonValue] = {
@@ -676,7 +936,7 @@ class Worker:
                 "consumed_asset_ids": [consumption.asset_id] if consumption else [],
                 "input_context": consumption.context.input_context if consumption else None,
                 "worker_id": self.worker_id, "fencing_token": lease.token,
-                "provenance": self.executor.provenance, "evidence_class": "contract_local",
+                "provenance": candidate_executor.provenance, "evidence_class": "contract_local",
                 "policy_version": policy.version,
                 "execution": result.metadata,
             }
@@ -722,6 +982,9 @@ class Worker:
                        "stale_lease" if not owned else "execution_or_validation_failed")
             return "failed"
         finally:
+            if deferred is not None:
+                # The chain ended before any next candidate was admitted.
+                self._append_observation(deferred)
             try:
                 lease = keeper.stop()
                 if self._active is not None:
