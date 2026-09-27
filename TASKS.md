@@ -74,3 +74,9 @@
 - 独立集成 worktree morph-fc-integration-0927 已按本轮计划创建，分支
   songconmaisaix31-design/morph-fc-integration-0927，基于治理提交 37b5b6b。
   没有集成 Worker 开工或领域合并，等最终领域交付。
+- D 当前草稿独立 collect-only 失败：time_machine.travel 的字符串
+  `2023-01-01 12:00:00 UTC` 不是合法 ISO 格式，no tests collected / 1 error。
+  A 当前 WIP git diff --check 报 trailing whitespace；均未动原 Worker 文件。
+- C 已收到主控反馈，真实终端确认 npm ci（工作树根目录）exit0，并正在补
+  billing_arrearage 单样本真实 B 接口测试；旧未安装 Node 环境的全量结果作废，
+  最终全量结果与原退出码另行留存。主控没有执行部署或模型任务彩排。
