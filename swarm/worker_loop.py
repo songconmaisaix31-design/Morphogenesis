@@ -839,7 +839,7 @@ class Worker:
                 cost_state: Literal["settled", "unknown"] = "unknown" if result.uncertain else "settled"
                 retry_after = fact_fields["retry_after_seconds"]
                 self._report_probe_outcome(breaker, guard.claims, success=False,
-                                           retry_after_seconds=retry if isinstance(retry, float) else None,
+                                           retry_after_seconds=retry_after if isinstance(retry_after, float) else None,
                                            occurred_at=occurred_at)
                 if classification is None:
                     failure = failure_details({"failure_kind": "ExecutionRejected",
@@ -916,7 +916,6 @@ class Worker:
                     "validation_reasons": [_safe_failure(AssetSafetyError(reason))["failure_reason"]
                                            for reason in report.reasons] if report else [],
                 })
-                outcome = "execution_failed"
                 return reject_task(outcome)
 
             if asset_id is None:
