@@ -103,6 +103,30 @@ Worker，新回合处理状态已读回；具体证据见 TASKS.md。暂不集�
 
 ## 所有权与接续顺序
 
+### 充值后总目标收口（2026-09-27 用户最新指令）
+
+用户明确“我充钱了，开始干吧，把任务干完，再更新报告”。原 DashScope Key/
+原生引擎恢复，不替换账号或重复创建 Key。原 A/C/D 同一 Owner、分支、WIP 返修；
+E 在精确最终快照上重新评审。宿主磁盘当前约 23GB 可用，仍保留之前失败证据。
+
+该指令同时授权补齐已报告的总目标缺口；原 QWEN 五轨写权不扩散，新增 FC-R
+窄运行时轨，隔离 worktree morph-fc-runtime-0927、分支
+songconmaisaix31-design/morph-fc-runtime-0927，基于 f159f1e。独占 write_paths：
+swarm/worker_loop.py、swarm/budget.py、swarm/task_ledger.py、必要的
+swarm/failure_chain.py、tests/swarm/test_failure_chain_runtime.py、
+docs/FC_RUNTIME_ACCEPTANCE.md。不修改 A/B/C/D 文件、锁文件、租约实现、拓扑或
+第一代主线。开发/测试/文档/领域返修由同一 R Worker 持续负责，最终普通合并。
+
+FC-R 接入真实生产 _process：有界候选序列，只有 confirmed_rejection 可以
+受控切换；unknown_effect 保留预留且立即停止；每次真实请求在发送前持久计数，
+同一任务预算累计约束；每次发送/提交都受原租约与 fencing 约束；观察通过 B
+记录真实字段，C 的共享路由资格与唯一探测生效。全不可用有界退出。禁止另造
+调度器/Attempt/Manifest 系统，复用现有 SQLite/Pydantic/httpx 机制。
+
+D 测试轨继续测试真实 A/B/C/R 接口；缺口回对应 Owner，禁止自建假 fallback。
+R 可以先做现有接口设计/测试，最终依赖精确 A/B/C 提交。独立 I 只在所有领域
+交付后普通 exact-SHA no-ff 合并并执行联合门禁；运行时逻辑不交 I 代写。
+
 | 轨 | 原 worktree / branch | 独占写权 | 接续条件 |
 |---|---|---|---|
 | FC-A / qwen | morph-fc-a / fc/failure-classify | gateway_transport.py、provider_adapters/** 及对应测试；evomap_executor.py 仅 QWEN.md 指定两处 | 认证可用或用户明确引擎替代；分类及 evidence_hash 回传接口先交付 |

@@ -1,5 +1,14 @@
 # TASKS.md — FC 轮任务账本
 
+## 充值后接续
+
+2026-09-27 用户明确充值并要求完成总任务、更新桌面报告。原生 A/D 已基于新
+Dispatch 接续原会话：ctx_63b12a67edf1 / ctx_07682b2d2cec；只在有实际模型/
+工具回执后记开工。C 的 ENOSPC 后未返回请求经 Escape 取消，终端明确
+Request cancelled，随后同 Owner/Dispatch 接续；先修 token fencing 与失败门禁。
+新增隔离 FC-R 运行时领域轨，写权与接续条件见 docs/FC_PLAN.md；以完成用户总
+目标为授权，不扩大原五轨写权。E 最终精确提交评审、I 独立集成仍在后续波次。
+
 ## 依赖申请区（五轨对 pyproject.toml/poetry.lock 只读，缺依赖在此登记，由队长批量执行）
 
 | 依赖 | 所属轨 | 用途 | dev 组 |
