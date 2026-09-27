@@ -31,11 +31,16 @@ mcp = ">=1.20,<2"
 faiss-cpu = ">=1.12,<2"
 numpy = ">=2.0,<3"
 scikit-learn = ">=1.7,<2"
+cachetools = "^7.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8,<10"
 mypy = ">=1.15,<2"
 build = ">=1.2,<2"
+hypothesis = "^6.168.2"
+time-machine = "^3.5.1"
+pytest-asyncio = "^1.4.0"
+respx = "^0.23.1"
 
 [tool.poetry.scripts]
 morphogenesis = "bootstrap.cli:main"
