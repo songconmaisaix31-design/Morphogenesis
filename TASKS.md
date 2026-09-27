@@ -2,6 +2,21 @@
 
 ## 充值后接续
 
+进程内清除代理环境后 A/D/R 的 DashScope 实际模型与代码工具活动已恢复。
+C 的 qoder dispatcher/resume 回合只返回旧测试仍运行的过期结论，未修复；
+终端明确 CLI 已结束，stop_unknown 因外部终端而无法关闭；依据实际退出证据
+abandon 旧 ctx_0df29cd2f91c、保留所有 WIP，同轨新 ctx_84ceea058c74。
+原生 qodercli 通过 stdin 新上下文已实际读文件，返回模型标签 Auto，不冒称
+Qwen3.8-Max。C 写权及 Owner 不变。R Codex 网络路由发现 turn.failed 且
+没有领域代码，随后 R 首次领域实现改用原生 Qwen Code，ctx_27a0b1455ff1。
+
+A 新提交 fc5b3934fed630c055a76fa6e3df83dc1b09f969 自报推送及25项定向/
+类型通过，业务验收仍拒绝：独立合法 HTTP-date 返回 None，+3/1_0 被接受；
+spawn 测试仅检查字段存在，未证明值或无秘密；parent ExecutionResult.metadata
+丢失新 Reply 事实，且没有全量门禁。原 Owner 新 task_cba58721948f 接续返修。
+R 自己工作树越界加了 evomap_executor.py 三行 Reply 字段，已明确退回撤销
+仅自身改动；事实传播归 A parent parsing，不以合并解决领域所有权冲突。
+
 2026-09-27 用户明确充值并要求完成总任务、更新桌面报告。原生 A/D 已基于新
 Dispatch 接续原会话：ctx_63b12a67edf1 / ctx_07682b2d2cec；只在有实际模型/
 工具回执后记开工。C 的 ENOSPC 后未返回请求经 Escape 取消，终端明确
