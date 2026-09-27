@@ -56,7 +56,7 @@ class ProviderAdapter:
         # Check if it contains only ASCII digits (and possibly a single +/- sign at the start)
         # This rejects floats (containing '.'), scientific notation (containing 'e'/'E'),
         # underscores, and non-ASCII digits
-        if re.fullmatch(r'[+-]?\d+', stripped) and all(ord(c) < 128 for c in stripped):
+        if re.fullmatch(r'\d+', stripped) and all(ord(c) < 128 for c in stripped):
             try:
                 value = int(stripped)
                 # According to RFC, negative values are invalid

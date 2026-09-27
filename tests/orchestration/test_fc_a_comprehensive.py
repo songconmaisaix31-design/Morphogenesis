@@ -29,7 +29,7 @@ def test_parse_retry_after_requirements():
     # 2. Parse integer branch only full ASCII DIGIT string, else HTTP-date
     # Valid integers should work
     assert ProviderAdapter.parse_retry_after('123') == 123.0
-    assert ProviderAdapter.parse_retry_after('+456') == 456.0
+    assert ProviderAdapter.parse_retry_after('+456') is None  # Sign not part of delay-seconds
     assert ProviderAdapter.parse_retry_after('-456') is None  # Negative should return None
     
     # Invalid formats should fall back to date parsing or return None

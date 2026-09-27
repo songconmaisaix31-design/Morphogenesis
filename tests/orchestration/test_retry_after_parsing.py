@@ -15,10 +15,10 @@ class TestParseRetryAfter:
         assert ProviderAdapter.parse_retry_after("3600") == 3600.0
         assert ProviderAdapter.parse_retry_after("1") == 1.0
 
-    def test_valid_integer_with_signs(self):
-        """Test parsing of integers with positive/negative signs."""
-        assert ProviderAdapter.parse_retry_after("+30") == 30.0
-        assert ProviderAdapter.parse_retry_after("-30") is None  # Negative should return None
+    def test_integer_sign_rejected(self):
+        """Test that signed integers are rejected (delay-seconds is 1*DIGIT, no sign)."""
+        assert ProviderAdapter.parse_retry_after("+30") is None
+        assert ProviderAdapter.parse_retry_after("-30") is None
 
     def test_invalid_float_rejected(self):
         """Test that floats are rejected."""
