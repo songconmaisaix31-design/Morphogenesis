@@ -6,6 +6,46 @@
 
 ## 接手与已核实状态
 
+### 认证恢复与首波接续（本次用户追加指令）
+
+用户要求通过 aliyuncli 配置 DashScope API，并通过 computer-use 完成 Qoder 登录，
+本轮保留原生引擎，不再等待 Codex 回退选择。
+
+- aliyun 3.4.11 的既有默认身份经 STS GetCallerIdentity 验证；安装官方
+  aliyun-cli-modelstudio 0.9.2 插件，使用北京默认工作空间。只创建一枚本轮专用
+  `morphogenesis-fc-20260927` Key，ID=7471526；未重置/删除任何已有 Key。
+  真实 CreateApiKey success=true，回执与秘密分别保存在 Git 忽略的私有目录，
+  ACL 仅当前用户。对 OpenAI-compatible `/models` 一次查询 HTTP 200，包含
+  qwen3-coder-plus 与 deepseek-r1；这只是认证/模型目录证据，不是蜂群 task_live。
+- Qoder CLI 1.1.64 的 browser login，经 Tabbit 的真实 Google 账户选择与基本
+  资料授权完成。网页“登录成功”与 CLI “Login successful”相符；随后
+  `qoder status --output json` 的 logged_in=true、auth_source=local、
+  login_method=browser，截图留在忽略目录。没有查找或导出 Qoder 令牌。
+- FC-C 已派发 task_4aef0ca00aef / ctx_0df29cd2f91c，原树原分支；终端
+  term_9680d646-f027-48ee-bcec-9da4ced2e1cf 经 trust 确认并有真实文件读取/开发活动。
+  可见实际默认模型 Qwen3.8-Max；不把请求物种名等同于返回模型。
+- FC-A 已派发 task_021476b9728f / ctx_908e3cf0b7a5，终端
+  term_607d7ea6-bff8-464e-8111-1b8d7684457e 使用 Qwen Code 0.24.6 / DashScope
+  qwen3-coder-plus。Orca 当前不能识别其 agent，worker-start 在任何任务创建前以
+  agent_unconfigured 拒绝；核对 Task 列表后，按现行恢复指南 dispatch 不 inject、
+  回传 preamble，再 terminal send。首个输入停留在 composer，读回后仅补 Enter；
+  随后读取 AGENTS.md/QWEN.md 的实际工具活动，才记开工，未重发模型请求。
+- 两轨均为复用外部终端，launch_token_hash 为空。Orca 的生命周期结算与真实业务
+  交付分开复核；不得因 worker_done 机械拒收便宣布业务失败或伪造生命周期成功。
+- 认证 Key 由仅本地 launcher 读入子进程环境，不传 argv、提示或 Git，不改全局
+  用户环境。D/E 等接口提交与评审条件满足后出闸；最终独立集成仍未执行。
+- FC-A 已产生分类模块 WIP，首批定向测试回执 13+3 项通过，但全量测试失败且
+  原命令使用全局 Python。本次独立诊断工作树 `.venv/Scripts/python.exe -m pytest
+  -q --maxfail=1` 得到 `No module named pytest`；未把环境不合格测试当作领域
+  验收。Poetry 环境修复、未授权 uv.lock、读超时优先级、非 UTF-8 原始响应、
+  Retry-After 完整语义及真正子进程回传测试已通过原 Dispatch 退回 FC-A；
+  native Qwen Ctrl+Q 入队后读回“1 queued”，未重复启动或接管业务代码。
+- dsh 原生 headless profile 的隔离配置通过 `--dump-config` 与 `--help`；模型
+  配置指向 DashScope deepseek-r1，maxRetries=0，附加标题模型调用禁用。
+  尚未发送 FC-E 模型请求，因此只记配置成功，不记 R1 审查或返回模型证据。
+
+### 原接手快照（以下认证待办已由上节取代）
+
 - 基线及施工分支：`decentralized-swarm@8c43f984f6d2eb77a2e8f3fd67d43ea0da37defa`。
 - 继续既有 Run `run_e46ee274f7c9`；主控已绑定
   `term_e7feb562-1f4f-4045-9c1d-1b2ed3844b81`，generation=2；不新建重复 Run。
@@ -14,7 +54,7 @@
   仅修改观察模块及其测试，工作树 clean。独立复验：52 项定向测试通过，
   strict 类型检查 82 个源文件通过。597 项全量测试与 build/SDK 是原 Worker
   的已归档回执，本次未重复执行，不混为本次全量复验。
-- FC-A/C/D/E 尚无 Dispatch，也无未释放 Worker；四个原 worktree 和分支保留。
+- 原接手时 FC-A/C/D/E 尚无 Dispatch，也无未释放 Worker；四个原 worktree 和分支保留。
 - Run objective 的“统一用 codex”与用户后续指定 CLI 指令冲突。原会话最后要求
   “用cli，去装对应的cli”，以该指令与 QWEN.md 的轨道安排为准。
   qwen/qoder/dsh 命令均存在；原终端报告认证阻塞。当前明确命名的凭据环境变量
