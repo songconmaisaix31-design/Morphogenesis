@@ -61,7 +61,7 @@ Path('executor-env.json').write_text(json.dumps({'key_present': 'MORPH_EVOMAP_AP
     try:
         completed = subprocess.run(['pwsh', '-NoProfile', '-File', str(tmp_path/'demo/run-demo.ps1'),
                                     '-AuthorizeLive', '-Executor', 'evomap', '-Mode', 'manual', '-Port', str(port)],
-                                   env=env, capture_output=True, text=True, encoding='utf-8', timeout=30)
+                                   env=env, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30)
         assert completed.returncode == 0, completed.stdout + completed.stderr
         assert not json.loads((tmp_path/'viewer-env.json').read_text())['key_present']
         executor = json.loads((tmp_path/'executor-env.json').read_text())
