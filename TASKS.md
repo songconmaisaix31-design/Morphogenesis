@@ -80,3 +80,9 @@
 - C 已收到主控反馈，真实终端确认 npm ci（工作树根目录）exit0，并正在补
   billing_arrearage 单样本真实 B 接口测试；旧未安装 Node 环境的全量结果作废，
   最终全量结果与原退出码另行留存。主控没有执行部署或模型任务彩排。
+- A 欠费停下时的 WIP 独立 strict 检查：84 文件中 3 个错误（base.py 使用
+  math 未导入，两处；mock_handler 缺类型注解）。未修复或宣称原定 19 项测试
+  能代表当前 WIP。D 仅有三个 HTTP 故障夹具与 __init__.py，六夹具尚不齐。
+- C 最新真实 B 联合回执 27 passed in 8.52s，包含 billing_arrearage 单样本
+  立即熔断；当前正式全量仍运行。现有 Codex 的 login status 确认 ChatGPT
+  登录，但仅做可用性核对，未在用户选择前替换 A/D 引擎。
