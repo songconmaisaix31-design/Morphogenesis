@@ -11,9 +11,10 @@
 FC-A 原 Dispatch 已自报成功并推送 e4396407e87e8745f8bfeff448343ecf6b6edd5f，
 但业务验收不通过：越权 uv.lock、缺失 Retry-After 解析和真正子进程集成测试；
 独立 MockTransport 复现非 UTF-8/畸形 JSON 崩溃及读超时误分类。环境已由原
-Worker 补做 Poetry install，19 项定向测试/84 文件类型检查仅有终端回执，
-不代表全量或需求完成。新返修 task_5853a2c3a4b9 / ctx_3993f67114a8 派回
-同一个原 Worker，native 队列读回确认；具体证据见 TASKS.md。暂不集成。
+Worker 补做 Poetry install 并推送 19fe837b5aafdecfcc963ed90dc518071c9b6511
+撤销 uv.lock；本次独立复验 19 项定向测试/84 文件类型检查通过，仍不代表全量
+或需求完成。新返修 task_5853a2c3a4b9 / ctx_3993f67114a8 派回同一个原
+Worker，新回合处理状态已读回；具体证据见 TASKS.md。暂不集成。
 
 ### 认证恢复与首波接续（本次用户追加指令）
 

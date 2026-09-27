@@ -42,3 +42,10 @@
   ctx_3993f67114a8；旧 Dispatch 已撤权，不复用旧身份。新 preamble 通过
   native Qwen Ctrl+Q 入队并读回“1 queued”；等待真正执行和修复回执。
 - FC-C 仍由原 Qoder Worker 开发；FC-D/E 暂等 A 接口返修，最终集成未执行。
+- 紧接原任务第二条 worker_done：19fe837b5aafdecfcc963ed90dc518071c9b6511
+  仅删除 uv.lock（已推送终端回执），没有修复领域代码。本次独立执行工作树
+  `.venv/Scripts/python.exe tools/typecheck.py`：84 源文件通过；
+  `.venv/Scripts/python.exe -m pytest -q tests/orchestration`：19 passed in
+  7.28s。上述已知缺陷与缺失需求仍阻止验收；第二条消息已读取并确认。
+- 新返修 preamble 已从队列进入 native 模型新回合，屏幕读回完整新任务及
+  processing 状态；不是仅记录终端输入接受。
