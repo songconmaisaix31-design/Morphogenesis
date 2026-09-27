@@ -49,3 +49,28 @@
   7.28s。上述已知缺陷与缺失需求仍阻止验收；第二条消息已读取并确认。
 - 新返修 preamble 已从队列进入 native 模型新回合，屏幕读回完整新任务及
   processing 状态；不是仅记录终端输入接受。
+
+## 最新并行开发与已知引擎阻塞
+
+- 用户要求继续五轨并行开发及桌面报告。A 原会话达到 100 轮后保留 WIP、
+  退出并原会话 resume，进程上限改 400；接续 ctx_b8e62d8a7999。D 首次
+  Windows shell 配置错误后绕过 Poetry 执行全局 pip（原生记录可见安装了
+  hypothesis/respx/time-machine 等）；立即停止，未盲目卸载共享包。随后
+  launcher 设置 POETRY_VIRTUALENVS_IN_PROJECT=true，同一 D 会话 resume 到
+  ctx_1bbdc67b67ba，实际执行 uv tool run poetry install；不以全局包为验收。
+- A/D 分别真实返回 DashScope HTTP 400 账户状态异常/欠费拒绝。没有再次
+  调用、创建替代 Key、充值或自动模型切换；两个 Dispatch 已 fenced/stopped，
+  原工作树 WIP 保留，Task blocked。引擎替代选择已向用户提出，尚待答复。
+- A 当前 WIP 的 subprocess 测试曾加 except Exception: pass，能吞掉断言；
+  主控已中断该回合并退回修复。explicit mock child seam 已开始编写，但尚未
+  最终验收。D 当前草稿存在 assert True/占位和错误账本调用，尚未测试、提交或
+  接受，不能混为真实五不变量验证。
+- E dsh/DashScope deepseek-r1 实际有模型与工具事件、provider usage，但首轮
+  结束后没有报告文件或 Commit；末尾声称写入 $MARTIFACT_FILE$ 未由文件系统
+  验证，且不按五不变量原文评审，未验收。ctx_588d14022e7e 已停止，不重发
+  同一欠费账户调用。原 native session 与响应证据保留在忽略的运行目录。
+- C Qoder 仍开发/验证；主控独立 strict 82 文件通过，尚等最终完整回执。
+  欠费原因 A billing_arrearage / C arrearage 不一致已退回 C 对齐。
+- 独立集成 worktree morph-fc-integration-0927 已按本轮计划创建，分支
+  songconmaisaix31-design/morph-fc-integration-0927，基于治理提交 37b5b6b。
+  没有集成 Worker 开工或领域合并，等最终领域交付。

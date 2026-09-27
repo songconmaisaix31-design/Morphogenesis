@@ -8,6 +8,11 @@
 
 ### 多 Agent 接续与桌面报告（最新用户指令）
 
+实时阻塞：A/D 原生 Qwen 已明确得到 DashScope HTTP400 欠费拒绝，两个
+Dispatch stopped，Task blocked，WIP 原样保留，不再自动调用；用户引擎替代
+选择待答。E 首轮 dsh 有真实调用但未生成报告、评审质量未通过，已停止；
+C 仍在 Qoder 开发，B 交付保持。详情和全局依赖误安装见 TASKS.md。
+
 用户要求按总 QWEN.md 继续多 Agent 并行开发，完成后在桌面放任务报告。复用
 原 Run/Worktree/Branch；主控仅计划、状态、决策、验收和报告，领域代码仍由原
 Worker 负责；第一代主线 WIP 不动。
