@@ -27,6 +27,8 @@ class GatewayResponse:
     elapsed_seconds: float
     finished_at: float
     request_id: str | None = None
+    retry_after: str | None = None
+    raw_body: bytes | None = None
 
 
 def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: float,
@@ -37,6 +39,7 @@ def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: fl
     status: int | None = None
     error_kind: str | None = None
     request_id: str | None = None
+    retry_after: str | None = None
     raw = bytearray()
     started = time.monotonic()
     try:
@@ -46,6 +49,7 @@ def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: fl
                                headers={"Authorization": f"Bearer {key}"}) as response:
                 status = response.status_code
                 identifier = response.headers.get("x-request-id")
+                retry_after = response.headers.get("Retry-After")
                 if identifier is not None and re.fullmatch(r"[A-Za-z0-9_.:/-]{1,200}", identifier) and key not in identifier:
                     request_id = identifier
                 for chunk in response.iter_bytes():
@@ -65,4 +69,4 @@ def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: fl
         identifier = body.get("id")
         if isinstance(identifier, str) and re.fullmatch(r"[A-Za-z0-9_.:/-]{1,200}", identifier) and key not in identifier:
             request_id = identifier
-    return GatewayResponse(status, body, error_kind, elapsed, time.time(), request_id)
+    return GatewayResponse(status, body, error_kind, elapsed, time.time(), request_id, retry_after, bytes(raw))
