@@ -21,3 +21,24 @@
 
 裁定：raw body 不出子进程；回传 `classification` + `evidence_hash`；FC-A 写权窄增补
 `swarm/evomap_executor.py` 两处（见 QWEN.md [FC-A 写权扩展]）。
+
+## FC-A 首次交付复核与返修（2026-09-27）
+
+- 收到 worker_done：原 task_021476b9728f / ctx_908e3cf0b7a5，远端分支
+  fc/failure-classify@e4396407e87e8745f8bfeff448343ecf6b6edd5f 已核实。生命周期
+  completed/succeeded 仅是 Worker 自报结算，主控业务验收未通过；不集成。
+- 该提交额外引入 uv.lock（3 行，基线不存在），违反锁文件/写权边界。由原
+  Worker 在普通后续提交中撤销自己新增文件，不改其他锁文件、不重写历史。
+- 最初工作树 Python 执行 tools/typecheck.py 失败：No module named mypy；
+  随后原 Worker 真实终端回执已执行 Poetry install，84 源文件类型检查、
+  tests/orchestration/ 的 19 项定向测试通过；尚无合格全量 pytest 回执。
+- 独立只读复现：分类器接受 JSON null 抛 TypeError，message=null 抛
+  AttributeError；_request 的非 UTF-8 响应抛 UnicodeDecodeError；HTTP 400
+  Arrearage 的流在部分 body 后 ReadTimeout，Reply 却为 confirmed_rejection
+  （uncertain=true）。均是进程内 MockTransport，无远端调用。
+- 未实现 Retry-After HTTP-date/整数/未知解析；当前所谓 integration 测试仅
+  进程内 _request 调用，无实际 spawn --request-child 回传证明。
+- 返修仍归同一个 FC-A 原终端、worktree、branch。新 task_5853a2c3a4b9 /
+  ctx_3993f67114a8；旧 Dispatch 已撤权，不复用旧身份。新 preamble 通过
+  native Qwen Ctrl+Q 入队并读回“1 queued”；等待真正执行和修复回执。
+- FC-C 仍由原 Qoder Worker 开发；FC-D/E 暂等 A 接口返修，最终集成未执行。
