@@ -126,7 +126,16 @@ class DashScopeAdapter(ProviderAdapter):
                 retry_after_seconds=retry_after_seconds
             )
             
-        # If we couldn't determine the classification, default to unknown
+        # HTTP 200 with valid content should have no classification
+        if status_code == 200:
+            return ClassificationResult(
+                classification=None,  # No classification for successful responses
+                normalized_reason=None,
+                retry_after_raw=retry_after_raw,
+                retry_after_seconds=retry_after_seconds
+            )
+
+        # If we couldn't determine the classification for non-200 status, default to unknown
         return ClassificationResult(
             classification=FailureClassification.UNKNOWN_EFFECT,
             normalized_reason="unknown_classification",

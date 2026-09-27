@@ -142,7 +142,7 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
         {"Retry-After": response.retry_after} if response.retry_after else {},
         request_context
     )
-    
+
     # Generate evidence hash from the actual raw bytes
     evidence_hash = hashlib.sha256(response.raw_body or b"").hexdigest() if response.raw_body is not None else None
 
@@ -151,14 +151,18 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
     usage = measured.model_dump() if measured is not None else None
     returned = body.get("model") if isinstance(body, dict) else None
     returned = returned if isinstance(returned, str) and len(returned) <= 128 and key not in returned else None
+    
+    # Handle classification that might be None
+    classification_value = classification_result.classification.value if classification_result.classification is not None else None
+    
     reply = Reply(
-        http_status=response.status, 
+        http_status=response.status,
         request_id=response.request_id,
-        elapsed_seconds=response.elapsed_seconds, 
-        usage=usage, 
+        elapsed_seconds=response.elapsed_seconds,
+        usage=usage,
         returned_model=returned,
         interface_live="blocked" if provenance == "live" else "not_run",
-        classification=classification_result.classification.value, 
+        classification=classification_value,
         evidence_hash=evidence_hash,
         normalized_reason=classification_result.normalized_reason,
         retry_after_raw=classification_result.retry_after_raw,
@@ -167,12 +171,12 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
     
     if key in json.dumps(body, ensure_ascii=False):
         return Reply(
-            http_status=response.status, 
+            http_status=response.status,
             elapsed_seconds=response.elapsed_seconds,
-            error_kind="credential_echo", 
+            error_kind="credential_echo",
             uncertain=True,
             interface_live="blocked" if provenance == "live" else "not_run",
-            classification=classification_result.classification.value, 
+            classification=classification_value,
             evidence_hash=evidence_hash,
             normalized_reason=classification_result.normalized_reason,
             retry_after_raw=classification_result.retry_after_raw,
@@ -211,17 +215,45 @@ def _child() -> int:
         key = config.credential_file.read_text(encoding="utf-8").strip()
         
         # Check if this is a mock request
-        mock_provenance = envelope.get("mock_provenance")
-        if mock_provenance == "mock":
-            # Use a mock transport for testing
+        mock_spec = envelope.get("mock_spec")
+        if mock_spec is not None:
+            # Use a mock transport for testing with various scenarios
             import httpx
-            def mock_handler(request: httpx.Request) -> httpx.Response:
-                # Return a mock response for testing
-                return httpx.Response(
-                    status_code=400,
-                    headers={"x-request-id": "test-id", "Retry-After": "60"},
-                    content=b'{"error": {"code": "Arrearage", "message": "Account has outstanding balance"}}'
-                )
+            
+            if mock_spec == "drop_mid_response":
+                # Simulate a dropped connection mid-response
+                def mock_handler(request: httpx.Request) -> httpx.Response:
+                    raise httpx.ReadTimeout("Read timed out")
+            elif mock_spec == "400_arrearage":
+                def mock_handler(request: httpx.Request) -> httpx.Response:
+                    return httpx.Response(
+                        status_code=400,
+                        headers={"x-request-id": "test-400-id"},
+                        content=b'{"error": {"code": "Arrearage", "message": "Account has outstanding balance"}}'
+                    )
+            elif mock_spec == "403_freetier":
+                def mock_handler(request: httpx.Request) -> httpx.Response:
+                    return httpx.Response(
+                        status_code=403,
+                        headers={"x-request-id": "test-403-id"},
+                        content=b'{"error": {"code": "AllocationQuota.FreeTierOnly", "message": "Free tier only"}}'
+                    )
+            elif mock_spec == "429_with_retry_after":
+                def mock_handler(request: httpx.Request) -> httpx.Response:
+                    return httpx.Response(
+                        status_code=429,
+                        headers={"x-request-id": "test-429-id", "Retry-After": "120"},
+                        content=b'{"error": {"code": "RateLimitExceeded", "message": "Too many requests"}}'
+                    )
+            else:
+                # Default mock for backward compatibility
+                def mock_handler(request: httpx.Request) -> httpx.Response:
+                    return httpx.Response(
+                        status_code=400,
+                        headers={"x-request-id": "test-id", "Retry-After": "60"},
+                        content=b'{"error": {"code": "Arrearage", "message": "Account has outstanding balance"}}'
+                    )
+            
             transport = httpx.MockTransport(mock_handler)
             reply = _request(payload, key, config.timeout_seconds, transport=transport, provenance="mock")
         else:
@@ -336,6 +368,11 @@ class EvoMapExecutor:
             "http_status": reply.http_status, "elapsed_seconds": reply.elapsed_seconds,
             "error_kind": reply.error_kind, "interface_live": reply.interface_live,
             "task_kind": "bounded_json", "evidence_uri": evidence.as_uri(), "actual_cost_usd": None,
+            "classification": reply.classification,
+            "evidence_hash": reply.evidence_hash,
+            "normalized_reason": reply.normalized_reason,
+            "retry_after_raw": reply.retry_after_raw,
+            "retry_after_seconds": reply.retry_after_seconds,
         }
         usage: JsonValue = {"usage": _JSON.validate_python(reply.usage)} if reply.usage is not None else None
         candidate: Candidate | None = None

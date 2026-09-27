@@ -1,9 +1,10 @@
 """Base interface for provider-specific failure classification."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from enum import Enum
 import math
+import re
 from typing import Dict, Optional
 from pydantic import BaseModel
 
@@ -24,7 +25,7 @@ class RequestContext(BaseModel):
 
 class ClassificationResult(BaseModel):
     """Result of classification containing both classification and normalized reason."""
-    classification: FailureClassification
+    classification: Optional[FailureClassification] = None
     normalized_reason: Optional[str] = None
     retry_after_raw: Optional[str] = None
     retry_after_seconds: Optional[float] = None
@@ -34,38 +35,56 @@ class ProviderAdapter:
     """Interface for provider-specific response interpretation."""
     
     @staticmethod
-    def parse_retry_after(retry_after_header: str) -> Optional[float]:
+    def parse_retry_after(retry_after_header: str, now_utc: Optional[datetime] = None) -> Optional[float]:
         """
         Parse Retry-After header according to RFC standards using proper timezone-aware parsing.
-        
+
         Args:
             retry_after_header: Value of Retry-After header
-            
+            now_utc: Optional datetime to use as current time for date calculations (for testing)
+
         Returns:
             Number of seconds to wait as float, or None if malformed
         """
-        try:
-            # Try to parse as seconds (integer only - reject floats/exponents)
-            # Check if the string represents an integer (no decimal point or exponent)
-            if '.' in retry_after_header or 'e' in retry_after_header.lower():
-                return None  # Reject floats and scientific notation
-            value = int(retry_after_header)
-            # According to RFC, negative values are invalid
-            if value < 0:
-                return None
-            return float(value)
-        except ValueError:
+        if retry_after_header is None:
+            return None
+            
+        # Check if it's a valid integer string (only ASCII digits, possibly with leading +/- sign)
+        # Reject floats, scientific notation, underscores, and non-ASCII digits
+        stripped = retry_after_header.strip()
+        
+        # Check if it contains only ASCII digits (and possibly a single +/- sign at the start)
+        # This rejects floats (containing '.'), scientific notation (containing 'e'/'E'),
+        # underscores, and non-ASCII digits
+        if re.fullmatch(r'[+-]?\d+', stripped) and all(ord(c) < 128 for c in stripped):
             try:
-                # Try to parse as HTTP-date using email.utils.parsedate_to_datetime for timezone awareness
+                value = int(stripped)
+                # According to RFC, negative values are invalid
+                if value < 0:
+                    return None
+                # Check for potential overflow (using a reasonable upper limit)
+                # Python integers can be arbitrarily large, so we need to check before converting to float
+                if abs(value) > 10**15:  # Very high limit to avoid practical overflow issues
+                    return None
+                return float(value)
+            except (ValueError, OverflowError):
+                return None
+        else:
+            # Try to parse as HTTP-date using email.utils.parsedate_to_datetime for timezone awareness
+            try:
                 dt = parsedate_to_datetime(retry_after_header)
                 if dt is None:
                     return None
-                # Calculate difference from current time
-                current_time = datetime.now(dt.tzinfo) if dt.tzinfo else datetime.utcnow()
+                # Use provided time or current UTC time
+                current_time = now_utc or datetime.now(timezone.utc)
+                if dt.tzinfo is None:
+                    # Assume UTC if no timezone info
+                    dt = dt.replace(tzinfo=timezone.utc)
+                
                 delta = (dt - current_time).total_seconds()
                 # Return non-negative value
                 return max(0.0, float(delta)) if not math.isnan(delta) and not math.isinf(delta) else None
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, AttributeError):
                 # Malformed - return None
                 return None
     
