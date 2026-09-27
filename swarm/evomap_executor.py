@@ -6,6 +6,7 @@ Remote content never becomes a command, module, validation policy or oracle.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -25,6 +26,8 @@ from local_assets.paths import FROZEN_MAINLINE, no_links, safe_join
 from local_assets.validate import blast_radius
 from orchestration.gateway import _Completion, _usage
 from orchestration.gateway_transport import single_request
+from orchestration.provider_adapters.base import FailureClassification, RequestContext
+from orchestration.provider_adapters.evomap import EvoMapAdapter
 from swarm.models import ExecutionBound, Signal
 from swarm.worker_loop import ExecutionResult, FixtureExecutor, _write_json
 
@@ -77,6 +80,8 @@ class Reply(BaseModel):
     error_kind: str | None = None
     uncertain: bool = False
     interface_live: Literal["passed", "not_run", "blocked"] = "not_run"
+    classification: str | None = None
+    evidence_hash: str | None = None
 
 
 def canonical_answer(value: JsonValue) -> str:
@@ -99,6 +104,25 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
     if key in json.dumps(payload, ensure_ascii=False):
         return Reply(error_kind="credential_in_input", uncertain=True)
     response = single_request(payload, key=key, phase_timeout=timeout, transport=transport)
+    
+    # Convert raw body to string for classification
+    raw_body_str = response.raw_body.decode('utf-8') if response.raw_body else ""
+    
+    # Perform classification
+    model_value = payload.get("model", "")
+    if not isinstance(model_value, str):
+        model_value = str(model_value) if model_value is not None else ""
+    request_context = RequestContext(provider="evomap", model=model_value, endpoint="/chat/completions")
+    classification = EvoMapAdapter.interpret(
+        raw_body_str,
+        response.status or 0,
+        {"Retry-After": response.retry_after} if response.retry_after else {},
+        request_context
+    )
+    
+    # Generate evidence hash
+    evidence_hash = hashlib.sha256(raw_body_str.encode()).hexdigest() if raw_body_str else None
+    
     body = response.body
     measured = _usage(body)
     usage = measured.model_dump() if measured is not None else None
@@ -106,11 +130,13 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
     returned = returned if isinstance(returned, str) and len(returned) <= 128 and key not in returned else None
     reply = Reply(http_status=response.status, request_id=response.request_id,
                   elapsed_seconds=response.elapsed_seconds, usage=usage, returned_model=returned,
-                  interface_live="blocked" if provenance == "live" else "not_run")
+                  interface_live="blocked" if provenance == "live" else "not_run",
+                  classification=classification.value, evidence_hash=evidence_hash)
     if key in json.dumps(body, ensure_ascii=False):
         return Reply(http_status=response.status, elapsed_seconds=response.elapsed_seconds,
                      error_kind="credential_echo", uncertain=True,
-                     interface_live="blocked" if provenance == "live" else "not_run")
+                     interface_live="blocked" if provenance == "live" else "not_run",
+                     classification=classification.value, evidence_hash=evidence_hash)
     if response.error_kind:
         return reply.model_copy(update={"error_kind": response.error_kind, "uncertain": True})
     if response.status != 200:
