@@ -123,6 +123,11 @@ worker_loop.py 或预算/attempt 逻辑。分类、观察与熔断模块单独�
 
 ## 验收与停止条件
 
+2026-09-27 最新 C 门禁：569 passed / 2 failed / 1 skipped，不予验收。
+主控另复现同 Worker 过期重领探测后旧结果仍获接受，已退原 C 轨修复。
+宿主磁盘 ENOSPC 曾中断原生 Qoder；保留 WIP、同 Owner 接续，不豁免门禁。
+A/D 已知欠费拒绝仍停止；引擎替代及运行时接入范围均等待用户决定。
+
 沿用每轨本地锁环境、全部适用 pytest、strict 类型检查，以及最终 build/SDK/分发。
 先保留全部五不变量，再进行 A/B/C/D 联合边界验证。未知 usage/cost/远端效果保持
 unknown/null 与原预留，禁止自动重试或换模型绕过。真实 API 调用不因引擎选择

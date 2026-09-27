@@ -86,3 +86,13 @@
 - C 最新真实 B 联合回执 27 passed in 8.52s，包含 billing_arrearage 单样本
   立即熔断；当前正式全量仍运行。现有 Codex 的 login status 确认 ChatGPT
   登录，但仅做可用性核对，未在用户选择前替换 A/D 引擎。
+- C 正式全量结束：569 passed、2 failed、1 skipped，781.42s；失败为
+  demo_environment 的 sentinel/执行器参数与 t1 bridge MCP。tail 管道退出码
+  不代表 pytest 退出码；已要求原 Worker 定向重跑留真实输出和退出码，不豁免。
+- C WIP 独立复现同 Worker 探测隔离缺陷：A 于 t=1000 领取 token1，t=1060
+  过期后同一 A 领取 token2；旧 report_probe_success(A) 被接受、state=normal。
+  回传 API 未接收认领 token，不能隔离同一 Worker 的迟到结果；已退原 C Owner。
+- 宿主 C 盘曾 free=0，Qoder 实际 ENOSPC，主控 apply_patch 失败将 TASKS.md
+  截断。仅清理本次 py-spy 的 uv 缓存 4.9MiB，未删除其他文件；磁盘空间另有
+  较大波动，原因尚未确认。TASKS.md 已从未改动的精确 HEAD 恢复，git diff
+  证明恢复无差异，再追加本段。两条新领域文件长度正常，不能据此证明未受影响。
