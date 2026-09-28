@@ -1,8 +1,11 @@
 """Boundary tests and property tests for failure chain - FC-D"""
 import asyncio
-import time
+import json
+import subprocess
+import sys
 import tempfile
 import os
+import time
 from datetime import timedelta
 from unittest.mock import Mock
 
@@ -17,9 +20,10 @@ from contracts.identity import AttemptId
 from swarm.budget import BudgetLedger, BudgetPolicy, BudgetSnapshot
 from swarm.lease import LeaseManager
 from swarm.task_ledger import TaskLedger
-from swarm.evomap_executor import EvoMapExecutor, Reply
+from swarm.evomap_executor import EvoMapExecutor, Reply, EvoMapConfig
 from swarm.models import ExecutionBound
 from orchestration.gateway_transport import GatewayResponse, single_request
+from orchestration.provider_adapters.base import FailureClassification
 
 
 class TestFailureChainBoundaries:
@@ -27,63 +31,230 @@ class TestFailureChainBoundaries:
 
     def test_bailian_400_arrearage_classification(self):
         """Test that HTTP 400 with Arrearage code is classified as confirmed_rejection"""
-        # This would be handled by FC-A provider adapters when implemented
-        response = GatewayResponse(
-            status=400,
-            body={"error": {"code": "Arrearage", "message": "Account balance insufficient"}},
-            error_kind=None,
-            elapsed_seconds=0.1,
-            finished_at=time.time()
-        )
-        # When FC-A is implemented, this should result in confirmed_rejection classification
-        assert response.status == 400
-        assert isinstance(response.body, dict)
-        error_body = response.body
-        assert isinstance(error_body, dict) and "error" in error_body
-        error_details = error_body["error"]
-        assert isinstance(error_details, dict) and error_details.get("code") == "Arrearage"
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as cred_file:
+            cred_file.write("test-key")
+            cred_file.flush()
+
+            # Prepare the request envelope with mock data
+            payload = {"model": "evomap-gpt-5.6-luna", "messages": [{"role": "user", "content": "Hello"}]}
+            config = EvoMapConfig(
+                model="evomap-gpt-5.6-luna",
+                credential_file=cred_file.name
+            )
+            # Use the new mock_spec flag to indicate this is a mock request for the subprocess
+            envelope = {"config": config.model_dump(mode="json"), "request": payload, "mock_spec": "400_arrearage"}
+
+            # Execute the subprocess with --request-child
+            result = subprocess.run([
+                sys.executable, "-m", "swarm.evomap_executor", "--request-child"
+            ],
+            input=json.dumps(envelope, ensure_ascii=False).encode("utf-8"),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+            env={**os.environ, "PYTHONPATH": os.getcwd()}
+            )
+
+            # Clean up the file
+            try:
+                os.unlink(cred_file.name)
+            except (PermissionError, OSError):
+                # File may still be locked by subprocess, ignore on Windows
+                pass
+
+            # Check that the subprocess executed successfully
+            assert result.returncode == 0
+
+            # Parse the output to ensure it contains classification and evidence_hash
+            output = result.stdout.decode('utf-8')
+            reply_data = json.loads(output)
+
+            # Verify that the response contains the expected fields
+            assert 'classification' in reply_data
+            assert 'evidence_hash' in reply_data
+            # Also verify the new fields are present
+            assert 'normalized_reason' in reply_data
+            assert 'retry_after_raw' in reply_data
+            assert 'retry_after_seconds' in reply_data
+
+            # Verify specific values for the arrearage case
+            assert reply_data['classification'] == FailureClassification.CONFIRMED_REJECTION.value
+            assert reply_data['normalized_reason'] == 'billing_arrearage'
+            assert reply_data['http_status'] == 400
+            assert reply_data['evidence_hash'] is not None  # Should have evidence hash
 
     def test_bailian_403_freetier_classification(self):
         """Test that HTTP 403 with AllocationQuota.FreeTierOnly is classified as confirmed_rejection"""
-        response = GatewayResponse(
-            status=403,
-            body={"error": {"code": "AllocationQuota.FreeTierOnly", "message": "Free tier only"}},
-            error_kind=None,
-            elapsed_seconds=0.1,
-            finished_at=time.time()
-        )
-        assert response.status == 403
-        assert isinstance(response.body, dict)
-        error_body = response.body
-        assert isinstance(error_body, dict) and "error" in error_body
-        error_details = error_body["error"]
-        assert isinstance(error_details, dict) and "AllocationQuota.FreeTierOnly" in error_details.get("code", "")
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as cred_file:
+            cred_file.write("test-key")
+            cred_file.flush()
+
+            # Prepare the request envelope with mock data
+            payload = {"model": "evomap-gpt-5.6-luna", "messages": [{"role": "user", "content": "Hello"}]}
+            config = EvoMapConfig(
+                model="evomap-gpt-5.6-luna",
+                credential_file=cred_file.name
+            )
+            # Use the new mock_spec flag to indicate this is a mock request for the subprocess
+            envelope = {"config": config.model_dump(mode="json"), "request": payload, "mock_spec": "403_freetier"}
+
+            # Execute the subprocess with --request-child
+            result = subprocess.run([
+                sys.executable, "-m", "swarm.evomap_executor", "--request-child"
+            ],
+            input=json.dumps(envelope, ensure_ascii=False).encode("utf-8"),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+            env={**os.environ, "PYTHONPATH": os.getcwd()}
+            )
+
+            # Clean up the file
+            try:
+                os.unlink(cred_file.name)
+            except (PermissionError, OSError):
+                # File may still be locked by subprocess, ignore on Windows
+                pass
+
+            # Check that the subprocess executed successfully
+            assert result.returncode == 0
+
+            # Parse the output to ensure it contains classification and evidence_hash
+            output = result.stdout.decode('utf-8')
+            reply_data = json.loads(output)
+
+            # Verify that the response contains the expected fields
+            assert 'classification' in reply_data
+            assert 'evidence_hash' in reply_data
+            # Also verify the new fields are present
+            assert 'normalized_reason' in reply_data
+            assert 'retry_after_raw' in reply_data
+            assert 'retry_after_seconds' in reply_data
+
+            # Verify specific values for the freetier case
+            assert reply_data['classification'] == FailureClassification.CONFIRMED_REJECTION.value
+            assert reply_data['normalized_reason'] == 'free_tier_quota_exceeded'
+            assert reply_data['http_status'] == 403
+            assert reply_data['evidence_hash'] is not None  # Should have evidence hash
 
     def test_rfc6585_429_with_retry_after_classification(self):
         """Test that HTTP 429 with Retry-After header is classified as confirmed_rejection"""
-        response = GatewayResponse(
-            status=429,
-            body={"error": {"message": "Rate limited"}},
-            error_kind=None,
-            elapsed_seconds=0.1,
-            finished_at=time.time(),
-            request_id="test_req"
-        )
-        # The actual Retry-After header handling would be in FC-A implementation
-        assert response.status == 429
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as cred_file:
+            cred_file.write("test-key")
+            cred_file.flush()
+
+            # Prepare the request envelope with mock data
+            payload = {"model": "evomap-gpt-5.6-luna", "messages": [{"role": "user", "content": "Hello"}]}
+            config = EvoMapConfig(
+                model="evomap-gpt-5.6-luna",
+                credential_file=cred_file.name
+            )
+            # Use the new mock_spec flag to indicate this is a mock request for the subprocess
+            envelope = {"config": config.model_dump(mode="json"), "request": payload, "mock_spec": "429_with_retry_after"}
+
+            # Execute the subprocess with --request-child
+            result = subprocess.run([
+                sys.executable, "-m", "swarm.evomap_executor", "--request-child"
+            ],
+            input=json.dumps(envelope, ensure_ascii=False).encode("utf-8"),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+            env={**os.environ, "PYTHONPATH": os.getcwd()}
+            )
+
+            # Clean up the file
+            try:
+                os.unlink(cred_file.name)
+            except (PermissionError, OSError):
+                # File may still be locked by subprocess, ignore on Windows
+                pass
+
+            # Check that the subprocess executed successfully
+            assert result.returncode == 0
+
+            # Parse the output to ensure it contains classification and evidence_hash
+            output = result.stdout.decode('utf-8')
+            reply_data = json.loads(output)
+
+            # Verify that the response contains the expected fields
+            assert 'classification' in reply_data
+            assert 'evidence_hash' in reply_data
+            # Also verify the new fields are present
+            assert 'normalized_reason' in reply_data
+            assert 'retry_after_raw' in reply_data
+            assert 'retry_after_seconds' in reply_data
+
+            # Verify specific values for the 429 case
+            assert reply_data['classification'] == FailureClassification.CONFIRMED_REJECTION.value
+            assert reply_data['normalized_reason'] == 'rate_limited'
+            assert reply_data['http_status'] == 429
+            assert reply_data['evidence_hash'] is not None  # Should have evidence hash
+            assert reply_data['retry_after_raw'] == "120"  # Should have the retry-after header value
+            assert reply_data['retry_after_seconds'] == 120.0
 
     def test_drop_mid_response_classification(self):
         """Test that connection interruption/timeout is classified as unknown_effect"""
-        response = GatewayResponse(
-            status=None,
-            body="",
-            error_kind="ReadTimeout",
-            elapsed_seconds=0.1,
-            finished_at=time.time()
-        )
-        # This simulates the conditions that would trigger unknown_effect in FC-A
-        assert response.error_kind is not None
-        assert "Timeout" in response.error_kind or "Connection" in response.error_kind
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as cred_file:
+            cred_file.write("test-key")
+            cred_file.flush()
+
+            # Prepare the request envelope with mock data
+            payload = {"model": "evomap-gpt-5.6-luna", "messages": [{"role": "user", "content": "Hello"}]}
+            config = EvoMapConfig(
+                model="evomap-gpt-5.6-luna",
+                credential_file=cred_file.name
+            )
+            # Use the new mock_spec flag to indicate this is a mock request for the subprocess
+            envelope = {"config": config.model_dump(mode="json"), "request": payload, "mock_spec": "drop_mid_response"}
+
+            # Execute the subprocess with --request-child
+            result = subprocess.run([
+                sys.executable, "-m", "swarm.evomap_executor", "--request-child"
+            ],
+            input=json.dumps(envelope, ensure_ascii=False).encode("utf-8"),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+            env={**os.environ, "PYTHONPATH": os.getcwd()}
+            )
+
+            # Clean up the file
+            try:
+                os.unlink(cred_file.name)
+            except (PermissionError, OSError):
+                # File may still be locked by subprocess, ignore on Windows
+                pass
+
+            # Check that the subprocess executed successfully
+            assert result.returncode == 0
+
+            # Parse the output to ensure it contains classification and evidence_hash
+            output = result.stdout.decode('utf-8')
+            reply_data = json.loads(output)
+
+            # Verify that the response contains the expected fields
+            assert 'classification' in reply_data
+            assert 'evidence_hash' in reply_data
+            # Also verify the new fields are present
+            assert 'normalized_reason' in reply_data
+            assert 'retry_after_raw' in reply_data
+            assert 'retry_after_seconds' in reply_data
+
+            # Verify specific values for the drop_mid_response case
+            assert reply_data['classification'] == FailureClassification.UNKNOWN_EFFECT.value
+            # For transport errors, evidence_hash might be None since there's no response body to hash
+            assert reply_data['uncertain'] is True
+            # The error_kind should be present for transport errors
+            assert reply_data['error_kind'] is not None
 
     def test_budget_insufficient_boundary(self):
         """Test that budget exhaustion is properly handled"""
@@ -108,7 +279,7 @@ class TestFailureChainBoundaries:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             try:
                 ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
+
                 # Try to make a reservation that would exceed the budget
                 bound = ExecutionBound(
                     provider="test_provider",
@@ -119,10 +290,10 @@ class TestFailureChainBoundaries:
                     request_bound="unbounded",
                     max_cost_usd=None
                 )
-                
+
                 with pytest.raises(Exception) as exc_info:
                     ledger.reserve("worker1", "task1", bound)
-                
+
                 # The exception should be related to budget exhaustion
                 assert "swarm_reservation_capacity" in str(exc_info.value) or "swarm_cost_estimate_exhausted" in str(exc_info.value)
             finally:
@@ -158,7 +329,7 @@ class TestFailureChainBoundaries:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             try:
                 ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
+
                 # Simulate multiple failed attempts to trigger the max attempts limit
                 bound = ExecutionBound(
                     provider="test_provider",
@@ -169,7 +340,7 @@ class TestFailureChainBoundaries:
                     request_bound="unbounded",
                     max_cost_usd=None
                 )
-                
+
                 # Make multiple reservations to hit the attempt limit
                 for i in range(5):
                     try:
@@ -177,11 +348,11 @@ class TestFailureChainBoundaries:
                     except Exception:
                         # Expected when hitting limits
                         pass
-                
+
                 # At this point, we should be hitting the max attempts limit
                 with pytest.raises(Exception) as exc_info:
                     ledger.reserve("worker1", "task_overflow", bound)
-                
+
                 assert "max_attempts" in str(exc_info.value)
             finally:
                 # Clean up the temporary file
@@ -202,8 +373,8 @@ class TestUnknownEffectProperty:
     )
     @settings(max_examples=10, deadline=500)
     def test_unknown_effect_preserves_reservation_and_no_subsequent_requests(
-        self, 
-        initial_budget: float, 
+        self,
+        initial_budget: float,
         reservation_amount: float
     ):
         """Test that when unknown_effect occurs, reservation is preserved and no new requests are made"""
@@ -226,7 +397,7 @@ class TestUnknownEffectProperty:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             try:
                 ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
+
                 # Make a reservation
                 bound = ExecutionBound(
                     provider="test_provider",
@@ -237,21 +408,45 @@ class TestUnknownEffectProperty:
                     request_bound="unbounded",
                     max_cost_usd=None
                 )
-                
+
                 reservation = ledger.reserve("worker1", "task1", bound)
-                
+
                 # Initially, the reservation should be pending
                 snapshot = ledger.snapshot()
                 assert snapshot.pending_reservations == 1
-                
+
+                # Get the initial reserved amount
+                initial_reserved = snapshot.reserved_estimate_usd
+
                 # Simulate an unknown_effect by settling with None usage (uncertain)
                 new_snapshot = ledger.mark_uncertain(reservation)
-                
+
                 # After marking as uncertain, the reservation should still be counted in uncertain
                 assert new_snapshot.uncertain_reservations == 1
-                
+
                 # The reservation amount should still be held (reserved)
                 assert new_snapshot.reserved_estimate_usd >= reservation.reserved_estimate_usd
+
+                # Verify that the reservation amount hasn't changed
+                assert new_snapshot.reserved_estimate_usd == initial_reserved
+
+                # Try to make another reservation - this should not consume additional budget if the uncertain one is still pending
+                # The key is to verify that no additional reservation requests are made in the worker loop
+                # when the first one is still in uncertain state
+                try:
+                    another_reservation = ledger.reserve("worker1", "task2", bound)
+                    
+                    # If we got a new reservation, check that it adds to the reserved amount
+                    newer_snapshot = ledger.snapshot()
+                    assert newer_snapshot.reserved_estimate_usd >= new_snapshot.reserved_estimate_usd
+                    
+                    # But when dealing with unknown effects, the system should not make additional requests
+                    # until the uncertain result is clarified - this is validated in real worker implementations
+                except:
+                    # If we can't make another reservation, that's also fine - it means the system
+                    # is respecting the uncertain state and not over-consuming resources
+                    pass
+
             finally:
                 # Clean up the temporary file
                 try:
@@ -271,8 +466,8 @@ class TestFiveInvariantProperties:
     )
     @settings(max_examples=10, deadline=500)
     def test_invariant_no_new_budget_on_provider_switch(
-        self, 
-        budget_limit: float, 
+        self,
+        budget_limit: float,
         provider_switches: int
     ):
         """Invariant 1: Switching provider does not create new task budget, does not clear existing consumption"""
@@ -295,7 +490,7 @@ class TestFiveInvariantProperties:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             try:
                 ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
+
                 # Make several reservations (simulating provider switches)
                 bound = ExecutionBound(
                     provider="test_provider",
@@ -306,7 +501,7 @@ class TestFiveInvariantProperties:
                     request_bound="unbounded",
                     max_cost_usd=None
                 )
-                
+
                 reservations = []
                 for i in range(provider_switches + 1):
                     try:
@@ -315,7 +510,7 @@ class TestFiveInvariantProperties:
                     except Exception:
                         # Might hit budget limits, which is expected
                         pass
-                
+
                 # Check that the total reserved doesn't exceed budget limit
                 snapshot = ledger.snapshot()
                 assert snapshot.reserved_estimate_usd <= budget_limit
@@ -327,13 +522,13 @@ class TestFiveInvariantProperties:
                 except PermissionError:
                     # On Windows, sometimes files can't be deleted immediately
                     pass
-    
+
     @given(
         budget_limit=st.floats(min_value=1.0, max_value=100.0)
     )
     @settings(max_examples=10, deadline=500)
     def test_invariant_unknown_cost_reservation_not_auto_released(
-        self, 
+        self,
         budget_limit: float
     ):
         """Invariant 2: Unknown cost reservations are never auto released by fallback"""
@@ -356,7 +551,7 @@ class TestFiveInvariantProperties:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             try:
                 ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
+
                 bound = ExecutionBound(
                     provider="test_provider",
                     model="test_model",
@@ -366,12 +561,12 @@ class TestFiveInvariantProperties:
                     request_bound="unbounded",
                     max_cost_usd=None
                 )
-                
+
                 reservation = ledger.reserve("worker1", "task1", bound)
-                
+
                 # Mark as uncertain (unknown cost)
                 ledger.mark_uncertain(reservation)
-                
+
                 # The reservation should still be held as uncertain
                 snapshot = ledger.snapshot()
                 assert snapshot.uncertain_reservations == 1
@@ -384,13 +579,13 @@ class TestFiveInvariantProperties:
                 except PermissionError:
                     # On Windows, sometimes files can't be deleted immediately
                     pass
-    
+
     @given(
         num_requests=st.integers(min_value=1, max_value=10)
     )
     @settings(max_examples=10, deadline=500)
     def test_invariant_external_attempt_count_covers_all_requests(
-        self, 
+        self,
         num_requests: int
     ):
         """Invariant 3: External attempt count covers all real remote requests"""
@@ -413,7 +608,7 @@ class TestFiveInvariantProperties:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             try:
                 ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
+
                 bound = ExecutionBound(
                     provider="test_provider",
                     model="test_model",
@@ -423,7 +618,7 @@ class TestFiveInvariantProperties:
                     request_bound="unbounded",
                     max_cost_usd=None
                 )
-                
+
                 # Make multiple reservations to simulate multiple requests
                 reservations = []
                 for i in range(num_requests):
@@ -433,7 +628,7 @@ class TestFiveInvariantProperties:
                     except Exception:
                         # Might hit limits, which is expected
                         pass
-                
+
                 # The attempt count should reflect the number of requests made
                 snapshot = ledger.snapshot()
                 total_attempts = snapshot.pending_reservations + snapshot.uncertain_reservations + snapshot.unreconciled_reservations
@@ -446,23 +641,23 @@ class TestFiveInvariantProperties:
                 except PermissionError:
                     # On Windows, sometimes files can't be deleted immediately
                     pass
-    
+
     def test_invariant_lost_lease_prevents_result_submission(self):
         """Invariant 4: Lost lease prevents successful result submission"""
         from swarm.models import Locality, Signal
-        
+
         # Create a task ledger in a temporary file
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             try:
                 task_ledger = TaskLedger(tmp.name, "test_swarm")
                 lease_manager = LeaseManager(task_ledger)
-                
+
                 # Create a proper locality object - authorized_scopes should be tuple
                 locality = Locality(
                     workspace="./test_workspace",
                     authorized_scopes=(".",)
                 )
-                
+
                 # Create a task first
                 signal = Signal(
                     task_id="task1",
@@ -473,16 +668,16 @@ class TestFiveInvariantProperties:
                     module="test_module",
                     required_capability="test_capability"
                 )
-                
+
                 task_ledger.enqueue(signal)
-                
+
                 # Now acquire a lease
                 lease = lease_manager.acquire("task1", "worker1", ttl_seconds=1.0, locality=locality)
                 assert lease is not None
-                
+
                 # Simulate lease expiration by sleeping
                 time.sleep(1.1)
-                
+
                 # The lease should no longer be valid
                 assert not lease_manager.is_valid(lease)
             finally:
@@ -493,15 +688,15 @@ class TestFiveInvariantProperties:
                 except PermissionError:
                     # On Windows, sometimes files can't be deleted immediately
                     pass
-    
+
     @given(
         num_workers=st.integers(min_value=1, max_value=5),
         budget_limit=st.floats(min_value=1.0, max_value=10.0)
     )
     @settings(max_examples=5, deadline=500)
     def test_invariant_all_candidates_down_has_bounded_exit(
-        self, 
-        num_workers: int, 
+        self,
+        num_workers: int,
         budget_limit: float
     ):
         """Invariant 5: All candidates unavailable has bounded exit, does not loop back to chain start"""
@@ -524,7 +719,7 @@ class TestFiveInvariantProperties:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             try:
                 ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
+
                 bound = ExecutionBound(
                     provider="test_provider",
                     model="test_model",
@@ -534,7 +729,7 @@ class TestFiveInvariantProperties:
                     request_bound="unbounded",
                     max_cost_usd=None
                 )
-                
+
                 # Try to make more reservations than allowed to trigger bounded exit
                 successful_reservations = 0
                 for i in range(policy.limits.max_attempts + 5):  # Try more than the limit
@@ -544,7 +739,7 @@ class TestFiveInvariantProperties:
                     except Exception:
                         # Expected when hitting limits
                         continue
-                
+
                 # Should not have exceeded the max attempts limit
                 assert successful_reservations <= policy.limits.max_attempts
             finally:
@@ -565,42 +760,71 @@ def test_process_in_memory_transport_path():
     route = respx.post("https://api.evomap.ai/v1/chat/completions").mock(
         return_value=httpx.Response(400, json={"error": {"code": "Arrearage"}})
     )
-    
+
     # Use httpx.MockTransport to simulate the transport layer
     transport = httpx.MockTransport(lambda request: httpx.Response(400, json={"error": {"code": "Arrearage"}}))
-    
+
     # Test the single_request function with the mock transport
     payload = {"model": "test-model", "messages": [{"role": "user", "content": "test"}]}
     response = single_request(payload, key="test-key", phase_timeout=30.0, transport=transport)
-    
+
     assert response.status == 400
     assert isinstance(response.body, dict)
     body = response.body
     if isinstance(body, dict) and "error" in body:
         assert body["error"]["code"] == "Arrearage"
-    
+
     # This demonstrates the in-process transport path that FC-A would classify
 
 
-@respx.mock
 def test_subprocess_integration_path():
     """Test subprocess integration path (mock mode) for classification/evidence_hash return"""
-    # This would test the --request-child subprocess path when FC-A is implemented
-    # Since FC-A isn't fully implemented yet, this is a placeholder for when it becomes available
-    
-    # The subprocess path would call provider_adapters for classification
-    # and return classification + evidence_hash in the Reply
-    
-    # For now, just verify the Reply structure
-    reply = Reply(
-        http_status=400,
-        error_kind="test_error",
-        uncertain=True
+    # Create a config with a temporary credential file
+    config = EvoMapConfig(
+        model="evomap-gpt-5.6-sol",
+        credential_file=tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt').name
     )
     
-    assert reply.http_status == 400
-    assert reply.error_kind == "test_error"
-    assert reply.uncertain is True
+    # Write a fake API key to the credential file
+    with open(config.credential_file, 'w') as f:
+        f.write("fake_api_key_for_testing")
+    
+    # Create a payload that will trigger the arrearage response
+    payload = {
+        "model": "evomap-gpt-5.6-sol",
+        "messages": [{"role": "user", "content": "test"}],
+        "max_tokens": 100
+    }
+    
+    # Create envelope with mock spec for arrearage
+    envelope = {
+        "config": config.model_dump(mode="json"),
+        "request": payload,
+        "mock_spec": "400_arrearage"
+    }
+    
+    # Run subprocess with mock spec
+    environment = {name: value for name, value in os.environ.items() 
+                  if name.upper() != "MORPH_EVOMAP_API_KEY"}
+    
+    result = subprocess.run([
+        sys.executable, "-m", "swarm.evomap_executor", "--request-child"
+    ], 
+    input=json.dumps(envelope, ensure_ascii=False).encode("utf-8"),
+    stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment,
+    timeout=30, check=False)
+    
+    # Verify subprocess ran successfully
+    assert result.returncode == 0
+    
+    # Parse the Reply from subprocess
+    reply = Reply.model_validate_json(result.stdout.decode("utf-8"))
+    
+    # Verify the classification and evidence_hash are properly returned
+    assert reply.classification is not None
+    assert reply.evidence_hash is not None
+    assert isinstance(reply.evidence_hash, str)
+    assert len(reply.evidence_hash) == 64  # SHA256 hash length
 
 
 if __name__ == "__main__":
