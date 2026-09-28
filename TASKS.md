@@ -31,7 +31,7 @@ morph-h4-docs-0928 修正。H4 真实 SHA 2957b40 已 rootff/push；T6 条件授
 T3 当前状态：22:11 第二次 mutation 删 breaker 转移仍绿（原生明确 The test still passes），
 主控已按两轮失败协议停工；保存点 2d9d4304cfc0e1a3d4bfaeccb6ec5688aef60366 已
 git push fix/fcd-interface-alignment；该提交实际缺 Swarm-Agent trailer（多行 shell 被截断），
-不能改写公开历史。breaker 字节/ git diff 恢复为空。ctx_86b253aba968 已在 native 回 shell 后
+不能改写公开历史。git diff --exit-code 73e64cc -- swarm/breaker.py 返回0；没有宣称字节级快照校验。ctx_86b253aba968 已在 native 回 shell 后
 abandon，task_1821ef01c94e blocked。门禁不通过、拒收不合并；22:40 裁撤规则保留但尚未到时
 不能写已经触发。
 
@@ -49,6 +49,11 @@ commit 缺 Swarm-Agent trailer、引用行号不匹配指定 73 源码。
 
 Budget A/B 和 H1 人工结论、签字仍未收到；不签字、不替换生产 TODO、不代得出人类结论。
 H3 Schema draft.2 待拍板。T6 merge/tag/smoke 全部 NOT_RUN。
+
+- T9：今晚不生成 GUI mock 或队友消息，依赖 H3 Schema 冻结。
+- T10：挪到明天 acceptance 之后、彩排之前；今晚不实现，不触碰 live 子进程路径。
+- benchmark WIP：POLL_MS 1000→120000 是 demo 演示风险；明天改回独立 BENCHMARK_POLL_MS；今晚不碰，不在冻结基线内。
+- FC-E：明天补 deepseek-r1 正式异构评审；没有自动预约或执行。今晚降级报告仍拒收，是否继续证据校正待队长答复。
 
 ## 2026-09-28 10:56 修复验收进展
 

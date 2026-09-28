@@ -164,7 +164,7 @@ commit 缺 Swarm-Agent trailer、引用行号不匹配指定 73 源码。
 未答复。ctx_925755d7dd00 原生已回 shell 后 abandon，task_fbbababc2840 blocked，
 禁止重启它或代做评审。
 
-T3 正在修复旧 FC-D 假绿测试；本材料引用的是现有测试入口，尚不是今天全量或 mutation 验收回执。昨夜 698 passed/87 strict:build/SDK 仅作为历史记录；interface_live、task_live 仍 not_run。
+T3 第二次mutation仍绿，原Worker已停止，WIP 2d9d430不验收；全量门禁NOT_RUN。本材料引用的是现有测试入口，尚不是今天全量或 mutation 验收回执。昨夜 698 passed/87 strict:build/SDK 仅作为历史记录；interface_live、task_live 仍 not_run。
 
 ## 人类签字槽与 T6
 

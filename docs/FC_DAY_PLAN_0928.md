@@ -44,7 +44,7 @@ T9 今晚不产生；T10 明日 acceptance 后、彩排前完成；benchmark 的
 
 总控 codex/master-control；当前用户任务书优先。事实基线为集成树 `73e64cc70116ac658d85591d082c0684a4952c99`，评审范围 `348cf8d42719402a7a5fcc09595e5040f96fa5be..73e64cc70116ac658d85591d082c0684a4952c99`。本日接续原 Orca Run `run_e46ee274f7c9`，当前总控终端 `term_f20e387c-dcb7-4bd1-97d7-bf6a5b446b9f`，generation 3。
 
-## 三条互斥轨道
+## 三条互斥轨道（上午历史计划，已被上方当前有效状态替代）
 
 | 轨 / Owner | Worktree / Branch | write_paths | 本日任务与验收 |
 |---|---|---|---|
