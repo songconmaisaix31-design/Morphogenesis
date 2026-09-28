@@ -1,9 +1,15 @@
-# T8 日志 Schema 冻结草案（未冻结）
+# T8 日志 Schema 冻结契约 1.0.0
 
-版本提案 `1.0.0-draft.2`。准备人 codex/master-control；基于集成生产 SHA
-`73e64cc70116ac658d85591d082c0684a4952c99`。这份文档是审批材料，未接入生产，未生成 T9 GUI mock。
-H3 由队长决定；批准前不能登记“Schema v1 已冻结”。生成复用当前安装的 Pydantic v2（MIT），
+版本 `1.0.0`。准备人 codex/master-control；基于集成生产 SHA
+`73e64cc70116ac658d85591d082c0684a4952c99`。这份文档是已批准的契约，未接入生产，未生成 T9 GUI mock。
+契约冻结不等于已接线采集或生产验收。生成复用当前安装的 Pydantic v2（MIT），
 直接导出 FaultObservation 与 RehearsalSnapshot 定义，不复制另一份运行时契约。
+
+## 授权来源与版本策略
+
+本契约版本 1.0.0 由人类队长于 2026-09-28 消息中正式授权冻结。
+版本规则：可选字段新增为 minor 版本，破坏性修改为 major 版本。
+optional → required 会拒绝已有旧日志，属于破坏性变更，需 2.0.0 版本。
 
 ## 字段及四视图映射
 
@@ -18,14 +24,14 @@ H3 由队长决定；批准前不能登记“Schema v1 已冻结”。生成复�
 | fault_observation | swarm/fault_observations.py:32 导出全部 14 字段，含 attempt | 不删字段、不改原 JSONL |
 | rehearsal | orchestration/rehearsal_models.py:79 的完整 RehearsalSnapshot 导出 | 保留原 provenance/acceptance/results/genes/adoptions |
 | drill、provenance、evidence_label | 演练为 true/mock/SIMULATED；真实为 false/live/LIVE；回放为 false/replay/REPLAY | 本提案的显式约束 |
-| audit_confirmed_issue_events、issue_audit | 审计确认问题事件数及审计范围/证据；未审计为 null；完整审计确认无问题才可为 0 | 今晚新增草案字段，随 H3 批准，未实现生产采集 |
+| audit_confirmed_issue_events、issue_audit | 审计确认问题事件数及审计范围/证据；未审计为 null；完整审计确认无问题才可为 0 | 可选字段，未采集可省略或null，随H3批准；配套issue_audit也应允许缺失/null，明确尚未接入采集 |
 
 ## 审计确认问题事件数：统计口径提案
 
-新增数值列 `audit_confirmed_issue_events: integer >= 0 | null`（必填、无默认0），配
+新增数值列 `audit_confirmed_issue_events: integer >= 0 | null`（可选、无默认0），配
 `issue_audit` 保存 status（partial/complete）、protocol_id、scope、reviewer、
 confirmed_issue_ids、evidence_refs。未审计时两字段均为 null；完整审计有证据且无问题
-才能写 0。partial 只能报告已确认的正数，必须显示“部分审计”，不能当最终总数。
+才能写 0。partial 只能报告已确认的正数，必须显示"部分审计"，不能当最终总数。
 
 计数单位为同一 run、同一审计范围内经证据确认的唯一问题事件，不是重试数、失败请求数、
 测试失败次数或模型自报。采用既有问题/审计条目 ID 去重，修复后的重跑不重复计数；
@@ -1405,7 +1411,7 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.0.0-draft.2",
+      "const": "1.0.0",
       "title": "Schema Version",
       "type": "string"
     },
@@ -1591,9 +1597,7 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
     "routing",
     "claim",
     "fault_observation",
-    "rehearsal",
-    "audit_confirmed_issue_events",
-    "issue_audit"
+    "rehearsal"
   ],
   "title": "FCLogDraft",
   "type": "object",

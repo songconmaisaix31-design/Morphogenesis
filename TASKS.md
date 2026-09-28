@@ -48,7 +48,7 @@ commit 缺 Swarm-Agent trailer、引用行号不匹配指定 73 源码。
 禁止重启它或代做评审。
 
 Budget A/B 和 H1 人工结论、签字仍未收到；不签字、不替换生产 TODO、不代得出人类结论。
-H3 Schema draft.2 待拍板。T6 merge/tag/smoke 全部 NOT_RUN。
+H3 Schema 1.0.0 已冻结（契约 v1.0.0），配套 FC-E 协议文档 v2 已创建。T6 merge/tag/smoke 全部 NOT_RUN。
 
 - T9：今晚不生成 GUI mock 或队友消息，依赖 H3 Schema 冻结。
 - T10：挪到明天 acceptance 之后、彩排之前；今晚不实现，不触碰 live 子进程路径。
