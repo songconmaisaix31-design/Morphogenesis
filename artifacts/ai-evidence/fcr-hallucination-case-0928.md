@@ -22,7 +22,7 @@
 - `retry` 未定义名修复为 `retry_after`：在 `swarm/worker_loop.py` 中，第839行附近将 `retry` 替换为 `retry_after`（参数名 `retry_after_seconds` 保持不变）
 - 删除错误的 `outcome='execution_failed'` 赋值：在 `swarm/worker_loop.py` 中，第916行附近删除了错误的赋值语句，保留原有的 `quarantined` 状态
 
-## FC-E 异构评审案例补充
+## FC-E 同源降级评审失实案例
 
 基于 `artifacts/ai-evidence/review-0928-integration-qwen-fallback.md` 及 commit 2180e02/78c0745 的真实代码（73e64cc）与测试（a821783）分离分析：
 
@@ -33,14 +33,13 @@
 
 ### call_count缺失却称覆盖充分案例
 - **原报告声称**（78c0745版本第109行）："Missing call_count: The tests seem to cover the reservation counts and states adequately."
-- **实际边界对照**：该报告未验证Worker实际调用次数，而是将未验证live测试的情况错误地表述为"call_count adequate"
-- **这是将边界测试缺失说成call_count覆盖**，表述与实际情况不符
+- **实际边界对照**：报告109行只讨论reservation状态，未给出Worker执行次数证据；原73边界文件搜call_count无命中
 
 ### 无依据high后作者撤回案例
 - **原报告**（2180e02版本）将"半开探测令牌围栏竞态条件"标记为高危
 - **代码分析**：`swarm/breaker.py` 的 `_finish_probe` 方法通过数据库UPDATE的token匹配确保只有合法持有者能修改状态
 - **测试验证**：`tests/swarm/test_breaker.py` 中 `test_same_owner_stale_probe_result_is_fenced_by_token` 明确验证了该机制
-- **作者修正**（78c0745版本report40-41）：明确撤回了高危判断，承认"原始关于半开探测令牌围栏竞态条件的高危发现已被**修订**。围栏机制按预期正确实现。原始担忧基于实际实现是无根据的。"
+- **作者修正**（78c0745版本report40-41概述）：明确撤回了高危判断，承认"原始关于半开探测令牌围栏竞态条件的高危发现已被**修订**。围栏机制按预期正确实现。原始担忧基于实际实现是无根据的。"（真实英文逐字："The high-severity finding regarding the race condition in probe token fencing is hereby **REVISED**. The mechanism is correctly implemented as per the code analysis and existing tests. The original concern was unfounded based on the actual implementation."）
 - **这是作者修改自己断言的真实例子**
 
 ### 三重锁方法论说明
@@ -50,5 +49,8 @@
 - 异构复核能够补充发现潜在问题，如在不同开发者的代码审查中发现了未定义变量和错误的状态赋值
 - 测试通过并不等于测试有效，特别是当测试针对的是不存在的接口或错误的假设时
 - 少数复核案例不足以衡量错误相关性，本案例未做统计独立性检验
-- 可验证的流程案例：异构评审中的发现、验证、修正过程本身是可追溯的，但不应夸大其对模型性能或因果关系的普遍性结论
+- 可验证的流程案例：这次同源降级评审产出的拒收
 - 同源降级不能称异构，这不是正式的人工或异构复核
+
+### T3变异测试案例
+根据主控验收台账记录，T3 mutation两次仍绿，这是已记录案例而非本轨重跑。三重锁未齐就未打demo-build；两例和mutation证明能暴露这些具体失误，不是全面有效性或统计因果证明。
