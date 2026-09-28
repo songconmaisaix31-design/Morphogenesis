@@ -21,18 +21,19 @@ SHA `a821783f4f89ae727698087f6ed5fd0a7d1fdd89`，trailer `Swarm-Agent: qwen-code
 总控已请求 H1 材料复核及 H4 确认。11:00 起停止开发，等待队长；不以材料准备代替
 人工签字，不替换 TODO-HUMAN-REVIEW。T6 merge/tag/三连冒烟未执行。
 
-## 2026-09-28 22:30 最新状态更新（当前有效）
+## 2026-09-28 最新状态更新（当前有效）
 
 权属已更新：主控只派发验收，治理文档由 Worker 独占；最新有效状态置顶，旧 10:56/11:00 状态
 已被晚间授权替代。原文晚间误称 H4 在 morph-fc-docs-0928，现按已记录实际
 morph-h4-docs-0928 修正。H4 真实 SHA 2957b40 已 rootff/push；T6 条件授权无需再问但
 三锁缺口不能绕过。
 
-T3 当前状态：22:06 第一次 mutation 删 breaker 转移仍绿，14passed 不能验收；
-生产 breaker git diff 已恢复为空。主控退回原 Worker 限一次针对性返修，
-当前 ctx_86b253aba968 / task_1821ef01c94e 同 session 24d15882-1d1d-499b-b18b-53a299aa464d。
-若再失败按上报协议停止；22:40 若未完成从冻结候选排除留 demo-build.1。
-现在未到 22:40，不能写已执行裁撤。全量门禁仍 NOT_RUN。
+T3 当前状态：22:11 第二次 mutation 删 breaker 转移仍绿（原生明确 The test still passes），
+主控已按两轮失败协议停工；保存点 2d9d4304cfc0e1a3d4bfaeccb6ec5688aef60366 已
+git push fix/fcd-interface-alignment；该提交实际缺 Swarm-Agent trailer（多行 shell 被截断），
+不能改写公开历史。breaker 字节/ git diff 恢复为空。ctx_86b253aba968 已在 native 回 shell 后
+abandon，task_1821ef01c94e blocked。门禁不通过、拒收不合并；22:40 裁撤规则保留但尚未到时
+不能写已经触发。
 
 FC-E 当前状态：修订稿 78c07459e14b4817c83c608c68978a07b68b5f9f 已由作者推送，
 自行撤回 token high 推断；主控仍拒收，假绿清单继续声称 call_count/覆盖充分，
