@@ -62,8 +62,8 @@ T3 已过 22:40 排除冻结候选、保留 fix 分支 demo-build.1：按裁撤�
 
 H4 完成：morph-h4-docs-0928 worktree 已完成，SHA 2957b40 已推送。
 
-T6 merge/tag/smoke 未执行：由于 Schema 阻塞、FC-E 无正式报告、H1 无签字，
-三项人类签字均未齐，T6 条件不满足，未执行合并/打标/冒烟测试。
+T6 merge/tag/smoke 未执行：三锁为"门禁全绿、可接受的 FC-E 无高危报告、队长 H1 人工签字"；
+当前没有可接受的 FC-E 报告及 H1 签字，不能执行。Schema 另有验收阻塞，不将三锁误写成三项人类签字。
 
 T9 等 Schema：GUI mock 生成依赖 H3 Schema 冻结，等待 Schema 修复和批准。
 
