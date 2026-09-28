@@ -1,3 +1,43 @@
+# FC 独立验收 — 最终状态文档更正
+
+时间：2026-09-29T00:15:23+08:00（Asia/Shanghai）；验收者 codex；任务 `task_248a1ff29495 / ctx_9e1b74616f4b`。接续已推送报告 `4bdb1483a5ca0a4807eb01c6601a40ef6bb57892`；本次仅验收治理状态差异，不重跑 Schema 或 FC-E，不恢复实现。
+
+**限定状态更正验收通过：当前治理为 `decentralized-swarm@73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`，远端同 SHA，Owner 工作区 clean；相对 `2e56fa1efaa030da5a52c614172654a4e6ea1188` 仅三份治理文档状态变化，冻结成功声明已撤回。Schema 仍 BLOCKED，沿用原九例 8/9、扩展十二例 11/12、退出码 1；文档更正不是 Schema 通过。**
+
+| 本次核对项 | 独立证据与结果 |
+|---|---|
+| 精确提交与范围 | 父提交恰为 `2e56fa1efaa030da5a52c614172654a4e6ea1188`；`git diff --name-only` 仅 `TASKS.md`、`docs/FC_DAY_PLAN_0928.md`、`docs/FC_LOG_SCHEMA_DRAFT_0928.md`；完整 diff 为 19 行新增、20 行删除，逐块核对均属状态文字 |
+| Schema 原文 | 唯一 fenced JSON（含围栏）38354 字节逐字节相等；SHA-256 `ee308908fe08521b342bc32018726e47aea0ed4679280027db93c2a9f16ad87d`；无需重复门禁，JSON/源码/测试均未改变 |
+| 预算十段引用 | TASKS 对生产 `73e64cc` 的十段 Python 引文整块 4174 字节不变；SHA-256 `d23613cf79a2048d0fc7c7712e0ad9815b5baa1e2b7af2feef21db8e8be731c1`；与先前已核验 10/10 的候选原文相同 |
+| 当前冻结状态 | Schema 标题改为候选、冻结验收阻塞，授权段改为冻结目标且仍有缺陷；TASKS 与日计划当前状态明确 8/9、11/12、exit 1、尚未获条件修复授权，删除“全部通过/阻塞已解决”声明 |
+| 远端与工作区 | `git ls-remote origin refs/heads/decentralized-swarm` = `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；Owner HEAD 同值、分支 `decentralized-swarm`，`git status --porcelain=v1 --untracked-files=all` 输出为空（忽略的运行产物不计入 clean） |
+| 交付采集 | 原 Owner 终端有界末尾含 push 成功、实际 `Sent msg_ec7dea6642c6` 和 PowerShell 提示符；主控 `msg_e41d080c9d35` 确认收到 worker_done，但原 body 无真实 SHA，故本轨独立取证，不以该 body 验收 |
+
+**治理交付的剩余限制：**本次 `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db` 没有登记任务书提到的新两轨协议，也仍缺 `Swarm-Agent` trailer；这两项不虚报完成。顶端旧“当前有效”段仍保留“两项缺陷待决定”等旧状态文字，最新验收段已准确写成一个红项，且所有当前 Schema 状态均未宣称冻结成功。本轨遵照限定验收范围记录，未替 Owner 修订或改写已推历史。
+
+Schema 红项保持 `count=null` 且 `issue_audit` 缺失应 VALID、实际 INVALID；定位为旧候选 `2e56fa1` 的文档 1650–1652 / JSON `allOf[1].then.required`（治理文字改动会改变当前文档行号，JSON 路径不变）。是否允许仅修该条件仍未答复。H1 无签字、可接受 FC-E 报告缺、T6 三锁未齐；merge/tag/smoke、生产采集接线、FC-E 评审或返修均 **NOT_RUN**。`contract_local=failed` 仍指 Schema；`interface_live=not_run`、`task_live=not_run`。
+
+本次命令及真实结果（在本验收 worktree 执行）：
+
+```powershell
+& 'C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-integration-0927\.venv\Scripts\python.exe' '.runtime/acceptance-0928/status_check.py'
+git diff --check 2e56fa1efaa030da5a52c614172654a4e6ea1188 73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db
+git ls-remote origin refs/heads/decentralized-swarm
+git -C 'C:\Users\DW\orca\workspaces\Morphogenesis\decentralized-swarm' status --porcelain=v1 --untracked-files=all
+```
+
+以上均退出 0；第一项只比较 Git blob、状态和既有桌面保留证据，没有执行 Schema validator。证据在 ignored `.runtime/acceptance-0928/status-results.json`、`status-delta.diff`、`status-check.log`、`status-check.exit.txt`。本轮未重新运行下方历史门禁。
+
+报告交付分支 `songconmaisaix31-design/morph-fc-acceptance-0928-final`，最终精确报告 SHA 以该分支 `git log -1 --format=%H -- artifacts/ai-evidence/acceptance-0928-final.md`、真实 push/ls-remote 回执和桌面置顶交付条为准；报告提交使用 `Swarm-Agent: codex`。没有合并 Owner 分支，验收报告分支的治理文件仍是其原有快照。
+
+桌面原文件 `C:\Users\DW\Desktop\Morphogenesis_项目改动整合_2026-09-28.md` 前置本轮当前治理 SHA 与限定验收结果。前一版整份 38659 字节（SHA-256 `4468cbe0acf29783b4c966e679e87737b6c7cfb1c8bee897c133454b2ce58594`）完整保留为后缀；其中原始旧快照 35158 字节 / SHA-256 `a63ca5e302f69d6696aa73360b53d8b13d3acc7826eeffa8094d9115463d1154` 的保留校验继续成立。没有覆盖旧快照；备份为 ignored `desktop-before-status.bin` 与既有 `desktop-original.bin`。
+
+---
+
+## 以下完整保留先前独立验收报告（4bdb148 历史快照）
+
+下方 V2/V4 的 `2e56fa1` 是实际执行 11/12 门禁的候选和当时远端快照；当前治理 SHA 以上方 `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db` 为准。Schema JSON 未变，原红项证据继续有效。
+
 # FC 独立验收 — 0928 任务跨日收口
 
 时间：2026-09-29T00:06:36+08:00（Asia/Shanghai）；验收者 codex；任务 task_7a9030034e77 / ctx_582a19d0a929。验收分支 `songconmaisaix31-design/morph-fc-acceptance-0928-final`，起点 `7b9954cffd81b5dc112cdfdd3f03591406c9e0c4`；本报告最终提交以该分支 `git log -1 --format=%H -- artifacts/ai-evidence/acceptance-0928-final.md` 为准。主控只派发汇总；本轨独立取证、判定，不代 H1 人类签字，不做 FC-E 评审。
