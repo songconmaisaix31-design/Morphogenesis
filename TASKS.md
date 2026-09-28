@@ -1,5 +1,13 @@
 # TASKS.md — FC 轮任务账本
 
+## 2026-09-28 10:43 修复恢复授权
+
+队长在收到上述停止报告后明确指令“开始修复”。据此解除 T2/T3 本次停止，原 Worker、
+worktree、branch 和写权不变，以同一 Task 的新 Dispatch 接续；T2 必须按精确 diff 纠错，
+T3 完成真实接口测试和 mutation/全量/strict 验收。FC-E 同一 deepseek-r1 允许一次新的
+有界发射，若仍连接失败或远端效果未知立即停止，不循环。原失败/中断记录不改写。
+H4 的“选三”、H1 人工复核签字、H3 Schema 冻结和 T6 merge/tag 仍保留独立人类决策。
+
 ## 2026-09-28 后继总控接手与暂停（10:38 CST）
 
 总控 `codex/master-control`，Orca Run `run_e46ee274f7c9`，当前 coordinator
