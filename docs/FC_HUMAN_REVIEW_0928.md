@@ -76,7 +76,7 @@ if cursor.rowcount != 1:
 
 ## FC-E 意见与门禁
 
-补评范围为 `348cf8d..73e64cc`，目标 `morph-fc-e/artifacts/ai-evidence/review-0928-integration.md`。本日首次 dsh 启动真实返回 `dsh: TRANSPORT: Connection error.`，进程已回 shell，未见报告；没有自动重发。**此栏目前无 FC-E 评审意见，不能填写“未发现高危”。** 请求队长决定是否授权同模型单次新发射，成本/远端效果未知。
+补评范围为 `348cf8d..73e64cc`，目标 `morph-fc-e/artifacts/ai-evidence/review-0928-integration.md`。本日首次 dsh 启动真实返回 `dsh: TRANSPORT: Connection error.`，进程已回 shell，未见报告，成本/远端效果未知。队长随后明确“开始修复”，总控发射一次同模型 deepseek-r1 新调用；它返回字面工具调用标记后退出，没有实际读取文件或生成报告，`ctx_20b51afb27b6` 已按真实退出证据 abandon，未再次自动调用。**此栏目前无 FC-E 评审意见，不能填写“未发现高危”或“五不变量未发现违反”。** 下一步建议先修复/验证评审工具通道，再由队长决定新的有界补评调用；模型保持 deepseek-r1。
 
 T3 正在修复旧 FC-D 假绿测试；本材料引用的是现有测试入口，尚不是今天全量或 mutation 验收回执。昨夜 698 passed/87 strict/build/SDK 仅作为历史记录；interface_live、task_live 仍 not_run。
 

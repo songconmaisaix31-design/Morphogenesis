@@ -1,5 +1,64 @@
 # TASKS.md — FC 轮任务账本
 
+## 2026-09-28 10:56 修复验收进展
+
+| 任务 | 状态 | Commit / Dispatch | 门禁与限制 |
+|---|---|---|---|
+| T2 | 返修验收通过，已 push | `2a4dcb403e8ac1366d0c416b4a43a953f16fcea5`；`songconmaisaix31-design/morph-fc-docs-0928` | 只改一页证据；核对真实 `_record_failure_fact`、bbe9d77 精确 diff、来源及统计结论边界；ls-remote 与 HEAD 相同；未合并 |
+| T3 | WIP，未验收 | `fix/fcd-interface-alignment`，base `73e64cc`；`ctx_e3ede6c38728` | 修后定向 14 passed / 22.63s；这是中间版本，后续还在编辑。全量、strict、mutation 均未取得回执；unknown_effect 仍缺真实 Worker/请求计数，不能当五不变量验证通过 |
+| T4 / FC-E | 无有效报告，T6 保持冻结 | `ctx_20b51afb27b6` | 队长授权后同一 deepseek-r1 新调用返回字面工具标记而非工具执行，随后回 shell；目标报告仍不存在；已据实际退出 abandon，未自动再试，未改模型 |
+| T5 | 人工材料就绪 | `docs/FC_HUMAN_REVIEW_0928.md` | 四态矩阵、fencing 摘录、六项清单已备；FC-E 意见缺失，H1 签字未填 |
+| T7 | 只读分析完成并登记 | 源码基线 `73e64cc`；qwen `task_464f4005cf46`，总控独立核对下列行号 | 两条路径均不消费 category 实现分级衰减；零生产/测试实现 |
+| T8 | 草案已生成并结构校验 | `docs/FC_LOG_SCHEMA_DRAFT_0928.md`，本次治理提交 | `Draft202012Validator.check_schema` 通过；实际模型导出，14 个 FaultObservation 字段保留；**未冻结**，H3 待人类拍板 |
+| T11 | 预检部分完成 | 本段只登记状态 | 云 profile/Key 配置存在；课题 workspace 未明确；无 live 调用、无三连冒烟 |
+
+### T7 category 的实际调用链（基线 73e64cc）
+
+结论：**当前无 category 分级衰减消费路径**。`hub_client/models.py:52` 定义
+`GenePolicy.category`；`hub_client/assets.py:39` 将其写入官方 Gene 资产，`:83`
+将其写为 EvolutionEvent.intent。这证明有分类序列化用途，不证明运行时衰减使用它。
+内部 `contracts/resolution.py:16` 的 Gene 没有 category 字段。
+
+```text
+Gene 召回：
+LocalMetabolism.ingest (metabolism/service.py:101)
+  -> GeneRow.body 写入 (:122)，GeneState.tau_seconds=self.tau_seconds (:130)
+  -> inject (:166) 读取 active/applicable (:191)，调用 _evaluate (:193)
+  -> _evaluate (:76/79) 使用 state.tau_seconds 计算 exp(-elapsed/tau)
+  -> inject (:200/205) 以相似度 × 权重排序，按 budget 选 Gene
+  -> Runtime._select (orchestration/runtime.py:120/129) 注入 state.genes (:137)
+  -> Runtime._execute (:161) 将这些 Gene 传给 executor.execute
+category 没有进入上述写入、权重读取或召回决策。
+
+路由信号：
+PheromoneField.deposit (swarm/pheromone.py:55)
+  -> ledger.enqueue (:58)，_save (:50/64) 写 concentration/updated_at/multiplier
+  -> for_records (:67/70) 调 _materialize (:41/46)
+  -> concentration *= exp(-elapsed / (self.tau_seconds / multiplier))
+  -> SoftmaxRouter.choose (swarm/router.py:33/55) 读取浓度
+  -> score (:62) -> softmax/探索混合概率 (:79/82)
+  -> rng.choices (:86) 返回所选 task
+  -> Worker.run (swarm/worker_loop.py:1021) 调 choose，随后 _process (:1056)
+feedback (swarm/pheromone.py:75/86) 按 success/reward 更新浓度和 multiplier；
+它不是 category 分级。此链没有读取 category。
+```
+
+证据为 qwen 只读分析加总控逐段源码核对；不是 live 运行证明，也未建议自动实现。
+
+### T11 配置与命令准备
+
+- 云端 profile：本机阿里云 CLI 可用；配置 default / AK / cn-hangzhou，密钥字段已配置。
+  只检查存在性/配置元数据，没有回显秘密、没有验证云端授权或创建云资源。
+- DashScope：既有私有 key 文件存在；本轮 qwen3-coder-plus 已有实际模型和工具响应。
+  deepseek-r1 补评未成功，不能把 key 存在或 qwen 成功当作 FC-E 报告。
+- 课题 workspace：队长未提供明确路径/课题身份，未就绪核验。
+- `demo/run-demo.ps1` 参数已读：`-Mock` 仅旧 dashboard 展示，不执行任务；
+  `-Replay <实际 rehearsal.json> -Port <已核实空闲端口>` 只回放；
+  `-AuthorizeLive -Executor evomap -Model evomap-gpt-5.6-sol -Mode manual`
+  是可准备的 live 入口，仍需补端口/预算/输出证据并获得相应授权，**未执行**。
+  三连冒烟依赖 T6 三锁；不能将 mock/replay 计作 task_live。
+- Key 目前已到，不触发“未到 Plan B”。EvoMap 网关 live 凭据及可用性未核验，不宣称可用。
+
 ## 2026-09-28 10:43 修复恢复授权
 
 队长在收到上述停止报告后明确指令“开始修复”。据此解除 T2/T3 本次停止，原 Worker、
