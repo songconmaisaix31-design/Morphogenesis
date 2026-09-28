@@ -11,7 +11,7 @@
 |---|---|---|---|
 | 接手计划 | 已提交 | f804fb1；Swarm-Agent: codex/master-control | git diff --check 通过；原 Run 已绑定，三轨互斥写权已登记 |
 | T1 | 等待 H4，未派发修改 | 无 | FC_ACCEPTANCE 仍记三选一未拍板；已请求“选三只改文档”确认，没有以沉默代批准 |
-| T2 | **拒收，待队长决定返修** | cd8f6c9641a666b0c9cd8d713490b5515e8b3240；task_e3bb4948bc47 / ctx_3981895d6cd4 | qwen3-coder-plus 实际工具活动；git diff --check 绿，内容事实不通过；push 120 秒超时，远端结果未知 |
+| T2 | **拒收，待队长决定返修** | cd8f6c9641a666b0c9cd8d713490b5515e8b3240；task_e3bb4948bc47 / ctx_3981895d6cd4 | qwen3-coder-plus 实际工具活动；git diff --check 绿，内容事实不通过；push 曾超时，后续只读 ls-remote 已确认远端为 cd8f6c9，没有重复推送 |
 | T3 | **按停止协议中断，未修改测试** | base 73e64cc；task_1821ef01c94e / ctx_93a537696020 | 原集成树现分支 fix/fcd-interface-alignment；基线 14 passed in 40.90s，不是修复验收；没有全量/strict/mutation 回执；Ctrl+C 后读回 PowerShell，工作区 clean |
 | T4 / FC-E | **启动失败，无报告** | task_6d4cbad4ae30 / ctx_523fd9024082 | dsh 原生命令报 TRANSPORT: Connection error. 后回 shell；未生成 review-0928-integration.md；未知远端效果/费用，不自动重试；已请求同模型单次重发决策 |
 | T5 | 人工材料已落盘，**晚于 10:30** | 本次治理提交，docs/FC_HUMAN_REVIEW_0928.md | 10:37 完成四态矩阵、fencing 摘录、六点清单；FC-E 意见槽明确空缺，不代签 |
@@ -45,6 +45,11 @@ E 已回 shell；T2 已结束，其结尾只有文本 `orcasend worker_done`，�
 原 Run 遗留四条邮件已复核：A/D 旧自报不是今日验收；C 旧 push 失败记录与原总控后来
 “六分支推送”终端记录并存；R 旧 heartbeat 不是完成证据。今日 `git ls-remote` 再核实时
 遇 `OpenSSL SSL_connect: SSL_ERROR_SYSCALL`，不宣称已实时核实所有旧分支远端。
+
+后续网络恢复：治理提交 `140797c64d9b0fe7656e1d00bd68aa7936c88370` 正常 push 成功，
+`git ls-remote` 确认主分支与 T2 分支分别为 `140797c` / `cd8f6c9`。T2 仍拒收，远端存在
+不等于验收通过。历史 A/D release 返回 no_owned_resource，未动外部终端；四条遗留邮件
+已处理并 ack；本 Run reclaimable 数为 0。
 
 H1 11:00–11:30 人工 breaker 复核材料已备；H2 12:15 提醒/12:30 报名、H3 16:00–17:30
 拍板、药学 PhD 20:00 截止、课题提案收集、21:30 站会仍由队长执行。本会话未创建定时

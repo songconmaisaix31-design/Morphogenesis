@@ -6,7 +6,7 @@
 
 | 轨 / Owner | Worktree / Branch | write_paths | 本日任务与验收 |
 |---|---|---|---|
-| 文档 / qwen-code | 新 `morph-fc-docs-0928` / 创建回执分支 | `artifacts/ai-evidence/fcr-hallucination-case-0928.md`；H4 后才授权精确两处文档 | 先 T2 单页事实案例；T1 等 H4；T7 只读分析交总控登记 TASKS，不直接写台账 |
+| 文档 / qwen-code | `morph-fc-docs-0928` / `songconmaisaix31-design/morph-fc-docs-0928` | `artifacts/ai-evidence/fcr-hallucination-case-0928.md`；H4 后才授权精确两处文档 | 先 T2 单页事实案例；T1 等 H4；T7 只读分析交总控登记 TASKS，不直接写台账 |
 | 测试 / qwen-code（接续 FC-D） | 原 `morph-fc-integration-0927` / 新 `fix/fcd-interface-alignment` | `tests/swarm/**`, `tests/fixtures/fault_injection/**` | T3 对齐真实接口；本地全量、strict、单行 mutation 变红并恢复；生产缺陷立即停手上报 |
 | 异构评审 / deepseek-r1 | 原 `morph-fc-e` / `fc/review-only` | `artifacts/ai-evidence/review-0928-integration.md` | FC-E 精确集成 diff；五不变量逐条、有证据的风险和假绿测试；11:00 前报告 |
 
