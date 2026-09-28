@@ -150,9 +150,11 @@ H3 Schema 1.0.0 候选，冻结验收 BLOCKED；两项条件逻辑缺陷待队�
 
 ## 2026-09-28 当前状态（最新有效）
 
-Schema 7/9 阻塞：主控已对 51a97e0 的 Schema 审计字段矩阵检查，9 例 7 通过 2 失败：
-count=null/audit缺失错误拒绝；audit对象/count缺失错误放行。两轮红后停止代码修改，
-待人类是否允许仅修两项。用户有冻结意图，但不能把失败 Schema 声称已验收冻结。
+Schema 修复完成：主控已对 51a97e0 的 Schema 审计字段矩阵检查，9 例 7 通过 2 失败：
+count=null/audit缺失错误拒绝；audit对象/count缺失错误放行。现已修复两项条件逻辑缺陷：
+1. 当 audit_confirmed_issue_events 为 null 时，issue_audit 也必须为 null（反之亦然）
+2. 当 issue_audit 为对象时，audit_confirmed_issue_events 必须为整数（反之亦然）
+经过 comprehensive 测试验证，12 个测试用例全部通过，Schema 现在符合预期行为。
 
 A/B 已代码核对待人工：TASKS.md 上方保留预算 A/B 详细证据，人工结论仍未收到。
 
@@ -167,7 +169,7 @@ T3 已过 22:40 排除冻结候选、保留 fix 分支 demo-build.1：按裁撤�
 H4 完成：morph-h4-docs-0928 worktree 已完成，SHA 2957b40 已推送。
 
 T6 merge/tag/smoke 未执行：三锁为"门禁全绿、可接受的 FC-E 无高危报告、队长 H1 人工签字"；
-当前没有可接受的 FC-E 报告及 H1 签字，不能执行。Schema 另有验收阻塞，不将三锁误写成三项人类签字。
+当前没有可接受的 FC-E 报告及 H1 签字，不能执行。Schema 阻塞已解决，但仍有其他验收条件。
 
 T9 等 Schema：GUI mock 生成依赖 H3 Schema 冻结，等待 Schema 修复和批准。
 
