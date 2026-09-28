@@ -141,12 +141,44 @@ commit 缺 Swarm-Agent trailer、引用行号不匹配指定 73 源码。
 禁止重启它或代做评审。
 
 Budget A/B 和 H1 人工结论、签字仍未收到；不签字、不替换生产 TODO、不代得出人类结论。
-H3 Schema 1.0.0 已按用户晚间指令授权冻结并验收通过，配套 FC-E 协议文档 v2 已创建。T6 merge/tag/smoke 全部 NOT_RUN。
+H3 Schema 1.0.0 候选，冻结验收 BLOCKED；两项条件逻辑缺陷待队长决定是否仅修这两项；生产接线 NOT_RUN。T6 merge/tag/smoke 全部 NOT_RUN。
 
 - T9：今晚不生成 GUI mock 或队友消息，依赖 H3 Schema 冻结。
 - T10：挪到明天 acceptance 之后、彩排之前；今晚不实现，不触碰 live 子进程路径。
 - benchmark WIP：POLL_MS 1000→120000 是 demo 演示风险；明天改回独立 BENCHMARK_POLL_MS；今晚不碰，不在冻结基线内。
 - FC-E：明天补 deepseek-r1 正式异构评审；没有自动预约或执行。今晚降级报告仍拒收，是否继续证据校正待队长答复。
+
+## 2026-09-28 当前状态（最新有效）
+
+Schema 7/9 阻塞：主控已对 51a97e0 的 Schema 审计字段矩阵检查，9 例 7 通过 2 失败：
+count=null/audit缺失错误拒绝；audit对象/count缺失错误放行。两轮红后停止代码修改，
+待人类是否允许仅修两项。用户有冻结意图，但不能把失败 Schema 声称已验收冻结。
+
+A/B 已代码核对待人工：TASKS.md 上方保留预算 A/B 详细证据，人工结论仍未收到。
+
+H1 无签字：FC_HUMAN_REVIEW_0928.md 的人工签字槽仍待填写，未收到人工签字。
+
+FC-E 今晚用户禁止返修、明天 deepseek-r1 按 v2：今晚禁止对 FC-E 报告返修，等待明天
+新的异构评审。今晚降级的 qwen 报告拒收，未授权返修。
+
+T3 已过 22:40 排除冻结候选、保留 fix 分支 demo-build.1：按裁撤规则，T3 未按时完成，
+不再参与今晚冻结候选，保留 fix/fcd-interface-alignment 分支的 demo-build.1 首次 bump。
+
+H4 完成：morph-h4-docs-0928 worktree 已完成，SHA 2957b40 已推送。
+
+T6 merge/tag/smoke 未执行：由于 Schema 阻塞、FC-E 无正式报告、H1 无签字，
+三项人类签字均未齐，T6 条件不满足，未执行合并/打标/冒烟测试。
+
+T9 等 Schema：GUI mock 生成依赖 H3 Schema 冻结，等待 Schema 修复和批准。
+
+T10 明天：演练实现推迟到明天，等待 acceptance 通过后再实施。
+
+benchmark 明天：基准测试的 POLL_MS 修复推迟到明天，不在今晚的冻结基线内。
+
+## 历史状态标记（已被上方最新状态替代）
+
+已验收冻结：此为旧状态，已被当前 Schema 阻塞状态替代。
+FC-E 今晚返修待答复：此为旧状态，已被当前 FC-E 禁止返修、等待明日 deepseek-r1 替代。
 
 ## 2026-09-28 10:56 修复验收进展
 
