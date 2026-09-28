@@ -1,5 +1,55 @@
 # TASKS.md — FC 轮任务账本
 
+## 2026-09-28 后继总控接手与暂停（10:38 CST）
+
+总控 `codex/master-control`，Orca Run `run_e46ee274f7c9`，当前 coordinator
+`term_f20e387c-dcb7-4bd1-97d7-bf6a5b446b9f`，generation=3。计划见
+`docs/FC_DAY_PLAN_0928.md`。评审生产基线 `73e64cc70116ac658d85591d082c0684a4952c99`；
+第一代根工作树 `f3feb7f` 与已有 SWARM_SOL_PLAN WIP 保持只读。
+
+| 任务 | 状态 | Commit / Dispatch | 门禁与证据 |
+|---|---|---|---|
+| 接手计划 | 已提交 | f804fb1；Swarm-Agent: codex/master-control | git diff --check 通过；原 Run 已绑定，三轨互斥写权已登记 |
+| T1 | 等待 H4，未派发修改 | 无 | FC_ACCEPTANCE 仍记三选一未拍板；已请求“选三只改文档”确认，没有以沉默代批准 |
+| T2 | **拒收，待队长决定返修** | cd8f6c9641a666b0c9cd8d713490b5515e8b3240；task_e3bb4948bc47 / ctx_3981895d6cd4 | qwen3-coder-plus 实际工具活动；git diff --check 绿，内容事实不通过；push 120 秒超时，远端结果未知 |
+| T3 | **按停止协议中断，未修改测试** | base 73e64cc；task_1821ef01c94e / ctx_93a537696020 | 原集成树现分支 fix/fcd-interface-alignment；基线 14 passed in 40.90s，不是修复验收；没有全量/strict/mutation 回执；Ctrl+C 后读回 PowerShell，工作区 clean |
+| T4 / FC-E | **启动失败，无报告** | task_6d4cbad4ae30 / ctx_523fd9024082 | dsh 原生命令报 TRANSPORT: Connection error. 后回 shell；未生成 review-0928-integration.md；未知远端效果/费用，不自动重试；已请求同模型单次重发决策 |
+| T5 | 人工材料已落盘，**晚于 10:30** | 本次治理提交，docs/FC_HUMAN_REVIEW_0928.md | 10:37 完成四态矩阵、fencing 摘录、六点清单；FC-E 意见槽明确空缺，不代签 |
+| T6 | 冻结未执行 | 无 | 今日门禁、FC-E 无高危结论、breaker 人工签字均未齐；无 merge/tag/三连冒烟 |
+| T7 | 未发射 | 无 | 纯分析任务尚未执行，不预判 category 消费结论 |
+| T8 | 未完成草案 | 无 | 仅只读查看既有 FaultObservation 与 Rehearsal 模型；无 Schema 冻结 |
+| T9 | 未执行 | 无 | 依赖 H3，未生成 mock、未向队友发送消息 |
+| T10 | 未实施 | 无 | B 类演练实现需队长确认；T3 写权未交接，未碰 live 子进程 |
+| T11 | 未完成 | 无 | 历史私有 DashScope Key 路径存在于既有 launcher；本日 E 连接失败不能当认证可用；云 profile/课题 workspace/彩排配置未核实 |
+
+### 按队长格式上报：接口事实不一致
+
+- 现象：T2 新产物将 `record_failure` 当作已有实现，并错误描述 retry 修复。
+- 证据：`morph-fc-docs-0928/artifacts/ai-evidence/fcr-hallucination-case-0928.md`
+  的 `cd8f6c9` 第 11–14 行引用实际 `_record_failure_fact` 来支持 `record_failure`；
+  实际定义 `swarm/worker_loop.py:678`、调用 `:813`。`git show bbe9d77 -- swarm/worker_loop.py`
+  明确把未定义变量 `retry` 改成 `retry_after`，参数名仍为 `retry_after_seconds`；
+  案例却写成字段改为 `retry_after_seconds`。其“不同 provider 分类逻辑”也不是异构开发模型
+  错误模式不相关的证据。该页不能验收，未合并或代写修正。
+- 建议：保留原提交，由同一 qwen Owner 按精确 diff 返修并复验；生产代码仍只读。
+- 需要队长决策：是否解除本次停止、恢复 T2 返修及 T3；另独立确认 H4 与 FC-E 单次重发。
+
+### 终端与生命周期
+
+三次本日启动使用既有原生 launcher。Orca 不识别其原生 agent，采用有权威 preamble 的
+low-level dispatch，均如实记 unsupervised，不冒称进程受 Orca 管理。
+E 已回 shell；T2 已结束，其结尾只有文本 `orcasend worker_done`，没有真正发送生命周期
+消息；T3 经明确中断后回 shell。主控依据上述正向退出证据 abandon 三个本日 Dispatch，
+保留终端、工作树、提交和原始记录；不伪造 worker_done。
+
+原 Run 遗留四条邮件已复核：A/D 旧自报不是今日验收；C 旧 push 失败记录与原总控后来
+“六分支推送”终端记录并存；R 旧 heartbeat 不是完成证据。今日 `git ls-remote` 再核实时
+遇 `OpenSSL SSL_connect: SSL_ERROR_SYSCALL`，不宣称已实时核实所有旧分支远端。
+
+H1 11:00–11:30 人工 breaker 复核材料已备；H2 12:15 提醒/12:30 报名、H3 16:00–17:30
+拍板、药学 PhD 20:00 截止、课题提案收集、21:30 站会仍由队长执行。本会话未创建定时
+提醒，不承诺离线后自动到点提醒。总目标 P1/P2 **未达成**。
+
 ## 充值后接续
 
 进程内清除代理环境后 A/D/R 的 DashScope 实际模型与代码工具活动已恢复。
