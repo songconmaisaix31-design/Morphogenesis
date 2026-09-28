@@ -148,13 +148,13 @@ H3 Schema 1.0.0 候选，冻结验收 BLOCKED；两项条件逻辑缺陷待队�
 - benchmark WIP：POLL_MS 1000→120000 是 demo 演示风险；明天改回独立 BENCHMARK_POLL_MS；今晚不碰，不在冻结基线内。
 - FC-E：明天补 deepseek-r1 正式异构评审；没有自动预约或执行。今晚降级报告仍拒收，是否继续证据校正待队长答复。
 
-## 2026-09-28 当前状态（最新有效）
+## 2026-09-29 当前状态（最新有效）
 
-Schema 修复完成：主控已对 51a97e0 的 Schema 审计字段矩阵检查，9 例 7 通过 2 失败：
-count=null/audit缺失错误拒绝；audit对象/count缺失错误放行。现已修复两项条件逻辑缺陷：
-1. 当 audit_confirmed_issue_events 为 null 时，issue_audit 也必须为 null（反之亦然）
-2. 当 issue_audit 为对象时，audit_confirmed_issue_events 必须为整数（反之亦然）
-经过 comprehensive 测试验证，12 个测试用例全部通过，Schema 现在符合预期行为。
+Schema 1.0.0 冻结 BLOCKED：独立验收 Agent 已验证 2e56fa1efaa030da5a52c614172654a4e6ea1188：
+原九例 8/9 通过、扩展十二例 11/12 通过，exit 1；count=null 且 issue_audit 缺失仍被错误拒绝。
+位置 docs/FC_LOG_SCHEMA_DRAFT_0928.md:1650-1652/allOf[1].then.required。
+主控已按两轮红规则停止进一步实现并询问队长是否仅修复此处，尚未收到授权。
+已通过部分：FaultObservation 14 字段精确匹配、非 audit 规则保留。
 
 A/B 已代码核对待人工：TASKS.md 上方保留预算 A/B 详细证据，人工结论仍未收到。
 
@@ -169,7 +169,7 @@ T3 已过 22:40 排除冻结候选、保留 fix 分支 demo-build.1：按裁撤�
 H4 完成：morph-h4-docs-0928 worktree 已完成，SHA 2957b40 已推送。
 
 T6 merge/tag/smoke 未执行：三锁为"门禁全绿、可接受的 FC-E 无高危报告、队长 H1 人工签字"；
-当前没有可接受的 FC-E 报告及 H1 签字，不能执行。Schema 阻塞已解决，但仍有其他验收条件。
+当前没有可接受的 FC-E 报告及 H1 签字，不能执行。Schema 阻塞未解决，仍有其他验收条件。
 
 T9 等 Schema：GUI mock 生成依赖 H3 Schema 冻结，等待 Schema 修复和批准。
 
