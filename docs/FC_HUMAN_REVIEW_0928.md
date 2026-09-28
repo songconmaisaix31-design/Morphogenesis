@@ -3,7 +3,7 @@
 ## 今晚先做：budget.py 场景 A/B（人类专属结论）
 
 队长 2026-09-28 晚间要求逐行手推。以下仅为 AI 整理的源码索引和空白工作表，
-**没有人工签字，没有替人给出“死锁/超支/两者都不是”的结论**。
+**没有人工签字，没有替人给出"死锁/超支/两者都不是"的结论**。
 使用 `morph-fc-e` 的 `73e64cc70116ac658d85591d082c0684a4952c99`，不要误读尚未合入 FC
 的 decentralized-swarm/budget.py。先完成预算复核，再看本文后半 breaker 矩阵。
 
@@ -33,7 +33,7 @@ uncertain 与真正 unknown_effect；809–826 未知效果提前停止；849、
 
 建议先固定同一 task_id、不同 request_id，预算 B、首笔 hold H1、新请求 hold H2；
 满足价格匹配、尝试上限、burn-rate、租约等前置。把 B>=H1+H2 与 B<H1+H2 分别走一遍。
-不能把模型价格不匹配或预算容量用尽导致的拒绝误记为“自己的 pending 自锁”。
+不能把模型价格不匹配或预算容量用尽导致的拒绝误记为"自己的 pending 自锁"。
 
 | 步骤 | 代码入口 | 首笔 status / pending计数 / hold总和 / admitted总和 | 人工核对记录 |
 |---|---|---|---|
@@ -48,7 +48,7 @@ uncertain 与真正 unknown_effect；809–826 未知效果提前停止；849、
 
 先走 A，再分两种输入：外部账单只在服务端出现；以及调用方尝试用晚到 usage 对原
 reservation 调 settle。请明确账单是否有真实接入函数，不能假定代码里存在自动对账。
-在所审 budget.py 中，非 pending 的 settle 早退（253–257），没有“uncertain→billed”
+在所审 budget.py 中，非 pending 的 settle 早退（253–257），没有"uncertain→billed"
 分支；这是需要人工判断的事实边界，不是已通过的账单处理设计。
 
 | 步骤 | 代码入口/需确认项 | hold / admitted / estimate / 外部真实账单四列分别填写 | 人工核对记录 |
@@ -62,7 +62,7 @@ reservation 调 settle。请明确账单是否有真实接入函数，不能假�
 
 人工需单独判定：①是否重复计算同一 reservation；②是否长期保守占用而不是重复收费；
 ③unbounded 请求的实际费用可能超过 allowance 时能否宣称硬预算保证；④账单晚到是否
-可被记录以及需要怎样的人工对账流程。请在结论中写清前提，不能仅写笼统“没问题”。
+可被记录以及需要怎样的人工对账流程。请在结论中写清前提，不能仅写笼统"没问题"。
 
 ### 人工结论登记槽（原文由队长提供，随后同步 TASKS.md）
 
@@ -80,7 +80,7 @@ reservation 调 settle。请明确账单是否有真实接入函数，不能假�
 
 ## 四态 × 四事件转移矩阵
 
-符号：I=insufficient_evidence，N=normal，S=suspended，P=probing_recovery；“保持”表示无动作。以下精确描述现有实现，不代表审批。
+符号：I=insufficient_evidence，N=normal，S=suspended，P=probing_recovery；"保持"表示无动作。以下精确描述现有实现，不代表审批。
 
 | 当前状态 | aggregate | cooldown_expired | probe_success | probe_failure |
 |---|---|---|---|---|
@@ -151,9 +151,20 @@ if cursor.rowcount != 1:
 
 ## FC-E 意见与门禁
 
-补评范围为 `348cf8d..73e64cc`，目标 `morph-fc-e/artifacts/ai-evidence/review-0928-integration.md`。本日首次 dsh 启动真实返回 `dsh: TRANSPORT: Connection error.`，进程已回 shell，未见报告，成本/远端效果未知。队长随后明确“开始修复”，总控发射一次同模型 deepseek-r1 新调用；它返回字面工具调用标记后退出，没有实际读取文件或生成报告，`ctx_20b51afb27b6` 已按真实退出证据 abandon，未再次自动调用。**此栏目前无 FC-E 评审意见，不能填写“未发现高危”或“五不变量未发现违反”。** 下一步建议先修复/验证评审工具通道，再由队长决定新的有界补评调用；模型保持 deepseek-r1。
+补评范围为 `348cf8d..73e64cc`，目标 `morph-fc-e/artifacts/ai-evidence/review-0928-integration.md`。本日首次 dsh 启动真实返回 `dsh: TRANSPORT: Connection error.`，进程已回 shell，未见报告，成本/远端效果未知。队长随后明确"开始修复"，总控发射一次同模型 deepseek-r1 新调用；它返回字面工具调用标记后退出，没有实际读取文件或生成报告，`ctx_20b51afb27b6` 已按真实退出证据 abandon，未再次自动调用。**此栏目前无 FC-E 评审意见，不能填写"未发现高危"或"五不变量未发现违反"。** 下一步建议先修复/验证评审工具通道，再由队长决定新的有界补评调用；模型保持 deepseek-r1。
 
-T3 正在修复旧 FC-D 假绿测试；本材料引用的是现有测试入口，尚不是今天全量或 mutation 验收回执。昨夜 698 passed/87 strict/build/SDK 仅作为历史记录；interface_live、task_live 仍 not_run。
+## FC-E 当前状态与报告信息
+
+报告路径：morph-fc-e/artifacts/ai-evidence/review-0928-integration-qwen-fallback.md；
+初稿 SHA：2180e0223fac39c5213c4a04474a8082e291bf7c；
+修订稿 SHA：78c07459e14b4817c83c608c68978a07b68b5f9f；
+拒收原因：high 声称 token 竞态无具体失败交错、假绿评价错误、同源标签不够、
+commit 缺 Swarm-Agent trailer、引用行号不匹配指定 73 源码。
+两提交均缺 Swarm-Agent trailer，不允许重写已推历史。人类已被问是否授权一次仅证据校正的返修；
+未答复。ctx_925755d7dd00 原生已回 shell 后 abandon，task_fbbababc2840 blocked，
+禁止重启它或代做评审。
+
+T3 正在修复旧 FC-D 假绿测试；本材料引用的是现有测试入口，尚不是今天全量或 mutation 验收回执。昨夜 698 passed/87 strict:build/SDK 仅作为历史记录；interface_live、task_live 仍 not_run。
 
 ## 人类签字槽与 T6
 

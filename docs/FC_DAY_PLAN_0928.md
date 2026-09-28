@@ -1,11 +1,32 @@
 # FC 后继开发一页计划 — 2026-09-28
 
-## 21:47 晚间解阻塞（当前有效授权）
+## 22:30 最新状态更新（当前有效）
 
-队长明确恢复三轨并行：原 qwen 测试 Owner 在 fix/fcd-interface-alignment 返修 T3；
-文档 Owner 在 morph-fc-docs-0928 落 H4；独立 qwen 新会话在 morph-fc-e 做同源降级评审。
-总控继续独占 TASKS.md、此计划、FC_HUMAN_REVIEW_0928.md、FC_LOG_SCHEMA_DRAFT_0928.md，
-增补预算 A/B 人工逐行核对材料与审计确认事件计数草案。生产代码不由总控代改。
+权属已更新：主控只派发验收，治理文档由 Worker 独占；最新有效状态置顶，旧 10:56/11:00 状态
+已被晚间授权替代。原文晚间误称 H4 在 morph-fc-docs-0928，现按已记录实际
+morph-h4-docs-0928 修正。H4 真实 SHA 2957b40 已 rootff/push；T6 条件授权无需再问但
+三锁缺口不能绕过。
+
+T3 当前状态：22:06 第一次 mutation 删 breaker 转移仍绿，14passed 不能验收；
+生产 breaker git diff 已恢复为空。主控退回原 Worker 限一次针对性返修，
+当前 ctx_86b253aba968 / task_1821ef01c94e 同 session 24d15882-1d1d-499b-b18b-53a299aa464d。
+若再失败按上报协议停止；22:40 若未完成从冻结候选排除留 demo-build.1。
+现在未到 22:40，不能写已执行裁撤。全量门禁仍 NOT_RUN。
+
+FC-E 当前状态：修订稿 78c07459e14b4817c83c608c68978a07b68b5f9f 已由作者推送，
+自行撤回 token high 推断；主控仍拒收，假绿清单继续声称 call_count/覆盖充分，
+引用行号不匹配指定 73 源码；静态无高危意见不能据此补锁。
+报告路径：morph-fc-e/artifacts/ai-evidence/review-0928-integration-qwen-fallback.md；
+初稿 SHA：2180e0223fac39c5213c4a04474a8082e291bf7c；
+修订稿 SHA：78c07459e14b4817c83c608c68978a07b68b5f9f；
+拒收原因：high 声称 token 竞态无具体失败交错、假绿评价错误、同源标签不够、
+commit 缺 Swarm-Agent trailer、引用行号不匹配指定 73 源码。
+两提交均缺 Swarm-Agent trailer，不允许重写已推历史。人类已被问是否授权一次仅证据校正的返修；
+未答复。ctx_925755d7dd00 原生已回 shell 后 abandon，task_fbbababc2840 blocked，
+禁止重启它或代做评审。
+
+Budget A/B 和 H1 人工结论、签字仍未收到；不签字、不替换生产 TODO、不代得出人类结论。
+H3 Schema draft.2 待拍板。T6 merge/tag/smoke 全部 NOT_RUN。
 
 | 轨道 | Worktree / Branch | 独占写权 | 今晚验收 |
 |---|---|---|---|

@@ -21,41 +21,33 @@ SHA `a821783f4f89ae727698087f6ed5fd0a7d1fdd89`，trailer `Swarm-Agent: qwen-code
 总控已请求 H1 材料复核及 H4 确认。11:00 起停止开发，等待队长；不以材料准备代替
 人工签字，不替换 TODO-HUMAN-REVIEW。T6 merge/tag/三连冒烟未执行。
 
-## 2026-09-28 21:47 晚间解阻塞（当前有效授权）
+## 2026-09-28 22:30 最新状态更新（当前有效）
 
-队长明确恢复三轨并行：原 qwen 测试 Owner 在 fix/fcd-interface-alignment 返修 T3；
-文档 Owner 在 morph-fc-docs-0928 落 H4；独立 qwen 新会话在 morph-fc-e 做同源降级评审。
-总控继续独占 TASKS.md、此计划、FC_HUMAN_REVIEW_0928.md、FC_LOG_SCHEMA_DRAFT_0928.md，
-增补预算 A/B 人工逐行核对材料与审计确认事件计数草案。生产代码不由总控代改。
+权属已更新：主控只派发验收，治理文档由 Worker 独占；最新有效状态置顶，旧 10:56/11:00 状态
+已被晚间授权替代。原文晚间误称 H4 在 morph-fc-docs-0928，现按已记录实际
+morph-h4-docs-0928 修正。H4 真实 SHA 2957b40 已 rootff/push；T6 条件授权无需再问但
+三锁缺口不能绕过。
 
-T3 返修授权：Worker._process 真实入口、assert 在 try 外、executor mock call_count；
-mutation 语义红并按字节恢复；全量+strict；commit+push。22:40 若 T3 未完成，
-保持 fix 分支不进入今晚冻结候选，登记 demo-build.1 首个 bump；
-它不再单独阻塞生产基线，但不得用此规则忽略生产高危、预算人工结论、breaker 人工签字
-或最新冻结候选的其他门禁。T6 条件满足后按本次用户授权执行，无需重复索要合并/tag许可。
+T3 当前状态：22:06 第一次 mutation 删 breaker 转移仍绿，14passed 不能验收；
+生产 breaker git diff 已恢复为空。主控退回原 Worker 限一次针对性返修，
+当前 ctx_86b253aba968 / task_1821ef01c94e 同 session 24d15882-1d1d-499b-b18b-53a299aa464d。
+若再失败按上报协议停止；22:40 若未完成从冻结候选排除留 demo-build.1。
+现在未到 22:40，不能写已执行裁撤。全量门禁仍 NOT_RUN。
 
-H4 完成情况：独立文档分支 songconmaisaix31-design/morph-h4-docs-0928，SHA
-2957b408ce922369a595a8acd43a882eb85897d3，仅 README1 行语义替换，已 push；
-主控已 ff-only 到根 codex/morphogenesis-mainline 并 push；原 docs/SWARM_SOL_PLAN.md
-WIP 字节未变。原错误原文只在第一代中文 README，FC 基线 README 是英文且无该句，
-第二处未定位，不伪称两处修改。H4 task_4a3ad542208e 完成，原生 Worker 把 orca 错当工具
-所以无 worker_done；主控核验退出/remote 后 abandon ctx_776c9a1f47ae 并
-coordinator_verified 结算。
+FC-E 当前状态：修订稿 78c07459e14b4817c83c608c68978a07b68b5f9f 已由作者推送，
+自行撤回 token high 推断；主控仍拒收，假绿清单继续声称 call_count/覆盖充分，
+引用行号不匹配指定 73 源码；静态无高危意见不能据此补锁。
+报告路径：morph-fc-e/artifacts/ai-evidence/review-0928-integration-qwen-fallback.md；
+初稿 SHA：2180e0223fac39c5213c4a04474a8082e291bf7c；
+修订稿 SHA：78c07459e14b4817c83c608c68978a07b68b5f9f；
+拒收原因：high 声称 token 竞态无具体失败交错、假绿评价错误、同源标签不够、
+commit 缺 Swarm-Agent trailer、引用行号不匹配指定 73 源码。
+两提交均缺 Swarm-Agent trailer，不允许重写已推历史。人类已被问是否授权一次仅证据校正的返修；
+未答复。ctx_925755d7dd00 原生已回 shell 后 abandon，task_fbbababc2840 blocked，
+禁止重启它或代做评审。
 
-T3 当前 task_1821ef01c94e / ctx_86b253aba968，原 wt morph-fc-integration-0927/fix/fcd-interface-alignment，
-qwen 新 session 24d15882-1d1d-499b-b18b-53a299aa464d，仍开发未验收。
-
-E 降级当前 task_fbbababc2840 / ctx_925755d7dd00，morph-fc-e/fc/review-only，
-qwen 独立 session 6c8ab3fa-4df6-4329-a980-7d6eb5ccbc47。初稿 2180e0223fac39c5213c4a04474a8082e291bf7c
-已 push 但被拒收：high 声称 token 竞态无具体失败交错、假绿评价错误、同源标签不够、
-commit 缺 Swarm-Agent trailer。已原 session 返修，要证据不能为补锁降级。
-主控错误使用不存在 --reason 参数，abandon 失败，后续 ready/dispatch 被拒；
-权威 ctx 从未改变，继续同 ctx。不要将不存在的新 Dispatch 登记为生效。T6 保持冻结；
-报告实际产出待核验。
-
-今晚不做但必须登记：T9 不产生 mock 或队友消息；T10 挪明天 acceptance 后彩排前；
-benchmark 工作树 POLL_MS1000→120000 为 demo 风险，明天改独立 BENCHMARK_POLL_MS，
-今晚不碰且不在冻结基线。正式 deepseek-r1 评审明天补，不冒称已执行或已预约。
+Budget A/B 和 H1 人工结论、签字仍未收到；不签字、不替换生产 TODO、不代得出人类结论。
+H3 Schema draft.2 待拍板。T6 merge/tag/smoke 全部 NOT_RUN。
 
 ## 2026-09-28 10:56 修复验收进展
 
