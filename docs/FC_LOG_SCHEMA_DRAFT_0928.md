@@ -1610,14 +1610,20 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
           "audit_confirmed_issue_events": {
             "type": "integer"
           }
-        }
+        },
+        "required": [
+          "audit_confirmed_issue_events"
+        ]
       },
       "then": {
         "properties": {
           "issue_audit": {
             "type": "object"
           }
-        }
+        },
+        "required": [
+          "issue_audit"
+        ]
       }
     },
     {
@@ -1626,14 +1632,20 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
           "audit_confirmed_issue_events": {
             "const": null
           }
-        }
+        },
+        "required": [
+          "audit_confirmed_issue_events"
+        ]
       },
       "then": {
         "properties": {
           "issue_audit": {
             "type": "null"
           }
-        }
+        },
+        "required": [
+          "issue_audit"
+        ]
       }
     },
     {
@@ -1642,7 +1654,10 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
           "audit_confirmed_issue_events": {
             "const": 0
           }
-        }
+        },
+        "required": [
+          "audit_confirmed_issue_events"
+        ]
       },
       "then": {
         "properties": {
@@ -1656,7 +1671,10 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
               }
             }
           }
-        }
+        },
+        "required": [
+          "issue_audit"
+        ]
       }
     },
     {

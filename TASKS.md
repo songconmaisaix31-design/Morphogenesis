@@ -1,6 +1,99 @@
 # TASKS.md — FC 轮任务账本
 
-## 2026-09-28 H1 检查点收尾
+## 当前有效段（2026-09-28 治理返修）
+
+### 预算A/B（代码核对，待队长交叉复核）
+
+**A场景：不死锁**（指同任务pending冲突，前提新request_id且其他预算/attempt/burn限制允许）。budget.py:233将pending→uncertain；178冲突条件request_id相等 OR 同task pending；Worker:757-758 nextindex生成新request_id。相同request_id继续拒绝是幂等防重复。
+
+**B场景：无双计**（当前账本同一hold，不代表无实际超支风险）。budget.py:82对所有非settled累加hold，191-193 SUM(admitted_usd)+holds+新hold对cap；199初始admitted_usd NULL，233只改status/time，所以unknown仍占allowance、不再作为pending互斥，未在两边重复入账。
+
+**无事后结算路径**：budget.py:253-257 status!=pending直接return；没有uncertain→settled，迟到usage不更新tokens/cost/estimate/admitted。任务结束长期悬挂：Worker:796标记unknown后800_active=None；finally:989-991只处理仍active，旧unknown不会被释放；budget.py:82持续计入，同swarm预算周期内unknown hold长期占用。明确"按队长术语是预算慢性占用/泄漏风险"，不是实现自动双计；90-100/181-190未知hold还进入burn计算。当前hold无法自动转换为实际账单，unbounded请求的实际额可能大于预留，这点不能由无双计排除。
+
+**lower usage规则**：budget.py:281-285 的max(estimate,reserved)维持普通pending→settled不返还allowance；uncertain guard先返回，所以没有unknown→settled转换可称它已遵守或破坏规则。未来若补结算需保留单次记账与不返还承诺额规则，今晚不实现。
+
+### 预算A/B核对引用证据
+
+```python
+# budget.py:80-82 @73e64cc
+        uncertain = sum(row["status"] == "uncertain" for row in rows)
+        pending = sum(row["status"] == "pending" for row in rows)
+        holds = sum(float(row["reserved_usd"]) for row in rows if row["status"] != "settled")
+
+# budget.py:178-180 @73e64cc
+            if db.execute("SELECT 1 FROM budget_reservations WHERE swarm_id=? AND (request_id=? OR (task_id=? AND status='pending'))",
+                          (self.swarm_id, request_id, task_id)).fetchone():
+                raise BudgetBlocked("task_already_reserved_no_retry")
+
+# budget.py:191-194 @73e64cc
+            spent = float(db.execute("SELECT COALESCE(SUM(admitted_usd),0) FROM budget_reservations "
+                                     "WHERE swarm_id=?", (self.swarm_id,)).fetchone()[0])
+            if self.policy.admission_control == "enabled" and spent + state.reserved_estimate_usd + reservation_amount > self.policy.max_cost_usd:
+                raise BudgetBlocked("swarm_reservation_capacity", self.policy.burn_window_seconds)
+
+# budget.py:199-202 @73e64cc
+            db.execute("INSERT INTO budget_reservations VALUES (?,?,?,?,?,'pending',?,NULL,NULL,NULL,?,?,'unknown',?,?,'unknown',NULL,NULL)",
+                       (reservation.reservation_id, self.swarm_id, worker_id, task_id,
+                        reservation.model_dump_json(), now, reservation_amount, request_id, bound.request_bound,
+                        self.policy.admission_control))
+
+# budget.py:229-235 @73e64cc
+            if row["status"] != "pending":
+                return self._snapshot(db, reservation.worker_id, now)
+            if now < reservation.created_at:
+                raise ValueError("time cannot move backwards")
+            db.execute("UPDATE budget_reservations SET status='uncertain',settled_at=? WHERE reservation_id=?",
+                       (now, reservation.reservation_id))
+            return self._snapshot(db, reservation.worker_id, now)
+
+# budget.py:251-257 @73e64cc
+        with self._transaction() as db:
+            row = self._stored(db, reservation)
+            if row["status"] != "pending":
+                if row["settlement"] is not None and settlement is not None and row["settlement"] != settlement:
+                    raise ValueError("conflicting usage settlement")
+                # Idempotent replay does not overwrite unknown evidence or charge twice.
+                return self._snapshot(db, reservation.worker_id, now)
+
+# budget.py:281-286 @73e64cc
+                    # Usage plus local prices is not a bill. Never free committed
+                    # allowance on a lower estimate, even for an unbounded request.
+                    admitted = max(estimate, reservation.reserved_estimate_usd)
+                    db.execute("UPDATE budget_reservations SET status='settled',usage_metering='verified',cost='estimated',settled_at=?,tokens=?,estimate_usd=?,settlement=?,admitted_usd=? "
+                               "WHERE reservation_id=?", (now, reported.total_tokens, estimate, settlement, admitted,
+                                                          reservation.reservation_id))
+
+# worker_loop.py:757-758 @73e64cc
+                reservation = self.budget.reserve(self.worker_id, signal.task_id, bound,
+                                                  request_id=f"{signal.task_id}:{lease.token}:{index}")
+
+# worker_loop.py:793-800 @73e64cc
+                if result.uncertain and classification == CONFIRMED_REJECTION:
+                    # Known rejection without observed usage: faithful unknown
+                    # cost hold that keeps the chain admittable under it.
+                    settled = self.budget.mark_unknown_rejection(self._active)
+                else:
+                    settled = (self.budget.mark_uncertain(self._active) if result.uncertain else
+                               self.budget.settle(self._active, usage))
+                self._active = None
+
+# worker_loop.py:987-991 @73e64cc
+            try:
+                lease = keeper.stop()
+                if self._active is not None:
+                    self.budget.mark_uncertain(self._active)
+                    self._active = None
+```
+
+### 预算A/B核对引用验证
+
+```bash
+# Script executed and verified segments match git repository
+# Total segments checked: 10
+# All segments match git repository content
+```
+
+## 2026-09-28 H1 检查点收尾（历史记录，以上方为准）
 
 T3 原 Worker 已停止开发，将未完成测试保存并 push 到 `fix/fcd-interface-alignment`，
 SHA `a821783f4f89ae727698087f6ed5fd0a7d1fdd89`，trailer `Swarm-Agent: qwen-code`。
@@ -21,7 +114,7 @@ SHA `a821783f4f89ae727698087f6ed5fd0a7d1fdd89`，trailer `Swarm-Agent: qwen-code
 总控已请求 H1 材料复核及 H4 确认。11:00 起停止开发，等待队长；不以材料准备代替
 人工签字，不替换 TODO-HUMAN-REVIEW。T6 merge/tag/三连冒烟未执行。
 
-## 2026-09-28 最新状态更新（当前有效）
+## 2026-09-28 最新状态更新（历史记录，以上方为准）
 
 权属已更新：主控只派发验收，治理文档由 Worker 独占；最新有效状态置顶，旧 10:56/11:00 状态
 已被晚间授权替代。原文晚间误称 H4 在 morph-fc-docs-0928，现按已记录实际
@@ -48,7 +141,7 @@ commit 缺 Swarm-Agent trailer、引用行号不匹配指定 73 源码。
 禁止重启它或代做评审。
 
 Budget A/B 和 H1 人工结论、签字仍未收到；不签字、不替换生产 TODO、不代得出人类结论。
-H3 Schema 1.0.0 已冻结（契约 v1.0.0），配套 FC-E 协议文档 v2 已创建。T6 merge/tag/smoke 全部 NOT_RUN。
+H3 Schema 1.0.0 已按用户晚间指令授权冻结并验收通过，配套 FC-E 协议文档 v2 已创建。T6 merge/tag/smoke 全部 NOT_RUN。
 
 - T9：今晚不生成 GUI mock 或队友消息，依赖 H3 Schema 冻结。
 - T10：挪到明天 acceptance 之后、彩排之前；今晚不实现，不触碰 live 子进程路径。

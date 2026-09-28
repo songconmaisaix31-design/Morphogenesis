@@ -65,6 +65,7 @@ verification: "PASS"
 - `FAIL`：验证失败
 - `INVALID`：引用不匹配，自动标记为无效
 - `NOT_FOUND`：找不到指定的提交/文件/行
+- `NOT_RUN`：待机械校验或未执行
 
 ## 引用验证机制
 
