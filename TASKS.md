@@ -12,14 +12,50 @@ SHA `a821783f4f89ae727698087f6ed5fd0a7d1fdd89`，trailer `Swarm-Agent: qwen-code
 - 现象：unknown_effect 测试仍假绿，T3 验收拒收。
 - 证据：该提交 `tests/swarm/test_failure_chain_boundaries.py:437` 新增 ledger.reserve，
   `:441` 的断言可被 `:445` 裸 except 吞掉；没有真实 Worker 执行次数断言。
-  子集绿色不能证明“无后续请求”或五不变量成立，也不能推断生产逻辑已违反不变量。
+  子集绿色不能证明"无后续请求"或五不变量成立，也不能推断生产逻辑已违反不变量。
 - 建议：H1 后原 qwen Owner 接续，先读真实 runtime fixture，删除吞断言逻辑并以真实
   Worker 的 executor 调用计数/账本预留/租约拒绝证明行为，再做 mutation 与全量门禁。
 - 需要队长决策：H1 人工结论与检查点后的接续指令；FC-E 工具通道修复后是否授权新的
-  有界同模型补评。H4 的“选三只改文档”仍单独待确认，H3/T6 也未获批准。
+  有界同模型补评。H4 的"选三只改文档"仍单独待确认，H3/T6 也未获批准。
 
 总控已请求 H1 材料复核及 H4 确认。11:00 起停止开发，等待队长；不以材料准备代替
 人工签字，不替换 TODO-HUMAN-REVIEW。T6 merge/tag/三连冒烟未执行。
+
+## 2026-09-28 21:47 晚间解阻塞（当前有效授权）
+
+队长明确恢复三轨并行：原 qwen 测试 Owner 在 fix/fcd-interface-alignment 返修 T3；
+文档 Owner 在 morph-fc-docs-0928 落 H4；独立 qwen 新会话在 morph-fc-e 做同源降级评审。
+总控继续独占 TASKS.md、此计划、FC_HUMAN_REVIEW_0928.md、FC_LOG_SCHEMA_DRAFT_0928.md，
+增补预算 A/B 人工逐行核对材料与审计确认事件计数草案。生产代码不由总控代改。
+
+T3 返修授权：Worker._process 真实入口、assert 在 try 外、executor mock call_count；
+mutation 语义红并按字节恢复；全量+strict；commit+push。22:40 若 T3 未完成，
+保持 fix 分支不进入今晚冻结候选，登记 demo-build.1 首个 bump；
+它不再单独阻塞生产基线，但不得用此规则忽略生产高危、预算人工结论、breaker 人工签字
+或最新冻结候选的其他门禁。T6 条件满足后按本次用户授权执行，无需重复索要合并/tag许可。
+
+H4 完成情况：独立文档分支 songconmaisaix31-design/morph-h4-docs-0928，SHA
+2957b408ce922369a595a8acd43a882eb85897d3，仅 README1 行语义替换，已 push；
+主控已 ff-only 到根 codex/morphogenesis-mainline 并 push；原 docs/SWARM_SOL_PLAN.md
+WIP 字节未变。原错误原文只在第一代中文 README，FC 基线 README 是英文且无该句，
+第二处未定位，不伪称两处修改。H4 task_4a3ad542208e 完成，原生 Worker 把 orca 错当工具
+所以无 worker_done；主控核验退出/remote 后 abandon ctx_776c9a1f47ae 并
+coordinator_verified 结算。
+
+T3 当前 task_1821ef01c94e / ctx_86b253aba968，原 wt morph-fc-integration-0927/fix/fcd-interface-alignment，
+qwen 新 session 24d15882-1d1d-499b-b18b-53a299aa464d，仍开发未验收。
+
+E 降级当前 task_fbbababc2840 / ctx_925755d7dd00，morph-fc-e/fc/review-only，
+qwen 独立 session 6c8ab3fa-4df6-4329-a980-7d6eb5ccbc47。初稿 2180e0223fac39c5213c4a04474a8082e291bf7c
+已 push 但被拒收：high 声称 token 竞态无具体失败交错、假绿评价错误、同源标签不够、
+commit 缺 Swarm-Agent trailer。已原 session 返修，要证据不能为补锁降级。
+主控错误使用不存在 --reason 参数，abandon 失败，后续 ready/dispatch 被拒；
+权威 ctx 从未改变，继续同 ctx。不要将不存在的新 Dispatch 登记为生效。T6 保持冻结；
+报告实际产出待核验。
+
+今晚不做但必须登记：T9 不产生 mock 或队友消息；T10 挪明天 acceptance 后彩排前；
+benchmark 工作树 POLL_MS1000→120000 为 demo 风险，明天改独立 BENCHMARK_POLL_MS，
+今晚不碰且不在冻结基线。正式 deepseek-r1 评审明天补，不冒称已执行或已预约。
 
 ## 2026-09-28 10:56 修复验收进展
 

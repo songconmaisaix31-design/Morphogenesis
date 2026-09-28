@@ -1,6 +1,6 @@
 # T8 日志 Schema 冻结草案（未冻结）
 
-版本提案 `1.0.0-draft.1`。准备人 codex/master-control；基于集成生产 SHA
+版本提案 `1.0.0-draft.2`。准备人 codex/master-control；基于集成生产 SHA
 `73e64cc70116ac658d85591d082c0684a4952c99`。这份文档是审批材料，未接入生产，未生成 T9 GUI mock。
 H3 由队长决定；批准前不能登记“Schema v1 已冻结”。生成复用当前安装的 Pydantic v2（MIT），
 直接导出 FaultObservation 与 RehearsalSnapshot 定义，不复制另一份运行时契约。
@@ -18,6 +18,31 @@ H3 由队长决定；批准前不能登记“Schema v1 已冻结”。生成复�
 | fault_observation | swarm/fault_observations.py:32 导出全部 14 字段，含 attempt | 不删字段、不改原 JSONL |
 | rehearsal | orchestration/rehearsal_models.py:79 的完整 RehearsalSnapshot 导出 | 保留原 provenance/acceptance/results/genes/adoptions |
 | drill、provenance、evidence_label | 演练为 true/mock/SIMULATED；真实为 false/live/LIVE；回放为 false/replay/REPLAY | 本提案的显式约束 |
+| audit_confirmed_issue_events、issue_audit | 审计确认问题事件数及审计范围/证据；未审计为 null；完整审计确认无问题才可为 0 | 今晚新增草案字段，随 H3 批准，未实现生产采集 |
+
+## 审计确认问题事件数：统计口径提案
+
+新增数值列 `audit_confirmed_issue_events: integer >= 0 | null`（必填、无默认0），配
+`issue_audit` 保存 status（partial/complete）、protocol_id、scope、reviewer、
+confirmed_issue_ids、evidence_refs。未审计时两字段均为 null；完整审计有证据且无问题
+才能写 0。partial 只能报告已确认的正数，必须显示“部分审计”，不能当最终总数。
+
+计数单位为同一 run、同一审计范围内经证据确认的唯一问题事件，不是重试数、失败请求数、
+测试失败次数或模型自报。采用既有问题/审计条目 ID 去重，修复后的重跑不重复计数；
+真实再次发生的独立事件须有独立证据才计新事件。不新造调度器/Manifest/证明系统。
+预期的 SIMULATED 故障注入本身不算问题；若其处理出现经审计确认的缺陷才计数。
+drill/mock、live、replay 分范围，不将演练计数混成 live。每行是累计快照，禁止跨行求和。
+
+消费侧还需检查 count == unique(confirmed_issue_ids) 数量，issue 属于声明 scope，
+证据可回溯；该跨字段关系不由当前 JSON Schema 自动证明。需要撤销误判时保留审计修订
+证据并更新快照，不悄悄删除原问题记录。原始来源没有审计事实时保持 null，不从日志错误码猜数。
+
+参考 [AutoResearch v2 §3.1–3.2 / Figure 2](https://arxiv.org/html/2608.17906v2)：
+RSICD 场景在共同任务契约下审计研究工件，公开数字依次为 AutoResearch 5、R&D-Agent 11、
+AutoResearchClaw 15、Agent Laboratory 18、The AI Scientist 27。该论文没有给出可直接复用
+的细粒度去重字段，本段计数/去重规则是 Morphogenesis 本地提案，不能宣称与论文协议完全等价。
+答辩可将数字同框展示，但须同时标注任务、协议、审计范围与完整性；本项目未采集值为“待审计”，
+不能预填0或据跨任务原始计数宣称优于这些系统。这里只新增 Schema 草案，明日经 H3 后接线采集。
 
 ## 与现有契约的边界
 
@@ -658,6 +683,63 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
         "archived_at"
       ],
       "title": "GeneView",
+      "type": "object"
+    },
+    "IssueAudit": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "partial",
+            "complete"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "protocol_id": {
+          "minLength": 1,
+          "title": "Protocol Id",
+          "type": "string"
+        },
+        "scope": {
+          "description": "Run, evaluated workflow, and trace interval covered",
+          "minLength": 1,
+          "title": "Scope",
+          "type": "string"
+        },
+        "reviewer": {
+          "minLength": 1,
+          "title": "Reviewer",
+          "type": "string"
+        },
+        "confirmed_issue_ids": {
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": "Confirmed Issue Ids",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "protocol_id",
+        "scope",
+        "reviewer",
+        "confirmed_issue_ids",
+        "evidence_refs"
+      ],
+      "title": "IssueAudit",
       "type": "object"
     },
     "MemberAvailability": {
@@ -1323,7 +1405,7 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.0.0-draft.1",
+      "const": "1.0.0-draft.2",
       "title": "Schema Version",
       "type": "string"
     },
@@ -1467,6 +1549,29 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
           "type": "null"
         }
       ]
+    },
+    "audit_confirmed_issue_events": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "审计确认问题事件数；未审计为null；同一scope累计快照，禁止跨日志行求和",
+      "title": "Audit Confirmed Issue Events"
+    },
+    "issue_audit": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IssueAudit"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "required": [
@@ -1486,13 +1591,70 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
     "routing",
     "claim",
     "fault_observation",
-    "rehearsal"
+    "rehearsal",
+    "audit_confirmed_issue_events",
+    "issue_audit"
   ],
   "title": "FCLogDraft",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "UNFROZEN proposal; generated from existing Pydantic source plus proposed event envelope.",
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "audit_confirmed_issue_events": {
+            "type": "integer"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "issue_audit": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "audit_confirmed_issue_events": {
+            "const": null
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "issue_audit": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "audit_confirmed_issue_events": {
+            "const": 0
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "issue_audit": {
+            "properties": {
+              "status": {
+                "const": "complete"
+              },
+              "confirmed_issue_ids": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {

@@ -1,5 +1,25 @@
 # FC 后继开发一页计划 — 2026-09-28
 
+## 21:47 晚间解阻塞（当前有效授权）
+
+队长明确恢复三轨并行：原 qwen 测试 Owner 在 fix/fcd-interface-alignment 返修 T3；
+文档 Owner 在 morph-fc-docs-0928 落 H4；独立 qwen 新会话在 morph-fc-e 做同源降级评审。
+总控继续独占 TASKS.md、此计划、FC_HUMAN_REVIEW_0928.md、FC_LOG_SCHEMA_DRAFT_0928.md，
+增补预算 A/B 人工逐行核对材料与审计确认事件计数草案。生产代码不由总控代改。
+
+| 轨道 | Worktree / Branch | 独占写权 | 今晚验收 |
+|---|---|---|---|
+| T3 / qwen-code | morph-fc-integration-0927 / fix/fcd-interface-alignment | tests/swarm/**、tests/fixtures/fault_injection/** | Worker._process 真实入口、assert 在 try 外、executor mock call_count；mutation 语义红并按字节恢复；全量+strict；commit+push |
+| H4 / qwen-code | morph-h4-docs-0928 / songconmaisaix31-design/morph-h4-docs-0928 | README.md | 中文错误原文只在第一代主线 README:31，故从 f3feb7f 隔离新文档任务；τ=86400、动态指数衰减、半衰期约16.6h；只文档；commit+push |
+| E 降级 / 独立 qwen-code 新会话 | morph-fc-e / fc/review-only | artifacts/ai-evidence/review-0928-integration-qwen-fallback.md | 精确 348cf8d..73e64cc；五不变量、转移表、假绿；标明同源降级；有行号、严重度、复现/验证边界；commit+push |
+
+22:40 若 T3 未完成，保持 fix 分支不进入今晚冻结候选，登记 demo-build.1 首个 bump；
+它不再单独阻塞生产基线，但不得用此规则忽略生产高危、预算人工结论、breaker 人工签字
+或最新冻结候选的其他门禁。T6 条件满足后按本次用户授权执行，无需重复索要合并/tag许可。
+①预算 A/B 结论与④breaker签字属于人类专属；AI只备材料，不代签或冒充人类复核。
+T9 今晚不产生；T10 明日 acceptance 后、彩排前完成；benchmark 的独立轮询常量修复
+登记明日，不纳入今晚基线。T8 新增审计确认事件计数，随 H3 一起批准，不自动冻结。
+
 总控 codex/master-control；当前用户任务书优先。事实基线为集成树 `73e64cc70116ac658d85591d082c0684a4952c99`，评审范围 `348cf8d42719402a7a5fcc09595e5040f96fa5be..73e64cc70116ac658d85591d082c0684a4952c99`。本日接续原 Orca Run `run_e46ee274f7c9`，当前总控终端 `term_f20e387c-dcb7-4bd1-97d7-bf6a5b446b9f`，generation 3。
 
 ## 三条互斥轨道
