@@ -1,5 +1,26 @@
 # TASKS.md — FC 轮任务账本
 
+## 2026-09-28 H1 检查点收尾
+
+T3 原 Worker 已停止开发，将未完成测试保存并 push 到 `fix/fcd-interface-alignment`，
+SHA `a821783f4f89ae727698087f6ed5fd0a7d1fdd89`，trailer `Swarm-Agent: qwen-code`。
+仅测试文件变更，`breaker.py` 无 diff；此提交是 **WIP，不可合并**。
+最近命令为 `.venv/Scripts/python.exe -m pytest tests/swarm/test_failure_chain_boundaries.py -v`
+返回 14 passed / 22.54s，以及 `.venv/Scripts/python.exe tools/typecheck.py`
+返回 no issues in 87 source files。全量 698 零回归和 mutation 敏感性均 **NOT_RUN**。
+
+- 现象：unknown_effect 测试仍假绿，T3 验收拒收。
+- 证据：该提交 `tests/swarm/test_failure_chain_boundaries.py:437` 新增 ledger.reserve，
+  `:441` 的断言可被 `:445` 裸 except 吞掉；没有真实 Worker 执行次数断言。
+  子集绿色不能证明“无后续请求”或五不变量成立，也不能推断生产逻辑已违反不变量。
+- 建议：H1 后原 qwen Owner 接续，先读真实 runtime fixture，删除吞断言逻辑并以真实
+  Worker 的 executor 调用计数/账本预留/租约拒绝证明行为，再做 mutation 与全量门禁。
+- 需要队长决策：H1 人工结论与检查点后的接续指令；FC-E 工具通道修复后是否授权新的
+  有界同模型补评。H4 的“选三只改文档”仍单独待确认，H3/T6 也未获批准。
+
+总控已请求 H1 材料复核及 H4 确认。11:00 起停止开发，等待队长；不以材料准备代替
+人工签字，不替换 TODO-HUMAN-REVIEW。T6 merge/tag/三连冒烟未执行。
+
 ## 2026-09-28 10:56 修复验收进展
 
 | 任务 | 状态 | Commit / Dispatch | 门禁与限制 |
