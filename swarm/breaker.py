@@ -37,7 +37,7 @@ import time
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Literal, Protocol, get_args
+from typing import Literal, Protocol, get_args, runtime_checkable
 
 from cachetools import TTLCache
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -105,6 +105,16 @@ class FaultStoreLike(Protocol):
     def aggregate(
         self, *, now: float, window_seconds: float
     ) -> Mapping[tuple[str, str], FaultAggregateLike]: ...
+
+
+@runtime_checkable
+class RecoveryAggregateLike(FaultAggregateLike, Protocol):
+    def after_recovery(self, at: float, sequence: int | None) -> FaultAggregateLike | None: ...
+
+
+@runtime_checkable
+class RecoveryStoreLike(Protocol):
+    def checkpoint(self) -> int: ...
 
 
 class BreakerConfig(_Model):
@@ -253,6 +263,8 @@ class BreakerView(_Model):
     probe_token: int = Field(default=0, ge=0)
     probe_expires_at: float | None = None
     updated_at: float | None = None
+    recovered_at: float | None = None
+    recovery_sequence: int | None = None
 
 
 class BreakerChange(_Model):
@@ -303,6 +315,7 @@ class SharedBreaker:
         self.config = config
         self.clock = clock
         self.timeout_seconds = timeout_seconds
+        self._recovery_store: RecoveryStoreLike | None = None
         self._window: TTLCache[tuple[str, str], FaultAggregateLike] = TTLCache(
             maxsize=config.window_max_keys, ttl=config.window_seconds, timer=clock
         )
@@ -316,6 +329,11 @@ class SharedBreaker:
                 "probe_token INTEGER NOT NULL DEFAULT 0, probe_expires_at REAL, "
                 "updated_at REAL NOT NULL, PRIMARY KEY(swarm_id, provider, reason))"
             )
+            # Additive migration preserves existing state, fencing tokens and audit.
+            columns = {str(row["name"]) for row in db.execute("PRAGMA table_info(breaker_states)")}
+            for name, sql_type in (("recovered_at", "REAL"), ("recovery_sequence", "INTEGER")):
+                if name not in columns:
+                    db.execute(f"ALTER TABLE breaker_states ADD COLUMN {name} {sql_type}")
             db.execute(
                 "CREATE TABLE IF NOT EXISTS breaker_audit ("
                 "sequence INTEGER PRIMARY KEY AUTOINCREMENT, swarm_id TEXT NOT NULL, "
@@ -357,6 +375,8 @@ class SharedBreaker:
             probe_token=int(row["probe_token"]),
             probe_expires_at=row["probe_expires_at"],
             updated_at=row["updated_at"],
+            recovered_at=row["recovered_at"],
+            recovery_sequence=row["recovery_sequence"],
         )
 
     def _audit(
@@ -420,6 +440,7 @@ class SharedBreaker:
     def observe(self, store: FaultStoreLike, *, now: float | None = None) -> ObservationReport:
         """One observation cycle against an FC-B store (or its structural equal)."""
         at = self._at(now)
+        self._recovery_store = store if isinstance(store, RecoveryStoreLike) else None
         snapshot = store.read()
         aggregates = store.aggregate(now=at, window_seconds=self.config.window_seconds)
         return self.apply_aggregates(aggregates, issues=snapshot.issues, now=at)
@@ -459,6 +480,17 @@ class SharedBreaker:
         provider, reason = aggregate.provider, aggregate.normalized_reason
         with self._write() as db:
             current = self._view(provider, reason, self._row(db, provider, reason))
+            # Re-read the durable boundary under the state write lock: an
+            # aggregate or another worker's cache may predate probe success.
+            if current.recovered_at is not None:
+                filtered = (aggregate.after_recovery(current.recovered_at, current.recovery_sequence)
+                            if isinstance(aggregate, RecoveryAggregateLike) else
+                            aggregate if aggregate.first_occurred_at > current.recovered_at else None)
+                if filtered is None:
+                    self._window.pop((provider, reason), None)
+                    return None
+                aggregate = filtered
+                self._window[(provider, reason)] = aggregate
             params = TransitionParams(
                 now=now, reason=reason, config=self.config,
                 sample_count=aggregate.sample_count,
@@ -518,7 +550,9 @@ class SharedBreaker:
     def _upsert(self, db: sqlite3.Connection, provider: str, reason: str,
                 values: Mapping[str, object], now: float) -> None:
         db.execute(
-            "INSERT INTO breaker_states VALUES (?,?,?,?,?,?,?,?,?,0,?,?) "
+            "INSERT INTO breaker_states (swarm_id,provider,reason,state,sample_count,"
+            "confirmed_rejections,cooldown_until,retry_after_until,probe_owner,probe_token,"
+            "probe_expires_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,0,?,?) "
             "ON CONFLICT(swarm_id,provider,reason) DO UPDATE SET state=excluded.state, "
             "sample_count=excluded.sample_count, confirmed_rejections=excluded.confirmed_rejections, "
             "cooldown_until=excluded.cooldown_until, retry_after_until=excluded.retry_after_until, "
@@ -618,13 +652,18 @@ class SharedBreaker:
             )
             typed_event: BreakerEvent = event  # type: ignore[assignment]
             new_state, actions = transition(current.state, typed_event, params)
-            if not actions:
+            if not actions or current.probe_token != probe_token:
                 return False
+            recovery_sequence = None
             if new_state == "normal":
+                # Serialize the append boundary with JSONL writers. The breaker
+                # transaction spans this short local read, never a model call.
+                if self._recovery_store is not None:
+                    recovery_sequence = self._recovery_store.checkpoint()
                 fields = ("state=?, probe_owner=NULL, probe_expires_at=NULL, sample_count=0, "
                           "confirmed_rejections=0, cooldown_until=NULL, retry_after_until=NULL, "
-                          "updated_at=?")
-                args: tuple[object, ...] = (new_state, at)
+                          "updated_at=?, recovered_at=?, recovery_sequence=?")
+                args: tuple[object, ...] = (new_state, at, at, recovery_sequence)
             else:
                 deadline = cooldown_deadline(params)
                 fields = ("state=?, probe_owner=NULL, probe_expires_at=NULL, cooldown_until=?, "
@@ -651,6 +690,7 @@ class SharedBreaker:
                 "worker_id": worker_id,
                 "retry_after_until": retry_after_until,
                 "probe_token": probe_token,
+                "recovery_sequence": recovery_sequence,
             }, at)
             return True
 

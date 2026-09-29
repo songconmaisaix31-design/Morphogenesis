@@ -267,3 +267,37 @@ def test_busy_writer_fails_within_configured_timeout_without_appending(tmp_path)
             store.append(observation())
     assert not path.exists()
     assert store.append(observation())
+
+
+def test_recovery_boundary_retains_history_and_filters_by_time_and_file_order(tmp_path):
+    store = FaultObservationStore(tmp_path / "facts.jsonl", "run")
+    store.append(observation(request_id="old", occurred_at=100.0))
+    store.append(observation(request_id="future-old", occurred_at=102.0))
+    # A corrupt line remains in the durable file and participates in file order.
+    with store.path.open("ab") as handle:
+        handle.write(b"invalid\n")
+    checkpoint = store.checkpoint()
+    before = store.path.read_bytes()
+    store.append(observation(request_id="late-old", occurred_at=99.0))
+    store.append(observation(request_id="new-equal", occurred_at=100.0))
+    store.append(observation(request_id="new", occurred_at=101.0, retry_after_seconds=3.0))
+    group = store.aggregate(now=102.0, window_seconds=10.0)[("dashscope", "rate_limited")]
+    recovered = group.after_recovery(100.0, checkpoint)
+    assert checkpoint == 3
+    assert group.sample_count == 5
+    assert recovered.sample_count == recovered.confirmed_rejections == 2
+    assert (recovered.first_occurred_at, recovered.last_occurred_at) == (100.0, 101.0)
+    assert recovered.retry_after_until == 104.0
+    assert store.path.read_bytes().startswith(before)
+    assert len(store.read().records) == 5 and len(store.read().issues) == 1
+    assert group.after_recovery(102.0, store.checkpoint()) is None
+
+
+def test_recovery_checkpoint_serializes_with_append_lock(tmp_path):
+    store = FaultObservationStore(tmp_path / "facts.jsonl", "run", timeout_seconds=0)
+    store.append(observation())
+    with sqlite3.connect(str(store.path) + ".lock.sqlite3") as database:
+        database.execute("BEGIN IMMEDIATE")
+        with pytest.raises(sqlite3.OperationalError, match="locked"):
+            store.checkpoint()
+    assert store.checkpoint() == 1
