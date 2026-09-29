@@ -48,3 +48,14 @@ the real handoff case. The two production bugs remain red as listed above.
 
 This is Owner `contract_local` evidence only. H1/H3, formal FC-E,
 `interface_live` and `task_live` are not closed by these tests.
+
+## Supplemental unknown-effect candidate counterexample
+
+The final additional test also runs against the three production files restored
+byte-for-byte from `baseline.zip` (all other production files were already base).
+Command: `<python> -m pytest -q tests/swarm/test_unknown_effect_recovery.py::test_unknown_effect_candidate_is_not_published_or_retried --basetemp=../test-state/original-candidate -p no:cacheprovider`.
+Result: **1 failed / exit 1 / 7.68s**, retained in
+`.runtime/original-candidate-red.log`: `assert 'completed' == 'sleeping'`.
+This exposes the original candidate-success branch taking precedence over an
+explicit `unknown_effect` classification. The fixed Worker gives the unknown
+effect precedence and leaves the candidate unpublished and task unretryable.
