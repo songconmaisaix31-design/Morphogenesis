@@ -2,6 +2,8 @@
 
 本轮仅完成预检材料。**发布/合并/tag/三连冒烟/T10/业务 live 均 NOT_RUN；H1/H3 unsigned；FC 未冻结。** E 不执行模型评审；主控所述 `dsh deepseekV4.1flash` 新正式评审由 G 负责，不能用旧 deepseek-r1 拒收报告或本预检补锁。
 
+本次为 `c1107b63911e44269b586a1252cb84836cdeacf3` 之后的同轨材料窄返修（task `task_4e9a57e7c2aa` / dispatch `ctx_2f4b8aeec806`），仅写本文件与 `artifacts/ai-evidence/fc-release-preflight-0929-validation.json`。下述原预检身份、盘点、门禁与失败均保留为历史快照；本次仅补 T10 Handoff 和授权边界，不重新预检、实现、测试或执行演练。G dsh 正式 review 仍缺凭据，H1/H3 pending；原 TLS 失败不改绿。
+
 ## 1. 任务与证据身份
 
 - E worktree：`C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-release-preflight-0929`；同名分支；开工 HEAD 精确为 `c552250c0d07f5f70f09eb0a5ab3c322195e34ec`（C552），clean。
@@ -139,21 +141,32 @@ if ($runExit -ne 0) { throw "本轮失败 exit=$runExit；保留证据，停止�
 
 ## 7. T10 查实结果与原 Owner 最小 Handoff
 
-**实现未发现，演练 NOT_IMPLEMENTED / NOT_RUN。** 本树、全部 59 个登记 worktree 均没有 `demo/fault_drill.py` 或 `tests/swarm/test_fault_drill.py`；`git log --all -- <两路径>` 无历史；本地/远端 `feat/fault-drill` 以及已知 drill refs 无结果，查询 exit 0。范围仅当前可读工作树和已知/远端引用，不声称不可见仓库也绝无实现。[逐树清单](../artifacts/ai-evidence/fc-release-preflight-0929-drill-inventory.json)。
+**原预检快照：实现未发现，演练 NOT_IMPLEMENTED / NOT_RUN。** 当时本树、全部 59 个登记 worktree 均没有 `demo/fault_drill.py` 或 `tests/swarm/test_fault_drill.py`；`git log --all -- <两路径>` 无历史；本地/远端 `feat/fault-drill` 以及已知 drill refs 无结果，查询 exit 0。范围仅原预检时可读工作树和已知/远端引用，不声称不可见仓库也绝无实现，本次不重跑盘点。[逐树清单](../artifacts/ai-evidence/fc-release-preflight-0929-drill-inventory.json)。
 
-`docs/FC_DAY_PLAN_0928.md:88` 与 TASKS:184–185,309 仍要求 acceptance 后、彩排前，和 T3 写权串行交接。仓内未登记可核验的独立 T10 Owner/分支交付；已知相邻测试权属是原 T3/FC-D qwen-code（day plan:34,81）。请主控交回**原 T10 Owner**，并核实与原测试 Owner 的写权交接；E 不新派人、不认领实现。
+`docs/FC_DAY_PLAN_0928.md:88` 与 TASKS:184–185,309 保留原 acceptance/队长确认及 T3 写权串行交接要求。**当前主控决定依据用户“继续”的既定 T10 实现授权，允许后续 T10 Worker 在独立 `feat/fault-drill` 分支先开发、自验；实现本身不再等待 H1/H3 人签。正式门禁演练、发布与冻结仍须满足原锁条件，隔离自验不能替代正式验收。** 后续 Worker 由主控安排认领原任务两文件并核清原 Owner/WIP 和写权交接；E 不派人、不认领实现。
 
 最小任务单：
 
-- 目标：在验收后的最终 FC 基线上，由原 Owner 单轨只写 **`demo/fault_drill.py`、`tests/swarm/test_fault_drill.py`**；分支拟用既定 `feat/fault-drill`（当前不存在）。先核原 Owner/WIP，无需为此重构任何目录、调度器或契约；生产注入点不足只 Handoff，不扩大写权。
+- 目标：后续 T10 Worker 从主控指定的精确 FC 候选基线，在独立 **`feat/fault-drill`** 分支单轨只写 **`demo/fault_drill.py`、`tests/swarm/test_fault_drill.py`**，先开发并进行隔离自验；正式演练前再核最终验收基线及锁。先核原 Owner/WIP，无需为此重构任何目录、调度器或契约；生产注入点不足只 Handoff，不扩大写权。
 - 复用真实 `Worker._process`、TaskLedger、BudgetLedger、租约、`FaultObservationStore`、SharedBreaker；参考 C552 `tests/swarm/test_failure_chain_runtime.py:198–228` 已有真实 A 观察→B 路由避让的测试。该测试只是已有 contract_local 测试，不是已实现的 CLI 演练。
-- 可审查预期序列：新隔离离线根 → A 第一任务通过进程内测试 seam 收到明确 400 Arrearage（SIMULATED）→真实分类/预算保留/JSONL append → B 使用同一持久 JSONL/breaker 状态、独立 Worker/task/lease → B `breaker.observe`（worker_loop.py:736）读到 A observation → A provider 被跳过且 executor 发送计数=0 → 受控备用候选被实际调用一次或全部不可用有界退出 → 输出每步原生结果与 reservation/observation/route 身份对应。不得预写成功日志；若扩展 429/冷却/unknown 仅沿用既有接口，避免扩大到新功能。
+- 完整预期序列按本次任务重申的原 T10 要求补齐：**正常执行 → SIMULATED confirmed_rejection → 真实受控切换 → Worker B 读取 A 观察并避让 → 冷却到期从真实 guard 获得新 probe token → 成功恢复回灌**。各阶段均走现有产品对象，transport 回执明确为模拟；不得预写成功日志或把“真实路径”写作真实 provider 调用。
 - 每轮单独 logs/state/source-target 目录；不读写生产 state。演练输出外层记录 **`drill:true / provenance:mock / evidence_label:SIMULATED`**（Schema 草案:30）；演练 usage/cost 未测即 null，不能伪称 provider 实测。FaultObservation 模型本身不要求硬塞 drill 字段，复用现有外层展示/日志契约，禁止改 Schema。
 - B 读取 A 的证据必须包含：A 原 observation_id/request_id/task_id/attempt、append sequence/evidence_ref；B 的新身份、共享存储路径与读取到的原事实引用、before/after breaker 视图、被避让 provider 的真实 execute 计数=0、备用候选实际 execute 计数与预算/lease审计。不能让 B 直接吃预制 aggregate 或手写状态冒充观察 A。
 - **零 mock live 子进程**：只注入进程内 mock transport/fixture seam；禁止 mock `--request-child` 的 live 路径、禁止请求真实 provider/付费。产品对象仍真实执行，不能用空壳 `assert True`、吞断言、伪 fallback/日志替代。
-- 验收：脚本失败返回非零；成功亦仅 SIMULATED；隔离目录、真实 B 避让、unknown hold、attempt 覆盖与预算/租约约束有行为证据；对 B 观察/避让做有意义 mutation 时必须红、恢复绿。只跑新实现适用测试，不机械重复本轮已完六门禁。
+- 后续自验：脚本失败返回非零；成功亦仅 SIMULATED；正常首段、受控切换、B 避让、冷却恢复末段、unknown hold、attempt 覆盖与预算/租约约束均需行为证据。只跑新实现适用测试，不机械重复本轮已完六门禁；本次 E 不执行这些检查。
 
-当前没有该模块，所以**没有已验证可执行的 fault_drill CLI 命令**。下面只是 Owner 待实现/评审的最小接口提案，绝不可现在运行或写作已存在：
+| 阶段 | 后续实现与自验必须提供的证据（本次均未执行） |
+|---|---|
+| 1. 正常首段 | 新隔离离线根内由 Worker A 的真实 `Worker._process` 正常完成一个任务；记录主候选 mock execute call count=1、备用=0、task/attempt/request、预算预留与租约/提交结果，作为故障前基线 |
+| 2. 明确拒绝 | A 的下一独立任务经进程内 seam 收到 SIMULATED 400 Arrearage / `confirmed_rejection`；真实分类和 JSONL append 产生可追溯 observation，记录发送计数与预算结果；未知费用仍保留 hold |
+| 3. 真实受控切换 | 同一故障任务经真实 Worker 候选链调用受控备用候选，核主候选拒绝一次、备用调用一次、attempt 递增及任务预算未重置；全不可用的有界退出作为负例，不能替代本成功切换阶段 |
+| 4. 他者避让 | Worker B 使用同一持久 JSONL/breaker 状态、独立 task/lease，经真实 `Worker._process` / `breaker.observe` 读取 A 原事实；本阶段被避让 provider execute=0、备用 execute=1，结果及原观察引用对应 |
+| 5. 冷却探测 | 冷却到期前核 guard 不放行；到期后沿既有时间 seam/真实 guard 原子领取新的有效 probe token，记录 owner/token/期限与 audit，不能手造 token、预写半开状态或绕过 guard 直接恢复 |
+| 6. 成功恢复末段 | 用该 token 经真实 Worker 路径执行一次模拟成功探测并回灌，核 breaker 恢复与 recovery checkpoint；保留原故障 JSONL，再分别让同 Worker、另一 Worker、重启后的新实例重新 observe，均不得仅因旧故障再次熔断；恢复不释放 unknown hold，不清除历史失败 |
+
+**必需测试：`test_stigmergy_avoidance`。** 必须驱动真实 `Worker._process`，以 mock call count 断言 B 对故障 provider 的 execute=0、备用 execute=1，并核 B 消费的是 A 实际追加的观察。断言放在 Worker 异常处理之外，不吞 `AssertionError`，不以日志/空断言或预制 breaker 结果替代。对“读取 A 观察/据此避让”做有意义的行为 mutation，必须使该测试红（非零），恢复原行为后绿（零），保留两次原生输出与退出码；冷却与恢复防重熔断另有上述同/跨 Worker/重启行为检查。本段仅为后续交付要求，不是已通过的测试或 mutation。
+
+原预检没有该模块，本次也未实现，所以**没有本次已验证可执行的 fault_drill CLI 命令**。下面仅为后续 Owner 待实现/评审的最小接口提案，不能据此声称模块已存在或正式演练获准；隔离自验按上述既定授权进行：
 
 ```powershell
 # FUTURE PROPOSED CLI -- 原 Owner 落实现有接口后才定稿
@@ -176,9 +189,9 @@ if ($runExit -ne 0) { throw "本轮失败 exit=$runExit；保留证据，停止�
 | 探索性 rg 使用两个猜测不存在的 executor 文件名 | 报 OS error 2；改按真实 `orchestration/gateway.py` / `codex.py` 读取，不当产品缺陷或 green gate；外层多命令 exit 0 不是该 rg 成功 |
 | 材料 JSON/路径边界/引用/`git diff --check`/commit/push | 材料验证见 `artifacts/ai-evidence/fc-release-preflight-0929-validation.json`；提交/远端/clean 实际回执保存于 ignored `.runtime/fc-release-preflight-0929/delivery.json` 并报 worker_done，未预写通过 |
 
-**可立即继续的授权工作**：G 完成指定模型正式评审及人审材料；主控核本文命令/边界；只读重核最终 refs、环境存在性、端口/PID、回放结构；收取人类 H1/H3。E 材料普通 commit+push 属本轮交付，不是生产发布。
+**可立即继续的授权工作**：主控安排后续 T10 Worker 认领两文件，在独立 `feat/fault-drill` 分支开发并隔离自验；G 补齐凭据后完成指定模型正式评审及人审材料；主控核本文命令/边界，按需只读重核最终 refs、环境存在性、端口/PID、回放结构，收取人类 H1/H3。本次 E 仅检查窄 diff/引用/历史保留，材料普通 commit+push 属本轮交付，不是生产发布。
 
-**待原条件满足的工作**：接受合格 FC-E/H1后集成及最终 SHA证据确认；H3后 Schema冻结/T9采集；原 Owner按最小 Handoff实施并验收T10；明确live条件后适用三连、课题入口和现场投影。T10实现与运行都未由本预检提前执行。若真正目标是课题，先明确现有可执行入口，不用固定repair/recovery样例替代。
+**待原条件满足的工作**：接受合格 FC-E/H1 后集成及最终 SHA 证据确认；H3 后 Schema 冻结/T9 采集；锁齐后在最终验收基线上进行 T10 正式门禁演练与验收；明确 live 条件后适用三连、课题入口和现场投影。隔离实现/自验可按当前授权先行，本次 E 未实现、测试或运行 T10；G 正式 review 缺凭据、H1/H3 pending 均未由材料修订解除。若真正目标是课题，先明确现有可执行入口，不用固定 repair/recovery 样例替代。
 
 必要最少人类信息只有：
 
