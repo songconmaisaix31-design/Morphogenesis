@@ -1,7 +1,9 @@
 # D independent FC remediation acceptance, 2026-09-29
 
-Status: common candidate D final focused and all nine mutations passed;
-I full gate pending. Evidence remains scoped to local contract acceptance.
+Status: **D independent local acceptance complete on the common candidate**.
+D final focused 47 passed; all nine semantic mutations failed as expected and
+restored green; I's six gates independently read and all actual exits 0.
+This closes these five local remediation checks, not FC release/freeze or human/live gates.
 No production, Owner test, Schema, plan, TASKS, AGENTS or lock file is edited by D.
 
 ## Scope and source authority
@@ -98,6 +100,10 @@ Process PYTHONPATH is the source, TEMP/TMP the relevant state parent, numerical
 thread counts 1, PYTHONDONTWRITEBYTECODE=1. No dependency installation or lock change.
 Existing `morph-fc-integration-0927/node_modules` SDK 1.14.0 is reused through
 an ignored junction after absence/version checks, read-only.
+The first external-file pytest invocation created its default root `.pytest_cache`
+(creation time matched this run). D relocated only that generated cache to
+`.runtime/pytest-cache-retained`, verifying both absolute paths first; final focused
+and the delivered mutation command disable cacheprovider. No unrelated file was removed.
 
 Exact export command:
 `git -c core.autocrlf=false archive --format=tar --output=.runtime/candidate.tar c552250c0d07f5f70f09eb0a5ab3c322195e34ec`.
@@ -200,7 +206,7 @@ source/import preflight and the distribution check implementation.
 | Gate | Evidence read | Result |
 |---|---|---|
 | Focused | `focused.log`, full 14-path pytest command, no skips/deselections | 408 passed, 2 warnings, exit 0, 278.45s |
-| Full | `full.log`, `python -u -m pytest -q --basetemp=../test-state/full -p no:cacheprovider` | RUNNING |
+| Full | `full.log`, `python -u -m pytest -q --basetemp=../test-state/full -p no:cacheprovider` | 862 passed, 2 warnings, exit 0, 589.58s |
 | Strict | `strict.log`, `python tools/typecheck.py` (calls mypy --strict) | 87 source files, exit 0 |
 | Build | `build.log`, `python -m build --no-isolation --outdir ../dist` | sdist + wheel, exit 0 |
 | SDK | `sdk.log`, `node tools/check_sdk.cjs` | schema 1.14.0 valid, ID verified, tampering rejected, published=false, exit 0 |
@@ -214,7 +220,22 @@ Git blobs**, all equal (`.runtime/wheel-origin-audit.json`). I preflight records
 346 archive files, 23 changed paths and eight relevant production imports exactly
 matching this candidate, with tempfile.gettempdir at sibling test-state. Focused
 warnings are the existing intentional invalid-model-copy Pydantic cases; none were
-suppressed. I full remains pending until actual process exit and raw final result.
+suppressed. I full ended at `2026-09-29T11:14:03.0550248Z`, actual exit 0;
+same two intentional warnings, no skips/deselections. This is a new common-SHA
+full run, not reuse of A/B/C or historical logs.
+
+D independently ran collection only (`python -m pytest --collect-only -q
+-p no:cacheprovider`): **862 collected, exit 0**. All **54** node IDs from B's old
+failed/error cases remain in this collection. D then compared BOTH I and D archive
+contents and post-gate exported files: **346/346 byte-identical**. Thus the collection
+and final I full cover the unchanged old failures on this candidate, without skipping
+them. The old B red remains historical evidence rather than being relabeled green.
+
+Final D read-only Git verification of I: HEAD and `git ls-remote` both
+`c552250c0d07f5f70f09eb0a5ab3c322195e34ec`; status empty. I's final-verification
+log also records diff-check exit 0, remote exit 0, zero porcelain lines and post-gate
+source verification exit 0. D's own report-only branch is separately committed and
+pushed; final report SHA is provided in the delivery, never substituted for code SHA.
 
 DashScope production executor is **NOT_IMPLEMENTED**: code search finds only the
 pure adapter; `swarm/evomap_executor.py:139` calls `EvoMapAdapter.interpret`.
@@ -224,7 +245,13 @@ DashScope production path. Independent Codex review is not formal DeepSeek FC-E.
 
 ## Open / NOT_RUN
 
-I full-gate evidence: pending; D focused/mutations complete.
-H1/H3 human approvals, formal FC-E, entry/rehearsal remain OPEN.
+No D acceptance work remains for the specified local candidate scope.
+H1/H3 human approvals, formal FC-E, T6 three consecutive smoke runs and
+entry/rehearsal remain OPEN/NOT_RUN under their separate owners and prerequisites.
 Paid live, production merge/tag/freeze/publishing are NOT_RUN.
 Local mock evidence never establishes interface_live or task_live.
+DashScope full production executor remains NOT_IMPLEMENTED; only its real adapter
+was accepted. Windows deep temporary paths retain the demonstrated Git length limit;
+the corrected short layout is part of this local evidence. Late uncertain-cost
+reconciliation/release, real provider billing and mixed-version deployment are not
+established by these gates. D performed no formal DeepSeek review or human sign-off.

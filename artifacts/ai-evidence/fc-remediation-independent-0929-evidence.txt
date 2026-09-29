@@ -299,7 +299,7 @@ ________ test_recovery_watermark_old_history_and_equal_time_new_faults ________
     assert process(recovered, 2) == "completed", _events(recovered)
 E   AssertionError: [{'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 78472, 'signal_id': 'fixture-0', ...}, {'worker_id': '...fixture-1', ...}, {'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 78472, 'signal_id': 'fixture-2', ...}]
 E   assert 'rejected' == 'completed'
-E     
+E
 E     - completed
 E     + rejected
 =========================== short test summary info ===========================
@@ -313,7 +313,7 @@ ________ test_recovery_watermark_old_history_and_equal_time_new_faults ________
 ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:219: in test_recovery_watermark_old_history_and_equal_time_new_faults
     assert reader.shared_breaker.view("local", "rate_limited").state == "normal"
 E   AssertionError: assert 'suspended' == 'normal'
-E     
+E
 E     - normal
 E     + suspended
 =========================== short test summary info ===========================
@@ -359,14 +359,14 @@ ___________ test_current_reservation_cost_and_retained_hold[False] ____________
 ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:259: in test_current_reservation_cost_and_retained_hold
     assert [facts[row["request_id"]].cost_state for row in rows] == ["unknown", "settled"]
 E   AssertionError: assert ['unknown', 'unknown'] == ['unknown', 'settled']
-E     
+E
 E     At index 1 diff: 'unknown' != 'settled'
 E     Use -v to get more diff
 ____________ test_current_reservation_cost_and_retained_hold[True] ____________
 ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:259: in test_current_reservation_cost_and_retained_hold
     assert [facts[row["request_id"]].cost_state for row in rows] == ["unknown", "settled"]
 E   AssertionError: assert ['unknown', 'unknown'] == ['unknown', 'settled']
-E     
+E
 E     At index 1 diff: 'unknown' != 'settled'
 E     Use -v to get more diff
 =========================== short test summary info ===========================
@@ -385,14 +385,14 @@ ___________ test_current_reservation_cost_and_retained_hold[False] ____________
 ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:247: in test_current_reservation_cost_and_retained_hold
     assert fact.cost_state == "unknown" and fact.request_id == row["request_id"]
 E   AssertionError: assert ('settled' == 'unknown'
-E     
+E
 E     - unknown
 E     + settled)
 ____________ test_current_reservation_cost_and_retained_hold[True] ____________
 ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:247: in test_current_reservation_cost_and_retained_hold
     assert fact.cost_state == "unknown" and fact.request_id == row["request_id"]
 E   AssertionError: assert ('settled' == 'unknown'
-E     
+E
 E     - unknown
 E     + settled)
 =========================== short test summary info ===========================
@@ -411,14 +411,14 @@ _ test_adapter_status_priority[Arrearage-\u8d26\u6237\u6b20\u8d39 balance accoun
 ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:270: in test_adapter_status_priority
     assert result.classification.value == expected
 E   AssertionError: assert 'confirmed_rejection' == 'unknown_effect'
-E     
+E
 E     - unknown_effect
 E     + confirmed_rejection
 _ test_adapter_status_priority[AllocationQuota.FreeTierOnly-\u514d\u8d39\u914d\u989d exhausted quota-503-DashScopeAdapter-dashscope] _
 ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:270: in test_adapter_status_priority
     assert result.classification.value == expected
 E   AssertionError: assert 'confirmed_rejection' == 'unknown_effect'
-E     
+E
 E     - unknown_effect
 E     + confirmed_rejection
 =========================== short test summary info ===========================
@@ -456,7 +456,7 @@ ____________________ test_real_gateway_request_count[503] _____________________
     assert [x.execute.call_count for x in executors] == expected, _events(worker)
 E   AssertionError: [{'worker_id': 'builder-0', 'swarm_id': 'evomap-data-v02', 'pid': 76256, 'signal_id': 'data-0', ...}]
 E   assert [1, 1] == [1, 0]
-E     
+E
 E     At index 1 diff: 1 != 0
 E     Use -v to get more diff
 =========================== short test summary info ===========================
@@ -647,3 +647,181 @@ END=2026-09-29T11:00:09.8643081Z
 POST-MUTATION AND FINAL-FOCUSED BYTE CHECK: 346/346 archive files equal.
 D final focused native exit 0 (captured by outer PowerShell $LASTEXITCODE), 47 passed / 73.71s.
 I full pending; not included as passed.
+
+===== D final independent crosscheck =====
+{
+  "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "collected_test_cases": 862,
+  "old_B_failed_error_cases_still_collected": 54,
+  "D_and_I_archives_and_source_files_byte_equal": 346,
+  "matched_old_B_cases": [
+    "tests/integration/test_gateway_audit.py::test_receipt_audit_is_read_only_and_mock_is_never_live",
+    "tests/integration/test_gateway_audit.py::test_receipt_audit_rejects_disconnected_evidence[applied_source]",
+    "tests/integration/test_gateway_audit.py::test_receipt_audit_rejects_disconnected_evidence[gene_content]",
+    "tests/integration/test_gateway_audit.py::test_receipt_audit_rejects_disconnected_evidence[model_missing]",
+    "tests/integration/test_gateway_audit.py::test_receipt_audit_rejects_disconnected_evidence[usage_mismatch]",
+    "tests/integration/test_gateway_audit.py::test_receipt_audit_rejects_disconnected_evidence[usage_missing]",
+    "tests/integration/test_gateway_audit.py::test_receipt_audit_rejects_disconnected_evidence[wrong_attempt]",
+    "tests/t2/test_codex.py::test_extra_files_and_hardlinks_are_rejected",
+    "tests/t2/test_codex.py::test_fake_proposal_only_writes_allowed_artifact",
+    "tests/t2/test_codex.py::test_invalid_proposal_does_not_modify_task[../test.py-adopted0]",
+    "tests/t2/test_codex.py::test_invalid_proposal_does_not_modify_task[sample.py-adopted1]",
+    "tests/t2/test_codex.py::test_no_progress_stops_subprocess_without_retry",
+    "tests/t2/test_codex.py::test_proposal_cannot_execute_io_in_verifier",
+    "tests/t2/test_codex.py::test_stop_before_launch_has_no_evidence_or_side_effect",
+    "tests/t2/test_codex.py::test_timeout_and_manual_stop_during_invocation",
+    "tests/t2/test_codex.py::test_token_limit_rejects_application",
+    "tests/t2/test_gateway.py::test_environment_credential_and_missing_credential_fail_before_request",
+    "tests/t2/test_gateway.py::test_gateway_rehearsal_reuses_review_adoption_and_stops_unknowns[missing_usage]",
+    "tests/t2/test_gateway.py::test_gateway_rehearsal_reuses_review_adoption_and_stops_unknowns[success]",
+    "tests/t2/test_gateway.py::test_gateway_rehearsal_reuses_review_adoption_and_stops_unknowns[timeout]",
+    "tests/t2/test_gateway.py::test_http_failure_or_redirect_has_one_request_and_redacted_evidence[307]",
+    "tests/t2/test_gateway.py::test_http_failure_or_redirect_has_one_request_and_redacted_evidence[401]",
+    "tests/t2/test_gateway.py::test_http_failure_or_redirect_has_one_request_and_redacted_evidence[429]",
+    "tests/t2/test_gateway.py::test_http_failure_or_redirect_has_one_request_and_redacted_evidence[500]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[bad_path]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[bool_usage]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[credential_echo]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[false_adoption]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[inconsistent_usage]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[length]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[missing_usage]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[negative_usage]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[not_json]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[refusal]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[tool_calls]",
+    "tests/t2/test_gateway.py::test_invalid_response_is_not_applied_or_retried[unsafe_python]",
+    "tests/t2/test_gateway.py::test_key_in_task_context_and_invalid_input_paths_fail_before_request",
+    "tests/t2/test_gateway.py::test_one_post_applies_proposal_and_preserves_real_http_evidence",
+    "tests/t2/test_gateway.py::test_path_stop_and_budget_guards_at_effect_boundary[changed_path]",
+    "tests/t2/test_gateway.py::test_path_stop_and_budget_guards_at_effect_boundary[elapsed_budget]",
+    "tests/t2/test_gateway.py::test_path_stop_and_budget_guards_at_effect_boundary[stop_before]",
+    "tests/t2/test_gateway.py::test_path_stop_and_budget_guards_at_effect_boundary[stop_during]",
+    "tests/t2/test_gateway.py::test_path_stop_and_budget_guards_at_effect_boundary[token_budget]",
+    "tests/t2/test_gateway.py::test_timeout_has_no_retry_or_exception_secret",
+    "tests/t2/test_rehearsal.py::test_complete_rehearsal_routes_actual_second_execution_and_metabolizes[normal]",
+    "tests/t2/test_rehearsal.py::test_complete_rehearsal_routes_actual_second_execution_and_metabolizes[slow-adoption-snapshot]",
+    "tests/t2/test_rehearsal.py::test_failure_or_unknown_never_starts_second_task_or_retries[failed_verification]",
+    "tests/t2/test_rehearsal.py::test_failure_or_unknown_never_starts_second_task_or_retries[unknown_execution]",
+    "tests/t2/test_rehearsal.py::test_failure_or_unknown_never_starts_second_task_or_retries[unknown_tokens]",
+    "tests/t2/test_rehearsal.py::test_injection_without_explicit_adoption_does_not_complete",
+    "tests/t2/test_runtime.py::test_changed_weights_change_actual_executor_attempt_identity",
+    "tests/t2/test_runtime.py::test_experience_body_is_injected_and_only_explicit_adoption_is_marked",
+    "tests/t2/test_runtime.py::test_external_success_before_checkpoint_is_not_reexecuted",
+    "tests/t2/test_runtime.py::test_reopen_checkpoint_resumes_review_without_repeating_cli_or_file_write"
+  ]
+}
+===== I full gate - same candidate actual native exit =====
+SHA=c552250c0d07f5f70f09eb0a5ab3c322195e34ec
+CWD=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src
+COMMAND=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927/.venv/Scripts/python.exe -u -m pytest -q --basetemp=../test-state/full -p no:cacheprovider
+TEMP=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/test-state
+TMP=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/test-state
+PYTHONPATH=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src
+START=2026-09-29T11:04:11.9672971Z
+........................................................................ [  8%]
+........................................................................ [ 16%]
+........................................................................ [ 25%]
+........................................................................ [ 33%]
+........................................................................ [ 41%]
+........................................................................ [ 50%]
+........................................................................ [ 58%]
+........................................................................ [ 66%]
+........................................................................ [ 75%]
+........................................................................ [ 83%]
+........................................................................ [ 91%]
+......................................................................   [100%]
+============================== warnings summary ===============================
+tests/swarm/test_budget.py::test_model_copy_cannot_bypass_preflight_validation[nan]
+  C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-integration-0927\.venv\Lib\site-packages\pydantic\main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='input_tokens', input_value=nan, input_type=float])
+    return self.__pydantic_serializer__.to_python(
+
+tests/swarm/test_budget.py::test_model_copy_cannot_bypass_preflight_validation[1]
+  C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-integration-0927\.venv\Lib\site-packages\pydantic\main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='input_tokens', input_value='1', input_type=str])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+862 passed, 2 warnings in 589.58s (0:09:49)
+EXIT_CODE=0
+END=2026-09-29T11:14:03.0550248Z
+
+===== I final source and Git verification =====
+**********************
+PowerShell 记录开始
+开始时间: 20260929191427
+用户名: LAPTOP-BS46UHBR\DW
+RunAs 用户: LAPTOP-BS46UHBR\DW
+配置名称:
+计算机: LAPTOP-BS46UHBR (Microsoft Windows NT 10.0.26200.0)
+主机应用程序: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+. ./.runtime/gate-env.ps1
+Start-Transcript -LiteralPath .runtime/final-verification.log -NoClobber | Out-Null
+$actual=git rev-parse HEAD
+Write-Output "HEAD=$actual"
+if ($actual -ne $fcSha) { throw 'candidate SHA drift' }
+$dirty=@(git status --porcelain)
+Write-Output "PORCELAIN_LINES=$($dirty.Count)"
+if ($dirty.Count) { throw 'worktree dirty' }
+git diff --check 3a34ecafe5f48b1a5a7c94c9e063797427817cab HEAD
+Write-Output "DIFF_CHECK_EXIT=$LASTEXITCODE"
+if ($LASTEXITCODE -ne 0) { throw 'diff check failed' }
+$remote=git ls-remote --heads origin refs/heads/morph-fc-candidate-0929
+$remoteExit=$LASTEXITCODE
+Write-Output $remote
+Write-Output "REMOTE_EXIT=$remoteExit"
+if ($remoteExit -ne 0 -or (($remote -split '\s+')[0] -ne $fcSha)) { throw 'remote not verified exact' }
+@'
+import pathlib, subprocess, zipfile
+root=pathlib.Path.cwd()
+source=root/'.runtime/candidate-src'
+sha='c552250c0d07f5f70f09eb0a5ab3c322195e34ec'
+base='3a34ecafe5f48b1a5a7c94c9e063797427817cab'
+with zipfile.ZipFile(root/'.runtime/candidate.zip') as archive:
+    files=[info for info in archive.infolist() if not info.is_dir()]
+    for info in files:
+        assert (source/info.filename).read_bytes()==archive.read(info.filename), info.filename
+    print('POST_ALL_GATES_ARCHIVE_FILES_BYTE_EQUAL',len(files))
+count=0
+for owner in ['4d1098ed151d6a9859e088f13ea292baeef1acf2','2c6a33ae1950fd6458543618d1c4044dcdd2596f','e6ac45ffefc171a7215f8db19bc4a28af24ec4fc']:
+    names=subprocess.check_output(['git','diff','--name-only',base,owner],text=True).splitlines()
+    for name in names:
+        expected=subprocess.check_output(['git','show',owner+':'+name])
+        assert (source/name).read_bytes()==expected, name
+        assert subprocess.check_output(['git','show',sha+':'+name])==expected, name
+        count+=1
+print('POST_ALL_GATES_OWNER_CANDIDATE_EXPORT_BLOBS_BYTE_EQUAL',count)
+print('CANDIDATE_MUTATION_BY_INTEGRATOR',False)
+'@ | & $fcPython -
+Write-Output "SOURCE_BYTE_VERIFICATION_EXIT=$LASTEXITCODE"
+if ($LASTEXITCODE -ne 0) { throw 'source verification failed' }
+git check-ignore .runtime/fc-remediation-integration-report.md .runtime/focused.log .runtime/full.log .runtime/strict.log .runtime/build.log .runtime/sdk.log .runtime/distribution.log
+Write-Output "FINAL_VERIFICATION_UTC=$([DateTime]::UtcNow.ToString('o'))"
+Stop-Transcript | Out-Null
+进程 ID: 75248
+PSVersion: 7.6.6
+PSEdition: Core
+GitCommitId: 7.6.6
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+HEAD=c552250c0d07f5f70f09eb0a5ab3c322195e34ec
+PORCELAIN_LINES=0
+› Ask Codex to do anything
+DIFF_CHECK_EXIT=0
+c552250c0d07f5f70f09eb0a5ab3c322195e34ec	refs/heads/morph-fc-candidate-0929
+REMOTE_EXIT=0
+SOURCE_BYTE_VERIFICATION_EXIT=0
+› Ask Codex to do anything
+FINAL_VERIFICATION_UTC=2026-09-29T11:14:33.0547147Z
+**********************
+PowerShell 记录结束
+结束时间: 20260929191433
+**********************
+
+FINAL: I six gates read with actual exit 0 on common candidate. D focused 47 passed, all nine semantic mutations red/restored green; historical failures retained. Manual/live/formal review gates remain separate.

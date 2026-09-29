@@ -48,7 +48,7 @@ for index, (name, relative, before, after, tests, selected) in enumerate(cases):
     assert original == tracked, relative
     assert original.count(before.encode()) == 1, (name, "nonunique mutation target")
     def run(label):
-        cmd = [sys.executable, "-m", "pytest", str(tests), "-q", "--tb=short", "-k", selected,
+        cmd = [sys.executable, "-m", "pytest", str(tests), "-q", "--tb=short", "-p", "no:cacheprovider", "-k", selected,
                "--basetemp", str(state / (str(index) + label[0]))]
         result = subprocess.run(cmd, cwd=source, env=env, capture_output=True, text=True, timeout=180)
         (state / (name + "-" + label + ".log")).write_text(result.stdout + result.stderr, encoding="utf-8")
