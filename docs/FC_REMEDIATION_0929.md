@@ -16,4 +16,4 @@
 
 环境与证据：只读使用 `C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927/.venv/Scripts/python.exe`；不安装依赖、不改锁。运行产物仅 ignored `.runtime`；源码用 `git -c core.autocrlf=false archive` 精确导出，测试 state 与源码平级；必要 SDK junction 先核实不存在、目标版本和 ignored。报告分别列原失败、Owner 修复自验、mutation、独立验收、NOT_RUN，附 exact SHA/base/diff/remote/clean、命令和 exit。
 
-当前状态：计划已落盘，A/B/C 实现与验收进行中，尚无本轮通过结论。H1/H3 人工签字、正式 deepseek-r1 FC-E v2、入口与演练分别保持 OPEN；`contract_local`、`interface_live`、`task_live` 分别登记。生产合并/tag/冻结/发布、付费 live 均不在本轮 Owner 自验范围。
+当前状态：C 源码 `36aa0e7ec7b355ad0c8e2eacfc5489df9d577ad4` Owner focused 246 / strict 87 / SDK 1.14.0 通过，分类 mutation 两家各红 2→恢复绿 2，guard mutation 红 3→恢复绿 3；[C 证据报告](../artifacts/ai-evidence/fc-remediation-classification-0929-report.md)。Guard 阶段 `42b6115b0815289c22678aaec6240515f700b881` 已交 B 组合验；A/B 独立交付、共同候选六门禁与独立验收仍待主控登记。C 的 `python -m build --no-isolation` 因指定 venv 缺 Poetry 后端 exit 1 保留，未安装依赖；主控已指定构建/分发交最终组合门禁处理。H1/H3 人工签字、正式 deepseek-r1 FC-E v2、入口与演练分别保持 OPEN；`contract_local`、`interface_live`、`task_live` 分别登记。生产合并/tag/冻结/发布、付费 live 均不在本轮 Owner 自验范围。
