@@ -662,7 +662,7 @@ class Worker:
 
     def _failure_fact(self, *, task_id: str, request_id: str, index: int, provider: str, model: str,
                       classification: str, fact_fields: dict[str, JsonValue],
-                      cost_state: Literal["settled", "unknown"], occurred_at: float) -> FailureObservationFact | None:
+                      cost_state: Literal["reserved", "settled", "unknown"], occurred_at: float) -> FailureObservationFact | None:
         if classification not in _KNOWN_FAILURE_CLASSES:
             return None
         retry = fact_fields["retry_after_seconds"]
@@ -677,7 +677,7 @@ class Worker:
 
     def _record_failure_fact(self, *, task_id: str, request_id: str, index: int, provider: str, model: str,
                              classification: str, fact_fields: dict[str, JsonValue],
-                             cost_state: Literal["settled", "unknown"], occurred_at: float) -> None:
+                             cost_state: Literal["reserved", "settled", "unknown"], occurred_at: float) -> None:
         fact = self._failure_fact(task_id=task_id, request_id=request_id, index=index, provider=provider,
                                   model=model, classification=classification, fact_fields=fact_fields,
                                   cost_state=cost_state, occurred_at=occurred_at)
@@ -774,6 +774,8 @@ class Worker:
                     consumption = self._consume(signal, keeper.current, attempt, revision, head, execution_id)
 
                     enter_phase("execute")
+                    with keeper.lock:
+                        self.ledger.begin_execution(keeper.current, reservation.request_id)
                     result = candidate_executor.execute(signal, attempt, self.target, directory,
                                                         base_revision=revision, base_head=head,
                                                         experience=consumption)
@@ -797,6 +799,7 @@ class Worker:
                 else:
                     settled = (self.budget.mark_uncertain(self._active) if result.uncertain else
                                self.budget.settle(self._active, usage))
+                cost_state = self.budget.reservation_cost_state(reservation)
                 self._active = None
                 self._status("settled")
                 occurred_at = time.time()
@@ -806,6 +809,11 @@ class Worker:
                         or result.original_run_uri != candidate_executor.original_run_uri):
                     raise AssetSafetyError("execution_provenance_mismatch")
 
+                if classification != "unknown_effect" and (not result.uncertain or classification == CONFIRMED_REJECTION):
+                    keeper.check()
+                    with keeper.lock:
+                        self.ledger.confirm_execution(keeper.current, reservation.request_id)
+
                 if result.uncertain and classification != CONFIRMED_REJECTION:
                     # Unknown effect (or non-rejection class) with unknown usage:
                     # the original reservation stays unknown/reserved and the
@@ -813,7 +821,7 @@ class Worker:
                     self._record_failure_fact(task_id=signal.task_id, request_id=reservation.request_id,
                                               index=index, provider=bound.provider, model=bound.model,
                                               classification=str(classification), fact_fields=fact_fields,
-                                              cost_state="unknown", occurred_at=occurred_at)
+                                              cost_state=cost_state, occurred_at=occurred_at)
                     self._report_probe_outcome(breaker, guard.claims, success=False,
                                                retry_after_seconds=None, occurred_at=occurred_at)
                     failure = failure_details({
@@ -829,14 +837,13 @@ class Worker:
                 }:
                     outcome = "budget_stopped"
                     return "sleeping"
-                if result.candidate is not None:
+                if result.candidate is not None and classification != "unknown_effect":
                     self._report_probe_outcome(breaker, guard.claims, success=True,
                                                retry_after_seconds=None, occurred_at=occurred_at)
                     break
 
-                # Failure domain: a rejected request whose effect is known
-                # (settled usage, or a confirmed rejection with unknown usage).
-                cost_state: Literal["settled", "unknown"] = "unknown" if result.uncertain else "settled"
+                # Cost evidence comes from this reservation, independently of
+                # effect classification and unknown holds from earlier requests.
                 retry_after = fact_fields["retry_after_seconds"]
                 self._report_probe_outcome(breaker, guard.claims, success=False,
                                            retry_after_seconds=retry_after if isinstance(retry_after, float) else None,

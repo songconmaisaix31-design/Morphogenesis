@@ -9,6 +9,7 @@ import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Literal
 from uuid import uuid4
 
 from pydantic import JsonValue
@@ -208,6 +209,20 @@ class BudgetLedger:
         if not isinstance(row, sqlite3.Row) or Reservation.model_validate_json(row["body"]) != reservation:
             raise ValueError("reservation identity does not match durable hold")
         return row
+
+    def reservation_cost_state(self, reservation: Reservation) -> Literal["reserved", "settled", "unknown"]:
+        """Read one durable hold, never infer its cost from swarm aggregates.
+
+        'settled' here means the ledger has settled a local estimate; it does
+        not claim an observed provider bill. Unknown costs retain their holds.
+        """
+        with connection(self.path) as db:
+            row = self._stored(db, reservation)
+            if row["status"] == "pending":
+                return "reserved"
+            if row["status"] == "settled" and row["cost"] != "unknown":
+                return "settled"
+            return "unknown"
 
     def mark_uncertain(self, reservation: Reservation) -> BudgetSnapshot:
         return self.settle(reservation, None)

@@ -7,11 +7,12 @@ from __future__ import annotations
 
 import json
 import multiprocessing
+from dataclasses import replace
 
 import pytest
 
 from contracts.identity import AgentId
-from swarm.worker_loop import Worker, WorkerConfig
+from swarm.worker_loop import FixtureExecutor, Worker, WorkerConfig
 from tests.swarm.test_failure_chain_runtime import (
     _claim, _events, _executor, _facts, _failure, _reservations, _worker_config,
 )
@@ -104,7 +105,8 @@ def test_unknown_effect_after_real_lease_handoff_cannot_be_sent_by_successor(tmp
     transfers = []
 
     def execute(*args, **kwargs):
-        transfers.append(worker.leases.handoff(lease, successor_config.worker_id))
+        current = next(item for item in worker.leases.snapshot() if item.task_id == signal.task_id)
+        transfers.append(worker.leases.handoff(current, successor_config.worker_id))
         return _failure("unknown_effect", known_usage=True, reason="read_timeout")
 
     executor.execute.side_effect = execute
@@ -121,3 +123,24 @@ def test_unknown_effect_after_real_lease_handoff_cannot_be_sent_by_successor(tmp
     assert _reservations(successor) == before
     assert successor.leases.acquire(signal.task_id, successor.worker_id, locality=config.locality) is None
     assert successor.ledger.get(signal.task_id).result_id is None
+
+
+def test_unknown_effect_candidate_is_not_published_or_retried(tmp_path):
+    config = _recovery_config(tmp_path)
+    fixture = FixtureExecutor()
+    executor = _executor(effect=lambda *args, **kwargs: replace(
+        fixture.execute(*args, **kwargs),
+        metadata={"classification": "unknown_effect", "normalized_reason": "read_timeout"}))
+    worker = Worker(config, executor)
+    signal, lease = _claim(worker)
+    outcome = worker._process(signal, lease)
+    assert outcome == "sleeping", _events(worker)
+    assert executor.execute.call_count == 1
+    assert worker.ledger.get(signal.task_id).status == "blocked"
+    assert worker.ledger.get(signal.task_id).result_id is None
+    assert not worker.assets.promotions()
+    assert worker.budget.snapshot().sleeping is False
+    assert _reservations(worker)[0]["status"] == "settled"
+    successor_executor = _executor()
+    Worker(config, successor_executor).run()
+    assert successor_executor.execute.call_count == 0

@@ -163,7 +163,9 @@ def test_lost_lease_after_successful_execution_prevents_submission(tmp_path):
         result = fixture.execute(*args, **kwargs)
         results.append(result)
         # Real lease handoff, without replacing keeper, submit, validation or ledger.
-        handoffs.append(worker.leases.handoff(lease, "replacement-worker"))
+        # Snapshot/fixture work may span a real renewal; use its current expiry.
+        current = next(item for item in worker.leases.snapshot() if item.task_id == signal.task_id)
+        handoffs.append(worker.leases.handoff(current, "replacement-worker"))
         return result
 
     first.execute.side_effect = lose_lease
