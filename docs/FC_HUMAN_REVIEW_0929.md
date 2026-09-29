@@ -97,3 +97,11 @@ H3 人工审批人/时间/Schema SHA/准入范围 **待填写**；`collected=未
 | `-AuthorizeLive -Executor evomap -Model evomap-gpt-5.6-sol -Mode manual` | NOT_RUN | 凭据/可用性、预算、端口、证据与原条件；未执行 |
 
 本轮 I 在 C552 实跑 `contract_local` 六门禁通过：focused 408、full 862/2 warnings、strict 87、build/SDK/分发，均 exit 0；G 核对原日志并在 [治理记录](../artifacts/ai-evidence/fc-remediation-governance-0929-report.md) 分别登记独立 D/正式 FC-E。蜂群 `interface_live`/`task_live` 均 NOT_RUN；长期运行、发布、生产合并/tag/冻结均未执行。正式 FC-E 的模型调用不替代蜂群 live 验收或人类签字。
+
+## 2026-09-29 新模型正式评审替换回执（非人工结论槽）
+
+最新指定 dsh + DeepSeek V4.1 Flash；官方安装目录映射 `deepseek-official / deepseek-flash`，原隔离 FC 配置仍为 DashScope R1。原生认证在已核准标准来源中缺失，本轮未调用模型，实际模型/usage/cost均null；**FC-E OPEN / replacement NOT_RUN**。旧 R1 REJECTED 与2条INVALID保留，不能以新模型材料准备完成抵销。
+
+[替换交接](../artifacts/ai-evidence/review-0929-v41flash-report.md) 备齐C552准确编号输入和37维覆盖要求，输入机械exit0；未取得模型原文，校验exit2/NOT_RUN。旧h2高风险标签没有新交错或证据，仍未证实，不等于bug也不等于已排除。5xx/transport unknown优先为既定用户要求。后续按主控明确的一轮原生dsh、最多10分钟、零自动重试、有限输出执行；CLI缺硬step/request参数不新增审批门禁，未知效果不重试。
+
+本节仅回执；以上预算A/B人工结论、breaker六点签名与H3审批/时间/SHA/准入槽逐字保留。**H1/H3仍待用户签字/拍板**，不代理、不预填、不冻结。I/D证据仅沿用，本轮未重跑；T6合并/tag/三连冒烟及入口演练条件仍由[两轨协调计划](FC_RELEASE_PLAN_0929.md)分别核对，保持NOT_RUN。

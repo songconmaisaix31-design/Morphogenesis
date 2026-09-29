@@ -1,0 +1,232 @@
+{
+  "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "bytes": 532215,
+  "characters": 532055,
+  "token_count": null,
+  "reused_v2_data_body_exact": true,
+  "old_r1_instruction_preamble_replaced": true,
+  "diff_checks": [
+    {
+      "from": "348cf8d42719402a7a5fcc09595e5040f96fa5be",
+      "to": "73e64cc70116ac658d85591d082c0684a4952c99",
+      "bytes": 110195,
+      "complete_occurrences": 1
+    },
+    {
+      "from": "73e64cc70116ac658d85591d082c0684a4952c99",
+      "to": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "bytes": 30063,
+      "complete_occurrences": 1
+    }
+  ],
+  "inherited_numbered_excerpts": [
+    {
+      "path": "swarm/budget.py",
+      "first": 77,
+      "last": 113,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/budget.py",
+      "first": 131,
+      "last": 313,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/worker_loop.py",
+      "first": 687,
+      "last": 905,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/worker_loop.py",
+      "first": 957,
+      "last": 977,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/breaker.py",
+      "first": 163,
+      "last": 251,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/breaker.py",
+      "first": 569,
+      "last": 695,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/task_ledger.py",
+      "first": 257,
+      "last": 328,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/task_ledger.py",
+      "first": 358,
+      "last": 393,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/task_ledger.py",
+      "first": 456,
+      "last": 493,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/failure_chain.py",
+      "first": 116,
+      "last": 177,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/fault_observations.py",
+      "first": 104,
+      "last": 134,
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/base.py",
+      "first": 1,
+      "last": 106,
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/dashscope.py",
+      "first": 1,
+      "last": 145,
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/evomap.py",
+      "first": 1,
+      "last": 148,
+      "result": "PASS"
+    },
+    {
+      "path": "swarm/lease.py",
+      "first": 1,
+      "last": 32,
+      "result": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_unknown_effect_recovery.py",
+      "first": 1,
+      "last": 146,
+      "result": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_reservation_cost_state.py",
+      "first": 1,
+      "last": 51,
+      "result": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_probe_lifecycle_recovery.py",
+      "first": 1,
+      "last": 210,
+      "result": "PASS"
+    },
+    {
+      "path": "tests/orchestration/test_rejection_classification_boundaries.py",
+      "first": 1,
+      "last": 71,
+      "result": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_rejection_runtime_boundaries.py",
+      "first": 1,
+      "last": 195,
+      "result": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_failure_chain_boundaries.py",
+      "first": 1,
+      "last": 207,
+      "result": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_failure_chain_runtime.py",
+      "first": 1,
+      "last": 255,
+      "result": "PASS"
+    }
+  ],
+  "complete_final_files": [
+    {
+      "path": "orchestration/gateway_transport.py",
+      "lines": 72,
+      "blob_bytes": 2921,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/base.py",
+      "lines": 106,
+      "blob_bytes": 4310,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/dashscope.py",
+      "lines": 145,
+      "blob_bytes": 7125,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/evomap.py",
+      "lines": 148,
+      "blob_bytes": 7349,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/budget.py",
+      "lines": 314,
+      "blob_bytes": 20686,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/worker_loop.py",
+      "lines": 1073,
+      "blob_bytes": 56103,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/task_ledger.py",
+      "lines": 515,
+      "blob_bytes": 30831,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/breaker.py",
+      "lines": 712,
+      "blob_bytes": 32300,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/fault_observations.py",
+      "lines": 278,
+      "blob_bytes": 12627,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/failure_chain.py",
+      "lines": 213,
+      "blob_bytes": 7780,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/evomap_executor.py",
+      "lines": 409,
+      "blob_bytes": 21633,
+      "numbered_reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/lease.py",
+      "lines": 32,
+      "blob_bytes": 1436,
+      "numbered_reconstruction": "PASS"
+    }
+  ],
+  "submitted": false,
+  "meaning": "input fidelity only; not model review"
+}

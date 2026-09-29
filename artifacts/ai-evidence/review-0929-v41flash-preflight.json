@@ -1,0 +1,251 @@
+{
+  "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "timestamp_utc": "2026-09-29T12:30:42.2846562Z",
+  "package": "@deepseek-ai/dsh",
+  "version": "0.1.5-rc.3",
+  "license": "MIT",
+  "commands": [
+    {
+      "stdout": "0.1.5-rc.3",
+      "command": "dsh --version",
+      "exit_code": 0
+    },
+    {
+      "stdout": "Usage: dsh [options] [command] [args...]\r\n\r\ndsh: boot a DeepSeek Harness profile — an ordered stack of plugin-bundle patch\r\nlayers under your own overrides.\r\n\r\nArguments:\r\n  args                           arguments for the booted profile's app (see:\r\n                                 dsh --profile <name> --help)\r\n\r\nOptions:\r\n  -V, --version                  output the version number\r\n  --profile <name>               the profile under $DSH_HOME/profiles to boot\r\n  --from-default-profile <name>  initialize a new custom profile from a shipped\r\n                                 profile template\r\n  --patch <path>                 extra patch-list overlay applied after the\r\n                                 profile layer (repeatable)\r\n  --dump-config                  print the composed profile tree and exit\r\n  --dump-default-config          print the profile tree without its user layer\r\n                                 or --patch overlays and exit\r\n\r\nCommands:\r\n  web [options] [args...]        boot the web profile (alias of --profile web);\r\n                                 the web app's own flags follow\r\n  plugin [options] [args...]     manage a profile's plugins by forwarding the\r\n                                 remaining arguments to pnpm in the profile\r\n                                 directory\r\n\r\nExamples:\r\n  dsh --profile web                          boot the web profile (same as: dsh web)\r\n  dsh --profile rescue --from-default-profile web\r\n                                             create rescue from the shipped web template, then boot it\r\n  dsh --profile headless \"run the tests\"     answer one task, print the result, and exit\r\n  dsh --profile tui --patch ./extra.yml      boot a custom profile with one extra overlay\r\n  dsh --profile tui --resume <session>       arguments after the launcher flags reach the app\r\n  dsh --profile web --help                   the web app's own flags and help\r\n  dsh plugin --profile tui add <package>     install a plugin into the tui profile\r\n\r\n",
+      "command": "dsh --help",
+      "exit_code": 0
+    },
+    {
+      "stdout": "Usage: dsh --profile headless [options] [task...]\r\n\r\nAnswer one task, stream reasoning to stderr, print the final assistant message,\r\nand exit.\r\n\r\nArguments:\r\n  task        the task text; multiple words are joined by spaces\r\n\r\nOptions:\r\n  -h, --help  show this help\r\n\r\nExamples:\r\n  dsh --profile headless \"run the tests\"     answer one task and exit\r\n\r\n",
+      "command": "dsh --profile headless --help",
+      "exit_code": 0
+    }
+  ],
+  "configured_original": [
+    {
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-dashscope.patch.yml",
+      "provider": "dashscope-fc",
+      "model": "deepseek-r1",
+      "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "max_retries": "0",
+      "has_v41_identifier": false
+    },
+    {
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-composed.yml",
+      "provider": "dashscope-fc",
+      "model": "deepseek-r1",
+      "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "max_retries": "0",
+      "has_v41_identifier": false
+    }
+  ],
+  "standard_profile_patches": [
+    {
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-home/profiles/headless/cordis.patch.yml",
+      "empty_patch": true
+    },
+    {
+      "path": "C:/Users/DW/.dsh/profiles/headless/cordis.patch.yml",
+      "empty_patch": true
+    },
+    {
+      "path": "C:/Users/DW/.dsh/profiles/web/cordis.patch.yml",
+      "empty_patch": true
+    }
+  ],
+  "requested_name": "deepseekV4.1flash",
+  "resolved_catalog": {
+    "name": "DeepSeek-V41-Flash",
+    "provider": "deepseek-official",
+    "model": "deepseek-flash",
+    "source": "installed official dsh-llm-deepseek 0.1.5-rc.3; not live model enumeration"
+  },
+  "official_default_endpoint": "https://api.deepseek.com",
+  "credential_environment_presence": [
+    {
+      "name": "DEEPSEEK_API_KEY",
+      "scope": "Process",
+      "present": false
+    },
+    {
+      "name": "DEEPSEEK_BASE_URL",
+      "scope": "Process",
+      "present": false
+    },
+    {
+      "name": "DSH_HOME",
+      "scope": "Process",
+      "present": false
+    },
+    {
+      "name": "DSH_SETTINGS_FILE",
+      "scope": "Process",
+      "present": false
+    },
+    {
+      "name": "DEEPSEEK_API_KEY",
+      "scope": "User",
+      "present": false
+    },
+    {
+      "name": "DEEPSEEK_BASE_URL",
+      "scope": "User",
+      "present": false
+    },
+    {
+      "name": "DSH_HOME",
+      "scope": "User",
+      "present": false
+    },
+    {
+      "name": "DSH_SETTINGS_FILE",
+      "scope": "User",
+      "present": false
+    },
+    {
+      "name": "DEEPSEEK_API_KEY",
+      "scope": "Machine",
+      "present": false
+    },
+    {
+      "name": "DEEPSEEK_BASE_URL",
+      "scope": "Machine",
+      "present": false
+    },
+    {
+      "name": "DSH_HOME",
+      "scope": "Machine",
+      "present": false
+    },
+    {
+      "name": "DSH_SETTINGS_FILE",
+      "scope": "Machine",
+      "present": false
+    }
+  ],
+  "native_config_file_presence": [
+    {
+      "path": "C:/Users/DW/.dsh/settings.yaml",
+      "exists": false
+    },
+    {
+      "path": "C:/Users/DW/.dsh/.credentials.yaml",
+      "exists": false
+    },
+    {
+      "path": "C:/Users/DW/.dsh/.env",
+      "exists": false
+    },
+    {
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-home/settings.yaml",
+      "exists": false
+    },
+    {
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-home/.credentials.yaml",
+      "exists": false
+    },
+    {
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-home/.env",
+      "exists": false
+    },
+    {
+      "path": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-governance-final-0929/.env",
+      "exists": false
+    }
+  ],
+  "credential_resolution": "process env > DSH_HOME/.credentials.yaml > invocation cwd/.env > DSH_HOME/.env",
+  "credential_status": "MISSING_IN_CHECKED_NATIVE_SOURCES",
+  "bounds": {
+    "tools_disable": "individual plugin disabled entries supported; read-only still permits multiple tool rounds; isolated final composition NOT_RUN",
+    "input_transport": "headless accepts positional task only; full packet exceeds ordinary Windows command-line size; native config task binding must be validated before sending",
+    "actual_returned_model_observability": "NOT_VERIFIED: headless returns final text; session source.model copies request.model, not independent returned model proof",
+    "finite_output_supported": "llm-deepseek.config.maxTokens",
+    "hard_step_request_cap": "CLI limitation, NOT an independent blocker: no explicit step/request limit; one bounded invocation authorized by coordinator msg_a077597131fd",
+    "zero_retries_supported": "llm-deepseek.config.retryPolicy.maxRetries=0, mode=normal"
+  },
+  "invocation_policy": {
+    "invocations": 1,
+    "automatic_retry": false,
+    "timeout_effect": "unknown if already submitted; preserve and never retry",
+    "max_wall_time_ms": 600000,
+    "status": "authorized but NOT_RUN due to credential absence",
+    "actual_request_count_if_unobservable": null
+  },
+  "source_evidence": [
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-llm-deepseek\\lib\\index.js",
+      "first_line": 1838,
+      "last_line": 1856,
+      "quote": "const DEFAULT_API_KEY_ENV = \"DEEPSEEK_API_KEY\";\n/** The single provider route this plugin owns. */\nconst PROVIDER = \"deepseek-official\";\nconst DEFAULT_MODELS = [\n\t{\n\t\tid: \"deepseek-flash\",\n\t\tname: \"DeepSeek-V41-Flash\",\n\t\tcontextWindow: DEFAULT_CONTEXT_WINDOW,\n\t\tinputModalities: [\"text\", \"image\"],\n\t\timagePixelBudget: DEFAULT_REQUEST_IMAGE_PIXEL_BUDGET,\n\t\timageMaxBytes: DEFAULT_REQUEST_IMAGE_MAX_BYTES,\n\t\tsystemPromptUpdate: \"in-history\"\n\t},\n\t{\n\t\tid: \"deepseek-v4-flash\",\n\t\tname: \"DeepSeek-V4-Flash\",\n\t\tdescription: \"Fast, efficient, and economical; suited to focused, routine, or parallel tasks.\",\n\t\tcontextWindow: DEFAULT_CONTEXT_WINDOW\n\t},"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-llm-deepseek\\lib\\index.js",
+      "first_line": 1884,
+      "last_line": 1898,
+      "quote": "const Config = z.object({\n\tapiKeyEnv: z.string().role(\"credential-ref\").default(DEFAULT_API_KEY_ENV),\n\tbaseURL: z.string(),\n\tthinking: z.union([\"enabled\", \"disabled\"]),\n\treasoningEffort: z.union([\n\t\t\"off\",\n\t\t\"low\",\n\t\t\"high\",\n\t\t\"max\"\n\t]),\n\tmaxTokens: z.number().step(1).min(1).max(Number.MAX_SAFE_INTEGER).default(DEFAULT_MAX_TOKENS),\n\tdefaultContextWindow: z.number().step(1).min(1).default(DEFAULT_CONTEXT_WINDOW),\n\tmodels: z.array(catalogModel).default(DEFAULT_MODELS),\n\tstreamIdleTimeoutMs: z.number().min(Number.MIN_VALUE).max(MAX_TIMER_DELAY_MS).default(DEFAULT_STREAM_IDLE_TIMEOUT_MS),\n\tmaxRequestFilesBytes: z.number().step(1).min(1).default(DEFAULT_MAX_REQUEST_FILES_BYTES),"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-llm-deepseek\\lib\\index.js",
+      "first_line": 1990,
+      "last_line": 2003,
+      "quote": "\tif (!Number.isSafeInteger(fileQuotaCleanupBatch) || fileQuotaCleanupBatch < 1 || fileQuotaCleanupBatch > 1e3) throw new Error(\"llm-deepseek: fileQuotaCleanupBatch must be an integer from 1 through 1000\");\n\treturn {\n\t\tapiKeyEnv: credentialRef(config.apiKeyEnv ?? DEFAULT_API_KEY_ENV),\n\t\tbaseURL: config.baseURL ?? environment?.get(BASE_URL_ENV)?.value ?? \"https://api.deepseek.com\",\n\t\tdefaults: {\n\t\t\tthinking: config.thinking,\n\t\t\treasoningEffort: config.reasoningEffort\n\t\t},\n\t\tmaxTokens: config.maxTokens ?? 256e3,\n\t\tdefaultContextWindow: config.defaultContextWindow ?? 1e6,\n\t\tmodels: resolveModels(config.models),\n\t\tstreamIdleTimeoutMs,\n\t\tmaxRequestFilesBytes,\n\t\tmaxInlineRequestImageBytes,"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-credentials-local\\lib\\index.js",
+      "first_line": 13,
+      "last_line": 20,
+      "quote": "* File-backed credentials provider over `$DSH_HOME/.credentials.yaml`, layered\n* against the environment by how much each layer is trusted:\n*\n* ```text\n* inherited process environment      (read-only, wins)\n* > $DSH_HOME/.credentials.yaml      (provider-managed, writable)\n* > <invocation cwd>/.env            (read-only fallback)\n* > $DSH_HOME/.env                   (read-only fallback)"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-headless\\lib\\startup.js",
+      "first_line": 24,
+      "last_line": 35,
+      "quote": "`);\n}\n/**\n* Parse and provide the one-shot task as an ordinary Cordis service. The\n* command's action publishes the task; a missing or whitespace-only task is a\n* usage error, so on rejection (and on `--help`) nothing is provided.\n* @param ctx - plugin context carrying the command line.\n*/\nfunction apply(ctx) {\n\tconst program = headlessCommand();\n\tprogram.action(() => {\n\t\tconst task = program.args.join(\" \");"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-headless\\lib\\index.js",
+      "first_line": 127,
+      "last_line": 145,
+      "quote": "async function run(ctx, task, io) {\n\tawait ctx.get(\"loader\")?.await();\n\tconst agents = ctx.get(\"agents\");\n\tconst defaultModel = ctx.get(\"agentDefaultModel\");\n\tconst sessions = ctx.get(\"sessions\");\n\tif (agents === void 0 || defaultModel === void 0 || sessions === void 0) return;\n\tconst selection = defaultModel.currentSelection();\n\tconst { agent } = await agents.create({\n\t\tsessionId: brandString(`session-${randomUUID()}`),\n\t\tmeta: { cwd: process.cwd() },\n\t\tagentOptions: {\n\t\t\tprovider: selection.provider,\n\t\t\tmodel: selection.model\n\t\t},\n\t\tsetup: (agentCtx) => {\n\t\t\tinstallModelSelection(agentCtx, {\n\t\t\t\tcurrent: selection,\n\t\t\t\tassembled: void 0\n\t\t\t});"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-agent-loop\\lib\\index.js",
+      "first_line": 927,
+      "last_line": 981,
+      "quote": "\t\t} catch (error) {\n\t\t\tthis.throwError(error);\n\t\t}\n\t\tphase.turn = turn;\n\t\tlet turnEnds = null;\n\t\tlet target = \"next-turn\";\n\t\ttry {\n\t\t\twhile (true) {\n\t\t\t\tsignal.throwIfAborted();\n\t\t\t\tconst step = phase.step + 1;\n\t\t\t\tconst decision = await this.preStep(target, {\n\t\t\t\t\tturn,\n\t\t\t\t\tstep\n\t\t\t\t});\n\t\t\t\tif (decision.kind === \"reject\") {\n\t\t\t\t\tturnEnds = { kind: \"blocked\" };\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t\tif (turnEnds && decision.messages.length === 0) break;\n\t\t\t\tif (phase.step === 0 && decision.messages.length === 0) {\n\t\t\t\t\tturnEnds = { kind: \"completed\" };\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t\tsignal.throwIfAborted();\n\t\t\t\tthis.session.append(\"step/start\", {\n\t\t\t\t\tturn,\n\t\t\t\t\tstep\n\t\t\t\t});\n\t\t\t\tphase.step = step;\n\t\t\t\ttry {\n\t\t\t\t\tconst stepEnd = await this.step(decision);\n\t\t\t\t\tif (turnEnds === null || turnEnds.kind !== \"max-tokens\") turnEnds = stepEnd;\n\t\t\t\t} finally {\n\t\t\t\t\tthis.session.append(\"step/end\", {\n\t\t\t\t\t\tturn,\n\t\t\t\t\t\tstep\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tsignal.throwIfAborted();\n\t\t\t\tif (turnEnds && this.inbox.nextStep.length === 0) {\n\t\t\t\t\tawait this.dispatch.serial(\"agent/turn-stopping\", {\n\t\t\t\t\t\tturn,\n\t\t\t\t\t\tsignal\n\t\t\t\t\t});\n\t\t\t\t\tsignal.throwIfAborted();\n\t\t\t\t}\n\t\t\t\tif (turnEnds && this.inbox.nextStep.length === 0) break;\n\t\t\t\ttarget = \"next-step\";\n\t\t\t}\n\t\t} catch (error) {\n\t\t\tif (signal.aborted) {\n\t\t\t\tturnEnds = {\n\t\t\t\t\tkind: \"aborted\",\n\t\t\t\t\treason: signal.reason\n\t\t\t\t};"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-agent-loop\\lib\\index.js",
+      "first_line": 1115,
+      "last_line": 1119,
+      "quote": "\t\t\t\tif (finish.kind === \"max-tokens\") return { kind: \"max-tokens\" };\n\t\t\t\tconst toolCalls = message.content.filter((block) => block.type === \"tool-call\");\n\t\t\t\tif (toolCalls.length === 0) return { kind: \"completed\" };\n\t\t\t\tconst { concluded } = await executeToolCalls(this.loopCtx, turn, step, toolCalls, signal, (context) => this.inbox.splice(\"next-step\", this.inbox.nextStep.length, 0, [context]));\n\t\t\t\treturn concluded ? { kind: \"completed\" } : null;"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-agent-loop\\lib\\index.js",
+      "first_line": 1490,
+      "last_line": 1503,
+      "quote": "\tstatic Config = z.object({\n\t\tmaxParallelToolCalls: z.number().step(1).min(1).default(10),\n\t\tagents: z.array(z.object({\n\t\t\tid: z.string().required(),\n\t\t\tsessionId: z.string().min(1),\n\t\t\tprovider: z.string(),\n\t\t\tmodel: z.string(),\n\t\t\treasoningEffort: z.string().min(1),\n\t\t\tmaxTokens: z.number().step(1).min(1).max(Number.MAX_SAFE_INTEGER),\n\t\t\tcwd: z.string(),\n\t\t\tresumeSessionId: z.string()\n\t\t})).default([])\n\t});\n\t/** Validated configuration owned by the agent-loop service. */"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-tools\\lib\\types\\index.d.ts",
+      "first_line": 449,
+      "last_line": 470,
+      "quote": "/** Plugin config: how the registered tools are presented to the model. */\nexport interface Config {\n    /**\n     * Model presentation. `native` (default) sends every visible schema; `ptc`\n     * sends only `run_code` plus a generated SDK prompt and collapses the\n     * executor to the same surface (a model-direct call may only name\n     * `run_code`; `run_code` SDK sub-dispatches keep every visible tool); `both`\n     * sends both forms. PTC mode requires a `ctx.codeRuntime` whose `language`\n     * has a registered SDK renderer (TypeScript or Python) and fail prompt\n     * assembly when it is absent or has no renderer. Under `ptc`, native names\n     * in `toolOrder` are invalid.\n     */\n    mode?: ToolPresentationMode;\n    /**\n     * Concurrency cap for a `run_code` program's overlapping sub-calls\n     * (default 10, the loop scheduler's own default). Sub-calls follow the\n     * native scheduling contract — only calls whose tools classify\n     * concurrency-safe overlap; exclusive calls form barriers — so `1`\n     * restores strictly serial dispatch. Must be a positive integer.\n     */\n    maxParallelSubCalls?: number;\n}"
+    },
+    {
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\node_modules\\@deepseek-ai\\dsh\\node_modules\\@deepseek-ai\\dsh-base\\cordis.patch.yml",
+      "first_line": 73,
+      "last_line": 79,
+      "quote": "    # The transport-independent default for Agents created by entry points.\n    # Settings may supply a saved selection; consumers read it at creation time.\n    - id: agent-default-model\n      name: '@deepseek-ai/dsh-agent-default-model'\n      config:\n        provider: deepseek-official\n        model: deepseek-flash"
+    }
+  ],
+  "submitted": false,
+  "request_count": 0,
+  "returned_model": null,
+  "usage": null,
+  "cost": null,
+  "review_exit_code": null,
+  "preflight": "BLOCKED",
+  "fc_e": "OPEN",
+  "signature": "unsigned"
+}

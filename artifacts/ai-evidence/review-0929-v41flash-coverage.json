@@ -1,0 +1,229 @@
+{
+  "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "review_status": "NOT_RUN",
+  "response_present": false,
+  "required": [
+    {
+      "id": "inv1",
+      "question": "Provider switch shares task budget and accumulated consumption",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "inv2",
+      "question": "Unknown cost hold is never automatically released by fallback",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "inv3",
+      "question": "Every actual external request is covered by attempt accounting",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "inv4",
+      "question": "Worker losing lease cannot submit even a successful result",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "inv5",
+      "question": "All candidates unavailable leads to bounded exit, never chain restart",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "repair1",
+      "question": "Unknown effect with known cost remains quarantined across restart/worker/handoff",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "repair2",
+      "question": "Exact TTL expiry obtains fresh token through actual Worker route",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "repair3",
+      "question": "Recovery excludes old faults; equal-time new appended faults remain effective",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "repair4",
+      "question": "5xx and transport unknown override Chinese/English/code rejection bodies",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "repair5",
+      "question": "FaultObservation cost_state reads this reservation, not global aggregate",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "fencing",
+      "question": "Same-owner old token, expiry boundary, transaction/rowcount, crash and restart interleaving",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "old_h2",
+      "question": "Old R1 high label is unproven unless supported by concrete interleaving and valid source",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "old_h3",
+      "question": "Old equal-time concern versus sequence/watermark evidence, no inference from invalid f4",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "budget_ab",
+      "question": "Pending collision versus capacity, cumulative holds, late reconciliation, lower usage",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "false_green1",
+      "question": "Assertions swallowed by production catch",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "false_green2",
+      "question": "Mock replacing production Worker/adapter/route",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "false_green3",
+      "question": "Budget-only assertions without request-count/persistent-task checks",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "false_green4",
+      "question": "Weakened predicates, deleted/skipped tests or decorators",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "false_green5",
+      "question": "Field presence asserted without cost/usage/switched_to semantics",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "false_green6",
+      "question": "Mutation remains green or restore not byte-identical",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "limitations",
+      "question": "Missing source, untested live paths, historical evidence versus new execution",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:insufficient_evidence:aggregate",
+      "question": "State insufficient_evidence x event aggregate: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:insufficient_evidence:cooldown_expired",
+      "question": "State insufficient_evidence x event cooldown_expired: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:insufficient_evidence:probe_success",
+      "question": "State insufficient_evidence x event probe_success: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:insufficient_evidence:probe_failure",
+      "question": "State insufficient_evidence x event probe_failure: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:normal:aggregate",
+      "question": "State normal x event aggregate: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:normal:cooldown_expired",
+      "question": "State normal x event cooldown_expired: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:normal:probe_success",
+      "question": "State normal x event probe_success: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:normal:probe_failure",
+      "question": "State normal x event probe_failure: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:suspended:aggregate",
+      "question": "State suspended x event aggregate: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:suspended:cooldown_expired",
+      "question": "State suspended x event cooldown_expired: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:suspended:probe_success",
+      "question": "State suspended x event probe_success: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:suspended:probe_failure",
+      "question": "State suspended x event probe_failure: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:probing_recovery:aggregate",
+      "question": "State probing_recovery x event aggregate: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:probing_recovery:cooldown_expired",
+      "question": "State probing_recovery x event cooldown_expired: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:probing_recovery:probe_success",
+      "question": "State probing_recovery x event probe_success: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "matrix:probing_recovery:probe_failure",
+      "question": "State probing_recovery x event probe_failure: guard, target, action, ignored/invalid cases",
+      "model_item_ids": [],
+      "status": "NOT_RUN"
+    }
+  ]
+}

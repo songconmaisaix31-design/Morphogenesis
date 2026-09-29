@@ -30,3 +30,11 @@
 - [H1/H3包](FC_HUMAN_REVIEW_0929.md) 已备C552预算A/B逐字代码、矩阵/fencing/三处TODO位置/六点和待验证风险，仍unsigned；Schema仍1.0.0 optional+nullable candidate、未采集。
 
 五项 `contract_local` 完成；蜂群 `interface_live/task_live`、T6三连冒烟、正式入口/演练、生产merge/tag/冻结/发布仍NOT_RUN。DashScope完整生产executor仍NOT_IMPLEMENTED（真实adapter已测）；unknown hold晚到对账/自动释放、任务自动解锁、混合版本/历史生产状态迁移没有被本轮证明。FC整体BLOCKED，不宣称整体稳定。完整事实与来源见[G最终治理报告](../artifacts/ai-evidence/fc-remediation-governance-0929-report.md)。
+
+## 2026-09-29 正式评审引擎替换状态（G续接，最新）
+
+用户本轮指定 **dsh + DeepSeek V4.1 Flash**，新授权不受旧R1请求额度限制；旧R1原响应/报告/REJECTED保留。安装目录解析为 `deepseek-official / deepseek-flash`，不同于V4 Flash；原FC配置为DashScope R1，标准原生认证来源未取得指定路由凭据。因此替换评审**NOT_RUN、认证BLOCKED、FC-E OPEN**，request_count=0，实际模型/usage/cost=null，无SDK替代或全局修改。
+
+完整C552编号输入/37项覆盖矩阵已备，机械输入exit0；无响应验收exit2，旧R1样本对照exit1仍2PASS/2INVALID。主控已澄清一轮原生invocation/最长10分钟/零自动重试/有限输出；缺原生请求数参数只记能力限制，不另设审批或exactly-one-HTTP门禁。详细来源与真实未执行项见[新模型报告](../artifacts/ai-evidence/review-0929-v41flash-report.md)及[两轨计划](FC_RELEASE_PLAN_0929.md)。
+
+五项本地修复和I/D旧证据状态不变，本轮未重跑六门禁或D测试；H1/H3 unsigned，T6 merge/tag/三连冒烟、T9/T10/T11/业务live NOT_RUN，整体BLOCKED未冻结。

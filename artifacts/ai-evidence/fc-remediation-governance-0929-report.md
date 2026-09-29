@@ -118,3 +118,13 @@ H1 21/21 引文只作 AI 备料，预算 A/B、四态矩阵、fencing、TODO 新
 本次仅补 TASKS 本轮预算附录、H1 备料说明、本段、final-check 材料校验与桌面回执。用 `git show c552250c0d07f5f70f09eb0a5ab3c322195e34ec:<path>` 核当前行号，明确“C552代码核对结论（AI备料，不是H1签字）”：A 在新 request_id 及额度/attempt/burn 等允许时不因同任务 pending 冲突死锁（budget:179–181、248–249；worker_loop:757–758）；B 同一 unknown hold 无双计（budget:83、192–203、248–249），不排除上游实际超支。附录同时说明无晚到 unknown 转换（budget:268–272）、任务终结后的长期占额（worker_loop:795–803、994–998）、普通结算 lower usage 不返还承诺额（budget:295–301），并区分确认拒绝的 unknown 费用 hold 与 unknown_effect 故意持久隔离。H1 人工判断/签名及源 TODO 未改，用户对五不变量交叉核对仍待完成。
 
 本次只核文档引用、授权范围和 diff，结果追加在 [final-check](fc-remediation-governance-0929-final-check.json) 的 `budget_ab_document_repair`；原材料校验记录保留。I 在 C552 的 focused408/full862/strict87/build/SDK/分发与 D `9a6705c7aeae9c812329c015f13e440842beff17` 的 47/9mutation 仅沿用既有证据，未重跑；没有追加模型调用或可选测试/分析。正式 deepseek 仍为唯一调用，2 fact PASS / 2 INVALID / 4 hypothesis，FC-E REJECTED；H1/H3 unsigned、FC BLOCKED 未冻结、T6 禁止执行状态不变。此前 `cb102af1ac85716176ba0a3cac603c3e7be373aa` 保留为本次父提交，最终新材料 SHA/remote/clean 以交付及桌面末尾回执为准。
+
+## 2026-09-29 G续接：dsh / V4.1 Flash 替换预检回执
+
+本轮起点`403909204c8b589d33943298e1cde0a2094bb15e`，唯一受评代码仍C552。用户已新授权dsh指定模型正式评审，不沿用旧R1额度限制；以上旧R1原文、INVALID、REJECTED与失败证据原样保存。
+
+已使用安装内dsh 0.1.5-rc.3 / MIT及其原生配置/认证代码核实`DeepSeek-V41-Flash = deepseek-official / deepseek-flash`。原FC配置仍为DashScope R1，两个许可home及当前cwd标准认证文件与Process/User/Machine同名变量未提供官方路由凭据；真实阻塞是认证，未发模型请求。主控`msg_a077597131fd`明确一轮原生invocation/最多10分钟/零自动重试/有限输出，CLI无max-step/request只记能力限制，不新增硬一次HTTP门禁。
+
+[具体交接及完整覆盖矩阵](review-0929-v41flash-report.md)、[预检证据](review-0929-v41flash-preflight.json)、[输入校验](review-0929-v41flash-input-check.json)已落盘：完整两段核心diff、22组原编号块和12份完整C552上下文，532215 bytes，tokens null，37维要求包括16格四态矩阵。模型原输出不存在，request_count=0、returned_model/usage/cost/review_exit=null；新验收exit2/NOT_RUN、旧条目对照exit1仍2PASS/2INVALID，不用Codex代评或补引用换绿。
+
+本轮只追加TASKS本轮附录、HUMAN非签字槽、REMEDIATION状态、本报告，新增指定review前缀证据和一页发布计划；桌面只追加回执。I六门禁与D测试未重跑，生产/测试/Schema/原TODO/人工槽/AGENTS/SWARM/锁未改，主线/tag未动。H1/H3 unsigned，正式替换未完成，FC-E OPEN、FC BLOCKED；合并/tag/三连冒烟/入口演练与业务live仍NOT_RUN。最终材料校验见[final-check](review-0929-v41flash-final-check.json)，分支/remote exact/clean以最终交付回执为准，worker按failed而非假成功结算。

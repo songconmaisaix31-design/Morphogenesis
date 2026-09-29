@@ -502,3 +502,15 @@ Request cancelled，随后同 Owner/Dispatch 接续；先修 token fencing 与�
 **H1 人工边界：** 上述为 AI 代码核对结论；预算 A/B 人工判断、五不变量交叉复核与签名仍由用户完成，所有人工结论槽和签字槽保持空白。四态矩阵、fencing、三处 TODO 新行号 202/592/672、六点及模型待验证风险仍见人工复核包；不改变 FC-E REJECTED 或 T6 禁止执行的状态。
 
 **H3 与 NOT_RUN：** Schema 与原已验收318dd的 blob相同，仍 optional+nullable **1.0.0 candidate / 未采集 / unsigned**，不补0、不冻结。T6 merge/tag/三连冒烟（缺可接受FC-E+H1签字）、T9依赖H3的采集接线、T10演练、T11课题入口条件、长期/业务live/生产发布均 NOT_RUN。DashScope 完整生产 executor NOT_IMPLEMENTED，只有 adapter 层实测；晚到对账/自动解锁/未知hold释放/混合版本部署未实现或未验。第一代应用 `morph-readonly-app-0929@621f588988899bdbc7c7a83e893369c4145d89b3` 仍独立，不称全项目主线统一。FC 整体 **BLOCKED、未冻结**。
+
+## 2026-09-29 dsh / V4.1 Flash 正式 FC-E 替换附录（G；最新）
+
+用户明确“不用 deepseek-r1，用 dsh 加 deepseekV4.1flash”，本轮新授权覆盖旧 R1 额度限制；旧响应/引用/REJECTED 原封不动。唯一受评代码仍 `c552250c0d07f5f70f09eb0a5ab3c322195e34ec`，源树只读。两轨职责见 [发布前置一页计划](docs/FC_RELEASE_PLAN_0929.md)：G 正式评审/人审材料，E 独立只读 release-preflight，互斥文件，主控调度验收。
+
+实际预检：dsh 0.1.5-rc.3 官方安装目录将 `DeepSeek-V41-Flash` 解析为 `deepseek-official / deepseek-flash`；原 FC launcher/patch/composed 是 `dashscope-fc / deepseek-r1`。按原生实现核对 Process/User/Machine 环境及两个许可 home 的标准认证文件、当前 cwd/.env，未取得指定路由凭据；没有猜 URL、重用 DashScope key 到新 endpoint、改全局或换 SDK。**认证 BLOCKED / 本轮 review NOT_RUN / FC-E OPEN**，请求0、returned_model/usage/cost/review_exit 均 null。
+
+主控 `msg_a077597131fd` 明确允许一轮原生 dsh invocation、retry=0、有限输出、禁非必要工具/title/compaction、最多10分钟；没有原生 max-step/request 参数仅属 CLI 限制，不新增 exactly-one-HTTP 门禁或重复审批。超时效果 unknown 不重试，请求数未能观测时写 unknown。输入实际532215 bytes，精确 tokens null，尚未提交，原生大输入绑定/返回模型证据需运行前核实。
+
+[新模型交接报告](artifacts/ai-evidence/review-0929-v41flash-report.md) 保留完整两段核心 diff、22组旧编号块、12份完整C552上下文与37项覆盖要求（含16格四态矩阵）。输入机械exit0；无新模型输出的校验exit2/NOT_RUN；旧R1样本对照exit1仍2PASS/2INVALID，不改旧引用换绿。旧h2高危假设仍未证实，5xx unknown优先仍为用户约束；五项真实路径/五不变量/假绿清单本轮模型覆盖全部NOT_RUN。
+
+H1预算A/B与breaker六点/五不变量签字、H3 Schema optional+nullable 1.0.0 candidate的采集/准入/冻结仍待用户，签字槽不变。本轮未重跑I六门禁或D测试；生产代码/测试/Schema/TODO/AGENTS/SWARM/锁未变。T6 merge/tag/三连冒烟、T9/T10/T11入口演练、业务interface_live/task_live仍NOT_RUN，FC BLOCKED未冻结。本次材料commit+push不表示正式审查或发布锁完成。

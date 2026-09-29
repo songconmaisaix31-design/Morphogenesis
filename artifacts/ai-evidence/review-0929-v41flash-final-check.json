@@ -1,0 +1,163 @@
+{
+  "base": "403909204c8b589d33943298e1cde0a2094bb15e",
+  "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "status": "PASS_MATERIALS_ONLY",
+  "exit_code": 0,
+  "changed_paths": [
+    "TASKS.md",
+    "artifacts/ai-evidence/fc-remediation-governance-0929-report.md",
+    "artifacts/ai-evidence/review-0929-v41flash-check-materials.py",
+    "artifacts/ai-evidence/review-0929-v41flash-coverage.json",
+    "artifacts/ai-evidence/review-0929-v41flash-final-check.json",
+    "artifacts/ai-evidence/review-0929-v41flash-input-check.json",
+    "artifacts/ai-evidence/review-0929-v41flash-input.json",
+    "artifacts/ai-evidence/review-0929-v41flash-legacy-control.json",
+    "artifacts/ai-evidence/review-0929-v41flash-preflight.json",
+    "artifacts/ai-evidence/review-0929-v41flash-preflight.ps1",
+    "artifacts/ai-evidence/review-0929-v41flash-prepare.py",
+    "artifacts/ai-evidence/review-0929-v41flash-report.md",
+    "artifacts/ai-evidence/review-0929-v41flash-verification.json",
+    "artifacts/ai-evidence/review-0929-v41flash-verify.py",
+    "docs/FC_HUMAN_REVIEW_0929.md",
+    "docs/FC_RELEASE_PLAN_0929.md",
+    "docs/FC_REMEDIATION_0929.md"
+  ],
+  "old_document_prefixes": [
+    {
+      "path": "TASKS.md",
+      "old_git_blob_bytes": 50022,
+      "result": "PASS",
+      "comparison": "full prefix; only Git checkout CRLF/LF normalized"
+    },
+    {
+      "path": "docs/FC_HUMAN_REVIEW_0929.md",
+      "old_git_blob_bytes": 10710,
+      "result": "PASS",
+      "comparison": "full prefix; only Git checkout CRLF/LF normalized"
+    },
+    {
+      "path": "docs/FC_REMEDIATION_0929.md",
+      "old_git_blob_bytes": 6741,
+      "result": "PASS",
+      "comparison": "full prefix; only Git checkout CRLF/LF normalized"
+    },
+    {
+      "path": "artifacts/ai-evidence/fc-remediation-governance-0929-report.md",
+      "old_git_blob_bytes": 20178,
+      "result": "PASS",
+      "comparison": "full prefix; only Git checkout CRLF/LF normalized"
+    }
+  ],
+  "unchanged_old_v2_files": [
+    "artifacts/ai-evidence/review-0929-formal-v2-call.cjs",
+    "artifacts/ai-evidence/review-0929-formal-v2-call.json",
+    "artifacts/ai-evidence/review-0929-formal-v2-input-check.json",
+    "artifacts/ai-evidence/review-0929-formal-v2-input.json",
+    "artifacts/ai-evidence/review-0929-formal-v2-input.md",
+    "artifacts/ai-evidence/review-0929-formal-v2-items.json",
+    "artifacts/ai-evidence/review-0929-formal-v2-raw.txt",
+    "artifacts/ai-evidence/review-0929-formal-v2-report.md",
+    "artifacts/ai-evidence/review-0929-formal-v2-response.json",
+    "artifacts/ai-evidence/review-0929-formal-v2-verification.json",
+    "artifacts/ai-evidence/review-0929-formal-v2-verify.py"
+  ],
+  "human_slots": "unchanged in preserved entire old human-review document",
+  "input_bytes": 532215,
+  "required_coverage": 37,
+  "new_review": "NOT_RUN_NO_RESPONSE; exit 2",
+  "legacy_control": "2 PASS / 2 INVALID; exit 1",
+  "request_count": 0,
+  "usage": null,
+  "cost": null,
+  "desktop_previous_bytes_preserved": 15913,
+  "source_candidate_clean": true,
+  "source_tests_six_gates_and_D_rerun": false,
+  "local_links_checked": 21,
+  "links": [
+    {
+      "from": "TASKS.md",
+      "target": "docs/FC_RELEASE_PLAN_0929.md"
+    },
+    {
+      "from": "TASKS.md",
+      "target": "artifacts/ai-evidence/review-0929-v41flash-report.md"
+    },
+    {
+      "from": "artifacts/ai-evidence/fc-remediation-governance-0929-report.md",
+      "target": "review-0929-v41flash-report.md"
+    },
+    {
+      "from": "artifacts/ai-evidence/fc-remediation-governance-0929-report.md",
+      "target": "review-0929-v41flash-preflight.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/fc-remediation-governance-0929-report.md",
+      "target": "review-0929-v41flash-input-check.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/fc-remediation-governance-0929-report.md",
+      "target": "review-0929-v41flash-final-check.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "review-0929-v41flash-preflight.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "review-0929-v41flash-preflight.ps1"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "review-0929-v41flash-input.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "review-0929-v41flash-prepare.py"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "review-0929-v41flash-input-check.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "review-0929-v41flash-coverage.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "review-0929-v41flash-verification.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "review-0929-v41flash-legacy-control.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "review-0929-v41flash-final-check.json"
+    },
+    {
+      "from": "artifacts/ai-evidence/review-0929-v41flash-report.md",
+      "target": "../../docs/FC_RELEASE_PLAN_0929.md"
+    },
+    {
+      "from": "docs/FC_HUMAN_REVIEW_0929.md",
+      "target": "../artifacts/ai-evidence/review-0929-v41flash-report.md"
+    },
+    {
+      "from": "docs/FC_HUMAN_REVIEW_0929.md",
+      "target": "FC_RELEASE_PLAN_0929.md"
+    },
+    {
+      "from": "docs/FC_RELEASE_PLAN_0929.md",
+      "target": "../artifacts/ai-evidence/review-0929-v41flash-report.md"
+    },
+    {
+      "from": "docs/FC_REMEDIATION_0929.md",
+      "target": "../artifacts/ai-evidence/review-0929-v41flash-report.md"
+    },
+    {
+      "from": "docs/FC_REMEDIATION_0929.md",
+      "target": "FC_RELEASE_PLAN_0929.md"
+    }
+  ],
+  "meaning": "material correctness only; FC-E OPEN, H1/H3 unsigned, FC BLOCKED"
+}
