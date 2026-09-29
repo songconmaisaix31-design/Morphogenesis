@@ -116,8 +116,8 @@ def guard_provider(breaker: SharedBreakerLike, provider: str, worker_id: str, *,
 
     Suspended breakers are probed exactly once per evaluation: the atomic
     ``try_claim_probe`` admits at most one worker network-wide. A breaker
-    already in ``probing_recovery`` is routable only for its live slot owner,
-    identified by worker id and fencing token.
+    already in ``probing_recovery`` is routable for its live slot owner or a
+    winner atomically reclaiming an expired slot with a fresh fencing token.
     """
     claims: list[ProbeClaim] = []
     blocked: list[str] = []
@@ -135,7 +135,10 @@ def guard_provider(breaker: SharedBreakerLike, provider: str, worker_id: str, *,
                 claims.append(ProbeClaim(provider, view.reason, claimed.probe_token))
             continue
         if state == "probing_recovery":
-            if breaker.eligible(provider, view.reason, worker_id=worker_id, now=now):
+            claimed = breaker.try_claim_probe(provider, view.reason, worker_id, now=now)
+            if claimed is not None:
+                claims.append(ProbeClaim(provider, view.reason, claimed.probe_token))
+            elif breaker.eligible(provider, view.reason, worker_id=worker_id, now=now):
                 claims.append(ProbeClaim(provider, view.reason, view.probe_token))
             else:
                 blocked.append(view.reason)
