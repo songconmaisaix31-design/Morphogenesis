@@ -5,6 +5,7 @@
 // package (lockfile is owned by T0) and stays fully keyboard accessible.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { deriveSwarm, agentKey, STAGE_LABELS, deriveSwarmView, LEASE_LABELS, RESERVATION_LABELS } from './derive';
+import BenchmarkPanel from '../benchmark/BenchmarkPanel';
 import './swarm.css';
 
 const VIEW_W = 1000;
@@ -108,7 +109,7 @@ function NodeDetail({ view, nodeKey, onClose }) {
   );
 }
 
-function SwarmTopology({ dashboard, active = true, reducedMotion = false, swarm = null }) {
+function SwarmTopology({ dashboard, active = true, reducedMotion = false, swarm = null, benchmark = null }) {
   const view = useMemo(() => deriveSwarm(dashboard), [dashboard]);
   const [selectedKey, setSelectedKey] = useState(null);
   const [hoverKey, setHoverKey] = useState(null);
@@ -182,7 +183,7 @@ function SwarmTopology({ dashboard, active = true, reducedMotion = false, swarm 
     reducedMotion ? 'swarm-reduced' : '',
   ].filter(Boolean).join(' ');
 
-  if (hasSwarm) return <SwarmFacts swarm={swarm} active={active} reducedMotion={reducedMotion} />;
+  if (hasSwarm) return <SwarmFacts swarm={swarm} benchmark={benchmark} active={active} reducedMotion={reducedMotion} />;
 
   if (view.state === 'disconnected') {
     return <section className={shellClass} aria-label='Agent Swarm 拓扑'><p className='swarm-state swarm-state-error' role='alert'>{view.message}</p></section>;
@@ -313,7 +314,7 @@ function swarmEdgePath(a, b) {
   return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
 }
 
-function SwarmFacts({ swarm, active = true, reducedMotion = false }) {
+function SwarmFacts({ swarm, benchmark = null, active = true, reducedMotion = false }) {
   const view = useMemo(() => deriveSwarmView(swarm), [swarm]);
   const [selected, setSelected] = useState(null);
 
@@ -493,6 +494,8 @@ function SwarmFacts({ swarm, active = true, reducedMotion = false }) {
           </ul>
         </section>
       </div>
+
+      <BenchmarkPanel benchmark={benchmark} />
 
       <footer className='swarm-foot'>
         <span>去中心化蜂群 · 严格只读 · {view.hubStatus}</span>

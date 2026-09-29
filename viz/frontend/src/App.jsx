@@ -5,13 +5,14 @@ import GrowthIntro from './intro/GrowthIntro';
 import Backend from './backend/Backend';
 import { useReducedMotion } from './components/hooks';
 
-const POLL_MS = 1000;
+const POLL_MS = 120000;
 const viewFromHash = () => ['workspace', 'swarm'].includes(window.location.hash.replace(/^#\/?/, '')) ? 'workspace' : 'physarum';
 
 const App = () => {
   const [view, setViewState] = useState(viewFromHash);
   const [dashboard, setDashboard] = useState(null);
   const [swarm, setSwarm] = useState(null);
+  const [benchmark, setBenchmark] = useState(null);
   const [connection, setConnection] = useState({ state: 'loading', detail: '' });
   const [phase, setPhase] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 3 : 0);
   const [evomap, setEvomap] = useState({ state: 'idle' });
@@ -83,6 +84,26 @@ const App = () => {
         if (!stopped) setSwarm(data);
       } catch (error) {
         // Keep the last good swarm snapshot; the rehearsal topology stays.
+      }
+      if (!stopped) timer = window.setTimeout(poll, POLL_MS);
+    };
+    poll();
+    return () => { stopped = true; window.clearTimeout(timer); };
+  }, []);
+
+  // Read-only persisted benchmark summary. Failures keep the last good
+  // snapshot; an unconfigured result stays empty rather than blanking the page.
+  useEffect(() => {
+    let stopped = false;
+    let timer = 0;
+    const poll = async () => {
+      try {
+        const response = await fetch('/api/benchmark', { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (!stopped) setBenchmark(data);
+      } catch (error) {
+        // Keep the last good benchmark snapshot.
       }
       if (!stopped) timer = window.setTimeout(poll, POLL_MS);
     };
@@ -255,7 +276,7 @@ const App = () => {
         </section>
         <section className={viewClass('workspace')} aria-label='产品后台'
           aria-hidden={view !== 'workspace'} inert={view === 'workspace' ? undefined : ''}>
-          <Backend dashboard={dashboard} swarm={swarm} active={view === 'workspace'} reducedMotion={reducedMotion}
+          <Backend dashboard={dashboard} swarm={swarm} benchmark={benchmark} active={view === 'workspace'} reducedMotion={reducedMotion}
             evomap={evomap} evomapDetail={evomapDetail} onSearch={searchEvomap}
             onOpenAsset={openEvomapAsset} onReturn={() => setView('physarum')} />
         </section>

@@ -17,6 +17,7 @@ from urllib.parse import parse_qs, urlsplit
 from viz.adapter import DashboardData, DashboardInputError, empty_dashboard, load_dashboard, load_rehearsal, load_runtime_export
 from viz.evomap_models import ASSET_VIEW_SCHEMA
 from viz.evomap_service import EvomapAssetError, EvomapQueryError, EvomapService, dumps_asset_view, dumps_report
+from viz.benchmark_adapter import empty_benchmark, load_benchmark
 from viz.swarm_adapter import empty_swarm, load_swarm
 
 
@@ -54,12 +55,14 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         echarts_asset: Path,
         evomap_service: EvomapService,
         swarm_loader: Callable[[], dict[str, Any]] | None = None,
+        benchmark_loader: Callable[[], dict[str, Any]] | None = None,
         **kwargs: Any,
     ) -> None:
         self.dashboard_loader = dashboard_loader
         self.echarts_asset = echarts_asset
         self.evomap_service = evomap_service
         self.swarm_loader = swarm_loader
+        self.benchmark_loader = benchmark_loader
         super().__init__(request, client_address, server, directory=directory, **kwargs)
 
     def parse_request(self) -> bool:
@@ -109,7 +112,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
     def do_HEAD(self) -> None:  # noqa: N802
         route = urlsplit(self.path).path
-        if route in {"/api/dashboard", "/api/evomap", "/api/evomap/asset", "/api/swarm", "/vendor/echarts.min.js"}:
+        if route in {"/api/dashboard", "/api/evomap", "/api/evomap/asset", "/api/swarm", "/api/benchmark", "/vendor/echarts.min.js"}:
             self.do_GET()
             return
         super().do_HEAD()
@@ -143,6 +146,13 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             # Strictly read-only swarm view; no query parameters, request body,
             # or filesystem path are interpreted here.
             loader = self.swarm_loader or empty_swarm
+            body = json.dumps(loader(), ensure_ascii=False).encode("utf-8")
+            self._json_response(200, body)
+            return
+        if route.path == "/api/benchmark":
+            # Strictly read-only persisted benchmark summary; no query
+            # parameters, request body, or filesystem path are interpreted here.
+            loader = self.benchmark_loader or empty_benchmark
             body = json.dumps(loader(), ensure_ascii=False).encode("utf-8")
             self._json_response(200, body)
             return
@@ -204,6 +214,7 @@ def main() -> None:
     parser.add_argument("--replay", action="store_true", help="Read the named rehearsal evidence as a downgraded replay")
     parser.add_argument("--evomap-store", type=Path, help="Read-only local Gene pool from the runtime SQLite store (e.g. metadata.db)")
     parser.add_argument("--swarm-state", type=Path, help="Read-only decentralized swarm state directory (tasks/field/budget SQLite, workers/audit JSON)")
+    parser.add_argument("--benchmark", type=Path, help="Read-only persisted benchmark summary JSON (aggregate only, no questions/answers)")
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("port must be between 1 and 65535")
@@ -232,11 +243,16 @@ def main() -> None:
         # Bind the path now; the observer itself fails closed per request.
         swarm_state = args.swarm_state
         swarm_loader = lambda: load_swarm(swarm_state)
+    benchmark_loader: Callable[[], dict[str, Any]] = empty_benchmark
+    if args.benchmark is not None:
+        benchmark_path = args.benchmark
+        benchmark_loader = lambda: load_benchmark(benchmark_path)
     handler = partial(
         DashboardHandler, directory=str(root / "viz" / "static"),
         dashboard_loader=load_data, echarts_asset=asset,
         evomap_service=EvomapService(store_path=args.evomap_store),
         swarm_loader=swarm_loader,
+        benchmark_loader=benchmark_loader,
     )
     server = ThreadingHTTPServer((args.host, args.port), handler)
     print(f"Morphogenesis T5 dashboard: http://{args.host}:{args.port}")
