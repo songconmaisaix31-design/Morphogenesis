@@ -28,7 +28,7 @@ def _gateway_worker(tmp_path, response_factory):
         directory=tmp_path / "data",
         api=EvoMapConfig(credential_file=tmp_path / "unused-mock-key"),
         budget={"max_cost_usd": 2, "unbounded_reservation_usd": 0.2,
-                "limits": {"max_attempts": 20, "max_attempts_per_task": 1,
+                "limits": {"max_tasks": 6, "max_attempts": 6, "max_attempts_per_task": 1,
                            "max_derived_tasks": 0, "max_runtime_seconds": 300}},
     )
     seed_evomap(config)
