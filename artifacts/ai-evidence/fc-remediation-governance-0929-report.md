@@ -43,3 +43,17 @@ Owner 为 codex；本文件不是 deepseek-r1 评审。治理分支 `morph-fc-go
 - TASKS、CLOSEOUT、本轮 remediation 状态与桌面 0929 章节在证据收齐后封存；保留历史失败和桌面 0928 原文件。
 
 阶段一验证：`git diff --check` exit 0；指定既有 integration-0927 venv 的 `python.exe -B` 对引用脚本执行六个机械控制（正确行、尾随空格错误、错行、短 SHA、越界行、hypothesis），6/6 符合预期、exit 0。控制仅绑定 C 基线的 QWEN 首行，不是正式评审或共同候选测试。阶段一仅新增本报告、H1/H3 包、短引用脚本。
+
+## 阶段二：共同 SHA 备料（尚未发出模型请求）
+
+阶段一提交 `bfbc0845b538661ab2a3fd3375a4713defb3c7ac` 已 push，远端同 SHA、当时 clean。主控随后明确共同代码候选 `c552250c0d07f5f70f09eb0a5ab3c322195e34ec`，分支 `morph-fc-candidate-0929`；本轨 `git ls-remote` 核对一致。其父为 B 合并 `5cf2612c04a34dfb17af12af817ebee8c08432dc` 与 C `e6ac45ffefc171a7215f8db19bc4a28af24ec4fc`。本轨未合入生产增量。
+
+主控消息 `msg_c3507f7bbc6d` 将既有授权具体化为最多 **1 次模型 API 请求**、maxRetries=0、输出≤16384、不启 agent 工具循环/自动第二轮；可复用现有成熟 SDK 与原模型/凭据/endpoint。`msg_d86174518fd5` / `msg_ae59dec7c8bc` 明确必须等主控六门禁全绿通知才能提交，故不是收到 SHA 即调用。
+
+- [单次脚本](review-0929-formal-v2-call.cjs) 复用 dsh 已安装的 **OpenAI SDK 6.40.0 / Apache-2.0** 与 YAML 解析器；从原 patch 校验 provider/model/endpoint/maxRetries。仅在正式发送时读原 launcher 所用凭据路径，绝不输出值。一次 SDK chat completion，省略 tools，maxRetries=0、max_tokens=16384、timeout=600000；拒绝 redirect 与第二次 fetch。调用前以排他创建保存原始意图证据，失败/未知效果停止，不自动重试。不是新调度或 Attempt 系统。
+- 原 dsh help 未提供已核实的单次无工具模式；复用 SDK 是主控明确允许的同 provider 适配，不是 Codex 代评或切换模型。dry-run 的 `submitted=false` 是本地控制事实，费用仍 unknown，usage 未采集。
+- [官方 Model Studio 模型页](https://help.aliyun.com/en/model-studio/deepseek-r1) 检索显示 context=131072、max input=98304、max output=16384；原 profile 能力声明一致。输入限制采用更保守的 **95000 UTF-8 bytes**；本地未安装精确 tokenizer，tokens 不冒充已测。
+- [精确输入包](review-0929-formal-v2-input.md) 本地实际 **94486 bytes**（包括 CRLF），含 `73e64cc..C552` 完整 swarm/orchestration 生产增量 diff 和逐行标注的 budget/Worker/breaker/task_ledger/failure_chain/fault_observations 片段。其余纳入/排除路径在输入包中逐项列明。原 `348cf8d..73e64cc` 核心 diff 单独为 **110195 bytes**，连同必要代码无法装入该保守包；完整旧 diff、完整测试、lease keeper 与 executor/transport 内部等未入模型，**coverage=PARTIAL**，即使收到报告也不能宣称整个原 FC 范围无高危/解除 FC-E 锁。
+- `node --check review-0929-formal-v2-call.cjs` 与无发送参数的 `node review-0929-formal-v2-call.cjs` 均 exit 0；未读凭据、未发网络请求。H1 21/21 exact-blob 引用 PASS（指定 Python，exit 0）；Schema 与原已验收 318dd 的 blob 同为 `ecf43b4f705bc8733af90751bbae6c9f0cf6fb29`。H1/H3 仍 unsigned。
+
+桌面保留基准：0929 文件原长 **8277 bytes**，原 SHA256 `D6B2195FA9B8F3635AFC96AF0E691CB7F0138A0F51F05B08EA5EC9F674A2DF52`；0928 原文件 `Morphogenesis_项目改动整合_2026-09-28.md` SHA256 `FBD02354C818A9770E6E4329B75CCA738658604B677D6BA959D77B614B2C36DF`。最终只追加/维护 0929 本轮章节，核对原前缀与 0928 原字节未变。

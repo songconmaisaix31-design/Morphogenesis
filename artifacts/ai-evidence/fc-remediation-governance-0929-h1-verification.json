@@ -1,0 +1,89 @@
+{
+  "scope": "quote equality only; inference not verified",
+  "results": [
+    {
+      "index": 0,
+      "verification": "PASS"
+    },
+    {
+      "index": 1,
+      "verification": "PASS"
+    },
+    {
+      "index": 2,
+      "verification": "PASS"
+    },
+    {
+      "index": 3,
+      "verification": "PASS"
+    },
+    {
+      "index": 4,
+      "verification": "PASS"
+    },
+    {
+      "index": 5,
+      "verification": "PASS"
+    },
+    {
+      "index": 6,
+      "verification": "PASS"
+    },
+    {
+      "index": 7,
+      "verification": "PASS"
+    },
+    {
+      "index": 8,
+      "verification": "PASS"
+    },
+    {
+      "index": 9,
+      "verification": "PASS"
+    },
+    {
+      "index": 10,
+      "verification": "PASS"
+    },
+    {
+      "index": 11,
+      "verification": "PASS"
+    },
+    {
+      "index": 12,
+      "verification": "PASS"
+    },
+    {
+      "index": 13,
+      "verification": "PASS"
+    },
+    {
+      "index": 14,
+      "verification": "PASS"
+    },
+    {
+      "index": 15,
+      "verification": "PASS"
+    },
+    {
+      "index": 16,
+      "verification": "PASS"
+    },
+    {
+      "index": 17,
+      "verification": "PASS"
+    },
+    {
+      "index": 18,
+      "verification": "PASS"
+    },
+    {
+      "index": 19,
+      "verification": "PASS"
+    },
+    {
+      "index": 20,
+      "verification": "PASS"
+    }
+  ]
+}
