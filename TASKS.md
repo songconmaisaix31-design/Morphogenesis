@@ -514,3 +514,14 @@ Request cancelled，随后同 Owner/Dispatch 接续；先修 token fencing 与�
 [新模型交接报告](artifacts/ai-evidence/review-0929-v41flash-report.md) 保留完整两段核心 diff、22组旧编号块、12份完整C552上下文与37项覆盖要求（含16格四态矩阵）。输入机械exit0；无新模型输出的校验exit2/NOT_RUN；旧R1样本对照exit1仍2PASS/2INVALID，不改旧引用换绿。旧h2高危假设仍未证实，5xx unknown优先仍为用户约束；五项真实路径/五不变量/假绿清单本轮模型覆盖全部NOT_RUN。
 
 H1预算A/B与breaker六点/五不变量签字、H3 Schema optional+nullable 1.0.0 candidate的采集/准入/冻结仍待用户，签字槽不变。本轮未重跑I六门禁或D测试；生产代码/测试/Schema/TODO/AGENTS/SWARM/锁未变。T6 merge/tag/三连冒烟、T9/T10/T11入口演练、业务interface_live/task_live仍NOT_RUN，FC BLOCKED未冻结。本次材料commit+push不表示正式审查或发布锁完成。
+
+## 2026-09-29 发布预检与 T10 真实结算附录（G；最新）
+
+本附录只登记本轮新事实，以上历史及原红全部保留。G 沿原树/同名分支从 `669b191bf41d3fa42e2ab34a2c1fa68d53498f49` 窄续接；共同受测代码仍是 `morph-fc-candidate-0929@c552250c0d07f5f70f09eb0a5ab3c322195e34ec`，其 I 六门禁与 D 47 focused / 九组 mutation 证据身份不变、本轮不重跑。G 治理提交不是新代码候选或发布提交。
+
+- **E 已完成且主控验收：** `morph-fc-release-preflight-0929@7347f5c1a7eaf0f5a3279c2db0ffb751a730792c`，父 `c1107b63911e44269b586a1252cb84836cdeacf3`；G 已 `git show` 读取材料并核远端 exact。[精确预检与六阶段 T10 任务单](https://github.com/songconmaisaix31-design/Morphogenesis/blob/7347f5c1a7eaf0f5a3279c2db0ffb751a730792c/docs/FC_RELEASE_PREFLIGHT_0929.md) 记录原快照 FC 目标 `decentralized-swarm@73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`、C552 可快进、无现存 demo-build tag、两次 merge-tree 无文本冲突、11 份旧回放仅 replay、59 树及 refs 当时未发现 T10。E 未运行三连、正式演练或 live；主控 remote TLS 首次失败及只读重试成功并列保留，后者不抹除前者。
+- **T10 已失败结算：** `task_5a07cc5ef0f5 / ctx_f5dfba4a52b3`；主控已核验并 release。原 Orca `--agent qwen` 前置报 `agent_unconfigured`，该失败没有创建 Task/树/终端；随后 Codex 宿主只启动已装原生 Qwen CLI，没有代写产品。`morph-fault-drill-0929` 普通改名到 `feat/fault-drill`，clean，HEAD 仍 C552；没有新实现提交或 push。
+- **原生执行事实：** Qwen `0.24.6` 唯一 CLI 调用 session `45763f00-a28a-4a98-a800-06b82fba27bb`，`2026-09-29T12:39:06.9704879Z` 至 `12:39:13.0913945Z`，exit **1** / `No auth type is selected`；`num_turns=0 / duration_api_ms=0` 只是原生 CLI 元数据，生成模型/provider usage/cost 保持 unknown/null。两个业务文件均未生成；实现、focused、typecheck、完整序列 CLI、`test_stigmergy_avoidance` 与 mutation 全 **NOT_RUN**。[本地宿主报告](C:/Users/DW/orca/workspaces/Morphogenesis/morph-fault-drill-0929/.runtime/fault-drill/report.md) 及原生退出/JSONL 已只读核对，不搬运运行产物入库。
+- **待用户事项：** H1 本人的预算 A/B、breaker 六点及姓名结论，H3 optional+nullable 1.0.0 candidate 冻结/准入拍板，dsh 原生 profile/认证路径均无回复。主控另询问是否允许 T10 从 qwen-code 改派 Codex，亦无回复；没有静默换模型，正式 dsh Flash 要求不变。用户一般“继续”授权隔离开发自验，不是人类签名或正式演练/发布放行。
+
+G 原 dsh 预检仍 **认证 BLOCKED / 正式 review NOT_RUN / FC-E OPEN / 请求 0**；旧 R1 REJECTED 原样保留。本轮仅材料登记，未调用模型、安装或改依赖，未执行 merge/tag/三连/课题/正式演练/live。T6 三锁未齐，H3 未冻结，FC 整体 **BLOCKED、未冻结**。当前分工见 [发布计划最新续接](docs/FC_RELEASE_PLAN_0929.md)，精简证据与本轮材料校验见 [状态回执](artifacts/ai-evidence/fc-release-status-0929.md)。
