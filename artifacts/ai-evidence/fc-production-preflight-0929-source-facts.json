@@ -1,0 +1,109 @@
+{
+  "scope": "literal immutable source/document quotations only, not human signoff",
+  "facts": [
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "swarm/breaker.py",
+      "first_line": 202,
+      "last_line": 202,
+      "quote": "    # TODO-HUMAN-REVIEW: complete four-state transition table.",
+      "git_exit": 0
+    },
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "swarm/breaker.py",
+      "first_line": 592,
+      "last_line": 593,
+      "quote": "            # TODO-HUMAN-REVIEW: multi-worker half-open race — the guarded UPDATE\n            # inside BEGIN IMMEDIATE plus token fencing admits exactly one winner.",
+      "git_exit": 0
+    },
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "swarm/breaker.py",
+      "first_line": 672,
+      "last_line": 674,
+      "quote": "            # TODO-HUMAN-REVIEW: same-owner stale probe — the fenced token is the\n            # caller-claimed one, not the row's current token, so a late outcome\n            # from a reclaimed (superseded) probe can never overwrite the live slot.",
+      "git_exit": 0
+    },
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "docs/FC_HUMAN_REVIEW_0928.md",
+      "first_line": 169,
+      "last_line": 178,
+      "quote": "## 人类签字槽与 T6\n\n- 复核人：待队长填写。\n- 时间：待队长填写。\n- 复核生产 SHA：待队长确认（当前为 73e64cc）。\n- 六项结论/发现与处理：待队长填写。\n- 是否允许将三处 TODO-HUMAN-REVIEW 替换为签名：待队长明确授权，交生产 Owner 操作。\n- T6 的 merge/tag 授权：已获条件授权，三锁未齐不能执行；门禁全绿 + FC-E 无高危 + 人工签字缺一不可。\n\n总控不会替人签字，也不会因预定时间到达而推定批准。",
+      "git_exit": 0
+    },
+    {
+      "commit": "40577cb841e8d89c08e1336d7254c4ca7bb3984e",
+      "path": "docs/FC_HUMAN_REVIEW_0929.md",
+      "first_line": 38,
+      "last_line": 40,
+      "quote": "| reservation 的 cost_state | budget.py:213–225 / worker_loop.py:802（H1-05/11）；本次 reservation 与全局 snapshot 分开 | 待填写 |\n\n预算人工结论槽：复核人/时间/完整候选 SHA **待填写**；A、B 各自“死锁 / 超支 / 两者都不是 / 证据不足”及前提 **待填写**。AI 不代填结论或签字。",
+      "git_exit": 0
+    },
+    {
+      "commit": "40577cb841e8d89c08e1336d7254c4ca7bb3984e",
+      "path": "docs/FC_HUMAN_REVIEW_0929.md",
+      "first_line": 55,
+      "last_line": 66,
+      "quote": "恢复水位：`breaker.py:477–521`（H1-15）先按 recovered_at/recovery_sequence 过滤，`:657–666` 成功时取 checkpoint；`fault_observations.py:104–117、206–218`（H1-18/19）以追加序号区别同一时间戳，保留新样本并排除旧/迟到样本。`breaker.py:127–144`（H1-14）保留 window≥aggregation_interval 的约束。\n\n| 六点 | 共同候选材料要求 | 人工结论 |\n|---|---|---|\n| 转移穷举 | breaker:193–251 / H1-13，以上矩阵与非法输入 | 待签 |\n| suspended 双阈值及欠费例外 | breaker:163–170 / H1-13，计数不是故障率 | 待签 |\n| 竞态与 fencing | breaker:569–695、failure_chain:116–149 / H1-16/17/20 | 待签 |\n| Retry-After | breaker:182–191、209–223 / H1-13 | 待签 |\n| 纯函数与水位 | breaker:193–251、477–521；fault_observations:104–117 / H1-13/15/18 | 待签 |\n| 预算/租约隔离 | budget:164–203、worker_loop:757–825、957–977 / H1-02/04/11/12 | 待签 |\n\nbreaker 人工签名、时间、SHA、六点结论 **待填写**；三处 TODO 保持不变。门禁全绿、可接受 FC-E 无高危报告、H1 真人签字三锁必须分别成立。",
+      "git_exit": 0
+    },
+    {
+      "commit": "be4fb7a685e951c9e42d8dc0c7eeb900cb5518f1",
+      "path": "docs/FC_LOG_SCHEMA_DRAFT_0928.md",
+      "first_line": 17,
+      "last_line": 26,
+      "quote": "\nH3 拍板登记：拍板人：David；日期：2026-09-29；冻结版本：1.0.0。\n依据：“未审计不等于零问题，语义缺失用 null 不伪造 0”。\n本轮只新增 `properties.audit_confirmed_issue_events.nullable: true` 并删除\n`allOf[1].then.required=[\"issue_audit\"]`，保留 `then.properties.issue_audit.const: null`。\nroot required 原已不含计数字段，`schema_version.const` 原已为 `1.0.0`，均未制造额外差异；\n已有 `anyOf` integer/null 保留，`nullable` 不替代 Draft 2020-12 的 null 类型声明。\n原独立脚本 `validate_schema.py` 的 fixtures、预期和断言保持不变；Owner 本轮复跑为 12/12，\n其中 `03_only_count_null` 实际 VALID、6 个预期拒绝负例仍 INVALID，既有控制用例 9/9，\nFaultObservation 14 字段导出一致。本轮复跑不冒充新一轮独立验收，也不代替 H1 或其他 FC 门禁。",
+      "git_exit": 0
+    },
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "orchestration/rehearsal.py",
+      "first_line": 301,
+      "last_line": 305,
+      "quote": "            if result.usage.tokens is None:\n                raise RuntimeError(f\"{name}: token usage unknown; no additional calls\")\n            # Cost remains unknown. Task two is a separately authorized NEW task;\n            # it is never a continuation or retry of this task's execution.\n            return result",
+      "git_exit": 0
+    },
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "orchestration/rehearsal.py",
+      "first_line": 318,
+      "last_line": 342,
+      "quote": "            self._emit(\"awaiting_offline\", \"两任务之间下线获胜 builder；不杀进程，不声称在途恢复\")\n            if self.options.mode == \"manual\":\n                self.wait_for_offline(\"Press Enter to remove the winning logical builder before the NEW recovery task: \")\n            if self._stopped():\n                raise InterruptedError(\"operator STOP before member removal\")\n            removed_at = time.time()\n            self.members = [member.model_copy(update={\"available\": False, \"changed_at\": removed_at,\n                                                      \"reason\": \"operator removed between tasks\"})\n                            if member.agent == first.attempt.agent else member for member in self.members]\n            self.routing = RoutingFact(task_id=f\"recovery-{self.rehearsal_id}\", eligible_members=self._eligible(),\n                                       removed_member=first.attempt.agent, removed_at=removed_at)\n            self._emit(\"member_offline\", \"获胜 builder 已从新任务有效成员列表移除，原管道展示 inactive\")\n            self.task_description = \"在全新样例副本修复相同三个 bug（新任务二）；只剩一名 builder，独立 reviewer 复核\"\n            workspace = prepare_workspace(self.root / \"recovery/task\")\n            task = workspace / \"TASK.md\"\n            task.write_text(task.read_text(encoding=\"utf-8\") + \"\\nThis is a NEW repair in a fresh workspace. \"\n                            \"Use the supplied verified experience when applicable; report its gene ID only \"\n                            \"if you actually apply its strategy.\\n\", encoding=\"utf-8\")\n            self.verifier = SampleVerifier(self.root / \"recovery/initial-review\")\n            self.checkpoints = _checkpoint_view(self.verifier, self.verifier.verify(str(workspace), self.reviewer),\n                                                self.provenance)\n            self._emit(\"recovery_ready\", \"新任务重新从真实坏样例开始；不是重试第一次调用\")\n            second = self._task(\"recovery\", workspace)\n            if second.attempt.agent == first.attempt.agent or second.attempt.agent not in self._eligible():\n                raise RuntimeError(\"recovery did not execute on the remaining eligible builder\")",
+      "git_exit": 0
+    },
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "orchestration/rehearsal.py",
+      "first_line": 388,
+      "last_line": 392,
+      "quote": "        max_tokens=args.max_tokens, max_cost_usd=args.max_cost_usd, authorized_tasks=args.authorize_task,\n    )\n    print(json.dumps({\"root\": str(options.root.resolve()), \"executor\": options.executor,\n                      \"model\": options.model, \"max_new_calls\": 2,\n                      \"cost_note\": \"No hard in-flight dollar cap; unknown costs remain null\"}), flush=True)",
+      "git_exit": 0
+    },
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "orchestration/gateway.py",
+      "first_line": 164,
+      "last_line": 168,
+      "quote": "        }, key)\n        reported = _usage(body)\n        usage = Usage(tokens=reported.total_tokens if reported else None, cost_usd=None)\n        if error_kind:\n            return self._result(attempt, config, f\"gateway {error_kind}; effect may be unknown; no retry\", usage)",
+      "git_exit": 0
+    },
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "demo/run-demo.ps1",
+      "first_line": 1,
+      "last_line": 16,
+      "quote": "param(\n  [switch]$Mock,\n  [ValidateSet(\"auto\", \"manual\")][string]$Mode = \"auto\",\n  [string]$Replay,\n  [switch]$AuthorizeLive,\n  [int]$Port = 7500,\n  [ValidateSet(\"codex\", \"evomap\")][string]$Executor = \"codex\",\n  [string]$Model,\n  [int]$MaxTokens = 20000,\n  [double]$MaxCostUsd = 1.0,\n  [int]$TimeoutSeconds = 120,\n  [double]$TauSeconds = 10,\n  [double]$ArchiveThreshold = 0.2,\n  [double]$StageDelay = 2,\n  [double]$TickSeconds = 1\n)",
+      "git_exit": 0
+    },
+    {
+      "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "path": "swarm/cli.py",
+      "first_line": 28,
+      "last_line": 53,
+      "quote": "    tasks: int = 6\n    worker_models: tuple[EvoMapTextModel, ...] = ()\n    capability_names: tuple[str, ...] = ()\n    continue_on_rejection: bool = False\n\n    @model_validator(mode=\"after\")\n    def bounded_experiment(self) -> Self:\n        limits = self.budget.limits\n        if (self.workers, self.tasks) not in {(3, 6), (8, 48), (16, 96)}:\n            raise ValueError(\"evomap_scale_must_be_3x6_8x48_or_16x96\")\n        if self.worker_models and len(self.worker_models) != self.workers:\n            raise ValueError(\"worker_models_must_match_worker_count\")\n        if (len(self.capability_names) > 16 or len(set(self.capability_names)) != len(self.capability_names)\n                or any(not re.fullmatch(r\"[a-z][a-z0-9_]{0,63}\", name) for name in self.capability_names)):\n            raise ValueError(\"capability_names_must_be_unique_bounded_identifiers\")\n        if (limits.max_tasks != self.tasks or limits.max_attempts != self.tasks or limits.max_attempts_per_task != 1\n                or limits.max_derived_tasks != 0 or limits.max_runtime_seconds > 900):\n            raise ValueError(\"evomap_requires_one_attempt_per_task_no_derivation_max900s\")\n        if (self.budget.admission_control != \"enabled\" or self.budget.unbounded_reservation_usd is None\n                or self.api.max_input_bytes + self.api.max_output_tokens > self.budget.max_tokens):\n            raise ValueError(\"evomap_requires_explicit_unbounded_admission\")\n        effective_models = set(self.worker_models or (self.api.model,))\n        if self.budget.prices is not None and (self.budget.prices.provider != \"evomap\"\n                or effective_models != {self.budget.prices.model}):\n            raise ValueError(\"evomap_matching_prices_required\")\n        return self",
+      "git_exit": 0
+    }
+  ]
+}

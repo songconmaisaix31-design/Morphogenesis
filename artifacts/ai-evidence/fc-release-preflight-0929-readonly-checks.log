@@ -1,0 +1,81 @@
+CHECK time: 2026-09-29T20:26:16.0242759+08:00
+CWD: C:\Users\DW\orca\workspaces\Morphogenesis\decentralized-swarm
+COMMAND: .venv/Scripts/python.exe -B -m orchestration.rehearsal --help
+usage: rehearsal.py [-h] [--root ROOT] [--replay REPLAY]
+                    [--mode {auto,manual}] [--executor {codex,evomap}]
+                    [--model MODEL] [--authorize-task {repair,recovery}]
+                    [--tau-seconds TAU_SECONDS]
+                    [--archive-threshold ARCHIVE_THRESHOLD]
+                    [--stage-delay STAGE_DELAY] [--tick-seconds TICK_SECONDS]
+                    [--timeout TIMEOUT] [--max-tokens MAX_TOKENS]
+                    [--max-cost-usd MAX_COST_USD]
+
+Two explicitly authorized NEW repairs through the existing LangGraph Runtime.
+This presentation adapter never resumes/retries paid execution. Reopening
+saved snapshots is read-only replay. The existing one-task acceptance CLI is
+unchanged.
+
+options:
+  -h, --help            show this help message and exit
+  --root ROOT
+  --replay REPLAY
+  --mode {auto,manual}
+  --executor {codex,evomap}
+  --model MODEL         defaults to gpt-5.6-luna or evomap-gpt-5.6-luna for
+                        the selected executor
+  --authorize-task {repair,recovery}
+  --tau-seconds TAU_SECONDS
+  --archive-threshold ARCHIVE_THRESHOLD
+  --stage-delay STAGE_DELAY
+  --tick-seconds TICK_SECONDS
+  --timeout TIMEOUT
+  --max-tokens MAX_TOKENS
+  --max-cost-usd MAX_COST_USD
+EXIT: 0
+COMMAND: .venv/Scripts/python.exe -B -m viz.server --help
+usage: server.py [-h] [--host HOST] [--port PORT]
+                 [--input INPUT | --t2-root T2_ROOT | --rehearsal REHEARSAL]
+                 [--replay] [--evomap-store EVOMAP_STORE]
+                 [--swarm-state SWARM_STATE] [--swarm-replay]
+
+Serve the Morphogenesis T5 dashboard locally.
+
+options:
+  -h, --help            show this help message and exit
+  --host HOST           Listen address; defaults to MORPH_BIND_IP or loopback
+  --port PORT
+  --input INPUT         Allowlisted mock document or Envelope JSONL
+  --t2-root T2_ROOT     T2 named evidence root with fixed sidecars
+  --rehearsal REHEARSAL
+                        R's explicit fixed-rehearsal rehearsal.json
+  --replay              Read the named rehearsal evidence as a downgraded
+                        replay
+  --evomap-store EVOMAP_STORE
+                        Read-only local Gene pool from the runtime SQLite
+                        store (e.g. metadata.db)
+  --swarm-state SWARM_STATE
+                        Read-only decentralized swarm state directory
+                        (tasks/field/budget SQLite, workers/audit JSON)
+  --swarm-replay        Mark a copied swarm state as historical replay;
+                        requires --swarm-state
+EXIT: 0
+COMMAND: .venv/Scripts/python.exe -B -m swarm.cli --help
+usage: cli.py [-h] {observe,seed-demo,demo,worker,evomap} ...
+
+Executable offline swarm mode. Each worker senses its own neighborhood.
+
+positional arguments:
+  {observe,seed-demo,demo,worker,evomap}
+    observe             read existing health/evidence without modifying it
+    seed-demo           create six local fixture observations; starts no
+                        workers
+    demo                run three independent offline fixture processes
+    worker              one local worker, suitable for independent terminals
+    evomap              three independent EvoMap workers; explicit data-task
+                        configuration
+
+options:
+  -h, --help            show this help message and exit
+EXIT: 0
+COMMAND: .venv/Scripts/python.exe -B -c <read_rehearsal(replay=True), summarized JSON only> <replay-paths.txt>
+EXIT: 0

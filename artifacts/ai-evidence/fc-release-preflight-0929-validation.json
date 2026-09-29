@@ -1,0 +1,96 @@
+{
+  "observed": "2026-09-29T20:30:48.3415082+08:00",
+  "base": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "json_files": [
+    "fc-release-preflight-0929-drill-inventory.json",
+    "fc-release-preflight-0929-environment.json",
+    "fc-release-preflight-0929-git.json",
+    "fc-release-preflight-0929-host.json",
+    "fc-release-preflight-0929-replay-validation.json",
+    "fc-release-preflight-0929-replays.json"
+  ],
+  "report_links_checked": 7,
+  "write_paths_check": "passed",
+  "changed_paths": [
+    "artifacts/ai-evidence/fc-release-preflight-0929-drill-inventory.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-environment.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-git.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-host.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-readonly-checks.log",
+    "artifacts/ai-evidence/fc-release-preflight-0929-replay-validation.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-replays.json",
+    "docs/FC_RELEASE_PREFLIGHT_0929.md"
+  ],
+  "protected_diff": [],
+  "diff_check_exit": 0,
+  "run_demo_parse_errors": 0,
+  "proposed_powershell_blocks": [
+    {
+      "lines": 2,
+      "parse_errors": 0
+    },
+    {
+      "lines": 4,
+      "parse_errors": 0
+    },
+    {
+      "lines": 19,
+      "parse_errors": 0
+    },
+    {
+      "lines": 4,
+      "parse_errors": 0
+    }
+  ],
+  "code_gates": "NOT_RERUN",
+  "release_and_live": "NOT_RUN",
+  "initial_inventory_parser_exit": 1,
+  "corrected_inventory_exit": 0,
+  "search_missing_file_errors": "OS error 2 retained; corrected to actual gateway.py and codex.py",
+  "narrow_repair": {
+    "observed": "2026-09-29T20:36:49.0383216+08:00",
+    "task_id": "task_4e9a57e7c2aa",
+    "dispatch_id": "ctx_2f4b8aeec806",
+    "base": "c1107b63911e44269b586a1252cb84836cdeacf3",
+    "scope": "Material-only T10 handoff correction; no preflight or behavioral gate rerun",
+    "write_paths": [
+      "docs/FC_RELEASE_PREFLIGHT_0929.md",
+      "artifacts/ai-evidence/fc-release-preflight-0929-validation.json"
+    ],
+    "history_check": "c1107 remains HEAD before ordinary new commit; original validation fields and every other tracked file unchanged",
+    "report_links_checked": 7,
+    "report_links": [
+      "../artifacts/ai-evidence/fc-release-preflight-0929-git.json",
+      "../artifacts/ai-evidence/fc-release-preflight-0929-environment.json",
+      "../artifacts/ai-evidence/fc-release-preflight-0929-host.json",
+      "../artifacts/ai-evidence/fc-release-preflight-0929-replays.json",
+      "../artifacts/ai-evidence/fc-release-preflight-0929-replay-validation.json",
+      "../artifacts/ai-evidence/fc-release-preflight-0929-drill-inventory.json",
+      "../artifacts/ai-evidence/fc-release-preflight-0929-readonly-checks.log"
+    ],
+    "diff_check_exit": 0,
+    "protected_diff": [],
+    "original_validation_fields_retained": true,
+    "required_sequence": [
+      "normal execution",
+      "SIMULATED confirmed_rejection",
+      "real Worker controlled fallback",
+      "Worker B reads A observation and avoids provider",
+      "cooldown expiry and new probe token from real guard",
+      "successful recovery feedback; old facts retained without same/cross/restarted Worker retrip"
+    ],
+    "required_test": "test_stigmergy_avoidance: real Worker._process, mock execute call counts, assertions outside Worker handlers, behavioral mutation red then restored green",
+    "isolated_implementation": "AUTHORIZED for later T10 Worker on feat/fault-drill under existing user continue authorization; not performed by E",
+    "formal_drill_and_release": "WAIT_FOR_LOCKS; NOT_RUN",
+    "g_formal_review": "PENDING_CREDENTIALS",
+    "h1_h3": "PENDING",
+    "historical_tls_failure": "RETAINED; not relabeled passed by this material correction",
+    "code_gates": "NOT_RERUN",
+    "t10_implementation_tests_mutation_drill": "NOT_RUN_BY_E; requirements only",
+    "release_and_live": "NOT_RUN",
+    "exploratory_read_errors": [
+      "Guessed swarm/shared_breaker.py did not exist; corrected to swarm/breaker.py",
+      "Literal wildcard path passed to rg returned OS error 123; corrected with -g; no product gate failed or rerun"
+    ]
+  }
+}

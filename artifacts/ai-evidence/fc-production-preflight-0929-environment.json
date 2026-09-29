@@ -1,0 +1,207 @@
+{
+  "captured_utc": "2026-09-29T15:13:28.9158145Z",
+  "head": "7347f5c1a7eaf0f5a3279c2db0ffb751a730792c",
+  "worktree": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-release-preflight-0929",
+  "worktree_status": "?? artifacts/ai-evidence/fc-production-preflight-0929-readonly.ps1\r\n?? artifacts/ai-evidence/review-0929-release-v41flash-native-prepare.ps1\r\n?? artifacts/ai-evidence/review-0929-release-v41flash-prepare.py\r\n?? artifacts/ai-evidence/review-0929-release-v41flash-verify.py\r\n?? docs/FC_PRODUCTION_PLAN_0929.md\r\n",
+  "remote_refs": "be4fb7a685e951c9e42d8dc0c7eeb900cb5518f1\trefs/heads/decentralized-swarm\r\nc552250c0d07f5f70f09eb0a5ab3c322195e34ec\trefs/heads/morph-fc-candidate-0929\r\n40577cb841e8d89c08e1336d7254c4ca7bb3984e\trefs/heads/morph-fc-governance-final-0929\r\n7347f5c1a7eaf0f5a3279c2db0ffb751a730792c\trefs/heads/morph-fc-release-preflight-0929\r\n",
+  "remote_exit": 0,
+  "commands": [
+    {
+      "exit_code": 0,
+      "command": "dsh --version",
+      "stdout": "0.1.5-rc.3\r\n"
+    },
+    {
+      "exit_code": 0,
+      "command": "dsh --help",
+      "stdout": "Usage: dsh [options] [command] [args...]\r\n\r\ndsh: boot a DeepSeek Harness profile — an ordered stack of plugin-bundle patch\r\nlayers under your own overrides.\r\n\r\nArguments:\r\n  args                           arguments for the booted profile's app (see:\r\n                                 dsh --profile <name> --help)\r\n\r\nOptions:\r\n  -V, --version                  output the version number\r\n  --profile <name>               the profile under $DSH_HOME/profiles to boot\r\n  --from-default-profile <name>  initialize a new custom profile from a shipped\r\n                                 profile template\r\n  --patch <path>                 extra patch-list overlay applied after the\r\n                                 profile layer (repeatable)\r\n  --dump-config                  print the composed profile tree and exit\r\n  --dump-default-config          print the profile tree without its user layer\r\n                                 or --patch overlays and exit\r\n\r\nCommands:\r\n  web [options] [args...]        boot the web profile (alias of --profile web);\r\n                                 the web app's own flags follow\r\n  plugin [options] [args...]     manage a profile's plugins by forwarding the\r\n                                 remaining arguments to pnpm in the profile\r\n                                 directory\r\n\r\nExamples:\r\n  dsh --profile web                          boot the web profile (same as: dsh web)\r\n  dsh --profile rescue --from-default-profile web\r\n                                             create rescue from the shipped web template, then boot it\r\n  dsh --profile headless \"run the tests\"     answer one task, print the result, and exit\r\n  dsh --profile tui --patch ./extra.yml      boot a custom profile with one extra overlay\r\n  dsh --profile tui --resume <session>       arguments after the launcher flags reach the app\r\n  dsh --profile web --help                   the web app's own flags and help\r\n  dsh plugin --profile tui add <package>     install a plugin into the tui profile\r\n\r\n"
+    },
+    {
+      "exit_code": 0,
+      "command": "dsh --profile headless --help",
+      "stdout": "Usage: dsh --profile headless [options] [task...]\r\n\r\nAnswer one task, stream reasoning to stderr, print the final assistant message,\r\nand exit.\r\n\r\nArguments:\r\n  task        the task text; multiple words are joined by spaces\r\n\r\nOptions:\r\n  -h, --help  show this help\r\n\r\nExamples:\r\n  dsh --profile headless \"run the tests\"     answer one task and exit\r\n\r\n"
+    }
+  ],
+  "credential_environment_presence": [
+    {
+      "name": "DEEPSEEK_API_KEY",
+      "present": false,
+      "scope": "Process"
+    },
+    {
+      "name": "DEEPSEEK_BASE_URL",
+      "present": false,
+      "scope": "Process"
+    },
+    {
+      "name": "DSH_HOME",
+      "present": false,
+      "scope": "Process"
+    },
+    {
+      "name": "DSH_SETTINGS_FILE",
+      "present": false,
+      "scope": "Process"
+    },
+    {
+      "name": "MORPH_EVOMAP_API_KEY",
+      "present": false,
+      "scope": "Process"
+    },
+    {
+      "name": "DASHSCOPE_API_KEY",
+      "present": false,
+      "scope": "Process"
+    },
+    {
+      "name": "DEEPSEEK_API_KEY",
+      "present": false,
+      "scope": "User"
+    },
+    {
+      "name": "DEEPSEEK_BASE_URL",
+      "present": false,
+      "scope": "User"
+    },
+    {
+      "name": "DSH_HOME",
+      "present": false,
+      "scope": "User"
+    },
+    {
+      "name": "DSH_SETTINGS_FILE",
+      "present": false,
+      "scope": "User"
+    },
+    {
+      "name": "MORPH_EVOMAP_API_KEY",
+      "present": false,
+      "scope": "User"
+    },
+    {
+      "name": "DASHSCOPE_API_KEY",
+      "present": false,
+      "scope": "User"
+    },
+    {
+      "name": "DEEPSEEK_API_KEY",
+      "present": false,
+      "scope": "Machine"
+    },
+    {
+      "name": "DEEPSEEK_BASE_URL",
+      "present": false,
+      "scope": "Machine"
+    },
+    {
+      "name": "DSH_HOME",
+      "present": false,
+      "scope": "Machine"
+    },
+    {
+      "name": "DSH_SETTINGS_FILE",
+      "present": false,
+      "scope": "Machine"
+    },
+    {
+      "name": "MORPH_EVOMAP_API_KEY",
+      "present": false,
+      "scope": "Machine"
+    },
+    {
+      "name": "DASHSCOPE_API_KEY",
+      "present": false,
+      "scope": "Machine"
+    }
+  ],
+  "standard_file_presence": [
+    {
+      "exists": false,
+      "path": "C:/Users/DW/.dsh/settings.yaml"
+    },
+    {
+      "exists": false,
+      "path": "C:/Users/DW/.dsh/.credentials.yaml"
+    },
+    {
+      "exists": false,
+      "path": "C:/Users/DW/.dsh/.env"
+    },
+    {
+      "exists": true,
+      "path": "C:/Users/DW/.dsh/profiles/headless/cordis.patch.yml"
+    },
+    {
+      "exists": false,
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-home/settings.yaml"
+    },
+    {
+      "exists": false,
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-home/.credentials.yaml"
+    },
+    {
+      "exists": false,
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-home/.env"
+    },
+    {
+      "exists": true,
+      "path": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm/.runtime/fc-auth/dsh-home/profiles/headless/cordis.patch.yml"
+    },
+    {
+      "exists": false,
+      "path": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-release-preflight-0929/.env"
+    }
+  ],
+  "credential_scope": "Known standard sources from governance 40577cb only; no secret content, no historical scan, no remote authentication",
+  "ports": [
+    {
+      "port": 7526,
+      "listener_pids": []
+    },
+    {
+      "port": 7527,
+      "listener_pids": []
+    },
+    {
+      "port": 7844,
+      "listener_pids": []
+    },
+    {
+      "port": 7861,
+      "listener_pids": []
+    },
+    {
+      "port": 7862,
+      "listener_pids": []
+    },
+    {
+      "port": 7863,
+      "listener_pids": []
+    }
+  ],
+  "environment": [
+    {
+      "exists": true,
+      "path": ".venv/Scripts/python.exe"
+    },
+    {
+      "exists": false,
+      "path": "node_modules/@evomap/gep-sdk/package.json"
+    },
+    {
+      "exists": false,
+      "path": "node_modules/echarts/package.json"
+    },
+    {
+      "exists": false,
+      "path": "viz/static/graphology.bundle.js"
+    }
+  ],
+  "submitted": false,
+  "model_requests": 0,
+  "hub_requests": 0,
+  "returned_model": null,
+  "usage": null,
+  "cost": null,
+  "interpretation": "Preflight observations only, not release/FC-E/live acceptance; inspect presence flags, never infer a key is valid"
+}
