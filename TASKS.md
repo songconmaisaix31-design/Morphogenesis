@@ -7,12 +7,20 @@
 | 轨 | 基线 / task / dispatch | 今日状态与限制 |
 |---|---|---|
 | A `morph-fc-tests-0929` | `73e64cc70116ac658d85591d082c0684a4952c99`；`task_bf99e1b4ba10 / ctx_d0bbed22831d` | 已启动，真实 Worker 测试证据收口；待主控转发结果，未预填通过 |
-| B `morph-schema-closeout-0929` | `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；`task_d536a112682f / ctx_170180e15e72` | 开工 HEAD 与远端 decentralized-swarm 一致、工作树 clean；一页计划已落盘；即将复现/修复 audit nullable 条件，未宣称修复通过 |
+| B `morph-schema-closeout-0929` | `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；`task_d536a112682f / ctx_170180e15e72` | 计划阶段 `b27a2ec16ce31b28d1b1ae60cd580288792fdcc9` 已 push；仅移除 `allOf/1/then/required`，Owner 原矩阵 12/12、扩展 24/24、控制 13/13、exit 0；待独立验收/H3，未冻结，证据见 `artifacts/ai-evidence/schema-0929-report.md` |
 | C `morph-readonly-app-0929` | `2957b408ce922369a595a8acd43a882eb85897d3`；`task_75eedbf12038 / ctx_9320f0ef60fa` | 主控已批准 Gene 采用明细只读展开，具体文件权见日计划；待主控转发验收结果 |
 
 历史 Schema 原九例 8/9、扩展十二例 11/12、exit 1 继续保留；当前目标仍 `1.0.0 candidate`，待独立验收与人工 H3。optional 新增 minor、optional→required 为破坏性 major（2.0.0），不得沿用 1.1 升级必填说法。
 
 昨夜 T3 两次 mutation 假绿、裁撤及 demo-build.1 后续候选保留；FC-E 正式 deepseek v2 与 H1 真人签字仍缺，今天 Codex 验收不代替。三锁未齐不生产合并/tag；不实现预算事后对账、生产日志接线，不跑付费 live。
+
+主控 10:51/10:53 转发 A 中间简报（非本轨独立验收）：focused 20 passed；真实语义复现 exit 1，合法 usage 但无价格时预算账本 uncertain/unknown，`73e64cc:swarm/worker_loop.py:839` 的 FaultObservation.cost_state 却为 settled。登记为 P0 语义信息准确性待验/待队长决策；主控已请求最小元数据修复确认，尚未授权，未修复，未见预算释放/超支证据。A 首轮 breaker mutation 被 blocked executor `call_count 1 != 0` 抓获，finally 恢复后目标通过、生产 diff 为空；正式结果待提交。不得用通过的测试覆盖该真实失败。
+
+B 启动记录：初始 prompt 未实际提交，主控仅补 Enter 恢复为 working/live，沿用原 task/dispatch，未另建派发。
+
+主控 10:54 转发 A 阶段提交 `f4779d45a1b1417ffa6bce37708e9a68d46cf4e5`，分支 `morph-fc-tests-0929` 已 push/远端一致；focused 20 passed、breaker mutation 语义红/恢复绿、strict 87 通过，全量运行中。仅登记阶段交付/待独立验收，A 尚未完成，cost_state exit 1 继续未解决。
+
+B 今日修前复现：基线 `73798cd6` 原矩阵 11/12、扩展 23/24、控制 13/13、exit 1，唯一失败仍是显式 count=null/audit 缺失；修后首轮原矩阵 12/12、扩展 24/24、控制 13/13、exit 0。Schema 除一个 required 删除外完全一致，FaultObservation 14 字段与精确 FC 源导出一致；零值/负值/孤立 audit/非法来源/非 audit 约束保留。任意正数与 unique(issue IDs) 数量不一致仍为已声明的消费侧校验责任，未实现生产消费者，不把该限制当本次修复能力。此前一次证据环境检查因历史提取文件 CRLF 字节不一致 exit 1，已保留日志，改从 Git 原字节提取到本轨 ignored `.runtime`，未改他树或安装依赖。
 
 ## 当前有效段（2026-09-28 治理返修）
 

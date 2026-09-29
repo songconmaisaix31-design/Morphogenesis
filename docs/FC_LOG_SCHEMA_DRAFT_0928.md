@@ -1,18 +1,19 @@
-# T8 日志 Schema 1.0.0 候选，冻结验收阻塞
+# T8 日志 Schema 1.0.0 候选，nullable 修复待独立验收 / H3
 
 版本 `1.0.0 candidate`。准备人 codex/master-control；基于集成生产 SHA
-`73e64cc70116ac658d85591d082c0684a4952c99`。这份文档是 1.0.0 候选契约，独立验收发现仍有一项条件逻辑缺陷：
-count=null/audit缺失仍被错误拒绝（位置:1650-1652/allOf[1].then.required）。
+`73e64cc70116ac658d85591d082c0684a4952c99`。这份文档是 1.0.0 候选契约；2026-09-28 独立验收
+原九例 8/9、扩展十二例 11/12、exit 1：count=null/audit缺失被错误拒绝。
+2026-09-29 按授权仅移除 `allOf[1].then.required`，保留其 null 约束及其他条件；修复候选待独立验收与人工 H3，不宣称冻结。
 生产接线未执行。契约冻结不等于已接线采集或生产验收。生成复用当前安装的 Pydantic v2（MIT），
 直接导出 FaultObservation 与 RehearsalSnapshot 定义，不复制另一份运行时契约。
 
 ## 授权来源与版本策略
 
 本契约版本 1.0.0 candidate 由人类队长于 2026-09-28 消息中正式授权冻结目标，
-但独立验收发现一项条件逻辑缺陷尚未修复：count=null/audit缺失仍被错误拒绝。
+此前 count=null/audit缺失误拒绝的失败记录保留；本次仅修 nullable 条件，不改变候选版本或代替人工 H3。
 版本规则：可选字段新增为 minor 版本，破坏性修改为 major 版本。
 optional → required 会拒绝已有旧日志，属于破坏性变更，需 2.0.0 版本。
-可选字段从 optional 保持为 optional 时，即使采集完善，也保持为 minor 版本 1.1。
+仅新增可选字段可使用 minor（如 1.1）；采集完善不自动使字段必填。本次未冻结候选纠错仍为 1.0.0 candidate。
 
 ## 字段及四视图映射
 
@@ -33,7 +34,8 @@ optional → required 会拒绝已有旧日志，属于破坏性变更，需 2.0
 
 新增数值列 `audit_confirmed_issue_events: integer >= 0 | null`（可选、无默认0），配
 `issue_audit` 保存 status（partial/complete）、protocol_id、scope、reviewer、
-confirmed_issue_ids、evidence_refs。未审计时两字段均为 null；完整审计有证据且无问题
+confirmed_issue_ids、evidence_refs。未采集时两字段各自可省略或为 null；count 显式 null 不要求 issue_audit 出现，
+但不得搭配非 null 的孤立审计对象。数值 count 仍须配审计对象，审计对象仍须配数值 count；完整审计有证据且无问题
 才能写 0。partial 只能报告已确认的正数，必须显示"部分审计"，不能当最终总数。
 
 计数单位为同一 run、同一审计范围内经证据确认的唯一问题事件，不是重试数、失败请求数、
@@ -1645,10 +1647,7 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
           "issue_audit": {
             "const": null
           }
-        },
-        "required": [
-          "issue_audit"
-        ]
+        }
       }
     },
     {

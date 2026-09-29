@@ -12,7 +12,7 @@
 | B / 固定 codex | `morph-schema-closeout-0929`；`73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`（去中心化治理/Schema，未合 FC） | 本文件；`docs/PLAN.md` 仅今日所有权附录；`TASKS.md` 仅今日台账/本轨项；`docs/FC_LOG_SCHEMA_DRAFT_0928.md` 仅 audit nullable 条件及说明；`artifacts/ai-evidence/schema-0929-*` | 先落盘计划，再复现并修复 count=null/audit 缺失误拒绝；保留历史失败，待自验/独立验收/H3 |
 | C / 固定 codex | `morph-readonly-app-0929`；`2957b408ce922369a595a8acd43a882eb85897d3`（第一代主线） | 首阶段 `artifacts/ai-evidence/application-readonly-0929.md`；主控盘点后新增 `viz/frontend/src/backend/Backend.jsx`、`viz/frontend/src/backend/backend.css`、`viz/static/assets/finals-shell.js`、`viz/static/assets/finals-shell.css`、`tests/t5/check_adoption_trace.cjs` | 主控已批准 Gene 池展开采用明细，复用 `/api/dashboard → RehearsalDocument → UseRecord`；保留 run/task/agent/attempt/Gene/version/time/provenance，缺失为未知；进行中，待验 |
 
-派发记录：A `task_bf99e1b4ba10 / ctx_d0bbed22831d`；B `task_d536a112682f / ctx_170180e15e72`；C `task_75eedbf12038 / ctx_9320f0ef60fa`。三个 Worker 已启动；允许各自 ignored `.runtime`，只读复用现成环境。跨轨缺口 Handoff，不改他树或生产源码/锁文件/AGENTS/SWARM 文档；C 无后端或 Schema 写权。
+派发记录：A `task_bf99e1b4ba10 / ctx_d0bbed22831d`；B `task_d536a112682f / ctx_170180e15e72`；C `task_75eedbf12038 / ctx_9320f0ef60fa`。三个 Worker 已启动；允许各自 ignored `.runtime`，只读复用现成环境。跨轨缺口 Handoff，不改他树/锁文件/AGENTS/SWARM 文档；除 C 已批准前端写权外不改生产源码，A/B 无生产写权；C 无后端或 Schema 写权。
 
 ## 顺序、验收与停止条件
 
