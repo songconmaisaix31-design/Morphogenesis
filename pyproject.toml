@@ -10,6 +10,7 @@ packages = [
   {include = "bridge_node"}, {include = "hub_client"}, {include = "orca_provision"},
   {include = "orchestration"}, {include = "topology"}, {include = "metabolism"},
   {include = "mocks"}, {include = "viz"},
+  {include = "swarm"}, {include = "local_assets"},
 ]
 include = [
   {path = "bootstrap/fixtures/*.txt", format = ["sdist", "wheel"]},
@@ -38,6 +39,7 @@ build = ">=1.2,<2"
 
 [tool.poetry.scripts]
 morphogenesis = "bootstrap.cli:main"
+morphogenesis-swarm = "swarm.cli:main"
 
 [build-system]
 requires = ["poetry-core>=2.0,<3.0"]

@@ -7,6 +7,7 @@ import sys
 PACKAGES = (
     "contracts", "persistence", "bootstrap", "tools", "hub_client", "bridge_node",
     "orca_provision", "orchestration", "topology", "metabolism", "mocks", "viz", "demo",
+    "swarm", "local_assets",
 )
 
 
