@@ -1,18 +1,30 @@
-# T8 日志 Schema 1.0.0 候选，冻结验收阻塞
+# T8 日志 Schema 1.0.0：H3 文档契约冻结
 
-版本 `1.0.0 candidate`。准备人 codex/master-control；基于集成生产 SHA
-`73e64cc70116ac658d85591d082c0684a4952c99`。这份文档是 1.0.0 候选契约，独立验收发现仍有一项条件逻辑缺陷：
-count=null/audit缺失仍被错误拒绝（位置:1650-1652/allOf[1].then.required）。
+版本 `1.0.0`。原准备人 codex/master-control；本轮 H3 Owner codex；基于集成生产 SHA
+`73e64cc70116ac658d85591d082c0684a4952c99`。2026-09-29 按 David 授权完成本文最小修复，
+Owner 复跑原独立 Schema 脚本的 12 例全部符合原预期（exit 0），H3 文档契约冻结。
 生产接线未执行。契约冻结不等于已接线采集或生产验收。生成复用当前安装的 Pydantic v2（MIT），
 直接导出 FaultObservation 与 RehearsalSnapshot 定义，不复制另一份运行时契约。
 
 ## 授权来源与版本策略
 
-本契约版本 1.0.0 candidate 由人类队长于 2026-09-28 消息中正式授权冻结目标，
-但独立验收发现一项条件逻辑缺陷尚未修复：count=null/audit缺失仍被错误拒绝。
+历史证据：2026-09-28 获授权的 1.0.0 candidate，在 `2e56fa1` 独立验收中原九例 8/9、
+扩展十二例 11/12（exit 1）；`73798cd` 保留同一 JSON。count=null/audit 缺失被错误拒绝，
+原因是 `allOf[1].then.required`（当时行 1650–1652）。该失败保留为历史，不以本轮结果覆盖。
 版本规则：可选字段新增为 minor 版本，破坏性修改为 major 版本。
 optional → required 会拒绝已有旧日志，属于破坏性变更，需 2.0.0 版本。
 可选字段从 optional 保持为 optional 时，即使采集完善，也保持为 minor 版本 1.1。
+
+H3 拍板登记：拍板人：David；日期：2026-09-29；冻结版本：1.0.0。
+依据：“未审计不等于零问题，语义缺失用 null 不伪造 0”。
+本轮只新增 `properties.audit_confirmed_issue_events.nullable: true` 并删除
+`allOf[1].then.required=["issue_audit"]`，保留 `then.properties.issue_audit.const: null`。
+root required 原已不含计数字段，`schema_version.const` 原已为 `1.0.0`，均未制造额外差异；
+已有 `anyOf` integer/null 保留，`nullable` 不替代 Draft 2020-12 的 null 类型声明。
+原独立脚本 `validate_schema.py` 的 fixtures、预期和断言保持不变；Owner 本轮复跑为 12/12，
+其中 `03_only_count_null` 实际 VALID、6 个预期拒绝负例仍 INVALID，既有控制用例 9/9，
+FaultObservation 14 字段导出一致。本轮复跑不冒充新一轮独立验收，也不代替 H1 或其他 FC 门禁。
+JSON `description` 中的历史 UNFROZEN 文案按本轮限定的 Schema 修改范围保留，当前 H3 状态以本节为准。
 
 ## 字段及四视图映射
 
@@ -27,7 +39,7 @@ optional → required 会拒绝已有旧日志，属于破坏性变更，需 2.0
 | fault_observation | swarm/fault_observations.py:32 导出全部 14 字段，含 attempt | 不删字段、不改原 JSONL |
 | rehearsal | orchestration/rehearsal_models.py:79 的完整 RehearsalSnapshot 导出 | 保留原 provenance/acceptance/results/genes/adoptions |
 | drill、provenance、evidence_label | 演练为 true/mock/SIMULATED；真实为 false/live/LIVE；回放为 false/replay/REPLAY | 本提案的显式约束 |
-| audit_confirmed_issue_events、issue_audit | 审计确认问题事件数及审计范围/证据；未审计为 null；完整审计确认无问题才可为 0 | 可选字段，未采集可省略或null，随H3批准；配套issue_audit也应允许缺失/null，明确尚未接入采集 |
+| audit_confirmed_issue_events、issue_audit | 审计确认问题事件数及审计范围/证据；未审计为 null；完整审计确认无问题才可为 0 | H3 已批准；可选字段，未采集可省略或null；配套issue_audit允许缺失/null，尚未接入采集 |
 
 ## 审计确认问题事件数：统计口径提案
 
@@ -51,7 +63,7 @@ RSICD 场景在共同任务契约下审计研究工件，公开数字依次为 A
 AutoResearchClaw 15、Agent Laboratory 18、The AI Scientist 27。该论文没有给出可直接复用
 的细粒度去重字段，本段计数/去重规则是 Morphogenesis 本地提案，不能宣称与论文协议完全等价。
 答辩可将数字同框展示，但须同时标注任务、协议、审计范围与完整性；本项目未采集值为“待审计”，
-不能预填0或据跨任务原始计数宣称优于这些系统。这里只新增 Schema 草案，明日经 H3 后接线采集。
+不能预填0或据跨任务原始计数宣称优于这些系统。本次仅冻结 Schema 文档契约，接线采集尚未实施。
 
 ## 与现有契约的边界
 
@@ -74,10 +86,10 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
 2. GUI 四视图与分析方消费共同 envelope；现有 API/CLI 不受本草案影响。旧日志只有可靠映射
    才转换，不能为补字段制造资产调用、认领、耗时或费用。跨机器时钟排序不能只依赖 at。
 3. 本提案只承诺既有故障事实与任务路由快照；provider 候选切换可由 FaultObservation 和已有
-   执行证据表达，不把现有任务路由概率错误映射成 provider 权重。是否增独立 provider 快照
-   应在冻结前由队长裁定并分配生产 Owner。
-4. 队长待确认：字段语义、版本策略、独立演练目录、四视图最小数据、跨字段校验责任。
-   审批人/时间/冻结版本：**待填写**。T9 仅在批准后生成样例与两条待发送消息。
+   执行证据表达，不把现有任务路由概率错误映射成 provider 权重。若未来新增独立 provider 快照，
+   应另由队长裁定并分配生产 Owner。
+4. H3 Schema 文档契约审批人/日期/冻结版本：**David / 2026-09-29 / 1.0.0**。
+   独立演练目录、四视图最小数据及跨字段校验责任的生产落地另行分配；T9 样例与消息本次未执行。
 
 ## Pydantic 导出的 JSON Schema（含提案外壳）
 
@@ -1560,6 +1572,7 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
       ]
     },
     "audit_confirmed_issue_events": {
+      "nullable": true,
       "anyOf": [
         {
           "minimum": 0,
@@ -1645,10 +1658,7 @@ bump；兼容新增字段 minor，删除/类型/语义改变 major，纯描述�
           "issue_audit": {
             "const": null
           }
-        },
-        "required": [
-          "issue_audit"
-        ]
+        }
       }
     },
     {
