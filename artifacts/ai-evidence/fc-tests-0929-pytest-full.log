@@ -1,0 +1,23 @@
+........................................................................ [ 10%]
+........................................................................ [ 20%]
+........................................................................ [ 30%]
+........................................................................ [ 41%]
+........................................................................ [ 51%]
+........................................................................ [ 61%]
+........................................................................ [ 72%]
+........................................................................ [ 82%]
+........................................................................ [ 92%]
+...................................................                      [100%]
+============================== warnings summary ===============================
+tests/swarm/test_budget.py::test_model_copy_cannot_bypass_preflight_validation[nan]
+  C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-integration-0927\.venv\Lib\site-packages\pydantic\main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='input_tokens', input_value=nan, input_type=float])
+    return self.__pydantic_serializer__.to_python(
+
+tests/swarm/test_budget.py::test_model_copy_cannot_bypass_preflight_validation[1]
+  C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-integration-0927\.venv\Lib\site-packages\pydantic\main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='input_tokens', input_value='1', input_type=str])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+699 passed, 2 warnings in 450.96s (0:07:30)
