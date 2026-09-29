@@ -31,3 +31,16 @@ G / codex 固定本树同名分支，task `task_a41bf1f2df89` / `ctx_94e98c11eb9
 用户已授权多 Agent 生产接线、合并/tag/三连/live；不是重新索取这些授权。执行仍须共同候选适用门禁、合格 FC-E 与 H1 三锁齐备；当前不可发布，G 不动公共主线/tag、不代签。主控已异步收取缺项，“继续任务”没有补齐本人结论、认证、live 目标/预算或 auto 路径选择。现有单任务 `orchestration.acceptance` 固定 Codex 样例，无 EvoMap/真实课题入口，exit0 可能仍 pending_review；不能冒充完整 live。未审计的计数不填0，未知实际 usage/费用保留 null/unknown。T9 GUI mock/队友消息、benchmark POLL_MS 及候选外 WIP 本轮未做。
 
 门禁分层及逐任务 SHA 见 [一页证据索引](../artifacts/ai-evidence/fc-production-status-0929.md) 与 [TASKS 本轮区](../TASKS.md)。
+
+
+## 2026-09-30 I正式交付后最终状态（G）
+
+主控已验收并release I（msg_367334489d47）。共同代码固定 `morph-fc-production-integration-0929@8c76af727cf8a669c0b22b65586c2a0a70577e72`；H3+A+B+C精确普通合并，没有领域胶水或测后文档提交。G治理checkpoint为e862e4ca08f1331246596db47f3abcdaa96e0ee7，本页所属新治理提交不是受测代码。
+
+I同SHA六门禁新执行：focused452/2warnings/837.19s、full899/2warnings/600.17s、strict89、新sdist+wheel、SDK1.14.0、独立安装分发13包+Node，均exit0；47独立P0、Schema原12/扩展24/controls13、12mutation红1恢复0，源码/安装包六阶段各21合法mock行，5 unknown holds保留。首轮focused6fail/full1fail、两次依赖下载-1、离线准备exit2及配置读码exit1等全部保留；Owner自验没有换标签成I实跑。
+
+最终SHA离线FC-E包748088 bytes/40维、native dump七检查已备，模型请求0、正式review NOT_RUN。H3 是 David / 2026-09-29 / Schema 1.0.0 已冻结事实，不能推导 H1；最终 `8c76af727cf8a669c0b22b65586c2a0a70577e72` 的 breaker TODO 仍在202/592/672，H1本人预算A/B、breaker六点结论、姓名/时间/署名及完整受审SHA仍缺，历史73e64/C552签字槽不冒充最终签字。正式FC-E固定原生dsh / DeepSeek-V41-Flash，标准profile/认证缺失，**review NOT_RUN / FC-E OPEN**；离线40维要求与config检查不等于模型覆盖或无高危，实际返回模型/usage/cost=null。用户已授权合并/tag/三连/live，但尚缺H1、合格FC-E及live目标/实际模型/安全配置入口/累计预算和入口选择；主控已收取，G不新增审批流程或代签。
+
+auto入口在 `orchestration/rehearsal.py:306–310` tokens已知/cost未知时仍返回并在346行执行recovery，auto live保持BLOCKED，未获路径选择前不启动。现有单任务orchestration.acceptance固定Codex样例，无EvoMap/真实课题入口，exit0仍可能pending_review；不能替代真实三连。unknown holds不释放、未知usage/费用不伪0，未审计计数不填0；日志是尽力旁路，崩溃/IO可能缺行，序号不等于请求数或审计问题数。公共主线合并、tag、正式FC-E调用、live三连、真实课题/现场/浏览器验收均NOT_RUN，interface_live/task_live未通过；T9 GUI mock/队友消息、benchmark POLL_MS及候选外WIP本轮未做。
+
+G已原字节接收I正式报告并同步TASKS/桌面；写权不扩大，不写产品、测试、Schema、TODO或人签槽，不动公共主线/tag。主线仍 `be4fb7a685e951c9e42d8dc0c7eeb900cb5518f1`，新demo-build tag未创建；第一代root的既有WIP按I报告保留，不称全仓clean。入口：[一页状态](../artifacts/ai-evidence/fc-production-status-0929.md)、[I原字节正式报告](../artifacts/ai-evidence/fc-production-integration-0929-report.md)。

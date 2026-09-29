@@ -546,3 +546,28 @@ G 原 dsh 预检仍 **认证 BLOCKED / 正式 review NOT_RUN / FC-E OPEN / 请�
 用户已授权多 Agent 生产接线、合并/tag/三连/live；不是重新索取这些授权。执行仍须共同候选适用门禁、合格 FC-E 与 H1 三锁齐备；当前不可发布，G 不动公共主线/tag、不代签。主控已异步收取缺项，“继续任务”没有补齐本人结论、认证、live 目标/预算或 auto 路径选择。现有单任务 `orchestration.acceptance` 固定 Codex 样例，无 EvoMap/真实课题入口，exit0 可能仍 pending_review；不能冒充完整 live。未审计的计数不填0，未知实际 usage/费用保留 null/unknown。T9 GUI mock/队友消息、benchmark POLL_MS 及候选外 WIP 本轮未做。
 
 证据入口：[本轮一页索引](artifacts/ai-evidence/fc-production-status-0929.md)、[生产计划](docs/FC_PRODUCTION_PLAN_0929.md)。G 只读核 immutable blobs / 部分 raw 日志 / remote refs，不冒充 Owner、I 或正式模型评审；第一阶段普通 commit+push 后继续同任务等 I raw 报告，未结算整个任务。
+
+
+## 2026-09-30 生产集成最终证据收口（G；最新状态）
+
+主控 `msg_367334489d47` 已验收 I 的 succeeded 并release；本段覆盖上方“进行中/候选待交付”，原文及失败完整保留。唯一受测代码为 `morph-fc-production-integration-0929@8c76af727cf8a669c0b22b65586c2a0a70577e72`，G另核remote exact、I HEAD一致/clean；治理分支 `morph-fc-governance-final-0929` 的checkpoint `e862e4ca08f1331246596db47f3abcdaa96e0ee7` 及本文件所属新提交均只是治理材料，不替代代码SHA。
+
+| 任务 | 最终阶段状态 | SHA与真实门禁身份 |
+|---|---|---|
+| H3 | 文档契约已冻结 | `be4fb7a685e951c9e42d8dc0c7eeb900cb5518f1`；David / 1.0.0；原Owner12/12+9controls，I另实跑见下 |
+| A / codex | 已交付/release，已被I精确接收 | `cb0902395d4e1fa89390c67c1cdfb6cec1607b72`；production1516d67；Owner55/strict88/build/wheel，旧6a全量888保持旧身份 |
+| B / codex | 已交付/release，已被I精确接收 | `cbec0b31fc1e27bfee1b83bd84e1f34097c19a19`；原Owner A6a+B组合81/strict89及mock六阶段/mutation；I结果另列 |
+| C / codex | 已验收/release，已被I精确接收 | `1d7753957a982f1f67f29ffa02e8f064d4f67a41`；10离线controls/7configchecks与旧524744 bytes是C预检；I另备最终SHA包 |
+| I / codex | 本地集成与独立验收完成；已release | `8c76af727cf8a669c0b22b65586c2a0a70577e72`；task_ee23e2bde40a / ctx_af144abe21c7；focused452/2warnings/837.19s、full899/2warnings/600.17s、strict89、新sdist+wheel、SDK1.14.0、独立分发13包+Node，均native exit0 |
+| I 独立语义 / Schema / 演练 | 同一最终SHA新执行完成，contract_local/mock | 47独立P0 / 95.14s；Schema原12/12、扩展24/24、controls13/13；12mutation均真实红1→恢复0；源码与安装wheel六阶段各21合法SIMULATED行，failure_count0仅投影失败计数，5×0.2 unknown holds保留，usage/cost=null |
+| I 最终SHA FC-E准备 | PREPARED；正式review NOT_RUN | 同8c76，748088 bytes、40维要求、native dump七检查，模型请求0；不是FC-E通过 |
+| G / codex | 治理证据接收完成，待本次提交回执 | task_a41bf1f2df89 / ctx_94e98c11eb94；只读核raw并复制最终报告原字节，未重跑产品测试/自评/代签 |
+| 发布 / H1 / FC-E / live | BLOCKED / OPEN / NOT_RUN | 本地门禁完成不自动补齐本人签字、正式评审或live条件；公共主线仍be4、demo-build tag未创建 |
+
+首轮 focused **6 failed / 446 passed / 2 warnings / 607.15s / exit1**，均为原30s mock子进程超时；首轮 full **1 failed / 898 passed / 2 warnings / 1166.70s / exit1**，为本地 demo fixture 等待stdout闭合超时。预编译依赖后导入耗时下降支持环境/冷启动/负载解释，未证明唯一根因，也没有放宽测试阈值或删选测试。两次依赖下载受控中断 **native -1**、随后核锁内SciPy wheel并离线sync；初次review packet相对Git范围 **exit2**、TEMP配置读取GBK解码 **exit1**、继承历史空白与MERGE_HEAD/128均保留。旧R1 **REJECTED / 2 PASS + 2 INVALID / exit1**、旧Schema8/9与11/12、此前所有失败不倒写。
+
+H3 是 David / 2026-09-29 / Schema 1.0.0 已冻结事实，不能推导 H1；最终 `8c76af727cf8a669c0b22b65586c2a0a70577e72` 的 breaker TODO 仍在202/592/672，H1本人预算A/B、breaker六点结论、姓名/时间/署名及完整受审SHA仍缺，历史73e64/C552签字槽不冒充最终签字。正式FC-E固定原生dsh / DeepSeek-V41-Flash，标准profile/认证缺失，**review NOT_RUN / FC-E OPEN**；离线40维要求与config检查不等于模型覆盖或无高危，实际返回模型/usage/cost=null。用户已授权合并/tag/三连/live，但尚缺H1、合格FC-E及live目标/实际模型/安全配置入口/累计预算和入口选择；主控已收取，G不新增审批流程或代签。
+
+auto入口在 `orchestration/rehearsal.py:306–310` tokens已知/cost未知时仍返回并在346行执行recovery，auto live保持BLOCKED，未获路径选择前不启动。现有单任务orchestration.acceptance固定Codex样例，无EvoMap/真实课题入口，exit0仍可能pending_review；不能替代真实三连。unknown holds不释放、未知usage/费用不伪0，未审计计数不填0；日志是尽力旁路，崩溃/IO可能缺行，序号不等于请求数或审计问题数。公共主线合并、tag、正式FC-E调用、live三连、真实课题/现场/浏览器验收均NOT_RUN，interface_live/task_live未通过；T9 GUI mock/队友消息、benchmark POLL_MS及候选外WIP本轮未做。
+
+G核20组门禁meta/exit/raw与24个逐例mutation回执；用G自行精确archive比对I普通/变异恢复两份源码各375文件一致。最终报告原字节27502 bytes、SHA256 `3455001aa0478aa3ad81ab50a0c5790e6f583f732bf185959ea4d8043d184bdc`，testedSHA为8c76；[原字节I报告](artifacts/ai-evidence/fc-production-integration-0929-report.md)、[一页状态/原始日志索引](artifacts/ai-evidence/fc-production-status-0929.md)。该归档报告的相对链接以原TEMP证据根解析，索引提供绝对入口。
