@@ -105,6 +105,138 @@ def test_reused_observation_id_rejected_and_copied_model_revalidated(tmp_path):
     assert store.read().records == (first,)
 
 
+def test_append_uses_persistent_index_without_repeated_scans(tmp_path, monkeypatch):
+    path = tmp_path / "facts.jsonl"
+    first = observation(attempt=2**80)
+    path.write_text(first.model_dump_json() + "\n", encoding="utf-8")
+    scans = []
+    original_read_all = FaultObservationStore._read_all
+
+    def counted_scan(store):
+        scans.append(store.path)
+        return original_read_all(store)
+
+    def forbidden_read(_):
+        pytest.fail("append must not use read()")
+
+    monkeypatch.setattr(FaultObservationStore, "_read_all", counted_scan)
+    monkeypatch.setattr(FaultObservationStore, "read", forbidden_read)
+    for index in range(40):
+        # New instances must reuse the on-disk index, including other runs.
+        run_id = "run" if index % 2 else "other"
+        store = FaultObservationStore(path, run_id)
+        item = observation(run_id=run_id, request_id=str(index))
+        assert store.append(item)
+        assert not store.append(observation(run_id=run_id, request_id=str(index)))
+        with pytest.raises(ObservationConflict, match="different facts"):
+            store.append(observation(run_id=run_id, request_id=str(index), cost_state="settled"))
+        with pytest.raises(ObservationConflict, match="observation_id"):
+            store.append(observation(run_id=run_id, observation_id=item.observation_id))
+    assert not FaultObservationStore(path, "run").append(first)
+    assert scans == [path]
+    assert len(path.read_bytes().splitlines()) == 41
+
+
+def test_replay_cannot_borrow_another_attempts_observation_id(tmp_path):
+    store = FaultObservationStore(tmp_path / "facts.jsonl", "run")
+    first, second = observation(), observation(request_id="second")
+    assert store.append(first)
+    assert store.append(second)
+    with pytest.raises(ObservationConflict, match="observation_id"):
+        store.append(observation(observation_id=second.observation_id))
+    assert store.read().records == (first, second)
+
+
+@pytest.mark.parametrize("missing", ["sidecar", "table", "state"])
+def test_missing_index_is_rebuilt_from_all_runs(tmp_path, missing):
+    path = tmp_path / "facts.jsonl"
+    first = observation()
+    other = observation(run_id="other", observation_id=first.observation_id)
+    store = FaultObservationStore(path, "run")
+    assert store.append(first)
+    assert FaultObservationStore(path, "other").append(other)
+    if missing == "sidecar":
+        store._lock_path.unlink()
+    else:
+        with sqlite3.connect(store._lock_path) as db:
+            if missing == "table":
+                db.execute("DROP TABLE fault_observation_index")
+            else:
+                db.execute("DELETE FROM fault_observation_index_state")
+    original = path.read_bytes()
+    assert not FaultObservationStore(path, "run").append(observation())
+    assert not FaultObservationStore(path, "other").append(other)
+    with pytest.raises(ObservationConflict, match="different facts"):
+        store.append(observation(cost_state="settled"))
+    assert path.read_bytes() == original
+
+
+@pytest.mark.parametrize("initialized", [False, True])
+@pytest.mark.parametrize("crash_at", ["fsynced", "indexed"])
+def test_process_crash_before_index_commit_recovers_without_duplicates(tmp_path, initialized, crash_at):
+    path = tmp_path / "facts.jsonl"
+    store = FaultObservationStore(path, "run")
+    previous = observation(request_id="previous")
+    if initialized:
+        assert store.append(previous)
+    item = observation()
+    script = """
+import os
+import sys
+from swarm.fault_observations import FaultObservation, FaultObservationStore
+store = FaultObservationStore(sys.argv[1], 'run')
+item = FaultObservation.model_validate_json(sys.stdin.read())
+if sys.argv[2] == 'fsynced':
+    original = os.fsync
+    def crash(fd):
+        original(fd)
+        os._exit(23)
+    os.fsync = crash
+else:
+    original = FaultObservationStore._save_index_signature
+    def crash(self, db):
+        original(self, db)
+        if db.execute('SELECT 1 FROM fault_observation_index WHERE request_id=?',
+                      (item.request_id,)).fetchone():
+            os._exit(23)
+    FaultObservationStore._save_index_signature = crash
+store.append(item)
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script, str(path), crash_at], input=item.model_dump_json(),
+        capture_output=True, text=True, timeout=30, cwd=Path(__file__).resolve().parents[2],
+    )
+    assert result.returncode == 23, result.stderr
+    original = path.read_bytes()
+    restarted = FaultObservationStore(path, "run")
+    assert not restarted.append(item)
+    with pytest.raises(ObservationConflict, match="different facts"):
+        restarted.append(observation(cost_state="settled"))
+    with pytest.raises(ObservationConflict, match="observation_id"):
+        restarted.append(observation(observation_id=item.observation_id, request_id="another"))
+    assert path.read_bytes() == original
+    following = observation(request_id="following")
+    assert restarted.append(following)
+    expected = (previous, item, following) if initialized else (item, following)
+    assert restarted.read().records == expected
+    assert restarted.read().issues == ()
+
+
+def test_partial_tail_invalidates_existing_index_and_is_sealed(tmp_path):
+    path = tmp_path / "facts.jsonl"
+    store = FaultObservationStore(path, "run")
+    first = observation()
+    assert store.append(first)
+    with path.open("ab") as output:
+        output.write(b'{"interrupted":')
+    original = path.read_bytes()
+    following = observation(request_id="following")
+    assert FaultObservationStore(path, "run").append(following)
+    assert path.read_bytes().startswith(original + b"\n")
+    assert store.read().records == (first, following)
+    assert [(issue.line_number, issue.reason) for issue in store.read().issues] == [(2, "invalid_record")]
+
+
 def test_read_and_aggregate_do_not_create_missing_files(tmp_path):
     path = tmp_path / "missing" / "facts.jsonl"
     store = FaultObservationStore(path, "run")
@@ -206,8 +338,12 @@ def test_complete_record_without_newline_is_not_lost(tmp_path):
     assert store.read().issues == ()
 
 
-def test_fsync_failure_does_not_cause_duplicate_local_replay(tmp_path, monkeypatch):
+@pytest.mark.parametrize("initialized", [False, True])
+def test_fsync_failure_does_not_cause_duplicate_local_replay(tmp_path, monkeypatch, initialized):
     store = FaultObservationStore(tmp_path / "facts.jsonl", "run")
+    previous = observation(request_id="previous")
+    if initialized:
+        assert store.append(previous)
     item = observation()
 
     def fail(_):
@@ -218,7 +354,7 @@ def test_fsync_failure_does_not_cause_duplicate_local_replay(tmp_path, monkeypat
         with pytest.raises(OSError):
             store.append(item)
     assert not store.append(item)
-    assert store.read().records == (item,)
+    assert store.read().records == ((previous, item) if initialized else (item,))
 
 
 def test_competing_processes_append_once_and_preserve_all_unique_records(tmp_path):

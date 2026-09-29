@@ -2,7 +2,7 @@
 
 Pydantic v2 (MIT) handles validation/JSON; stdlib uuid supplies identifiers.
 The existing swarm.task_ledger SQLite transaction helper serializes cooperating
-writers through a sidecar, without a second copy/index of the observation facts.
+writers through a sidecar holding a rebuildable deduplication index.
 JSONL writes follow the local_assets fsync convention without importing assets.
 All writers must use this store and preserve its sidecar while it is in use.
 Reads are snapshots: a concurrent incomplete last line may be reported as invalid.
@@ -13,6 +13,7 @@ from __future__ import annotations
 import math
 import os
 from pathlib import Path
+import sqlite3
 from typing import Literal
 from uuid import uuid4
 
@@ -142,8 +143,10 @@ def _same_facts(first: FaultObservation, second: FaultObservation) -> bool:
 class FaultObservationStore:
     """Append-only JSONL; idempotence is (run_id, request_id, attempt).
 
-    Each append scans the file while holding a bounded SQLite write transaction.
-    There is no persistent deduplication cache to become inconsistent on a crash.
+    Each append checks a persistent index in a bounded SQLite write transaction.
+    JSONL remains authoritative: its fsync precedes the index commit. A missing
+    index or changed file signature triggers one rebuild before using the index,
+    including after a crash between the JSONL write and the SQLite commit.
     Truncated/malformed lines are retained and skipped; a missing trailing newline
     is sealed before a new record. Valid records with conflicting identities are
     diagnosed and the first valid fact wins on read. Filesystem errors propagate.
@@ -217,29 +220,94 @@ class FaultObservationStore:
             except FileNotFoundError:
                 return 0
 
+    def _file_signature(self) -> str:
+        try:
+            stat = self.path.stat()
+        except FileNotFoundError:
+            return "missing"
+        return str((stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns))
+
+    @staticmethod
+    def _index_record(db: sqlite3.Connection, item: FaultObservation) -> None:
+        db.execute(
+            "INSERT INTO fault_observation_index "
+            "(run_id, request_id, attempt, observation_id, record) VALUES (?,?,?,?,?)",
+            (item.run_id, item.request_id, str(item.attempt), item.observation_id,
+             item.model_dump_json()),
+        )
+
+    def _save_index_signature(self, db: sqlite3.Connection) -> None:
+        db.execute(
+            "INSERT OR REPLACE INTO fault_observation_index_state VALUES (1,?)",
+            (self._file_signature(),),
+        )
+
+    def _ensure_index(self, db: sqlite3.Connection) -> None:
+        index_exists = db.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='fault_observation_index'"
+        ).fetchone() is not None
+        # TEXT preserves the model's unbounded nonnegative integer attempt IDs.
+        db.execute(
+            "CREATE TABLE IF NOT EXISTS fault_observation_index ("
+            "run_id TEXT NOT NULL, request_id TEXT NOT NULL, attempt TEXT NOT NULL, "
+            "observation_id TEXT NOT NULL, record TEXT NOT NULL, "
+            "PRIMARY KEY(run_id,request_id,attempt), UNIQUE(run_id,observation_id))"
+        )
+        db.execute(
+            "CREATE TABLE IF NOT EXISTS fault_observation_index_state ("
+            "singleton INTEGER PRIMARY KEY CHECK(singleton=1), file_signature TEXT NOT NULL)"
+        )
+        state = db.execute(
+            "SELECT file_signature FROM fault_observation_index_state WHERE singleton=1"
+        ).fetchone()
+        if index_exists and state is not None and state["file_signature"] == self._file_signature():
+            return
+        db.execute("DELETE FROM fault_observation_index")
+        for item in self._read_all().records:
+            self._index_record(db, item)
+        # Recovered bytes may come from a failed fsync or an interrupted writer.
+        # Make them durable before committing an index that includes them.
+        try:
+            # Windows fsync requires a writable handle, even without a write.
+            source = self.path.open("r+b")
+        except FileNotFoundError:
+            pass
+        else:
+            with source:
+                os.fsync(source.fileno())
+        self._save_index_signature(db)
+
     def append(self, observation: FaultObservation) -> bool:
         """Return True for an fsynced append, False for replay; reject conflicts.
 
         Storage failure can leave a partial or complete final line; it is not a
-        reason to repeat a remote request. A later local replay rescans the file.
+        reason to repeat a remote request. A later local replay rebuilds a stale
+        index from the file; SQLite cannot roll back already appended JSONL bytes.
         """
         observation = FaultObservation.model_validate(observation.model_dump())
         if observation.run_id != self.run_id:
             raise ValueError("observation run_id mismatch")
         payload = observation.model_dump_json().encode("utf-8") + b"\n"
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        with connection(self._lock_path, write=True, timeout=self.timeout_seconds):
-            records = self.read().records
-            for existing in records:
-                same_key = (existing.request_id, existing.attempt) == (
-                    observation.request_id, observation.attempt
-                )
-                if same_key and not _same_facts(existing, observation):
-                    raise ObservationConflict("request attempt already has different facts")
-                if existing.observation_id == observation.observation_id and not same_key:
-                    raise ObservationConflict("observation_id already identifies another request attempt")
-            if any((item.request_id, item.attempt) == (observation.request_id, observation.attempt)
-                   for item in records):
+        with connection(self._lock_path, write=True, timeout=self.timeout_seconds) as db:
+            self._ensure_index(db)
+            key = (observation.run_id, observation.request_id, str(observation.attempt))
+            existing = db.execute(
+                "SELECT record FROM fault_observation_index WHERE run_id=? AND request_id=? AND attempt=?",
+                key,
+            ).fetchone()
+            if existing is not None and not _same_facts(
+                FaultObservation.model_validate_json(existing["record"]), observation
+            ):
+                raise ObservationConflict("request attempt already has different facts")
+            if db.execute(
+                "SELECT 1 FROM fault_observation_index WHERE run_id=? AND observation_id=? "
+                "AND NOT (request_id=? AND attempt=?)",
+                (observation.run_id, observation.observation_id, observation.request_id,
+                 str(observation.attempt)),
+            ).fetchone() is not None:
+                raise ObservationConflict("observation_id already identifies another request attempt")
+            if existing is not None:
                 return False
             with self.path.open("a+b") as output:
                 output.seek(0, os.SEEK_END)
@@ -250,6 +318,8 @@ class FaultObservationStore:
                 output.write(payload)
                 output.flush()
                 os.fsync(output.fileno())
+            self._index_record(db, observation)
+            self._save_index_signature(db)
         return True
 
     def aggregate(self, *, now: float, window_seconds: float) -> dict[tuple[str, str], FaultAggregate]:
