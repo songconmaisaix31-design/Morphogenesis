@@ -22,6 +22,10 @@ B 启动记录：初始 prompt 未实际提交，主控仅补 Enter 恢复为 wo
 
 B 今日修前复现：基线 `73798cd6` 原矩阵 11/12、扩展 23/24、控制 13/13、exit 1，唯一失败仍是显式 count=null/audit 缺失；修后首轮原矩阵 12/12、扩展 24/24、控制 13/13、exit 0。Schema 除一个 required 删除外完全一致，FaultObservation 14 字段与精确 FC 源导出一致；零值/负值/孤立 audit/非法来源/非 audit 约束保留。任意正数与 unique(issue IDs) 数量不一致仍为已声明的消费侧校验责任，未实现生产消费者，不把该限制当本次修复能力。此前一次证据环境检查因历史提取文件 CRLF 字节不一致 exit 1，已保留日志，改从 Git 原字节提取到本轨 ignored `.runtime`，未改他树或安装依赖。
 
+B 修复提交 `188fae46de4f3d2fe4943461a62a9626caa5325d` 已在不可变 Git blob 上复验，12/12、24/24、13/13、exit 0 与工作树结果一致；旧 PLAN 前缀和 TASKS 历史原文不变、changed paths 全在写权内。证据 `artifacts/ai-evidence/schema-0929-exact-summary.json`；最终证据提交不再改 Schema，最终交付 SHA/remote 以 worker_done 回执为准。
+
+主控 10:56 转发 C（Owner 结果，非 B 独立验收）：产品 `8c57c4964fbf78b90d7232d3644975dab277d277`，最终 `621f588988899bdbc7c7a83e893369c4145d89b3`；六 owned 文件，push/remote 一致/clean；契约、53 T5、build、44 采用语义浏览器、既有 72 页面回归 exit 0。真实历史输入明确作为 replay，未新跑 live；C 资源已释放，D 独立验收启动。主控要求 B 完成本轨即交付，不等待 A 全量或 D 结论；后续汇总由受限集成登记。
+
 ## 当前有效段（2026-09-28 治理返修）
 
 ### 预算A/B（代码核对，待队长交叉复核）

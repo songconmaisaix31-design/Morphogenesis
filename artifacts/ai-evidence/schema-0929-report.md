@@ -4,6 +4,8 @@
 
 ## 版本与范围
 
+修复精确提交 `188fae46de4f3d2fe4943461a62a9626caa5325d`；后继交付提交仅补本报告/台账/计划状态和不可变复验结果，不再改 Schema。最终分支 SHA 和远端一致性随 worker_done 提交。
+
 - 开工分支 `morph-schema-closeout-0929`，HEAD/base `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；开工 status clean，`git ls-remote` 确认 origin/decentralized-swarm 同 SHA。
 - remote：`https://github.com/songconmaisaix31-design/Morphogenesis`。计划阶段 `b27a2ec16ce31b28d1b1ae60cd580288792fdcc9` 已 push，远端一致。
 - FaultObservation 源固定 `73e64cc70116ac658d85591d082c0684a4952c99`。治理树不包含 FC 实现，不把跨分支能力混算。
@@ -40,6 +42,14 @@ git diff --check
 初次证据环境检查 **exit 1**（[日志](schema-0929-environment-check.log)）：历史生产提取 `swarm/__init__.py` 为 CRLF 71 字节、Git blob 为 LF 70 字节，换行归一后相等；未进入矩阵。随后只在本轨 `.runtime` 从 Git 提取精确字节，字节检查成功；这是取证环境修正，不是产品修复轮次。修前已知红项为复现，修复后首轮通过，没有进行连续失败返修或越界安装。
 
 ## 真实限制与未执行
+
+不可变复验命令：
+
+```powershell
+& '../morph-fc-integration-0927/.venv/Scripts/python.exe' -B artifacts/ai-evidence/schema-0929-validate.py --revision 188fae46de4f3d2fe4943461a62a9626caa5325d --production-root .runtime/schema-0929/production --output .runtime/schema-0929/exact-results.json
+```
+
+结果仍为 **12/12、24/24、13/13、exit 0**，与 after.json 除 revision 标签外逐项一致；见 [精确复验摘要](schema-0929-exact-summary.json)、[日志](schema-0929-exact.log)、[退出码](schema-0929-exact.exit)。同时用 Git 基线比较确认旧 PLAN 全文为未改前缀、旧 TASKS 历史原文未变、所有已提交路径在 B 写权内，检查 exit 0。以下限制仍成立。
 
 - 两个额外不一致样本（正数1配空ID、正数2配单ID）仍被 Schema 接受。文档既有责任要求消费侧验证 `count == len(unique(ids))`、scope 归属和证据可追溯；本次仅记录差异，**未实现生产消费者**，不宣称完整语义验证。0 配非空 ID、重复 ID 等现有可表达约束仍实际拒绝。
 - `contract_local` 仅指候选 Schema 的 Owner 自验；`interface_live/task_live=NOT_RUN`，夹具不是真实日志采集。缺失/null 未补 0，任何数值都不能由本脚本推导成项目真实审计数量。

@@ -1,0 +1,56 @@
+{
+  "schema_revision": "188fae46de4f3d2fe4943461a62a9626caa5325d",
+  "baseline": "73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db",
+  "fault_source_sha": "73e64cc70116ac658d85591d082c0684a4952c99",
+  "verified_imported_sources": [
+    "swarm/__init__.py",
+    "swarm/fault_observations.py",
+    "swarm/models.py",
+    "swarm/task_ledger.py"
+  ],
+  "python": "3.12.13 (main, Jun 23 2026, 15:23:43) [MSC v.1944 64 bit (AMD64)]",
+  "jsonschema": "4.26.0",
+  "pydantic": "2.13.5",
+  "schema_diff": "only allOf/1/then/required removed",
+  "fault_observation_14_export_exact": true,
+  "non_audit_unchanged": true,
+  "optional_no_default_input_unchanged": true,
+  "original_matrix": "12/12",
+  "expanded_matrix": "24/24",
+  "controls_summary": "13/13",
+  "exit_code": 0,
+  "documented_limitations": [
+    {
+      "case": "positive_empty_ids",
+      "schema_valid": true,
+      "consumer_count_equals_unique_ids": false,
+      "production_consumer": "NOT_IMPLEMENTED"
+    },
+    {
+      "case": "positive_count_mismatch",
+      "schema_valid": true,
+      "consumer_count_equals_unique_ids": false,
+      "production_consumer": "NOT_IMPLEMENTED"
+    }
+  ],
+  "plan_old_prefix_unchanged": true,
+  "tasks_old_history_unchanged": true,
+  "exact_results_equal_worktree_results": true,
+  "scope_valid": true,
+  "changed_paths_through_schema_commit": [
+    "TASKS.md",
+    "artifacts/ai-evidence/schema-0929-after.exit",
+    "artifacts/ai-evidence/schema-0929-after.json",
+    "artifacts/ai-evidence/schema-0929-after.log",
+    "artifacts/ai-evidence/schema-0929-before.exit",
+    "artifacts/ai-evidence/schema-0929-before.json",
+    "artifacts/ai-evidence/schema-0929-before.log",
+    "artifacts/ai-evidence/schema-0929-environment-check.exit",
+    "artifacts/ai-evidence/schema-0929-environment-check.log",
+    "artifacts/ai-evidence/schema-0929-report.md",
+    "artifacts/ai-evidence/schema-0929-validate.py",
+    "docs/FC_DAY_PLAN_0929.md",
+    "docs/FC_LOG_SCHEMA_DRAFT_0928.md",
+    "docs/PLAN.md"
+  ]
+}

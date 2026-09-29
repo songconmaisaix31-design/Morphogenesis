@@ -14,6 +14,8 @@
 
 派发记录：A `task_bf99e1b4ba10 / ctx_d0bbed22831d`；B `task_d536a112682f / ctx_170180e15e72`；C `task_75eedbf12038 / ctx_9320f0ef60fa`。三个 Worker 已启动；允许各自 ignored `.runtime`，只读复用现成环境。跨轨缺口 Handoff，不改他树/锁文件/AGENTS/SWARM 文档；除 C 已批准前端写权外不改生产源码，A/B 无生产写权；C 无后端或 Schema 写权。
 
+**交付检查点（替代表内开工状态，不改变写权）**：B 修复 `188fae46de4f3d2fe4943461a62a9626caa5325d` 的 Owner 原矩阵 12/12、扩展 24/24、控制 13/13、exit 0，待独立验收/H3。主控转发 C 最终 `621f588988899bdbc7c7a83e893369c4145d89b3` 已 push/clean、replay 自验通过，待 D 独立验收；A 阶段 `f4779d45a1b1417ffa6bce37708e9a68d46cf4e5` 的全量及 cost_state 语义缺陷仍待后续结论。后续台账由受限集成登记，B 不等待他轨、不预填通过。
+
 ## 顺序、验收与停止条件
 
 1. **计划阶段**：B 核实 HEAD/remote/clean 状态、记录写权，立即回传计划路径与阶段状态；旧计划/历史失败原样保存。
