@@ -39,6 +39,16 @@ class EvoMapAdapter(ProviderAdapter):
                 retry_after_seconds=retry_after_seconds
             )
         
+        # A server/gateway failure does not prove that the request was rejected
+        # before execution. Body codes and billing/quota text cannot override it.
+        if status_code >= 500:
+            return ClassificationResult(
+                classification=FailureClassification.UNKNOWN_EFFECT,
+                normalized_reason=f"http_{status_code}",
+                retry_after_raw=retry_after_raw,
+                retry_after_seconds=retry_after_seconds
+            )
+
         # Handle various status codes
         if status_code == 429:
             return ClassificationResult(
@@ -120,15 +130,6 @@ class EvoMapAdapter(ProviderAdapter):
                         retry_after_seconds=retry_after_seconds
                     )
         
-        # Server errors (5xx) or connection issues are usually unknown effect
-        if status_code >= 500:
-            return ClassificationResult(
-                classification=FailureClassification.UNKNOWN_EFFECT,
-                normalized_reason=f"http_{status_code}",
-                retry_after_raw=retry_after_raw,
-                retry_after_seconds=retry_after_seconds
-            )
-            
         # HTTP 200 with valid content should have no classification
         if status_code == 200:
             return ClassificationResult(
