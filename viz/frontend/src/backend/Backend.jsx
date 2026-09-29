@@ -18,6 +18,36 @@ const Property = ({ icon, label, children }) => <div className='KFZpfa_propertyR
   <Icon name={icon} /><span className='property-label'>{label}</span><span className='property-value'>{children}</span>
 </div>;
 
+const adoptionValue = value => value == null || value === '' ? '未知' : String(value);
+function AdoptionTrace({ adoptions }) {
+  const records = Array.isArray(adoptions) ? adoptions : null;
+  return <section className='backend-adoptions' aria-labelledby='adoption-trace-title'>
+    <h2 id='adoption-trace-title'>采用记录</h2>
+    {!records ? <p>采用记录未提供。</p> : records.length === 0 ? <p>暂无采用记录；注入不代表采用。</p> : records.map((use, index) => {
+      const attempt = use?.attempt;
+      const member = `${adoptionValue(attempt?.agent?.role)}#${adoptionValue(attempt?.agent?.instance)}`;
+      const date = Number.isFinite(use?.used_at) ? new Date(use.used_at * 1000) : null;
+      const timestamp = date && Number.isFinite(date.getTime()) ? date.toISOString() : null;
+      // React keys only: retain every supplied record, including repeated uses.
+      const key = JSON.stringify([use?.run_id, attempt, use?.ref, use?.used_at, index]);
+      return <details className='backend-adoption' key={key}>
+        <summary>{adoptionValue(use?.ref?.gene_id)} · v{adoptionValue(use?.ref?.version)} · {adoptionValue(attempt?.task_id)} · 尝试 {adoptionValue(attempt?.attempt)} · {adoptionValue(use?.provenance)}</summary>
+        <dl>
+          <div><dt>运行</dt><dd>{adoptionValue(use?.run_id)}</dd></div>
+          <div><dt>任务</dt><dd>{adoptionValue(attempt?.task_id)}</dd></div>
+          <div><dt>成员</dt><dd>{member}</dd></div>
+          <div><dt>尝试</dt><dd>{adoptionValue(attempt?.attempt)}</dd></div>
+          <div><dt>Gene</dt><dd>{adoptionValue(use?.ref?.gene_id)}</dd></div>
+          <div><dt>版本</dt><dd>{adoptionValue(use?.ref?.version)}</dd></div>
+          <div><dt>资产</dt><dd>{adoptionValue(use?.ref?.asset_id)}</dd></div>
+          <div><dt>采用时间（UTC）</dt><dd>{timestamp ? <time dateTime={timestamp}>{timestamp}</time> : '未知'}</dd></div>
+          <div><dt>来源</dt><dd>{adoptionValue(use?.provenance)}</dd></div>
+        </dl>
+      </details>;
+    })}
+  </section>;
+}
+
 function TopologyPanel({ dashboard, active, reducedMotion }) {
   const { Component: SwarmTopology, error } = useTrackComponent('swarm');
   useEffect(() => { document.body.dataset.swarmModule = SwarmTopology && !error ? 'loaded' : 'fallback'; }, [SwarmTopology, error]);
@@ -115,7 +145,7 @@ function Backend({ dashboard, active = true, reducedMotion = false, evomap, evom
             </aside>
           </section>
           <section {...panelProps('topology')} className='backend-document'><TopologyPanel dashboard={dashboard} active={active && selected === 'topology'} reducedMotion={reducedMotion} /></section>
-          <section {...panelProps('genes')} className='backend-document'><div className='backend-page-heading'><h1>Gene 池</h1></div><div id='story-genes' className='gene-ledger-list'><p>尚无 Gene 快照</p></div><h2>谱系</h2><div id='gene-chart' className='chart' /><div id='gene-empty' className='empty' hidden /></section>
+          <section {...panelProps('genes')} className='backend-document'><div className='backend-page-heading'><h1>Gene 池</h1></div><div id='story-genes' className='gene-ledger-list'><p>尚无 Gene 快照</p></div><AdoptionTrace adoptions={dashboard?.adoptions} /><h2>谱系</h2><div id='gene-chart' className='chart' /><div id='gene-empty' className='empty' hidden /></section>
           <section {...panelProps('evidence')} className='backend-document'><div className='backend-page-heading'><h1>证据与指标</h1></div><h2>消息流</h2><div id='message-chart' className='chart' /><div id='message-empty' className='empty' hidden /><h2>历史指标</h2><div id='metric-chart' className='chart' /><div id='metric-empty' className='empty' hidden /></section>
           <section {...panelProps('evomap')} className='backend-document'><EvoMapPanel evomap={evomap} detail={evomapDetail} onSearch={onSearch} onOpenAsset={onOpenAsset} /></section>
         </div>

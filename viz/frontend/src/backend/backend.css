@@ -76,6 +76,12 @@
 .morph-backend .has-swarm-module .pipe-empty { display:none; }
 .backend-pipe-details { color:var(--ink-dim);font-size:12px; }
 .backend-pipe-details summary { cursor:pointer;padding:8px 0; }
+.backend-adoption { min-width:0;border-bottom:1px solid var(--line);overflow-wrap:anywhere; }
+.backend-adoption summary { cursor:pointer;padding:12px 0; }
+.backend-adoption dl { margin:0 0 12px;font-size:12px; }
+.backend-adoption dl > div { display:grid;grid-template-columns:100px minmax(0,1fr);gap:12px;margin:6px 0; }
+.backend-adoption dt,.backend-adoptions > p { color:var(--ink-dim); }
+.backend-adoption dd { margin:0; }
 .morph-backend .pipe-list { max-height:200px;border:0;padding:0; }
 .morph-backend .morph-evomap { padding:0;max-width:none; }
 .morph-backend .morph-evomap-head h2 { font-size:20px;margin:0; }
