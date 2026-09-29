@@ -2,6 +2,8 @@
 
 ## 2026-09-29 今日新增台账（本次授权；历史记录保留）
 
+**I 今日最终整合（受限候选）：** `morph-closeout-integration-0929` 的标准合并 `4c3dc46e7c0459680a7567ff6d91ba44301c3819` 接纳 A `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd` 与 B 最终材料 `092cadaf497482e00518dfd86d958a81c876a7bd`；D `969d3274622538a36ac8a60e09c41be86bea9c60` 报告单文件原 blob 引入。B 后续仅四治理文档、Schema 对 318dd 字节不变；候选生产、A 两测试、AGENTS/SWARM/锁不变。精确合并源码 focused 20 / exit 0（43.60s），Schema 12/12、24/24、13/13 / exit 0；首次源码树内 basetemp 被 protected_runtime_state 拒绝，18 failed / 2 passed / exit 1 原样保留，改用精确导出源码与平级状态目录后通过。699/strict87 仅复用 A f477 原日志，非 merge SHA 重跑。C `morph-readonly-app-0929@621f588988899bdbc7c7a83e893369c4145d89b3` 独立保留；cost_state 语义 exit 1 / OPEN、unknown hold 无晚到结算、H1/H3/正式 deepseek FC-E 未闭合。正式 FC-E 已授权范围保留，真实限制是原隔离 profile/launcher 与适用调用上限未核实，不替代引擎。发布三锁未齐，无生产合并/tag/live；详见 [I 集成报告](artifacts/ai-evidence/integration-0929-closeout.md)，最终材料提交与 push 以交付回执为准。
+
 用户授权今日底层收口与受限只读应用并行，取代下方昨夜“尚未收到 nullable 修复授权”的当时状态；不追认历史失败或冻结。计划和排他写权见 `docs/FC_DAY_PLAN_0929.md` 及 `docs/PLAN.md` 今日附录。
 
 | 轨 | 基线 / task / dispatch | 今日状态与限制 |

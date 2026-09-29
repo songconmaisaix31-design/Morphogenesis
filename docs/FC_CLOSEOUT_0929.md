@@ -1,6 +1,6 @@
 # FC 2026-09-29 人类审批 / 下一步包
 
-**主控 11:13 已确认本轮结果齐备并通知封存；材料已收口，FC 整体仍 BLOCKED、未冻结。** 本包仅索引证据和待决项，不替代 H1/H3 签字或正式 FC-E。FC 生产基线固定为 `73e64cc70116ac658d85591d082c0684a4952c99`；B 治理树未合入 FC，不能把两个分支能力混算。
+**主控 11:13 已确认本轮结果齐备并通知封存；FC 整体仍 BLOCKED、未冻结。** 本包仅索引证据和待决项，不替代 H1/H3 签字或正式 FC-E。FC 生产基线固定为 `73e64cc70116ac658d85591d082c0684a4952c99`；“B 治理树未合入 FC”是 B 交付阶段事实。I 已将 A/B 合入隔离候选 `4c3dc46e7c0459680a7567ff6d91ba44301c3819`，生产主线未合，C 仍是独立第一代候选。
 
 ## 1. 已有交付与证据级别
 
@@ -26,6 +26,8 @@
 
 **FC-E：** 正式 deepseek-r1 v2 报告仍未补，D/Codex 验收不能替代。沿用 [v2 协议](FC_E_REVIEW_PROTOCOL_V2.md)：hypothesis 标待验证；fact 具精确 SHA、file:line、逐字 quote 和机械结果，引用匹配不证明推论成立。历史 qwen 降级稿仍拒收。
 
-只读通道盘点：本机 `dsh --help`、`dsh --profile headless --help` 均 exit 0；现有 headless 语法是 `dsh --profile headless "任务文本"`。本 Dispatch 未继承 `DSH_HOME`，未证明默认 profile 就是既有 DashScope deepseek-r1 隔离配置；正式报告文件 `morph-fc-e/artifacts/ai-evidence/review-0928-integration.md` 不存在。因此仅帮助命令可直接复用，**尚无已核实可直接执行的正式评审命令**；需主控定位原有隔离 launcher/profile，并明确新的有界调用授权后由 FC-E 执行。本次未安装、读出密钥、调用模型或付费 live，不以 CLI 可启动宣称工具通道已修复。
+只读通道盘点：B 的 `dsh --help`、`dsh --profile headless --help` 均 exit 0；现有 headless 语法是 `dsh --profile headless "任务文本"`。B Dispatch 未继承 `DSH_HOME`，未证明默认 profile 就是既有 DashScope deepseek-r1 隔离配置；正式报告文件 `morph-fc-e/artifacts/ai-evidence/review-0928-integration.md` 未补。因此仅帮助命令可直接复用，**尚无已核实可直接执行的正式评审命令**；需恢复原有已授权的 v2 正式 deepseek 评审范围，核实原隔离 launcher/profile、工具通道与适用调用上限后由 FC-E 执行，不能擅用默认 provider 或猜配置。本次未安装、读出密钥、调用模型或付费 live，不以 CLI 可启动宣称工具通道已修复。
 
-下一步：I 接续 A/B 隔离集成，组合门禁待 I 实际交付；队长决定 cost_state 生产修复范围、H1/H3；原 FC-E 通道补正式评审。主控 merge-tree 盘点 A/B 无重叠冲突；C 与 FC 从 `605cf48` 分叉，Backend.jsx/两 bundle 冲突，**本轮分别保留候选，不强合前端**。本包不预填合并通过；适用门禁、可接受 FC-E 无高危报告、真人 H1 三锁未齐，**生产 merge/tag、Schema 冻结、人工签字、T9 生产采集/接线、T10 演练均 NOT_RUN**；`contract_local` 不扩写成 `interface_live/task_live`。
+I 实际整合：A `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd` + B 最终材料 `092cadaf497482e00518dfd86d958a81c876a7bd` 已标准 no-ff 合并为 `4c3dc46e7c0459680a7567ff6d91ba44301c3819`，D `969d3274622538a36ac8a60e09c41be86bea9c60` 报告按精确 blob 引入。B 后续四治理文档范围、Schema 对 318dd 原字节、生产与 A 两测试及 protected 路径不变均已核实。精确合并源码 focused **20 passed / exit 0 / 43.60s**；Schema 原 **12/12**、扩展 **24/24**、控制 **13/13 / exit 0**。首次 I 根目录下 basetemp 触发既有 protected_runtime_state，**18 failed / 2 passed / exit 1**；按主控确认的精确 LF archive + 平级状态目录布局纠正后复验通过，没有改保护或测试。全量 699 / strict 87 复用 A 测试 SHA f4779d45 原日志，**未在 merge SHA 重跑**；详见 [I 集成报告](../artifacts/ai-evidence/integration-0929-closeout.md)。
+
+下一步：队长决定 cost_state 最小生产元数据修复范围，由原 Owner 实施后独立复验；真人完成 H1/H3，原 FC-E 核实隔离通道并补正式评审。C 与 FC 从 `605cf48` 分叉，Backend.jsx/两 bundle 冲突，**本轮分别保留候选，不强合前端**。本包仅为今日首批三轨收口，不代表 T1–T11 或今日全部开发完成，继承待办未清空；benchmark 的 BENCHMARK_POLL_MS 风险本轮未核验，不替其他工作树断言修复状态。候选门禁不解除发布三锁；**生产 merge/tag、Schema 冻结、人工签字、依赖 H3 的 T9 生产采集/接线、T10 演练均 NOT_RUN**，`contract_local` 不扩写成 `interface_live/task_live`。
