@@ -12,7 +12,7 @@ import random
 import sqlite3
 from threading import Event, Lock, Thread
 import time
-from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, cast
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, TypeAdapter
@@ -31,6 +31,7 @@ from local_assets.snapshot import snapshot_revision
 from local_assets.store import LocalAssetStore
 from local_assets.validate import AssetValidator, blast_radius, inspect_candidate
 from orchestration.gateway import _usage
+from orchestration.fc_logging import EventKind, FCLogWriter
 from swarm.budget import BudgetBlocked, BudgetLedger
 from swarm.hub_mirror import HubMirror
 from swarm.lease import LeaseManager
@@ -38,6 +39,7 @@ from swarm.models import (BudgetPolicy, BudgetSnapshot, ExecutionBound, Lease, L
                           Signal)
 from swarm.pheromone import PheromoneField
 from swarm.router import Router
+from swarm.fault_observations import FaultObservationStore
 from swarm.task_ledger import LeaseLost, RunLimitReached, TaskLedger
 
 from swarm.failure_chain import (
@@ -61,6 +63,7 @@ _SOURCE = Path(__file__).resolve().parents[1]
 _FIXTURE_USAGE: JsonValue = {"usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}}
 _KNOWN_FAILURE_CLASSES = frozenset({"confirmed_rejection", "unknown_effect",
                                     "budget_exhausted", "capability_mismatch"})
+_T = TypeVar("_T")
 
 
 def _load_failure_components() -> tuple[Any, Any]:
@@ -360,7 +363,7 @@ class _Renewal:
 class Worker:
     def __init__(self, config: WorkerConfig, executor: Executor | None = None, *,
                  mirror: HubMirror | None = None, candidates: Sequence[Executor] | None = None,
-                 breaker_config: "BreakerConfig | None" = None) -> None:
+                 breaker_config: "BreakerConfig | None" = None, fc_log: FCLogWriter | None = None) -> None:
         self.config = config
         self.target = check_target(config.target, (_SOURCE,))
         self.state = check_state_path(config.state)
@@ -393,6 +396,18 @@ class Worker:
         self._active: Reservation | None = None
         self._pending: dict[str, JsonValue] | None = None
         self._last_failure: dict[str, JsonValue] | None = None
+        self.fc_log = fc_log or FCLogWriter(self.state, config.swarm_id, provenance=self.executor.provenance,
+                                            original_run_uri=self.executor.original_run_uri)
+        if (self.fc_log.run_id != config.swarm_id or self.fc_log.provenance != self.executor.provenance
+                or self.fc_log.original_run_uri != self.executor.original_run_uri
+                or (self.fc_log.drill and any(item.provenance != "mock" for item in self._candidates))):
+            raise ValueError("fc_log_source_mismatch")
+        if self.fc_log.root.resolve() == self.target or self.fc_log.root.resolve().is_relative_to(self.target):
+            raise ValueError("fc_log_must_be_outside_promotion_target")
+        self._fc_pending: list[tuple[EventKind, str, float, float | None, dict[str, object],
+                                     Provenance, str | None]] = []
+        self._fc_source = self.executor
+        self._fc_sources: dict[str, Executor] = {}
         store_cls, breaker_cls = _load_failure_components()
         self.fault_observation_store: FaultStoreLike | None = None
         self.shared_breaker: SharedBreakerLike | None = None
@@ -516,7 +531,8 @@ class Worker:
             execution_id = task.result.get("execution_id")
             if not isinstance(execution_id, str):
                 raise AssetSafetyError("finalization_execution_missing")
-            self.consumer.record_adoption(execution_id, result_id, self.ledger)
+            self._fc_asset(task.signal.task_id, consumed[0], "adopt",
+                           lambda: self.consumer.record_adoption(execution_id, result_id, self.ledger))
         if not pending.get("feedback_started"):
             pending["feedback_started"] = True
             self._status("finalizing")
@@ -589,7 +605,8 @@ class Worker:
             input_context=json.dumps({"task_id": signal.task_id, "payload": signal.payload,
                                       "baseline": revision}, sort_keys=True, ensure_ascii=False),
         )
-        injected = self.consumer.inject(asset_id, context)
+        injected = self._fc_asset(signal.task_id, asset_id, "inject",
+                                  lambda: self.consumer.inject(asset_id, context))
         path_map = TypeAdapter(dict[str, str]).validate_python(signal.payload.get("path_map"))
         preimages = self._preimages(path_map, signal.scope)
         return self.consumer.execute(injected, attempt=attempt, base_revision=revision,
@@ -612,6 +629,58 @@ class Worker:
         store = self.fault_observation_store
         if store is not None:
             store.append(fact)
+        source = self._fc_sources.get(fact.request_id, self.executor)
+        self._fc_pending.append(("fault_observation", fact.task_id, fact.occurred_at, None,
+                                 {"fault_observation": fact}, source.provenance, source.original_run_uri))
+
+    def _fc_asset(self, task_id: str, asset_id: str,
+                  operation: Literal["inject", "validate", "apply", "adopt"], call: Callable[[], _T]) -> _T:
+        started = time.perf_counter()
+        outcome = "failed"
+        evidence: str | None = None
+        try:
+            value = call()
+            outcome = "succeeded"
+            if isinstance(value, ValidationReport):
+                outcome = "succeeded" if value.passed else "failed"
+                evidence = value.report_id
+            return value
+        finally:
+            duration = time.perf_counter() - started
+            self._fc_pending.append(("asset_call", task_id, time.time(), duration, {"asset_calls": [{
+                "asset_id": asset_id, "operation": operation, "worker_id": self.worker_id,
+                "duration_seconds": duration, "outcome": outcome, "evidence_ref": evidence,
+            }]}, self._fc_source.provenance, self._fc_source.original_run_uri))
+
+    def _fc_flush(self, signal: Signal, duration: float) -> None:
+        # All observation IO occurs after execution/settlement and lease cleanup.
+        # Failure here never changes the return value, remote effect, or budget.
+        pending, self._fc_pending = self._fc_pending, []
+        try:
+            self.fc_log.observe_ledger(self.ledger, self.worker_id)
+            for event, task_id, at, seconds, facts, provenance, origin in pending:
+                if event == "fault_observation":
+                    # FC-B creates observation_id internally. Read that exact
+                    # persisted identity; never manufacture a second UUID.
+                    fact = cast(FailureObservationFact, facts["fault_observation"])
+                    stored = FaultObservationStore(self.state / "fault_observations.jsonl", self.config.swarm_id).read()
+                    observation = next(item for item in stored.records
+                                       if (item.request_id, item.attempt) == (fact.request_id, fact.attempt))
+                    facts = {"fault_observation": observation}
+                writer = (self.fc_log if (provenance, origin) == (self.fc_log.provenance, self.fc_log.original_run_uri)
+                          else FCLogWriter(self.fc_log.root, self.config.swarm_id, provenance=provenance,
+                                           drill=self.fc_log.drill, original_run_uri=origin))
+                emitted = writer.emit(event, task_id=task_id, at=at, sequence=None, duration_seconds=seconds, **facts)
+                if not emitted and writer is not self.fc_log:
+                    self.fc_log.diagnostic()
+            task = self.ledger.get(signal.task_id)
+            self.fc_log.emit("task", task_id=signal.task_id, at=task.updated_at, duration_seconds=duration,
+                             dag_node={"task_id": signal.task_id, "dependencies": list(task.dependencies),
+                                       "status": task.status})
+        except Exception:
+            self.fc_log.diagnostic()
+        finally:
+            self._fc_sources.clear()
 
     @staticmethod
     def _metadata_retry_after_seconds(metadata: dict[str, JsonValue]) -> float | None:
@@ -685,6 +754,7 @@ class Worker:
             self._append_observation(fact)
 
     def _process(self, signal: Signal, lease: Lease) -> str:
+        process_started = time.perf_counter()
         attempt = AttemptId(task_id=signal.task_id, agent=self.config.agent, attempt=lease.token - 1)
         keeper = _Renewal(self.leases, lease, self.config.lease_seconds)
         report: ValidationReport | None = None
@@ -757,6 +827,8 @@ class Worker:
                 reservation = self.budget.reserve(self.worker_id, signal.task_id, bound,
                                                   request_id=f"{signal.task_id}:{lease.token}:{index}")
                 self._active = reservation
+                self._fc_source = candidate_executor
+                self._fc_sources[reservation.request_id] = candidate_executor
                 if deferred is not None:
                     # A switch factually happened only once the next request was admitted.
                     self._append_observation(deferred.model_copy(update={
@@ -912,8 +984,9 @@ class Worker:
             enter_phase("publish_asset")
             asset_id = self.assets.publish(candidate)
             enter_phase("validate")
-            report = AssetValidator(self.assets, self.target, policy=policy,
-                                    timeout_seconds=self.config.validation_seconds).validate(asset_id)
+            validator = AssetValidator(self.assets, self.target, policy=policy,
+                                       timeout_seconds=self.config.validation_seconds)
+            report = self._fc_asset(signal.task_id, asset_id, "validate", lambda: validator.validate(asset_id))
             outcome = "quarantined"
 
             if report is None or not report.passed:
@@ -948,7 +1021,7 @@ class Worker:
             }
 
             def apply(assert_owned: Callable[[], None]) -> None:
-                prepared.apply(assert_owned)
+                self._fc_asset(signal.task_id, prepared.report.asset_id, "apply", lambda: prepared.apply(assert_owned))
 
             parsed_usage = _usage(usage)
             self._pending = {
@@ -1002,7 +1075,10 @@ class Worker:
                                 result_id=result_id, consumed=[consumption.asset_id] if consumption else [],
                                 metadata={**(result.metadata if result else {}), **failure})
             finally:
-                self.leases.release(keeper.current)
+                try:
+                    self.leases.release(keeper.current)
+                finally:
+                    self._fc_flush(signal, time.perf_counter() - process_started)
 
     def _backoff(self, count: int) -> None:
         upper = min(5.0, self.config.idle_seconds * 2 ** min(count, 8))
@@ -1026,6 +1102,7 @@ class Worker:
             self.remaining -= 1
             self._status("sensing")
             signal = self.router.choose(self.worker_id, self.config.locality, self.config.capabilities)
+            self.fc_log.observe_ledger(self.ledger, self.worker_id)
             if signal is None:
                 local = self.ledger.candidates(self.config.locality, include_blocked=True)
                 if local and len(local) < 100 and all(task.status in {"completed", "failed"} for task in local):

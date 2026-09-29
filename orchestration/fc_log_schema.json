@@ -1,0 +1,1816 @@
+{
+  "$defs": {
+    "Acceptance": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_local": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "passed",
+            "failed",
+            "blocked"
+          ],
+          "title": "Contract Local",
+          "type": "string"
+        },
+        "interface_live": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "passed",
+            "failed",
+            "blocked"
+          ],
+          "title": "Interface Live",
+          "type": "string"
+        },
+        "task_live": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "passed",
+            "failed",
+            "blocked"
+          ],
+          "title": "Task Live",
+          "type": "string"
+        },
+        "provenance": {
+          "default": "live",
+          "enum": [
+            "live",
+            "replay",
+            "mock"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "original_run_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Original Run Uri"
+        }
+      },
+      "title": "Acceptance",
+      "type": "object"
+    },
+    "AgentId": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "planner",
+            "builder",
+            "reviewer",
+            "aggregator"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "instance": {
+          "minimum": 0,
+          "title": "Instance",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "role",
+        "instance"
+      ],
+      "title": "AgentId",
+      "type": "object"
+    },
+    "AssetCall": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "operation": {
+          "enum": [
+            "lookup",
+            "inject",
+            "validate",
+            "apply",
+            "adopt"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "worker_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Worker Id"
+        },
+        "duration_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duration Seconds"
+        },
+        "outcome": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "unknown"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "evidence_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evidence Ref"
+        }
+      },
+      "required": [
+        "asset_id",
+        "operation",
+        "worker_id",
+        "duration_seconds",
+        "outcome",
+        "evidence_ref"
+      ],
+      "title": "AssetCall",
+      "type": "object"
+    },
+    "AttemptId": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "agent": {
+          "$ref": "#/$defs/AgentId"
+        },
+        "attempt": {
+          "minimum": 0,
+          "title": "Attempt",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "task_id",
+        "agent",
+        "attempt"
+      ],
+      "title": "AttemptId",
+      "type": "object"
+    },
+    "Checkpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "enum": [
+            "clamp",
+            "mean",
+            "unique"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "passed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Passed"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Checkpoint",
+      "type": "object"
+    },
+    "Checkpoints": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/Checkpoint"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "title": "Checks",
+          "type": "array"
+        },
+        "passed_count": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Passed Count",
+          "type": "integer"
+        },
+        "total": {
+          "const": 3,
+          "default": 3,
+          "title": "Total",
+          "type": "integer"
+        },
+        "ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Ratio",
+          "type": "number"
+        },
+        "verification": {
+          "$ref": "#/$defs/Verification"
+        },
+        "provenance": {
+          "enum": [
+            "live",
+            "replay",
+            "mock"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "checks",
+        "passed_count",
+        "ratio",
+        "verification",
+        "provenance"
+      ],
+      "title": "Checkpoints",
+      "type": "object"
+    },
+    "ClaimEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "worker_id": {
+          "title": "Worker Id",
+          "type": "string"
+        },
+        "token": {
+          "minimum": 1,
+          "title": "Token",
+          "type": "integer"
+        },
+        "outcome": {
+          "enum": [
+            "claimed",
+            "released",
+            "lost",
+            "submitted"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "worker_id",
+        "token",
+        "outcome"
+      ],
+      "title": "ClaimEvent",
+      "type": "object"
+    },
+    "DagNode": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dependencies",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "available",
+            "claimed",
+            "submitting",
+            "partial",
+            "handoff",
+            "completed",
+            "failed",
+            "blocked"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "dependencies",
+        "status"
+      ],
+      "title": "DagNode",
+      "type": "object"
+    },
+    "FaultObservation": {
+      "additionalProperties": false,
+      "description": "One request attempt; evidence_ref is FC-A's evidence_hash verbatim.\n\nattempt is zero-based, matching contracts.identity.AttemptId.attempt. Time is\nUTC Unix seconds. Missing switch, cost state and cooldown remain unknown.\nA replay may regenerate observation_id but must retain every other fact.",
+      "properties": {
+        "observation_id": {
+          "minLength": 1,
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "attempt": {
+          "minimum": 0,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "failure_class": {
+          "enum": [
+            "confirmed_rejection",
+            "unknown_effect",
+            "budget_exhausted",
+            "capability_mismatch"
+          ],
+          "title": "Failure Class",
+          "type": "string"
+        },
+        "normalized_reason": {
+          "minLength": 1,
+          "title": "Normalized Reason",
+          "type": "string"
+        },
+        "retry_after_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retry After Seconds"
+        },
+        "switched_to": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Switched To"
+        },
+        "cost_state": {
+          "anyOf": [
+            {
+              "enum": [
+                "settled",
+                "unknown",
+                "reserved"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost State"
+        },
+        "occurred_at": {
+          "minimum": 0,
+          "title": "Occurred At",
+          "type": "number"
+        },
+        "evidence_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Ref"
+        }
+      },
+      "required": [
+        "run_id",
+        "task_id",
+        "request_id",
+        "attempt",
+        "provider",
+        "model",
+        "failure_class",
+        "normalized_reason",
+        "occurred_at"
+      ],
+      "title": "FaultObservation",
+      "type": "object"
+    },
+    "GeneRef": {
+      "additionalProperties": false,
+      "properties": {
+        "gene_id": {
+          "minLength": 1,
+          "title": "Gene Id",
+          "type": "string"
+        },
+        "version": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "asset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Asset Id"
+        }
+      },
+      "required": [
+        "gene_id"
+      ],
+      "title": "GeneRef",
+      "type": "object"
+    },
+    "GeneView": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/GeneRef"
+        },
+        "provenance": {
+          "enum": [
+            "live",
+            "replay",
+            "mock"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "original_run_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Original Run Uri"
+        },
+        "source_attempt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AttemptId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "weight": {
+          "title": "Weight",
+          "type": "number"
+        },
+        "use_count": {
+          "title": "Use Count",
+          "type": "integer"
+        },
+        "injected_count": {
+          "title": "Injected Count",
+          "type": "integer"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "number"
+        },
+        "last_used_at": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Used At"
+        },
+        "evaluated_at": {
+          "title": "Evaluated At",
+          "type": "number"
+        },
+        "tau_seconds": {
+          "title": "Tau Seconds",
+          "type": "number"
+        },
+        "archived_at": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Archived At"
+        },
+        "remote_archive_status": {
+          "default": "not_synchronized",
+          "title": "Remote Archive Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "provenance",
+        "original_run_uri",
+        "source_attempt",
+        "weight",
+        "use_count",
+        "injected_count",
+        "created_at",
+        "last_used_at",
+        "evaluated_at",
+        "tau_seconds",
+        "archived_at"
+      ],
+      "title": "GeneView",
+      "type": "object"
+    },
+    "IssueAudit": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "partial",
+            "complete"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "protocol_id": {
+          "minLength": 1,
+          "title": "Protocol Id",
+          "type": "string"
+        },
+        "scope": {
+          "description": "Run, evaluated workflow, and trace interval covered",
+          "minLength": 1,
+          "title": "Scope",
+          "type": "string"
+        },
+        "reviewer": {
+          "minLength": 1,
+          "title": "Reviewer",
+          "type": "string"
+        },
+        "confirmed_issue_ids": {
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": "Confirmed Issue Ids",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "protocol_id",
+        "scope",
+        "reviewer",
+        "confirmed_issue_ids",
+        "evidence_refs"
+      ],
+      "title": "IssueAudit",
+      "type": "object"
+    },
+    "MemberAvailability": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "$ref": "#/$defs/AgentId"
+        },
+        "available": {
+          "default": true,
+          "title": "Available",
+          "type": "boolean"
+        },
+        "changed_at": {
+          "minimum": 0,
+          "title": "Changed At",
+          "type": "number"
+        },
+        "reason": {
+          "default": "fixed logical member",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent",
+        "changed_at"
+      ],
+      "title": "MemberAvailability",
+      "type": "object"
+    },
+    "PipeState": {
+      "additionalProperties": false,
+      "properties": {
+        "src": {
+          "$ref": "#/$defs/AgentId"
+        },
+        "dst": {
+          "$ref": "#/$defs/AgentId"
+        },
+        "weight": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Weight",
+          "type": "number"
+        },
+        "flow": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Flow",
+          "type": "number"
+        },
+        "success_rate": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Success Rate",
+          "type": "number"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "src",
+        "dst"
+      ],
+      "title": "PipeState",
+      "type": "object"
+    },
+    "RehearsalSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "executor": {
+          "default": "codex",
+          "enum": [
+            "codex",
+            "evomap"
+          ],
+          "title": "Executor",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "stage": {
+          "enum": [
+            "task_ready",
+            "repair_selected",
+            "repair_reviewed",
+            "gene_generated",
+            "awaiting_offline",
+            "member_offline",
+            "recovery_ready",
+            "recovery_selected",
+            "recovery_reviewed",
+            "gene_adopted",
+            "decaying",
+            "archived",
+            "completed",
+            "failed"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "at": {
+          "description": "Actual Unix wall-clock seconds",
+          "minimum": 0,
+          "title": "At",
+          "type": "number"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "task_description": {
+          "title": "Task Description",
+          "type": "string"
+        },
+        "provenance": {
+          "enum": [
+            "live",
+            "replay",
+            "mock"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "acceptance": {
+          "$ref": "#/$defs/Acceptance"
+        },
+        "checkpoints": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Checkpoints"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/MemberAvailability"
+          },
+          "title": "Members",
+          "type": "array"
+        },
+        "pipes": {
+          "items": {
+            "$ref": "#/$defs/PipeState"
+          },
+          "title": "Pipes",
+          "type": "array"
+        },
+        "routing": {
+          "$ref": "#/$defs/RoutingFact"
+        },
+        "genes": {
+          "items": {
+            "$ref": "#/$defs/GeneView"
+          },
+          "title": "Genes",
+          "type": "array"
+        },
+        "adoptions": {
+          "items": {
+            "$ref": "#/$defs/UseRecord"
+          },
+          "title": "Adoptions",
+          "type": "array"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/TaskResult"
+          },
+          "title": "Results",
+          "type": "array"
+        },
+        "retrievable_gene_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Retrievable Gene Ids",
+          "type": "array"
+        },
+        "tau_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Tau Seconds",
+          "type": "number"
+        },
+        "archive_threshold": {
+          "exclusiveMaximum": 1,
+          "exclusiveMinimum": 0,
+          "title": "Archive Threshold",
+          "type": "number"
+        },
+        "max_model_calls": {
+          "const": 2,
+          "default": 2,
+          "title": "Max Model Calls",
+          "type": "integer"
+        },
+        "model_calls_started": {
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Model Calls Started",
+          "type": "integer"
+        },
+        "cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Usd"
+        },
+        "message": {
+          "default": "",
+          "title": "Message",
+          "type": "string"
+        },
+        "failure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failure"
+        }
+      },
+      "required": [
+        "sequence",
+        "stage",
+        "at",
+        "task_id",
+        "task_description",
+        "provenance",
+        "acceptance",
+        "members",
+        "pipes",
+        "routing",
+        "tau_seconds",
+        "archive_threshold",
+        "model_calls_started"
+      ],
+      "title": "RehearsalSnapshot",
+      "type": "object"
+    },
+    "RouteCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "concentration": {
+          "title": "Concentration",
+          "type": "number"
+        },
+        "capability_match": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Capability Match",
+          "type": "number"
+        },
+        "w_history": {
+          "title": "W History",
+          "type": "number"
+        },
+        "urgency": {
+          "title": "Urgency",
+          "type": "number"
+        },
+        "base_urgency": {
+          "title": "Base Urgency",
+          "type": "number"
+        },
+        "age_weight": {
+          "title": "Age Weight",
+          "type": "number"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        },
+        "probability": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "task_id",
+        "concentration",
+        "capability_match",
+        "w_history",
+        "urgency",
+        "base_urgency",
+        "age_weight",
+        "score",
+        "probability"
+      ],
+      "title": "RouteCandidate",
+      "type": "object"
+    },
+    "RouteSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "worker_id": {
+          "title": "Worker Id",
+          "type": "string"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Selected"
+        },
+        "candidates": {
+          "items": {
+            "$ref": "#/$defs/RouteCandidate"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "filtered_task_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Filtered Task Ids",
+          "type": "array"
+        },
+        "beta": {
+          "title": "Beta",
+          "type": "number"
+        },
+        "exploration": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Exploration",
+          "type": "number"
+        }
+      },
+      "required": [
+        "worker_id",
+        "selected",
+        "candidates",
+        "filtered_task_ids",
+        "beta",
+        "exploration"
+      ],
+      "title": "RouteSnapshot",
+      "type": "object"
+    },
+    "RoutingFact": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "eligible_members": {
+          "items": {
+            "$ref": "#/$defs/AgentId"
+          },
+          "title": "Eligible Members",
+          "type": "array"
+        },
+        "selected_attempt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AttemptId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "removed_member": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "removed_at": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Removed At"
+        },
+        "boundary": {
+          "const": "between_tasks",
+          "default": "between_tasks",
+          "title": "Boundary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "eligible_members"
+      ],
+      "title": "RoutingFact",
+      "type": "object"
+    },
+    "TaskResult": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "attempt": {
+          "$ref": "#/$defs/AttemptId"
+        },
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "interrupted",
+            "pending_review",
+            "insufficient_evidence"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/Verification"
+        },
+        "artifact_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Uri"
+        },
+        "provenance": {
+          "default": "live",
+          "enum": [
+            "live",
+            "replay",
+            "mock"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "original_run_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Original Run Uri"
+        },
+        "acceptance": {
+          "$ref": "#/$defs/Acceptance"
+        },
+        "usage": {
+          "$ref": "#/$defs/Usage"
+        }
+      },
+      "required": [
+        "run_id",
+        "task_id",
+        "attempt",
+        "status"
+      ],
+      "title": "TaskResult",
+      "type": "object"
+    },
+    "Usage": {
+      "additionalProperties": false,
+      "description": "None means unreported/unknown, distinct from a measured zero.",
+      "properties": {
+        "tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens"
+        },
+        "cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Usd"
+        }
+      },
+      "title": "Usage",
+      "type": "object"
+    },
+    "UseRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "attempt": {
+          "$ref": "#/$defs/AttemptId"
+        },
+        "ref": {
+          "$ref": "#/$defs/GeneRef"
+        },
+        "used_at": {
+          "title": "Used At",
+          "type": "number"
+        },
+        "provenance": {
+          "enum": [
+            "live",
+            "replay",
+            "mock"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "attempt",
+        "ref",
+        "used_at",
+        "provenance"
+      ],
+      "title": "UseRecord",
+      "type": "object"
+    },
+    "Verification": {
+      "additionalProperties": false,
+      "properties": {
+        "passed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Passed"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "exit_code": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exit Code"
+        },
+        "summary": {
+          "default": "Not verified",
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "title": "Verification",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sequence": {
+      "minimum": 0,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "task_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Task Id"
+    },
+    "at": {
+      "description": "UTC Unix seconds; preserve observed source time",
+      "minimum": 0,
+      "title": "At",
+      "type": "number"
+    },
+    "duration_seconds": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Duration Seconds"
+    },
+    "drill": {
+      "title": "Drill",
+      "type": "boolean"
+    },
+    "provenance": {
+      "enum": [
+        "live",
+        "mock",
+        "replay"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "evidence_label": {
+      "enum": [
+        "LIVE",
+        "SIMULATED",
+        "REPLAY"
+      ],
+      "title": "Evidence Label",
+      "type": "string"
+    },
+    "original_run_uri": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Original Run Uri"
+    },
+    "event": {
+      "enum": [
+        "task",
+        "asset_call",
+        "routing",
+        "claim",
+        "fault_observation",
+        "rehearsal"
+      ],
+      "title": "Event",
+      "type": "string"
+    },
+    "dag_node": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DagNode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "asset_calls": {
+      "items": {
+        "$ref": "#/$defs/AssetCall"
+      },
+      "title": "Asset Calls",
+      "type": "array"
+    },
+    "routing": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RouteSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "claim": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ClaimEvent"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fault_observation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FaultObservation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rehearsal": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RehearsalSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "audit_confirmed_issue_events": {
+      "nullable": true,
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "审计确认问题事件数；未审计为null；同一scope累计快照，禁止跨日志行求和",
+      "title": "Audit Confirmed Issue Events"
+    },
+    "issue_audit": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IssueAudit"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "run_id",
+    "sequence",
+    "task_id",
+    "at",
+    "duration_seconds",
+    "drill",
+    "provenance",
+    "evidence_label",
+    "original_run_uri",
+    "event",
+    "dag_node",
+    "asset_calls",
+    "routing",
+    "claim",
+    "fault_observation",
+    "rehearsal"
+  ],
+  "title": "FCLogDraft",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "UNFROZEN proposal; generated from existing Pydantic source plus proposed event envelope.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "audit_confirmed_issue_events": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "audit_confirmed_issue_events"
+        ]
+      },
+      "then": {
+        "properties": {
+          "issue_audit": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "issue_audit"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "audit_confirmed_issue_events": {
+            "const": null
+          }
+        },
+        "required": [
+          "audit_confirmed_issue_events"
+        ]
+      },
+      "then": {
+        "properties": {
+          "issue_audit": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "issue_audit": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "issue_audit"
+        ]
+      },
+      "then": {
+        "properties": {
+          "audit_confirmed_issue_events": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "audit_confirmed_issue_events"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "audit_confirmed_issue_events": {
+            "const": 0
+          }
+        },
+        "required": [
+          "audit_confirmed_issue_events"
+        ]
+      },
+      "then": {
+        "properties": {
+          "issue_audit": {
+            "properties": {
+              "status": {
+                "const": "complete"
+              },
+              "confirmed_issue_ids": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        "required": [
+          "issue_audit"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "drill": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "const": "mock"
+          },
+          "evidence_label": {
+            "const": "SIMULATED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provenance": {
+            "const": "live"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "drill": {
+            "const": false
+          },
+          "evidence_label": {
+            "const": "LIVE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provenance": {
+            "const": "mock"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evidence_label": {
+            "const": "SIMULATED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provenance": {
+            "const": "replay"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "drill": {
+            "const": false
+          },
+          "evidence_label": {
+            "const": "REPLAY"
+          },
+          "original_run_uri": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "const": "task"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "dag_node": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "const": "routing"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "routing": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "const": "claim"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "claim": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "const": "fault_observation"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "fault_observation": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "const": "rehearsal"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "rehearsal": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "const": "asset_call"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "asset_calls": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "enum": [
+              "task",
+              "claim",
+              "fault_observation",
+              "rehearsal",
+              "asset_call"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}
