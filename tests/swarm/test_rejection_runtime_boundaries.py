@@ -48,6 +48,7 @@ def _gateway_worker(tmp_path, response_factory):
     values = seeded.model_dump()
     values["state"] = tmp_path / "chain-state"
     values["budget"]["limits"]["max_attempts_per_task"] = 10
+    values["budget"]["burn_rate_tokens"] = 100000  # Admit both real request bounds in this control.
     worker_config = WorkerConfig.model_validate(values)
     ledger = TaskLedger(worker_config.state / "tasks.sqlite3", worker_config.swarm_id,
                         limits=worker_config.budget.limits)
