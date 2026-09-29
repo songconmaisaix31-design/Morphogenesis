@@ -1,0 +1,592 @@
+[
+  {
+    "worktree": "C:/Users/DW/orca/Morphogenesis",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/Morphogenesis",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-algorithm-baseline-review-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-algorithm-baseline-review-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-beijing-deploy",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-beijing-deploy",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-closeout-acceptance-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-closeout-acceptance-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-closeout-integration-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-closeout-integration-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-a",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-a",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-acceptance-0928-final",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-acceptance-0928-final",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-b",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-b",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-breaker-fix-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-breaker-fix-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-c",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-c",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-classification-fix-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-classification-fix-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-d",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-d",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-docs-0928",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-docs-0928",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-e",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-e",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-governance-final-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-governance-final-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-independent-final-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-independent-final-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-release-preflight-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-release-preflight-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-runtime-0927",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-runtime-0927",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-runtime-fix-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-runtime-fix-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-tests-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-tests-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-finals-integration",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-finals-integration",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-evomap",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-evomap",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-integration",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-integration",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-physarum",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-physarum",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-shell",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-shell",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-swarm",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-front-swarm",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-frontend-stack",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-frontend-stack",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-frontend-stack-integration",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-frontend-stack-integration",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-gpt-reference",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-gpt-reference",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-gpt-reference-integration",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-gpt-reference-integration",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-h4-docs-0928",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-h4-docs-0928",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-hub",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-hub",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-integration",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-integration",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-integration",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-integration",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-observer",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-observer",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-viz",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-onsite-viz",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-provision",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-provision",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-readonly-app-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-readonly-app-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-rehearsal-integration",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-rehearsal-integration",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-rehearsal-runtime",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-rehearsal-runtime",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-rehearsal-viz",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-rehearsal-viz",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-release-readiness-review-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-release-readiness-review-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-schema-closeout-0929",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-schema-closeout-0929",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-sol-scale",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-sol-scale",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-story-backend",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-story-backend",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-story-growth",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-story-growth",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-story-integration",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-story-integration",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-story-shell",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-story-shell",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-swarm-benchmark",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-swarm-benchmark",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-swarm-viz",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-swarm-viz",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t0-foundation",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t0-foundation",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t1-adapters",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t1-adapters",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t2-runtime",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t2-runtime",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t3-metabolism",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t3-metabolism",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t3-topology",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t3-topology",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t5-viz",
+    "path": "demo/fault_drill.py",
+    "exists": false
+  },
+  {
+    "worktree": "C:/Users/DW/orca/workspaces/Morphogenesis/morph-t5-viz",
+    "path": "tests/swarm/test_fault_drill.py",
+    "exists": false
+  }
+]

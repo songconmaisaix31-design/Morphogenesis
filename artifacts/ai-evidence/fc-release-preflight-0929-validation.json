@@ -1,0 +1,50 @@
+{
+  "observed": "2026-09-29T20:30:48.3415082+08:00",
+  "base": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "json_files": [
+    "fc-release-preflight-0929-drill-inventory.json",
+    "fc-release-preflight-0929-environment.json",
+    "fc-release-preflight-0929-git.json",
+    "fc-release-preflight-0929-host.json",
+    "fc-release-preflight-0929-replay-validation.json",
+    "fc-release-preflight-0929-replays.json"
+  ],
+  "report_links_checked": 7,
+  "write_paths_check": "passed",
+  "changed_paths": [
+    "artifacts/ai-evidence/fc-release-preflight-0929-drill-inventory.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-environment.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-git.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-host.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-readonly-checks.log",
+    "artifacts/ai-evidence/fc-release-preflight-0929-replay-validation.json",
+    "artifacts/ai-evidence/fc-release-preflight-0929-replays.json",
+    "docs/FC_RELEASE_PREFLIGHT_0929.md"
+  ],
+  "protected_diff": [],
+  "diff_check_exit": 0,
+  "run_demo_parse_errors": 0,
+  "proposed_powershell_blocks": [
+    {
+      "lines": 2,
+      "parse_errors": 0
+    },
+    {
+      "lines": 4,
+      "parse_errors": 0
+    },
+    {
+      "lines": 19,
+      "parse_errors": 0
+    },
+    {
+      "lines": 4,
+      "parse_errors": 0
+    }
+  ],
+  "code_gates": "NOT_RERUN",
+  "release_and_live": "NOT_RUN",
+  "initial_inventory_parser_exit": 1,
+  "corrected_inventory_exit": 0,
+  "search_missing_file_errors": "OS error 2 retained; corrected to actual gateway.py and codex.py"
+}

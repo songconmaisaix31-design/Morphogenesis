@@ -1,0 +1,112 @@
+[
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-finals-replay-4stMNd\\rehearsal.json",
+    "validation": "passed",
+    "history": 20,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-finals-replay-Dq1dGn\\rehearsal.json",
+    "validation": "passed",
+    "history": 20,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-finals-replay-JJiOwi\\rehearsal.json",
+    "validation": "passed",
+    "history": 20,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-i-fixture-ail6xpua\\rehearsal.json",
+    "validation": "passed",
+    "history": 19,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-i-gateway-stages-1dcace8868a04d9c8f91eecbd506c5b1\\rehearsal.json",
+    "validation": "passed",
+    "history": 19,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-rehearsal-40f04885b37e489fa3ea1a04f61a984d\\rehearsal.json",
+    "validation": "passed",
+    "history": 20,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-rehearsal-478415a14d4345ae87edf564c10a17aa\\rehearsal.json",
+    "validation": "passed",
+    "history": 20,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-rehearsal-8a253c1f138c4d79b18dffc5bb888350\\rehearsal.json",
+    "validation": "passed",
+    "history": 20,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-rehearsal-f1ef4bbac84247b9919a4e7a927b6112\\rehearsal.json",
+    "validation": "passed",
+    "history": 20,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-review-20260924-768b91a264cf4397ab1174c11af47cc5\\rehearsal.json",
+    "validation": "passed",
+    "history": 20,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-sol-20260924-e27e2dc198664413a2a8333b236bd123\\rehearsal.json",
+    "validation": "passed",
+    "history": 20,
+    "stage": "completed",
+    "provenance": "replay",
+    "interface_live": "not_run",
+    "task_live": "not_run",
+    "original_run_uri_present": true
+  }
+]

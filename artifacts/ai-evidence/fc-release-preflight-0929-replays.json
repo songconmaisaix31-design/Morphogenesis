@@ -1,0 +1,376 @@
+[
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-finals-replay-4stMNd\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 20,
+    "current_stage": "completed",
+    "current_provenance": "live",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "passed",
+      "task_live": "passed",
+      "provenance": "live",
+      "original_run_uri": null
+    },
+    "executor": "evomap",
+    "model": "evomap-gpt-5.6-luna",
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      911,
+      1226
+    ],
+    "rehearsal_id": "rehearsal-d67607bc97974954b66db12c34ab85e8"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-finals-replay-Dq1dGn\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 20,
+    "current_stage": "completed",
+    "current_provenance": "live",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "passed",
+      "task_live": "passed",
+      "provenance": "live",
+      "original_run_uri": null
+    },
+    "executor": "evomap",
+    "model": "evomap-gpt-5.6-luna",
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      911,
+      1226
+    ],
+    "rehearsal_id": "rehearsal-d67607bc97974954b66db12c34ab85e8"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-finals-replay-JJiOwi\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 20,
+    "current_stage": "completed",
+    "current_provenance": "live",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "passed",
+      "task_live": "passed",
+      "provenance": "live",
+      "original_run_uri": null
+    },
+    "executor": "evomap",
+    "model": "evomap-gpt-5.6-luna",
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      911,
+      1226
+    ],
+    "rehearsal_id": "rehearsal-d67607bc97974954b66db12c34ab85e8"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-i-fixture-ail6xpua\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 19,
+    "current_stage": "completed",
+    "current_provenance": "mock",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "not_run",
+      "task_live": "not_run",
+      "provenance": "mock",
+      "original_run_uri": null
+    },
+    "executor": null,
+    "model": null,
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      13,
+      13
+    ],
+    "rehearsal_id": "rehearsal-2f3cfdfc2c5c450e8536c2d64040d61a"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-i-gateway-stages-1dcace8868a04d9c8f91eecbd506c5b1\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 19,
+    "current_stage": "completed",
+    "current_provenance": "mock",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "not_run",
+      "task_live": "not_run",
+      "provenance": "mock",
+      "original_run_uri": null
+    },
+    "executor": null,
+    "model": null,
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      13,
+      13
+    ],
+    "rehearsal_id": "rehearsal-2f3cfdfc2c5c450e8536c2d64040d61a"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-rehearsal-40f04885b37e489fa3ea1a04f61a984d\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 20,
+    "current_stage": "completed",
+    "current_provenance": "live",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "passed",
+      "task_live": "passed",
+      "provenance": "live",
+      "original_run_uri": null
+    },
+    "executor": "evomap",
+    "model": "evomap-gpt-5.6-luna",
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      911,
+      1226
+    ],
+    "rehearsal_id": "rehearsal-d67607bc97974954b66db12c34ab85e8"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-rehearsal-478415a14d4345ae87edf564c10a17aa\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 20,
+    "current_stage": "completed",
+    "current_provenance": "live",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "passed",
+      "task_live": "passed",
+      "provenance": "live",
+      "original_run_uri": null
+    },
+    "executor": null,
+    "model": null,
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      14344,
+      14732
+    ],
+    "rehearsal_id": "rehearsal-fe0ddcdebd664f4c9f219c9b9b1e8dce"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-rehearsal-8a253c1f138c4d79b18dffc5bb888350\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 20,
+    "current_stage": "completed",
+    "current_provenance": "live",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "passed",
+      "task_live": "passed",
+      "provenance": "live",
+      "original_run_uri": null
+    },
+    "executor": null,
+    "model": null,
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      14326,
+      14717
+    ],
+    "rehearsal_id": "rehearsal-1e4e7d42d3324e30a956adc8d02cb86c"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-rehearsal-f1ef4bbac84247b9919a4e7a927b6112\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 20,
+    "current_stage": "completed",
+    "current_provenance": "live",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "passed",
+      "task_live": "passed",
+      "provenance": "live",
+      "original_run_uri": null
+    },
+    "executor": null,
+    "model": null,
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      14329,
+      14685
+    ],
+    "rehearsal_id": "rehearsal-1c4a94439cba4d76bbfab0c6e93c3b6e"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-review-20260924-768b91a264cf4397ab1174c11af47cc5\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 20,
+    "current_stage": "completed",
+    "current_provenance": "live",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "passed",
+      "task_live": "passed",
+      "provenance": "live",
+      "original_run_uri": null
+    },
+    "executor": "codex",
+    "model": "gpt-5.6-luna",
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      15018,
+      15349
+    ],
+    "rehearsal_id": "rehearsal-30227ce2036e4048900c42c2ee25631d"
+  },
+  {
+    "path": "C:\\Users\\DW\\AppData\\Local\\Temp\\morph-sol-20260924-e27e2dc198664413a2a8333b236bd123\\rehearsal.json",
+    "json_parse": "passed",
+    "keys": [
+      "schema_version",
+      "rehearsal_id",
+      "mode",
+      "original_run_uri",
+      "current",
+      "history",
+      "scope",
+      "hub_status"
+    ],
+    "history_count": 20,
+    "current_stage": "completed",
+    "current_provenance": "live",
+    "acceptance": {
+      "contract_local": "passed",
+      "interface_live": "passed",
+      "task_live": "passed",
+      "provenance": "live",
+      "original_run_uri": null
+    },
+    "executor": "evomap",
+    "model": "evomap-gpt-5.6-sol",
+    "model_calls_started": 2,
+    "result_count": 2,
+    "cost_usd": null,
+    "tokens": [
+      844,
+      1174
+    ],
+    "rehearsal_id": "rehearsal-85ff3bf872d941aa9eade0ddc92cd485"
+  }
+]
