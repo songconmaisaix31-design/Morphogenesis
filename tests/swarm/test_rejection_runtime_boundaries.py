@@ -15,7 +15,9 @@ from swarm.breaker import SharedBreaker
 from swarm.cli import EvoMapRun, evomap_worker_config, seed_evomap
 from swarm.evomap_executor import EvoMapConfig, EvoMapExecutor
 from swarm.failure_chain import guard_provider
-from swarm.fault_observations import FaultObservationStore
+from swarm.fault_observations import FaultObservation, FaultObservationStore
+from swarm.pheromone import PheromoneField
+from swarm.task_ledger import TaskLedger
 from swarm.worker_loop import Worker, WorkerConfig
 from tests.orchestration.test_rejection_classification_boundaries import ERRORS, error_body
 from tests.swarm.test_failure_chain_runtime import _claim, _config, _events, _facts, _reservations
@@ -26,7 +28,8 @@ def _gateway_worker(tmp_path, response_factory):
         directory=tmp_path / "data",
         api=EvoMapConfig(credential_file=tmp_path / "unused-mock-key"),
         budget={"max_cost_usd": 2, "unbounded_reservation_usd": 0.2,
-                "limits": {"max_attempts": 20, "max_attempts_per_task": 10}},
+                "limits": {"max_attempts": 20, "max_attempts_per_task": 1,
+                           "max_derived_tasks": 0, "max_runtime_seconds": 300}},
     )
     seed_evomap(config)
     first_transport = Mock(side_effect=response_factory)
@@ -39,8 +42,20 @@ def _gateway_worker(tmp_path, response_factory):
         wrapped.usage_source = real.usage_source
         wrapped.original_run_uri = real.original_run_uri
         executors.append(wrapped)
-    worker = Worker(WorkerConfig.model_validate_json(evomap_worker_config(config, 0)),
-                    executors[0], candidates=executors, breaker_config=_config())
+    seeded = WorkerConfig.model_validate_json(evomap_worker_config(config, 0))
+    # The EvoMap demo CLI deliberately permits one request. The production
+    # Worker chain accepts immutable multi-attempt limits in a separate run.
+    values = seeded.model_dump()
+    values["state"] = tmp_path / "chain-state"
+    values["budget"]["limits"]["max_attempts_per_task"] = 10
+    worker_config = WorkerConfig.model_validate(values)
+    ledger = TaskLedger(worker_config.state / "tasks.sqlite3", worker_config.swarm_id,
+                        limits=worker_config.budget.limits)
+    field = PheromoneField(worker_config.state / "field.sqlite3", ledger=ledger)
+    for task in TaskLedger(seeded.state / "tasks.sqlite3", seeded.swarm_id).snapshot():
+        ledger.enqueue(task.signal, acceptance=task.acceptance)
+        field.deposit(task.signal)
+    worker = Worker(worker_config, executors[0], candidates=executors, breaker_config=_config())
     return worker, executors, (first_transport, later_transport)
 
 
@@ -136,9 +151,9 @@ def test_transport_unknown_overrides_even_received_rejection_body(tmp_path, faul
 @pytest.mark.parametrize("next_owner", ["old-owner", "new-owner"])
 def test_guard_reclaims_expired_probe_with_fresh_fenced_token(tmp_path, next_owner):
     store = FaultObservationStore(tmp_path / "faults.jsonl", "probe-run")
-    store.append({"run_id": "probe-run", "task_id": "task", "request_id": "request", "attempt": 0,
+    store.append(FaultObservation.model_validate({"run_id": "probe-run", "task_id": "task", "request_id": "request", "attempt": 0,
                   "provider": "evomap", "model": "fixture", "failure_class": "confirmed_rejection",
-                  "normalized_reason": "billing_arrearage", "occurred_at": 1000.0})
+                  "normalized_reason": "billing_arrearage", "occurred_at": 1000.0}))
     path = tmp_path / "breaker.sqlite3"
     breaker = SharedBreaker(path, "probe-run", _config())
     breaker.observe(store, now=1000.0)
@@ -160,9 +175,9 @@ def test_guard_reclaims_expired_probe_with_fresh_fenced_token(tmp_path, next_own
 
 def test_guard_expired_probe_has_one_concurrent_winner(tmp_path):
     store = FaultObservationStore(tmp_path / "faults.jsonl", "probe-race")
-    store.append({"run_id": "probe-race", "task_id": "task", "request_id": "request", "attempt": 0,
+    store.append(FaultObservation.model_validate({"run_id": "probe-race", "task_id": "task", "request_id": "request", "attempt": 0,
                   "provider": "evomap", "model": "fixture", "failure_class": "confirmed_rejection",
-                  "normalized_reason": "billing_arrearage", "occurred_at": 1000.0})
+                  "normalized_reason": "billing_arrearage", "occurred_at": 1000.0}))
     path = tmp_path / "breaker.sqlite3"
     breaker = SharedBreaker(path, "probe-race", _config())
     breaker.observe(store, now=1000.0)
