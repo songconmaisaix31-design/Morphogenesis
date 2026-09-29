@@ -112,3 +112,9 @@ H1 21/21 引文只作 AI 备料，预算 A/B、四态矩阵、fencing、TODO 新
 指定 venv 的最终材料检查 exit 0，详见 `fc-remediation-governance-0929-final-check.json`：授权路径、原有三文档前缀、桌面 0929 原8277字节/0928原哈希、I/D报告原字节、H1 21条原引文、正式原条目未改且仍2INVALID、模型响应usage与一次fetch、26个新本地链接均核实。保存这些结果没有把引用相等当推论正确。`node --check` exit 0；模型脚本实际运行 exit 0仅表示响应收到；正式引用脚本的 exit 1 与拒收独立保留。
 
 阶段提交均带 `Swarm-Agent: codex`：`bfbc0845b538661ab2a3fd3375a4713defb3c7ac`（配置/备料）、`8fd30f687fa9c95b204c5eaa1e0069fbe2559a6d`（共同SHA备料）、`f0fee3d11712851964de9608ce2fbd91f38d6aef`（正式完整输入）。最终治理提交、remote exact 与 clean 以本任务最终交付回执为准；origin 为 `https://github.com/songconmaisaix31-design/Morphogenesis`，不合主线、不打tag、不冻结。
+
+## 预算 A/B 文档验收返修（基于 cb102af；原历史保留）
+
+本次仅补 TASKS 本轮预算附录、H1 备料说明、本段、final-check 材料校验与桌面回执。用 `git show c552250c0d07f5f70f09eb0a5ab3c322195e34ec:<path>` 核当前行号，明确“C552代码核对结论（AI备料，不是H1签字）”：A 在新 request_id 及额度/attempt/burn 等允许时不因同任务 pending 冲突死锁（budget:179–181、248–249；worker_loop:757–758）；B 同一 unknown hold 无双计（budget:83、192–203、248–249），不排除上游实际超支。附录同时说明无晚到 unknown 转换（budget:268–272）、任务终结后的长期占额（worker_loop:795–803、994–998）、普通结算 lower usage 不返还承诺额（budget:295–301），并区分确认拒绝的 unknown 费用 hold 与 unknown_effect 故意持久隔离。H1 人工判断/签名及源 TODO 未改，用户对五不变量交叉核对仍待完成。
+
+本次只核文档引用、授权范围和 diff，结果追加在 [final-check](fc-remediation-governance-0929-final-check.json) 的 `budget_ab_document_repair`；原材料校验记录保留。I 在 C552 的 focused408/full862/strict87/build/SDK/分发与 D `9a6705c7aeae9c812329c015f13e440842beff17` 的 47/9mutation 仅沿用既有证据，未重跑；没有追加模型调用或可选测试/分析。正式 deepseek 仍为唯一调用，2 fact PASS / 2 INVALID / 4 hypothesis，FC-E REJECTED；H1/H3 unsigned、FC BLOCKED 未冻结、T6 禁止执行状态不变。此前 `cb102af1ac85716176ba0a3cac603c3e7be373aa` 保留为本次父提交，最终新材料 SHA/remote/clean 以交付及桌面末尾回执为准。

@@ -40,5 +40,155 @@
   "model_fetch_calls": 1,
   "usage_total_tokens": 76253,
   "cost": "unknown",
-  "new_local_links_checked": 26
+  "new_local_links_checked": 26,
+  "budget_ab_document_repair": {
+    "material_check": "PASS; documentation citations/scope/diff only, not H1 or FC-E acceptance",
+    "base_material_sha": "cb102af1ac85716176ba0a3cac603c3e7be373aa",
+    "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "changed_paths": [
+      "TASKS.md",
+      "artifacts/ai-evidence/fc-remediation-governance-0929-final-check.json",
+      "artifacts/ai-evidence/fc-remediation-governance-0929-report.md",
+      "docs/FC_HUMAN_REVIEW_0929.md"
+    ],
+    "historical_check_fields_preserved": true,
+    "tasks_history_and_nonbudget_text_preserved": true,
+    "report_prior_text_preserved": true,
+    "human_conclusion_and_signature_slots_preserved": true,
+    "h1_existing_quotes_rechecked": {
+      "pass": 21,
+      "invalid": 0,
+      "scope": "exact git blob quote equality only"
+    },
+    "supplementary_source_locations": [
+      {
+        "file": "swarm/budget.py",
+        "line": 83,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/budget.py",
+        "line": 179,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/budget.py",
+        "line": 192,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/budget.py",
+        "line": 194,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/budget.py",
+        "line": 200,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/budget.py",
+        "line": 248,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/budget.py",
+        "line": 268,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/budget.py",
+        "line": 272,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/budget.py",
+        "line": 298,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/worker_loop.py",
+        "line": 758,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/worker_loop.py",
+        "line": 798,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/worker_loop.py",
+        "line": 803,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/worker_loop.py",
+        "line": 812,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/worker_loop.py",
+        "line": 885,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/worker_loop.py",
+        "line": 887,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/worker_loop.py",
+        "line": 996,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/worker_loop.py",
+        "line": 997,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/task_ledger.py",
+        "line": 259,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/task_ledger.py",
+        "line": 370,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/task_ledger.py",
+        "line": 387,
+        "result": "PASS"
+      },
+      {
+        "file": "swarm/task_ledger.py",
+        "line": 388,
+        "result": "PASS"
+      }
+    ],
+    "a_code_conclusion": "No same-task pending deadlock after confirmed rejection; requires a new request_id and other capacity/attempt/burn/runtime/routing/lease policies to permit admission",
+    "b_code_conclusion": "No double counting of the same unknown hold; does not bound actual upstream spend",
+    "remaining_budget_limits": [
+      "No uncertain-to-settled or unknown-cost late reconciliation entry",
+      "Durable unknown holds remain after task finalization and can chronically consume capacity/burn",
+      "Ordinary pending-to-settled uses max(estimate,reserved); unknown conversion does not exist",
+      "unknown_effect intentionally retains task isolation independent of cost state"
+    ],
+    "desktop_path": "C:/Users/DW/Desktop/Morphogenesis_今日开发与验收_2026-09-29.md",
+    "desktop_original_byte_count": 14014,
+    "desktop_original_sha256": "c49ef1d8056209b9637a48a4a2ce9ea5c4a89e30492899f3cd85ecc85f755a93",
+    "desktop_original_bytes_preserved": true,
+    "desktop_budget_conclusions_written": true,
+    "desktop_new_receipt": "Outside this pre-commit check; append and verify the exact material SHA after push in the last desktop receipt",
+    "original_quotes_model_response_and_reports_changed": false,
+    "production_tests_schema_agents_qwen_swarm_locks_changed": false,
+    "additional_model_calls": 0,
+    "product_tests_or_optional_analysis_run": false,
+    "i_six_gates_and_d_47_9mutation": "Existing evidence retained; NOT_RERUN",
+    "formal_review": "REJECTED; existing 2 fact PASS / 2 INVALID / 4 hypothesis retained",
+    "h1_h3": "unsigned; human review pending",
+    "t6": "Blocked; no merge/tag/smoke/freeze execution",
+    "git_diff_check_exit": 0
+  }
 }

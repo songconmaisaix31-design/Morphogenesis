@@ -485,6 +485,20 @@ Request cancelled，随后同 Owner/Dispatch 接续；先修 token fencing 与�
 
 **正式 FC-E：已取得，未通过。** 原隔离 profile 已定位，主控六绿通知后通过同配置/凭据的现成 SDK 发出唯一 deepseek-r1 请求：returned model 同名，finish=stop，fetch=1，prompt71611/completion4642/total76253（reasoning2930），费用 unknown。四 fact 中 **2 引文 PASS / 2 INVALID，机械 exit 1**；四 hypothesis 待验证。h2 high 没有具体失败交错且依赖无效引用，不是确认代码缺陷；h4 与用户 5xx 保守 unknown 要求冲突；五不变量逐项覆盖不全，报告 **REJECTED**。不改原引用换绿、不代评、不第二次调用：[正式接收记录](artifacts/ai-evidence/review-0929-formal-v2-report.md)。
 
-**预算 A/B 与 H1：** [新人工复核包](docs/FC_HUMAN_REVIEW_0929.md) 以 C552 的 21 组逐字引文（21/21 引用校验）备料。A 对照 pending 同任务冲突、unknown hold 累计和容量；B 对照 admitted+holds、不支持晚到 uncertain→settled 的 settle 早退、任务终结/重启占额及 lower usage 不返还承诺额。四态矩阵、fencing、三处 TODO 新行号 202/592/672、六点和模型待验证风险已备；AI 没有签字或填“死锁/超支/两者都不是”结论。
+### C552代码核对结论（AI备料，不是H1签字）
+
+以下技术结论以 `git show c552250c0d07f5f70f09eb0a5ab3c322195e34ec:<path>` 核对，全部行号属于该共同代码候选；上文历史预算 A/B 的 73e64 行号保留，不用于本轮引用。[人工复核包](docs/FC_HUMAN_REVIEW_0929.md) 与既有 21 组逐字引文配套，引用相等只证明文字存在，用户仍需对五不变量交叉核对。
+
+**场景A：不死锁**（仅指确认拒绝后的同任务 pending 冲突；前提为新 `request_id`，且其他额度、attempt、burn、运行时限与路由/租约策略允许）。`swarm/budget.py:248–249` 将确认拒绝的费用未知预留从 pending 改为 uncertain；`swarm/budget.py:179–181` 只拦相同 request_id 或同 task 的 pending，旧 uncertain 不再造成该互斥。`swarm/worker_loop.py:757–758` 以 task/lease token/candidate index 生成每次请求 ID，`:795–798` 走确认拒绝保留 hold 路径；相同 request_id 仍拒绝是防重复。容量检查 `swarm/budget.py:192–195` 要求 admitted+旧 holds+新预留不超过 cap；`:160–173`、`:182–191` 仍分别限制运行时间/attempt/睡眠和 burn，容量不足或策略阻止不等于 pending 自锁。
+
+**场景B：无双计**（仅指当前账本同一 unknown hold；不代表无上游实际超支风险）。`swarm/budget.py:200–203` 初始 admitted_usd 为 NULL，`:248–249` 只改 status/settled_at；`:83` 将非 settled 的 reserved_usd 计入 hold，`:192–195` 使用 SUM(admitted_usd)+holds+新预留。因此同一 uncertain hold 保留一次容量占用，并未同时记入 admitted；多次独立请求的 hold 累加是累计占额。unbounded 的 allowance 是本地准入额（`:136–154`），真实费用可能超过它，估价也不是上游账单（`:296–301`）。
+
+**晚到结算与任务终结：** `swarm/budget.py:268–272` 对非 pending 直接返回（冲突 usage 可先抛错），没有 uncertain→settled 或 unknown_cost_allowed→settled 的晚到入口，不能声称 unknown 已转实际账单。`swarm/worker_loop.py:795–803` 记账后清空 `_active`，`:994–998` 收尾只处理仍 active 的预留；任务终结不会释放旧 unknown hold。`swarm/budget.py:79–83` 每次从持久账本累计非 settled hold，重启也保留；`:91–101`、`:182–191` 还会将这些未知预留纳入 burn。结论是同 swarm 预算周期内长期占额／预算慢性占用（泄漏风险），并非同一 hold 自动双计。
+
+**lower observed usage 不返还承诺额：** 既有普通 pending→settled、usage 可解析且有本地价格的路径在 `swarm/budget.py:295–301` 以 `max(estimate, reservation.reserved_estimate_usd)` 写 admitted_usd，随后 settled 从 hold 集合退出（`:83`），准入仍计 admitted（`:192–195`）。无价格的 usage 留 full hold（`:286–294`）。当前 unknown 转换不存在（`:268–272`），不把这条普通结算规则冒称已覆盖晚到 unknown 对账。
+
+**确认拒绝的 unknown 费用与 unknown_effect 分开：** 前者走 `swarm/budget.py:230–250` 保留费用 hold，可在上述条件下切换；`swarm/worker_loop.py:812–815` 可确认其执行结果。后者即使费用已知也不清除任务未确认请求（同一条件排除 unknown_effect），`:885–887` 停止；`swarm/task_ledger.py:358–382` 持久记录请求，`:257–266` 排除未确认任务，`:384–393` 将其保持 blocked。这是故意的任务持久隔离，不自动重发，不应归为场景 A 的 pending 自锁。
+
+**H1 人工边界：** 上述为 AI 代码核对结论；预算 A/B 人工判断、五不变量交叉复核与签名仍由用户完成，所有人工结论槽和签字槽保持空白。四态矩阵、fencing、三处 TODO 新行号 202/592/672、六点及模型待验证风险仍见人工复核包；不改变 FC-E REJECTED 或 T6 禁止执行的状态。
 
 **H3 与 NOT_RUN：** Schema 与原已验收318dd的 blob相同，仍 optional+nullable **1.0.0 candidate / 未采集 / unsigned**，不补0、不冻结。T6 merge/tag/三连冒烟（缺可接受FC-E+H1签字）、T9依赖H3的采集接线、T10演练、T11课题入口条件、长期/业务live/生产发布均 NOT_RUN。DashScope 完整生产 executor NOT_IMPLEMENTED，只有 adapter 层实测；晚到对账/自动解锁/未知hold释放/混合版本部署未实现或未验。第一代应用 `morph-readonly-app-0929@621f588988899bdbc7c7a83e893369c4145d89b3` 仍独立，不称全项目主线统一。FC 整体 **BLOCKED、未冻结**。

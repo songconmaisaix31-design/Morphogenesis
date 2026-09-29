@@ -8,11 +8,17 @@
 
 ## H1：先预算 A/B，再 breaker
 
+**C552代码核对结论（AI备料，不是H1签字）：** 本轮已在 [TASKS 预算 A/B 附录](../TASKS.md#c552代码核对结论ai备料不是h1签字) 明确写出技术判断及前提：场景 A 对确认拒绝后的同任务 pending 冲突为“不死锁”（`swarm/budget.py:179–181、248–249`；`swarm/worker_loop.py:757–758、795–798`），场景 B 对同一 unknown hold 为“无双计”（`swarm/budget.py:83、192–203、248–249`）。新 request_id 和额度/attempt/burn 等策略仍须允许；无双计不排除上游真实费用超过本地 allowance。
+
+备料边界也已列明：非 pending 在 `swarm/budget.py:268–272` 早退，无晚到 uncertain→settled / unknown 转换；`swarm/worker_loop.py:795–803、994–998` 不释放旧 unknown，持久 hold 与 burn（`swarm/budget.py:79–83、91–101、182–191`）存在长期占额／预算慢性占用风险。lower observed usage 不返还承诺额由普通 pending→settled 的 `swarm/budget.py:295–301` 保证，无价格路径 `:286–294` 保留 full hold，不能称 unknown 转换已实现。确认拒绝的 unknown 费用 hold 不等于 unknown_effect：后者由 `swarm/worker_loop.py:812–815、885–887` 与 `swarm/task_ledger.py:257–266、358–393` 保持任务隔离，故意不自动重发。
+
+上述技术核对不填写下文人工结论槽；下文“AI 不代填结论或签字”专指人工判断和签名。用户仍须对五不变量交叉核对，所有人工记录/结论/签字保持待填写。
+
 ### 预算 A：unknown hold 与同任务 pending 冲突
 
 逐字备料 H1-01 至 H1-11 覆盖 `BudgetLedger.snapshot/reserve/mark_unknown_rejection/settle`，Worker 每候选 request_id、confirmed_rejection 继续条件、unknown_effect 停止与 TaskLedger 持久隔离入口。不能把容量、attempt、模型价格、burn、租约拒绝当成 pending 自锁。
 
-| 人工手推步骤 | 待补共同 SHA 引文 | 人工记录 |
+| 人工手推步骤 | 已备 C552 引文及行号（待人工复核） | 人工记录 |
 |---|---|---|
 | 首次 reserve | budget.py:77–86、164–180（H1-01/02） | 待填写 |
 | 确认拒绝但费用未知 | budget.py:230–251（H1-06），pending→uncertain，full hold 保留 | 待填写 |
