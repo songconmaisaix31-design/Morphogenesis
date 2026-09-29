@@ -20,7 +20,12 @@
 
 ## 执行状态
 
-- Orca Run `run_cef52e19ade6`，协调终端 `term_357594e1-b3a7-43f5-97c4-61f84f997a04`。V `task_25b7ebc9f5f8 / ctx_1fcd0cb53852`；R `task_82da0ebb69e4 / ctx_78acc39a104a`。两者经实际终端开发活动核实，均为 OpenCode 1.18.32 的 EvoMap Sol API 会话；接续已有终端，因此 Orca launch model 字段为空，不把该字段当作型号证明。
+- 2026-09-24 协调接手：原协调终端 `term_357594e1` 会话已结束（闲置 shell），主控于新终端绑定本 Run 并继续监督。三轨 V/R/B 均为接续已有 OpenCode 终端的 external 派发，`launch_token_hash=null`，注入前言缺 `--dispatch-capability` 令牌；这导致 worker_done/heartbeat 被 Orca 拒收，属编排机械缺陷而非业务失败，普通 status 消息不受影响。V 已按此协调侧结算。
+- V 已结算：最终 SHA `ec46aedfc52a108e62f197c2f627373c29c4f0b4`（分支 `songconmaisaix31-design/morph-swarm-viz`），22 项 Python、Vite 49 模块构建、1366/1920/375 真实 Chromium 通过。worker_done 因上述令牌缺失被拒，主控 `worker-abandon` 围栏该派发（保留终端）后 `task-update --status completed` 记录完成；终端保留待集成领域返修。
+- R `task_82da0ebb69e4 / ctx_78acc39a104a`：已结算（completed，最终 SHA `478de3ca1e97f5f196b36d9e49a905d2d6213e63`）。两轮有界异构 smoke 均 4/6：首轮 GLM 5.1 返回完整 `json fence 被严格 parser 拒收，次轮 DeepSeek v4 Flash 返回三个拼接 JSON 值被严格「恰好一文档」parser 拒收。interface_live 均 PASSED，task_live 均 BLOCKED；capability_names 覆盖 + 有效模型价格绑定（`05175d8`）、fence 归一化（`b60d507`）、路由历史消融（`e79f7fa`）均已提交。主控采纳 R 建议：不削弱 parser，将 4/6 记为诚实的异构模型结构化输出合规性发现。
+- B `task_938f5b370fe9 / ctx_e2ff7ac24bc2`：已结算（completed，最终 SHA `b551cd4441d8fbab09dcc4d081baa4dccc73910e`，含合并 R `e79f7fa` 的 `5b920d3`）。真实 8x48 benchmark：all-Sol 48 请求 25 对/21 错/0 畸形/2 缺（accuracy 0.5208、strict-JSON 0.9583、12304 tokens）；异构 48 请求 30 对/15 错/2 畸形/1 缺（accuracy 0.625、strict-JSON 0.9375、18454 tokens）；GLM 5.1 是唯一畸形来源（5 中 2），其余返回模型零畸形；费用未知，无放宽评分/重试/采用伪造，16x96 未跑。14 项聚焦测试通过。
+- I 集成：`task_af726e0c892a / ctx_45fdab04b90e`（终端 `term_fe0f745f`）。以 `worker-start --agent opencode` 全新启动，`launch_token_hash` 非空，具备正常 dispatch 能力（区别于 V/R/B 的 external 派发），可正常 worker_done。任务：普通 exact-SHA 合并 V/R/B 到 `decentralized-swarm`、deploy 白名单/Nginx 只读路由/swarm 数据挂载胶水、全量测试/类型/构建/分发、真实 viewer 与 browser、`docs/SWARM_SOL_ACCEPTANCE.md`；不自行部署公网。
+- Orca Run `run_cef52e19ade6`，原协调终端 `term_357594e1-b3a7-43f5-97c4-61f84f997a04`。V `task_25b7ebc9f5f8 / ctx_1fcd0cb53852`；R `task_82da0ebb69e4 / ctx_78acc39a104a`。两者经实际终端开发活动核实，均为 OpenCode 1.18.32 的 EvoMap Sol API 会话；接续已有终端，因此 Orca launch model 字段为空，不把该字段当作型号证明。
 - 认证 GET `https://api.evomap.ai/v1/models` 返回 200，含 `evomap-gpt-5.6-sol`，没有价格字段。已异步请求用户提供对应单价；此问题仅改善费用记录，不再作为扩容许可门禁。初始从旧任务书推导的缺价阻塞已按当前用户支出授权纠正，采用上一段显式 opt-in；不能放宽未知请求/usage 保护。
 - 公网 `47.93.118.110:7799` 当前为只读旧版本 `53bb52c31ab68655e2bca620508488d7f95e00e6`，`/api/swarm` 实测 404。I 须补 Docker/打包白名单的 swarm 与 local_assets、Nginx 精确只读路由、独立 swarm 数据挂载配置及适用部署检查。保持原项目名 morphogenesis、端口 7799、其他共治容器不变；旧镜像/版本/数据保留回滚。
 - 本地 viewer 绑定本轮原始 state；公网若部署复制的完成态，必须显式标注 capture/replay，不能冒称公网有活动模型进程。真实 API 在本机运行与公网展示分别验收。
