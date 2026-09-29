@@ -22,6 +22,7 @@ from uuid import uuid4
 import httpx
 from pydantic import JsonValue
 
+from orchestration.fc_logging import FCLogWriter, validate_event
 from swarm.breaker import BreakerConfig, SharedBreaker
 from swarm.cli import demo_config, seed_demo
 from swarm.evomap_executor import _request
@@ -116,9 +117,11 @@ def executor(provider: str, *, reject_tasks: tuple[str, ...] = (),
     return boundary
 
 
-def make_worker(config: WorkerConfig, candidates: Sequence[Executor], instance: int = 0) -> Worker:
+def make_worker(config: WorkerConfig, candidates: Sequence[Executor], instance: int = 0, *,
+                fc_log: FCLogWriter | None = None) -> Worker:
     config = config.model_copy(update={"agent": config.agent.model_copy(update={"instance": instance})})
-    return Worker(config, candidates[0], candidates=candidates, breaker_config=breaker_config())
+    writer = fc_log or FCLogWriter(config.state.parent, config.swarm_id, provenance="mock", drill=True)
+    return Worker(config, candidates[0], candidates=candidates, breaker_config=breaker_config(), fc_log=writer)
 
 
 def reservations(worker: Worker) -> list[dict[str, Any]]:
@@ -156,11 +159,13 @@ class ReadTraceStore(FaultObservationStore):
         return snapshot
 
 
-def peer_sequence(config: WorkerConfig) -> tuple[Worker, Worker, dict[str, Any]]:
+def peer_sequence(config: WorkerConfig, *, fc_log: FCLogWriter | None = None
+                  ) -> tuple[Worker, Worker, dict[str, Any]]:
     """Stages 1-4; no precomputed aggregates or direct state writes."""
     primary = executor("alpha", reject_tasks=("fixture-1",))
     backup = executor("beta")
-    worker_a = make_worker(config, [primary, backup])
+    writer = fc_log or FCLogWriter(config.state.parent, config.swarm_id, provenance="mock", drill=True)
+    worker_a = make_worker(config, [primary, backup], fc_log=writer)
     baseline = process(worker_a, "fixture-0")
     baseline["calls"] = {"alpha": primary.execute.call_count, "beta": backup.execute.call_count}
     require(baseline["outcome"] == "completed", baseline)
@@ -178,7 +183,7 @@ def peer_sequence(config: WorkerConfig) -> tuple[Worker, Worker, dict[str, Any]]
     fault = {**fact.model_dump(mode="json"), "append_sequence": snapshot.record_lines[0]}
 
     blocked, alternate = executor("alpha"), executor("beta")
-    worker_b = make_worker(config, [blocked, alternate], instance=1)
+    worker_b = make_worker(config, [blocked, alternate], instance=1, fc_log=writer)
     trace = ReadTraceStore(cast(FaultObservationStore, worker_b.fault_observation_store).path, config.swarm_id)
     worker_b.fault_observation_store = trace
     breaker = cast(SharedBreaker, worker_b.shared_breaker)
@@ -191,7 +196,8 @@ def peer_sequence(config: WorkerConfig) -> tuple[Worker, Worker, dict[str, Any]]
     after = breaker.view("alpha", "billing_arrearage")
     require(before.state == "insufficient_evidence" and after.state == "suspended", (before, after))
     require(any(fact.model_dump(mode="json") in read["records"] for read in trace.reads), trace.reads)
-    avoided.update(shared_store=str(trace.path), reads=trace.reads,
+    require(writer.failure_count == 0, "FC log projection failed")
+    avoided.update(shared_store=str(trace.path), reads=list(trace.reads),
                    breaker_before=before.model_dump(mode="json"), breaker_after=after.model_dump(mode="json"))
     return worker_a, worker_b, {"normal": baseline, "rejection": fault,
                                "controlled_switch": switched, "peer_avoidance": avoided}
@@ -202,7 +208,8 @@ def wait_until(deadline: float) -> None:
 
 
 def recover(config: WorkerConfig, worker_a: Worker, worker_b: Worker, *,
-            wait: Callable[[float], None] = wait_until) -> tuple[dict[str, Any], dict[str, Any]]:
+            wait: Callable[[float], None] = wait_until,
+            fc_log: FCLogWriter | None = None) -> tuple[dict[str, Any], dict[str, Any]]:
     store = cast(FaultObservationStore, worker_a.fault_observation_store)
     breaker = cast(SharedBreaker, worker_a.shared_breaker)
     old_bytes = store.path.read_bytes()
@@ -228,7 +235,7 @@ def recover(config: WorkerConfig, worker_a: Worker, worker_b: Worker, *,
     require(probe["probe_expires_at"] > probe["updated_at"], probe)
     observers: dict[str, Any] = {}
     for name, subject in (("same_worker", worker_a), ("other_worker", worker_b),
-                          ("restart", make_worker(config, [executor("alpha")], instance=2))):
+                          ("restart", make_worker(config, [executor("alpha")], instance=2, fc_log=fc_log))):
         reader = cast(SharedBreaker, subject.shared_breaker)
         reader.observe(cast(FaultObservationStore, subject.fault_observation_store), now=time.time())
         current = reader.view("alpha", "billing_arrearage")
@@ -243,15 +250,33 @@ def recover(config: WorkerConfig, worker_a: Worker, worker_b: Worker, *,
 
 def run_drill(directory: Path, *, wait: Callable[[float], None] = wait_until) -> dict[str, Any]:
     config = prepare(directory)
-    worker_a, worker_b, stages = peer_sequence(config)
-    stages["cooldown_probe"], stages["recovery"] = recover(config, worker_a, worker_b, wait=wait)
+    writer = FCLogWriter(directory, config.swarm_id, provenance="mock", drill=True)
+    worker_a, worker_b, stages = peer_sequence(config, fc_log=writer)
+    stages["cooldown_probe"], stages["recovery"] = recover(config, worker_a, worker_b, wait=wait, fc_log=writer)
     rows = reservations(worker_a)
     require(len(rows) == 5 and all(row["reserved_usd"] == 0.2 for row in rows), rows)
     require(all(row["tokens"] is None and row["cost"] == "unknown" and row["status"] == "uncertain"
                 for row in rows), rows)
     require(worker_a.budget.snapshot().reserved_estimate_usd == 1.0, rows)
+    require(writer.failure_count == 0, "FC log projection failed")
+    records = [validate_event(json.loads(line)) for line in writer.path.read_text(encoding="utf-8").splitlines()]
+    require(records, "FC log is empty")
+    for record in records:
+        require(all(record[key] == value for key, value in LABELS.items()), record)
+        require(record["run_id"] == config.swarm_id and record["schema_version"] == "1.0.0", record)
+        require(record.get("audit_confirmed_issue_events") is None and record.get("issue_audit") is None, record)
+    logged_facts = [record["fault_observation"] for record in records if record["event"] == "fault_observation"]
+    actual_facts = [fact.model_dump(mode="json") for fact in
+                    cast(FaultObservationStore, worker_a.fault_observation_store).read().records]
+    require(logged_facts == actual_facts, "FC log missing or duplicating the actual failure fact")
+    expected_tasks = {f"fixture-{number}" for number in range(4)}
+    for event in ("claim", "task", "asset_call"):
+        require(expected_tasks <= {record["task_id"] for record in records if record["event"] == event},
+                f"FC log missing {event} identity")
     result = {**LABELS, "run_id": config.swarm_id, "scenario": SCENARIO,
               "mock_budget_policy": config.budget.model_dump(mode="json"),
+              "fc_log_path": str(writer.path), "fc_log_records": len(records),
+              "writer_failure_count": writer.failure_count,
               "contract_local": "passed", "interface_live": "not_run", "task_live": "not_run",
               "usage": None, "cost_usd": None, "stages": stages}
     Path(directory, "result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")

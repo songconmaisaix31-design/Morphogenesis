@@ -4,6 +4,7 @@ Only executor boundaries and the documented time-machine clock seam are used.
 Assertions live outside Worker callbacks. Formal live acceptance is NOT_RUN.
 """
 import json
+from importlib.resources import files
 from pathlib import Path
 import subprocess
 import sys
@@ -11,7 +12,9 @@ import time
 
 import pytest
 import time_machine
+from jsonschema import Draft202012Validator
 
+from orchestration.fc_logging import validate_event
 from demo.fault_drill import (
     LABELS, executor, make_worker, peer_sequence, prepare, process, reservations, run_drill,
 )
@@ -93,6 +96,35 @@ def test_cooldown_probe_and_recovery_watermark(completed):
         assert view["state"] == "normal" and view["recovered_at"] is not None
         assert view["recovery_sequence"] == stages["rejection"]["append_sequence"]
     assert {row["event"] for row in recovery["breaker_audit"]} >= {"aggregate", "probe_claimed", "probe_success"}
+
+
+def test_all_unified_log_rows_match_frozen_schema_and_actual_facts(completed):
+    directory, result = completed
+    # A packages the be4fb7a frozen fence; the older source-tree draft may differ.
+    # Reuse that contract, never a copied/reinvented schema.
+    schema = json.loads(files("orchestration").joinpath("fc_log_schema.json").read_text(encoding="utf-8"))
+    validator = Draft202012Validator(schema)
+    path = Path(result["fc_log_path"])
+    assert path == directory / "fc-logs/drill/mock/events.jsonl"
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    assert rows and len(rows) == result["fc_log_records"]
+    assert result["writer_failure_count"] == 0
+    for row in rows:
+        validator.validate(row)
+        validate_event(row)
+        assert {key: row[key] for key in LABELS} == LABELS
+        assert row["run_id"] == result["run_id"]
+        assert row.get("audit_confirmed_issue_events") is row.get("issue_audit") is None
+    fact, = [row["fault_observation"] for row in rows if row["event"] == "fault_observation"]
+    expected = {key: value for key, value in result["stages"]["rejection"].items() if key != "append_sequence"}
+    assert fact == expected
+    claimed = [row for row in rows if row["event"] == "claim" and row["task_id"] == "fixture-2"]
+    assert claimed
+    peer = result["stages"]["peer_avoidance"]
+    assert {row["claim"]["outcome"] for row in claimed} >= {"claimed", "submitted"}
+    assert all(row["claim"]["worker_id"] == peer["worker_id"] and
+               row["claim"]["token"] == peer["lease"]["token"] for row in claimed)
+    assert not (directory / "fc-logs/live").exists()
 
 
 def test_unknown_effect_default_policy_stops_without_releasing_hold(tmp_path):
