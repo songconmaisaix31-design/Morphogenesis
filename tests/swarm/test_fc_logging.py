@@ -4,6 +4,7 @@ No live subprocess interception. Fixture executors are the existing local file
 transformation; unknown usage/cost remains unknown in both source and projection.
 """
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from functools import lru_cache
 import json
 from pathlib import Path
@@ -15,7 +16,7 @@ from jsonschema import Draft202012Validator
 import pytest
 
 from orchestration.fc_logging import FCLogWriter, validate_event
-from swarm.worker_loop import Worker
+from swarm.worker_loop import FixtureExecutor, Worker
 from tests.swarm.test_failure_chain_runtime import (
     _claim, _executor, _facts, _failure, _reservations, _worker_config,
 )
@@ -249,6 +250,33 @@ def test_real_asset_injection_and_adoption_are_distinct_calls(tmp_path):
     assert all(call["outcome"] == "succeeded" for call in calls)
     record = next(record for record in records if record["event"] == "task" and record["task_id"] == followup.task_id)
     assert record["dag_node"]["dependencies"] == [source_signal.task_id]
+
+
+@pytest.mark.parametrize("origin", ["file:///recorded-fixture/run.json", "https://example.org/original/run"])
+def test_task_snapshot_preserves_last_admitted_candidate_source(tmp_path, origin):
+    class ReplayFixture(FixtureExecutor):
+        provenance = "replay"
+        usage_source = "replay"
+        original_run_uri = origin
+
+        def execute(self, *args, **kwargs):
+            return replace(super().execute(*args, **kwargs), provenance=self.provenance,
+                           usage_source=self.usage_source, original_run_uri=self.original_run_uri)
+
+    config = _worker_config(tmp_path, prices=True)
+    first = _executor(result=_failure(known_usage=True))
+    worker = Worker(config, first, candidates=[first, ReplayFixture()])
+    signal, lease = _claim(worker)
+    assert worker._process(signal, lease) == "completed"
+    assert worker.ledger.get(signal.task_id).result["provenance"] == "replay"
+    mock_records = read_events(worker.fc_log.path)
+    replay_records = read_events(worker.fc_log.root / "fc-logs/runtime/replay/events.jsonl")
+    assert any(record["event"] == "fault_observation" for record in mock_records)
+    assert not any(record["event"] == "task" for record in mock_records)
+    task_record, = [record for record in replay_records if record["event"] == "task"]
+    assert task_record["provenance"] == "replay" and task_record["original_run_uri"] == origin
+    assert all(record["provenance"] == "replay" and record["original_run_uri"] == origin for record in replay_records)
+    assert worker.fc_log.failure_count == 0
 
 
 def test_foreign_ledger_worker_claims_are_not_projected(tmp_path):

@@ -674,9 +674,16 @@ class Worker:
                 if not emitted and writer is not self.fc_log:
                     self.fc_log.diagnostic()
             task = self.ledger.get(signal.task_id)
-            self.fc_log.emit("task", task_id=signal.task_id, at=task.updated_at, duration_seconds=duration,
-                             dag_node={"task_id": signal.task_id, "dependencies": list(task.dependencies),
-                                       "status": task.status})
+            source = self._fc_source
+            task_writer = (self.fc_log if (source.provenance, source.original_run_uri) ==
+                           (self.fc_log.provenance, self.fc_log.original_run_uri) else
+                           FCLogWriter(self.fc_log.root, self.config.swarm_id, provenance=source.provenance,
+                                       drill=self.fc_log.drill, original_run_uri=source.original_run_uri))
+            emitted = task_writer.emit("task", task_id=signal.task_id, at=task.updated_at, duration_seconds=duration,
+                                       dag_node={"task_id": signal.task_id, "dependencies": list(task.dependencies),
+                                                 "status": task.status})
+            if not emitted and task_writer is not self.fc_log:
+                self.fc_log.diagnostic()
         except Exception:
             self.fc_log.diagnostic()
         finally:
@@ -755,6 +762,7 @@ class Worker:
 
     def _process(self, signal: Signal, lease: Lease) -> str:
         process_started = time.perf_counter()
+        self._fc_source = self.executor
         attempt = AttemptId(task_id=signal.task_id, agent=self.config.agent, attempt=lease.token - 1)
         keeper = _Renewal(self.leases, lease, self.config.lease_seconds)
         report: ValidationReport | None = None
