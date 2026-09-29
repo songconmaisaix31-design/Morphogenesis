@@ -1,5 +1,19 @@
 # TASKS.md — FC 轮任务账本
 
+## 2026-09-29 今日新增台账（本次授权；历史记录保留）
+
+用户授权今日底层收口与受限只读应用并行，取代下方昨夜“尚未收到 nullable 修复授权”的当时状态；不追认历史失败或冻结。计划和排他写权见 `docs/FC_DAY_PLAN_0929.md` 及 `docs/PLAN.md` 今日附录。
+
+| 轨 | 基线 / task / dispatch | 今日状态与限制 |
+|---|---|---|
+| A `morph-fc-tests-0929` | `73e64cc70116ac658d85591d082c0684a4952c99`；`task_bf99e1b4ba10 / ctx_d0bbed22831d` | 已启动，真实 Worker 测试证据收口；待主控转发结果，未预填通过 |
+| B `morph-schema-closeout-0929` | `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；`task_d536a112682f / ctx_170180e15e72` | 开工 HEAD 与远端 decentralized-swarm 一致、工作树 clean；一页计划已落盘；即将复现/修复 audit nullable 条件，未宣称修复通过 |
+| C `morph-readonly-app-0929` | `2957b408ce922369a595a8acd43a882eb85897d3`；`task_75eedbf12038 / ctx_9320f0ef60fa` | 主控已批准 Gene 采用明细只读展开，具体文件权见日计划；待主控转发验收结果 |
+
+历史 Schema 原九例 8/9、扩展十二例 11/12、exit 1 继续保留；当前目标仍 `1.0.0 candidate`，待独立验收与人工 H3。optional 新增 minor、optional→required 为破坏性 major（2.0.0），不得沿用 1.1 升级必填说法。
+
+昨夜 T3 两次 mutation 假绿、裁撤及 demo-build.1 后续候选保留；FC-E 正式 deepseek v2 与 H1 真人签字仍缺，今天 Codex 验收不代替。三锁未齐不生产合并/tag；不实现预算事后对账、生产日志接线，不跑付费 live。
+
 ## 当前有效段（2026-09-28 治理返修）
 
 ### 预算A/B（代码核对，待队长交叉复核）

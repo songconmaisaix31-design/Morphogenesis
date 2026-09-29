@@ -255,3 +255,13 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 - 首选已安装的 Codex CLI 作为现有执行入口；仅使用公开 CLI、隔离任务目录和其支持的沙箱，不依赖 ORCA 内部代码。若账号/配额/沙箱阻塞，保留精确错误并标 task_live 未验证，不换 mock。
 - 开源复用以依赖调用为主，不复制整个项目；许可证由实际版本核实，原仓库 Apache-2.0 保留。
 - Hub 沙箱地址/凭据和运行时 ORCA 供给契约缺失，按文档降级，不要求用户重复确认，不进行生产发布。
+
+## 2026-09-29 今日所有权附录（保留以上旧计划）
+
+今日唯一计划见 [FC_DAY_PLAN_0929.md](FC_DAY_PLAN_0929.md)：底层只收口、有限只读应用并行；原始受限本地原型成立，当前版本不统一，FC 未冻结。
+
+- A：固定 codex / `morph-fc-tests-0929` worktree 与同名分支，base `73e64cc70116ac658d85591d082c0684a4952c99`；仅两个 failure_chain 测试文件及 `artifacts/ai-evidence/fc-tests-0929-*`。
+- B：固定 codex / `morph-schema-closeout-0929` worktree 与同名分支，base `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；仅今日计划、本附录、TASKS 今日台账/本轨项、Schema audit nullable 条件和说明及 `artifacts/ai-evidence/schema-0929-*`。
+- C：固定 codex / `morph-readonly-app-0929` worktree 与同名分支，base `2957b408ce922369a595a8acd43a882eb85897d3`；只读盘点报告及主控批准的 Gene 采用明细增量。完整写权见今日计划；无后端、Schema 或执行控制写权。
+
+主控只调度/决策/验收；同 Owner 实现、自验、返修、commit/push，跨轨只 Handoff。三轨交付后另派独立验收/集成 Agent，三锁未齐不得生产合并/tag；H1、H3、FC-E 与本地测试分别登记，不追加无限底层功能。
