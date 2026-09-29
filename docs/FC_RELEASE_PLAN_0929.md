@@ -32,3 +32,16 @@ T10 前一次 Orca `--agent qwen` 在 `agent_unconfigured` 前置拒绝，无 Ta
 用户“继续”已授权 T10 隔离开发自验，无需等待 H1/H3 才开发；此次未完成的原因是 Qwen 认证，而不是重新索取开发许可。正式演练验收与发布仍等原三锁：共同候选门禁、可接受 FC-E、H1 本人签字；H3 是 Schema 采集/准入/冻结的独立人工条件。H1 预算 A/B、breaker 六点与姓名结论、H3 optional+nullable 1.0.0 candidate 拍板均 pending，普通“继续”不代签。
 
 当前下一步由主控接收既有 Qwen 认证入口或用户明确的 T10 改派决定、dsh 原生 profile/认证信息与 H1/H3 结论；G 本轮登记不等这些答复。T6 merge/tag/三连、T9 采集、T10 正式演练、T11 课题入口、业务 interface_live/task_live 均 NOT_RUN；不冻结、不发布。C552 I 六门禁与 D 47 focused / 九组 mutation 保留原身份，不重跑或改标签。详见 [状态与材料校验](../artifacts/ai-evidence/fc-release-status-0929.md)。
+
+
+## 2026-09-30 生产接线发布状态（G；第一阶段最新）
+
+用户现已授权多 Agent 生产接线、合并/tag/三连/live；上文未改派/T10 未实现/H3 待冻结只保留为历史，不能再作为当前事实。H3 `decentralized-swarm@be4fb7a685e951c9e42d8dc0c7eeb900cb5518f1` 已由 David 于 2026-09-29 冻结 Schema 1.0.0（单文档，原 Owner 12/12 + 9 controls），不等于 H1 或生产验收。
+
+A `cb0902395d4e1fa89390c67c1cdfb6cec1607b72`（production `1516d67b9b7d9316025533949b105fff36bc37c3`）、B `cbec0b31fc1e27bfee1b83bd84e1f34097c19a19`、C `1d7753957a982f1f67f29ffa02e8f064d4f67a41` 已交付且 release。A 最终 focused55/strict88/build/wheel 是 Owner 自验，6a 的888全量仅历史；B 的81/strict89/六阶段21行/mutation是 A6a+B 精确组合 Owner mock 自验；C 的10 controls+7配置检查仅离线预检。正式模型评审 NOT_RUN，不能填无高危。
+
+I 固定 `morph-fc-production-integration-0929`，task `task_ee23e2bde40a` / 恢复 Dispatch `ctx_af144abe21c7`，正在合 H3+A+B+C 并跑最终共同 SHA 的独立门禁，**最终 SHA/结果待报告**。前次重启 failed/terminal_missing 保留；本树开工治理 `40577cb841e8d89c08e1336d7254c4ca7bb3984e` 及后续治理提交均不是受测代码。
+
+用户已授权多 Agent 生产接线、合并/tag/三连/live；不是重新索取这些授权。执行仍须共同候选适用门禁、合格 FC-E 与 H1 三锁齐备；当前不可发布，G 不动公共主线/tag、不代签。主控已异步收取缺项，“继续任务”没有补齐本人结论、认证、live 目标/预算或 auto 路径选择。现有单任务 `orchestration.acceptance` 固定 Codex 样例，无 EvoMap/真实课题入口，exit0 可能仍 pending_review；不能冒充完整 live。未审计的计数不填0，未知实际 usage/费用保留 null/unknown。T9 GUI mock/队友消息、benchmark POLL_MS 及候选外 WIP 本轮未做。
+
+G 先普通 commit+push 台账 checkpoint，随后仍在本任务接收 I raw 报告，核验实际 Git 身份/原日志后更新；I 返修/阻塞照实登记，不以文档绿补锁。当前 FC BLOCKED、整体未发布；H3 文档契约已经冻结，两者分别陈述。详见 [生产计划](FC_PRODUCTION_PLAN_0929.md) 与 [一页索引](../artifacts/ai-evidence/fc-production-status-0929.md)。

@@ -525,3 +525,24 @@ H1预算A/B与breaker六点/五不变量签字、H3 Schema optional+nullable 1.0
 - **待用户事项：** H1 本人的预算 A/B、breaker 六点及姓名结论，H3 optional+nullable 1.0.0 candidate 冻结/准入拍板，dsh 原生 profile/认证路径均无回复。主控另询问是否允许 T10 从 qwen-code 改派 Codex，亦无回复；没有静默换模型，正式 dsh Flash 要求不变。用户一般“继续”授权隔离开发自验，不是人类签名或正式演练/发布放行。
 
 G 原 dsh 预检仍 **认证 BLOCKED / 正式 review NOT_RUN / FC-E OPEN / 请求 0**；旧 R1 REJECTED 原样保留。本轮仅材料登记，未调用模型、安装或改依赖，未执行 merge/tag/三连/课题/正式演练/live。T6 三锁未齐，H3 未冻结，FC 整体 **BLOCKED、未冻结**。当前分工见 [发布计划最新续接](docs/FC_RELEASE_PLAN_0929.md)，精简证据与本轮材料校验见 [状态回执](artifacts/ai-evidence/fc-release-status-0929.md)。
+
+
+## 2026-09-30 生产接线与发布台账（G；第一阶段）
+
+本区只追加当前事实，以上原红和旧 R1 拒收全部保留；旧 H3 待签、T10 无实现均是历史快照。Orca 重启导致前次 Dispatch 正式 failed/terminal_missing，工作树未改，按主控恢复消息 `msg_c3b4eb125773` 接续；原 I Dispatch `ctx_215408d848d6` 不冒充当前执行。当前唯一最终共同代码 SHA **尚待 I 交付**，C552 六绿或本治理 HEAD 都不能替代。
+
+| 任务 / Owner | 当前状态 | 精确 SHA / 真实门禁身份 |
+|---|---|---|
+| H3 文档冻结 | 已冻结 | `decentralized-swarm@be4fb7a685e951c9e42d8dc0c7eeb900cb5518f1`；David / 2026-09-29 / Schema 1.0.0；单文档，原 Owner 12/12 + 9 controls，不是 G 重跑或 H1 签名 |
+| A 生产日志接线 / codex | 已交付、主控已 release | `morph-fc-log-wiring-0929@cb0902395d4e1fa89390c67c1cdfb6cec1607b72`；production `1516d67b9b7d9316025533949b105fff36bc37c3`；7 paths，最终 Owner focused 55 / strict 88 / build / wheel 实际 import PASS；888 full 仅 `6a04d7fe7f974305d57fec06bfad26d53cf8716f` 历史 |
+| B 六阶段故障演练 / codex | 已交付、主控已 release | `feat/fault-drill@cbec0b31fc1e27bfee1b83bd84e1f34097c19a19`，parent `3a60850a91d358dfed2fc407d247eb941ba86058`；只 2 files；精确 A6a+B 外部组合 Owner mock 自验 81 tests / strict 89 / build / CLI 六阶段 21 合法 SIMULATED 日志，failure_count=0（投影失败计数）且 5 unknown holds 保留；因果 mutation alpha0/beta1→alpha1/beta0 红1→恢复绿0 |
+| C 发布前置 / codex | 已验收交付、已 release | `morph-fc-release-preflight-0929@1d7753957a982f1f67f29ffa02e8f064d4f67a41`；最终 SHA 参数化 prepare、逐字 verifier；native dsh dump 接受完整 524744 bytes 离线对照，10 controls + 7 config checks；正式 review NOT_RUN，模型/Hub 请求0 |
+| I 独立集成 / codex | 进行中；最终代码 SHA 待交付 | `morph-fc-production-integration-0929`；task `task_ee23e2bde40a`，恢复 Dispatch `ctx_af144abe21c7`；基于 H3 精确合 A+B+C，随后同 SHA focused/full/strict/build/SDK/distribution、独立 Schema/mutation/六阶段；结果待原报告，不预写 green |
+| G 发布台账 / codex | 本轮第一阶段登记；待 I 原报告 | `morph-fc-governance-final-0929`，开工 `40577cb841e8d89c08e1336d7254c4ca7bb3984e` clean；task `task_a41bf1f2df89` / Dispatch `ctx_94e98c11eb94`；治理 SHA 永不替代代码候选 SHA |
+| H1 本人复核 | OPEN | 预算 A/B、breaker 六点结论、本人署名及完整受审 SHA 尚缺；三 TODO 保留，不从 H3 推导 H1 |
+| FC-E 正式评审 | OPEN / NOT_RUN | 固定原生 dsh / DeepSeek-V41-Flash；标准 profile/认证缺失，实际返回模型/usage/cost=null；旧 R1 REJECTED 保留，不能登记无高危 |
+| 三连 / 真实课题 live | BLOCKED / NOT_RUN | 目标、模型、安全配置入口及累计预算待主控收取；auto 双任务在 tokens 已知/cost 未知时仍会 recovery，入口选择未答；mock/replay 不计 live 轮次 |
+
+用户已授权多 Agent 生产接线、合并/tag/三连/live；不是重新索取这些授权。执行仍须共同候选适用门禁、合格 FC-E 与 H1 三锁齐备；当前不可发布，G 不动公共主线/tag、不代签。主控已异步收取缺项，“继续任务”没有补齐本人结论、认证、live 目标/预算或 auto 路径选择。现有单任务 `orchestration.acceptance` 固定 Codex 样例，无 EvoMap/真实课题入口，exit0 可能仍 pending_review；不能冒充完整 live。未审计的计数不填0，未知实际 usage/费用保留 null/unknown。T9 GUI mock/队友消息、benchmark POLL_MS 及候选外 WIP 本轮未做。
+
+证据入口：[本轮一页索引](artifacts/ai-evidence/fc-production-status-0929.md)、[生产计划](docs/FC_PRODUCTION_PLAN_0929.md)。G 只读核 immutable blobs / 部分 raw 日志 / remote refs，不冒充 Owner、I 或正式模型评审；第一阶段普通 commit+push 后继续同任务等 I raw 报告，未结算整个任务。
