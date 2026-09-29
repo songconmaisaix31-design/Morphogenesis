@@ -43,7 +43,7 @@ fs.writeFileSync(prefix + '-call.json', JSON.stringify(metadata, null, 2) + '\n'
 const key = fs.readFileSync(path.join(original, 'private', 'dashscope-api-key'), 'utf8').trim();
 let fetchCalls = 0;
 const client = new OpenAI({
-  apiKey: key, baseURL: provider.baseURL, maxRetries: 0, timeout: 600000,
+  apiKey: key, baseURL: provider.baseURL, maxRetries: 0, timeout: 600000, logLevel: 'off',
   fetch: async (url, options) => {
     if (++fetchCalls !== 1 || String(url) !== provider.baseURL + '/chat/completions') {
       throw new Error('Single-request boundary rejected');

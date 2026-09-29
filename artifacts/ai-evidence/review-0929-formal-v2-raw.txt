@@ -1,0 +1,83 @@
+[
+  {
+    "id": "f1",
+    "dimension": "unknown_holds",
+    "type": "fact",
+    "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "file": "swarm/budget.py:230",
+    "quote": "    def mark_unknown_rejection(self, reservation: Reservation) -> BudgetSnapshot:\n        \"\"\"A confirmed provider rejection whose usage/cost stayed unobserved.\n\n        The hold remains open (status 'uncertain', usage/cost 'unknown') and\n        keeps counting toward admission capacity under the same task budget,\n        but the swarm is not slept: the failure class is a known rejection, so\n        a bounded chain switch stays admittable under cumulative holds. A\n        genuine unknown effect still uses ``mark_uncertain``, which trips the\n        swarm stop. Never fabricates a zero settlement.\n        \"\"\"\n        reservation = Reservation.model_validate(reservation.model_dump())\n        now = self._now()\n        with self._transaction() as db:\n            row = self._stored(db, reservation)\n            if row[\"status\"] != \"pending\":\n                return self._snapshot(db, reservation.worker_id, now)\n            if now < reservation.created_at:\n                raise ValueError(\"time cannot move backwards\")\n            db.execute(\"UPDATE budget_reservations SET status='uncertain',settled_at=? WHERE reservation_id=?\",\n                       (now, reservation.reservation_id))\n            return self._snapshot(db, reservation.worker_id, now)",
+    "content": "预留对于已知拒绝（confirmed rejection）保持未知状态，但不会触发群体休眠；而真正的未知效果（unknown effect）会触发停止",
+    "verification": "NOT_RUN"
+  },
+  {
+    "id": "f2",
+    "dimension": "budget_state",
+    "type": "fact",
+    "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "file": "swarm/budget.py:213",
+    "quote": "    def reservation_cost_state(self, reservation: Reservation) -> Literal[\"reserved\", \"settled\", \"unknown\"]:\n        \"\"\"Read one durable hold, never infer its cost from swarm aggregates.\n\n        'settled' here means the ledger has settled a local estimate; it does\n        not claim an observed provider bill. Unknown costs retain their holds.\n        \"\"\"\n        with connection(self.path) as db:\n            row = self._stored(db, reservation)\n            if row[\"status\"] == \"pending\":\n                return \"reserved\"\n            if row[\"status\"] == \"settled\" and row[\"cost\"] != \"unknown\":\n                return \"settled\"\n            return \"unknown\"",
+    "content": "预留成本状态独立于群体聚合数据，仅读取持久保留状态",
+    "verification": "NOT_RUN"
+  },
+  {
+    "id": "f3",
+    "dimension": "external_request_counting",
+    "type": "fact",
+    "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "file": "swarm/task_ledger.py:365",
+    "quote": "    def begin_execution(self, lease: Lease, request_id: str) -> None:\n        \"\"\"Persist the no-resend fact before crossing the executor boundary.\n\n        A crash, expired lease or voluntary handoff must not make an unconfirmed\n        external request eligible again. This fact is independent of its cost.\n        \"\"\"\n        if not request_id.strip():\n            raise ValueError(\"request_id required\")\n        with self.transaction() as db:\n            row = self._owned(db, lease)\n            if row[\"unconfirmed_request_id\"] is not None:\n                raise TaskConflict(\"task has an unconfirmed external request\")\n            db.execute(\"UPDATE tasks SET unconfirmed_request_id=?,updated_at=? WHERE swarm_id=? AND task_id=?\",\n                       (request_id, self.now(), self.swarm_id, lease.task_id))\n            self._event(db, lease.task_id, \"execution_unconfirmed\", {\"request_id\": request_id, \"token\": lease.token})",
+    "content": "在发送外部请求前持久化请求ID，防止重启后重复计入",
+    "verification": "NOT_RUN"
+  },
+  {
+    "id": "f4",
+    "dimension": "recovery_watermark",
+    "type": "fact",
+    "commit": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "file": "swarm/fault_observations.py:100",
+    "quote": "    def after_recovery(self, at: float, sequence: int | None) -> FaultAggregate | None:\n        \"\"\"Exclude the recovery snapshot and delayed pre-recovery events.\n\n        File order disambiguates equal timestamps. Without a file checkpoint,\n        only strictly later timestamps are known to be new evidence.\n        \"\"\"\n        if not self.samples:\n            return self if self.first_occurred_at > at else None\n        samples = tuple(sample for sample in self.samples if (\n            sample.occurred_at > at if sequence is None else\n            sample.sequence > sequence and sample.occurred_at >= at\n        ))\n        return self.from_samples(self.provider, self.normalized_reason, samples) if samples else None",
+    "content": "使用序列号和水位线来过滤恢复点之前的事件",
+    "verification": "NOT_RUN"
+  },
+  {
+    "id": "h1",
+    "dimension": "unknown_holds",
+    "type": "hypothesis",
+    "severity": "medium",
+    "content": "已知拒绝的未知成本预留可能影响多候选链的预算容量",
+    "status": "待验证",
+    "evidence": ["f1"],
+    "suggested_check": "验证当预留因已知拒绝保持'uncertain'状态且未释放时，后续候选的预算预留是否会被计数"
+  },
+  {
+    "id": "h2",
+    "dimension": "resource_fencing",
+    "type": "hypothesis",
+    "severity": "high",
+    "content": "探头令牌fencing可能在进程崩溃/重启时出现竞争",
+    "status": "待验证",
+    "evidence": ["f4"],
+    "suggested_check": "模拟多个工作者同时尝试回收过期探头槽位的场景"
+  },
+  {
+    "id": "h3",
+    "dimension": "recovery_sequence",
+    "type": "hypothesis",
+    "severity": "low",
+    "content": "序列号检查可能无法捕获同时间戳的新事件",
+    "status": "待验证",
+    "evidence": ["f4"],
+    "suggested_check": "检查在高吞吐系统下序列号和水位线的有效性"
+  },
+  {
+    "id": "h4",
+    "dimension": "gateway_authority",
+    "type": "hypothesis",
+    "severity": "medium",
+    "content": "5xx错误处理可能覆盖合法的拒绝分类",
+    "status": "待验证",
+    "evidence": [],
+    "suggested_check": "测试包含5xx状态码但含明确拒绝体（如欠费）的响应是否会错误分类为UNKNOWN"
+  }
+]
+```

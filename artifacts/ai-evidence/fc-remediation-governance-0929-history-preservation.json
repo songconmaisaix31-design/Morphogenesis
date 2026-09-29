@@ -1,0 +1,25 @@
+{
+  "TASKS.md": {
+    "original_bytes": 41633,
+    "original_sha256": "b5b255cda6d5b0241e309dd84982be57874fa5e797e2c259e899ab8ac9abb30c",
+    "original_prefix_preserved": true
+  },
+  "docs/FC_CLOSEOUT_0929.md": {
+    "original_bytes": 7389,
+    "original_sha256": "edbebc39ee183aad2e3d7e71d40ede9aea1eec96a06d5b4f8658d81c846144e0",
+    "original_prefix_preserved": true
+  },
+  "docs/FC_REMEDIATION_0929.md": {
+    "original_bytes": 4404,
+    "original_sha256": "3708e154501a7dfcc1e0ec7a1d143ca2675d4425f0fab51d8d38f3103adb54c2",
+    "original_prefix_preserved": true
+  },
+  "C:\\Users\\DW\\Desktop\\Morphogenesis_今日开发与验收_2026-09-29.md": {
+    "original_bytes": 8277,
+    "original_sha256": "d6b2195fa9b8f3635afc96af0e691cb7f0138a0f51f05b08ea5ec9f674a2df52",
+    "original_prefix_preserved": true
+  },
+  "C:\\Users\\DW\\Desktop\\Morphogenesis_项目改动整合_2026-09-28.md": {
+    "unchanged_sha256": "FBD02354C818A9770E6E4329B75CCA738658604B677D6BA959D77B614B2C36DF"
+  }
+}

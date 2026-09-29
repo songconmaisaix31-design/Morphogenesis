@@ -1,5 +1,7 @@
 # G 治理与正式评审协调记录 · 2026-09-29
 
+**当前封存结论：五项 C552 本地验收完成；正式 deepseek-r1 响应取得但 v2 门禁 REJECTED；FC 整体 BLOCKED、未冻结。** H1/H3 unsigned，入口/演练 NOT_RUN。下文按阶段保留真实过程，早期“等待 SHA/尚未调用”仅为当时状态；最终状态以本文末与 [正式评审接收记录](review-0929-formal-v2-report.md) 为准。治理文档 SHA、D 报告 SHA 均不能替代共同代码候选 SHA。
+
 ## 阶段一：配置定位与备料
 
 Owner 为 codex；本文件不是 deepseek-r1 评审。治理分支 `morph-fc-governance-final-0929` 从 C 单轨 `e6ac45ffefc171a7215f8db19bc4a28af24ec4fc` 创建，**不得将本分支 HEAD 当作 A+B+C 测试候选**。共同候选 SHA 尚待主控转发；I 六门禁和 D 独立验收尚待原日志核对。FC 未冻结，H1/H3 unsigned。
@@ -67,3 +69,46 @@ Owner 为 codex；本文件不是 deepseek-r1 评审。治理分支 `morph-fc-go
 脚本 dry-run 与 `node --check` 重新 exit 0；当前输入未调用模型。若服务端拒绝长度或发生未知远端效果，原始错误保留、停止且不重试，不再缩包第二次调用。此纠正不改变六绿前不得提交的依赖。
 
 输入载体调整：完整 Markdown 直接复制 Git diff 时，`git diff --check` 报原源码继承的 trailing whitespace（真实失败，非产品门禁）。为保留逐字代码而不清洗源文，改为 [input.json](review-0929-formal-v2-input.json) 的 `content` 字符串，经标准 JSON 一次解码后提交；input.md 只作为范围索引。第一次 Python round-trip 自检遗漏 UTF-8 参数，Windows 默认 GBK 抛 UnicodeDecodeError；显式 UTF-8 后重新核对两个完整 diff 字符串、输入字节数均通过，exit 0。SDK dry-run、最终 `git diff --check` 均 exit 0；这两项本地材料错误未触发模型请求。
+
+## I 共同候选六门禁：已核原日志
+
+I 于 19:15 转发最终结果，主控 `msg_3a5321683756` 于 19:16 明确六绿并允许唯一正式调用。G 读取六个原日志及 final-verification，独立比较精确 archive 与 I 测后 source 的 **346 文件**均原字节相等。原日志以标准 JSON 字符串原文保存在 [I 证据](fc-remediation-governance-0929-i-evidence.json)，包含来源绝对路径、命令、SHA、原退出码、时间及最终 I 报告；没有将此读回检查称作 G 重跑六门禁。
+
+所有门禁绑定 **C552**，源码位于 I `.runtime/candidate-src`，Python 为既有 integration-0927 `.venv/Scripts/python.exe`；TEMP/TMP 在 Python 启动前绑定平级 `.runtime/test-state`。build 仅进程内复用已有 Poetry 2.5.0 后端缓存，SDK 复用已存在 1.14.0；分发仅离线安装本候选自建 wheel 到新目标，不安装第三方依赖或修改锁。
+
+| 同一候选的实际命令 | 结果（I 执行，G 核日志） |
+|---|---|
+| `python -u -m pytest -q tests/orchestration` + 日志所列 Worker/预算/熔断/任务/租约 focused 文件，`--basetemp=../test-state/focused -p no:cacheprovider` | **408 passed / 2 warnings / 278.45s / exit 0**；无 skip/deselect |
+| `python -u -m pytest -q --basetemp=../test-state/full -p no:cacheprovider` | **862 passed / 2 warnings / 589.58s / exit 0**；无 skip/deselect |
+| `python tools/typecheck.py` | **87 source files / exit 0** |
+| `python -m build --no-isolation --outdir ../dist` | **新 sdist+wheel / exit 0** |
+| `node tools/check_sdk.cjs` | **SDK 1.14.0 schema/asset ID/tampering 通过，published=false / exit 0** |
+| `uv pip install --python <既有venv> --offline --no-deps --target ../wheel-site ../dist/morphogenesis-0.1.0-py3-none-any.whl`；`python -I tools/check_distribution.py --site-dir ../wheel-site --check-node` | **install 0 + checker 0；13 packages、resources、installed verifier、Node check 通过** |
+
+两项 warnings 为原 budget 非法 model_copy（nan/string）预检夹具，未过滤。它们不是模型 usage 或费用。I final-verification 的 HEAD/remote 为 C552、PORCELAIN_LINES=0、diff-check/remote/source-byte exit 均 0；I 没有提交后续文档或变异测试候选。原 B full **47 failed / 656 passed / 7 errors / 2 warnings / exit 1**、B/C 缺 Poetry 后端 build exit 1、A 首修 1 failed/117 passed、各 Owner 初始复现和 mutation 红/恢复绿全部保留；新六绿不是重写旧失败。历史 protected_runtime_state 18 failed/2 passed、T3 两次假绿与 Schema 原 8/9、11/12 也未追认为通过。
+
+本次是 `contract_local`，不能扩写为蜂群 `interface_live/task_live`。唯一正式 FC-E 模型请求是独立评审调用，不是业务 live 验收；于主控通知之后 11:16:12Z 提交，SDK 日志显式关闭，结果另记。
+
+## D 独立验收与材料来源
+
+主控 `msg_186bd179e3ff` 转发 D 最终 `9a6705c7aeae9c812329c015f13e440842beff17`，分支 `morph-fc-independent-final-0929`；G `git ls-remote` 核对同 SHA，读取 exact report blob、focused-final 原日志和两轮 mutation 原 summary。D **47 passed / 73.71s / exit 0**；已接受的前两对加短目录恢复后的七对共 **9 组 red_exit=1 / restored_exit=0 / byte_restored=true**。D 原 equal-time 恢复失败 `git_operation_failed:worktree`、Git `$GIT_DIR too big` exit 128 及短路径修正后的复验均保留，不能把那次恢复红写成绿。
+
+- [D 报告原字节副本](fc-remediation-governance-0929-independent-report.md) 来源 `9a6705c7aeae9c812329c015f13e440842beff17:artifacts/ai-evidence/fc-remediation-independent-0929-report.md`。原文内未带超链接的 D evidence/script 名称仍相对于原 D 树；完整原证据在 [D 原文证据 JSON](fc-remediation-governance-0929-d-evidence.json)，脚本可从该 SHA 读取，本轨未改写它们。
+- [I 最终报告原字节副本](fc-remediation-governance-0929-integration-report.md) 来源 `C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/fc-remediation-integration-report.md`；I 报告不是 Git 提交，所测 candidate 固定 C552，六原日志另存 I evidence JSON。
+- D 464 旧函数/1558 assert/decorators 保留、同候选 collect 862/旧 54 失败节点仍在、I/D 346 源码及 wheel/安装目标 83 Python 文件一致为 D 执行证据；G 核读原报告/证据，未冒称自己重跑 D 行为或 wheel 门禁。
+
+真实限制：DashScope 完整生产 executor **NOT_IMPLEMENTED**，其真实 adapter 已测，完整 HTTP→executor→Worker 证据属于 EvoMap；无晚到 uncertain→settled 对账/自动解锁/未知 hold 释放，新旧混合部署及生产历史状态迁移未验证。Windows 深临时路径限制保留。独立第一代应用 `morph-readonly-app-0929@621f588988899bdbc7c7a83e893369c4145d89b3` 仍独立；C552 仅 FC 共同候选，不称全项目主线统一。
+
+## 正式评审和最终门禁边界
+
+真实 returned_model=deepseek-r1、finish_reason=stop、一次 fetch；prompt71611/completion4642/total76253（reasoning2930），费用 unknown。四个 fact 中 **2 PASS、2 INVALID**；四项 hypothesis 待验证，原 h2 high 已立即上报但无具体交错且引用无效，不是确认缺陷；h4 与用户要求冲突。原始模型输出没有五不变量完整逐项评审，**v2 校验 exit 1 / FC-E REJECTED**。主控 `msg_9cce787460cd` 明确维持拒收，禁止追加调用、生产返修或以 G/Codex 补稿代充。详见正式报告，原响应与所有错误引用保留。
+
+H1 21/21 引文只作 AI 备料，预算 A/B、四态矩阵、fencing、TODO 新位置、六点和上述风险均待真人复核；H3 1.0.0 optional+nullable candidate 未采集、不补 0、unsigned/未冻结。T6 merge/tag/三连冒烟、T9 采集接线、T10 演练、T11 原入口条件、长期运行、生产发布/冻结仍 OPEN/NOT_RUN。没有自动解锁、费用确认、未知效果重试或业务 live 调用。
+
+## 治理交付与材料校验
+
+本 G 轨的授权材料工作已完成，正式 FC-E 的 **REJECTED/exit 1** 是交付内保留的实际门禁结果，不编码成通过。TASKS 仅增加本轮五项附录；CLOSEOUT/REMEDIATION 仅增加本轮状态与索引；新 H1/H3 包、指定 evidence 前缀以及桌面 0929 本轮章节为全部改动范围。生产/测试/Schema/AGENTS/QWEN/SWARM/锁、原 H1 与 v2 协议无 diff。
+
+指定 venv 的最终材料检查 exit 0，详见 `fc-remediation-governance-0929-final-check.json`：授权路径、原有三文档前缀、桌面 0929 原8277字节/0928原哈希、I/D报告原字节、H1 21条原引文、正式原条目未改且仍2INVALID、模型响应usage与一次fetch、26个新本地链接均核实。保存这些结果没有把引用相等当推论正确。`node --check` exit 0；模型脚本实际运行 exit 0仅表示响应收到；正式引用脚本的 exit 1 与拒收独立保留。
+
+阶段提交均带 `Swarm-Agent: codex`：`bfbc0845b538661ab2a3fd3375a4713defb3c7ac`（配置/备料）、`8fd30f687fa9c95b204c5eaa1e0069fbe2559a6d`（共同SHA备料）、`f0fee3d11712851964de9608ce2fbd91f38d6aef`（正式完整输入）。最终治理提交、remote exact 与 clean 以本任务最终交付回执为准；origin 为 `https://github.com/songconmaisaix31-design/Morphogenesis`，不合主线、不打tag、不冻结。

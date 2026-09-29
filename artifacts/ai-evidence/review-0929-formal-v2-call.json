@@ -1,0 +1,37 @@
+{
+  "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "configured_model": "deepseek-r1",
+  "provider": "dashscope-fc",
+  "original_profile": "headless",
+  "execution": "installed SDK single chat completion; no dsh tool loop",
+  "sdk": "openai@6.40.0",
+  "max_retries": 0,
+  "max_output_tokens": 16384,
+  "input_bytes": 288865,
+  "input_characters": 288741,
+  "input_token_count": "unknown; not locally tokenized; byte guard is not token count",
+  "provider_context": 131072,
+  "provider_max_input_tokens": 98304,
+  "capacity_source": "https://help.aliyun.com/en/model-studio/deepseek-r1",
+  "cost": "unknown",
+  "usage": {
+    "prompt_tokens": 71611,
+    "completion_tokens": 4642,
+    "total_tokens": 76253,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2930
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "submitted": true,
+  "submitted_at": "2026-09-29T11:16:12.290Z",
+  "result": "response_received",
+  "returned_model": "deepseek-r1",
+  "response_id": "chatcmpl-e80b7cdc-526d-9524-a07e-88fc81af30f7",
+  "finish_reason": "stop",
+  "fetch_calls": 1,
+  "completed_at": "2026-09-29T11:18:39.393Z",
+  "review_status": "RECEIVED_NOT_ACCEPTED; requires v2 mechanical and semantic checks"
+}

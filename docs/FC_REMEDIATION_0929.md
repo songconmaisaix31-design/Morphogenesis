@@ -17,3 +17,16 @@
 环境与证据：只读使用 `C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927/.venv/Scripts/python.exe`；不安装依赖、不改锁。运行产物仅 ignored `.runtime`；源码用 `git -c core.autocrlf=false archive` 精确导出，测试 state 与源码平级；必要 SDK junction 先核实不存在、目标版本和 ignored。报告分别列原失败、Owner 修复自验、mutation、独立验收、NOT_RUN，附 exact SHA/base/diff/remote/clean、命令和 exit。
 
 当前状态：C 源码 `36aa0e7ec7b355ad0c8e2eacfc5489df9d577ad4` Owner focused 246 / strict 87 / SDK 1.14.0 通过，分类 mutation 两家各红 2→恢复绿 2，guard mutation 红 3→恢复绿 3；[C 证据报告](../artifacts/ai-evidence/fc-remediation-classification-0929-report.md)。Guard 阶段 `42b6115b0815289c22678aaec6240515f700b881` 已交 B 组合验；A/B 独立交付、共同候选六门禁与独立验收仍待主控登记。C 的 `python -m build --no-isolation` 因指定 venv 缺 Poetry 后端 exit 1 保留，未安装依赖；主控已指定构建/分发交最终组合门禁处理。H1/H3 人工签字、正式 deepseek-r1 FC-E v2、入口与演练分别保持 OPEN；`contract_local`、`interface_live`、`task_live` 分别登记。生产合并/tag/冻结/发布、付费 live 均不在本轮 Owner 自验范围。
+
+## 2026-09-29 五项最终状态（独立治理分支登记）
+
+本轮五项修复已获授权并完成 C552 本地验收；不再沿用旧 cost_state 未授权限制。A `4d1098ed151d6a9859e088f13ea292baeef1acf2`、B `2c6a33ae1950fd6458543618d1c4044dcdd2596f`、C `e6ac45ffefc171a7215f8db19bc4a28af24ec4fc` 普通 no-ff 合并为唯一代码候选 **`c552250c0d07f5f70f09eb0a5ab3c322195e34ec`**，代码分支 `morph-fc-candidate-0929` remote exact/clean。治理 G 分支 `morph-fc-governance-final-0929` 不合入代码，不把文档 SHA 当测试候选。
+
+- Owner：A119 focused/3 scoped strict，B+C96组合，C246 focused/strict87/SDK；各原始红与mutation分别保留。
+- I同一C552六门禁实际执行：focused408、full862/2 warnings/589.58s、strict87、build新sdist+wheel、SDK1.14.0、分发13packages+Node，全exit0；[I报告原字节副本](../artifacts/ai-evidence/fc-remediation-governance-0929-integration-report.md)。
+- D `9a6705c7aeae9c812329c015f13e440842beff17`：独立47 focused、九mutation红/恢复绿，464旧函数/1558assert保留；[D报告原字节副本](../artifacts/ai-evidence/fc-remediation-governance-0929-independent-report.md)。G已核原日志及346源码，非G重跑。
+- B原full47failed/656passed/7errors/exit1、B/C缺后端build exit1、D首轮恢复失败/路径过长及其他原红继续保留，不被最终六绿改写。
+- 正式FC-E实际一次deepseek-r1响应已取得，usage76253、cost unknown；引用2PASS/2INVALID、机械exit1，缺五不变量逐项覆盖，高危仅待验证假设、5xx意见与要求冲突，**REJECTED**；唯一请求用尽，未自动再试。
+- [H1/H3包](FC_HUMAN_REVIEW_0929.md) 已备C552预算A/B逐字代码、矩阵/fencing/三处TODO位置/六点和待验证风险，仍unsigned；Schema仍1.0.0 optional+nullable candidate、未采集。
+
+五项 `contract_local` 完成；蜂群 `interface_live/task_live`、T6三连冒烟、正式入口/演练、生产merge/tag/冻结/发布仍NOT_RUN。DashScope完整生产executor仍NOT_IMPLEMENTED（真实adapter已测）；unknown hold晚到对账/自动释放、任务自动解锁、混合版本/历史生产状态迁移没有被本轮证明。FC整体BLOCKED，不宣称整体稳定。完整事实与来源见[G最终治理报告](../artifacts/ai-evidence/fc-remediation-governance-0929-report.md)。

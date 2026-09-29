@@ -1,0 +1,37 @@
+{
+  "scope": "quote equality only; inference not verified",
+  "results": [
+    {
+      "index": 0,
+      "verification": "PASS"
+    },
+    {
+      "index": 1,
+      "verification": "PASS"
+    },
+    {
+      "index": 2,
+      "verification": "INVALID"
+    },
+    {
+      "index": 3,
+      "verification": "INVALID"
+    },
+    {
+      "index": 4,
+      "verification": "NOT_RUN"
+    },
+    {
+      "index": 5,
+      "verification": "NOT_RUN"
+    },
+    {
+      "index": 6,
+      "verification": "NOT_RUN"
+    },
+    {
+      "index": 7,
+      "verification": "NOT_RUN"
+    }
+  ]
+}

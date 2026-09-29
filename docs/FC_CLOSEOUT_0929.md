@@ -31,3 +31,20 @@
 I 实际整合：A `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd` + B 最终材料 `092cadaf497482e00518dfd86d958a81c876a7bd` 已标准 no-ff 合并为 `4c3dc46e7c0459680a7567ff6d91ba44301c3819`，D `969d3274622538a36ac8a60e09c41be86bea9c60` 报告按精确 blob 引入。B 后续四治理文档范围、Schema 对 318dd 原字节、生产与 A 两测试及 protected 路径不变均已核实。精确合并源码 focused **20 passed / exit 0 / 43.60s**；Schema 原 **12/12**、扩展 **24/24**、控制 **13/13 / exit 0**。首次 I 根目录下 basetemp 触发既有 protected_runtime_state，**18 failed / 2 passed / exit 1**；按主控确认的精确 LF archive + 平级状态目录布局纠正后复验通过，没有改保护或测试。全量 699 / strict 87 复用 A 测试 SHA f4779d45 原日志，**未在 merge SHA 重跑**；详见 [I 集成报告](../artifacts/ai-evidence/integration-0929-closeout.md)。
 
 下一步：队长决定 cost_state 最小生产元数据修复范围，由原 Owner 实施后独立复验；真人完成 H1/H3，原 FC-E 核实隔离通道并补正式评审。C 与 FC 从 `605cf48` 分叉，Backend.jsx/两 bundle 冲突，**本轮分别保留候选，不强合前端**。本包仅为今日首批三轨收口，不代表 T1–T11 或今日全部开发完成，继承待办未清空；benchmark 的 BENCHMARK_POLL_MS 风险本轮未核验，不替其他工作树断言修复状态。候选门禁不解除发布三锁；**生产 merge/tag、Schema 冻结、人工签字、依赖 H3 的 T9 生产采集/接线、T10 演练均 NOT_RUN**，`contract_local` 不扩写成 `interface_live/task_live`。
+
+## 本轮五项生产修复最终索引（2026-09-29；取代上文旧待授权状态）
+
+**五项本地验收完成；正式 FC-E 报告取得但 REJECTED；FC 整体仍 BLOCKED、未冻结。** 本轮生产修复已获用户授权，上文“cost_state 待授权/原配置未定位”是首批历史状态，不能作为本轮现状。唯一代码候选为 `c552250c0d07f5f70f09eb0a5ab3c322195e34ec`，分支 `morph-fc-candidate-0929`；G 文档和 D 报告提交不能替代这个 SHA。
+
+| 证据层 | 实际结果 / 索引 |
+|---|---|
+| Owner 自验 | A119 focused/3 scoped strict；B+C96组合；C246 focused/87 strict/SDK；各自原红/mutation保留，不冒充共同SHA全量 |
+| I 共同 SHA 六门禁 | focused408、full862/2 warnings、strict87、build sdist+wheel、SDK1.14.0、分发13 packages+Node，均exit0；[I 原字节报告](../artifacts/ai-evidence/fc-remediation-governance-0929-integration-report.md) |
+| D 独立验收 | `9a6705c7aeae9c812329c015f13e440842beff17`，47 focused、9 mutation红/恢复绿；464旧函数/1558assert保留，另核83 wheel包文件；[D 原字节报告](../artifacts/ai-evidence/fc-remediation-governance-0929-independent-report.md) |
+| G 接收与原日志 | [治理报告](../artifacts/ai-evidence/fc-remediation-governance-0929-report.md) 保存 I/D来源SHA/路径、原日志、346源文件复核及所有边界；未重跑I/D行为测试 |
+| 正式 deepseek-r1 | 同原配置唯一请求、fetch1、stop、usage76253、cost unknown；2 fact PASS/2 INVALID、quote gate exit1，覆盖不完整，h2 high待验证/h4与要求冲突；[正式接收记录](../artifacts/ai-evidence/review-0929-formal-v2-report.md)，**REJECTED**，不追加调用 |
+| H1/H3 | [C552 新人审包](FC_HUMAN_REVIEW_0929.md) 与21组逐字引文；预算A/B、矩阵、fencing、TODO新位置/六点已备；**unsigned** |
+
+预算 A 的 pending 冲突与 hold 容量分开；预算 B 的非 pending settle 早退、长期 hold、lower usage 承诺额及无真实账单对账限制仍在。Schema blob与318dd一致，optional+nullable 1.0.0 candidate，尚未采集、不伪0、不冻结。原H1文档和三个TODO原文字未动。
+
+B旧full 47failed/656passed/7errors、B/C旧build红、A首修红、D首次恢复红/Git路径限制及全部历史假绿记录保留；新共同SHA门禁不倒写旧失败。DashScope完整生产executor NOT_IMPLEMENTED，只有其adapter验收；完整HTTP链证据为EvoMap。T6/入口/演练依原条件NOT_RUN，H1/H3与可接受FC-E未齐；无生产main合并/tag/冻结/发布或业务live。第一代应用621f588仍独立，C552不是全项目统一主线。

@@ -462,3 +462,29 @@ Request cancelled，随后同 Owner/Dispatch 接续；先修 token fencing 与�
   截断。仅清理本次 py-spy 的 uv 缓存 4.9MiB，未删除其他文件；磁盘空间另有
   较大波动，原因尚未确认。TASKS.md 已从未改动的精确 HEAD 恢复，git diff
   证明恢复无差异，再追加本段。两条新领域文件长度正常，不能据此证明未受影响。
+
+## 2026-09-29 五项生产修复最终收口附录（G；不冻结）
+
+本附录为本轮最新状态，保留以上全部历史。**用户本轮已经授权五项生产修复**，旧 cost_state“待授权/未授权”限制已被覆盖；H1/H3 真人签字、正式 FC-E 门禁、入口/演练仍分别 OPEN。五项本地验收完成不等于全系统稳定或冻结。
+
+唯一共同代码候选：`morph-fc-candidate-0929@c552250c0d07f5f70f09eb0a5ab3c322195e34ec`；A 最终 `4d1098ed151d6a9859e088f13ea292baeef1acf2`、B 最终 `2c6a33ae1950fd6458543618d1c4044dcdd2596f`、C 最终 `e6ac45ffefc171a7215f8db19bc4a28af24ec4fc` 经普通 no-ff 合并，B 中间合并 `5cf2612c04a34dfb17af12af817ebee8c08432dc`。三轨路径互斥，无集成胶水；远端 exact/clean。G 治理分支从 C 单轨建立，其最终文档 SHA 与 D 报告 SHA 都不是受测代码 SHA。
+
+| 五项修复 | Owner 自验（各自源码/组合，不冒充共同候选） | C552 独立验收 |
+|---|---|---|
+| unknown_effect 已知费用仍跨重启/换 Worker/真实 handoff 隔离 | A：119 focused / 2 warnings，3 文件 scoped strict；四组 mutation 红/恢复绿 | D：真实进程/持久账本/租约，executor 不再发送；确认拒绝/成功与失租为对照 |
+| TTL 过期 probe 取得新 token 并经真实路由执行 | B+C guard：96 组合，无 skip；TTL mutation 红/恢复绿 | D：TTL 前/精确到期、同 owner 旧 token、双 Worker 只有一个 executor |
+| 成功恢复后旧故障不重熔断，新同时间戳故障仍有效 | B：恢复水位和追加序号；历史过滤 mutation 红/恢复绿 | D：同 Worker/旧缓存/新进程、在途旧聚合与 equal-time 新故障均验证 |
+| 5xx/transport unknown 优先于欠费/配额正文 | C：246 focused、strict 87、SDK 1.14.0；两 adapter 与 guard mutation 红/恢复绿 | D：双真实 adapter；EvoMap HTTP→executor→Worker 的 5xx [1,0]/4xx [1,1]、中断 [1,0] |
+| FaultObservation.cost_state 来自本次 reservation | A：无价格两策略保留 full hold；历史 unknown 不污染本次 settled | D：本笔持久状态/字段语义与 executor 行为；usage-only/global 推断 mutation 均红 |
+
+**I 同一 C552 六门禁实际重跑：** focused **408/2 warnings/278.45s**、full **862/2 warnings/589.58s**、strict **87**、新 sdist+wheel、官方 SDK **1.14.0**、离线自建 wheel 分发 **13 packages + check-node**，所有 native exit 0。G 核六原日志并比对测后 346 源码与 archive 原字节相等；不是复用历史 699/698。两 warnings 为原非法 model_copy 夹具。
+
+**D 独立：** `morph-fc-independent-final-0929@9a6705c7aeae9c812329c015f13e440842beff17`，focused **47/73.71s/exit 0**，九组有效行为 mutation 均 red 1→restored 0；464 原测试函数/1558 assert/全部 decorators 保留。D 读取 I 六原日志而非重跑 full；另核 wheel/安装目标 83 Python 文件与 C552 一致。来源：[D 原字节报告](artifacts/ai-evidence/fc-remediation-governance-0929-independent-report.md)、[I 原字节报告](artifacts/ai-evidence/fc-remediation-governance-0929-integration-report.md)、[G 原日志索引](artifacts/ai-evidence/fc-remediation-governance-0929-report.md)。
+
+**原失败保留：** B full 47 failed/656 passed/7 errors/2 warnings/exit 1；B/C 缺 Poetry 后端 build exit 1；A 首修 1 failed/117 passed；D 首次 equal-time 恢复红与 Git `$GIT_DIR too big` exit 128、短目录修正复验；旧 protected_runtime_state 18 failed/2 passed、Schema 8/9 与 11/12、T3 两次假绿仍为真实历史，不追认通过。
+
+**正式 FC-E：已取得，未通过。** 原隔离 profile 已定位，主控六绿通知后通过同配置/凭据的现成 SDK 发出唯一 deepseek-r1 请求：returned model 同名，finish=stop，fetch=1，prompt71611/completion4642/total76253（reasoning2930），费用 unknown。四 fact 中 **2 引文 PASS / 2 INVALID，机械 exit 1**；四 hypothesis 待验证。h2 high 没有具体失败交错且依赖无效引用，不是确认代码缺陷；h4 与用户 5xx 保守 unknown 要求冲突；五不变量逐项覆盖不全，报告 **REJECTED**。不改原引用换绿、不代评、不第二次调用：[正式接收记录](artifacts/ai-evidence/review-0929-formal-v2-report.md)。
+
+**预算 A/B 与 H1：** [新人工复核包](docs/FC_HUMAN_REVIEW_0929.md) 以 C552 的 21 组逐字引文（21/21 引用校验）备料。A 对照 pending 同任务冲突、unknown hold 累计和容量；B 对照 admitted+holds、不支持晚到 uncertain→settled 的 settle 早退、任务终结/重启占额及 lower usage 不返还承诺额。四态矩阵、fencing、三处 TODO 新行号 202/592/672、六点和模型待验证风险已备；AI 没有签字或填“死锁/超支/两者都不是”结论。
+
+**H3 与 NOT_RUN：** Schema 与原已验收318dd的 blob相同，仍 optional+nullable **1.0.0 candidate / 未采集 / unsigned**，不补0、不冻结。T6 merge/tag/三连冒烟（缺可接受FC-E+H1签字）、T9依赖H3的采集接线、T10演练、T11课题入口条件、长期/业务live/生产发布均 NOT_RUN。DashScope 完整生产 executor NOT_IMPLEMENTED，只有 adapter 层实测；晚到对账/自动解锁/未知hold释放/混合版本部署未实现或未验。第一代应用 `morph-readonly-app-0929@621f588988899bdbc7c7a83e893369c4145d89b3` 仍独立，不称全项目主线统一。FC 整体 **BLOCKED、未冻结**。

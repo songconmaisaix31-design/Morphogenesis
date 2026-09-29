@@ -59,6 +59,19 @@
 
 breaker 人工签名、时间、SHA、六点结论 **待填写**；三处 TODO 保持不变。门禁全绿、可接受 FC-E 无高危报告、H1 真人签字三锁必须分别成立。
 
+### 正式 FC-E 返回的待验证风险（不代替人审）
+
+唯一 deepseek-r1 响应已收到，**报告未通过 v2 门禁**；四条 fact 中两条行号不匹配作废，五不变量逐项覆盖不完整。参见 [正式接收记录与原文](../artifacts/ai-evidence/review-0929-formal-v2-report.md)。
+
+| 原假设 | 人工/领域后续验证入口 | 当前状态 |
+|---|---|---|
+| h1 medium：未知拒绝 hold 影响后续容量 | 上文预算 A/B 的容量、不双计和晚到结算限制 | 待验证，保守占额不自动等于缺陷 |
+| h2 high：崩溃/重启中的 probe fencing 竞争 | 补具体 owner/token/expiry/事务交错，再对照 H1-16/17/20 与 D 并发/旧 token 案例 | 待验证；原唯一引用 f4 INVALID，未确认代码缺陷 |
+| h3 low：同时间戳新事件可能遗漏 | H1-18/19 与 D equal-time 行为/mutation；仍需具体反例 | 待验证；不能由既有测试排除所有交错 |
+| h4 medium：5xx 含明确拒绝体归 unknown 可能错误 | 与本轮“5xx/transport unknown 优先”要求逐项对照 | 与用户要求冲突，不采纳削弱分类建议 |
+
+D 在 C552 的 47 项独立 focused、九组 mutation 红/恢复绿及 I 六门禁均已完成；这些本地证据不能替 FC-E 修补原引用/意见或代替真人签名。唯一请求额度已用，本轮不追加调用。T6 三锁仍缺可接受 FC-E 与 H1 签字。
+
 ## H3：Schema 仍为 1.0.0 candidate
 
 沿用已通过独立验收的 optional+nullable 修复；本轮未修改 Schema。无采集允许缺失/null，不能补 0；数值需要 audit，0 需要 complete/证据/空 issue IDs；正数与 unique IDs 数量、scope、追溯的消费侧限制保留。新增 optional 字段按 minor，optional→required 是 major/2.0.0；不自行冻结。
@@ -77,4 +90,4 @@ H3 人工审批人/时间/Schema SHA/准入范围 **待填写**；`collected=未
 | `-Replay <实际 rehearsal.json> -Port <空闲端口>` | 本轮 NOT_RUN | 仅回放；必须保留 provenance=replay |
 | `-AuthorizeLive -Executor evomap -Model evomap-gpt-5.6-sol -Mode manual` | NOT_RUN | 凭据/可用性、预算、端口、证据与原条件；未执行 |
 
-本轮 `contract_local` 仅待登记共同候选实际门禁，`interface_live`/`task_live` 均 NOT_RUN；长期运行、发布、生产合并/tag/冻结均未执行。正式 FC-E 配置与缺项见 [G 记录](../artifacts/ai-evidence/fc-remediation-governance-0929-report.md)，不是 Codex 代评。
+本轮 I 在 C552 实跑 `contract_local` 六门禁通过：focused 408、full 862/2 warnings、strict 87、build/SDK/分发，均 exit 0；G 核对原日志并在 [治理记录](../artifacts/ai-evidence/fc-remediation-governance-0929-report.md) 分别登记独立 D/正式 FC-E。蜂群 `interface_live`/`task_live` 均 NOT_RUN；长期运行、发布、生产合并/tag/冻结均未执行。正式 FC-E 的模型调用不替代蜂群 live 验收或人类签字。
