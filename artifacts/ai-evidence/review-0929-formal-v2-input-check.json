@@ -1,0 +1,22 @@
+{
+  "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "bytes": 288865,
+  "characters": 288741,
+  "token_count": "unknown",
+  "byte_guard": 300000,
+  "diff_checks": [
+    {
+      "from": "348cf8d",
+      "to": "73e64cc",
+      "bytes": 110195,
+      "complete_diff_occurrences": 1
+    },
+    {
+      "from": "73e64cc",
+      "to": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "bytes": 30063,
+      "complete_diff_occurrences": 1
+    }
+  ],
+  "meaning": "input fidelity only; no model call or review verdict"
+}

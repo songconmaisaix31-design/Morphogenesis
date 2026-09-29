@@ -18,14 +18,17 @@ if (selected.provider !== 'dashscope-fc' || selected.model !== 'deepseek-r1' ||
     provider.retryPolicy.maxRetries !== 0 || !provider.models.some(x => x.id === 'deepseek-r1' && x.maxTokens === 16384)) {
   throw new Error('Original provider/model boundary changed; no request');
 }
-const input = fs.readFileSync(prefix + '-input.md', 'utf8');
+const packet = JSON.parse(fs.readFileSync(prefix + '-input.json', 'utf8'));
+if (packet.candidate !== candidate) throw new Error('Input metadata candidate mismatch');
+const input = packet.content;
 const inputBytes = Buffer.byteLength(input);
-if (!input.includes(candidate) || inputBytes > 95000) throw new Error('Wrong candidate or input exceeds 95000 UTF-8 bytes');
+if (!input.includes(candidate) || inputBytes > 300000) throw new Error('Wrong candidate or input exceeds 300000 UTF-8 bytes');
 const metadata = {
   candidate, configured_model: selected.model, provider: selected.provider,
   original_profile: 'headless', execution: 'installed SDK single chat completion; no dsh tool loop',
   sdk: 'openai@6.40.0', max_retries: 0, max_output_tokens: 16384,
-  input_bytes: inputBytes, input_token_count: 'unknown; not locally tokenized',
+  input_bytes: inputBytes, input_characters: [...input].length,
+  input_token_count: 'unknown; not locally tokenized; byte guard is not token count',
   provider_context: 131072, provider_max_input_tokens: 98304,
   capacity_source: 'https://help.aliyun.com/en/model-studio/deepseek-r1',
   cost: 'unknown', usage: 'not_collected', submitted: false,

@@ -57,3 +57,13 @@ Owner 为 codex；本文件不是 deepseek-r1 评审。治理分支 `morph-fc-go
 - `node --check review-0929-formal-v2-call.cjs` 与无发送参数的 `node review-0929-formal-v2-call.cjs` 均 exit 0；未读凭据、未发网络请求。H1 21/21 exact-blob 引用 PASS（指定 Python，exit 0）；Schema 与原已验收 318dd 的 blob 同为 `ecf43b4f705bc8733af90751bbae6c9f0cf6fb29`。H1/H3 仍 unsigned。
 
 桌面保留基准：0929 文件原长 **8277 bytes**，原 SHA256 `D6B2195FA9B8F3635AFC96AF0E691CB7F0138A0F51F05B08EA5EC9F674A2DF52`；0928 原文件 `Morphogenesis_项目改动整合_2026-09-28.md` SHA256 `FBD02354C818A9770E6E4329B75CCA738658604B677D6BA959D77B614B2C36DF`。最终只追加/维护 0929 本轮章节，核对原前缀与 0928 原字节未变。
+
+### 输入边界纠正（主控 msg_ba90b5f88eed，正式请求之前）
+
+上述 95000-byte 缩包方案已撤回、未调用；它是 G 自选代理限制，**不是 provider token 限制，110195 bytes 也不等于超 98304 tokens**。按主控明确要求，完整生产范围恢复后再准备唯一请求。未安装 tokenizer，exact tokens 仍 unknown。
+
+当前正式输入为 **288865 UTF-8 bytes / 288741 Unicode 字符**，防误传体积上限改为 **300000 bytes**；服务端 max_input=98304/context=131072 才是 token 约束，max_output=16384 不变。包内含完整 `348cf8d..73e64cc` 核心生产 diff（110195 bytes）、完整 `73e64cc..C552` 生产增量（30063 bytes），均 `git diff --unified=3 -- swarm orchestration`、无缺失 hunk。补充了必要最终源码行号、全部三个 adapter 与 lease 文件，以及以下七个完整最终测试：unknown_effect_recovery、reservation_cost_state、probe_lifecycle_recovery、rejection_classification_boundaries、rejection_runtime_boundaries、failure_chain_boundaries、failure_chain_runtime。其他测试全文、未选中的不变源码、文档/锁/前端内容不在评审包，明确列出范围，不称全仓审查。
+
+脚本 dry-run 与 `node --check` 重新 exit 0；当前输入未调用模型。若服务端拒绝长度或发生未知远端效果，原始错误保留、停止且不重试，不再缩包第二次调用。此纠正不改变六绿前不得提交的依赖。
+
+输入载体调整：完整 Markdown 直接复制 Git diff 时，`git diff --check` 报原源码继承的 trailing whitespace（真实失败，非产品门禁）。为保留逐字代码而不清洗源文，改为 [input.json](review-0929-formal-v2-input.json) 的 `content` 字符串，经标准 JSON 一次解码后提交；input.md 只作为范围索引。第一次 Python round-trip 自检遗漏 UTF-8 参数，Windows 默认 GBK 抛 UnicodeDecodeError；显式 UTF-8 后重新核对两个完整 diff 字符串、输入字节数均通过，exit 0。SDK dry-run、最终 `git diff --check` 均 exit 0；这两项本地材料错误未触发模型请求。
