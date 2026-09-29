@@ -1,0 +1,649 @@
+D independent raw evidence extracts
+Code candidate c552250c0d07f5f70f09eb0a5ab3c322195e34ec
+D report branch morph-fc-independent-final-0929
+No paid live. Mock/contract_local only.
+
+===== D static-candidate.log =====
+[
+  {
+    "ref": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "original_test_functions": 464,
+    "original_assertions": 1558,
+    "missing": [],
+    "changed_functions": [
+      "tests/swarm/test_failure_chain_boundaries.py:test_lost_lease_after_successful_execution_prevents_submission"
+    ],
+    "assertion_changes": [],
+    "decorator_changes": [],
+    "changed_test_paths": [
+      "tests/orchestration/test_rejection_classification_boundaries.py",
+      "tests/swarm/test_breaker.py",
+      "tests/swarm/test_failure_chain_boundaries.py",
+      "tests/swarm/test_fault_observations.py",
+      "tests/swarm/test_probe_lifecycle_recovery.py",
+      "tests/swarm/test_rejection_runtime_boundaries.py",
+      "tests/swarm/test_reservation_cost_state.py",
+      "tests/swarm/test_unknown_effect_recovery.py"
+    ]
+  },
+  {
+    "b_full_summary": "47 failed, 656 passed, 2 warnings, 7 errors in 578.25s (0:09:38)",
+    "terminal_cases": 54,
+    "by_file": {
+      "FAILED tests/t2/test_codex.py": 9,
+      "FAILED tests/t2/test_gateway.py": 28,
+      "FAILED tests/t2/test_rehearsal.py": 6,
+      "FAILED tests/t2/test_runtime.py": 4,
+      "ERROR tests/integration/test_gateway_audit.py": 7
+    },
+    "traceback_blocks": 54,
+    "temp_guard_blocks": 54,
+    "terminal_exception_lines": [
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E       AssertionError: Regex pattern did not match.",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E       AssertionError: Regex pattern did not match.",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E       AssertionError: Regex pattern did not match.",
+      "E           ValueError: rehearsal requires a new private root under OS TEMP",
+      "E           ValueError: rehearsal requires a new private root under OS TEMP",
+      "E           ValueError: rehearsal requires a new private root under OS TEMP",
+      "E           ValueError: rehearsal requires a new private root under OS TEMP",
+      "E           ValueError: rehearsal requires a new private root under OS TEMP",
+      "E           ValueError: rehearsal requires a new private root under OS TEMP",
+      "E           ValueError: rehearsal requires a new private root under OS TEMP",
+      "E           ValueError: rehearsal requires a new private root under OS TEMP",
+      "E           ValueError: rehearsal requires a new private root under OS TEMP",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root",
+      "E           ValueError: executor requires a dedicated directory under the OS temp root"
+    ]
+  }
+]
+
+===== D focused-first.log =====
+..............................................                           [100%]
+46 passed in 73.31s (0:01:13)
+
+===== D focused-final.log =====
+...............................................                          [100%]
+47 passed in 73.71s (0:01:13)
+
+===== D mutations-driver.log =====
+{"name": "effect-persistence", "file": "swarm/worker_loop.py", "selection": "test_unknown_settled_effect_restart_and_handoff", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_unknown_settled_effect_restart_and_handoff[False-11]", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_unknown_settled_effect_restart_and_handoff[True-0]", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_unknown_settled_effect_restart_and_handoff[True-11]", "4 failed, 42 deselected in 21.78s"], "green_tail": ["....                                                                     [100%]", "4 passed, 42 deselected in 19.15s"]}
+{"name": "ttl-worker-guard", "file": "swarm/failure_chain.py", "selection": "test_ttl_worker_boundary_fences_both_old_results", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["=========================== short test summary info ===========================", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_ttl_worker_boundary_fences_both_old_results[False]", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_ttl_worker_boundary_fences_both_old_results[True]", "2 failed, 44 deselected in 6.30s"], "green_tail": ["..                                                                       [100%]", "2 passed, 44 deselected in 12.53s"]}
+{"name": "history-watermark", "file": "swarm/breaker.py", "selection": "test_recovery_watermark_old_history_and_equal_time_new_faults", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["E     + suspended", "=========================== short test summary info ===========================", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults", "1 failed, 45 deselected in 8.37s"], "green_tail": [".                                                                        [100%]", "1 passed, 45 deselected in 12.46s"]}
+{"name": "equal-time-new-fault", "file": "swarm/fault_observations.py", "selection": "test_recovery_watermark_old_history_and_equal_time_new_faults", "red_exit": 1, "restored_exit": 1, "byte_restored": true, "red_tail": ["E    +    where <Mock name='mock.execute' id='2342126431616'> = <Mock spec_set='FixtureExecutor' id='2342126425472'>.execute", "=========================== short test summary info ===========================", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults", "1 failed, 45 deselected in 13.35s"], "green_tail": ["FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults", "1 failed, 45 deselected in 6.97s"]}
+Traceback (most recent call last):
+  File "C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-independent-final-0929\artifacts\ai-evidence\fc-remediation-independent-0929-mutations.py", line 65, in <module>
+    assert red == 1 and "FAILED" in red_log and green == 0, row
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'name': 'equal-time-new-fault', 'file': 'swarm/fault_observations.py', 'selection': 'test_recovery_watermark_old_history_and_equal_time_new_faults', 'red_exit': 1, 'restored_exit': 1, 'byte_restored': True, 'red_tail': ["E    +    where <Mock name='mock.execute' id='2342126431616'> = <Mock spec_set='FixtureExecutor' id='2342126425472'>.execute", '=========================== short test summary info ===========================', 'FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults', '1 failed, 45 deselected in 13.35s'], 'green_tail': ['FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults', '1 failed, 45 deselected in 6.97s']}
+
+===== D restore-git-diagnostic.json =====
+{
+  "command": [
+    "git",
+    "-c",
+    "core.hooksPath=nul",
+    "-c",
+    "core.autocrlf=false",
+    "-c",
+    "core.fsmonitor=false",
+    "-C",
+    "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-independent-final-0929\\.runtime\\mutations\\equal-time-new-fault-restored\\test_recovery_watermark_old_hi0\\fixture\\local-workspace",
+    "worktree",
+    "add",
+    "--detach",
+    "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-independent-final-0929\\.runtime\\mutations\\equal-time-new-fault-restored\\test_recovery_watermark_old_hi0\\chain-state\\assets\\worktrees\\73d3c21a389a4846b89b029ec436a89c",
+    "d2c0e3a08e7d098e63fa156c5bc68d2dcd7e8347"
+  ],
+  "exit": 128,
+  "stdout": "",
+  "stderr": "Preparing worktree (detached HEAD d2c0e3a)\nfatal: '$GIT_DIR' too big\n"
+}
+===== D restored-short-path.log =====
+.                                                                        [100%]
+1 passed, 45 deselected in 11.26s
+
+===== D mutations-resumed.log =====
+{"name": "history-watermark", "file": "swarm/breaker.py", "selection": "test_recovery_watermark_old_history_and_equal_time_new_faults", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["E    +    where <Mock name='mock.execute' id='1278194597968'> = <Mock spec_set='FixtureExecutor' id='1278194603680'>.execute", "=========================== short test summary info ===========================", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults", "1 failed, 45 deselected in 10.90s"], "green_tail": [".                                                                        [100%]", "1 passed, 45 deselected in 11.16s"]}
+{"name": "equal-time-new-fault", "file": "swarm/fault_observations.py", "selection": "test_recovery_watermark_old_history_and_equal_time_new_faults", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["E    +    where <Mock name='mock.execute' id='2494897963472'> = <Mock spec_set='FixtureExecutor' id='2494897964576'>.execute", "=========================== short test summary info ===========================", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults", "1 failed, 45 deselected in 13.53s"], "green_tail": [".                                                                        [100%]", "1 passed, 45 deselected in 12.15s"]}
+{"name": "dashscope-5xx", "file": "orchestration/provider_adapters/dashscope.py", "selection": "test_adapter_status_priority and dashscope and 503", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["=========================== short test summary info ===========================", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_adapter_status_priority[Arrearage-\\u8d26\\u6237\\u6b20\\u8d39 balance account-503-DashScopeAdapter-dashscope]", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_adapter_status_priority[AllocationQuota.FreeTierOnly-\\u514d\\u8d39\\u914d\\u989d exhausted quota-503-DashScopeAdapter-dashscope]", "2 failed, 44 deselected in 2.18s"], "green_tail": ["..                                                                       [100%]", "2 passed, 44 deselected in 1.85s"]}
+{"name": "evomap-5xx", "file": "orchestration/provider_adapters/evomap.py", "selection": "test_real_gateway_request_count and 503", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["E     Use -v to get more diff", "=========================== short test summary info ===========================", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_real_gateway_request_count[503]", "1 failed, 45 deselected in 4.58s"], "green_tail": [".                                                                        [100%]", "1 passed, 45 deselected in 3.60s"]}
+{"name": "cost-from-usage", "file": "swarm/worker_loop.py", "selection": "test_current_reservation_cost_and_retained_hold", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["=========================== short test summary info ===========================", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_current_reservation_cost_and_retained_hold[False]", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_current_reservation_cost_and_retained_hold[True]", "2 failed, 44 deselected in 5.91s"], "green_tail": ["..                                                                       [100%]", "2 passed, 44 deselected in 9.59s"]}
+{"name": "cost-from-global", "file": "swarm/worker_loop.py", "selection": "test_current_reservation_cost_and_retained_hold", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["=========================== short test summary info ===========================", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_current_reservation_cost_and_retained_hold[False]", "FAILED ..\\..\\artifacts\\ai-evidence\\fc-remediation-independent-0929-focused.py::test_current_reservation_cost_and_retained_hold[True]", "2 failed, 44 deselected in 10.12s"], "green_tail": ["..                                                                       [100%]", "2 passed, 44 deselected in 9.51s"]}
+{"name": "original-suspended-transition", "file": "swarm/breaker.py", "selection": "test_worker_observation_suspends_provider_and_routes_later_candidate", "red_exit": 1, "restored_exit": 0, "byte_restored": true, "red_tail": ["E    +    where <Mock name='mock.execute' id='1379604095408'> = <Mock spec_set='FixtureExecutor' id='1379603930464'>.execute", "=========================== short test summary info ===========================", "FAILED tests/swarm/test_failure_chain_runtime.py::test_worker_observation_suspends_provider_and_routes_later_candidate", "1 failed, 4 deselected in 4.90s"], "green_tail": [".                                                                        [100%]", "1 passed, 4 deselected in 4.22s"]}
+
+===== D wheel-origin-audit.json =====
+{
+  "sha": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "wheel": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-candidate-0929\\.runtime\\dist\\morphogenesis-0.1.0-py3-none-any.whl",
+  "wheel_and_installed_python_files_match_git": 83,
+  "matched": [
+    "bootstrap/__init__.py",
+    "bootstrap/__main__.py",
+    "bootstrap/acceptance_runner.py",
+    "bootstrap/cli.py",
+    "bootstrap/sample.py",
+    "bootstrap/verify.py",
+    "bridge_node/__init__.py",
+    "bridge_node/assets.py",
+    "bridge_node/environment.py",
+    "bridge_node/mcp_client.py",
+    "contracts/__init__.py",
+    "contracts/base.py",
+    "contracts/identity.py",
+    "contracts/messages.py",
+    "contracts/protocols.py",
+    "contracts/provenance.py",
+    "contracts/resolution.py",
+    "contracts/results.py",
+    "contracts/runtime.py",
+    "hub_client/__init__.py",
+    "hub_client/assets.py",
+    "hub_client/client.py",
+    "hub_client/models.py",
+    "local_assets/__init__.py",
+    "local_assets/apply.py",
+    "local_assets/consume.py",
+    "local_assets/models.py",
+    "local_assets/paths.py",
+    "local_assets/promote.py",
+    "local_assets/snapshot.py",
+    "local_assets/store.py",
+    "local_assets/validate.py",
+    "metabolism/__init__.py",
+    "metabolism/decay.py",
+    "metabolism/index.py",
+    "metabolism/models.py",
+    "metabolism/service.py",
+    "mocks/__init__.py",
+    "orca_provision/__init__.py",
+    "orca_provision/fixed.py",
+    "orca_provision/models.py",
+    "orca_provision/policy.py",
+    "orca_provision/protocols.py",
+    "orca_provision/service.py",
+    "orchestration/__init__.py",
+    "orchestration/acceptance.py",
+    "orchestration/codex.py",
+    "orchestration/events.py",
+    "orchestration/gateway.py",
+    "orchestration/gateway_transport.py",
+    "orchestration/provider_adapters/base.py",
+    "orchestration/provider_adapters/dashscope.py",
+    "orchestration/provider_adapters/evomap.py",
+    "orchestration/rehearsal.py",
+    "orchestration/rehearsal_models.py",
+    "orchestration/runtime.py",
+    "orchestration/sample_policy.py",
+    "persistence/__init__.py",
+    "persistence/store.py",
+    "swarm/__init__.py",
+    "swarm/__main__.py",
+    "swarm/breaker.py",
+    "swarm/budget.py",
+    "swarm/cli.py",
+    "swarm/evomap_executor.py",
+    "swarm/failure_chain.py",
+    "swarm/fault_observations.py",
+    "swarm/hub_mirror.py",
+    "swarm/lease.py",
+    "swarm/models.py",
+    "swarm/observer.py",
+    "swarm/pheromone.py",
+    "swarm/router.py",
+    "swarm/task_ledger.py",
+    "swarm/worker_loop.py",
+    "topology/__init__.py",
+    "topology/engine.py",
+    "viz/__init__.py",
+    "viz/adapter.py",
+    "viz/evomap_models.py",
+    "viz/evomap_service.py",
+    "viz/server.py",
+    "viz/swarm_adapter.py"
+  ]
+}
+
+===== D mutations/effect-persistence-red.log =====
+FFFF                                                                     [100%]
+================================== FAILURES ===================================
+__________ test_unknown_settled_effect_restart_and_handoff[False-0] ___________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:92: in test_unknown_settled_effect_restart_and_handoff
+    assert restarted["calls"] == 0, restarted
+E   AssertionError: {'pid': 55952, 'source': 'C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-independent-final-0929\\.runtime\\c...cd995342439308b1c71306e433', 'swarm_id': 'local-fixture', 'worker_id': 'builder-0', 'task_id': 'fixture-0', ...}], ...}
+E   assert 1 == 0
+__________ test_unknown_settled_effect_restart_and_handoff[False-11] __________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:92: in test_unknown_settled_effect_restart_and_handoff
+    assert restarted["calls"] == 0, restarted
+E   AssertionError: {'pid': 76020, 'source': 'C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-independent-final-0929\\.runtime\\c...f62d843fdab7a7bc20509105c', 'swarm_id': 'local-fixture', 'worker_id': 'builder-11', 'task_id': 'fixture-0', ...}], ...}
+E   assert 1 == 0
+___________ test_unknown_settled_effect_restart_and_handoff[True-0] ___________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:92: in test_unknown_settled_effect_restart_and_handoff
+    assert restarted["calls"] == 0, restarted
+E   AssertionError: {'pid': 73560, 'source': 'C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-independent-final-0929\\.runtime\\c...6008284252afa2ee59cd55e086', 'swarm_id': 'local-fixture', 'worker_id': 'builder-0', 'task_id': 'fixture-0', ...}], ...}
+E   assert 1 == 0
+__________ test_unknown_settled_effect_restart_and_handoff[True-11] ___________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:92: in test_unknown_settled_effect_restart_and_handoff
+    assert restarted["calls"] == 0, restarted
+E   AssertionError: {'pid': 75392, 'source': 'C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-independent-final-0929\\.runtime\\c...0b7594d61b64cea4c68f2107e', 'swarm_id': 'local-fixture', 'worker_id': 'builder-11', 'task_id': 'fixture-0', ...}], ...}
+E   assert 1 == 0
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_unknown_settled_effect_restart_and_handoff[False-0]
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_unknown_settled_effect_restart_and_handoff[False-11]
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_unknown_settled_effect_restart_and_handoff[True-0]
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_unknown_settled_effect_restart_and_handoff[True-11]
+4 failed, 42 deselected in 21.78s
+
+===== D mutations/effect-persistence-restored.log =====
+....                                                                     [100%]
+4 passed, 42 deselected in 19.15s
+
+===== D mutations/equal-time-new-fault-red.log =====
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_recovery_watermark_old_history_and_equal_time_new_faults ________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:229: in test_recovery_watermark_old_history_and_equal_time_new_faults
+    assert fresh.execute.call_count == 2 and blocked == "sleeping", _events(emitter)
+E   AssertionError: [{'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 71160, 'signal_id': 'fixture-1', ...}, {'worker_id': '...fixture-3', ...}, {'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 71160, 'signal_id': 'fixture-0', ...}]
+E   assert (3 == 2)
+E    +  where 3 = <Mock name='mock.execute' id='2342126431616'>.call_count
+E    +    where <Mock name='mock.execute' id='2342126431616'> = <Mock spec_set='FixtureExecutor' id='2342126425472'>.execute
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults
+1 failed, 45 deselected in 13.35s
+
+===== D mutations/equal-time-new-fault-restored.log =====
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_recovery_watermark_old_history_and_equal_time_new_faults ________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:214: in test_recovery_watermark_old_history_and_equal_time_new_faults
+    assert process(recovered, 2) == "completed", _events(recovered)
+E   AssertionError: [{'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 78472, 'signal_id': 'fixture-0', ...}, {'worker_id': '...fixture-1', ...}, {'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 78472, 'signal_id': 'fixture-2', ...}]
+E   assert 'rejected' == 'completed'
+E     
+E     - completed
+E     + rejected
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults
+1 failed, 45 deselected in 6.97s
+
+===== D mutations/history-watermark-red.log =====
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_recovery_watermark_old_history_and_equal_time_new_faults ________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:219: in test_recovery_watermark_old_history_and_equal_time_new_faults
+    assert reader.shared_breaker.view("local", "rate_limited").state == "normal"
+E   AssertionError: assert 'suspended' == 'normal'
+E     
+E     - normal
+E     + suspended
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults
+1 failed, 45 deselected in 8.37s
+
+===== D mutations/history-watermark-restored.log =====
+.                                                                        [100%]
+1 passed, 45 deselected in 12.46s
+
+===== D mutations/ttl-worker-guard-red.log =====
+FF                                                                       [100%]
+================================== FAILURES ===================================
+___________ test_ttl_worker_boundary_fences_both_old_results[False] ___________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:161: in test_ttl_worker_boundary_fences_both_old_results
+    assert contender.executor.execute.call_count == 1, _events(contender)
+E   AssertionError: [{'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 72480, 'signal_id': 'fixture-0', ...}, {'worker_id': '...fixture-2', ...}, {'worker_id': 'builder-9', 'swarm_id': 'local-fixture', 'pid': 72480, 'signal_id': 'fixture-2', ...}]
+E   assert 0 == 1
+E    +  where 0 = <Mock name='mock.execute' id='2266917460192'>.call_count
+E    +    where <Mock name='mock.execute' id='2266917460192'> = <Mock spec_set='FixtureExecutor' id='2266917459424'>.execute
+E    +      where <Mock spec_set='FixtureExecutor' id='2266917459424'> = <swarm.worker_loop.Worker object at 0x0000020FCECF59A0>.executor
+___________ test_ttl_worker_boundary_fences_both_old_results[True] ____________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:161: in test_ttl_worker_boundary_fences_both_old_results
+    assert contender.executor.execute.call_count == 1, _events(contender)
+E   AssertionError: [{'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 72480, 'signal_id': 'fixture-0', ...}, {'worker_id': '...fixture-2', ...}, {'worker_id': 'builder-9', 'swarm_id': 'local-fixture', 'pid': 72480, 'signal_id': 'fixture-2', ...}]
+E   assert 0 == 1
+E    +  where 0 = <Mock name='mock.execute' id='2266917469648'>.call_count
+E    +    where <Mock name='mock.execute' id='2266917469648'> = <Mock spec_set='FixtureExecutor' id='2266917469360'>.execute
+E    +      where <Mock spec_set='FixtureExecutor' id='2266917469360'> = <swarm.worker_loop.Worker object at 0x0000020FCECF7710>.executor
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_ttl_worker_boundary_fences_both_old_results[False]
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_ttl_worker_boundary_fences_both_old_results[True]
+2 failed, 44 deselected in 6.30s
+
+===== D mutations/ttl-worker-guard-restored.log =====
+..                                                                       [100%]
+2 passed, 44 deselected in 12.53s
+
+===== D m2/cost-from-global-red.log =====
+FF                                                                       [100%]
+================================== FAILURES ===================================
+___________ test_current_reservation_cost_and_retained_hold[False] ____________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:259: in test_current_reservation_cost_and_retained_hold
+    assert [facts[row["request_id"]].cost_state for row in rows] == ["unknown", "settled"]
+E   AssertionError: assert ['unknown', 'unknown'] == ['unknown', 'settled']
+E     
+E     At index 1 diff: 'unknown' != 'settled'
+E     Use -v to get more diff
+____________ test_current_reservation_cost_and_retained_hold[True] ____________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:259: in test_current_reservation_cost_and_retained_hold
+    assert [facts[row["request_id"]].cost_state for row in rows] == ["unknown", "settled"]
+E   AssertionError: assert ['unknown', 'unknown'] == ['unknown', 'settled']
+E     
+E     At index 1 diff: 'unknown' != 'settled'
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_current_reservation_cost_and_retained_hold[False]
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_current_reservation_cost_and_retained_hold[True]
+2 failed, 44 deselected in 10.12s
+
+===== D m2/cost-from-global-restored.log =====
+..                                                                       [100%]
+2 passed, 44 deselected in 9.51s
+
+===== D m2/cost-from-usage-red.log =====
+FF                                                                       [100%]
+================================== FAILURES ===================================
+___________ test_current_reservation_cost_and_retained_hold[False] ____________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:247: in test_current_reservation_cost_and_retained_hold
+    assert fact.cost_state == "unknown" and fact.request_id == row["request_id"]
+E   AssertionError: assert ('settled' == 'unknown'
+E     
+E     - unknown
+E     + settled)
+____________ test_current_reservation_cost_and_retained_hold[True] ____________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:247: in test_current_reservation_cost_and_retained_hold
+    assert fact.cost_state == "unknown" and fact.request_id == row["request_id"]
+E   AssertionError: assert ('settled' == 'unknown'
+E     
+E     - unknown
+E     + settled)
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_current_reservation_cost_and_retained_hold[False]
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_current_reservation_cost_and_retained_hold[True]
+2 failed, 44 deselected in 5.91s
+
+===== D m2/cost-from-usage-restored.log =====
+..                                                                       [100%]
+2 passed, 44 deselected in 9.59s
+
+===== D m2/dashscope-5xx-red.log =====
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_ test_adapter_status_priority[Arrearage-\u8d26\u6237\u6b20\u8d39 balance account-503-DashScopeAdapter-dashscope] _
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:270: in test_adapter_status_priority
+    assert result.classification.value == expected
+E   AssertionError: assert 'confirmed_rejection' == 'unknown_effect'
+E     
+E     - unknown_effect
+E     + confirmed_rejection
+_ test_adapter_status_priority[AllocationQuota.FreeTierOnly-\u514d\u8d39\u914d\u989d exhausted quota-503-DashScopeAdapter-dashscope] _
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:270: in test_adapter_status_priority
+    assert result.classification.value == expected
+E   AssertionError: assert 'confirmed_rejection' == 'unknown_effect'
+E     
+E     - unknown_effect
+E     + confirmed_rejection
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_adapter_status_priority[Arrearage-\u8d26\u6237\u6b20\u8d39 balance account-503-DashScopeAdapter-dashscope]
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_adapter_status_priority[AllocationQuota.FreeTierOnly-\u514d\u8d39\u914d\u989d exhausted quota-503-DashScopeAdapter-dashscope]
+2 failed, 44 deselected in 2.18s
+
+===== D m2/dashscope-5xx-restored.log =====
+..                                                                       [100%]
+2 passed, 44 deselected in 1.85s
+
+===== D m2/equal-time-new-fault-red.log =====
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_recovery_watermark_old_history_and_equal_time_new_faults ________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:231: in test_recovery_watermark_old_history_and_equal_time_new_faults
+    assert fresh.execute.call_count == 2 and blocked == "sleeping", _events(emitter)
+E   AssertionError: [{'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 76944, 'signal_id': 'fixture-5', ...}, {'worker_id': '...fixture-0', ...}, {'worker_id': 'builder-0', 'swarm_id': 'local-fixture', 'pid': 76944, 'signal_id': 'fixture-3', ...}]
+E   assert (3 == 2)
+E    +  where 3 = <Mock name='mock.execute' id='2494897963472'>.call_count
+E    +    where <Mock name='mock.execute' id='2494897963472'> = <Mock spec_set='FixtureExecutor' id='2494897964576'>.execute
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults
+1 failed, 45 deselected in 13.53s
+
+===== D m2/equal-time-new-fault-restored.log =====
+.                                                                        [100%]
+1 passed, 45 deselected in 12.15s
+
+===== D m2/evomap-5xx-red.log =====
+F                                                                        [100%]
+================================== FAILURES ===================================
+____________________ test_real_gateway_request_count[503] _____________________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:308: in test_real_gateway_request_count
+    assert [x.execute.call_count for x in executors] == expected, _events(worker)
+E   AssertionError: [{'worker_id': 'builder-0', 'swarm_id': 'evomap-data-v02', 'pid': 76256, 'signal_id': 'data-0', ...}]
+E   assert [1, 1] == [1, 0]
+E     
+E     At index 1 diff: 1 != 0
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_real_gateway_request_count[503]
+1 failed, 45 deselected in 4.58s
+
+===== D m2/evomap-5xx-restored.log =====
+.                                                                        [100%]
+1 passed, 45 deselected in 3.60s
+
+===== D m2/history-watermark-red.log =====
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_recovery_watermark_old_history_and_equal_time_new_faults ________
+..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py:226: in test_recovery_watermark_old_history_and_equal_time_new_faults
+    assert fresh.execute.call_count == 2
+E   AssertionError: assert 0 == 2
+E    +  where 0 = <Mock name='mock.execute' id='1278194597968'>.call_count
+E    +    where <Mock name='mock.execute' id='1278194597968'> = <Mock spec_set='FixtureExecutor' id='1278194603680'>.execute
+=========================== short test summary info ===========================
+FAILED ..\..\artifacts\ai-evidence\fc-remediation-independent-0929-focused.py::test_recovery_watermark_old_history_and_equal_time_new_faults
+1 failed, 45 deselected in 10.90s
+
+===== D m2/history-watermark-restored.log =====
+.                                                                        [100%]
+1 passed, 45 deselected in 11.16s
+
+===== D m2/original-suspended-transition-red.log =====
+F                                                                        [100%]
+================================== FAILURES ===================================
+____ test_worker_observation_suspends_provider_and_routes_later_candidate _____
+tests\swarm\test_failure_chain_runtime.py:218: in test_worker_observation_suspends_provider_and_routes_later_candidate
+    _assert_calls(blocked, next_signal, next_lease, expected=0)
+tests\swarm\test_failure_chain_runtime.py:124: in _assert_calls
+    assert executor.execute.call_count == expected
+E   AssertionError: assert 1 == 0
+E    +  where 1 = <Mock name='mock.execute' id='1379604095408'>.call_count
+E    +    where <Mock name='mock.execute' id='1379604095408'> = <Mock spec_set='FixtureExecutor' id='1379603930464'>.execute
+=========================== short test summary info ===========================
+FAILED tests/swarm/test_failure_chain_runtime.py::test_worker_observation_suspends_provider_and_routes_later_candidate
+1 failed, 4 deselected in 4.90s
+
+===== D m2/original-suspended-transition-restored.log =====
+.                                                                        [100%]
+1 passed, 4 deselected in 4.22s
+
+===== Original failed ValidationReport (unaltered JSON) =====
+{
+  "report_id": "73d3c21a389a4846b89b029ec436a89c",
+  "asset_id": "sha256:e5c7e5f204ed9f59a951bef5809d2319d1622a567cc2979078fd15708d53625e",
+  "attempt": {
+    "task_id": "fixture-2",
+    "agent": {
+      "role": "builder",
+      "instance": 0
+    },
+    "attempt": 0
+  },
+  "base_revision": "d2c0e3a08e7d098e63fa156c5bc68d2dcd7e8347",
+  "candidate_json": "{\"attempt\":{\"task_id\":\"fixture-2\",\"agent\":{\"role\":\"builder\",\"instance\":0},\"attempt\":0},\"base_revision\":\"d2c0e3a08e7d098e63fa156c5bc68d2dcd7e8347\",\"base_head\":\"986b84dfe76d0c0a1162671bb7d5e412efadd2cd\",\"changes\":[{\"path\":\"module_1/task_2.py\",\"before\":\"def answer():\\n    return -1\\n\",\"after\":\"def answer():\\n    return 2\\n\"}],\"declared_files\":1,\"declared_lines\":2,\"scope\":\"module_1\",\"summary\":\"Local quarantined candidate; validation pending\",\"required_capabilities\":[],\"dependencies\":[]}",
+  "passed": false,
+  "reasons": [
+    "git_operation_failed:worktree"
+  ],
+  "actual_files": 1,
+  "actual_lines": 2,
+  "env_fingerprint": {
+    "node_version": "v24.16.0",
+    "arch": "x64",
+    "platform": "win32",
+    "python_version": "3.12.13"
+  },
+  "commands": [],
+  "worktree_path": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-independent-final-0929\\.runtime\\mutations\\equal-time-new-fault-restored\\test_recovery_watermark_old_hi0\\chain-state\\assets\\worktrees\\73d3c21a389a4846b89b029ec436a89c",
+  "created_at": 1800000304.0,
+  "expires_at": 1800000604.0,
+  "policy_version": "fixture-files-v1",
+  "policy_json": "{\"version\":\"fixture-files-v1\",\"expectations\":[{\"path\":\"module_1/task_2.py\",\"content\":\"def answer():\\n    return 2\\n\"}],\"executor\":\"literal-files-v1\"}",
+  "isolation": "non_arbitrary_literal_files"
+}
+===== I source-preflight.log (independently read, not D execution) =====
+OS_TEMP C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-candidate-0929\.runtime\test-state
+archive_export_all_files_byte_equal 346
+all_changed_paths_git_blob_equal 23
+import_git_blob_equal swarm.worker_loop C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-candidate-0929\.runtime\candidate-src\swarm\worker_loop.py
+import_git_blob_equal swarm.task_ledger C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-candidate-0929\.runtime\candidate-src\swarm\task_ledger.py
+import_git_blob_equal swarm.budget C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-candidate-0929\.runtime\candidate-src\swarm\budget.py
+import_git_blob_equal swarm.breaker C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-candidate-0929\.runtime\candidate-src\swarm\breaker.py
+import_git_blob_equal swarm.fault_observations C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-candidate-0929\.runtime\candidate-src\swarm\fault_observations.py
+import_git_blob_equal swarm.failure_chain C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-candidate-0929\.runtime\candidate-src\swarm\failure_chain.py
+import_git_blob_equal orchestration.provider_adapters.dashscope C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-candidate-0929\.runtime\candidate-src\orchestration\provider_adapters\dashscope.py
+import_git_blob_equal orchestration.provider_adapters.evomap C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-candidate-0929\.runtime\candidate-src\orchestration\provider_adapters\evomap.py
+PYTHONPATH C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src
+EXIT_CODE=0
+
+===== I backend-preflight.log (independently read, not D execution) =====
+build_requires poetry-core<3.0,>=2.0
+backend_version 2.5.0
+backend_import C:\Users\DW\AppData\Local\uv\cache\archive-v0\8IuHKNOGrMpTxzu6\Lib\site-packages\poetry\core\masonry\api.py
+EXIT_CODE=0
+
+===== I temp-preflight.log (independently read, not D execution) =====
+SHA=c552250c0d07f5f70f09eb0a5ab3c322195e34ec
+CWD=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src
+PYTHON=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927/.venv/Scripts/python.exe
+COMMAND=python -m pytest -q tests/integration/test_gateway_audit.py --basetemp=../test-state/preflight -p no:cacheprovider
+.......                                                                  [100%]
+7 passed in 2.35s
+EXIT_CODE=0
+
+===== I focused.log (independently read, not D execution) =====
+SHA=c552250c0d07f5f70f09eb0a5ab3c322195e34ec
+CWD=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src
+COMMAND=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927/.venv/Scripts/python.exe -u -m pytest -q tests/orchestration tests/swarm/test_unknown_effect_recovery.py tests/swarm/test_reservation_cost_state.py tests/swarm/test_probe_lifecycle_recovery.py tests/swarm/test_rejection_runtime_boundaries.py tests/swarm/test_failure_chain_boundaries.py tests/swarm/test_failure_chain_runtime.py tests/swarm/test_breaker.py tests/swarm/test_fault_observations.py tests/swarm/test_budget.py tests/swarm/test_budget_evomap.py tests/swarm/test_worker_runtime.py tests/swarm/test_ledger.py tests/swarm/test_lease.py --basetemp=../test-state/focused -p no:cacheprovider
+START=2026-09-29T10:59:13.7346265Z
+........................................................................ [ 17%]
+........................................................................ [ 35%]
+........................................................................ [ 52%]
+........................................................................ [ 70%]
+........................................................................ [ 88%]
+................................................                         [100%]
+============================== warnings summary ===============================
+tests/swarm/test_budget.py::test_model_copy_cannot_bypass_preflight_validation[nan]
+  C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-integration-0927\.venv\Lib\site-packages\pydantic\main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='input_tokens', input_value=nan, input_type=float])
+    return self.__pydantic_serializer__.to_python(
+
+tests/swarm/test_budget.py::test_model_copy_cannot_bypass_preflight_validation[1]
+  C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-integration-0927\.venv\Lib\site-packages\pydantic\main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='input_tokens', input_value='1', input_type=str])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+408 passed, 2 warnings in 278.45s (0:04:38)
+EXIT_CODE=0
+END=2026-09-29T11:03:53.7642699Z
+
+===== I strict.log (independently read, not D execution) =====
+SHA=c552250c0d07f5f70f09eb0a5ab3c322195e34ec
+CWD=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src
+COMMAND=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927/.venv/Scripts/python.exe tools/typecheck.py
+MYPY_CACHE_DIR=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/mypy-cache
+START=2026-09-29T11:00:22.9321785Z
+Success: no issues found in 87 source files
+EXIT_CODE=0
+END=2026-09-29T11:01:00.2717905Z
+
+===== I build.log (independently read, not D execution) =====
+SHA=c552250c0d07f5f70f09eb0a5ab3c322195e34ec
+CWD=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src
+COMMAND=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927/.venv/Scripts/python.exe -m build --no-isolation --outdir ../dist
+BUILD_ONLY_PYTHONPATH=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src;C:/Users/DW/AppData/Local/uv/cache/archive-v0/8IuHKNOGrMpTxzu6/Lib/site-packages
+START=2026-09-29T10:59:49.1710840Z
+* Getting build dependencies for sdist...
+* Building sdist...
+* Building wheel from sdist
+* Getting build dependencies for wheel...
+* Building wheel...
+Successfully built morphogenesis-0.1.0.tar.gz and morphogenesis-0.1.0-py3-none-any.whl
+EXIT_CODE=0
+END=2026-09-29T10:59:52.8584829Z
+
+===== I sdk.log (independently read, not D execution) =====
+SHA=c552250c0d07f5f70f09eb0a5ab3c322195e34ec
+CWD=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src
+COMMAND=node tools/check_sdk.cjs
+START=2026-09-29T10:59:38.4487896Z
+{"scope":"contract_local","schema_version":"1.14.0","schema_valid":true,"asset_id_verified":true,"tampering_rejected":true,"published":false}
+EXIT_CODE=0
+END=2026-09-29T10:59:38.6308087Z
+
+===== I distribution.log (independently read, not D execution) =====
+SHA=c552250c0d07f5f70f09eb0a5ab3c322195e34ec
+CWD=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/candidate-src
+COMMAND=uv pip install --python C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927/.venv/Scripts/python.exe --offline --no-deps --target ../wheel-site ../dist/morphogenesis-0.1.0-py3-none-any.whl
+START=2026-09-29T11:00:06.0833314Z
+Using CPython 3.12.13 interpreter at: C:\Users\DW\orca\workspaces\Morphogenesis\morph-fc-integration-0927\.venv\Scripts\python.exe
+Resolved 1 package in 47ms
+Prepared 1 package in 138ms
+Installed 1 package in 186ms
+ + morphogenesis==0.1.0 (from file:///C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-candidate-0929/.runtime/dist/morphogenesis-0.1.0-py3-none-any.whl)
+INSTALL_EXIT_CODE=0
+COMMAND=C:/Users/DW/orca/workspaces/Morphogenesis/morph-fc-integration-0927/.venv/Scripts/python.exe -I tools/check_distribution.py --site-dir ../wheel-site --check-node
+{"scope": "contract_local", "packages_from_wheel": 13, "resources_present": true, "installed_verifier": "passed", "node_dependency_check": true}
+EXIT_CODE=0
+END=2026-09-29T11:00:09.8643081Z
+
+POST-MUTATION AND FINAL-FOCUSED BYTE CHECK: 346/346 archive files equal.
+D final focused native exit 0 (captured by outer PowerShell $LASTEXITCODE), 47 passed / 73.71s.
+I full pending; not included as passed.

@@ -76,7 +76,8 @@ def test_unknown_settled_effect_restart_and_handoff(tmp_path, instance, handoff)
     def unknown(*args, **kwargs):
         if handoff:
             current, = worker.leases.snapshot()
-            moved.append(worker.leases.handoff(current, destination.worker_id))
+            next_owner = destination.worker_id if instance else "recipient-D"
+            moved.append(worker.leases.handoff(current, next_owner))
         return _failure("unknown_effect", known_usage=True, reason="read_timeout")
     boundary.execute.side_effect = unknown
     outcome = process(worker)
@@ -212,18 +213,20 @@ def test_recovery_watermark_old_history_and_equal_time_new_faults(tmp_path):
         recovered = subject(cfg, _executor())
         assert process(recovered, 2) == "completed", _events(recovered)
         assert recovered.executor.execute.call_count == 1
+        observed_states = []
         for reader in (recovered, peer):
             reader.shared_breaker.observe(reader.fault_observation_store)
             reader.shared_breaker.apply_aggregates(stale_aggregate)
-            assert reader.shared_breaker.view("local", "rate_limited").state == "normal"
+            observed_states.append(reader.shared_breaker.view("local", "rate_limited").state)
         restarted = child(cfg, "observe")
-        assert restarted["breaker"] == "normal" and restarted["records"] == 2
         assert recovered.fault_observation_store.path.read_bytes() == old_bytes
         fresh = _executor(result=_failure(known_usage=True, reason="rate_limited"))
         emitter = subject(cfg, fresh)
-        for n in (3, 4):
-            assert process(emitter, n) == "rejected", _events(emitter)
+        outcomes = [process(emitter, n) for n in (3, 4)]
         assert fresh.execute.call_count == 2
+        assert outcomes == ["rejected", "rejected"], _events(emitter)
+        assert observed_states == ["normal", "normal"]
+        assert restarted["breaker"] == "normal" and restarted["records"] == 2
         blocked = process(emitter, 5)
         assert fresh.execute.call_count == 2 and blocked == "sleeping", _events(emitter)
         records = _facts(emitter)
@@ -269,7 +272,9 @@ def test_adapter_status_priority(adapter, provider, status, code, message):
 
 def gateway(tmp_path, handler):
     run = EvoMapRun(directory=tmp_path / "demo", api=EvoMapConfig(credential_file=tmp_path / "mock-unused"),
-        budget={"max_cost_usd": 10, "unbounded_reservation_usd": .2})
+        budget={"max_cost_usd": 10, "unbounded_reservation_usd": .2,
+                "limits": {"max_tasks": 6, "max_attempts": 6, "max_attempts_per_task": 1,
+                           "max_derived_tasks": 0, "max_runtime_seconds": 300}})
     seed_evomap(run)
     cfg = WorkerConfig.model_validate_json(evomap_worker_config(run, 0))
     cfg = cfg.model_copy(update={"state": tmp_path / "state", "budget": cfg.budget.model_copy(update={
