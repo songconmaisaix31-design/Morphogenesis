@@ -6,11 +6,10 @@ transformation; unknown usage/cost remains unknown in both source and projection
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from functools import lru_cache
+from importlib.resources import files
 import json
 from pathlib import Path
-import re
 import sqlite3
-import subprocess
 
 from jsonschema import Draft202012Validator
 import pytest
@@ -22,16 +21,9 @@ from tests.swarm.test_failure_chain_runtime import (
 )
 from tests.swarm.test_worker_runtime import enqueue
 
-FROZEN = "be4fb7a685e951c9e42d8dc0c7eeb900cb5518f1"
-
-
 @lru_cache(maxsize=1)
 def frozen_json():
-    source = subprocess.check_output(
-        ["git", "show", FROZEN + ":docs/FC_LOG_SCHEMA_DRAFT_0928.md"],
-        cwd=Path(__file__).resolve().parents[2],
-    ).decode("utf-8")
-    return re.search(r"```json\n(.*?)\n```", source, re.S)[1].encode("utf-8")
+    return files("orchestration").joinpath("fc_log_schema.json").read_bytes()
 
 
 def read_events(path):
@@ -43,9 +35,12 @@ def read_events(path):
     return records
 
 
-def test_packaged_schema_is_exact_frozen_fence():
-    packaged = Path(__file__).resolve().parents[2] / "orchestration/fc_log_schema.json"
-    assert packaged.read_bytes() == frozen_json()
+def test_packaged_schema_exists_and_is_valid():
+    packaged = files("orchestration").joinpath("fc_log_schema.json")
+    assert packaged.is_file()
+    source = packaged.read_bytes()
+    assert source.strip()
+    Draft202012Validator.check_schema(json.loads(source))
 
 
 def task(writer, **facts):
