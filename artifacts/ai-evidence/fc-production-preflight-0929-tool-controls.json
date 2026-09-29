@@ -1,0 +1,121 @@
+{
+  "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "preparation_control": true,
+  "source_reference": "40577cb841e8d89c08e1336d7254c4ca7bb3984e",
+  "control_cases": [
+    {
+      "case": "exact_positive_mechanical_only",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "pass": true
+    },
+    {
+      "case": "wrong_start_line",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "pass": true
+    },
+    {
+      "case": "changed_whitespace",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "pass": true
+    },
+    {
+      "case": "governance_sha_substitution",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "pass": true
+    },
+    {
+      "case": "missing_dimension",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "pass": true
+    },
+    {
+      "case": "duplicate_id",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "pass": true
+    },
+    {
+      "case": "invalid_evidence",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "pass": true
+    },
+    {
+      "case": "non_array_output",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "pass": true
+    },
+    {
+      "case": "no_response",
+      "expected_exit": 2,
+      "actual_exit": 2,
+      "pass": true
+    },
+    {
+      "case": "legacy_response_unchanged",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "pass": true
+    }
+  ],
+  "native_configuration_checks": {
+    "native_dump_exit_zero": true,
+    "full_task_bytes_equal": true,
+    "runner_no_startup_dependency": true,
+    "all_disabled_plugins_retained": true,
+    "zero_retry": true,
+    "finite_output": true,
+    "official_route": true
+  },
+  "legacy_original_results": [
+    {
+      "index": 0,
+      "id": "f1",
+      "verification": "INVALID"
+    },
+    {
+      "index": 1,
+      "id": "f2",
+      "verification": "INVALID"
+    },
+    {
+      "index": 2,
+      "id": "f3",
+      "verification": "INVALID"
+    },
+    {
+      "index": 3,
+      "id": "f4",
+      "verification": "INVALID"
+    },
+    {
+      "index": 4,
+      "id": "h1",
+      "verification": "INVALID"
+    },
+    {
+      "index": 5,
+      "id": "h2",
+      "verification": "INVALID"
+    },
+    {
+      "index": 6,
+      "id": "h3",
+      "verification": "INVALID"
+    },
+    {
+      "index": 7,
+      "id": "h4",
+      "verification": "INVALID"
+    }
+  ],
+  "model_requests": 0,
+  "scope": "offline review-tool controls/config composition, NOT FC-E or product acceptance",
+  "exit_code": 0
+}

@@ -200,3 +200,110 @@ if ($runExit -ne 0) { throw "本轮失败 exit=$runExit；保留证据，停止�
 3. 实际 live executor/model、凭据所在的既有安全通道（只需路径/配置存在性，不在消息中发值）、新任务/调用次数和跨三轮预算、超时及未知费用时是否允许独立新任务的明确约束。脚本并不保证上游硬费用上限。
 
 现场投影/选屏和 manual Enter 仍由现场操作员完成；没有额外新增审批流程。FC-E成败由G正式回执决定，代码门禁/文档齐全/预检完成均不自动签署H1/H3。
+
+## 9. 本轮生产前置追加事实（2026-09-29）
+
+本节是 C / codex 的 `task_3e21836ea2c2 / ctx_6b976c62b96d` 新事实；上文历史快照逐字保留，不能把其中 H3 未签、T10 无实现等旧状态当作当前结论。当前三轨写权及后续 I 顺序见 [生产一页计划](FC_PRODUCTION_PLAN_0929.md)。本轨开工 `7347f5c1a7eaf0f5a3279c2db0ffb751a730792c`，clean；共同代码仍是 **C552**，最终 A+B+H3 候选 SHA 尚未收到。本轮交付的是前置工具和材料，**正式 FC-E / smoke / tag / 生产 merge / 业务 live 均 NOT_RUN，模型与 Hub 请求均为 0**。
+
+### 9.1 H3 已冻结；H1 最小待签清单
+
+本轮 `git ls-remote origin` 实查：`decentralized-swarm=be4fb7a685e951c9e42d8dc0c7eeb900cb5518f1`，parent `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；目标工作树 clean。提交仅改 `docs/FC_LOG_SCHEMA_DRAFT_0928.md`，`:17–26` 明确 David / 2026-09-29 / Schema **1.0.0 正式冻结**、原 12/12 与 9/9 controls。它声明是 Owner 复跑，C 没有重跑或冒充独立验收。该冻结不等于生产采集完成，也不自动成为 H1 签名。
+
+H1 的实查 [immutable 原文](../artifacts/ai-evidence/fc-production-preflight-0929-source-facts.json)：C552 `swarm/breaker.py:202,592,672` 三处 TODO 保留；`docs/FC_HUMAN_REVIEW_0928.md:169–178` 的姓名、时间、六项结论仍待填，槽内旧目标为 `73e64cc`。治理 **40577cb841e8d89c08e1336d7254c4ca7bb3984e** 的 `docs/FC_HUMAN_REVIEW_0929.md:40,66` 绑定 C552 的预算结论/签名也待填。没有从“签字目前h1”推定人签已齐；主控已向本人收取，C 不重复问、不改人签槽。
+
+本人只需提供以下完整记录，由主控收录到授权材料：
+
+| 待签项 | 最少内容 | 绑定要求 |
+|---|---|---|
+| 预算 A | unknown hold 后同 task 新 request 的 pending 冲突/容量判断，结论与成立前提 | C552 `budget.py:179–203,230–251` 和 `worker_loop.py:757–825`；最终 SHA 到位后重新绑定，旧行号不得照搬 |
+| 预算 B | 可用额度是否双计、晚到 uncertain 对账未实现、长期 hold、lower usage、无上游硬账单上限的结论与前提 | C552 `budget.py:77–101,192–203,259–313` |
+| breaker 六点 | 16 格转移、双阈值/欠费例外、并发 fencing/旧 token、Retry-After、纯函数与恢复水位、预算/租约隔离，各写结论或未解决项 | C552 `breaker.py:163–251,477–521,569–695`；实际最终候选的同路径须重核 |
+| 身份与范围 | 本人姓名、日期、完整受审 SHA、以上结论；是否授权原生产 Owner 替换三处 TODO | 不把 AI 源码核对、H3 David 签名、旧 SHA 自动转成最终 H1 |
+
+三锁仍分别要求最终候选适用门禁、合格正式 FC-E、H1；“H3 已冻结”不能解锁全部 FC。
+
+### 9.2 正式 native dsh 通道与可复用前置
+
+只读复用治理 **40577cb** 的 `review-0929-v41flash-report/prepare/verify/preflight`，不是拿治理 HEAD 作产品基线。新脚本注明 repo Apache-2.0 来源；原生安装 `@deepseek-ai/dsh 0.1.5-rc.3 / MIT` 不变。内置目录 `DeepSeek-V41-Flash → deepseek-official/deepseek-flash` 已据原生文件复核；这是配置名称，不是实际服务返回模型。未改成 R1/V4 Flash/SDK。
+
+[第一次环境快照](../artifacts/ai-evidence/fc-production-preflight-0929-environment.json) 与 [安装既有锁包后的快照](../artifacts/ai-evidence/fc-production-preflight-0929-environment-ready.json) 均只查存在性：Process/User/Machine 的 `DEEPSEEK_API_KEY / DEEPSEEK_BASE_URL / DSH_HOME / DSH_SETTINGS_FILE` 全缺；`C:/Users/DW/.dsh` 与原 `decentralized-swarm/.runtime/fc-auth/dsh-home` 的 `settings.yaml/.credentials.yaml/.env` 及本树 `.env` 全缺，两个标准 headless patch 文件存在。没有搜索秘密历史、读取秘密值或做远端认证。原 DashScope R1 配置不能用于官方 DeepSeek key。
+
+可复制的安全认证入口（**仅由持有官方 key 的操作者在后续实际调用进程中运行，本阶段未执行**）：
+
+```powershell
+$fcSecret = Read-Host '官方 DeepSeek API key（不回显）' -AsSecureString
+$env:DEEPSEEK_API_KEY = [Net.NetworkCredential]::new('', $fcSecret).Password
+# 不打印、不写入 Git/命令正文；调用结束后 Remove-Item Env:DEEPSEEK_API_KEY
+```
+
+若用户已有标准 profile/凭据路径，交主控后由同 Owner 仅检查该路径；本次没有广扫其他位置。缺认证不阻塞下面离线准备。
+
+| 工具 | 实际作用 / 已验证边界 |
+|---|---|
+| [prepare.py](../artifacts/ai-evidence/review-0929-release-v41flash-prepare.py) | 强制完整 `--candidate` SHA；从 immutable Git blobs 取原 FC diff、五修复 diff、C552→最终 A/B diff、完整核心文件与七个原测试、A/B/入口/H3 上下文；默认拒绝缺 A/B 文件的旧候选；不执行模型 |
+| [native-prepare.ps1](../artifacts/ai-evidence/review-0929-release-v41flash-native-prepare.ps1) | 用本树 ignored 独立 DSH_HOME 和 JSON overlay，直接设置原生 headless-runner `config.task`，取消 startup 依赖；仅 `dsh --profile headless --patch … --dump-config`，不 boot runner |
+| [verify.py](../artifacts/ai-evidence/review-0929-release-v41flash-verify.py) | 原响应只读；逐条 fact 完整 SHA + 原 `file:start_line` + 原 UTF-8 bytes，相差即整条 INVALID；hypothesis 必须待验证；不帮模型改行号、引文、风险或结论 |
+| [check-materials.py](../artifacts/ai-evidence/fc-production-preflight-0929-check-materials.py) | 离线反例及组合配置检查；10 个控制，非产品/模型评审测试 |
+| [readonly.ps1](../artifacts/ai-evidence/fc-production-preflight-0929-readonly.ps1) | 标准来源存在性、native help/version、端口、环境和 remote refs；不输出密钥、不开服务 |
+
+覆盖沿用原 **37 维**：五不变量、五修复、16 个 breaker state/event 格、fencing/旧 h2/旧 h3/预算 A/B/限制、六类假绿；另加生产日志、六阶段演练、live 入口，共 **40 维**。coverage 是要求，**没有模型输出，不能称模型已覆盖**。假绿包含吞断言、mock 替代产品路径、只断言预算、弱化/删除/skip、只检查字段、mutation 不红或恢复不一致。
+
+本次用明确 `--preparation-control` 的旧 C552 离线对照检验工具：完整输入 **524,744 UTF-8 bytes**，tokens=null；7 项 native config 检查通过，组合后 task bytes 完全相等，`retryPolicy={mode:normal,maxRetries:0}`、maxTokens=16384、工具/title/compaction/子 Agent/遥测等指定插件 disabled。**这里只证明 dump/config 组合，不证明运行时启动、provider 接受输入、真实请求数、usage/cost 或返回模型。** full final prepare 未加 control 时对 C552 四个缺失 A/B 文件按预期 exit **2**，没有生成可冒充最终候选的输入。
+
+离线 verifier 控制的真实 exit：[最终控制回执](../artifacts/ai-evidence/fc-production-preflight-0929-tool-controls-v2.json)（保留[初版回执](../artifacts/ai-evidence/fc-production-preflight-0929-tool-controls.json)）。精确合成样本只得 MECHANICAL_ONLY/0；错行、空白改变、治理 SHA 替换、缺维度、重复 ID、无效 evidence、非数组、旧报告均 exit1；响应不存在 exit2/NOT_RUN。原 R1 quote-only 仍 **f1/f2 PASS、f3/f4 INVALID**；新协议维度不接受旧标签，旧报告不变，也没有据此获得新评审。
+
+后续收到主控最终 `$fcCandidate` 后可按下面顺序准备，输出必须选全新目录；不得带 `--preparation-control`：
+
+```powershell
+# $fcCandidate 必须是主控交来的完整最终 SHA；$fcPacket/$fcNative 是新的 OS TEMP 或 ignored 本轨目录。
+.\.venv\Scripts\python.exe -B artifacts/ai-evidence/review-0929-release-v41flash-prepare.py --candidate $fcCandidate --output-dir $fcPacket
+if ($LASTEXITCODE -ne 0) { throw '保留失败，停止' }
+pwsh -NoProfile -File artifacts/ai-evidence/review-0929-release-v41flash-native-prepare.ps1 -Candidate $fcCandidate -InputJson (Join-Path $fcPacket 'review-0929-release-v41flash-input.json') -OutputDirectory $fcNative
+if ($LASTEXITCODE -ne 0) { throw '保留失败，停止' }
+# 实际 review 由后续 Dispatch 在最终 SHA/认证/限制核完后执行一次原生 dsh；本段只 prepare。
+# 返回后原始文件不改，使用同一 coverage/SHA：
+.\.venv\Scripts\python.exe -B artifacts/ai-evidence/review-0929-release-v41flash-verify.py $fcRaw --candidate $fcCandidate --coverage (Join-Path $fcPacket 'review-0929-release-v41flash-coverage.json') --output $fcVerification
+```
+
+后续原生命令为 `dsh --profile headless --patch <本次overlay绝对路径>`，task 已在配置内，无需塞到 Windows argv；使用生成的独立 `DSH_HOME` 并清除不相关 `DSH_SETTINGS_FILE` 后再核组合，不借旧 DashScope home。原授权是**一轮 invocation ≤600000ms / retry0 / 有限输出 / 禁非必要工具、title、compaction**，不是 exactly-one-HTTP；需要执行者监视该轮时间、保存 stdout/stderr/原生 session 与真实 exit，超时按本轮进程身份终止并保留可能已发送/unknown，绝不自动再发。native config 尚未实际 boot；若失败只保留事实。headless session 的 source.model 来自 request.model，不能冒称返回模型；无法独立观测的 returned_model/request_count/usage/cost 留 null。
+
+### 9.3 真正入口、auto 三轮及单任务备选
+
+已在本树创建锁定 `.venv`（Python 3.12.13，Poetry 从现有锁装 88 包）并 `npm ci --ignore-scripts --no-audit --no-fund`（99 包）；两条 exit0，锁/依赖文件未改。`orchestration.rehearsal / swarm.cli / viz.server / orchestration.acceptance --help` 四条均 exit0；不是执行入口任务或最终候选测试。运行环境原始日志在 ignored `.runtime/fc-production-0929/`，未借用他树虚拟环境。
+
+本次拟用 7861/7862/7863 与历史 7526/7527/7844 均无 listener；不保证将来仍空闲，不创建 listener、不停止任何进程。`demo/run-demo.ps1` 语法解析零错误，真实参数为 `-AuthorizeLive -Mode auto|manual -Executor codex|evomap -Model -Port -MaxTokens -MaxCostUsd -TimeoutSeconds -TauSeconds -ArchiveThreshold -StageDelay -TickSeconds`，无课题 workspace 参数。它在 OS TEMP 创建新的 repair/recovery 样例，read-only 页面不是任务授权；`-Mock/-Replay` 都不能算 live。
+
+路由/费用现状：gateway 默认 `https://api.evomap.ai/v1`、`evomap-gpt-5.6-luna`（C552 gateway_transport:17–18），历史 `evomap-gpt-5.6-sol` 只是建议；当前三层 `MORPH_EVOMAP_API_KEY` 也缺，未核到本轮指明的外部 credential_file 或正式价格配置。gateway `gateway.py:166` 费用固定未知 null；swarm executor 使用外部 credential_file，拒绝把该环境 key 带入（evomap_executor:279–289），二者不可混配。`swarm.cli evomap --config <path>` 为受限 JSON 样例（3×6 / 8×48 / 16×96；每任务一次，cli:28–53），不是任意真实课题，也不替代 demo 三连。未调用 models/discover、SDK 接口或 provider 验证价格。
+
+**双任务 auto live 当前 BLOCKED。** C552 `rehearsal.py:301–305` 仅在 tokens 未知时停止；cost null 仍返回，`:318–342` auto 随后执行 recovery。`-MaxCostUsd` 非在途硬上限，也没有跨三根累计账本。若约束是每次 unknown 费用即停止后续新任务，该入口连同一轮第二任务都不能保证阻断；不能只在轮末查 null 冒称满足。主控 `msg_58cbb50f268c` 已明确保持此阻塞，向用户提出“现有单任务并 unknown 即停”或“明确授权原 Owner 修复 auto 准入后双任务三连”；C 不把日志接线授权扩成预算实现修改。
+
+收到路由/目标/预算决策且上述入口限制解决后，三轮均 auto，顺序为 **01/7861 → 验收 → 02/7862 → 验收 → 03/7863 → 验收**，各自新 OS TEMP 根及独立 run_id，绝不循环盲发。每轮最多 repair+recovery 两个新任务，三轮最多六个；只能按本人给定的累计 tokens/费用 allowance/任务数/超时约束准入，现有默认 20000/1USD/120秒不是本轮预算授权。使用上文第6节同一原生命令模板，把三轮 `$mode` 均设为 `auto`，模型与上限来自本轮确认值；旧第一轮 manual 安排不适用于当前 auto 方案。
+
+每轮必须完成以下检查才考虑下一轮：源码 SHA/环境不漂移；listener PID、父 PID、创建时间和绝对 rehearsal 路径属于本轮；真实 exit0、stage=completed、两份结果 succeeded/三个 checkpoint 真、provenance=live、实际 request/attempt/run 及 usage/evidence 对应；实际累计费用/未知持有与剩余授权核实。任何失败、中断、unknown effect、unknown 成本或证据缺失立即停后续，保留证据/hold，不退款、不重发、不用 replay 补轮数。viewer 仍存活是独立事实；只按第6节归属核实后清理本轮自己进程。若改用 manual，真实 awaiting_offline 时由操作者按 Enter，C 不代按。当前未执行三轮中的任一轮。
+
+**现有单任务备选**已核为 `orchestration.acceptance`，不是新实现：
+
+```powershell
+# 仅后续用户确认 Codex 样例路由/有限预算后执行；$fcSingleRoot 必须是新的 OS TEMP 空根。
+# $fcModel/$fcTokens/$fcCost/$fcTimeout 来自本人确认，当前没有代填默认预算。
+.\.venv\Scripts\python.exe -B -m orchestration.acceptance --root $fcSingleRoot --model $fcModel --max-tokens $fcTokens --max-cost-usd $fcCost --timeout $fcTimeout
+$fcExit = $LASTEXITCODE
+```
+
+它 `acceptance.py:62–64` 设置 max_retries=0，`:103` 固定 **CodexExecutor**；没有 `--executor`，不能传 EvoMap 名称暗中换路由。不传 `--continue / --experience / --pause-after-execute`，执行一个新的 sample.py repair；内部一次 CLI invocation 不被扩大表述为恰好一次 HTTP。`:130` 的 exit0 也包括 pending_review，必须另核 `result.json.status=succeeded`、`acceptance.task_live=passed`、真实 verifier 与 request/usage；summary 明示费用未知、无自动下一调用，故费用仍 null 时即停止后续任务。它不自动启动 viewer、不接受任意课题 workspace，**不能充当用户实际课题或六任务三连的替代品**。本轮只运行 help，真实执行 NOT_RUN。
+
+待主控收取的最少 live 信息仍是：真实课题绝对 workspace/身份/目标验收，选定入口及实际 provider/model、标准安全凭据路径，任务数与跨三轮累计预算/超时/unknown 处理约束。旧历史授权中的 `allow_unknown_cost` 或旧样例预算不能推定对本轮新目标有效。T9 样例/消息仍待后续；benchmark `POLL_MS` 风险保留，不触不在候选的 WIP，不外发消息/报名/发布。
+
+### 9.4 本轮验证与交付边界
+
+| 本轮检查 | 真实结果 |
+|---|---|
+| 开工身份 / remote 四 refs / H3 parent、单文档、目标 clean | exit0；H3 新冻结事实已独立读取；C552 与治理 refs 精确匹配 |
+| Poetry/npm 从既有锁安装；四入口 help | 全部 exit0；不代表 final SHA focused/full/strict/build/SDK/distribution |
+| PowerShell parser：run-demo、readonly、native-prepare | 3 项零语法错误，未执行 demo |
+| C552 离线 control prepare / native dump | exit0；524744 bytes，40维；未请求模型；最终模式拒绝缺 A/B exit2 为预期控制 |
+| 10 个 verifier 控制 / 7 项配置核对 | 汇总 exit0；内含有意的 exit1/2，分别保留；见 tool-controls-v2 |
+| 探索性错误 | 对 PowerShell 通配路径 `docs/FC_HUMAN*` 的 rg 报 OS error123；猜测不存在的 `orchestration/cli.py`、`tools/check_demo_environment.py` 报 OS error2；改从 rg --files 真实入口定位，不当产品失败或通过；首份环境记录探测 `graphology.bundle.js` 不存在是错误候选路径，最终脚本改查实际 `viz/static/app.js`，保留首份快照 |
+| 材料写权 / 历史前缀 / immutable 原引文 / JSON / diff | 见 [最终材料校验](../artifacts/ai-evidence/fc-production-preflight-0929-validation.json)，仅材料门禁 |
+
+本阶段不等待用户认证/签字/目标而无限占用；材料 commit+push 后结算，后续由主控给同 C Owner 新 Dispatch 和共同最终 SHA 接正式 FC-E/入口验收。未执行 final SHA 产品门禁、独立 Schema/mutation/六阶段验收、模型评审、人签、生产合并/tag/三连/课题 live；C552 历史六绿不借名为新 SHA 实跑。交付 SHA/parent/remote exact/clean 回执保存于 ignored `.runtime/fc-production-0929/delivery.json` 并在 worker_done 报告。

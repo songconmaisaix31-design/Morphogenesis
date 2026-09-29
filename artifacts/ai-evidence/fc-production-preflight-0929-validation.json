@@ -1,0 +1,52 @@
+{
+  "material_base": "7347f5c1a7eaf0f5a3279c2db0ffb751a730792c",
+  "code_baseline": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "checks": {
+    "write_paths": true,
+    "history_prefix_exact_git_bytes": true,
+    "append_only": true,
+    "locks_unchanged": true,
+    "json_and_python_parse": true,
+    "13_immutable_spans_exact": true,
+    "10_controls_and_7_config_checks": true,
+    "powershell_parser": true,
+    "four_help_exits_zero": true,
+    "diff_check": true,
+    "new_doc_relative_links": true
+  },
+  "changed_paths": [
+    "docs/FC_RELEASE_PREFLIGHT_0929.md",
+    "artifacts/ai-evidence/fc-production-preflight-0929-check-materials.py",
+    "artifacts/ai-evidence/fc-production-preflight-0929-environment-ready.json",
+    "artifacts/ai-evidence/fc-production-preflight-0929-environment.json",
+    "artifacts/ai-evidence/fc-production-preflight-0929-readonly.ps1",
+    "artifacts/ai-evidence/fc-production-preflight-0929-source-facts.json",
+    "artifacts/ai-evidence/fc-production-preflight-0929-tool-controls-v2.json",
+    "artifacts/ai-evidence/fc-production-preflight-0929-tool-controls.json",
+    "artifacts/ai-evidence/review-0929-release-v41flash-control-input-check.json",
+    "artifacts/ai-evidence/review-0929-release-v41flash-native-prepare-check.json",
+    "artifacts/ai-evidence/review-0929-release-v41flash-native-prepare.ps1",
+    "artifacts/ai-evidence/review-0929-release-v41flash-prepare.py",
+    "artifacts/ai-evidence/review-0929-release-v41flash-verify.py",
+    "docs/FC_PRODUCTION_PLAN_0929.md"
+  ],
+  "help_exits": {
+    "rehearsal": 0,
+    "swarm": 0,
+    "viz": 0,
+    "acceptance": 0
+  },
+  "install_exits": {
+    "poetry-install": 0,
+    "npm-ci": 0
+  },
+  "exit_code": 0,
+  "model_requests": 0,
+  "hub_requests": 0,
+  "product_final_gates": "NOT_RUN",
+  "fc_e": "NOT_RUN_AUTH_MISSING_FINAL_SHA_PENDING",
+  "h1": "PENDING_HUMAN",
+  "h3": "FROZEN_DOCUMENT_1.0.0_BE4FB7A",
+  "live": "NOT_RUN_AUTO_BLOCKED",
+  "meaning": "material checks only; no product review or release acceptance"
+}

@@ -1,0 +1,191 @@
+{
+  "candidate": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+  "reference": "40577cb841e8d89c08e1336d7254c4ca7bb3984e",
+  "preparation_control": true,
+  "input_bytes": 524744,
+  "token_count": null,
+  "missing_paths": [
+    "orchestration/fc_logging.py",
+    "demo/fault_drill.py",
+    "tests/swarm/test_fc_logging.py",
+    "tests/swarm/test_fault_drill.py"
+  ],
+  "complete_diffs": [
+    {
+      "from": "348cf8d42719402a7a5fcc09595e5040f96fa5be",
+      "to": "73e64cc70116ac658d85591d082c0684a4952c99",
+      "scope": [
+        "swarm/",
+        "orchestration/"
+      ],
+      "bytes": 110195,
+      "complete": true
+    },
+    {
+      "from": "73e64cc70116ac658d85591d082c0684a4952c99",
+      "to": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "scope": [
+        "swarm/",
+        "orchestration/"
+      ],
+      "bytes": 30063,
+      "complete": true
+    },
+    {
+      "from": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "to": "c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "scope": [
+        "swarm/",
+        "orchestration/",
+        "demo/",
+        "tests/"
+      ],
+      "bytes": 0,
+      "complete": true
+    }
+  ],
+  "complete_final_files": [
+    {
+      "path": "orchestration/gateway_transport.py",
+      "lines": 72,
+      "bytes": 2921,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/base.py",
+      "lines": 106,
+      "bytes": 4310,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/dashscope.py",
+      "lines": 145,
+      "bytes": 7125,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/evomap.py",
+      "lines": 148,
+      "bytes": 7349,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/budget.py",
+      "lines": 314,
+      "bytes": 20686,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/worker_loop.py",
+      "lines": 1073,
+      "bytes": 56103,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/task_ledger.py",
+      "lines": 515,
+      "bytes": 30831,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/breaker.py",
+      "lines": 712,
+      "bytes": 32300,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/fault_observations.py",
+      "lines": 278,
+      "bytes": 12627,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/failure_chain.py",
+      "lines": 213,
+      "bytes": 7780,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/evomap_executor.py",
+      "lines": 409,
+      "bytes": 21633,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/lease.py",
+      "lines": 32,
+      "bytes": 1436,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "tests/orchestration/test_rejection_classification_boundaries.py",
+      "lines": 71,
+      "bytes": 3991,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_failure_chain_boundaries.py",
+      "lines": 207,
+      "bytes": 9835,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_failure_chain_runtime.py",
+      "lines": 255,
+      "bytes": 11470,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_probe_lifecycle_recovery.py",
+      "lines": 210,
+      "bytes": 10094,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_rejection_runtime_boundaries.py",
+      "lines": 195,
+      "bytes": 10584,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_reservation_cost_state.py",
+      "lines": 51,
+      "bytes": 2748,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "tests/swarm/test_unknown_effect_recovery.py",
+      "lines": 146,
+      "bytes": 6775,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/rehearsal.py",
+      "lines": 400,
+      "bytes": 24580,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "demo/run-demo.ps1",
+      "lines": 106,
+      "bytes": 5841,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "tests/t2/test_rehearsal.py",
+      "lines": 166,
+      "bytes": 8981,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "docs/FC_LOG_SCHEMA_DRAFT_0928.md",
+      "lines": 1902,
+      "bytes": 45775,
+      "reconstruction": "PASS"
+    }
+  ],
+  "dimensions": 40,
+  "model_requests": 0,
+  "submitted": false,
+  "meaning": "offline input fidelity only; NOT a review or test run"
+}
