@@ -6,11 +6,11 @@
 
 | 轨 | 基线 / task / dispatch | 今日状态与限制 |
 |---|---|---|
-| A `morph-fc-tests-0929` | `73e64cc70116ac658d85591d082c0684a4952c99`；`task_bf99e1b4ba10 / ctx_d0bbed22831d` | 最终 `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd` 已 push；Owner focused 20/full 699（2 warnings）/strict 87 exit 0，mutation 红/恢复绿；D pending，cost_state 语义 exit 1 仍 OPEN |
-| B `morph-schema-closeout-0929` | `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；实现 `task_d536a112682f / ctx_170180e15e72`；收口 `task_507418789086 / ctx_bf1fdfa6a61e` | Schema 交付 `318dd4f26f27cda25e4278772bcce6b508023c26` 已 push；Owner 原矩阵 12/12、扩展 24/24、控制 13/13、exit 0；D/H3 pending，仍 candidate；同 Owner 续接材料，见 `docs/FC_CLOSEOUT_0929.md` |
-| C `morph-readonly-app-0929` | `2957b408ce922369a595a8acd43a882eb85897d3`；`task_75eedbf12038 / ctx_9320f0ef60fa` | 最终 `621f588988899bdbc7c7a83e893369c4145d89b3` 已交付；Owner 契约/53 T5/build/44 采用语义/72 页面检查 exit 0；D pending，仅 replay |
+| A `morph-fc-tests-0929` | `73e64cc70116ac658d85591d082c0684a4952c99`；`task_bf99e1b4ba10 / ctx_d0bbed22831d` | 最终 `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd` 已 push；Owner focused 20/full 699（2 warnings）/strict 87 exit 0；D 独立 focused 20、mutation call_count 红/恢复绿通过，cost_state 独立语义 exit 1 仍 OPEN |
+| B `morph-schema-closeout-0929` | `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；实现 `task_d536a112682f / ctx_170180e15e72`；收口 `task_507418789086 / ctx_bf1fdfa6a61e` | Schema 交付 `318dd4f26f27cda25e4278772bcce6b508023c26` 已 push；Owner 12/12、24/24、13/13 exit 0；D 独立修前 43/44、修后 44/44，nullable-only；H3 pending，仍 candidate；材料见 `docs/FC_CLOSEOUT_0929.md` |
+| C `morph-readonly-app-0929` | `2957b408ce922369a595a8acd43a882eb85897d3`；`task_75eedbf12038 / ctx_9320f0ef60fa` | 最终 `621f588988899bdbc7c7a83e893369c4145d89b3`；Owner 契约/53 T5/build/44 采用语义/72 页面检查 exit 0；D 独立 T5 53、双 bundle 字节、3 历史 run replay HTTP→DOM/缺失/0/多 attempt/可访问性通过；越契约输入既有限制单列 |
 
-历史 Schema 原九例 8/9、扩展十二例 11/12、exit 1 继续保留；当前目标仍 `1.0.0 candidate`，待独立验收与人工 H3。optional 新增 minor、optional→required 为破坏性 major（2.0.0），不得沿用 1.1 升级必填说法。
+历史 Schema 原九例 8/9、扩展十二例 11/12、exit 1 继续保留；今日 D 已独立验收 nullable 修复，当前目标仍 `1.0.0 candidate`、待人工 H3。optional 新增 minor、optional→required 为破坏性 major（2.0.0），不得沿用 1.1 升级必填说法。
 
 昨夜 T3 两次 mutation 假绿、裁撤及 demo-build.1 后续候选保留；FC-E 正式 deepseek v2 与 H1 真人签字仍缺，今天 Codex 验收不代替。三锁未齐不生产合并/tag；不实现预算事后对账、生产日志接线，不跑付费 live。
 
@@ -29,6 +29,12 @@ B 修复提交 `188fae46de4f3d2fe4943461a62a9626caa5325d` 已在不可变 Git bl
 **本次收口续接取代上一段当时的“不等待”安排：** 同一 B Agent/树/分支以新 Task 仅维护 H1/H3 材料、今日台账和计划状态，等待主控确认 A/D 结果完整后封存；Schema 本体没有默认返修权。索引 [FC_CLOSEOUT_0929](docs/FC_CLOSEOUT_0929.md) 链接既有 H1 四态矩阵/fencing/TODO、A 报告和 Handoff，不改人工签名或 TODO。11:03 主控转发 A 最终 `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd`；测试仍 `f4779d45a1b1417ffa6bce37708e9a68d46cf4e5`，Owner full 699/2 warnings/450.96s、strict 87、focused 20 通过，生产 cost_state 语义 exit 1 未解决、队长修复授权未到；D 独立结果仍 pending，不能宣称全部验收。
 
 FC-E 只读入口检查：`dsh --help` 与 `dsh --profile headless --help` exit 0；本 Dispatch 的 DSH_HOME 未设置，原隔离 deepseek-r1 配置/正式工具通道未获验证，正式报告仍缺。检查没有安装、输出密钥或调用模型，不能补成 FC-E 通过；下一步须主控定位原 launcher/profile 与有界补评授权。H1/H3、生产修复、FC-E、合并/tag、T9/T10 与新 live 分别保持 pending/OPEN/NOT_RUN，不由 Owner 自验覆盖。
+
+**11:06 主控转发 D 独立简报，11:13 最终报告补齐并通知封存：** A focused 20 与有效 breaker mutation 通过，cost_state 独立复现仍 exit 1；B 修前 43/44、修后 44/44，变化只有原 nullable 缺陷、其他限制不变；C 独立 T5 53、双 bundle 字节一致、3 历史 run replay HTTP→DOM 及缺失/0/多 attempt/可访问性通过。C 非法 `adoptions=[null]` 引发原 app.js 错误（exit 1），为越契约既有限制、未修复。B 仅登记 D 结论，不用 Owner 699/strict 冒充 D 重跑全量；D 也不代替 FC-E/H1/H3。
+
+主控集成盘点/决策：A/B merge-tree 无重叠冲突，I 接续隔离 FC 候选、组合门禁待实际结果；C 与 FC 从 `605cf48` 分叉，Backend.jsx 和两 bundle 冲突，本轮分别保留候选，不强合前端、不触生产分支/tag。收口包阶段 `d9ce433677e2926ee1ab7b0f2e53a0ba84f005c7` 已 push；本次已补 [D 最终报告 969d3274622538a36ac8a60e09c41be86bea9c60](https://github.com/songconmaisaix31-design/Morphogenesis/blob/969d3274622538a36ac8a60e09c41be86bea9c60/artifacts/ai-evidence/acceptance-0929-closeout.md) 并按主控通知封存。D 报告分支 `morph-closeout-acceptance-0929`，B 只读核对远端同 SHA/报告 Git blob 存在；主控转发引用 25 范围+13 短引文+10 预算段最终 exit 0，初错记录仍保留。FC 整体 BLOCKED；未改 Schema/H1 签字/TODO 或他轨文件。
+
+本次文档验证：`git diff --check` exit 0；`git diff --exit-code 318dd4f26f27cda25e4278772bcce6b508023c26 -- docs/FC_LOG_SCHEMA_DRAFT_0928.md docs/FC_HUMAN_REVIEW_0928.md swarm tests artifacts` exit 0。内联 Python 比较确认仅四个授权文档变化、TASKS 历史尾段/PLAN 旧前缀逐字保留，索引的本地目标及精确 SHA 的 Git blob 均存在；不新增测试，不重跑全量，不把文档检查计作 Schema 独立验收。
 
 ## 当前有效段（2026-09-28 治理返修）
 

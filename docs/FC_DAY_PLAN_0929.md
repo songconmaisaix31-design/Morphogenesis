@@ -18,6 +18,8 @@
 
 **B 同 Owner 新任务续接**：`task_507418789086 / ctx_bf1fdfa6a61e` 取代实现阶段的后续收口安排。当前仅可写 `docs/FC_CLOSEOUT_0929.md`（新、最多两页 H1/H3 索引/下一步）、TASKS 今日段、PLAN 今日附录及本文件状态；`schema-0929-*` 仅独立验收返修需要时。Schema 本体仅在主控传回具体拒收并授权原 nullable 范围时可改，其余生产无写权。B 等主控转发 A/D 完整结果再封存，Owner 自验/独立验收/未解决/NOT_RUN 分开；不评审自己，不修改其他轨道。FC-E 仅只读入口检查：CLI 帮助可用，但原 deepseek-r1 隔离配置和正式工具通道未验证、正式报告缺失，无模型/付费调用。
 
+**11:13 独立验收封存检查点（取代以上 D pending）**：主控确认 A/D 本轮结果齐备，D 最终报告 `969d3274622538a36ac8a60e09c41be86bea9c60` 已 push，索引见 [收口包](FC_CLOSEOUT_0929.md)。D：A focused 20、breaker mutation call_count 红/恢复绿，cost_state 独立语义仍 exit 1；B 原 43/44、修后 44/44，仅 nullable 修复，其他限制保留，H3 pending；C T5 53/双 bundle 字节/3 run replay HTTP→DOM 及缺失/0/多 attempt/可访问性通过，非法 `adoptions=[null]` 的原 app.js 错误（exit 1）为越契约既有限制、未修复。Owner 699/strict 不当作 D 重跑全量。主控 merge-tree 盘点 A/B 无重叠冲突，I 接续隔离集成、组合门禁待实际交付；C 与 FC 自 `605cf48` 分叉且前端文件冲突，本轮分别保留候选，不强合前端或生产 merge/tag。B 已据主控通知封存材料，FC 仍 BLOCKED，不宣称版本统一或三锁完成。
+
 ## 顺序、验收与停止条件
 
 1. **计划阶段**：B 核实 HEAD/remote/clean 状态、记录写权，立即回传计划路径与阶段状态；旧计划/历史失败原样保存。
@@ -25,6 +27,6 @@
 3. **同 Owner 自验/返修**：记录实际命令、exit、前后结果和精确 SHA；依赖缺失只上报，不安装/改锁；失效门禁连续两轮即停止上报。阶段 commit，最终 push，trailer `Swarm-Agent: codex`，只暂存所属文件。
 4. **独立验收 → 受限集成**：主控在三轨交付后派独立验收/集成 Agent；精确候选、远端一致、changed paths、适用全量/strict/build/SDK 和行为证据分别核验。领域缺陷退回同 Owner；集成仅少量导入/配置/类型/路由胶水。
 
-**冻结仍禁止**：三锁（适用门禁全绿、可接受的 FC-E 无高危报告、真人 H1 签字）未齐，不得生产合并/tag；今天 Codex 独立验收不替代 FC-E v2 正式 deepseek 评审或 H1。昨夜 T3 `2d9d4304cfc0e1a3d4bfaeccb6ec5688aef60366` 两次 mutation 仍绿及裁撤原样有效，仅保留 demo-build.1 后续候选，今日不追认。Schema 仍 `1.0.0 candidate`，待独立验收及人工 H3；可选字段新增为 minor，optional→required 为破坏性 major（2.0.0），不得称 1.1 可升级必填。
+**冻结仍禁止**：三锁（适用门禁全绿、可接受的 FC-E 无高危报告、真人 H1 签字）未齐，不得生产合并/tag；今天 Codex 独立验收不替代 FC-E v2 正式 deepseek 评审或 H1。昨夜 T3 `2d9d4304cfc0e1a3d4bfaeccb6ec5688aef60366` 两次 mutation 仍绿及裁撤原样有效，仅保留 demo-build.1 后续候选，今日不追认。Schema nullable 已独立通过，仍 `1.0.0 candidate`、待人工 H3；可选字段新增为 minor，optional→required 为破坏性 major（2.0.0），不得称 1.1 可升级必填。
 
 **明确不做**：预算事后对账、unknown 自动退额/重试、人工代签、FC-E 代评、付费 live、T9 正式日志采集/生产接线、T10 演练和额外底层功能。unknown hold 的长期占用与人工处理限制继续存在；只读 replay 验收仅支持 contract_local，不冒充 interface_live/task_live。别轨结果只按主控转发登记。
