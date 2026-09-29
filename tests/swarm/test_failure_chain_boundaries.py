@@ -1,607 +1,205 @@
-"""Boundary tests and property tests for failure chain - FC-D"""
-import asyncio
-import time
-import tempfile
-import os
-from datetime import timedelta
-from unittest.mock import Mock
+"""Failure-chain invariants through Worker._process, never direct settlement."""
+from __future__ import annotations
 
-import hypothesis.strategies as st
-from hypothesis import given, settings
+import json
+
 import pytest
-import respx
-import httpx
-from pydantic import JsonValue
 
-from contracts.identity import AttemptId
-from swarm.budget import BudgetLedger, BudgetPolicy, BudgetSnapshot
-from swarm.lease import LeaseManager
-from swarm.task_ledger import TaskLedger
-from swarm.evomap_executor import EvoMapExecutor, Reply
-from swarm.models import ExecutionBound
-from orchestration.gateway_transport import GatewayResponse, single_request
+from swarm.worker_loop import FixtureExecutor
+from tests.swarm.test_failure_chain_runtime import (
+    _assert_calls, _claim, _events, _executor, _facts, _failure, _reservations,
+    _worker, _worker_config,
+)
 
 
-class TestFailureChainBoundaries:
-    """Tests for failure classification and handling boundaries"""
+@pytest.mark.parametrize("known_usage", [False, True])
+def test_unknown_effect_stops_chain_and_preserves_real_usage_state(tmp_path, known_usage):
+    config = _worker_config(tmp_path, prices=known_usage)
+    first = _executor(result=_failure("unknown_effect", known_usage=known_usage, reason="read_timeout"))
+    later = _executor()
+    worker = _worker(config, [first, later])
+    signal, lease = _claim(worker)
 
-    def test_bailian_400_arrearage_classification(self):
-        """Test that HTTP 400 with Arrearage code is classified as confirmed_rejection"""
-        # This would be handled by FC-A provider adapters when implemented
-        response = GatewayResponse(
-            status=400,
-            body={"error": {"code": "Arrearage", "message": "Account balance insufficient"}},
-            error_kind=None,
-            elapsed_seconds=0.1,
-            finished_at=time.time()
-        )
-        # When FC-A is implemented, this should result in confirmed_rejection classification
-        assert response.status == 400
-        assert isinstance(response.body, dict)
-        error_body = response.body
-        assert isinstance(error_body, dict) and "error" in error_body
-        error_details = error_body["error"]
-        assert isinstance(error_details, dict) and error_details.get("code") == "Arrearage"
+    outcome = worker._process(signal, lease)
 
-    def test_bailian_403_freetier_classification(self):
-        """Test that HTTP 403 with AllocationQuota.FreeTierOnly is classified as confirmed_rejection"""
-        response = GatewayResponse(
-            status=403,
-            body={"error": {"code": "AllocationQuota.FreeTierOnly", "message": "Free tier only"}},
-            error_kind=None,
-            elapsed_seconds=0.1,
-            finished_at=time.time()
-        )
-        assert response.status == 403
-        assert isinstance(response.body, dict)
-        error_body = response.body
-        assert isinstance(error_body, dict) and "error" in error_body
-        error_details = error_body["error"]
-        assert isinstance(error_details, dict) and "AllocationQuota.FreeTierOnly" in error_details.get("code", "")
-
-    def test_rfc6585_429_with_retry_after_classification(self):
-        """Test that HTTP 429 with Retry-After header is classified as confirmed_rejection"""
-        response = GatewayResponse(
-            status=429,
-            body={"error": {"message": "Rate limited"}},
-            error_kind=None,
-            elapsed_seconds=0.1,
-            finished_at=time.time(),
-            request_id="test_req"
-        )
-        # The actual Retry-After header handling would be in FC-A implementation
-        assert response.status == 429
-
-    def test_drop_mid_response_classification(self):
-        """Test that connection interruption/timeout is classified as unknown_effect"""
-        response = GatewayResponse(
-            status=None,
-            body="",
-            error_kind="ReadTimeout",
-            elapsed_seconds=0.1,
-            finished_at=time.time()
-        )
-        # This simulates the conditions that would trigger unknown_effect in FC-A
-        assert response.error_kind is not None
-        assert "Timeout" in response.error_kind or "Connection" in response.error_kind
-
-    def test_budget_insufficient_boundary(self):
-        """Test that budget exhaustion is properly handled"""
-        # Create a budget policy with a very low limit
-        policy = BudgetPolicy(
-            max_cost_usd=0.01,  # Very small budget
-            max_tokens=1000000,
-            prices={"provider": "test_provider", "model": "test_model", "input_usd_per_million": 100.0, "output_usd_per_million": 100.0},  # Proper prices format
-            admission_control="enabled",
-            unbounded_reservation_usd=0.1,
-            limits={
-                "max_attempts": 100,
-                "max_attempts_per_task": 10,
-                "max_tasks": 50,
-                "max_runtime_seconds": 3600
-            },
-            burn_rate_tokens=100000,
-            burn_window_seconds=60
-        )
-
-        # Create budget ledger with small limit in a temporary file
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            try:
-                ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
-                # Try to make a reservation that would exceed the budget
-                bound = ExecutionBound(
-                    provider="test_provider",
-                    model="test_model",
-                    input_tokens=1000,
-                    max_output_tokens=1000,
-                    provider_enforced=False,
-                    request_bound="unbounded",
-                    max_cost_usd=None
-                )
-                
-                with pytest.raises(Exception) as exc_info:
-                    ledger.reserve("worker1", "task1", bound)
-                
-                # The exception should be related to budget exhaustion
-                assert "swarm_reservation_capacity" in str(exc_info.value) or "swarm_cost_estimate_exhausted" in str(exc_info.value)
-            finally:
-                # Clean up the temporary file - close any handles first
-                try:
-                    if os.path.exists(tmp.name):
-                        os.unlink(tmp.name)
-                except PermissionError:
-                    # On Windows, sometimes files can't be deleted immediately
-                    # due to file handle still being open; we'll skip this in tests
-                    pass
-
-    def test_all_candidates_down_boundary(self):
-        """Test bounded exit when all candidates are unavailable"""
-        # This simulates the condition where all providers are down
-        # and the system should exit within bounds rather than looping infinitely
-        policy = BudgetPolicy(
-            max_cost_usd=1.0,
-            max_tokens=1000000,
-            prices={"provider": "test_provider", "model": "test_model", "input_usd_per_million": 0.1, "output_usd_per_million": 0.1},
-            admission_control="enabled",
-            unbounded_reservation_usd=0.1,
-            limits={
-                "max_attempts": 5,  # Small number of attempts
-                "max_attempts_per_task": 3,
-                "max_tasks": 50,
-                "max_runtime_seconds": 3600
-            },
-            burn_rate_tokens=100000,
-            burn_window_seconds=60
-        )
-
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            try:
-                ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
-                # Simulate multiple failed attempts to trigger the max attempts limit
-                bound = ExecutionBound(
-                    provider="test_provider",
-                    model="test_model",
-                    input_tokens=100,
-                    max_output_tokens=100,
-                    provider_enforced=False,
-                    request_bound="unbounded",
-                    max_cost_usd=None
-                )
-                
-                # Make multiple reservations to hit the attempt limit
-                for i in range(5):
-                    try:
-                        ledger.reserve(f"worker1", f"task{i}", bound)
-                    except Exception:
-                        # Expected when hitting limits
-                        pass
-                
-                # At this point, we should be hitting the max attempts limit
-                with pytest.raises(Exception) as exc_info:
-                    ledger.reserve("worker1", "task_overflow", bound)
-                
-                assert "max_attempts" in str(exc_info.value)
-            finally:
-                # Clean up the temporary file
-                try:
-                    if os.path.exists(tmp.name):
-                        os.unlink(tmp.name)
-                except PermissionError:
-                    # On Windows, sometimes files can't be deleted immediately
-                    pass
+    assert outcome == "sleeping", _events(worker)
+    _assert_calls(first, signal, lease)
+    _assert_calls(later, signal, lease, expected=0)
+    assert later.bound.call_count == 0
+    row, = _reservations(worker)
+    assert row["status"] == ("settled" if known_usage else "uncertain")
+    assert row["tokens"] == (2 if known_usage else None)
+    assert row["reserved_usd"] == 0.2
+    fact, = _facts(worker)
+    assert fact.failure_class == "unknown_effect" and fact.switched_to is None
+    assert fact.cost_state == ("settled" if known_usage else "unknown")
+    assert worker.ledger.get(signal.task_id).result_id is None
+    assert not worker.assets.promotions()
+    if not known_usage:
+        snapshot = worker.budget.snapshot()
+        assert snapshot.tokens is snapshot.estimated_cost_usd is snapshot.actual_cost_usd is None
+        assert snapshot.reserved_estimate_usd == 0.2 and snapshot.reason == "unknown_usage"
+        restarted = _worker(config, [first, later])
+        restart_outcome = restarted.run()
+        assert restart_outcome["state"] == "sleeping"
+        assert first.execute.call_count == 1 and later.execute.call_count == 0
+        assert _reservations(restarted) == [row]
 
 
-class TestUnknownEffectProperty:
-    """Property tests for unknown_effect handling - ensuring reservations are retained and no subsequent requests are made"""
+def test_known_usage_unknown_cost_blocks_next_candidate_and_restart(tmp_path):
+    config = _worker_config(tmp_path)  # Valid tokens without model prices leave cost unknown.
+    first = _executor("alpha", result=_failure(known_usage=True))
+    later = _executor("beta")
+    worker = _worker(config, [first, later])
+    signal, lease = _claim(worker)
 
-    @given(
-        initial_budget=st.floats(min_value=1.0, max_value=10.0),  # Increased minimum to ensure reservation fits
-        reservation_amount=st.floats(min_value=0.01, max_value=0.5)  # Decreased max to ensure it fits in budget
+    outcome = worker._process(signal, lease)
+
+    assert outcome == "sleeping", _events(worker)
+    _assert_calls(first, signal, lease)
+    _assert_calls(later, signal, lease, expected=0)
+    row, = _reservations(worker)
+    assert row["status"] == "uncertain" and row["tokens"] == 2
+    assert row["usage_metering"] == "verified" and row["cost"] == "unknown"
+    assert row["estimate_usd"] is row["admitted_usd"] is None
+    snapshot = worker.budget.snapshot()
+    assert snapshot.reason == "unknown_cost" and snapshot.reserved_estimate_usd == 0.2
+    assert snapshot.tokens == 2 and snapshot.actual_cost_usd is snapshot.estimated_cost_usd is None
+    fact, = _facts(worker)
+    assert fact.switched_to is None  # Considered fallback is not an admitted request.
+    event, = _events(worker)
+    assert event["outcome"] == "unknown_cost"
+    restarted = _worker(config, [first, later])
+    restart_outcome = restarted.run()
+    assert restart_outcome["state"] == "sleeping"
+    assert first.execute.call_count == 1 and later.execute.call_count == 0
+    assert _reservations(restarted) == [row]
+
+
+@pytest.mark.parametrize("known_usage", [False, True])
+@pytest.mark.parametrize("gate", ["capacity", "task_attempts", "run_attempts"])
+def test_chain_cumulative_budget_and_attempts_limit_actual_sends(tmp_path, known_usage, gate):
+    config = _worker_config(
+        tmp_path, prices=known_usage, max_cost=0.5 if gate == "capacity" else 2.0,
+        per_task=2 if gate == "task_attempts" else 10,
+        max_attempts=2 if gate == "run_attempts" else 20,
     )
-    @settings(max_examples=10, deadline=500)
-    def test_unknown_effect_preserves_reservation_and_no_subsequent_requests(
-        self, 
-        initial_budget: float, 
-        reservation_amount: float
-    ):
-        """Test that when unknown_effect occurs, reservation is preserved and no new requests are made"""
-        policy = BudgetPolicy(
-            max_cost_usd=initial_budget,
-            max_tokens=1000000,
-            prices={"provider": "test_provider", "model": "test_model", "input_usd_per_million": 0.1, "output_usd_per_million": 0.1},
-            admission_control="enabled",
-            unbounded_reservation_usd=reservation_amount,
-            limits={
-                "max_attempts": 100,
-                "max_attempts_per_task": 10,
-                "max_tasks": 50,
-                "max_runtime_seconds": 3600
-            },
-            burn_rate_tokens=100000,
-            burn_window_seconds=60
-        )
+    # Cross-provider unknown holds; same priced model for the known-usage control.
+    providers = ["local"] * 3 if known_usage else ["alpha", "beta", "gamma"]
+    candidates = [_executor(provider, result=_failure(known_usage=known_usage)) for provider in providers]
+    worker = _worker(config, candidates)
+    signal, lease = _claim(worker)
+    before_each_send = []
 
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            try:
-                ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
-                # Make a reservation
-                bound = ExecutionBound(
-                    provider="test_provider",
-                    model="test_model",
-                    input_tokens=100,
-                    max_output_tokens=100,
-                    provider_enforced=False,
-                    request_bound="unbounded",
-                    max_cost_usd=None
-                )
-                
-                reservation = ledger.reserve("worker1", "task1", bound)
-                
-                # Initially, the reservation should be pending
-                snapshot = ledger.snapshot()
-                assert snapshot.pending_reservations == 1
-                
-                # Simulate an unknown_effect by settling with None usage (uncertain)
-                new_snapshot = ledger.mark_uncertain(reservation)
-                
-                # After marking as uncertain, the reservation should still be counted in uncertain
-                assert new_snapshot.uncertain_reservations == 1
-                
-                # The reservation amount should still be held (reserved)
-                assert new_snapshot.reserved_estimate_usd >= reservation.reserved_estimate_usd
-            finally:
-                # Clean up the temporary file
-                try:
-                    if os.path.exists(tmp.name):
-                        os.unlink(tmp.name)
-                except PermissionError:
-                    # On Windows, sometimes files can't be deleted immediately
-                    pass
+    def rejected(*args, **kwargs):
+        before_each_send.append(_reservations(worker))
+        return _failure(known_usage=known_usage)
+
+    for executor in candidates:
+        executor.execute.side_effect = rejected
+    outcome = worker._process(signal, lease)
+
+    assert outcome == "sleeping", _events(worker)
+    assert [executor.execute.call_count for executor in candidates] == [1, 1, 0]
+    for executor in candidates[:2]:
+        _assert_calls(executor, signal, lease)
+    assert [len(rows) for rows in before_each_send] == [1, 2]
+    assert all(rows[-1]["status"] == "pending" for rows in before_each_send)
+    rows = _reservations(worker)
+    assert len(rows) == sum(executor.execute.call_count for executor in candidates) == 2
+    assert [row["request_id"] for row in rows] == [f"fixture-0:{lease.token}:{index}" for index in range(2)]
+    assert {row["task_id"] for row in rows} == {signal.task_id}
+    assert [json.loads(row["body"])["bound"]["provider"] for row in rows] == providers[:2]
+    snapshot = worker.budget.snapshot()
+    assert snapshot.reserved_estimate_usd == pytest.approx(0 if known_usage else 0.4)
+    assert snapshot.admission_charged_usd == pytest.approx(0.4 if known_usage else 0)
+    assert snapshot.reserved_estimate_usd + snapshot.admission_charged_usd == pytest.approx(0.4)
+    assert [row["tokens"] for row in rows] == ([2, 2] if known_usage else [None, None])
+    if not known_usage:
+        assert snapshot.tokens is snapshot.estimated_cost_usd is None
+        assert all(row["admitted_usd"] is None and row["status"] == "uncertain" for row in rows)
+    event, = _events(worker)
+    assert event["outcome"] == {"capacity": "swarm_reservation_capacity",
+                                 "task_attempts": "max_attempts_per_task",
+                                 "run_attempts": "max_attempts"}[gate]
+    facts = _facts(worker)
+    assert [fact.switched_to for fact in facts] == [f"{providers[1]}:fixture", None]
 
 
-class TestFiveInvariantProperties:
-    """Property tests for the five invariants mentioned in the specification"""
+@pytest.mark.parametrize("candidate_count", [1, 2, 4])
+def test_rejected_candidates_exit_after_one_pass(tmp_path, candidate_count):
+    config = _worker_config(tmp_path)
+    candidates = [_executor(f"provider-{index}", result=_failure()) for index in range(candidate_count)]
+    worker = _worker(config, candidates)
+    signal, lease = _claim(worker)
 
-    @given(
-        budget_limit=st.floats(min_value=1.0, max_value=100.0),
-        provider_switches=st.integers(min_value=0, max_value=3)
-    )
-    @settings(max_examples=10, deadline=500)
-    def test_invariant_no_new_budget_on_provider_switch(
-        self, 
-        budget_limit: float, 
-        provider_switches: int
-    ):
-        """Invariant 1: Switching provider does not create new task budget, does not clear existing consumption"""
-        policy = BudgetPolicy(
-            max_cost_usd=budget_limit,
-            max_tokens=1000000,
-            prices={"provider": "test_provider", "model": "test_model", "input_usd_per_million": 0.1, "output_usd_per_million": 0.1},
-            admission_control="enabled",
-            unbounded_reservation_usd=0.1,
-            limits={
-                "max_attempts": 100,
-                "max_attempts_per_task": 10,
-                "max_tasks": 50,
-                "max_runtime_seconds": 3600
-            },
-            burn_rate_tokens=100000,
-            burn_window_seconds=60
-        )
+    outcome = worker._process(signal, lease)
 
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            try:
-                ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
-                # Make several reservations (simulating provider switches)
-                bound = ExecutionBound(
-                    provider="test_provider",
-                    model="test_model",
-                    input_tokens=100,
-                    max_output_tokens=100,
-                    provider_enforced=False,
-                    request_bound="unbounded",
-                    max_cost_usd=None
-                )
-                
-                reservations = []
-                for i in range(provider_switches + 1):
-                    try:
-                        reservation = ledger.reserve(f"worker1", f"task{i}", bound)
-                        reservations.append(reservation)
-                    except Exception:
-                        # Might hit budget limits, which is expected
-                        pass
-                
-                # Check that the total reserved doesn't exceed budget limit
-                snapshot = ledger.snapshot()
-                assert snapshot.reserved_estimate_usd <= budget_limit
-            finally:
-                # Clean up the temporary file
-                try:
-                    if os.path.exists(tmp.name):
-                        os.unlink(tmp.name)
-                except PermissionError:
-                    # On Windows, sometimes files can't be deleted immediately
-                    pass
-    
-    @given(
-        budget_limit=st.floats(min_value=1.0, max_value=100.0)
-    )
-    @settings(max_examples=10, deadline=500)
-    def test_invariant_unknown_cost_reservation_not_auto_released(
-        self, 
-        budget_limit: float
-    ):
-        """Invariant 2: Unknown cost reservations are never auto released by fallback"""
-        policy = BudgetPolicy(
-            max_cost_usd=budget_limit,
-            max_tokens=1000000,
-            prices={"provider": "test_provider", "model": "test_model", "input_usd_per_million": 0.1, "output_usd_per_million": 0.1},
-            admission_control="enabled",
-            unbounded_reservation_usd=0.1,
-            limits={
-                "max_attempts": 100,
-                "max_attempts_per_task": 10,
-                "max_tasks": 50,
-                "max_runtime_seconds": 3600
-            },
-            burn_rate_tokens=100000,
-            burn_window_seconds=60
-        )
-
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            try:
-                ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
-                bound = ExecutionBound(
-                    provider="test_provider",
-                    model="test_model",
-                    input_tokens=100,
-                    max_output_tokens=100,
-                    provider_enforced=False,
-                    request_bound="unbounded",
-                    max_cost_usd=None
-                )
-                
-                reservation = ledger.reserve("worker1", "task1", bound)
-                
-                # Mark as uncertain (unknown cost)
-                ledger.mark_uncertain(reservation)
-                
-                # The reservation should still be held as uncertain
-                snapshot = ledger.snapshot()
-                assert snapshot.uncertain_reservations == 1
-                assert snapshot.reserved_estimate_usd > 0  # Still reserved
-            finally:
-                # Clean up the temporary file
-                try:
-                    if os.path.exists(tmp.name):
-                        os.unlink(tmp.name)
-                except PermissionError:
-                    # On Windows, sometimes files can't be deleted immediately
-                    pass
-    
-    @given(
-        num_requests=st.integers(min_value=1, max_value=10)
-    )
-    @settings(max_examples=10, deadline=500)
-    def test_invariant_external_attempt_count_covers_all_requests(
-        self, 
-        num_requests: int
-    ):
-        """Invariant 3: External attempt count covers all real remote requests"""
-        policy = BudgetPolicy(
-            max_cost_usd=100.0,
-            max_tokens=1000000,
-            prices={"provider": "test_provider", "model": "test_model", "input_usd_per_million": 0.1, "output_usd_per_million": 0.1},
-            admission_control="enabled",
-            unbounded_reservation_usd=0.1,
-            limits={
-                "max_attempts": 100,
-                "max_attempts_per_task": 10,
-                "max_tasks": 50,
-                "max_runtime_seconds": 3600
-            },
-            burn_rate_tokens=100000,
-            burn_window_seconds=60
-        )
-
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            try:
-                ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
-                bound = ExecutionBound(
-                    provider="test_provider",
-                    model="test_model",
-                    input_tokens=100,
-                    max_output_tokens=100,
-                    provider_enforced=False,
-                    request_bound="unbounded",
-                    max_cost_usd=None
-                )
-                
-                # Make multiple reservations to simulate multiple requests
-                reservations = []
-                for i in range(num_requests):
-                    try:
-                        reservation = ledger.reserve(f"worker1", f"task{i}", bound)
-                        reservations.append(reservation)
-                    except Exception:
-                        # Might hit limits, which is expected
-                        pass
-                
-                # The attempt count should reflect the number of requests made
-                snapshot = ledger.snapshot()
-                total_attempts = snapshot.pending_reservations + snapshot.uncertain_reservations + snapshot.unreconciled_reservations
-                assert len(reservations) <= total_attempts
-            finally:
-                # Clean up the temporary file
-                try:
-                    if os.path.exists(tmp.name):
-                        os.unlink(tmp.name)
-                except PermissionError:
-                    # On Windows, sometimes files can't be deleted immediately
-                    pass
-    
-    def test_invariant_lost_lease_prevents_result_submission(self):
-        """Invariant 4: Lost lease prevents successful result submission"""
-        from swarm.models import Locality, Signal
-        
-        # Create a task ledger in a temporary file
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            try:
-                task_ledger = TaskLedger(tmp.name, "test_swarm")
-                lease_manager = LeaseManager(task_ledger)
-                
-                # Create a proper locality object - authorized_scopes should be tuple
-                locality = Locality(
-                    workspace="./test_workspace",
-                    authorized_scopes=(".",)
-                )
-                
-                # Create a task first
-                signal = Signal(
-                    task_id="task1",
-                    workspace="./test_workspace",
-                    scope=".",
-                    kind="opportunity",
-                    payload={"test": "data"},
-                    module="test_module",
-                    required_capability="test_capability"
-                )
-                
-                task_ledger.enqueue(signal)
-                
-                # Now acquire a lease
-                lease = lease_manager.acquire("task1", "worker1", ttl_seconds=1.0, locality=locality)
-                assert lease is not None
-                
-                # Simulate lease expiration by sleeping
-                time.sleep(1.1)
-                
-                # The lease should no longer be valid
-                assert not lease_manager.is_valid(lease)
-            finally:
-                # Clean up the temporary file
-                try:
-                    if os.path.exists(tmp.name):
-                        os.unlink(tmp.name)
-                except PermissionError:
-                    # On Windows, sometimes files can't be deleted immediately
-                    pass
-    
-    @given(
-        num_workers=st.integers(min_value=1, max_value=5),
-        budget_limit=st.floats(min_value=1.0, max_value=10.0)
-    )
-    @settings(max_examples=5, deadline=500)
-    def test_invariant_all_candidates_down_has_bounded_exit(
-        self, 
-        num_workers: int, 
-        budget_limit: float
-    ):
-        """Invariant 5: All candidates unavailable has bounded exit, does not loop back to chain start"""
-        policy = BudgetPolicy(
-            max_cost_usd=budget_limit,
-            max_tokens=1000000,
-            prices={"provider": "test_provider", "model": "test_model", "input_usd_per_million": 0.1, "output_usd_per_million": 0.1},
-            admission_control="enabled",
-            unbounded_reservation_usd=0.1,
-            limits={
-                "max_attempts": 10,  # Bounded number of attempts
-                "max_attempts_per_task": 5,
-                "max_tasks": 50,
-                "max_runtime_seconds": 3600
-            },
-            burn_rate_tokens=100000,
-            burn_window_seconds=60
-        )
-
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            try:
-                ledger = BudgetLedger(tmp.name, "test_swarm", policy)
-                
-                bound = ExecutionBound(
-                    provider="test_provider",
-                    model="test_model",
-                    input_tokens=100,
-                    max_output_tokens=100,
-                    provider_enforced=False,
-                    request_bound="unbounded",
-                    max_cost_usd=None
-                )
-                
-                # Try to make more reservations than allowed to trigger bounded exit
-                successful_reservations = 0
-                for i in range(policy.limits.max_attempts + 5):  # Try more than the limit
-                    try:
-                        reservation = ledger.reserve(f"worker{i % num_workers}", f"task{i}", bound)
-                        successful_reservations += 1
-                    except Exception:
-                        # Expected when hitting limits
-                        continue
-                
-                # Should not have exceeded the max attempts limit
-                assert successful_reservations <= policy.limits.max_attempts
-            finally:
-                # Clean up the temporary file
-                try:
-                    if os.path.exists(tmp.name):
-                        os.unlink(tmp.name)
-                except PermissionError:
-                    # On Windows, sometimes files can't be deleted immediately
-                    pass
+    assert outcome == "rejected", _events(worker)
+    for executor in candidates:
+        _assert_calls(executor, signal, lease)
+        assert executor.bound.call_count == 1
+    rows = _reservations(worker)
+    assert len(rows) == candidate_count
+    assert [row["request_id"] for row in rows] == [f"fixture-0:{lease.token}:{i}" for i in range(candidate_count)]
+    facts = _facts(worker)
+    assert len(facts) == candidate_count and facts[-1].switched_to is None
+    assert [fact.attempt for fact in facts] == list(range(candidate_count))
+    event, = _events(worker)
+    assert event["outcome"] == "all_candidates_rejected"
+    assert worker.ledger.get(signal.task_id).result_id is None
 
 
-# Integration tests with respx for mocking HTTP responses
-@respx.mock
-def test_process_in_memory_transport_path():
-    """Test classification logic using respx MockTransport for in-process paths"""
-    # Mock an HTTP 400 Arrearage response
-    route = respx.post("https://api.evomap.ai/v1/chat/completions").mock(
-        return_value=httpx.Response(400, json={"error": {"code": "Arrearage"}})
-    )
-    
-    # Use httpx.MockTransport to simulate the transport layer
-    transport = httpx.MockTransport(lambda request: httpx.Response(400, json={"error": {"code": "Arrearage"}}))
-    
-    # Test the single_request function with the mock transport
-    payload = {"model": "test-model", "messages": [{"role": "user", "content": "test"}]}
-    response = single_request(payload, key="test-key", phase_timeout=30.0, transport=transport)
-    
-    assert response.status == 400
-    assert isinstance(response.body, dict)
-    body = response.body
-    if isinstance(body, dict) and "error" in body:
-        assert body["error"]["code"] == "Arrearage"
-    
-    # This demonstrates the in-process transport path that FC-A would classify
+def test_lost_lease_after_successful_execution_prevents_submission(tmp_path):
+    config = _worker_config(tmp_path, prices=True)
+    first, later = _executor(), _executor()
+    worker = _worker(config, [first, later])
+    signal, lease = _claim(worker)
+    original = (worker.target / "module_0/task_0.py").read_bytes()
+    results, handoffs = [], []
+    fixture = FixtureExecutor()
+
+    def lose_lease(*args, **kwargs):
+        result = fixture.execute(*args, **kwargs)
+        results.append(result)
+        # Real lease handoff, without replacing keeper, submit, validation or ledger.
+        handoffs.append(worker.leases.handoff(lease, "replacement-worker"))
+        return result
+
+    first.execute.side_effect = lose_lease
+    outcome = worker._process(signal, lease)
+
+    assert outcome == "failed", _events(worker)
+    assert len(results) == len(handoffs) == 1 and results[0].candidate is not None
+    _assert_calls(first, signal, lease)
+    _assert_calls(later, signal, lease, expected=0)
+    task = worker.ledger.get(signal.task_id)
+    assert task.status == "handoff" and not task.effect_applied
+    assert task.result_id is task.result is None
+    assert not worker.assets.promotions()
+    assert (worker.target / "module_0/task_0.py").read_bytes() == original
+    row, = _reservations(worker)
+    assert row["status"] == "settled" and row["tokens"] == 2
+    event, = _events(worker)
+    assert event["outcome"] == "stale_lease"
+    assert event["execution"]["failure_reason"] == "stale_lease"
 
 
-@respx.mock
-def test_subprocess_integration_path():
-    """Test subprocess integration path (mock mode) for classification/evidence_hash return"""
-    # This would test the --request-child subprocess path when FC-A is implemented
-    # Since FC-A isn't fully implemented yet, this is a placeholder for when it becomes available
-    
-    # The subprocess path would call provider_adapters for classification
-    # and return classification + evidence_hash in the Reply
-    
-    # For now, just verify the Reply structure
-    reply = Reply(
-        http_status=400,
-        error_kind="test_error",
-        uncertain=True
-    )
-    
-    assert reply.http_status == 400
-    assert reply.error_kind == "test_error"
-    assert reply.uncertain is True
+@pytest.mark.parametrize("classification,outcome", [
+    ("capability_mismatch", "rejected"), ("budget_exhausted", "sleeping"),
+])
+def test_non_rejection_classification_never_switches(tmp_path, classification, outcome):
+    config = _worker_config(tmp_path, prices=True)
+    first = _executor(result=_failure(classification, known_usage=True, reason=classification))
+    later = _executor()
+    worker = _worker(config, [first, later])
+    signal, lease = _claim(worker)
 
+    actual = worker._process(signal, lease)
 
-if __name__ == "__main__":
-    pytest.main([__file__])
+    assert actual == outcome, _events(worker)
+    _assert_calls(first, signal, lease)
+    _assert_calls(later, signal, lease, expected=0)
+    assert len(_reservations(worker)) == 1
+    fact, = _facts(worker)
+    assert fact.failure_class == classification and fact.switched_to is None

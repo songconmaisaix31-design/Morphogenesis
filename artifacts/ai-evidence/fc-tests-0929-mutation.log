@@ -1,0 +1,46 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+____ test_worker_observation_suspends_provider_and_routes_later_candidate _____
+
+tmp_path = WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-264/test_worker_observation_suspen0')
+
+    def test_worker_observation_suspends_provider_and_routes_later_candidate(tmp_path):
+        """Mutation target: real Worker failure drives observe -> transition -> routing."""
+        config = _worker_config(tmp_path)
+        rejected = _executor("alpha", result=_failure())
+        first_worker = _worker(config, [rejected])
+        signal, lease = _claim(first_worker)
+        first_outcome = first_worker._process(signal, lease)
+        assert first_outcome == "rejected", _events(first_worker)
+        _assert_calls(rejected, signal, lease)
+        fact, = _facts(first_worker)
+        assert fact.provider == "alpha" and fact.failure_class == CONFIRMED_REJECTION
+    
+        blocked = _executor("alpha", result=_failure())
+        fallback = _executor("beta", result=_failure(reason="rate_limited"))
+        next_worker = _worker(config, [blocked, fallback])
+        next_signal, next_lease = _claim(next_worker, "fixture-1")
+        outcome = next_worker._process(next_signal, next_lease)
+    
+        assert outcome == "rejected", _events(next_worker)
+        # Check behavior first: mutation must change an actual executor invocation.
+>       _assert_calls(blocked, next_signal, next_lease, expected=0)
+
+tests\swarm\test_failure_chain_runtime.py:218: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+executor = <Mock spec_set='FixtureExecutor' id='1925770828288'>
+signal = Signal(signal_id='fixture-1', task_id='fixture-1', workspace='c:\\users\\dw\\appdata\\local\\temp\\pytest-of-dw\\pytes...ion=1.0, urgency=1.0, required_capability='', module='module_0', updated_at=0.0, decay_multiplier=1.0, completed=False)
+lease = Lease(task_id='fixture-1', swarm_id='local-fixture', scope='c:\\users\\dw\\appdata\\local\\temp\\pytest-of-dw\\pytest-...bservation_suspen0\\fixture\\local-workspace\\module_0', worker_id='builder-0', token=1, expires_at=1790650329.0048678)
+expected = 0
+
+    def _assert_calls(executor, signal, lease, expected=1):
+>       assert executor.execute.call_count == expected
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <Mock name='mock.execute' id='1925698658352'>.call_count
+E        +    where <Mock name='mock.execute' id='1925698658352'> = <Mock spec_set='FixtureExecutor' id='1925770828288'>.execute
+
+tests\swarm\test_failure_chain_runtime.py:124: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/swarm/test_failure_chain_runtime.py::test_worker_observation_suspends_provider_and_routes_later_candidate
+1 failed in 16.45s
