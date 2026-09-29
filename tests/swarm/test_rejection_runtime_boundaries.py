@@ -52,7 +52,8 @@ def _gateway_worker(tmp_path, response_factory):
     ledger = TaskLedger(worker_config.state / "tasks.sqlite3", worker_config.swarm_id,
                         limits=worker_config.budget.limits)
     field = PheromoneField(worker_config.state / "field.sqlite3", ledger=ledger)
-    for task in TaskLedger(seeded.state / "tasks.sqlite3", seeded.swarm_id).snapshot():
+    for task in TaskLedger(seeded.state / "tasks.sqlite3", seeded.swarm_id,
+                           limits=seeded.budget.limits).snapshot():
         ledger.enqueue(task.signal, acceptance=task.acceptance)
         field.deposit(task.signal)
     worker = Worker(worker_config, executors[0], candidates=executors, breaker_config=_config())
