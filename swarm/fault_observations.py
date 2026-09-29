@@ -72,6 +72,16 @@ class FaultReadIssue(_Model):
 class FaultReadResult(_Model):
     records: tuple[FaultObservation, ...] = ()
     issues: tuple[FaultReadIssue, ...] = ()
+    record_lines: tuple[int, ...] = ()
+
+
+class FaultSample(_Model):
+    """Routing inputs with their existing append-only file position."""
+
+    sequence: int = Field(gt=0)
+    occurred_at: float
+    confirmed_rejection: bool
+    retry_after_until: float | None = None
 
 
 class FaultAggregate(_Model):
@@ -89,6 +99,34 @@ class FaultAggregate(_Model):
     first_occurred_at: float
     last_occurred_at: float
     retry_after_until: float | None = None
+    samples: tuple[FaultSample, ...] = ()
+
+    def after_recovery(self, at: float, sequence: int | None) -> FaultAggregate | None:
+        """Exclude the recovery snapshot and delayed pre-recovery events.
+
+        File order disambiguates equal timestamps. Without a file checkpoint,
+        only strictly later timestamps are known to be new evidence.
+        """
+        if not self.samples:
+            return self if self.first_occurred_at > at else None
+        samples = tuple(sample for sample in self.samples if (
+            sample.occurred_at > at if sequence is None else
+            sample.sequence > sequence and sample.occurred_at >= at
+        ))
+        return self.from_samples(self.provider, self.normalized_reason, samples) if samples else None
+
+    @classmethod
+    def from_samples(cls, provider: str, reason: str,
+                     samples: tuple[FaultSample, ...]) -> FaultAggregate:
+        deadlines = [sample.retry_after_until for sample in samples
+                     if sample.retry_after_until is not None]
+        return cls(
+            provider=provider, normalized_reason=reason, sample_count=len(samples),
+            confirmed_rejections=sum(sample.confirmed_rejection for sample in samples),
+            first_occurred_at=min(sample.occurred_at for sample in samples),
+            last_occurred_at=max(sample.occurred_at for sample in samples),
+            retry_after_until=max(deadlines) if deadlines else None, samples=samples,
+        )
 
 
 class ObservationConflict(ValueError):
@@ -124,6 +162,7 @@ class FaultObservationStore:
 
     def _read_all(self) -> FaultReadResult:
         records: dict[tuple[str, str, int], FaultObservation] = {}
+        record_lines: list[int] = []
         identities: set[tuple[str, str]] = set()
         issues: list[FaultReadIssue] = []
         try:
@@ -150,7 +189,9 @@ class FaultObservationStore:
                 else:
                     records[key] = item
                     identities.add(identity)
-        return FaultReadResult(records=tuple(records.values()), issues=tuple(issues))
+                    record_lines.append(number)
+        return FaultReadResult(records=tuple(records.values()), issues=tuple(issues),
+                               record_lines=tuple(record_lines))
 
     def read(self) -> FaultReadResult:
         """Read without creating or repairing files; diagnostics cover the file."""
@@ -158,7 +199,23 @@ class FaultObservationStore:
         return FaultReadResult(
             records=tuple(item for item in result.records if item.run_id == self.run_id),
             issues=result.issues,
+            record_lines=tuple(line for item, line in zip(result.records, result.record_lines, strict=True)
+                               if item.run_id == self.run_id),
         )
+
+    def checkpoint(self) -> int:
+        """Capture append order under the same bounded lock as writers.
+
+        This is a position in the existing JSONL, not a second event log. The
+        last partial line also counts: append seals it before adding new facts.
+        """
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with connection(self._lock_path, write=True, timeout=self.timeout_seconds):
+            try:
+                with self.path.open("rb") as source:
+                    return sum(1 for _ in source)
+            except FileNotFoundError:
+                return 0
 
     def append(self, observation: FaultObservation) -> bool:
         """Return True for an fsynced append, False for replay; reject conflicts.
@@ -205,19 +262,17 @@ class FaultObservationStore:
             raise ValueError("now must be finite and nonnegative")
         if not math.isfinite(window_seconds) or window_seconds <= 0:
             raise ValueError("window_seconds must be finite and positive")
-        groups: dict[tuple[str, str], list[FaultObservation]] = {}
-        for item in self.read().records:
+        groups: dict[tuple[str, str], list[FaultSample]] = {}
+        snapshot = self.read()
+        for item, sequence in zip(snapshot.records, snapshot.record_lines, strict=True):
             if now - window_seconds < item.occurred_at <= now:
-                groups.setdefault((item.provider, item.normalized_reason), []).append(item)
+                groups.setdefault((item.provider, item.normalized_reason), []).append(FaultSample(
+                    sequence=sequence, occurred_at=item.occurred_at,
+                    confirmed_rejection=item.failure_class == "confirmed_rejection",
+                    retry_after_until=(item.occurred_at + item.retry_after_seconds
+                                       if item.retry_after_seconds is not None else None),
+                ))
         result: dict[tuple[str, str], FaultAggregate] = {}
         for key, items in sorted(groups.items()):
-            deadlines = [item.occurred_at + item.retry_after_seconds for item in items
-                         if item.retry_after_seconds is not None]
-            result[key] = FaultAggregate(
-                provider=key[0], normalized_reason=key[1], sample_count=len(items),
-                confirmed_rejections=sum(item.failure_class == "confirmed_rejection" for item in items),
-                first_occurred_at=min(item.occurred_at for item in items),
-                last_occurred_at=max(item.occurred_at for item in items),
-                retry_after_until=max(deadlines) if deadlines else None,
-            )
+            result[key] = FaultAggregate.from_samples(key[0], key[1], tuple(items))
         return result

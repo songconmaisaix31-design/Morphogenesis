@@ -11,6 +11,7 @@ seam swarm.task_ledger uses), which also drives the TTLCache window timer.
 """
 
 import multiprocessing
+import sqlite3
 import sys
 import time
 from pathlib import Path
@@ -461,6 +462,54 @@ def test_same_owner_stale_probe_result_is_fenced_by_token(tmp_path):
     # a fabricated token never matches anything
     with pytest.raises(ValueError, match="probe_token"):
         breaker.report_probe_success("bailian", "rate_limited", "A", probe_token=0, now=clock())
+
+
+def test_recovery_fences_inflight_aggregate_and_checkpoint_failure(tmp_path):
+    clock = Clock()
+    breaker, _ = make(tmp_path, clock=clock, cooldown_seconds=1.0)
+    store = FaultObservationStore(tmp_path / "facts.jsonl", "run", timeout_seconds=0)
+    store.append(FaultObservation(
+        run_id="run", task_id="t", request_id="r", attempt=0, provider="bailian", model="m",
+        failure_class="confirmed_rejection", normalized_reason="arrearage", occurred_at=clock(),
+    ))
+    breaker.observe(store)
+    inflight = store.aggregate(now=clock(), window_seconds=60.0)
+    clock.t += 1
+    probe = breaker.try_claim_probe("bailian", "arrearage", "A")
+    with sqlite3.connect(str(store.path) + ".lock.sqlite3") as db:
+        db.execute("BEGIN IMMEDIATE")
+        with pytest.raises(sqlite3.OperationalError, match="locked"):
+            breaker.report_probe_success("bailian", "arrearage", "A", probe_token=probe.probe_token)
+    assert breaker.view("bailian", "arrearage") == probe
+    assert breaker.report_probe_success("bailian", "arrearage", "A", probe_token=probe.probe_token)
+    recovered = breaker.view("bailian", "arrearage")
+    assert recovered.recovered_at == clock() and recovered.recovery_sequence == 1
+    # Snapshot was read before success; apply must check the persisted boundary.
+    other = SharedBreaker(breaker.path, breaker.swarm_id, breaker.config, clock=clock)
+    other.apply_aggregates(inflight)
+    assert other.view("bailian", "arrearage") == recovered
+    assert not other.report_probe_failure("bailian", "arrearage", "A", probe_token=probe.probe_token)
+    assert other.view("bailian", "arrearage") == recovered
+    assert len(store.read().records) == 1
+
+
+def test_existing_breaker_database_migrates_without_losing_probe_or_audit(tmp_path):
+    breaker, clock = make(tmp_path, cooldown_seconds=1.0)
+    breaker.apply_aggregates({("bailian", "arrearage"): AggregateDouble(
+        reason="arrearage", confirmed_rejections=1,
+    )})
+    clock.t += 1
+    probe = breaker.try_claim_probe("bailian", "arrearage", "A", now=clock())
+    audit = breaker.audit()
+    with sqlite3.connect(breaker.path) as db:
+        # Remove only the two additive columns to reconstruct the existing schema.
+        db.execute("ALTER TABLE breaker_states DROP COLUMN recovered_at")
+        db.execute("ALTER TABLE breaker_states DROP COLUMN recovery_sequence")
+    reopened = SharedBreaker(breaker.path, breaker.swarm_id, breaker.config, clock=clock)
+    assert reopened.view("bailian", "arrearage") == probe
+    assert reopened.audit() == audit
+    assert reopened.report_probe_success("bailian", "arrearage", "A", probe_token=probe.probe_token)
+    assert reopened.view("bailian", "arrearage").recovered_at == clock()
 
 
 def test_state_survives_reopen_with_deadlines_intact(tmp_path):
