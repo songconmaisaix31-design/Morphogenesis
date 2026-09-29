@@ -261,7 +261,9 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 今日唯一计划见 [FC_DAY_PLAN_0929.md](FC_DAY_PLAN_0929.md)：底层只收口、有限只读应用并行；原始受限本地原型成立，当前版本不统一，FC 未冻结。
 
 - A：固定 codex / `morph-fc-tests-0929` worktree 与同名分支，base `73e64cc70116ac658d85591d082c0684a4952c99`；仅两个 failure_chain 测试文件及 `artifacts/ai-evidence/fc-tests-0929-*`。
-- B：固定 codex / `morph-schema-closeout-0929` worktree 与同名分支，base `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；仅今日计划、本附录、TASKS 今日台账/本轨项、Schema audit nullable 条件和说明及 `artifacts/ai-evidence/schema-0929-*`。
+- B：固定 codex / `morph-schema-closeout-0929` worktree 与同名分支，base `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；Schema 原实现已交付 `318dd4f26f27cda25e4278772bcce6b508023c26`，D 独立验收/H3 pending。新 `task_507418789086 / ctx_bf1fdfa6a61e` 同 Agent 续接：仅 `docs/FC_CLOSEOUT_0929.md`（最多两页）、TASKS 今日段、本附录、日计划状态；`schema-0929-*` 仅独立验收返修需要时可写。Schema 本体须主控传回具体拒收并授权原 nullable 范围才可返修，其余生产无写权。
 - C：固定 codex / `morph-readonly-app-0929` worktree 与同名分支，base `2957b408ce922369a595a8acd43a882eb85897d3`；只读盘点报告及主控批准的 Gene 采用明细增量。完整写权见今日计划；无后端、Schema 或执行控制写权。
 
 主控只调度/决策/验收；同 Owner 实现、自验、返修、commit/push，跨轨只 Handoff。三轨交付后另派独立验收/集成 Agent，三锁未齐不得生产合并/tag；H1、H3、FC-E 与本地测试分别登记，不追加无限底层功能。
+
+收口状态：A 最终 `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd` 的 Owner focused 20/full 699/strict 87 与有效 mutation 已由主控转发，cost_state 生产语义 exit 1 仍 OPEN、待队长授权；A/B/C 的 D 独立结论 pending。B 只读检查 FC-E 既有入口，不调用模型或付费 live；待主控通知结果齐备再封存 [审批/下一步包](FC_CLOSEOUT_0929.md)，确实无法收到的项保留 pending 并询问主控收口。

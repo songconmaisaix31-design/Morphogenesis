@@ -14,7 +14,9 @@
 
 派发记录：A `task_bf99e1b4ba10 / ctx_d0bbed22831d`；B `task_d536a112682f / ctx_170180e15e72`；C `task_75eedbf12038 / ctx_9320f0ef60fa`。三个 Worker 已启动；允许各自 ignored `.runtime`，只读复用现成环境。跨轨缺口 Handoff，不改他树/锁文件/AGENTS/SWARM 文档；除 C 已批准前端写权外不改生产源码，A/B 无生产写权；C 无后端或 Schema 写权。
 
-**交付检查点（替代表内开工状态，不改变写权）**：B 修复 `188fae46de4f3d2fe4943461a62a9626caa5325d` 的 Owner 原矩阵 12/12、扩展 24/24、控制 13/13、exit 0，待独立验收/H3。主控转发 C 最终 `621f588988899bdbc7c7a83e893369c4145d89b3` 已 push/clean、replay 自验通过，待 D 独立验收；A 阶段 `f4779d45a1b1417ffa6bce37708e9a68d46cf4e5` 的全量及 cost_state 语义缺陷仍待后续结论。后续台账由受限集成登记，B 不等待他轨、不预填通过。
+**交付检查点（替代表内开工状态）**：B 修复 `188fae46de4f3d2fe4943461a62a9626caa5325d`、交付 `318dd4f26f27cda25e4278772bcce6b508023c26` 的 Owner 原矩阵 12/12、扩展 24/24、控制 13/13、exit 0，D/H3 pending。主控转发 C 最终 `621f588988899bdbc7c7a83e893369c4145d89b3` 已 push/clean、replay 自验通过，D pending；A 测试 `f4779d45a1b1417ffa6bce37708e9a68d46cf4e5`、最终 `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd` 的 Owner focused 20/full 699（2 warnings）/strict 87 exit 0，真实 mutation 红/恢复绿，D pending。A cost_state 语义 exit 1 仍 OPEN，未获生产修复授权；绿色门禁不覆盖该失败。
+
+**B 同 Owner 新任务续接**：`task_507418789086 / ctx_bf1fdfa6a61e` 取代实现阶段的后续收口安排。当前仅可写 `docs/FC_CLOSEOUT_0929.md`（新、最多两页 H1/H3 索引/下一步）、TASKS 今日段、PLAN 今日附录及本文件状态；`schema-0929-*` 仅独立验收返修需要时。Schema 本体仅在主控传回具体拒收并授权原 nullable 范围时可改，其余生产无写权。B 等主控转发 A/D 完整结果再封存，Owner 自验/独立验收/未解决/NOT_RUN 分开；不评审自己，不修改其他轨道。FC-E 仅只读入口检查：CLI 帮助可用，但原 deepseek-r1 隔离配置和正式工具通道未验证、正式报告缺失，无模型/付费调用。
 
 ## 顺序、验收与停止条件
 

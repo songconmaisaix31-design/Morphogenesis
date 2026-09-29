@@ -6,9 +6,9 @@
 
 | 轨 | 基线 / task / dispatch | 今日状态与限制 |
 |---|---|---|
-| A `morph-fc-tests-0929` | `73e64cc70116ac658d85591d082c0684a4952c99`；`task_bf99e1b4ba10 / ctx_d0bbed22831d` | 已启动，真实 Worker 测试证据收口；待主控转发结果，未预填通过 |
-| B `morph-schema-closeout-0929` | `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；`task_d536a112682f / ctx_170180e15e72` | 计划阶段 `b27a2ec16ce31b28d1b1ae60cd580288792fdcc9` 已 push；仅移除 `allOf/1/then/required`，Owner 原矩阵 12/12、扩展 24/24、控制 13/13、exit 0；待独立验收/H3，未冻结，证据见 `artifacts/ai-evidence/schema-0929-report.md` |
-| C `morph-readonly-app-0929` | `2957b408ce922369a595a8acd43a882eb85897d3`；`task_75eedbf12038 / ctx_9320f0ef60fa` | 主控已批准 Gene 采用明细只读展开，具体文件权见日计划；待主控转发验收结果 |
+| A `morph-fc-tests-0929` | `73e64cc70116ac658d85591d082c0684a4952c99`；`task_bf99e1b4ba10 / ctx_d0bbed22831d` | 最终 `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd` 已 push；Owner focused 20/full 699（2 warnings）/strict 87 exit 0，mutation 红/恢复绿；D pending，cost_state 语义 exit 1 仍 OPEN |
+| B `morph-schema-closeout-0929` | `73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db`；实现 `task_d536a112682f / ctx_170180e15e72`；收口 `task_507418789086 / ctx_bf1fdfa6a61e` | Schema 交付 `318dd4f26f27cda25e4278772bcce6b508023c26` 已 push；Owner 原矩阵 12/12、扩展 24/24、控制 13/13、exit 0；D/H3 pending，仍 candidate；同 Owner 续接材料，见 `docs/FC_CLOSEOUT_0929.md` |
+| C `morph-readonly-app-0929` | `2957b408ce922369a595a8acd43a882eb85897d3`；`task_75eedbf12038 / ctx_9320f0ef60fa` | 最终 `621f588988899bdbc7c7a83e893369c4145d89b3` 已交付；Owner 契约/53 T5/build/44 采用语义/72 页面检查 exit 0；D pending，仅 replay |
 
 历史 Schema 原九例 8/9、扩展十二例 11/12、exit 1 继续保留；当前目标仍 `1.0.0 candidate`，待独立验收与人工 H3。optional 新增 minor、optional→required 为破坏性 major（2.0.0），不得沿用 1.1 升级必填说法。
 
@@ -22,9 +22,13 @@ B 启动记录：初始 prompt 未实际提交，主控仅补 Enter 恢复为 wo
 
 B 今日修前复现：基线 `73798cd6` 原矩阵 11/12、扩展 23/24、控制 13/13、exit 1，唯一失败仍是显式 count=null/audit 缺失；修后首轮原矩阵 12/12、扩展 24/24、控制 13/13、exit 0。Schema 除一个 required 删除外完全一致，FaultObservation 14 字段与精确 FC 源导出一致；零值/负值/孤立 audit/非法来源/非 audit 约束保留。任意正数与 unique(issue IDs) 数量不一致仍为已声明的消费侧校验责任，未实现生产消费者，不把该限制当本次修复能力。此前一次证据环境检查因历史提取文件 CRLF 字节不一致 exit 1，已保留日志，改从 Git 原字节提取到本轨 ignored `.runtime`，未改他树或安装依赖。
 
-B 修复提交 `188fae46de4f3d2fe4943461a62a9626caa5325d` 已在不可变 Git blob 上复验，12/12、24/24、13/13、exit 0 与工作树结果一致；旧 PLAN 前缀和 TASKS 历史原文不变、changed paths 全在写权内。证据 `artifacts/ai-evidence/schema-0929-exact-summary.json`；最终证据提交不再改 Schema，最终交付 SHA/remote 以 worker_done 回执为准。
+B 修复提交 `188fae46de4f3d2fe4943461a62a9626caa5325d` 已在不可变 Git blob 上复验，12/12、24/24、13/13、exit 0 与工作树结果一致；旧 PLAN 前缀和 TASKS 历史原文不变、changed paths 全在写权内。证据 `artifacts/ai-evidence/schema-0929-exact-summary.json`；最终证据提交不再改 Schema，交付为 `318dd4f26f27cda25e4278772bcce6b508023c26`，本次续接已核对远端一致及开工 clean。
 
 主控 10:56 转发 C（Owner 结果，非 B 独立验收）：产品 `8c57c4964fbf78b90d7232d3644975dab277d277`，最终 `621f588988899bdbc7c7a83e893369c4145d89b3`；六 owned 文件，push/remote 一致/clean；契约、53 T5、build、44 采用语义浏览器、既有 72 页面回归 exit 0。真实历史输入明确作为 replay，未新跑 live；C 资源已释放，D 独立验收启动。主控要求 B 完成本轨即交付，不等待 A 全量或 D 结论；后续汇总由受限集成登记。
+
+**本次收口续接取代上一段当时的“不等待”安排：** 同一 B Agent/树/分支以新 Task 仅维护 H1/H3 材料、今日台账和计划状态，等待主控确认 A/D 结果完整后封存；Schema 本体没有默认返修权。索引 [FC_CLOSEOUT_0929](docs/FC_CLOSEOUT_0929.md) 链接既有 H1 四态矩阵/fencing/TODO、A 报告和 Handoff，不改人工签名或 TODO。11:03 主控转发 A 最终 `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd`；测试仍 `f4779d45a1b1417ffa6bce37708e9a68d46cf4e5`，Owner full 699/2 warnings/450.96s、strict 87、focused 20 通过，生产 cost_state 语义 exit 1 未解决、队长修复授权未到；D 独立结果仍 pending，不能宣称全部验收。
+
+FC-E 只读入口检查：`dsh --help` 与 `dsh --profile headless --help` exit 0；本 Dispatch 的 DSH_HOME 未设置，原隔离 deepseek-r1 配置/正式工具通道未获验证，正式报告仍缺。检查没有安装、输出密钥或调用模型，不能补成 FC-E 通过；下一步须主控定位原 launcher/profile 与有界补评授权。H1/H3、生产修复、FC-E、合并/tag、T9/T10 与新 live 分别保持 pending/OPEN/NOT_RUN，不由 Owner 自验覆盖。
 
 ## 当前有效段（2026-09-28 治理返修）
 
