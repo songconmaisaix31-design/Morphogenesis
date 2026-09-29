@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\DW\orca\workspaces\Morphogenesis\morph-schema-closeout-0929\artifacts\ai-evidence\schema-0929-validate.py", line 178, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "C:\Users\DW\orca\workspaces\Morphogenesis\morph-schema-closeout-0929\artifacts\ai-evidence\schema-0929-validate.py", line 57, in main
+    assert Path(file).read_bytes() == blob(FC, relative), relative
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: swarm/__init__.py

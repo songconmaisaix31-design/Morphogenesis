@@ -1,0 +1,756 @@
+{
+  "schema_revision": "73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db",
+  "baseline": "73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db",
+  "fault_source_sha": "73e64cc70116ac658d85591d082c0684a4952c99",
+  "verified_imported_sources": [
+    "swarm/__init__.py",
+    "swarm/fault_observations.py",
+    "swarm/models.py",
+    "swarm/task_ledger.py"
+  ],
+  "python": "3.12.13 (main, Jun 23 2026, 15:23:43) [MSC v.1944 64 bit (AMD64)]",
+  "jsonschema": "4.26.0",
+  "pydantic": "2.13.5",
+  "schema_diff": "unchanged",
+  "fault_observation_14_export_exact": true,
+  "non_audit_unchanged": true,
+  "optional_no_default_input_unchanged": true,
+  "original_matrix": "11/12",
+  "expanded_matrix": "23/24",
+  "controls_summary": "13/13",
+  "exit_code": 1,
+  "cases": [
+    {
+      "case": "01_both_missing",
+      "expected_valid": true,
+      "actual_valid": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "case": "02_both_null",
+      "expected_valid": true,
+      "actual_valid": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "case": "03_only_count_null",
+      "expected_valid": true,
+      "actual_valid": false,
+      "passed": false,
+      "errors": [
+        {
+          "message": "'issue_audit' is a required property",
+          "path": [],
+          "schema_path": [
+            "allOf",
+            1,
+            "then",
+            "required"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "04_only_audit_null",
+      "expected_valid": true,
+      "actual_valid": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "case": "05_zero_complete",
+      "expected_valid": true,
+      "actual_valid": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "case": "06_zero_partial",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "'complete' was expected",
+          "path": [
+            "issue_audit",
+            "status"
+          ],
+          "schema_path": [
+            "allOf",
+            3,
+            "then",
+            "properties",
+            "issue_audit",
+            "properties",
+            "status",
+            "const"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "07_negative_complete",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "-1 is not valid under any of the given schemas",
+          "path": [
+            "audit_confirmed_issue_events"
+          ],
+          "schema_path": [
+            "properties",
+            "audit_confirmed_issue_events",
+            "anyOf"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "08_integer_no_audit",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "'issue_audit' is a required property",
+          "path": [],
+          "schema_path": [
+            "allOf",
+            0,
+            "then",
+            "required"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "09_audit_no_count",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "'audit_confirmed_issue_events' is a required property",
+          "path": [],
+          "schema_path": [
+            "allOf",
+            2,
+            "then",
+            "required"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "10_integer_null_audit",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "None is not of type 'object'",
+          "path": [
+            "issue_audit"
+          ],
+          "schema_path": [
+            "allOf",
+            0,
+            "then",
+            "properties",
+            "issue_audit",
+            "type"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "11_null_count_object_audit",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "None was expected",
+          "path": [
+            "issue_audit"
+          ],
+          "schema_path": [
+            "allOf",
+            1,
+            "then",
+            "properties",
+            "issue_audit",
+            "const"
+          ]
+        },
+        {
+          "message": "None is not of type 'integer'",
+          "path": [
+            "audit_confirmed_issue_events"
+          ],
+          "schema_path": [
+            "allOf",
+            2,
+            "then",
+            "properties",
+            "audit_confirmed_issue_events",
+            "type"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "12_positive_partial",
+      "expected_valid": true,
+      "actual_valid": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "case": "13_positive_complete",
+      "expected_valid": true,
+      "actual_valid": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "case": "14_positive_without_evidence",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "{'status': 'complete', 'protocol_id': 'test-protocol', 'scope': 'test-scope', 'reviewer': 'test-reviewer', 'confirmed_issue_ids': ['issue-1'], 'evidence_refs': []} is not valid under any of the given schemas",
+          "path": [
+            "issue_audit"
+          ],
+          "schema_path": [
+            "properties",
+            "issue_audit",
+            "anyOf"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "15_zero_no_audit",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "'issue_audit' is a required property",
+          "path": [],
+          "schema_path": [
+            "allOf",
+            0,
+            "then",
+            "required"
+          ]
+        },
+        {
+          "message": "'issue_audit' is a required property",
+          "path": [],
+          "schema_path": [
+            "allOf",
+            3,
+            "then",
+            "required"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "16_zero_null_audit",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "None is not of type 'object'",
+          "path": [
+            "issue_audit"
+          ],
+          "schema_path": [
+            "allOf",
+            0,
+            "then",
+            "properties",
+            "issue_audit",
+            "type"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "17_zero_nonempty_ids",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "['issue-1'] is expected to be empty",
+          "path": [
+            "issue_audit",
+            "confirmed_issue_ids"
+          ],
+          "schema_path": [
+            "allOf",
+            3,
+            "then",
+            "properties",
+            "issue_audit",
+            "properties",
+            "confirmed_issue_ids",
+            "maxItems"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "18_fractional_count",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "0.5 is not valid under any of the given schemas",
+          "path": [
+            "audit_confirmed_issue_events"
+          ],
+          "schema_path": [
+            "properties",
+            "audit_confirmed_issue_events",
+            "anyOf"
+          ]
+        },
+        {
+          "message": "0.5 is not of type 'integer'",
+          "path": [
+            "audit_confirmed_issue_events"
+          ],
+          "schema_path": [
+            "allOf",
+            2,
+            "then",
+            "properties",
+            "audit_confirmed_issue_events",
+            "type"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "19_boolean_count",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "True is not valid under any of the given schemas",
+          "path": [
+            "audit_confirmed_issue_events"
+          ],
+          "schema_path": [
+            "properties",
+            "audit_confirmed_issue_events",
+            "anyOf"
+          ]
+        },
+        {
+          "message": "True is not of type 'integer'",
+          "path": [
+            "audit_confirmed_issue_events"
+          ],
+          "schema_path": [
+            "allOf",
+            2,
+            "then",
+            "properties",
+            "audit_confirmed_issue_events",
+            "type"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "20_string_count",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "'1' is not valid under any of the given schemas",
+          "path": [
+            "audit_confirmed_issue_events"
+          ],
+          "schema_path": [
+            "properties",
+            "audit_confirmed_issue_events",
+            "anyOf"
+          ]
+        },
+        {
+          "message": "'1' is not of type 'integer'",
+          "path": [
+            "audit_confirmed_issue_events"
+          ],
+          "schema_path": [
+            "allOf",
+            2,
+            "then",
+            "properties",
+            "audit_confirmed_issue_events",
+            "type"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "21_empty_audit",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "{} is not valid under any of the given schemas",
+          "path": [
+            "issue_audit"
+          ],
+          "schema_path": [
+            "properties",
+            "issue_audit",
+            "anyOf"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "22_duplicate_issue_ids",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "{'status': 'complete', 'protocol_id': 'test-protocol', 'scope': 'test-scope', 'reviewer': 'test-reviewer', 'confirmed_issue_ids': ['issue-1', 'issue-1'], 'evidence_refs': ['evidence-1']} is not valid under any of the given schemas",
+          "path": [
+            "issue_audit"
+          ],
+          "schema_path": [
+            "properties",
+            "issue_audit",
+            "anyOf"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "23_unknown_audit_property",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "{'status': 'complete', 'protocol_id': 'test-protocol', 'scope': 'test-scope', 'reviewer': 'test-reviewer', 'confirmed_issue_ids': ['issue-1'], 'evidence_refs': ['evidence-1'], 'invented': True} is not valid under any of the given schemas",
+          "path": [
+            "issue_audit"
+          ],
+          "schema_path": [
+            "properties",
+            "issue_audit",
+            "anyOf"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "24_orphan_partial_audit",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "'audit_confirmed_issue_events' is a required property",
+          "path": [],
+          "schema_path": [
+            "allOf",
+            2,
+            "then",
+            "required"
+          ]
+        }
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "case": "live_as_SIMULATED",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "'LIVE' was expected",
+          "path": [
+            "evidence_label"
+          ],
+          "schema_path": [
+            "allOf",
+            5,
+            "then",
+            "properties",
+            "evidence_label",
+            "const"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "drill_with_live",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "'mock' was expected",
+          "path": [
+            "provenance"
+          ],
+          "schema_path": [
+            "allOf",
+            4,
+            "then",
+            "properties",
+            "provenance",
+            "const"
+          ]
+        },
+        {
+          "message": "'SIMULATED' was expected",
+          "path": [
+            "evidence_label"
+          ],
+          "schema_path": [
+            "allOf",
+            4,
+            "then",
+            "properties",
+            "evidence_label",
+            "const"
+          ]
+        },
+        {
+          "message": "False was expected",
+          "path": [
+            "drill"
+          ],
+          "schema_path": [
+            "allOf",
+            5,
+            "then",
+            "properties",
+            "drill",
+            "const"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "mock_drill_valid",
+      "expected_valid": true,
+      "actual_valid": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "case": "replay_missing_uri",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "None is not of type 'string'",
+          "path": [
+            "original_run_uri"
+          ],
+          "schema_path": [
+            "allOf",
+            7,
+            "then",
+            "properties",
+            "original_run_uri",
+            "type"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "replay_valid",
+      "expected_valid": true,
+      "actual_valid": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "case": "event_payload_null",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "None is not of type 'object'",
+          "path": [
+            "fault_observation"
+          ],
+          "schema_path": [
+            "allOf",
+            11,
+            "then",
+            "properties",
+            "fault_observation",
+            "type"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "task_id_null",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "None is not of type 'string'",
+          "path": [
+            "task_id"
+          ],
+          "schema_path": [
+            "allOf",
+            14,
+            "then",
+            "properties",
+            "task_id",
+            "type"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "unknown_field",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "Additional properties are not allowed ('invented' was unexpected)",
+          "path": [],
+          "schema_path": [
+            "additionalProperties"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "zero_without_evidence",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "{'status': 'complete', 'protocol_id': 'test-protocol', 'scope': 'test-scope', 'reviewer': 'test-reviewer', 'confirmed_issue_ids': [], 'evidence_refs': []} is not valid under any of the given schemas",
+          "path": [
+            "issue_audit"
+          ],
+          "schema_path": [
+            "properties",
+            "issue_audit",
+            "anyOf"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "negative_duration",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "-1 is not valid under any of the given schemas",
+          "path": [
+            "duration_seconds"
+          ],
+          "schema_path": [
+            "properties",
+            "duration_seconds",
+            "anyOf"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "negative_fault_attempt",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "{'observation_id': 'obs-789', 'run_id': 'test-run-123', 'task_id': 'task-456', 'request_id': 'req-101', 'attempt': -1, 'provider': 'test-provider', 'model': 'test-model', 'failure_class': 'confirmed_rejection', 'normalized_reason': 'test reason', 'occurred_at': 1634567890} is not valid under any of the given schemas",
+          "path": [
+            "fault_observation"
+          ],
+          "schema_path": [
+            "properties",
+            "fault_observation",
+            "anyOf"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "invalid_cost_state",
+      "expected_valid": false,
+      "actual_valid": false,
+      "passed": true,
+      "errors": [
+        {
+          "message": "{'observation_id': 'obs-789', 'run_id': 'test-run-123', 'task_id': 'task-456', 'request_id': 'req-101', 'attempt': 0, 'provider': 'test-provider', 'model': 'test-model', 'failure_class': 'confirmed_rejection', 'normalized_reason': 'test reason', 'occurred_at': 1634567890, 'cost_state': 'free'} is not valid under any of the given schemas",
+          "path": [
+            "fault_observation"
+          ],
+          "schema_path": [
+            "properties",
+            "fault_observation",
+            "anyOf"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "explicit_unknown_fault_fields",
+      "expected_valid": true,
+      "actual_valid": true,
+      "passed": true,
+      "errors": []
+    }
+  ],
+  "documented_limitations": [
+    {
+      "case": "positive_empty_ids",
+      "schema_valid": true,
+      "consumer_count_equals_unique_ids": false,
+      "production_consumer": "NOT_IMPLEMENTED"
+    },
+    {
+      "case": "positive_count_mismatch",
+      "schema_valid": true,
+      "consumer_count_equals_unique_ids": false,
+      "production_consumer": "NOT_IMPLEMENTED"
+    }
+  ]
+}

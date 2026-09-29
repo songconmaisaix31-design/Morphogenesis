@@ -1,0 +1,40 @@
+01_both_missing VALID PASS
+02_both_null VALID PASS
+03_only_count_null VALID PASS
+04_only_audit_null VALID PASS
+05_zero_complete VALID PASS
+06_zero_partial INVALID PASS
+07_negative_complete INVALID PASS
+08_integer_no_audit INVALID PASS
+09_audit_no_count INVALID PASS
+10_integer_null_audit INVALID PASS
+11_null_count_object_audit INVALID PASS
+12_positive_partial VALID PASS
+13_positive_complete VALID PASS
+14_positive_without_evidence INVALID PASS
+15_zero_no_audit INVALID PASS
+16_zero_null_audit INVALID PASS
+17_zero_nonempty_ids INVALID PASS
+18_fractional_count INVALID PASS
+19_boolean_count INVALID PASS
+20_string_count INVALID PASS
+21_empty_audit INVALID PASS
+22_duplicate_issue_ids INVALID PASS
+23_unknown_audit_property INVALID PASS
+24_orphan_partial_audit INVALID PASS
+live_as_SIMULATED INVALID PASS
+drill_with_live INVALID PASS
+mock_drill_valid VALID PASS
+replay_missing_uri INVALID PASS
+replay_valid VALID PASS
+event_payload_null INVALID PASS
+task_id_null INVALID PASS
+unknown_field INVALID PASS
+zero_without_evidence INVALID PASS
+negative_duration INVALID PASS
+negative_fault_attempt INVALID PASS
+invalid_cost_state INVALID PASS
+explicit_unknown_fault_fields VALID PASS
+LIMITATION positive_empty_ids Schema VALID; consumer must reject, NOT_IMPLEMENTED
+LIMITATION positive_count_mismatch Schema VALID; consumer must reject, NOT_IMPLEMENTED
+RESULT original=12/12 expanded=24/24 controls=13/13 exit=0

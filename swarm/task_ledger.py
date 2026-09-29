@@ -101,6 +101,8 @@ class TaskLedger:
                 db.execute("ALTER TABLE tasks ADD COLUMN effect_applied INTEGER NOT NULL DEFAULT 0")
             if "condition_fail_count" not in {r[1] for r in db.execute("PRAGMA table_info(tasks)")}:
                 db.execute("ALTER TABLE tasks ADD COLUMN condition_fail_count INTEGER NOT NULL DEFAULT 0")
+            if "unconfirmed_request_id" not in {r[1] for r in db.execute("PRAGMA table_info(tasks)")}:
+                db.execute("ALTER TABLE tasks ADD COLUMN unconfirmed_request_id TEXT")
             db.execute("CREATE INDEX IF NOT EXISTS tasks_locality ON tasks(swarm_id,workspace,scope,status,created_at)")
             db.execute("CREATE INDEX IF NOT EXISTS tasks_claims ON tasks(swarm_id,status,expiry,scope)")
             db.execute("CREATE TABLE IF NOT EXISTS dependencies (swarm_id TEXT NOT NULL, task_id TEXT NOT NULL, "
@@ -216,7 +218,7 @@ class TaskLedger:
                     raise RunLimitReached("max_derived_tasks")
             for dependency in deps:
                 self._row(db, dependency)
-            db.execute("INSERT INTO tasks VALUES (?,?,?,?,?,?,?,'available',?,0,0,NULL,NULL,?,?,?,NULL,NULL,0,0)",
+            db.execute("INSERT INTO tasks VALUES (?,?,?,?,?,?,?,'available',?,0,0,NULL,NULL,?,?,?,NULL,NULL,0,0,NULL)",
                        (self.swarm_id, signal.task_id, signal.workspace, scope, signal.module,
                         signal.required_capability or signal.task_kind, signal.model_dump_json(),
                         _OBJECT.dump_json(acceptance).decode(), now, now, derived_from))
@@ -254,6 +256,7 @@ class TaskLedger:
     @staticmethod
     def _eligible() -> str:
         return ("(t.status IN ('available','partial','handoff') OR (t.status='claimed' AND t.expiry<=?)) AND t.attempts<? "
+                "AND t.unconfirmed_request_id IS NULL "
                 "AND NOT EXISTS (SELECT 1 FROM dependencies d LEFT JOIN tasks p ON p.swarm_id=d.swarm_id "
                 "AND p.task_id=d.dependency_id WHERE d.swarm_id=t.swarm_id AND d.task_id=t.task_id "
                 "AND (p.status IS NULL OR p.status!='completed')) "
@@ -352,9 +355,37 @@ class TaskLedger:
             self._finish_attempt(db, lease, row, "released", {})
             return True
 
+    def begin_execution(self, lease: Lease, request_id: str) -> None:
+        """Persist the no-resend fact before crossing the executor boundary.
+
+        A crash, expired lease or voluntary handoff must not make an unconfirmed
+        external request eligible again. This fact is independent of its cost.
+        """
+        if not request_id.strip():
+            raise ValueError("request_id required")
+        with self.transaction() as db:
+            row = self._owned(db, lease)
+            if row["unconfirmed_request_id"] is not None:
+                raise TaskConflict("task has an unconfirmed external request")
+            db.execute("UPDATE tasks SET unconfirmed_request_id=?,updated_at=? WHERE swarm_id=? AND task_id=?",
+                       (request_id, self.now(), self.swarm_id, lease.task_id))
+            self._event(db, lease.task_id, "execution_unconfirmed", {"request_id": request_id, "token": lease.token})
+
+    def confirm_execution(self, lease: Lease, request_id: str) -> None:
+        """Clear only this owned request after a confirmed external outcome."""
+        with self.transaction() as db:
+            row = self._owned(db, lease)
+            if row["unconfirmed_request_id"] != request_id:
+                raise TaskConflict("execution confirmation does not match request")
+            db.execute("UPDATE tasks SET unconfirmed_request_id=NULL,updated_at=? WHERE swarm_id=? AND task_id=?",
+                       (self.now(), self.swarm_id, lease.task_id))
+            self._event(db, lease.task_id, "execution_confirmed", {"request_id": request_id, "token": lease.token})
+
     def _finish_attempt(self, db: sqlite3.Connection, lease: Lease, row: sqlite3.Row,
                         outcome: str, evidence: dict[str, JsonValue]) -> None:
         status = "failed" if row["attempts"] >= self.limits.max_attempts_per_task else "available"
+        if row["unconfirmed_request_id"] is not None:
+            status = "blocked"
         db.execute("UPDATE tasks SET status=?,owner=NULL,expiry=NULL,updated_at=? WHERE swarm_id=? AND task_id=?",
                    (status, self.now(), self.swarm_id, lease.task_id))
         db.execute("UPDATE task_attempts SET finished_at=?,outcome=?,evidence=? WHERE swarm_id=? AND task_id=? AND token=?",

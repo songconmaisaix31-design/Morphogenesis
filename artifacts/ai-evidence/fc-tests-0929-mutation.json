@@ -1,0 +1,22 @@
+{
+  "baseline_sha": "73e64cc70116ac658d85591d082c0684a4952c99",
+  "file": "swarm/breaker.py",
+  "line": 212,
+  "original_line": "        if _suspension_required(params):",
+  "mutation_line": "        if False and _suspension_required(params):",
+  "original_sha256": "943613494823feec7598a87e7de936c14f43ebe3d14296099ebafc4fe09a27b4",
+  "command": [
+    "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-integration-0927\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/swarm/test_failure_chain_runtime.py::test_worker_observation_suspends_provider_and_routes_later_candidate"
+  ],
+  "mutation_sha256": "45ac1ac5815145683c4ccfd9d8488c44b2a5dd867122dba913a2b0c11110bf9d",
+  "mutation_exit": 1,
+  "restored_sha256": "943613494823feec7598a87e7de936c14f43ebe3d14296099ebafc4fe09a27b4",
+  "bytes_restored": true,
+  "restored_exit": 0,
+  "production_diff_exit": 0,
+  "behavioral_failure": true
+}
