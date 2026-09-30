@@ -19,6 +19,7 @@ from hub_client.models import CapsuleEvidence, GenePolicy
 from local_assets.models import (AdoptionReceipt, AssetSafetyError, Candidate, ConsumptionExecution,
                                  PromotionReceipt, ValidationReport)
 from local_assets.paths import FROZEN_MAINLINE, no_links
+from local_assets.research_models import ResearchObservation
 
 _OBJECT = TypeAdapter(dict[str, JsonValue])
 
@@ -52,8 +53,11 @@ class LocalAssetStore:
                 CREATE TABLE IF NOT EXISTS adoptions (
                     execution_id TEXT PRIMARY KEY, body TEXT NOT NULL,
                     FOREIGN KEY(execution_id) REFERENCES consumptions(execution_id));
+                CREATE TABLE IF NOT EXISTS research_reports (
+                    report_id TEXT PRIMARY KEY, asset_id TEXT NOT NULL, body TEXT NOT NULL,
+                    FOREIGN KEY(asset_id) REFERENCES assets(asset_id));
             """)
-            for table in ("assets", "reports", "promotions", "approvals", "consumptions", "adoptions"):
+            for table in ("assets", "reports", "promotions", "approvals", "consumptions", "adoptions", "research_reports"):
                 for operation in ("UPDATE", "DELETE"):
                     db.execute(f"CREATE TRIGGER IF NOT EXISTS {table}_{operation} "
                                f"BEFORE {operation} ON {table} BEGIN "
@@ -153,7 +157,23 @@ class LocalAssetStore:
     def fetch_approved(self, asset_id: str) -> Candidate:
         if self.state(asset_id) != "approved":
             raise AssetSafetyError("asset_not_approved")
-        return self.fetch(asset_id)
+        candidate = self.fetch(asset_id)
+        if candidate.research is not None:
+            from local_assets.research import require_reproduced
+            require_reproduced(self, asset_id)
+        return candidate
+
+    def research_reports(self, asset_id: str) -> list[ResearchObservation]:
+        with self.connection() as db:
+            rows = db.execute("SELECT body FROM research_reports WHERE asset_id=? ORDER BY rowid", (asset_id,)).fetchall()
+        return [ResearchObservation.model_validate_json(row[0]) for row in rows]
+
+    def _record_research(self, report: ResearchObservation) -> None:
+        """Trusted evidence reader only; not exposed as an MCP write tool."""
+        self.fetch(report.asset_id)
+        with self.connection() as db:
+            db.execute("INSERT INTO research_reports VALUES (?,?,?)",
+                       (report.report_id, report.asset_id, report.model_dump_json()))
 
     def consumption(self, execution_id: str) -> ConsumptionExecution:
         with self.connection() as db:
@@ -161,6 +181,14 @@ class LocalAssetStore:
         if row is None:
             raise AssetSafetyError("execution_not_consumed")
         return ConsumptionExecution.model_validate_json(row[0])
+
+    def source_consumption(self, asset_id: str) -> ConsumptionExecution | None:
+        with self.connection() as db:
+            rows = db.execute("SELECT body FROM consumptions WHERE json_extract(body,'$.candidate_asset_id')=?",
+                              (asset_id,)).fetchall()
+        if len(rows) > 1:
+            raise AssetSafetyError("ambiguous_consumption_source")
+        return ConsumptionExecution.model_validate_json(rows[0][0]) if rows else None
 
     def adoptions(self) -> list[AdoptionReceipt]:
         with self.connection() as db:

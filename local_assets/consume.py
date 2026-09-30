@@ -69,6 +69,7 @@ class AssetConsumer:
             summary="Literal content reuse from " + injected.asset_id,
             required_capabilities=verified.candidate.required_capabilities,
             dependencies=verified.candidate.dependencies,
+            research=verified.candidate.research,
         )
         files, lines = blast_radius(candidate)
         candidate = candidate.model_copy(update={"declared_files": files, "declared_lines": lines})

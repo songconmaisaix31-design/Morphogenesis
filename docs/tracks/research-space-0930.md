@@ -1,0 +1,54 @@
+# B 科研空间 / MCP / 资产语义
+
+Owner 固定 B，branch `songconmaisaix31-design/morph-research-space-0930`；baseline `ef77af603577d4539d8dbdf780e1536a369b0d12`，plan `6ba12b24781318383454d2e7fb0b132e897b8a8d`。仅本轨 write_paths，未创建其他 Agent/Run。
+
+本轨领域交付源码：`9ad7387c34bd0995df51f2dbb5cba8fc8bb7e7e7`，已push并通过ls-remote核对；最后文档提交不改业务源码。实现官方FastMCP独立stdio入口和11工具、宿主身份/scope/资格、主动claim/renew/release/handoff、C唯一实验契约与可信raw验证、科研隔离/独立复现/条件继承/反例及既有AdoptionReceipt链。公共CPU入口与三角色上下文见 [PUBLIC_CASE.md](../research/PUBLIC_CASE.md)，工具契约见 [MCP_CONTRACT.md](../research/MCP_CONTRACT.md)。产品运行不调用ORCA；native认证/会话由A保留，B不复制HOME或接管凭据。
+
+最终适用门禁（C锁CPython3.12，串行，局部BLAS线程1）：
+
+- `python -m pytest tests/research tests/local_assets -q --tb=short`：**35 passed**, 68.73s，包括实际stdio、真实ledger fencing/未知不重放、科学拒绝、normal interpreter/MCP导入/sys.prefix及初始化WIP保护；strict `python tools/typecheck.py`：**98 source files**通过。
+- `python tests/research/bridge_probe.py --c-source <C22c21e8 exact LF archive>`：在 **B9ad exact LF archive** 实际exit0；C可信raw公共NumAcc4计算、B ledger/store与初始化→作者完成→peer发现通过，**provenance=mock，科研quarantine，无adoption/live结论**。
+- `python -m build --outdir <TEMP/morph-B-9ad7387-exact-0930/dist>`：在 **B9ad exact LF archive** 隔离sdist/wheel实际成功；poetry-core2.5.0仅构建隔离环境，命令局部PIP_INDEX_URL官方PyPI；不改全局/锁。
+- 旧基线实际资产迁移及missing-effect gate：主控在B28dc独立exit0，保留早期实际失败；不冒充B9ad新复跑。完整分发/SDK/整库测试与双平台CI仍交I。新源码CI [36727919838](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/36727919838) 截至本次记录两平台in_progress，**PENDING**。
+
+Python验证窗口已释放，B无运行中的Python门禁。**interface_live/task_live NOT_RUN**：I按原标准精确合并冻结A/B/C、两种真实原生CLI工具循环、最多三研究session与三干净sandbox、独立科研准入/真实adoption、同session中断接续及陈旧token拒绝；未知usage/cost/effect仍unknown。B未调用付费模型或真实Sandbox实验。模型同操作系统用户的直接文件/DB访问须由宿主原生权限保护，MCP参数边界本身不构成OS隔离；当前科研准入仅单个静态安全Python script。以下保留阶段历史和原失败，绿色子集不覆盖失败，也不等于整条科研验收。
+
+第一阶段：官方 FastMCP stdio 入口、宿主身份/scope/capability 工具边界；复用 TaskLedger 主动claim/renew/release/handoff/begin_execution，补续租审计与短事务 evidence fencing。既有 Candidate 增 research claim，assets.sqlite3 追加不可变 research_reports；静态安全与 literal-files-v1 验证保留。
+
+A 已确认 `python -m swarm.research --config ABS_TRUSTED_JSON`，通过原生每次启动配置，不动认证/HOME。C 选唯一 NIST NumAcc4 CPU 案例，提供 ExperimentPlan/Context/Result/Executor/read_result；B 用该唯一契约，不平行定义实验执行状态。
+
+当前自验：`python -m pytest tests/research -q` → 6 passed；真实 SQLite scope/capability、stale holder、renew审计、handoff、unknown/crash不重放、外部调用期间独立writer通过；模拟 executor 只证明 contract_local。首次 `python -m mypy ...` → 6 errors（JSON字段类型与apply返回值），修正后 `python -m mypy swarm/research local_assets swarm/task_ledger.py` → Success，17 files。首次失败保留于此，尚未全链验收。
+
+剩余：C executor 接线、独立科研复现/反例/缺失产物/条件拒绝与真实既有 adoption 契约测试、完整适用回归、打包、最终 commit/push。interface_live/task_live NOT_RUN，Docker当前问题属于C/I外部前置，不阻断本轨本地开发。无付费调用。
+
+保留首次扩大回归：`python -m pytest tests/research tests/swarm/test_ledger.py tests/swarm/test_lease.py tests/swarm/test_assets.py -q` → **52 failed / 31 passed**, exit 1；资产发布统一 `bridge_node.assets.BridgeError: sdk_process_failed`，正在检查官方 Node SDK 本地安装。未改断言、阈值或mock官方SDK。
+
+主控准入决定：新的科研经验 approve/继承必须真实执行与独立复现；mock/replay仅观察，保持科研 quarantine。旧literal静态资产兼容，正向完整科研链由I真实OpenSandbox case验收，缺条件NOT_RUN。本轨不放宽生产准入取得绿色测试。
+
+原独立失败保留：主控在 `29446a0bf6619310a448599292b9197662425dc9` exact LF archive 运行只读探针，mock backend 返回 succeeded/exit0 但缺 effect 字段，实际调用1次，`missing_effect_still_unconfirmed=True` 断言实际 False，exit1，`FAILED GATE: absent effect cleared execution_unconfirmed`。B修正为只接纳明确已知的执行状态与effect正向值，补缺失/未知effect真实ledger+call_count测试；等待新SHA主控同断言复验。
+
+Node失败诊断：本 worktree `node_modules/@evomap/gep-sdk` 不存在；按原package-lock `npm ci --ignore-scripts --no-audit --no-fund` 安装99包，未改锁或官方SDK。原扩大回归同断言重跑含新增stdio一项 → 84 passed，115.69s。新增科研拒绝链首次 `1 failed / 6 passed`：静态report.passed=False，定位fixture write_text在Windows产生CRLF，与candidate LF preimage不符；改fixture原始write_bytes，生产验证断言保留。
+
+阶段2当前门禁：科研/stdio/资产拒绝链19 passed（mock仅contract_local）；`python tools/typecheck.py` → Success，97 source files。C已冻结接口12ffb925后续6179d41（签名不变），B不合并对方分支，调用C唯一ExperimentPlan/Context/Executor/read_result，源码模块由最终I集成。
+
+打包失败历史：CPython313 `python -m build` 缺build模块；原项目CPython3.12 venv隔离build下载poetry-core被已有Tsinghua索引HTTP403拒绝；no-isolation诊断发现该venv缺poetry-core，BackendUnavailable。未修改任何全局index/venv；仅该命令进程指定官方PyPI后隔离构建使用poetry-core2.5.0，sdist/wheel均成功，输出TEMP目录 `morph-research-B-build-0930`。
+
+科研/工具增量保留首次失败：11工具跨action参数测试实际被官方FastMCP拒绝并包装为ToolError，测试误期待内部ValueError，`1 failed / 20 passed`。修为SDK公开ToolError类型；原拒绝条件及message断言均保留。工具协作契约收敛、作者/peer科学plan等价（排除role/local_path但完整原plan保留）、候选与归档代码byte绑定、unknown正向值判定、child消费关联均已实现；未造live批准。
+
+离线桥接：`tests/research/bridge_probe.py --c-source <C6179d41 exact LF archive>` 使用C锁环境且B当前源码，调用C唯一Executor/expected_plan+context/read_result与真实公共CPU脚本产物；mock provenance，科研quarantine拒绝批准，contract_local passed。
+
+基线迁移：`tests/research/migration_probe.py --baseline-source <ef77af6 exact LF archive>` 用基线实际Candidate/Store/Validator/Promoter生成旧持久证据，新B读取旧candidate_json、official asset_id、report及approval不变并允许静态消费，contract_local passed。新增research=None仅在其独立可选metadata字段省略，旧base_head/before等null和值0不改；科研metadata存在时完整进入canonical JSON/官方资产身份。该探针不加入依赖Git历史的普通CI测试，浅克隆不需旧源码；普通测试覆盖序列化边界。
+
+业务阶段提交：`9f20d34a4e4f1e760a6449d029314957e8c9f210` 已远端核实；97文件strict和隔离wheel/sdist通过。随后主控要求可运行初始化入口，原B负责新增 `python -m swarm.research.case` 与 [I公开case步骤](../research/PUBLIC_CASE.md)，再冻结新SHA；I不建设领域harness。初始化通过原TaskLedger登记三项任务和角色资格、真实依赖、C唯一plan、固定静态policy及三份HostConfig；不自动claim/execute/approve/adopt。2项初始化WIP保护/资格边界通过，19业务文件strict通过；当前最终整库门禁未结算，不能据旧WIP测试宣称新候选通过。
+
+初始化阶段提交 `54d48c8385cb7427cdcd6c185595396514f3e8d7` 已push。主控独立审查9f20指出科学准入缺逐份result effect正向检查、报告可能重贴plan_id/criterion，原失败事实保留；B补unknown拒绝和预注册plan绑定，本地继承也比较完整科学plan。另修继承child沿用旧HEAD作用域树问题，直接复用既有snapshot_revision捕获已apply的scope。没有添加第二快照/哈希系统。
+
+Windows同时运行多轨Python门禁导致内存/commit压力：主控独立9f20 missing-effect及EF77迁移probe在OpenBLAS导入分配阶段exit1，未抵达行为断言，不能算通过或准入行为失败。B两项旧WIP广域pytest仍保留原输出；运行中因新增初始化要求而源码发生变化，结果不能作为新不可变SHA门禁。停止新增并发Python，后续串行候选归档验证仅进程局部设置OPENBLAS_NUM_THREADS=1/OMP_NUM_THREADS=1，不改全局、不停止他人进程。
+
+重启后新Dispatch接续；旧WIP pytest进程结束且原exec句柄不可用，最终exit/count unknown，保留已见失败，不填通过。主控独立28dc missing-effect与EF77迁移均exit0；9f20/29446的历史失败不改写。远端28dc CI `36719277559` 原失败4项：plan_identity两项DID NOT RAISE、Linux初始化两项拒绝正常sys.executable链接。Owner核实测试写事务缺write=True，SQLite退出回滚；仅修fixture提交，保留原raises/assert。初始化绑定解析后的可信宿主解释器，数据/权威路径链接拒绝不放宽；使用C锁CPython3.12及BLAS线程1串行复验，未重新盲跑整库。
+
+已直接读取36719277559日志：Ubuntu **4 failed / 955 passed / 1 skipped**, 374.84s；Windows被取消，strict/build/distribution skipped，均不补通过。本轮Owner串行 `C锁CPython3.12 -m pytest tests/research tests/local_assets -q --tb=short` → **35 passed**, 69.80s；`python tools/typecheck.py` → **Success, 98 source files**，两命令仅局部OPENBLAS_NUM_THREADS=1/OMP_NUM_THREADS=1。源码与原测试门槛冻结，待推送后双平台CI真实验证完整回归/build/distribution；不重复付费或本机整库压力运行。
+
+返修阶段 `fb280e6a6e2d30c66b45fbe8c693084727b11221` 已push；主控独立指出直接替换为resolved base解释器会丢Linux venv身份，初始化绿色不足以证明实际MCP可启动，此候选暂不接收。B纠正为只核验解析后的目标，保留原venv executable argv；在原初始化正向测试增加真实解释器subprocess的MCP导入、sys.prefix及返回启动路径一致断言（CI Poetry环境包含Linux解释器链接）。原失败/既有拒绝断言均保留，数据及权威目录链接仍拒绝。
+
+venv身份修正后同一适用命令 **35 passed**, 68.73s，strict **98 source files**通过，均为C锁CPython3.12/局部BLAS线程1串行执行。fb280 exact LF源码归档与C22c21e8归档的离线bridge（含真实初始化→作者quarantine完成→不同worker发现前置结果）已实际passed，provenance=mock，未批准科研或生成adoption。最后业务源码提交后由新双平台CI检验真实Linux venv链接、完整回归/构建/分发；历史被拒收候选不因绿色子集变成通过。

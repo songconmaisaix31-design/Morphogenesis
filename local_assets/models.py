@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from contextlib import AbstractContextManager
-from typing import Literal, Protocol
+from typing import Any, Literal, Protocol
 
-from pydantic import Field
+from pydantic import Field, SerializerFunctionWrapHandler, model_serializer
 
 from contracts.base import Contract
 from contracts.identity import AttemptId
+from local_assets.research_models import ResearchClaim
 
 
 class FileChange(Contract):
@@ -29,6 +30,16 @@ class Candidate(Contract):
     summary: str = "Local quarantined candidate; validation pending"
     required_capabilities: tuple[str, ...] = ()
     dependencies: tuple[str, ...] = ()
+    research: ResearchClaim | None = None
+
+    @model_serializer(mode="wrap")
+    def canonical_candidate(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        body: dict[str, Any] = handler(self)
+        # No scientific metadata preserves the exact pre-research canonical
+        # payload and official GEP address. Other nullable fields stay intact.
+        if self.research is None:
+            body.pop("research", None)
+        return body
 
 
 class FileExpectation(Contract):
