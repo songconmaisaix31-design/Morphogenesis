@@ -52,3 +52,19 @@ Docker Desktop 已启动一次（`Start-Process -WindowStyle Hidden`），既有
 Notebook Dockerfile 未build/run，Code Interpreter/持久卷未实测，GPU不在范围。
 服务HTTP200不等于实验通过，CI/mock/宿主脚本不等于原生Agent验收；不存在本轨“开发全部完成”或生产结论。
 本轨实现/失败留存/文档移交完成，后续接入领域问题仍退回同一Owner；I合并少量胶水并负责独立live与原生session验收。
+
+## 同 Owner 集成返修：command wire
+
+I 的固定候选 `bc4d017924d8d08454b97e6d0c1b5a84d4064fd6` 新唯一run
+`interface-i-0930-bc4-01` 首个cgroup命令HTTP400：RunCommandRequest.Command required；
+此前create/connect/renew/附着拒杀和binary roundtrip真实完成，整体interface仍FAILED，原unknown不改、不重放。
+SDK1.1.0把list发为argv，但固定execd v1.1.0旧契约只收command；新release b1a29源码已有argv，
+其能力不能移称为旧镜像。官方execd源tag commit `48b0215f1bd097b31d0f022a44640e00c11ac49d`、image digest与许可证单独记录。
+
+源码修复 `b4b403cd098df5cf2194e32377f7bd9f18a54ade` 已push，仅薄适配采用标准POSIX shlex.join
+进入SDK既有字符串入口，前台/后台一致，owned guard、SDK输入异常、timeout/no-retry不变；依赖/镜像/科学阈值未变。
+修复前准确HTTP边界基线4failed6passed保留；修复快照全experiments40passed，冻结b4b403的wire10passed、
+strict97、Poetry lock/check与sdist/wheel均exit0。没有重跑全仓pytest、开新live或借用未知会话；Python窗口已交回I。
+原失败/原日志SHA/初次测试异常类型校正/源码与image区别/各命令及原始结果均见
+`docs/experiments/interface-i-0930-bc4-01-command.md`。
+本阶段是修复交付，I须在新集成SHA获新唯一run决策后验证live；旧候选CI不代表本修复SHA全门禁通过。
