@@ -1,0 +1,13 @@
+# 已知科研结果的同作者续接
+
+首次 live 文件门禁保留：集成源码 dec579889af7c3853c9a7f76ba1fe5d835299716，作者 native item_18 在300秒后 tools/call超时；持久静态报告 a9b79ce344fe4a24ac8547efcd69c320 为 passed=false / TimeoutExpired / commands=[] / worktree_path=null。科学run a79578f21ff148c6a86708bddd9f611b 已知成功、判据通过、sandbox已销毁；静态基础设施失败不是科学负结果，也不是科研通过。B只读日志与诊断文件，不操作live账本、候选、原归档、批准或采用。
+
+已证明两个边界：官方FastMCP直接调用同步fn，因此同步candidate操作占事件循环；自有Windows父/子进程明确继承stdout/stderr、实际输出标记与ready信号后，原Git helper的0.2秒timeout实际耗时4.063秒，违反预声明<3秒断言。初版fixture未证明后代启动且Git项passed，原1failed/1passed仍保留；强化fixture后上述红灯成立。该复现证明机制，**live Git具体根因仍未确定**，不把它替代实机栈证据。
+
+最小修复复用标准库：Git stdout/stderr用TemporaryFile，保留默认15秒，无input时DEVNULL隔离MCP stdin；不广杀后代、不提升validator30秒、不跳过静态门禁。research_candidate改为官方async工具并用asyncio.to_thread执行原publish/validate，形状和权限检查不变。原0.2/<3秒探针和事件循环续租断言修后2passed；随后科研/MCP/资产适用集50passed。
+
+现有verify_research/complete_research_task新增必要续接，未添加工具、调度器、状态池或重试系统：当前有效租约仍是入口、报告写入和完成的授权。仅purpose=original、同一task/swarm/worker/AgentId、原Candidate.attempt与task_attempts匹配、原research_execution已知terminal效果且对应execution_confirmed存在、当前无unconfirmed hold时，可读取旧run。原token仅供C expected_context数据校验，不授予旧持有者写权限；C重读原plan/code/data/conditions/raw结果，sandbox/effect/science/provenance/exit及完整experiment_result须与原持久结果一致。
+
+ResearchObservation增加向后兼容可选source_swarm_id、source_fencing_token、source_attempt；原fencing_token表示本次有效观察写入，原候选/审计/归档身份保持不变。恢复后完成也记录observation_fencing_token与原source身份，候选保持quarantine；恢复完成要求可信passed/succeeded/known，原同token科学负结果证据提交语义不变。缺失、未知、篡改、其他身份/任务、无确认、未确认hold及观察时租约失效均拒绝。
+
+I的唯一允许续接是原native UUID、原900秒/64工具累计窗口内：主动claim新token，verify_research原run_id/原asset_id/purpose=original，然后complete_research_task；不能换Attempt重新publish或执行第二实验。原TaskLedger3600秒和最多3次claim限制不重置。peer/child依然必须自己的干净sandbox与全部静态/科学准入，真实adoption和完整CI由I独立验收。

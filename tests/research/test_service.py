@@ -183,3 +183,37 @@ def test_confirmed_experiment_is_bounded_by_host_without_extra_call(tmp_path: Pa
     with pytest.raises(TaskConflict, match="host_experiment_limit"):
         asyncio.run(s.execute("original", 1))
     assert backend.calls == 1
+
+
+def test_blocking_candidate_validation_does_not_block_real_lease_renewal(tmp_path: Path, monkeypatch) -> None:
+    import threading
+    from swarm.research.server import create_server
+    service = make_service(tmp_path)
+    enqueue(service)
+    assert service.claim("original")
+    entered, release = threading.Event(), threading.Event()
+
+    def blocking_validation(task_id, token, asset_id):
+        service._lease(task_id, token)
+        entered.set()
+        release.wait(timeout=1)
+        service._lease(task_id, token)
+        return {"fixture_finished": True}
+
+    monkeypatch.setattr(service, "validate_files", blocking_validation)
+    server = create_server(service)
+
+    async def run():
+        validation = asyncio.create_task(server.call_tool("research_candidate", {
+            "action": "validate_files", "task_id": "original", "token": 1, "asset_id": "owned-fixture"}))
+        try:
+            assert await asyncio.to_thread(entered.wait, 2)
+            assert not validation.done(), "sync validation occupied the MCP event loop"
+            await server.call_tool("lease_task", {"action": "renew", "task_id": "original", "token": 1})
+            assert any(e["event"] == "renewed" and e["body"]["token"] == 1 for e in service.ledger.audit())
+            assert not release.is_set()
+        finally:
+            release.set()
+            await validation
+
+    asyncio.run(run())
