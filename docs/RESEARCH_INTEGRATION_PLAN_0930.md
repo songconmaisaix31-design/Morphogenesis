@@ -40,3 +40,16 @@
 6. 官方认证保持原状，不复制 HOME、不接管凭证、不绕过原生权限；缺条件写 blocked/NOT_RUN，继续其余实现与门禁。无 DSH 强制评审，无生产 Hub 发布、部署主线覆盖或新 tag。
 
 当前状态：三轨已按固定所有权启动；A已提交并核验真实前置探测，B/C正进行返修与适用门禁。首次OpenSandbox接口烟测FAILED，完整科研task_live与集成候选验收仍NOT_RUN。最终只报告实现、分支/完整 SHA、命令/结果、真实限制、未执行/人工操作。
+
+## 继续开发检查点（2026-09-30）
+
+用户要求继续既有任务，重点复用 ORCA 多 Agent 接入协议和官方 OpenSandbox。现有三轨、所有权及验收范围继续有效；只在已有实现上返修和集成。
+
+- 原 Run `run_4d81d03a8550` 已绑定当前总控 `term_bdbac2dc-861f-4ba9-af30-f44bd35cc2d7`，generation=2。ORCA 重启后的原 B/C Dispatch 均为 failed/terminal_missing，Task ready；保留已交付源码及原失败，不把运行时恢复失败写成代码验收失败。
+- A 固定候选 `648f43c54203f555b1b05827cfe119c8e3dfa622` 已完成原 Task；需要领域返修时恢复原 Owner。ORCA 固定来源、许可证、原模块行为对照、原生 argv/session/event/进程归属协议进入 I 独立复核。
+- B 候选 `28dc6d0b4ff73edd6da7c27d8ef6f359b95bc126` 已 push、clean。恢复原 B 会话完成已知 effect、预注册计划、旧资产兼容性、案例初始化及适用门禁；原 missing-effect 失败断言继续保留。
+- C 候选 `23417b09ffc93fbc432da0f63a7abec2546fd825` 已 push、clean；主控实际读取 CI `36717414791` 的 exact headSha，Ubuntu/Windows 全部门禁 success。恢复原 C 会话核对最终文档、服务归属和证据 Handoff；旧 `interface-c-0930-01` 失败保持不变，不重放。
+- Python 验证串行进行，仅进程局部限制 BLAS 线程；不关闭他人进程/容器或修改全局资源设置。主控处理既有 FIFO 消息后 ack。
+- B/C 交付后由独立 I 在新 Orca worktree 精确合并 A/B/C 及治理提交，只做必要胶水；源码固定后完成独立本地、双平台 CI 和已授权有界 live。缺少真实权限、资源或预算配置时只阻断依赖路径，其余实现和验证继续。
+
+此记录为继续开发计划，尚未创建 I 或执行新 live；不预写科研验收、生产部署、主线覆盖或 tag 通过。
