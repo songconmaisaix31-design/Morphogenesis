@@ -49,6 +49,9 @@ class AssetPromoter:
 
     def promote(self, asset_id: str, report_id: str | ValidationReport) -> PromotionReceipt:
         _, report = checked_report(self.store, asset_id, report_id, self.policy_version)
+        if self.store.fetch(asset_id).research is not None:
+            from local_assets.research import require_reproduced
+            require_reproduced(self.store, asset_id)
         with self.store.connection() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT body FROM approvals WHERE asset_id=?", (asset_id,)).fetchone()

@@ -10,6 +10,7 @@ from pydantic import Field
 
 from contracts.base import Contract
 from contracts.identity import AttemptId
+from local_assets.research_models import ResearchClaim
 
 
 class FileChange(Contract):
@@ -29,6 +30,7 @@ class Candidate(Contract):
     summary: str = "Local quarantined candidate; validation pending"
     required_capabilities: tuple[str, ...] = ()
     dependencies: tuple[str, ...] = ()
+    research: ResearchClaim | None = None
 
 
 class FileExpectation(Contract):
