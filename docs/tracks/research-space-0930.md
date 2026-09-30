@@ -2,6 +2,17 @@
 
 Owner 固定 B，branch `songconmaisaix31-design/morph-research-space-0930`；baseline `ef77af603577d4539d8dbdf780e1536a369b0d12`，plan `6ba12b24781318383454d2e7fb0b132e897b8a8d`。仅本轨 write_paths，未创建其他 Agent/Run。
 
+本轨领域交付源码：`9ad7387c34bd0995df51f2dbb5cba8fc8bb7e7e7`，已push并通过ls-remote核对；最后文档提交不改业务源码。实现官方FastMCP独立stdio入口和11工具、宿主身份/scope/资格、主动claim/renew/release/handoff、C唯一实验契约与可信raw验证、科研隔离/独立复现/条件继承/反例及既有AdoptionReceipt链。公共CPU入口与三角色上下文见 [PUBLIC_CASE.md](../research/PUBLIC_CASE.md)，工具契约见 [MCP_CONTRACT.md](../research/MCP_CONTRACT.md)。产品运行不调用ORCA；native认证/会话由A保留，B不复制HOME或接管凭据。
+
+最终适用门禁（C锁CPython3.12，串行，局部BLAS线程1）：
+
+- `python -m pytest tests/research tests/local_assets -q --tb=short`：**35 passed**, 68.73s，包括实际stdio、真实ledger fencing/未知不重放、科学拒绝、normal interpreter/MCP导入/sys.prefix及初始化WIP保护；strict `python tools/typecheck.py`：**98 source files**通过。
+- `python tests/research/bridge_probe.py --c-source <C22c21e8 exact LF archive>`：在 **B9ad exact LF archive** 实际exit0；C可信raw公共NumAcc4计算、B ledger/store与初始化→作者完成→peer发现通过，**provenance=mock，科研quarantine，无adoption/live结论**。
+- `python -m build --outdir <TEMP/morph-B-9ad7387-exact-0930/dist>`：在 **B9ad exact LF archive** 隔离sdist/wheel实际成功；poetry-core2.5.0仅构建隔离环境，命令局部PIP_INDEX_URL官方PyPI；不改全局/锁。
+- 旧基线实际资产迁移及missing-effect gate：主控在B28dc独立exit0，保留早期实际失败；不冒充B9ad新复跑。完整分发/SDK/整库测试与双平台CI仍交I。新源码CI [36727919838](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/36727919838) 截至本次记录两平台in_progress，**PENDING**。
+
+Python验证窗口已释放，B无运行中的Python门禁。**interface_live/task_live NOT_RUN**：I按原标准精确合并冻结A/B/C、两种真实原生CLI工具循环、最多三研究session与三干净sandbox、独立科研准入/真实adoption、同session中断接续及陈旧token拒绝；未知usage/cost/effect仍unknown。B未调用付费模型或真实Sandbox实验。模型同操作系统用户的直接文件/DB访问须由宿主原生权限保护，MCP参数边界本身不构成OS隔离；当前科研准入仅单个静态安全Python script。以下保留阶段历史和原失败，绿色子集不覆盖失败，也不等于整条科研验收。
+
 第一阶段：官方 FastMCP stdio 入口、宿主身份/scope/capability 工具边界；复用 TaskLedger 主动claim/renew/release/handoff/begin_execution，补续租审计与短事务 evidence fencing。既有 Candidate 增 research claim，assets.sqlite3 追加不可变 research_reports；静态安全与 literal-files-v1 验证保留。
 
 A 已确认 `python -m swarm.research --config ABS_TRUSTED_JSON`，通过原生每次启动配置，不动认证/HOME。C 选唯一 NIST NumAcc4 CPU 案例，提供 ExperimentPlan/Context/Result/Executor/read_result；B 用该唯一契约，不平行定义实验执行状态。
