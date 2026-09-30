@@ -5,6 +5,7 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 import time
+from collections.abc import Callable
 
 from local_assets.models import AssetSafetyError, Candidate, PromotionReceipt, ValidationPolicy, ValidationReport
 from local_assets.store import LocalAssetStore
@@ -48,20 +49,33 @@ class AssetPromoter:
         self.policy_version = policy_version
 
     def promote(self, asset_id: str, report_id: str | ValidationReport) -> PromotionReceipt:
+        receipt = self.prepare(asset_id, report_id)
+        return self._commit(receipt)
+
+    def prepare(self, asset_id: str, report_id: str | ValidationReport) -> PromotionReceipt:
         _, report = checked_report(self.store, asset_id, report_id, self.policy_version)
         if self.store.fetch(asset_id).research is not None:
             from local_assets.research import require_reproduced
             require_reproduced(self.store, asset_id)
+        return PromotionReceipt(asset_id=asset_id, report_id=report.report_id,
+                                promoted_at=time.time(), policy_version=report.policy_version)
+
+    def _commit(self, receipt: PromotionReceipt, assert_owned: Callable[[], None] = lambda: None) -> PromotionReceipt:
+        """Short index write; callers perform SDK/file checks before holding a lease lock."""
+        asset_id = receipt.asset_id
         with self.store.connection() as db:
             db.execute("BEGIN IMMEDIATE")
+            assert_owned()
             row = db.execute("SELECT body FROM approvals WHERE asset_id=?", (asset_id,)).fetchone()
             if row:
-                receipt = PromotionReceipt.model_validate_json(row[0])
-                if receipt.report_id != report.report_id:
+                old = PromotionReceipt.model_validate_json(row[0])
+                if old.report_id != receipt.report_id:
                     raise AssetSafetyError("asset_already_approved")
-                return receipt
-            receipt = PromotionReceipt(asset_id=asset_id, report_id=report.report_id,
-                                       promoted_at=time.time(), policy_version=report.policy_version)
+                return old
+            report = self.store.get_report(receipt.report_id)
+            if not report.passed or time.time() >= report.expires_at:
+                raise AssetSafetyError("stale_or_failed_report")
             db.execute("INSERT INTO approvals VALUES (?, ?, ?)",
-                       (asset_id, report.report_id, receipt.model_dump_json()))
+                       (asset_id, receipt.report_id, receipt.model_dump_json()))
+            assert_owned()
         return receipt

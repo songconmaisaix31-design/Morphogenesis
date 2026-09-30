@@ -106,3 +106,19 @@ remote marketing requests, images, Christmas models and offline reveal hacks
 are not product imports; the component structure and SVG geometry above are adaptations.
 Font-specific licenses have not been independently established from the supplied
 files; the user's reuse authorization is recorded without relabeling ownership.
+# 2026-09-30 native research integration sources
+
+This section records actual runtime adapters and the A/C interface handoffs. It does not replace the historical notices below. No scheduler, Attempt lifecycle, manifest, hashing implementation or completion proof is copied or rebuilt.
+
+| Source | Version / immutable reference | License and use |
+|---|---|---|
+| Official MCP Python SDK | B's local interpreter 1.28.1; project constraint `mcp>=1.20,<2`, exact deployment version from C's lock | MIT; `mcp.server.fastmcp.FastMCP` stdio server and official SDK client tests, no implementation copied. [v1 source](https://github.com/modelcontextprotocol/python-sdk/blob/v1.x/README.md) |
+| stablyai/orca | `85f8d6b5f507df795cd3cef1cdea08124cf801ee` | A source audit: MIT, Copyright 2026 Lovecast Inc.; native launch/session/config behavioral reference. Product has no Orca service/runtime dependency. [source](https://github.com/stablyai/orca/tree/85f8d6b5f507df795cd3cef1cdea08124cf801ee) |
+| Codex CLI | npm 0.159.0, A native probes | Apache-2.0; invoke original CLI with its native authentication, no copied HOME or credentials. [source](https://github.com/openai/codex) |
+| Claude Code CLI | npm 2.1.238, A native probes | Proprietary Anthropic terms; invoke installed native CLI, no SDK or open-source license claim. [official documentation](https://code.claude.com/docs/en/overview) |
+| OpenSandbox SDK / Code Interpreter / service | 1.1.0; release-1.1.0 commit `b1a29cf93a823a95913f7943010febb3f29de05c` (annotated tag object `836b182e208e66c046026fa0f633e089321f1efb`); initial source study `089b59ad48af33fc2733de58bd1a39c687c93b0a` | Apache-2.0; C calls official SDK and deploys official service/image; local configuration adaptations retain source attribution. B calls C's sole contracts and trusted archive reader. [release source](https://github.com/opensandbox-group/OpenSandbox/tree/b1a29cf93a823a95913f7943010febb3f29de05c) |
+| nbclient / nbformat | 0.10.4 / 5.10.4, C lock | BSD-3-Clause; C uses NotebookClient and official notebook format, no new kernel executor. [nbclient](https://github.com/jupyter/nbclient), [nbformat](https://github.com/jupyter/nbformat) |
+| CPython statistics | 3.12.13 in C's pinned CPU image | PSF-2.0; invoke `statistics.variance`, no implementation copied. [official API](https://docs.python.org/3.12/library/statistics.html#statistics.variance) |
+| NIST StRD NumAcc4 | Public 1001-observation constructed dataset; original file SHA256 `ca310dc767f5130f980f8280bbe69e26ba414a4d85a89fc11b6c767b828e5fe4` | Public NIST scientific reference data; preserve [NIST data licensing statements](https://www.nist.gov/open/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications), no NIST endorsement or invented MIT license. [original data](https://www.itl.nist.gov/div898/strd/univ/data/NumAcc4.dat) |
+
+NumAcc4 cites Simon, Stephen D. and Lesage, James P. (1989), *Assessing the Accuracy of ANOVA Calculations in Statistical Software*, Computational Statistics & Data Analysis 8:325-332. This CPU case tests only declared numerical conditions; it does not establish a general research result. C's source audit and retained SDK/API distinctions are in `docs/experiments/upstream.md` on the integrated branch.

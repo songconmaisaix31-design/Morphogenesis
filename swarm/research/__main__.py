@@ -16,7 +16,11 @@ def main() -> None:
         parser.error("--config must be absolute")
     no_links(args.config)
     config = HostConfig.model_validate_json(args.config.read_text(encoding="utf-8"))
-    service = ResearchService(config)
+    backend = None
+    if config.experiment_backend:
+        from swarm.research.experiments import OfficialExperiments
+        backend = OfficialExperiments(config)
+    service = ResearchService(config, backend=backend)
     create_server(service).run(transport="stdio")
 
 

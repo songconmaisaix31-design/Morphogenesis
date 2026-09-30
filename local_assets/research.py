@@ -1,16 +1,28 @@
 """Scientific eligibility supplements, and never replaces, static file checks."""
+import json
 from local_assets.models import AssetSafetyError
 from local_assets.research_models import ResearchObservation
 from local_assets.store import LocalAssetStore
 
 
 def matching_reports(store: LocalAssetStore, asset_id: str) -> list[ResearchObservation]:
-    claim = store.fetch(asset_id).research
+    candidate = store.fetch(asset_id)
+    claim = candidate.research
     if claim is None:
         raise AssetSafetyError("research_claim_required")
     return [r for r in store.research_reports(asset_id)
             if r.plan_id == claim.plan_id and r.criterion_version == claim.criterion_version
-            and r.conditions == claim.conditions]
+            and r.conditions == claim.conditions and r.candidate_json == candidate.model_dump_json()]
+
+
+def scientific_plan(plan_json: str) -> str:
+    """Role/local archive paths are lineage, not a scientific condition."""
+    plan = json.loads(plan_json)
+    plan.pop("role", None)
+    for name in ("code", "data"):
+        if isinstance(plan.get(name), dict):
+            plan[name].pop("local_path", None)
+    return json.dumps(plan, sort_keys=True, separators=(",", ":"))
 
 
 def require_reproduced(store: LocalAssetStore, asset_id: str, *, _ancestors: tuple[str, ...] = ()) -> None:
@@ -43,16 +55,16 @@ def require_reproduced(store: LocalAssetStore, asset_id: str, *, _ancestors: tup
     reproductions = [r for r in reports if r.purpose == "reproduction" and r.scientific_verdict == "passed"
                     and r.execution_state == "succeeded" and r.provenance == "live" and r.sandbox_id]
     if not any(a.worker_id != b.worker_id and a.sandbox_id != b.sandbox_id and a.run_id != b.run_id
-               and a.plan_json == b.plan_json for a in originals for b in reproductions):
+               and scientific_plan(a.plan_json) == scientific_plan(b.plan_json) for a in originals for b in reproductions):
         raise AssetSafetyError("independent_clean_reproduction_required")
 
 
 def require_inheritance(store: LocalAssetStore, asset_id: str, task_id: str,
                         worker_id: str, token: int, conditions: dict[str, str]) -> None:
-    require_reproduced(store, asset_id)
     claim = store.fetch(asset_id).research
     if claim is None or claim.conditions != conditions:
         raise AssetSafetyError("research_condition_mismatch")
+    require_reproduced(store, asset_id)
     if not any(r.purpose == "inheritance" and r.task_id == task_id and r.worker_id == worker_id
                and r.fencing_token == token and r.scientific_verdict == "passed"
                and r.execution_state == "succeeded" and r.provenance == "live"

@@ -17,6 +17,7 @@ class HostConfig(Contract):
     evidence_root: str
     project_context: str = ""
     experiment_backend: dict[str, str] = Field(default_factory=dict)
+    max_experiments_per_task: int = Field(default=1, ge=1, le=10, strict=True)
 
     def locality(self) -> Locality:
         return Locality(workspace=self.workspace, authorized_scopes=self.authorized_scopes)

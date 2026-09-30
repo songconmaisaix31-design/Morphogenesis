@@ -367,7 +367,7 @@ class TaskLedger:
             self._finish_attempt(db, lease, row, "released", {})
             return True
 
-    def begin_execution(self, lease: Lease, request_id: str) -> None:
+    def begin_execution(self, lease: Lease, request_id: str, *, max_executions: int | None = None) -> None:
         """Persist the no-resend fact before crossing the executor boundary.
 
         A crash, expired lease or voluntary handoff must not make an unconfirmed
@@ -375,10 +375,17 @@ class TaskLedger:
         """
         if not request_id.strip():
             raise ValueError("request_id required")
+        if max_executions is not None and (isinstance(max_executions, bool) or not 1 <= max_executions <= 10):
+            raise ValueError("max_executions must be in [1,10]")
         with self.transaction() as db:
             row = self._owned(db, lease)
             if row["unconfirmed_request_id"] is not None:
                 raise TaskConflict("task has an unconfirmed external request")
+            if max_executions is not None:
+                count = db.execute("SELECT COUNT(*) FROM task_audit WHERE swarm_id=? AND task_id=? AND event='execution_unconfirmed'",
+                                   (self.swarm_id, lease.task_id)).fetchone()[0]
+                if count >= max_executions:
+                    raise TaskConflict("host_experiment_limit_reached")
             db.execute("UPDATE tasks SET unconfirmed_request_id=?,updated_at=? WHERE swarm_id=? AND task_id=?",
                        (request_id, self.now(), self.swarm_id, lease.task_id))
             self._event(db, lease.task_id, "execution_unconfirmed", {"request_id": request_id, "token": lease.token})

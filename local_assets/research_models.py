@@ -25,6 +25,7 @@ class ResearchObservation(Contract):
     criterion_version: str
     conditions: dict[str, str]
     plan_json: str
+    candidate_json: str
     result_json: str
     provenance: Literal["live", "replay", "mock"]
     purpose: Literal["original", "reproduction", "inheritance", "counterexample"]
@@ -32,4 +33,3 @@ class ResearchObservation(Contract):
     scientific_verdict: Literal["passed", "failed", "not_evaluated"]
     reasons: tuple[str, ...] = ()
     created_at: float
-

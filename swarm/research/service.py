@@ -27,7 +27,7 @@ Purpose = Literal["original", "reproduction", "inheritance", "counterexample"]
 class ExperimentBackend(Protocol):
     async def execute(self, plan: dict[str, JsonValue], run_id: str, lease: Lease) -> dict[str, JsonValue]: ...
     def read(self, run_id: str) -> dict[str, JsonValue]: ...
-    def evaluate(self, run_id: str, plan: dict[str, JsonValue]) -> dict[str, JsonValue]: ...
+    def evaluate(self, run_id: str, plan: dict[str, JsonValue], lease: Lease) -> dict[str, JsonValue]: ...
 
 
 class ResearchService:
@@ -71,7 +71,12 @@ class ResearchService:
     def claim(self, task_id: str, ttl_seconds: float = 60) -> dict[str, JsonValue] | None:
         self._task(task_id)
         lease = self.ledger.claim(task_id, self.config.worker_id, locality=self.locality, ttl_seconds=ttl_seconds)
-        return _OBJECT.validate_json(lease.model_dump_json()) if lease else None
+        if lease is None:
+            return None
+        response = _OBJECT.validate_json(lease.model_dump_json())
+        response["attempt_id"] = _OBJECT.validate_json(AttemptId(task_id=task_id, agent=self.config.agent,
+                                                               attempt=self.ledger.get(task_id).attempts).model_dump_json())
+        return response
 
     def _lease(self, task_id: str, token: int) -> Lease:
         task = self._task(task_id)
@@ -107,8 +112,9 @@ class ResearchService:
 
     def environment(self, task_id: str, token: int) -> dict[str, JsonValue]:
         self._lease(task_id, token)
-        return {"plan": self._plan(task_id), "available": self.backend is not None,
-                "allocation": "fresh_sandbox_per_execution", "execution_started": False}
+        return {"plan": self._plan(task_id), "backend_configured": self.backend is not None,
+                "allocation": "on_execute", "isolation_requested": "fresh_sandbox_per_execution",
+                "execution_started": False}
 
     async def execute(self, task_id: str, token: int) -> dict[str, JsonValue]:
         lease = self._lease(task_id, token)
@@ -116,14 +122,15 @@ class ResearchService:
         if self.backend is None:
             raise AssetSafetyError("experiment_backend_not_configured")
         run_id = uuid4().hex
-        self.ledger.begin_execution(lease, run_id)
+        self.ledger.begin_execution(lease, run_id, max_executions=self.config.max_experiments_per_task)
         # No SQLite transaction survives this boundary. Exceptions/crashes retain
         # unconfirmed_request_id and prohibit automatic replay after expiry.
         result = await self.backend.execute(plan, run_id, lease)
         self._lease(task_id, token)
         self.ledger.record_event("research_execution", {"run_id": run_id, "worker_id": lease.worker_id,
                                                        "token": token, "result": result}, task_id=task_id)
-        if result.get("execution_state") not in {"unknown", None} and result.get("effect_state") != "unknown":
+        if (result.get("execution_state") in {"succeeded", "failed", "timeout", "unsupported", "missing_artifact"}
+                and result.get("effect_state") in {"known", "confirmed"}):
             self.ledger.confirm_execution(self._lease(task_id, token), run_id)
         return {"run_id": run_id, "result": result}
 
@@ -189,10 +196,24 @@ class ResearchService:
         if self.backend is None or candidate.research is None:
             raise AssetSafetyError("research_backend_and_claim_required")
         plan = self._plan(task_id)
-        evaluated = self.backend.evaluate(run_id, plan)
+        try:
+            evaluated = self.backend.evaluate(run_id, plan, lease)
+        except (ValueError, OSError) as error:
+            original = lineage.get("result")
+            if not isinstance(original, dict) or original.get("provenance") not in {"live", "replay", "mock"}:
+                raise AssetSafetyError("durable_result_provenance_required") from error
+            evaluated = {"execution_state": "missing_artifact", "scientific_verdict": "not_evaluated",
+                         "provenance": original["provenance"], "sandbox_id": original.get("sandbox_id"),
+                         "reasons": ["trusted_archive_rejected:" + type(error).__name__ + ":" + str(error)],
+                         "code_text": None}
         claim = candidate.research
         if self._task(task_id).acceptance.get("research_claim") != _OBJECT.validate_json(claim.model_dump_json()):
             raise AssetSafetyError("research_condition_mismatch")
+        # The executed code, not an unrelated passing reference program, must
+        # supply every candidate after-byte. The current CPU case is one script.
+        if (evaluated.get("execution_state") == "succeeded"
+                and (len(candidate.changes) != 1 or candidate.changes[0].after != evaluated.get("code_text"))):
+            raise AssetSafetyError("research_candidate_executed_code_mismatch")
         verdict = evaluated.get("scientific_verdict")
         if verdict not in {"passed", "failed", "not_evaluated"}:
             raise AssetSafetyError("invalid_trusted_verdict")
@@ -202,6 +223,7 @@ class ResearchService:
             "sandbox_id": evaluated.get("sandbox_id"), "plan_id": claim.plan_id,
             "criterion_version": claim.criterion_version, "conditions": claim.conditions,
             "plan_json": _OBJECT.dump_json(plan).decode(), "result_json": _OBJECT.dump_json(evaluated).decode(),
+            "candidate_json": candidate.model_dump_json(),
             "provenance": evaluated.get("provenance"), "purpose": purpose,
             "execution_state": evaluated.get("execution_state"), "scientific_verdict": verdict,
             "reasons": evaluated.get("reasons", []), "created_at": self.ledger.now(),
@@ -236,8 +258,10 @@ class ResearchService:
         self.ledger.assert_execution_confirmed(lease)
         # Promotion still invokes the existing static report checks. No MCP tool
         # accepts passed/approved flags or a caller-supplied scientific metric.
-        with self.ledger.fenced(lease):
-            receipt = AssetPromoter(self.store, policy_version=policy.version).promote(asset_id, report_id)
+        promoter = AssetPromoter(self.store, policy_version=policy.version)
+        receipt = promoter.prepare(asset_id, report_id)
+        with self.ledger.fenced(self._lease(task_id, token)) as owned:
+            receipt = promoter._commit(receipt, owned)
         return _OBJECT.validate_json(receipt.model_dump_json())
 
     def search(self, query: str, limit: int = 20) -> list[dict[str, JsonValue]]:

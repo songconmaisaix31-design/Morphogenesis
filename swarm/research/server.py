@@ -1,6 +1,7 @@
 """Official MCP v1 FastMCP exposes a small, identity-bound research surface."""
 from mcp.server.fastmcp import FastMCP
 from pydantic import JsonValue
+from typing import Literal
 
 from local_assets.models import Candidate
 from swarm.research.service import Purpose, ResearchService
@@ -23,25 +24,25 @@ def create_server(service: ResearchService) -> FastMCP:
         return service.context(task_id)
 
     @mcp.tool()
-    def claim_task(task_id: str, ttl_seconds: float = 60) -> dict[str, JsonValue] | None:
-        """Voluntarily claim an eligible task as the bound host identity."""
-        return service.claim(task_id, ttl_seconds)
-
-    @mcp.tool()
-    def renew_task(task_id: str, token: int, ttl_seconds: float = 60) -> dict[str, JsonValue]:
-        """Renew a current task lease; stale tokens and other holders are rejected."""
-        return service.renew(task_id, token, ttl_seconds)
-
-    @mcp.tool()
-    def release_task(task_id: str, token: int) -> bool:
-        """Release a held task; an unconfirmed external request stays blocked."""
+    def lease_task(action: Literal["claim", "renew", "release", "handoff"], task_id: str,
+                   token: int | None = None, ttl_seconds: float = 60, next_worker_id: str | None = None,
+                   partial: dict[str, JsonValue] | None = None) -> dict[str, JsonValue] | bool | None:
+        """Actively claim/renew/release/handoff one lease as the bound identity; handoff never auto-assigns."""
+        if action == "claim":
+            if token is not None or next_worker_id is not None or partial is not None:
+                raise ValueError("claim_accepts_only_task_and_ttl")
+            return service.claim(task_id, ttl_seconds)
+        if token is None:
+            raise ValueError("current_fencing_token_required")
+        if action == "handoff":
+            if next_worker_id is None:
+                raise ValueError("handoff_target_required")
+            return service.handoff(task_id, token, next_worker_id, partial)
+        if next_worker_id is not None or partial is not None:
+            raise ValueError("handoff_arguments_require_handoff_action")
+        if action == "renew":
+            return service.renew(task_id, token, ttl_seconds)
         return service.release(task_id, token)
-
-    @mcp.tool()
-    def handoff_task(task_id: str, token: int, next_worker_id: str,
-                     partial: dict[str, JsonValue] | None = None) -> dict[str, JsonValue]:
-        """Preserve partial work and yield; the next worker must actively claim."""
-        return service.handoff(task_id, token, next_worker_id, partial)
 
     @mcp.tool()
     def search_evidence(query: str, limit: int = 20) -> list[dict[str, JsonValue]]:
@@ -49,28 +50,29 @@ def create_server(service: ResearchService) -> FastMCP:
         return service.search(query, limit)
 
     @mcp.tool()
-    def request_environment(task_id: str, token: int) -> dict[str, JsonValue]:
-        """Inspect a pre-registered experiment environment request without executing."""
-        return service.environment(task_id, token)
-
-    @mcp.tool()
-    async def execute_experiment(task_id: str, token: int) -> dict[str, JsonValue]:
-        """Execute the trusted pre-registered plan once in a fresh sandbox."""
+    async def research_experiment(action: Literal["request", "run", "result"], task_id: str,
+                                  token: int | None = None, run_id: str | None = None) -> dict[str, JsonValue]:
+        """Inspect registered environment, run once in a fresh sandbox, or read durable result; never replay unknown."""
+        if action == "result":
+            if run_id is None or token is not None:
+                raise ValueError("result_requires_run_id_only")
+            return service.result(task_id, run_id)
+        if token is None or run_id is not None:
+            raise ValueError("request_or_run_requires_current_token_only")
+        if action == "request":
+            return service.environment(task_id, token)
         return await service.execute(task_id, token)
 
     @mcp.tool()
-    def experiment_result(task_id: str, run_id: str) -> dict[str, JsonValue]:
-        """Read durable evidence for a run belonging to this scoped task."""
-        return service.result(task_id, run_id)
-
-    @mcp.tool()
-    def submit_candidate(task_id: str, token: int, candidate: Candidate) -> str:
-        """Publish a statically safe candidate to quarantine; acceptance cannot be changed."""
-        return service.publish(task_id, token, candidate)
-
-    @mcp.tool()
-    def validate_candidate_files(task_id: str, token: int, asset_id: str) -> dict[str, JsonValue]:
-        """Run the existing trusted static/file validator, separately from science."""
+    def research_candidate(action: Literal["submit", "validate_files"], task_id: str, token: int,
+                           candidate: Candidate | None = None, asset_id: str | None = None) -> str | dict[str, JsonValue]:
+        """Submit to quarantine or run trusted static/file validation; these do not certify the science."""
+        if action == "submit":
+            if candidate is None or asset_id is not None:
+                raise ValueError("submit_requires_candidate_only")
+            return service.publish(task_id, token, candidate)
+        if asset_id is None or candidate is not None:
+            raise ValueError("validate_files_requires_asset_id_only")
         return service.validate_files(task_id, token, asset_id)
 
     @mcp.tool()

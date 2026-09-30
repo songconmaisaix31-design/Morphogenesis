@@ -91,7 +91,7 @@ class Backend:
     def read(self, run_id):
         return {}
 
-    def evaluate(self, run_id, plan):
+    def evaluate(self, run_id, plan, lease):
         return {}
 
 
@@ -124,4 +124,61 @@ def test_mcp_tools_have_no_identity_database_or_metric_write_parameters(tmp_path
     tools = asyncio.run(server.list_tools())
     for tool in tools:
         assert not {"worker_id", "agent", "ledger_path", "passed", "approved", "metric"} & tool.inputSchema.get("properties", {}).keys()
-    assert {t.name for t in tools} >= {"discover_tasks", "claim_task", "execute_experiment", "verify_research", "inherit_experience"}
+    assert len(tools) == 11
+    assert {t.name for t in tools} >= {"discover_tasks", "lease_task", "research_experiment", "verify_research", "inherit_experience"}
+
+
+def test_consolidated_tools_reject_cross_action_arguments_and_stale_holder(tmp_path: Path) -> None:
+    from swarm.research.server import create_server
+    from mcp.server.fastmcp.exceptions import ToolError
+    s = make_service(tmp_path)
+    enqueue(s)
+    server = create_server(s)
+    async def run():
+        with pytest.raises(ToolError, match="claim_accepts_only"):
+            await server.call_tool("lease_task", {"action": "claim", "task_id": "original", "token": 100})
+        await server.call_tool("lease_task", {"action": "claim", "task_id": "original"})
+        assert s.ledger.get("original").owner == "native-a"
+        with pytest.raises(ToolError, match="current_fencing_token_required"):
+            await server.call_tool("lease_task", {"action": "renew", "task_id": "original"})
+        with pytest.raises(ToolError, match="request_or_run"):
+            await server.call_tool("research_experiment", {"action": "run", "task_id": "original", "token": 1, "run_id": "replay"})
+        with pytest.raises(ToolError, match="validate_files_requires"):
+            await server.call_tool("research_candidate", {"action": "validate_files", "task_id": "original", "token": 1})
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("effect", [None, "unexpected"])
+def test_missing_or_unrecognised_effect_is_unconfirmed_not_retryable(tmp_path: Path, effect) -> None:
+    s = make_service(tmp_path)
+    enqueue(s)
+    assert s.claim("original")
+    backend = Backend(s, state="succeeded")
+    original = backend.execute
+    async def incomplete(plan, run_id, lease):
+        result = await original(plan, run_id, lease)
+        if effect is None:
+            del result["effect_state"]
+        else:
+            result["effect_state"] = effect
+        return result
+    backend.execute = incomplete
+    s.backend = backend
+    asyncio.run(s.execute("original", 1))
+    with pytest.raises(TaskConflict, match="unconfirmed"):
+        asyncio.run(s.execute("original", 1))
+    assert backend.calls == 1
+    assert s.release("original", 1)
+    assert s.ledger.get("original").status == "blocked"
+
+
+def test_confirmed_experiment_is_bounded_by_host_without_extra_call(tmp_path: Path) -> None:
+    s = make_service(tmp_path)
+    enqueue(s)
+    assert s.claim("original")
+    backend = Backend(s, state="succeeded")
+    s.backend = backend
+    asyncio.run(s.execute("original", 1))
+    with pytest.raises(TaskConflict, match="host_experiment_limit"):
+        asyncio.run(s.execute("original", 1))
+    assert backend.calls == 1
