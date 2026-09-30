@@ -28,7 +28,7 @@ from orchestration.fc_logging import FCLogWriter, validate_event
 from swarm.breaker import BreakerConfig, SharedBreaker
 from swarm.cli import demo_config, seed_demo
 from swarm.evomap_executor import _request
-from swarm.failure_chain import SharedBreakerLike, guard_provider
+from swarm.failure_chain import guard_provider
 from swarm.fault_observations import FaultObservationStore, FaultReadResult
 from swarm.models import BudgetPolicy, ExecutionBound, RunLimits, Signal
 from swarm.pheromone import PheromoneField
@@ -264,7 +264,7 @@ def recover(config: WorkerConfig, worker_a: Worker, worker_b: Worker, *,
     breaker = cast(SharedBreaker, worker_a.shared_breaker)
     old_bytes = store.path.read_bytes()
     view = breaker.view("alpha", "billing_arrearage")
-    before_guard = guard_provider(cast(SharedBreakerLike, breaker), "alpha", worker_a.worker_id, now=time.time())
+    before_guard = guard_provider(breaker, "alpha", worker_a.worker_id, now=time.time())
     require(not before_guard.routable and not before_guard.claims, before_guard)
     if view.cooldown_until is None:
         raise AssertionError(view)
