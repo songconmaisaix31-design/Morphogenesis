@@ -2,6 +2,8 @@
 
 业务事实源：2026-09-30 用户本轮指令优先；现行包见 docs/source/README_包内说明.md。主控只分发、决策和独立验收，领域开发及返修由同一个 Owner 完成。
 
+当前结算（2026-10-01）：领域代码已精确集成至 bde3412d2257fd1581ce1d7f88b254fb0c13a269；该冻结源码双平台完整 CI success，本机 full1104 passed，原strict/build/SDK/实际wheel分发、桥接隔离、ef77资产迁移、missing-effect one-call/unconfirmed及错误用量回放全部exit0。工程集成已验证。官方 SDK interface_live 及作者真实实验、中断恢复、真实 TTL 和陈旧合法提交拒绝已有通过证据。Claude 复现实测401 AUTH_BLOCKED，第三角色 NOT_RUN，无实际采用回执；原3600秒案例到期，不改时钟或上限，完整原标准未完成。旧 FC Windows 锁失败及全部原失败独立保留。详细事实见主控验收记录，工程与真实任务分别结算。
+
 ## 核验与基线
 
 - 开发基线：origin/decentralized-swarm = ef77af603577d4539d8dbdf780e1536a369b0d12；foundation CI 36702905606 success。
@@ -27,7 +29,7 @@
 | B 科研空间与 MCP | morph-research-space-0930 | swarm/research/**；local_assets/**；swarm/task_ledger.py（仅必要扩展）；tests/research/**；tests/local_assets/**；docs/research/**；docs/tracks/research-space-0930.md；README.md；THIRD_PARTY_NOTICES.md |
 | C OpenSandbox / T0 | morph-research-sandbox-0930 | orchestration/experiments/**；tests/experiments/**；demo/research_case/**；deploy/opensandbox/**；docs/experiments/**；docs/tracks/research-sandbox-0930.md；pyproject.toml；poetry.lock；tools/typecheck.py |
 | 主控 | morph-research-plan-0930 | docs/PLAN.md；本计划；docs/RESEARCH_INTEGRATION_ACCEPTANCE_0930.md（仅状态/决策/验收） |
-| I 独立集成 | morph-research-integration-0930（待 A/B/C 冻结交付后启动） | 合并既有精确提交；tests/integration/**；docs/tracks/research-integration-0930.md；必要导入/配置/类型/路由胶水，领域问题退原 Owner |
+| I 独立集成 | morph-research-integration-0930（已在固定基线启动） | 合并既有精确提交；tests/integration/**；docs/tracks/research-integration-0930.md；必要导入/配置/类型/路由胶水，领域问题退原 Owner |
 
 每轨一个 Agent、一个 worktree、一个分支，开发/测试/文档/返修持续同 Owner；阶段 commit + push。A/B/C 首个检查点交付薄接口 Handoff（启动 MCP 参数、实验计划/结果、科研准入），跨轨不写文件。集成 I 最后只合并并补少量导入/配置/类型/路由胶水，领域问题退回 Owner。
 
@@ -40,7 +42,7 @@
 5. 启动单机 Docker/OpenSandbox 与隔离 CPU 案例属于本轮授权范围；GPU 可选。正式复现干净沙箱/内核，探索可保留内核；大文件通过 SDK/存储，必要原始证据在沙箱关闭后保留。
 6. 官方认证保持原状，不复制 HOME、不接管凭证、不绕过原生权限；缺条件写 blocked/NOT_RUN，继续其余实现与门禁。无 DSH 强制评审，无生产 Hub 发布、部署主线覆盖或新 tag。
 
-当前状态：三轨已按固定所有权启动；A已提交并核验真实前置探测，B/C正进行返修与适用门禁。首次OpenSandbox接口烟测FAILED，完整科研task_live与集成候选验收仍NOT_RUN。最终只报告实现、分支/完整 SHA、命令/结果、真实限制、未执行/人工操作。
+当前状态（2026-10-01）：原A最终b219（源码3c4）、B970、Cbb2均已push并独立核验。I最终代码bde3412d2257fd1581ce1d7f88b254fb0c13a269已push、clean，原full本地回归与新双平台CI36746045909运行中，Ubuntu全部步骤success、Windows待完成。官方SDK新接口、作者唯一科学实验、实际中断/同UUID恢复/真实TTL/旧公开提交拒绝及新有效租约下原可信结果收口通过；作者completed但候选quarantined。Claude真实10次401 authentication_failed后exit1/tools0，没有复现；第三任务NOT_RUN，完整task_live未达成。原3600秒run已到期，不重置；认证身份选择待用户回复。原失败及unknown保留，详细证据见RESEARCH_INTEGRATION_ACCEPTANCE_0930.md。
 
 ## 继续开发检查点（2026-09-30）
 
@@ -74,3 +76,13 @@ A、B、C 已分别结算本轨交付（科研 live 尚未通过）。最终输�
 Orca 创建 I worktree 于精确 `ef77af603577d4539d8dbdf780e1536a369b0d12`，分支 `morph-research-integration-0930`，与治理 worktree 建立明确 parent lineage。首个空 shell 经正面核验后直接启动原生开发 Codex 标准全权限配置，没有额外重复 Agent。I Task `task_afa0f9c81b55` / Dispatch `ctx_9e1033019bc7` / terminal `term_1e598676-e019-4b24-ab8d-1d0ca6840ea4`，injected=true 且屏幕 actual Working；此为低层 unsupervised 放置，未冒称 worker-start ready 通过。
 
 I 已获完整原标准、互斥所有权、精确来源与各领域 Handoff，先合并与独立门禁，随后有界真实案例。主控继续独立核验并把领域问题退原 Owner；原始根仓 WIP 保留，最终候选、科研证据和剩余门禁均不得提前写通过。
+
+## 2026-10-01 真实案例中的必要边界返修
+
+当前 I 代码 `dec579889af7c3853c9a7f76ba1fe5d835299716` 的 CI `36738222386` 双平台完整 success，官方 SDK 新接口与作者科学实验通过；任务完成、Claude 独立复现及第三任务实际采用尚未通过。原生中断、同 UUID 续接、真实 TTL 到期及旧持有者公开提交拒绝已有证据。详见独立验收记录，不覆盖此前失败和 NOT_RUN。
+
+原 B 在既有 write_paths 接续 `task_21c39c9f2ff3` / `ctx_72dae7cfe06d`，负责验证超时/事件循环窄修复，以及已知实验在租约到期后的必要续接适配。用户已授权完成该原任务，主控 Handoff `msg_0a57b00acab2` 明确允许扩展既有 verify/complete：当前有效租约控制新增观察与完成，原执行 task/swarm/worker/agent/token、Candidate AttemptId、可信归档和原科学判据保持原身份；只允许同作者、同任务、已持久确认的已知终态结果。禁止重跑实验、把旧执行标作新执行、重写 archive/audit/candidate，拒绝 unknown、缺失、篡改、不同身份/任务/条件及未确认 hold。复用既有账本、观察模型和存储，不新增工具、调度器或 Attempt 基建。
+
+B 独占 Python 测试窗口，修复原行为并保留首红和原断言；I 可并行准备自有 integration 脚本的显式 local-completion 阶段，但不得启动 Python/native 或写 live 状态。I 等 B 冻结并 push 后精确合并与门禁，以同一作者 UUID 的剩余累计382.405秒/40工具收口，所有原调用仍计入900秒/64工具。保持既有 run 的真实 runtime/attempt 上限，不重置时钟或账本；peer/child 原文件检查、独立干净实验、准入、实际应用和 AdoptionReceipt 门禁不变。主控只写本计划与验收，领域返修仍由原 Owner 完成。
+
+门禁执行顺序决策 `msg_0e5c94a46dd9`：B 冻结源码的恢复负例及适用测试通过后，I 精确合并，执行 native/research/assets/experiments、本地 strict/build、官方11工具权限与累计预算/原执行上下文检查；均通过且无已知新 CI 失败时，允许原有界科研案例与新完整 CI 并行。原3600秒 runtime 不重置，作者仅验证旧已知结果，不再实验。最终原完整双平台 CI 与全部真实科学/恢复/fencing/adoption 标准仍必须同时通过，未删断言、降低阈值或把待运行门禁标绿。

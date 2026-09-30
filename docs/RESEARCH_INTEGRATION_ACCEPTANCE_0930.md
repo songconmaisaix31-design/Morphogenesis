@@ -118,3 +118,60 @@ I 后续独立 GET404、按 morph-run 未发现容器并单独保存 cleanup.jso
 - C 最小修复 `b4b403cd098df5cf2194e32377f7bd9f18a54ade` 已 push 并由主控 exact ls-remote 核验，工作树在源码冻结时 clean；仅 backend 与新 HTTP 边界测试，SDK、锁和固定镜像不变。标准 shlex.join 保留参数字面值，前台/后台调用官方 string command，输入约束和附着归属保护保留。
 - 主控读取 C 同 SHA 原日志/退出记录：官方 SDK MockTransport 请求回归 `10 passed`（0.41s）、strict97文件、lock/build均 exit0；sdist/wheel实际构建。修复前正确新测试基线4 failed/6 passed保留，原 SDK list 发 argv 的400负对照继续存在。此前工作区 experiments40 passed属于源码相同的本地专项证据，均非 live。
 - I 明确释放后 C 独占该 Python 窗口，C `msg_0d20f69bf003` 明确完成验证并交回 I；主控 `msg_15aa05987913` 授 I 窗口及新不可变候选门禁。只有新适用本地门禁和新 exact-head Ubuntu CI 全部通过、Windows未新失败时，才能继续已授权新唯一接口 smoke；原 unknown 不重放，最多三科研身份窗口尚未使用。
+
+### 新集成与真实接口通过，原生授权拒绝保留
+
+I 冻结 `7d04d9c4759a14c91dd75aff2aa9162a84b4c397`，remote一致、clean；主控机械检查 C b4 为祖先且 C/A84/B428 领域树 diff--exit-code 均0，I仅新增两个明确阶段的原生观察/只读证据检查脚本，无新调度器或完成证明设施。主控实际读取新本机 focused `150 passed`（47.44s）、strict116、SDK、实际wheel13包与Node、旧ef77资产迁移、mock桥接隔离及原missing-effect one-call/unconfirmed断言，均通过。exact-head CI `36736123569` 的 Ubuntu原全部门禁由主控实际读取success；Windows仍运行，双平台新候选未预写通过。
+
+唯一新接口 `interface-i-0930-7d04-02` **interface_live=passed**。主控读取持久 summary、interface、独立复算记录：sandbox `78189de1-196d-469e-9f00-1e552634bada`，known/succeeded/destroyed；实际 binary roundtrip、CPU cgroup `100000 100000`、memory `536870912`，后台命令由 running true 变 false、exit -1/signal terminated并保留原log。科研样本方差 `0.01000000011175871`、绝对误差 `1.1175870992530257e-10`，在原1e-9内；I的独立Fraction1001残差复算exact mean `50000001/5`、variance `1/100`。usage/cost仍null。这是SDK接口与公开脚本通过，原生科研task_live尚未通过，不改两个旧失败run。
+
+作者真实Codex第一调用的UUID `01a0f2ee-ae2a-7ce3-9470-e485066fb8d2`，51.9734652秒、1个工具调用、原生reported tokens36750/cost null。主控读取原native JSONL：discover_tasks 被工具层以 `MCP tool call requires approval, but approval policy is never` 拒绝，随后自然exit0；账本仍available、无claim/renew/experiment，actual_interruption=false。保留原interrupt-observation/native/audit，不把自然退出写成中断。原生模型目录刷新超时、priority省略与fallback metadata警告保持原样，不更换账号/模型/provider。
+
+用户全部权限已覆盖此隔离科研流程。主控核对[官方MCP配置](https://learn.chatgpt.com/docs/extend/mcp)、[官方配置参考](https://learn.chatgpt.com/docs/config-file/config-reference)及I保存的0.159.0 schema：批准官方per-tool approve仅用于上述11个可信科研工具，serverdefault prompt、enabled11、read-only/never及禁用其它工具保持。I仅修改授权内观察脚本配置胶水，原生领域问题仍退A；新脚本冻结并验证实际有效配置/适用契约后，显式interrupt-recovery接续同一UUID，累计计入首次51.973秒/1调用。原失败不重放、不覆盖，科研实验仍每任务至多一次；最终新代码head双平台CI与原真实科学/恢复/fencing/adoption标准仍全部必需。
+
+### 真实中断、陈旧提交拒绝与已知实验后的本地阻塞
+
+- 主控实际读取 exact `dec579889af7c3853c9a7f76ba1fe5d835299716` CI `36738222386`：Ubuntu、Windows 全部步骤 success，包括原 full pytest、严格类型、build、SDK 与实际 wheel 分发。该工程通过不等于 task_live 完成；后续领域修复需要新的不可变候选及适用门禁。
+- 同一作者 UUID 的 interrupt-recovery 实际 discover/context/search/claim/renew 成功。token1 在实验前续租后由自有原生进程归属取消，exit1、actual_interruption=true、没有实验调用；取消阶段 usage/cost 和远端效果保持 unknown，不写成零。51.973秒/1调用的首次拒绝记录完整保留。
+- 实际 TTL 到期后，同 UUID 的 resume 先通过公开工具提交原结构合法 Candidate 和旧 AttemptId；旧 token1 的 renew 与 submit 均真实拒绝 `lease_expired_or_not_claimed`。随后认领 token2/attempt2，作者唯一实验 `a79578f21ff148c6a86708bddd9f611b` 实际 succeeded/known/destroyed，sandbox `14580dc2-65ee-4c0c-b724-9e70fb4f04dd`，原科学判据通过；没有重跑实验。
+- 作者候选 `sha256:ddd070985e6ee0d895d0c8a3270a4688208c4d4051907a4c79711b40c97b90f5` 已提交但仍 quarantined。随后额外调用 validate_files，原生 item18 真实 tools/call 300秒超时；持久报告 `a9b79ce344fe4a24ac8547efcd69c320` passed=false、reasons=[TimeoutExpired]，没有 research observation、完成、审批或 adoption。原报告和日志不修改、不补通过。
+- 三次作者调用累计517.595秒/24工具；同 UUID 仅余382.405秒/40工具，仍受原900秒/64工具约束。token2 又自然到期；旧实验的执行上下文、旧 candidate AttemptId 必须保留，新租约不得把旧执行重标为新执行，已知实验不得自动重跑。原作者完成只要求可信科学观察及 quarantined 提交；额外静态验证不是作者完成前置，peer/child 的真实文件与审批门禁仍必需。
+- 原 B 同 worktree/branch/会话接续 `task_21c39c9f2ff3` / `ctx_72dae7cfe06d`，独占 Python 诊断窗口。官方 FastMCP 同步工具直接占事件循环已核对；Windows timeout 后继承管道的排空是待有界复现的假设，不能冒称当前实机根因。仅返修原本地验证边界，并核对既有 known-effect continuation/fencing 合约；不得提高15/30秒超时、绕过门禁或写 live 状态。I 等待该领域决策；Claude 复现与第三任务实际采用尚 NOT_RUN，完整 task_live 尚未通过。
+
+### 旧已知结果续接通过，Claude 实际认证阻塞
+
+- B `970fc530539c85d25b01096bf5001b5f4262554c` 已 push、remote一致、clean；主控机械核对九个路径均在原 B 所有权内，实际读取源码、测试、报告及50项适用测试49.37秒、strict98结果。新标准库 TemporaryFile 捕获与 async/to_thread 保留原Git15/validator30界限；自有明确继承 stdout/stderr 的探针已证明原超时排空超过3秒，但 live Git 的具体根因仍未知。新观察保留 source_swarm_id/source_fencing_token/source_attempt，当前有效租约另行控制写入，恢复完成不改变同token科学负结果的旧语义。真实缺失、未知、篡改、他人、无确认/hold、观察期间租约失效均拒绝。B worker_done succeeded，精确 release retained/no_owned_resource/processAction=none，不声称 PTY 已退出。
+- I `363cac52f515f5e810de2e3a65fa83bc8c7b859e` 已 remote一致、clean；主控实际 A/B/C 三领域树精确对比均0，B970为祖先。主控实际读取 focused165 passed55.40秒/exit0、strict116、sdist/wheel构建；Owner实际安装wheel13包/资源/验证器/Node通过，首次AJV定位失败保留。最终源码完整CI `36743307157` 此刻Ubuntu全部success、Windows仍运行；新候选尚未预写双平台通过。
+- 同一作者UUID的 local-completion 84.9916294秒/12工具，累计602.586秒/36工具；实际 trusted report `7efcf571d7c7434591d975e0cc149b9a` 为passed/live，source token2/Attempt2、当前观察/完成token3，作者任务completed但候选仍quarantined，effect_applied=false。原唯一run、candidate和静态失败报告完整保留；该阶段没有新作者实验、候选或文件验证。主控实际读取公开verify/complete原响应与观察；此前只读逐个核对七份原归档artifact摘要均匹配。
+- Claude真实UUID `5c787eb6-602b-4e03-9fea-313af2b5c826`，原官方CLI实际10次401 authentication_failed重试后自然exit1；wall186.583秒/tools0，task仍available，没有MCP调用、认领或实验。停止时原归属屏障已不存在，精确停止被拒绝，实际没有kill、不称中断。raw result subtype=success但is_error=true/terminal_reason=api_error，原tokens/cost合成0原样保留；不能据此证明零消耗，规范化billing/usage保持unknown/null。
+- 主控只读核对环境变量存在状态：Process有ANTHROPIC_AUTH_TOKEN/ANTHROPIC_BASE_URL，User/Machine无；只解析非秘密endpoint为 api.deepseek.com/anthropic。官方auth status显示loggedIn=true/oauth_token/firstParty，A child_environment保留非ORCA变量。[官方认证文档](https://code.claude.com/docs/en/authentication#authentication-precedence)说明 bearer环境优先于保存登录；因此真实失败可能是已配置gateway认证，不推断OAuth过期，不更换provider/model/account、不读或输出秘密。向用户发单次身份选择，等待答案期间不做依赖调用；elapsed或默认选项不是批准。
+- 真实 swarm_runs.started_at=1790782122.151175，原3600秒deadline=1790785722.151175（16:28:42.151UTC）已到期，max_attempts3/runtime3600不重置。原三角色完整checker原样运行exit1，缺inheritance-observation.json原日志/退出保留；独立作者档案检查只能证明对应范围，不能替代完整task_live。Claude复现AUTH_BLOCKED，第三任务实际采用NOT_RUN，没有审批或adoption。
+- 原A正面核验上次completed后idle，同会话/同分支/同write_paths接续 `task_527f87788de5` / `ctx_cd11934cb2dd` 修复模糊失败zero用量归一化。规则为失败/未确认终态逐字段将合成zero置null，真实成功zero和失败已知正值保留，raw原值/is_error优先/cancel未知不变；需真实process/stdout/exit路径与原native门禁。I已明确释放Python给A，等待新冻结提交后才合并和最终完整门禁；无新模型、实验或认证配置变更。
+
+### 最终代码冻结与原完整门禁
+
+A源码 `3c4bc28e19abff7863007a2452b331762d10802e`、最终报告 `b2199c2fcc03a41389f69c3a8ac20e69ec7eb87c` 已push并remote/clean核验，代码/测试/指南相对源码diff0。生产只改Claude错误用量逐字段归一化和真实失败exit的zero处理；成功真实zero、失败已知正值/partial、raw和原终态/取消guard保留。主控实际读取原89 passed7.49秒日志、Windows与Linux类型目标各10源文件strict成功；首红7 failed/7 passed3.97秒保留。新回归经过真实owned Popen/stdout/exit，传输只MockTransport，401 case10次mock请求/1次process invocation，无网络或新live。A worker_done succeeded，精确release retained/no_owned_resource/processAction=none，不声称PTY退出。
+
+I最终代码 `bde3412d2257fd1581ce1d7f88b254fb0c13a269` 已push、remote一致、完整本地gate启动时clean；主控独立验证A3c4/B970/Cbb2均祖先且三个领域树精确diff0。原完整pytest正在运行，不以此前候选测试代替；新CI `36746045909` exact headSha由主控核验，Ubuntu全部步骤success、Windows原pytest仍运行。完整CI日志取回的Azure Blob EOF是只读证据下载失败，不是门禁失败，不触发代码CI重跑或改变测试。新全门禁完成后才作工程最终结论。
+
+主控在不并发Python的情况下，对原作者归档独立作decimal精确复算：1001原数据的mean=10000000.2、sample variance=0.01；全部1001输出residuals满足原1e-8，样本方差误差0.0000000001117587满足原1e-9，原七份artifact摘要已逐份匹配。这是旧真实作者证据的独立只读复核，不是Claude新沙箱复现或第三任务实际采用；完整task_live仍AUTH_BLOCKED/未达成，原失败checker不改写。
+### 原 363 Windows 完整门禁失败保留
+
+- `363cac52f515f5e810de2e3a65fa83bc8c7b859e` 的 CI `36743307157` 最终为 failure：Ubuntu 全步骤 success；Windows 原 full pytest 为 `1 failed / 1089 passed / 75 warnings`，2094.27秒，未进入后续门禁。原日志保存在集成 sibling state 的 `ci-363cac5-first-windows-failure.log`。
+- 主控实际读取原 traceback：`tests/swarm/test_fc_logging.py::test_concurrent_append_and_partial_tail_preserve_facts` 在 `orchestration/fc_logging.py:143` 的 `connection(lock, write=True, timeout=0.05)` 进入 `swarm/task_ledger.py:47` 的 BEGIN IMMEDIATE 时，抛 `sqlite3.OperationalError: database is locked`。主控机械比较当前 bde 与 ef77 基线的该 FC 实现及原测试，diff exit0；这不是本轮领域改动。未修改事务、断言、超时或跳过测试，未重跑旧 CI；确切环境诱因尚未证实。
+- 最终源码 `bde3412d2257fd1581ce1d7f88b254fb0c13a269` 是已合并必要 A 错误用量修复的新候选，其原完整门禁独立结算。主控已核验 CI `36746045909` 的 Ubuntu 全步骤 success，Windows 仍在原 pytest；本机完整 pytest 进至71%，尚无失败。这些进行中状态不构成工程或 task_live 完成。
+
+### 最终冻结源码双平台完整门禁通过
+
+主控已实际读取 completed CI `36746045909` 的 exact headSha 为 `bde3412d2257fd1581ce1d7f88b254fb0c13a269`，overall/Ubuntu/Windows 全部 success；完整原日志已成功保存 sibling state 的 `ci-36746045909-root-verified.log`，先前 Azure EOF 作为证据下载失败单列保留，未重跑 CI。Ubuntu 原 pytest 为 `1101 passed / 3 skipped / 75 warnings`，399.83秒；Windows 为 `1104 passed / 75 warnings`，1481.75秒。双平台严格116文件、sdist/wheel构建、官方SDK检查、实际安装wheel的13包/资源/installed verifier/Node依赖检查全部通过。
+
+主控实际读取同冻结源码、本机完整原 `python -m pytest -q` 日志为 `1104 passed / 75 warnings`，1708.98秒，退出文件0；期间源码保持clean、未合入文档或代码。I正在收齐剩余本地strict/build/SDK/wheel和兼容性记录，不重复已通过full。旧363的Windows FC锁首红仍为FAILED，未修改相关实现/测试、断言或timeout，也不据新候选通过推断其环境根因已证实。
+
+本节只结算工程证据。原完整三角色科研checker的exit1仍保留；作者部分证据及interface_live通过不能替代Claude新沙箱独立复现和第三角色实际采用。当前task_live仍AUTH_BLOCKED/未完成，usage/cost未知保持null；原3600秒时钟/attempts3不重置，未创建新科研身份或重跑实验。
+
+### 最终独立结算及自有资源清理
+
+- I 明确 handoff `msg_f3591684d9ec` 后交回唯一 Python 窗口，原全部本地门禁已经退出0，源码 bde保持冻结。主控逐份读取 strict116/native-Linux10、build、SDK、实际wheel13包/资源/验证器/Node以及四个新模块实际wheel导入/MIT资源结果。桥接mock记录仍quarantined；实际ef77资产JSON/address/report/approval/consumption/adoption不变；原missing-effect探针 calls=1、missing_effect_still_unconfirmed=true；旧实际Claude错误回放 failed/tokens=null/cost=null、原raw及旧观察不变、model/research calls=0。这些是contract_local/replay，不升级为真实三角色科研通过。
+- 主控独立临时验收脚本只用标准库及 SQLite `mode=ro`/`query_only=ON`，不调用会初始化schema的领域构造器。第一次误把GEP assets.body当Candidate而KeyError，原脚本/日志/exit1完整保留；按既有strategy[1]的local_candidate_json封装修正读取后，所有原身份/状态/上限断言不变，`original-case-readonly-schema-corrected.log` exit0。实际核验同UUID作者累计602.586241秒/36工具、唯一原实验、source token2/Attempt2及当前写token3、原失败静态报告未改、作者completed但无approval/adoption、Claude10次401零工具、第三角色NOT_RUN、原attempts3/runtime3600及已到期时钟不变。该只读检查无模型/实验调用，不能替代完整task_live checker。
+- 2026-09-30T17:22:07Z 主控正面核验容器全ID `eb6152fbdee01a0044cc1fdd881cf05c00dbbf3905411bc6c5a480f6a7141ec6`、name `/morph-research-c-0930-server`、owner=research-c-0930及compose_project=morph-research-c-0930 后，仅停止该自有服务；stop exit0，running→exited。容器、私钥与全部原归档保留，未删除文件或操作其它资源；独立cleanup.json在主控sibling state。原根仓仍为2957b408，既有docs/SWARM_SOL_PLAN.md WIP未触碰。
+- 原任务整体仍未完成：Claude401认证身份选择尚无回复，不能擅自切换provider/account/model；独立复现和第三角色实际采用尚未运行。原案例已到期，不能将重置时钟或新案例冒充原案例通过。未合入主线、打tag、发布Hub或执行可选notebook/volumes/GPU。最终只合并已验证来源的文档和交付记录，业务代码候选SHA与后续治理/evidence SHA分列；不重复已通过的测试或CI。
