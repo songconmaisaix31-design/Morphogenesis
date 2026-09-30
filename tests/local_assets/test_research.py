@@ -184,7 +184,7 @@ def test_registered_plan_identity_cannot_be_relabelled_by_claim(tmp_path: Path, 
     executed = asyncio.run(service.execute("original", 1))
     from swarm.task_ledger import connection
     import json
-    with connection(service.ledger.path) as db:
+    with connection(service.ledger.path, write=True) as db:
         row = db.execute("SELECT acceptance FROM tasks WHERE task_id='original'").fetchone()
         acceptance = json.loads(row[0])
         acceptance["experiment_plan"][field] = "different" if field == "plan_id" else {"version": "different"}

@@ -33,3 +33,7 @@ Node失败诊断：本 worktree `node_modules/@evomap/gep-sdk` 不存在；按�
 初始化阶段提交 `54d48c8385cb7427cdcd6c185595396514f3e8d7` 已push。主控独立审查9f20指出科学准入缺逐份result effect正向检查、报告可能重贴plan_id/criterion，原失败事实保留；B补unknown拒绝和预注册plan绑定，本地继承也比较完整科学plan。另修继承child沿用旧HEAD作用域树问题，直接复用既有snapshot_revision捕获已apply的scope。没有添加第二快照/哈希系统。
 
 Windows同时运行多轨Python门禁导致内存/commit压力：主控独立9f20 missing-effect及EF77迁移probe在OpenBLAS导入分配阶段exit1，未抵达行为断言，不能算通过或准入行为失败。B两项旧WIP广域pytest仍保留原输出；运行中因新增初始化要求而源码发生变化，结果不能作为新不可变SHA门禁。停止新增并发Python，后续串行候选归档验证仅进程局部设置OPENBLAS_NUM_THREADS=1/OMP_NUM_THREADS=1，不改全局、不停止他人进程。
+
+重启后新Dispatch接续；旧WIP pytest进程结束且原exec句柄不可用，最终exit/count unknown，保留已见失败，不填通过。主控独立28dc missing-effect与EF77迁移均exit0；9f20/29446的历史失败不改写。远端28dc CI `36719277559` 原失败4项：plan_identity两项DID NOT RAISE、Linux初始化两项拒绝正常sys.executable链接。Owner核实测试写事务缺write=True，SQLite退出回滚；仅修fixture提交，保留原raises/assert。初始化绑定解析后的可信宿主解释器，数据/权威路径链接拒绝不放宽；使用C锁CPython3.12及BLAS线程1串行复验，未重新盲跑整库。
+
+已直接读取36719277559日志：Ubuntu **4 failed / 955 passed / 1 skipped**, 374.84s；Windows被取消，strict/build/distribution skipped，均不补通过。本轮Owner串行 `C锁CPython3.12 -m pytest tests/research tests/local_assets -q --tb=short` → **35 passed**, 69.80s；`python tools/typecheck.py` → **Success, 98 source files**，两命令仅局部OPENBLAS_NUM_THREADS=1/OMP_NUM_THREADS=1。源码与原测试门槛冻结，待推送后双平台CI真实验证完整回归/build/distribution；不重复付费或本机整库压力运行。

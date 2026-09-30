@@ -27,7 +27,12 @@ def seed_case(project: Path, state: Path, *, python: Path, plan: dict[str, JsonV
     for path in (project, state, python):
         if not path.is_absolute():
             raise ValueError("case_paths_must_be_absolute")
+    for path in (project, state):
         no_links(path)
+    # A trusted operator may select a normal venv/system interpreter symlink.
+    # Bind its resolved executable, while data/authority paths remain link-free.
+    python = python.resolve(strict=True)
+    no_links(python)
     project, state = project.resolve(), state.resolve()
     if (project == state or project.is_relative_to(state) or state.is_relative_to(project)
             or any(project.is_relative_to(p.resolve()) or state.is_relative_to(p.resolve())
