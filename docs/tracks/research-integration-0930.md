@@ -1,8 +1,12 @@
-# Research integration I — 2026-10-01 checkpoint
+# Research integration I — 2026-10-01
 
 ## Current result: full acceptance not passed
 
-Branch `morph-research-integration-0930`; frozen live code candidate `363cac52f515f5e810de2e3a65fa83bc8c7b859e`, pushed and remote exact verified. Complete histories include original A/B/C, A portable/platform fixes, C command-wire repair `b4b403cd098df5cf2194e32377f7bd9f18a54ade`, and B bounded validation/known-result continuation `970fc530539c85d25b01096bf5001b5f4262554c`. I changed only integration observers/checkers and this report. No domain source, original assertions, run limits, main/tag/Hub or root WIP was changed by I.
+Branch `morph-research-integration-0930`; final engineering code candidate **`bde3412d2257fd1581ce1d7f88b254fb0c13a269`**, pushed and remote exact/clean verified before gates. Engineering original gates passed locally and on both CI platforms. **Original complete research acceptance remains AUTH_BLOCKED**, with inheritance NOT_RUN and no actual adoption. Subsequent evidence revisions merge documentation only; their full SHA is recorded in the final CLI handoff, separately from this code candidate. Actual interrupted/resumed author turns ran at dec5798 and local completion at `363cac52f515f5e810de2e3a65fa83bc8c7b859e`; no new live was run on bde.
+
+Complete histories include original A/B/C, A portable/platform fixes and final API-error accounting repair `3c4bc28e19abff7863007a2452b331762d10802e`, C command-wire repair `b4b403cd098df5cf2194e32377f7bd9f18a54ade`, and B bounded validation/known-result continuation `970fc530539c85d25b01096bf5001b5f4262554c`. Final A documentation `b2199c2fcc03a41389f69c3a8ac20e69ec7eb87c` changes only its track report. I changed only integration observers/checkers and this report. No domain source, original assertions, run limits, main/tag/Hub or root WIP was changed by I.
+
+Final governance `e7d235a90f998fbb2015bc57d867592ec6988c96` was exact remote-verified and merged with full history after all frozen code gates settled. `git diff bde3412… HEAD` contains only authorized documentation; A3c4 native source/tests, B970 research/assets source/tests and Cbb2 experiment source/tests remain mechanically identical to their exact Owner commits. Final evidence publication does not rerun CI or relabel the failed original case.
 
 Persistent evidence root, `S`: `C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-integration-0930-state`. Protected case state is `S/research-host-7d04`, outside model workspace `S/research-project-7d04`. Actual raw/native/SQLite/scientific archives remain outside Git; no secret is included here.
 
@@ -17,7 +21,13 @@ Persistent evidence root, `S`: `C:/Users/DW/orca/workspaces/Morphogenesis/morph-
 | same wheel, `python -I tools/check_distribution.py --site-dir … --check-node` | First target `S/wheel-363cac5` lacked parent Node `ajv` dependency; bounded diagnosis confirmed ERR_MODULE_NOT_FOUND. Same wheel at `S/merged-7d04/tools/.wheel-site-363cac5` with unchanged original-lock dependencies passed 13 packages/resources/verifier/Node | Both targets retained; first terminal error retained |
 | same SHA, `npm run check:sdk` | schema1.14 valid, address verified, tampering rejected, not published | actual command output |
 | same exact LF archive, B bridge/migration/original missing-effect probes | Mock stays quarantined; actual ef77 legacy asset/approval/consumption/adoption unchanged; one missing-effect call remains unconfirmed | `bridge-363cac5`, `migration-363cac5`, `missing-effect-363cac5` logs and exits |
-| same SHA, CI `36743307157` | Ubuntu 1087 passed /3 skipped /75 warnings,397.95s; strict116/build/SDK/wheel13+Node success. Windows pending at this checkpoint; exact headSha confirmed | `ci-363cac5-current.json`, `ci-363cac5-ubuntu-job.log` |
+| same SHA, CI `36743307157` | Ubuntu 1087 passed /3 skipped /75 warnings,397.95s, all remaining gates success. Windows first red: existing FC concurrent logging test failed SQLite database locked; 1 failed /1089 passed /75 warnings,2094.27s. Original timeout0.05 and assertions untouched; FC logger/test diff vs ef77 is0 | `ci-363cac5-final.json`, `ci-363cac5-all-final.log`, `ci-363cac5-first-windows-failure.log` |
+| final bde, original `python -m pytest -q --tb=short` | 1104 passed /75 warnings,1708.98s, exit0; not rerun | `full-final-A3c4-first.log/.exit` |
+| final bde, `python tools/typecheck.py` / `python -m mypy --strict --platform linux orchestration/native_agents` | 116 /10 files passed | `strict-bde3412`, `strict-native-linux-bde3412` logs/exits |
+| final bde, `python -m build`, actual wheel install then `python -I tools/check_distribution.py --site-dir … --check-node` | sdist/wheel built; 13 packages from wheel, resources/verifier/Node passed. Four research/native/experiment modules and packaged ORCA MIT license verified from installed target | `build-bde3412.log`, `dist-bde3412/`, `wheel-install-bde3412.log`, `distribution-bde3412.log`, `wheel-research-imports-bde3412.log` |
+| final exact bde archive, original SDK/bridge/migration/missing-effect gates | SDK1.14 valid/tampering rejected/not published; mock quarantine preserved; actual ef77 assets/report/approval/consumption/adoption unchanged; one absent-effect call remains unconfirmed. All exit0 | `sdk-bde3412`, `bridge-bde3412`, `migration-bde3412`, `missing-effect-bde3412` logs/exits |
+| final bde, archived actual Claude API-error normalization | replay/contract_local only, no model or research tool invocation: failed terminal, tokens/cost null; original raw and old zero-valued observation unchanged | `claude-error-replay-bde3412.json/.exit`, `S/replay-claude-error-usage.py` |
+| final bde, CI `36746045909` | Exact headSha, both jobs/all original steps SUCCESS: Ubuntu1101 passed /3 skipped /75 warnings,399.83s; Windows1104 passed /75 warnings,1481.75s. Both strict116/build/SDK/wheel13+Node success | `ci-bde3412-final.json`, `ci-36746045909-root-verified.log` |
 
 First failures below, original C 12 failed / 943 passed and old B first-red gates remain historical failures. No thresholds were relaxed. I helper's first nonexistent TaskRecord hold attribute error was corrected before native launch to a read-only query of the existing authoritative column. Pinned Codex0.159 config-schema/official exact11 approvals/default prompt/read-only/disabled built-ins and other MCP/same UUID/source token2/cumulative-budget checks then passed. Actual subsequent MCP calls establish effective access. Official per-tool policy follows pinned upstream [mcp_tool_call.rs](https://raw.githubusercontent.com/openai/codex/rust-v0.159.0/codex-rs/core/src/mcp_tool_call.rs); no general permission bypass was introduced.
 
@@ -44,17 +54,23 @@ Trusted original report `7efcf571d7c7434591d975e0cc149b9a` records source swarm/
 
 Claude replication UUID `5c787eb6-602b-4e03-9fea-313af2b5c826` launched once using existing official authentication and exact narrow trusted tools. Actual API returned401 authentication_failed through10 official retries, then naturally exited1 in186.5831312s /0tools. No MCP call, claim or experiment occurred; replication remains available. Stop identity guard found the owned barrier already absent, refused termination, and no process was killed or interruption claimed. Auth-status logged-in is not successful API authentication. Coordinator performed read-only existing-auth-source diagnosis and requested user identity selection; no credential value/provider/model/account/auth source was changed by I.
 
-The native API-error result contains synthetic zero usage/cost; original raw and first normalized observation remain unchanged, but billing usage/cost are null/unknown. Original A Owner owns the error-accounting normalization repair. No further model calls are authorized at this checkpoint.
+The native API-error result contains synthetic zero usage/cost; original raw and first normalized observation remain unchanged, but billing usage/cost are null/unknown. Original A repaired error-accounting normalization at3c4; final bde's read-only replay of this exact real error yields failed/null while preserving raw fields. This is replay evidence, not new live, and no further model calls are authorized.
 
 Original swarm_runs started_at1790782122.151175, max_attempts_per_task3 and runtime3600 give deadline **2026-09-30T16:28:42.151175Z**, now expired unchanged. No clock/run/claim budget reset. Inheritance is NOT_RUN; third identity was not launched. Independent reproduction, original static approval/application, local inheritance validation and actual adoption are absent; actual adoption count0, no AdoptionReceipt/ConsumptionExecution/UseRecord was fabricated.
 
 Full `python tests/integration/check_research_live.py --state S/research-host-7d04` ran unchanged and failed exit1 on absent inheritance-observation.json (`full-live-checker-363cac5-first.log/.exit`). Author-only check explicitly reports AUTH_BLOCKED and does not substitute for full acceptance.
 
-## Remaining work at this checkpoint
+## Independent read-only acceptance, cleanup and remaining limits
 
-Await exact A API-error usage repair/window release; merge complete history and verify new immutable code candidate with the required full two-platform gates. Evidence SHA remains separate from live candidate. User authentication selection is pending; elapsed time is not approval, and the original run cannot be silently reset. Owned service shutdown/selective cleanup awaits coordinated closeout. Linux/WSL actual native, other Agent/SDK vendors, Notebook/Jupyter/CodeInterpreter/volumes/GPU remain NOT_RUN. Full original scientific research/adoption standard is unmet.
+Engineering is verified at final bde; the sole Python window was released for coordinator's independent acceptance. Coordinator's stdlib-only SQLite mode=ro/query_only check passed original identity/budget/fence/one-experiment/failed-report/no-adoption/expired-limit assertions, with zero model/experiment calls. Its first incorrect GEP envelope assumption produced KeyError and exit1, both retained; corrected extraction uses existing strategy[1].local_candidate_json, retaining all original assertions. Actual corrected output and exit0 were read from `C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-plan-0930-state/original-case-readonly-schema-corrected.log/.exit`; it explicitly reports full_task_live not_passed.
+
+Coordinator cleanup at2026-09-30T17:22:07Z verified full container ID `eb6152fbdee01a0044cc1fdd881cf05c00dbbf3905411bc6c5a480f6a7141ec6`, exact name `/morph-research-c-0930-server`, owner research-c-0930 and compose project morph-research-c-0930, then stopped only that service, exit0, running→exited. Container, private key and all archives were retained; other resources unchanged. Actual `morph-research-plan-0930-state/owned-service-cleanup.json` remains separate cleanup evidence; no historical unknown result was rewritten. Main, old demo tag, production Hub and root WIP remain untouched.
+
+User authentication identity selection remains pending; elapsed time is not approval, and the expired original run cannot be silently reset or a fourth identity created. Actual independent reproduction, original static approval/application, inheritance local validation and real consumption/adoption remain absent. Linux/WSL actual native, other Agent/SDK vendors, Notebook/Jupyter/CodeInterpreter/volumes/GPU remain NOT_RUN. Full original scientific research/adoption standard is unmet; overall dispatched outcome is failed/AUTH_BLOCKED, engineering passes separately.
 
 ## Archived bc4 checkpoint — superseded status, preserved evidence
+
+All "current"/candidate references in the following archived sections describe the original bc4 checkpoint only; final status and exact engineering candidate are above. First failures remain their original outcomes.
 
 ## Frozen integration and evidence classes
 
@@ -103,9 +119,9 @@ Evidence: `interface-i-0930-bc4-01.log`, `interface-live/interface-i-0930-bc4-01
 
 Original C `interface-c-0930-01` remains FAILED and is not replayed; its directory-mode failure, unknown result and later separate cleanup evidence remain in the original C/governance record.
 
-## Remaining acceptance
+## Archived remaining acceptance at bc4
 
-task_live, actual author interruption / same-session resume / stale renew and legitimate stale submit rejection, independent clean reproduction, local inheritance validation and actual adoption are NOT_RUN. New code from original C must pass applicable gates before a new unique live run; an unknown experiment is never replayed. At most three original native research identities remain authorized, with each identity's cumulative wall and observed tool limits preserved.
+At the archived bc4 checkpoint, author interruption / same-session resume / stale renew and legal stale submit rejection had not run; those author behaviors now have the actual evidence listed above. Independent clean reproduction failed before tools because of authentication, inheritance is NOT_RUN, and actual adoption remains absent. The original failed interface records remain failed, and no unknown experiment was replayed. Native identity wall/tool budgets and the original expired run limits were preserved.
 
 Actual research adoption must use existing ConsumptionExecution and AdoptionReceipt plus canonical claim/attempt/result/target-bytes lineage. Coordinator clarified `msg_ad610e51738d` that the original user task did not require the unrelated `metabolism.models.UseRecord` class; do not introduce a second adoption store or manufacture that record. Search, injection, application and actual adoption remain distinct.
 
