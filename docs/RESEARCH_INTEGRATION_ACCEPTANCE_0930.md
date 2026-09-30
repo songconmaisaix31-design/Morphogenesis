@@ -155,3 +155,8 @@ A源码 `3c4bc28e19abff7863007a2452b331762d10802e`、最终报告 `b2199c2fcc03a
 I最终代码 `bde3412d2257fd1581ce1d7f88b254fb0c13a269` 已push、remote一致、完整本地gate启动时clean；主控独立验证A3c4/B970/Cbb2均祖先且三个领域树精确diff0。原完整pytest正在运行，不以此前候选测试代替；新CI `36746045909` exact headSha由主控核验，Ubuntu全部步骤success、Windows原pytest仍运行。完整CI日志取回的Azure Blob EOF是只读证据下载失败，不是门禁失败，不触发代码CI重跑或改变测试。新全门禁完成后才作工程最终结论。
 
 主控在不并发Python的情况下，对原作者归档独立作decimal精确复算：1001原数据的mean=10000000.2、sample variance=0.01；全部1001输出residuals满足原1e-8，样本方差误差0.0000000001117587满足原1e-9，原七份artifact摘要已逐份匹配。这是旧真实作者证据的独立只读复核，不是Claude新沙箱复现或第三任务实际采用；完整task_live仍AUTH_BLOCKED/未达成，原失败checker不改写。
+### 原 363 Windows 完整门禁失败保留
+
+- `363cac52f515f5e810de2e3a65fa83bc8c7b859e` 的 CI `36743307157` 最终为 failure：Ubuntu 全步骤 success；Windows 原 full pytest 为 `1 failed / 1089 passed / 75 warnings`，2094.27秒，未进入后续门禁。原日志保存在集成 sibling state 的 `ci-363cac5-first-windows-failure.log`。
+- 主控实际读取原 traceback：`tests/swarm/test_fc_logging.py::test_concurrent_append_and_partial_tail_preserve_facts` 在 `orchestration/fc_logging.py:143` 的 `connection(lock, write=True, timeout=0.05)` 进入 `swarm/task_ledger.py:47` 的 BEGIN IMMEDIATE 时，抛 `sqlite3.OperationalError: database is locked`。主控机械比较当前 bde 与 ef77 基线的该 FC 实现及原测试，diff exit0；这不是本轮领域改动。未修改事务、断言、超时或跳过测试，未重跑旧 CI；确切环境诱因尚未证实。
+- 最终源码 `bde3412d2257fd1581ce1d7f88b254fb0c13a269` 是已合并必要 A 错误用量修复的新候选，其原完整门禁独立结算。主控已核验 CI `36746045909` 的 Ubuntu 全步骤 success，Windows 仍在原 pytest；本机完整 pytest 进至71%，尚无失败。这些进行中状态不构成工程或 task_live 完成。
