@@ -40,7 +40,7 @@
 5. 启动单机 Docker/OpenSandbox 与隔离 CPU 案例属于本轮授权范围；GPU 可选。正式复现干净沙箱/内核，探索可保留内核；大文件通过 SDK/存储，必要原始证据在沙箱关闭后保留。
 6. 官方认证保持原状，不复制 HOME、不接管凭证、不绕过原生权限；缺条件写 blocked/NOT_RUN，继续其余实现与门禁。无 DSH 强制评审，无生产 Hub 发布、部署主线覆盖或新 tag。
 
-当前状态：A最终84d59c、B最终428de06、C最终bb2cc07均已交付、push并独立核验；领域返修持续由原Owner完成。I冻结候选7d04d9c4759a14c91dd75aff2aa9162a84b4c397已push、clean，专项150测试、strict116、build/实际wheel及兼容/缺effect原断言通过，新双平台CI36736123569运行中。此前bc4候选双平台工程全门禁通过，但其interface烟测FAILED；原失败unknown不改、不重放。I待新Ubuntu原门禁通过后执行唯一新interface smoke及已授权三身份科研链，task_live尚NOT_RUN。逐项原失败和当前证据见RESEARCH_INTEGRATION_ACCEPTANCE_0930.md。
+当前状态（2026-10-01）：I dec579 的双平台完整工程 CI 已通过，新官方 SDK interface_live 与作者唯一科研实验通过；实际原生中断、同会话恢复及旧持有者续租/提交拒绝已有证据。作者文件验证真实 FAILED 后租约自然到期，B 原 Owner 正返修超时/事件循环和已知结果续接；I 准备独立收口。作者完成、Claude 独立复现与第三任务实际采用尚未通过，完整 task_live 尚未完成。首次接口 FAILED 及后续各失败保留。逐项证据见 RESEARCH_INTEGRATION_ACCEPTANCE_0930.md。
 
 ## 继续开发检查点（2026-09-30）
 
@@ -82,3 +82,5 @@ I 已获完整原标准、互斥所有权、精确来源与各领域 Handoff，�
 原 B 在既有 write_paths 接续 `task_21c39c9f2ff3` / `ctx_72dae7cfe06d`，负责验证超时/事件循环窄修复，以及已知实验在租约到期后的必要续接适配。用户已授权完成该原任务，主控 Handoff `msg_0a57b00acab2` 明确允许扩展既有 verify/complete：当前有效租约控制新增观察与完成，原执行 task/swarm/worker/agent/token、Candidate AttemptId、可信归档和原科学判据保持原身份；只允许同作者、同任务、已持久确认的已知终态结果。禁止重跑实验、把旧执行标作新执行、重写 archive/audit/candidate，拒绝 unknown、缺失、篡改、不同身份/任务/条件及未确认 hold。复用既有账本、观察模型和存储，不新增工具、调度器或 Attempt 基建。
 
 B 独占 Python 测试窗口，修复原行为并保留首红和原断言；I 可并行准备自有 integration 脚本的显式 local-completion 阶段，但不得启动 Python/native 或写 live 状态。I 等 B 冻结并 push 后精确合并与门禁，以同一作者 UUID 的剩余累计382.405秒/40工具收口，所有原调用仍计入900秒/64工具。保持既有 run 的真实 runtime/attempt 上限，不重置时钟或账本；peer/child 原文件检查、独立干净实验、准入、实际应用和 AdoptionReceipt 门禁不变。主控只写本计划与验收，领域返修仍由原 Owner 完成。
+
+门禁执行顺序决策 `msg_0e5c94a46dd9`：B 冻结源码的恢复负例及适用测试通过后，I 精确合并，执行 native/research/assets/experiments、本地 strict/build、官方11工具权限与累计预算/原执行上下文检查；均通过且无已知新 CI 失败时，允许原有界科研案例与新完整 CI 并行。原3600秒 runtime 不重置，作者仅验证旧已知结果，不再实验。最终原完整双平台 CI 与全部真实科学/恢复/fencing/adoption 标准仍必须同时通过，未删断言、降低阈值或把待运行门禁标绿。
