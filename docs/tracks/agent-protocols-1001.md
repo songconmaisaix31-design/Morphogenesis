@@ -21,7 +21,7 @@
 | `git diff --no-index -- <A/.reference/LICENSE> orchestration/native_agents/ORCA_LICENSE.txt` | exit0；许可相同，Git既有LF/CRLF提示保留 |
 | 只读官方固定raw源码 / 本机 npm package.json / `node --version` | ORCA源码1.4.214、Claude JS SDK依赖0.3.251；本机Codex0.159.0/Claude2.1.238/Node24.16.0；未认证/调用/安装 |
 | `node --input-type=module -` 标准库只读覆盖/引用检查；Git基线diff检查 | 43/43注册条目和C引用块匹配；20 resume/19 managed hook；73处headless/events/permissions官方范围及族名匹配；ToolPolicy行界有效；只有两授权文档变更，native/research/原checker diff为空；两个检查exit0 |
-| `git diff --check`、`git diff --cached --check`、commit/push/`git ls-remote`/clean | 待本阶段提交前实际运行，完整SHA经最终Handoff回传 |
+| `git diff --check`、`git diff --cached --check`、commit/push/`git ls-remote`/clean | exit0；盘点提交 `5a7b945eda2d3ceca816aa7b88871dfd95e756ea` 已push，ls-remote精确相同，status --porcelain空；相对c458只两授权文档。此收口记录另作文档提交，其完整SHA/remote/clean由最终Handoff回传 |
 
 源码检索的真实失败保留：D worktree的`.reference`和A的`.runtime`不存在；`C:/Users/DW/orca/Agent-Graph`无可解析HEAD，不把它当指定上游；web页面抓取cache miss后改读固定官方raw/tree；推测的`claude-agent-sdk-connection.ts`、`codex-structured-turns.ts`为404，后按官方tree找到stream-json/cancellation真实文件；大JSON输出截断/HTTP错误混入stdout分别导致解析失败，随后缩小到必要schema/源码行并按真实tree定位。以上均未修改上游/业务/账号，也不是模型调用或工程门禁失败。
 
