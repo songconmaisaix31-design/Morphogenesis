@@ -122,3 +122,28 @@ def test_plan_roundtrip_preserves_missing_zero_and_unknown_semantics():
     assert plan.seed == 0 and plan.persistent_volume is None
     with pytest.raises(ValidationError):
         ExperimentContext(run_id="../other", task_id="x", worker_id="x", fencing_token=1)
+
+
+def test_interface_mismatched_binary_is_failed_and_only_owned_sandbox_is_closed(tmp_path, monkeypatch):
+    from orchestration.experiments.smoke import InterfaceBackend
+    root = Path(__file__).resolve().parents[2] / "demo/research_case"
+    ctx = ExperimentContext(run_id="interface-contract", task_id="x", worker_id="x", fencing_token=1)
+    (tmp_path / ctx.run_id).mkdir()
+    owned = Mock(id="ours")
+    owned.info.return_value = {"id": "ours"}
+    owned.renew.return_value = {}
+    owned.download.return_value = b"wrong binary"
+    attached = Mock()
+    attached.info.return_value = {"id": "ours"}
+    attached.destroy.side_effect = PermissionError("attached")
+    monkeypatch.setattr(OpenSandboxBackend, "create", lambda *args: owned)
+    backend = InterfaceBackend(tmp_path)
+    monkeypatch.setattr(backend, "connect", lambda *args: attached)
+    with pytest.raises(AssertionError, match="binary roundtrip mismatch"):
+        backend.create(public_case(root), ctx)
+    owned.destroy.assert_called_once()
+    owned.close.assert_called_once()
+    owned.run.assert_not_called()
+    observation = json.loads((tmp_path / ctx.run_id / "interface.json").read_bytes())
+    assert observation["binary_roundtrip"] is False
+    assert observation["error_type"] == "AssertionError"

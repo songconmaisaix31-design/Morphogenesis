@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import time
 from typing import Any
 
 from orchestration.experiments.backend import OpenSandboxBackend, OpenSandboxSession
@@ -43,6 +44,8 @@ class InterfaceBackend(OpenSandboxBackend):
             observations["renewal"] = session.renew(plan.resources.lifetime_seconds)
             session.upload(f"{DIRECTORY}/binary.bin", b"\x00\xff\x80\x01")
             observations["binary_roundtrip"] = session.download(f"{DIRECTORY}/binary.bin", 16) == b"\x00\xff\x80\x01"
+            if observations["binary_roundtrip"] is not True:
+                raise AssertionError("binary roundtrip mismatch")
             resource_code = ("from pathlib import Path;import json;"
                 "print(json.dumps({n:Path('/sys/fs/cgroup/'+n).read_text().strip() "
                 "for n in ['cpu.max','memory.max']}))")
@@ -62,7 +65,15 @@ class InterfaceBackend(OpenSandboxBackend):
                 raise AssertionError("background id missing")
             observations["command_status_before_cancel"] = session.command_status(command.id)
             session.cancel(command.id)
-            observations["command_status_after_cancel"] = session.command_status(command.id)
+            deadline = time.monotonic() + 3
+            status = session.command_status(command.id)
+            # Read-only observation of the same command, never another run.
+            while status.get("running") is True and time.monotonic() < deadline:
+                time.sleep(0.1)
+                status = session.command_status(command.id)
+            observations["command_status_after_cancel"] = status
+            if status.get("running") is not False:
+                raise AssertionError("cancel completion unknown")
             observations["command_logs"] = session.command_logs(command.id)
             record()
             return session
