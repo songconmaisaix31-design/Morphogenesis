@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import Field
 
 from contracts.base import Contract
+from contracts.identity import AttemptId
 
 
 class ResearchClaim(Contract):
@@ -33,3 +34,6 @@ class ResearchObservation(Contract):
     scientific_verdict: Literal["passed", "failed", "not_evaluated"]
     reasons: tuple[str, ...] = ()
     created_at: float
+    source_swarm_id: str | None = None
+    source_fencing_token: int | None = Field(default=None, gt=0)
+    source_attempt: AttemptId | None = None

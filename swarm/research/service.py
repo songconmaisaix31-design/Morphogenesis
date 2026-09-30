@@ -13,7 +13,7 @@ from local_assets import AssetApplicator, AssetPromoter, AssetValidator, LocalAs
 from local_assets.consume import AssetConsumer
 from local_assets.models import AssetSafetyError, Candidate, ConsumptionContext, ValidationPolicy
 from local_assets.paths import no_links
-from local_assets.research import require_inheritance
+from local_assets.research import known_effect, require_inheritance
 from local_assets.research_models import ResearchObservation
 from local_assets.snapshot import snapshot_revision
 from local_assets.validate import inspect_candidate
@@ -188,14 +188,44 @@ class ResearchService:
             raise PermissionError("asset_scope_mismatch")
         return candidate
 
+    def _observation_source(self, lease: Lease, candidate: Candidate, lineage: dict[str, JsonValue],
+                            run_id: str, purpose: Purpose) -> tuple[Lease, AttemptId, bool]:
+        source_token = lineage.get("token")
+        if (lineage.get("worker_id") != self.config.worker_id or not isinstance(source_token, int)
+                or isinstance(source_token, bool) or not 0 < source_token <= lease.token):
+            raise AssetSafetyError("run_host_identity_mismatch")
+        with connection(self.ledger.path) as db:
+            source = db.execute("SELECT worker_id FROM task_attempts WHERE swarm_id=? AND task_id=? AND token=?",
+                                (lease.swarm_id, lease.task_id, source_token)).fetchone()
+            attempt = db.execute("SELECT COUNT(*) FROM task_attempts WHERE swarm_id=? AND task_id=? AND token<=?",
+                                 (lease.swarm_id, lease.task_id, source_token)).fetchone()[0]
+            confirmations = db.execute("SELECT body FROM task_audit WHERE swarm_id=? AND task_id=? AND event='execution_confirmed'",
+                                       (lease.swarm_id, lease.task_id)).fetchall()
+        if source is None or source[0] != self.config.worker_id:
+            raise AssetSafetyError("source_execution_attempt_missing_or_mismatched")
+        source_attempt = AttemptId(task_id=lease.task_id, agent=self.config.agent, attempt=attempt)
+        if purpose == "original" and candidate.attempt != source_attempt:
+            raise AssetSafetyError("original_execution_attempt_mismatch")
+        recovered = source_token != lease.token
+        if recovered:
+            result = lineage.get("result")
+            if (purpose != "original" or not isinstance(result, dict)
+                    or result.get("execution_state") not in {"succeeded", "failed", "timeout", "unsupported", "missing_artifact"}
+                    or result.get("effect_state") not in {"known", "confirmed"}
+                    or not any(_OBJECT.validate_json(r[0]).get("request_id") == run_id
+                               and _OBJECT.validate_json(r[0]).get("token") == source_token for r in confirmations)):
+                raise AssetSafetyError("confirmed_original_execution_required_for_recovery")
+            self.ledger.assert_execution_confirmed(lease)
+        # Data identity only. This token never authorizes a ledger/store write.
+        return lease.model_copy(update={"token": source_token}), source_attempt, recovered
+
     def observe(self, task_id: str, token: int, asset_id: str, run_id: str, purpose: Purpose) -> dict[str, JsonValue]:
         lease = self._lease(task_id, token)
         candidate = self._asset(task_id, asset_id)
         if purpose == "original" and (candidate.attempt.task_id != task_id or candidate.attempt.agent != self.config.agent):
             raise AssetSafetyError("original_author_identity_mismatch")
         lineage = self._run(task_id, run_id)
-        if lineage.get("worker_id") != self.config.worker_id or lineage.get("token") != token:
-            raise AssetSafetyError("run_host_identity_mismatch")
+        source_context, source_attempt, recovered = self._observation_source(lease, candidate, lineage, run_id, purpose)
         if self.backend is None or candidate.research is None:
             raise AssetSafetyError("research_backend_and_claim_required")
         plan = self._plan(task_id)
@@ -205,8 +235,10 @@ class ResearchService:
                 or criteria.get("version") != claim.criterion_version):
             raise AssetSafetyError("research_pre_registered_plan_claim_mismatch")
         try:
-            evaluated = self.backend.evaluate(run_id, plan, lease)
+            evaluated = self.backend.evaluate(run_id, plan, source_context)
         except (ValueError, OSError) as error:
+            if recovered:
+                raise AssetSafetyError("recovered_execution_archive_rejected") from error
             original = lineage.get("result")
             if not isinstance(original, dict) or original.get("provenance") not in {"live", "replay", "mock"}:
                 raise AssetSafetyError("durable_result_provenance_required") from error
@@ -217,6 +249,15 @@ class ResearchService:
         claim = candidate.research
         if self._task(task_id).acceptance.get("research_claim") != _OBJECT.validate_json(claim.model_dump_json()):
             raise AssetSafetyError("research_condition_mismatch")
+        if recovered:
+            original_result = lineage.get("result")
+            if (not isinstance(original_result, dict)
+                    or evaluated.get("effect_state") not in {"known", "confirmed"}
+                    or any(evaluated.get(field) != original_result.get(field) for field in (
+                        "execution_state", "scientific_verdict", "provenance", "sandbox_id", "effect_state", "exit_code"))
+                    or (isinstance(original_result.get("experiment_result"), dict)
+                        and evaluated.get("experiment_result") != original_result["experiment_result"])):
+                raise AssetSafetyError("recovered_execution_result_mismatch_or_unknown")
         # The executed code, not an unrelated passing reference program, must
         # supply every candidate after-byte. The current CPU case is one script.
         if (evaluated.get("execution_state") == "succeeded"
@@ -235,6 +276,8 @@ class ResearchService:
             "provenance": evaluated.get("provenance"), "purpose": purpose,
             "execution_state": evaluated.get("execution_state"), "scientific_verdict": verdict,
             "reasons": evaluated.get("reasons", []), "created_at": self.ledger.now(),
+            "source_swarm_id": lease.swarm_id, "source_fencing_token": source_context.token,
+            "source_attempt": source_attempt.model_dump(mode="json"),
         })
         with self.ledger.fenced(self._lease(task_id, token)):
             self.store._record_research(report)
@@ -251,11 +294,19 @@ class ResearchService:
         if not reports:
             raise AssetSafetyError("trusted_research_observation_required")
         last = reports[-1]
+        if (last.source_fencing_token is not None and last.source_fencing_token != last.fencing_token
+                and (last.scientific_verdict != "passed" or last.execution_state != "succeeded" or not known_effect(last))):
+            raise AssetSafetyError("trusted_passed_observation_required_for_completion")
         result: dict[str, JsonValue] = {"asset_id": asset_id, "run_id": run_id,
                                       "scientific_verdict": last.scientific_verdict,
                                       "execution_state": last.execution_state,
                                       "stage": "evidence_submitted", "approved": False,
                                       "provenance": last.provenance}
+        if last.source_attempt is not None:
+            result.update({"source_swarm_id": last.source_swarm_id,
+                           "source_fencing_token": last.source_fencing_token,
+                           "source_attempt": _OBJECT.validate_json(last.source_attempt.model_dump_json()),
+                           "observation_fencing_token": last.fencing_token})
         task = self.ledger.submit(lease, uuid4().hex, result)
         return _OBJECT.validate_json(task.model_dump_json())
 

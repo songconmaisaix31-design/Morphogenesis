@@ -1,4 +1,5 @@
 """Official MCP v1 FastMCP exposes a small, identity-bound research surface."""
+import asyncio
 from mcp.server.fastmcp import FastMCP
 from pydantic import JsonValue
 from typing import Literal
@@ -64,16 +65,16 @@ def create_server(service: ResearchService) -> FastMCP:
         return await service.execute(task_id, token)
 
     @mcp.tool()
-    def research_candidate(action: Literal["submit", "validate_files"], task_id: str, token: int,
+    async def research_candidate(action: Literal["submit", "validate_files"], task_id: str, token: int,
                            candidate: Candidate | None = None, asset_id: str | None = None) -> str | dict[str, JsonValue]:
         """Submit to quarantine or run trusted static/file validation; these do not certify the science."""
         if action == "submit":
             if candidate is None or asset_id is not None:
                 raise ValueError("submit_requires_candidate_only")
-            return service.publish(task_id, token, candidate)
+            return await asyncio.to_thread(service.publish, task_id, token, candidate)
         if asset_id is None or candidate is not None:
             raise ValueError("validate_files_requires_asset_id_only")
-        return service.validate_files(task_id, token, asset_id)
+        return await asyncio.to_thread(service.validate_files, task_id, token, asset_id)
 
     @mcp.tool()
     def verify_research(task_id: str, token: int, asset_id: str, run_id: str,

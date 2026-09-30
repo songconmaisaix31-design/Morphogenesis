@@ -8,6 +8,7 @@ import re
 import stat
 import subprocess
 import sys
+import tempfile
 
 from local_assets.models import AssetSafetyError
 
@@ -80,14 +81,20 @@ def git(root: Path, *args: str, timeout: float = 15, input_data: bytes | None = 
                 "GIT_TERMINAL_PROMPT": "0"})
     if index_file is not None:
         env["GIT_INDEX_FILE"] = str(index_file.absolute())
-    result = subprocess.run(
-        ["git", "-c", "core.hooksPath=" + os.devnull, "-c", "core.autocrlf=false",
-         "-c", "core.fsmonitor=false", "-C", str(root), *args],
-        capture_output=True, timeout=timeout, check=False, shell=False, env=env, input=input_data,
-    )
+    # File-backed capture avoids CPython's unbounded Windows pipe drain after
+    # killing a wrapper whose descendants retain stdout/stderr. No tree kill.
+    with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
+        result = subprocess.run(
+            ["git", "-c", "core.hooksPath=" + os.devnull, "-c", "core.autocrlf=false",
+             "-c", "core.fsmonitor=false", "-C", str(root), *args],
+            stdout=stdout, stderr=stderr, timeout=timeout, check=False, shell=False,
+            env=env, input=input_data, stdin=subprocess.DEVNULL if input_data is None else None,
+        )
+        stdout.seek(0)
+        output = stdout.read()
     if result.returncode:
         raise AssetSafetyError("git_operation_failed:" + args[0])
-    return result.stdout
+    return output
 
 
 def check_target(root: Path, protected_paths: tuple[Path, ...] = ()) -> Path:

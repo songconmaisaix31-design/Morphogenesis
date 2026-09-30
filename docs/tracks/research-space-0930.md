@@ -1,5 +1,7 @@
 # B 科研空间 / MCP / 资产语义
 
+2026-10-01集成返修：原Owner同工作树，限原write_paths；只读诊断→受主控授权最小known-result恢复，详情和原失败见 [KNOWN_RESULT_RECOVERY_1001.md](../research/KNOWN_RESULT_RECOVERY_1001.md)。Git默认15秒/validator30秒不改，candidate async保持MCP续租响应，旧run/context不重贴身份；当前有效fence写入新观察并完成，未知/陈旧/其他身份/篡改/未确认拒绝，原科学负结果保留。适用科研/MCP/资产门禁实际50passed，49.37s；`python tools/typecheck.py`严格98源文件通过（C锁CPython3.12、命令局部BLAS线程1、串行）。无liveDB写入、无第二作者实验、无批准/采用或他人进程清理；完整实际续接、full/build/SDK/wheel与双平台CI由I独立验收，不沿用旧提交测试冒充本次集成通过。
+
 Owner 固定 B，branch `songconmaisaix31-design/morph-research-space-0930`；baseline `ef77af603577d4539d8dbdf780e1536a369b0d12`，plan `6ba12b24781318383454d2e7fb0b132e897b8a8d`。仅本轨 write_paths，未创建其他 Agent/Run。
 
 本轨领域交付源码：`9ad7387c34bd0995df51f2dbb5cba8fc8bb7e7e7`，已push并通过ls-remote核对；最后文档提交不改业务源码。实现官方FastMCP独立stdio入口和11工具、宿主身份/scope/资格、主动claim/renew/release/handoff、C唯一实验契约与可信raw验证、科研隔离/独立复现/条件继承/反例及既有AdoptionReceipt链。公共CPU入口与三角色上下文见 [PUBLIC_CASE.md](../research/PUBLIC_CASE.md)，工具契约见 [MCP_CONTRACT.md](../research/MCP_CONTRACT.md)。产品运行不调用ORCA；native认证/会话由A保留，B不复制HOME或接管凭据。

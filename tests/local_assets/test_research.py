@@ -23,8 +23,11 @@ class MockEvidence:
     def __init__(self, state="succeeded", verdict="passed", reasons=()) -> None:
         self.state, self.verdict, self.reasons = state, verdict, list(reasons)
         self.runs = {}
+        self.calls = 0
+        self.evaluation_tokens = []
 
     async def execute(self, plan, run_id, lease):
+        self.calls += 1
         result = {"execution_state": self.state, "scientific_verdict": self.verdict,
                   "effect_state": "unknown" if self.state == "unknown" else "known",
                   "sandbox_id": "mock-" + run_id, "provenance": "mock", "reasons": self.reasons,
@@ -36,6 +39,7 @@ class MockEvidence:
         return self.runs[run_id]
 
     def evaluate(self, run_id, plan, lease):
+        self.evaluation_tokens.append(lease.token)
         return self.read(run_id)
 
 
@@ -192,3 +196,97 @@ def test_registered_plan_identity_cannot_be_relabelled_by_claim(tmp_path: Path, 
     with pytest.raises(AssetSafetyError, match="plan_claim_mismatch"):
         service.observe("original", 1, asset, executed["run_id"], "original")
     assert not service.store.research_reports(asset)
+
+
+def expire_and_reclaim(service):
+    task = service.ledger.get("original")
+    service.ledger.clock = lambda: task.expires_at + 1
+    claimed = service.claim("original", ttl_seconds=600)
+    assert claimed and claimed["token"] == 2 and claimed["attempt_id"]["attempt"] == 2
+
+
+def test_known_original_result_survives_expiry_under_new_write_fence_without_reexecution(tmp_path: Path) -> None:
+    service, asset, _ = setup(tmp_path)
+    executed = asyncio.run(service.execute("original", 1))
+    original_candidate = service.store.fetch(asset).model_dump_json()
+    original_audit = service._run("original", executed["run_id"])
+    expire_and_reclaim(service)
+    with pytest.raises(LeaseLost):
+        service.observe("original", 1, asset, executed["run_id"], "original")
+    report = service.observe("original", 2, asset, executed["run_id"], "original")
+    assert report["fencing_token"] == 2 and report["source_fencing_token"] == 1
+    assert report["source_attempt"]["attempt"] == 1 and report["source_swarm_id"] == service.config.swarm_id
+    assert service.backend.evaluation_tokens == [1]
+    done = service.complete_research("original", 2, asset, executed["run_id"])
+    assert done["status"] == "completed" and done["effect_applied"] is False
+    assert done["result"]["source_fencing_token"] == 1 and done["result"]["observation_fencing_token"] == 2
+    assert service.backend.calls == 1 and len(service.backend.runs) == 1
+    assert service._run("original", executed["run_id"]) == original_audit
+    assert service.store.fetch(asset).model_dump_json() == original_candidate
+    assert service.store.state(asset) == "quarantined" and not service.store.adoptions()
+
+
+@pytest.mark.parametrize("fault", ["missing_archive", "unknown_result", "failed_science", "tampered_sandbox", "unconfirmed", "missing_confirmation",
+                                  "other_worker", "other_agent", "other_task", "stale_after_read"])
+def test_original_result_recovery_refuses_invalid_identity_evidence_or_write_fence(tmp_path: Path, fault) -> None:
+    from swarm.task_ledger import TaskConflict, connection
+    service, asset, _ = setup(tmp_path)
+    executed = asyncio.run(service.execute("original", 1))
+    run_id = executed["run_id"]
+    expire_and_reclaim(service)
+    task_id = "original"
+    expected = (AssetSafetyError, LeaseLost, TaskConflict)
+    if fault == "missing_archive":
+        service.backend.runs.pop(run_id)
+        def missing(run, plan, lease):
+            raise FileNotFoundError("owned raw archive missing")
+        service.backend.evaluate = missing
+    elif fault == "unknown_result":
+        service.backend.runs[run_id]["effect_state"] = "unknown"
+    elif fault == "failed_science":
+        service.backend.runs[run_id]["scientific_verdict"] = "failed"
+    elif fault == "tampered_sandbox":
+        service.backend.runs[run_id]["sandbox_id"] = "different-sandbox"
+    elif fault == "unconfirmed":
+        service.ledger.begin_execution(service._lease("original", 2), "owned-unconfirmed-fixture")
+    elif fault == "missing_confirmation":
+        with connection(service.ledger.path, write=True) as db:
+            db.execute("DELETE FROM task_audit WHERE event='execution_confirmed'")
+    elif fault in {"other_worker", "other_agent"}:
+        if fault == "other_worker":
+            service.config = service.config.model_copy(update={"worker_id": "other"})
+        else:
+            service.config = service.config.model_copy(update={"agent": AgentId(role="reviewer", instance=1)})
+    elif fault == "other_task":
+        task_id = "absent"
+        expected = (PermissionError,)
+    else:
+        original_evaluate = service.backend.evaluate
+        def lose_lease(run, plan, lease):
+            result = original_evaluate(run, plan, lease)
+            service.ledger.clock = lambda: service.ledger.get("original").expires_at + 1
+            return result
+        service.backend.evaluate = lose_lease
+    with pytest.raises(expected):
+        service.observe(task_id, 2, asset, run_id, "original")
+    assert not service.store.research_reports(asset)
+    assert service.backend.calls == 1
+    assert service.store.state(asset) == "quarantined" and not service.store.adoptions()
+
+
+@pytest.mark.parametrize("recover", [False, True])
+def test_negative_original_observation_preserved_and_recovery_does_not_complete_it(tmp_path: Path, recover) -> None:
+    service, asset, _ = setup(tmp_path)
+    service.backend.verdict = "failed"
+    executed = asyncio.run(service.execute("original", 1))
+    if recover:
+        expire_and_reclaim(service)
+    token = 2 if recover else 1
+    report = service.observe("original", token, asset, executed["run_id"], "original")
+    assert report["scientific_verdict"] == "failed"
+    if recover:
+        with pytest.raises(AssetSafetyError, match="trusted_passed_observation"):
+            service.complete_research("original", token, asset, executed["run_id"])
+    else:
+        assert service.complete_research("original", token, asset, executed["run_id"])["status"] == "completed"
+    assert service.store.state(asset) == "quarantined" and not service.store.adoptions()
