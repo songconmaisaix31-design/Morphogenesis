@@ -147,7 +147,8 @@ def test_unknown_launch_exit_and_mock_cannot_be_live(tmp_path: Path) -> None:
 @pytest.mark.parametrize("instance", [0, 1])
 def test_persistent_native_host_attempt_trace(tmp_path: Path, instance: int) -> None:
     attempt = {"task_id": "science-1", "agent": {"role": "builder", "instance": instance}, "attempt": 2}
-    raw = {"type": "item.completed", "item": {"id": "t1", "type": "mcp_tool_call", "tool": "claim_task",
+    raw = {"type": "item.completed", "item": {"id": "t1", "type": "mcp_tool_call", "server": "morph_research", "tool": "lease_task",
+           "arguments": {"action": "claim", "task_id": "science-1"},
            "result": {"structured_content": {"attempt_id": attempt}}}}
     script = "print(" + repr(json.dumps(raw)) + ")"
     binding = HostBinding(agent=AgentId(role="builder", instance=0), worker_id="native-author",

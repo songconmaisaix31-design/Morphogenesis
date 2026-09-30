@@ -38,10 +38,11 @@ host_config = Path("C:/research-state/author.json")  # B 的宿主配置，权�
 bootstrap = ResearchBootstrap(
     space="research-demo", agent=AgentId(role="builder", instance=0),
     objective="阅读共享科研问题、证据和经验，自主认领合适任务，记录实验与反例。",
-    tool_names=("project_context", "discover_tasks", "claim_task", "renew_task",
-                "search_evidence", "request_environment", "execute_experiment", "experiment_result",
-                "submit_candidate", "verify_research", "complete_research_task",
-                "inherit_experience", "apply_candidate"),
+    tool_names=("project_context", "discover_tasks", "lease_task", "search_evidence",
+                "research_experiment", "research_candidate", "verify_research",
+                "complete_research_task", "approve_candidate", "inherit_experience", "apply_candidate"),
+    rules=("通过 lease_task(action=claim, task_id=自己选择的任务) 认领，renew/release/handoff 同一工具。",
+           "research_experiment 的 action=request/run/result；research_candidate 的 action=submit/validate_files。"),
 )
 request = LaunchRequest(
     runtime="codex", workspace=workspace, prompt=bootstrap.prompt(),
@@ -52,6 +53,8 @@ Path("C:/research-state/launch.json").write_text(request.model_dump_json(indent=
 ```
 
 bootstrap 的 role/instance 用于提示；实际身份来自受保护的 B host_config，提示不能更改授权。研究判据与独立复现、候选批准和实际 adoption 全部由 B/C 的既有服务执行，CLI 结束或生成代码不能代替。
+
+上述工具列表对应 B 最终收敛的11工具接口；B早期29446a0阶段仍为17工具。以统一候选上的实际 MCP metadata 为准。事件解析不依赖 claim_task/lease_task 名称，既有 canonical attempt_id 和完整 tool/result raw 都保留，不能因为名称变更丢失认领证据。
 
 ## 安全探针、预览与明确执行
 

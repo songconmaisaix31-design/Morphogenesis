@@ -6,14 +6,19 @@
 
 来源：stablyai/orca 固定 85f8d6b5f507df795cd3cef1cdea08124cf801ee，MIT Copyright 2026 Lovecast Inc.，许可已保留；已核对指定 shared 文件、真实依赖和有关测试，窄行为适配与独立原模块运行见 docs/agents/upstream.md。Codex 0.159.0 Apache-2.0 和 Claude 2.1.238 自身许可独立，未复制 CLI 实现，无 SDK 结论。
 
+第一阶段代码提交 `5623ee73d948ed3b6494d43ca0cf1027ce0943a4` 已 commit+push，`git ls-remote` 与本地完整 SHA 一致。后续仅工具面测试/启动示例与验证报告收口，运行源文件未再改变。
+
 当前本地证据：
 
 - `python -m orchestration.native_agents probe`：Codex 0.159.0 / Claude 2.1.238，两者 version/auth exit=0、authenticated=true、精确版本相符。只读前置，不是模型/MCP interface_live。
 - 新建/恢复、交互/headless 共 8 个原生 argv 的 `--help` 解析：全部 exit=0，未发送模型请求。
 - `python -m pytest tests/native_agents -q --basetemp=tests/native_agents/.runtime/pytest-stage1 --tb=short`：73 passed；真实 subprocess / Windows Job Object / 外部附着进程保留 / unknown / canonical binding fixture 契约均覆盖，provider 数据为 mock。
+- 最终工具面收口后 `python -m pytest tests/native_agents -q --basetemp=tests/native_agents/.runtime/pytest-final --tb=short`：75 passed，新增旧 claim_task / 新 lease_task 名称兼容的 canonical 回包追踪；运行代码仍为第一阶段 SHA，未在适配器分配任务。这是 Owner self-test；独立 I 验收尚 NOT_RUN。
 - `python -m mypy --strict orchestration/native_agents`：10 source files，通过。
 - `git diff --no-index docs/agents/.reference/src/shared/print-mode-headless-command.ts tests/native_agents/upstream/print-mode-headless-command.ts`：exit=0；pytest 实际用 Node 24.16.0 内置 TS stripping 跑 unchanged 上游纯模块，与 Python port 比较。上游全套 Vitest/Electron测试 NOT_RUN。
-- 旧 Codex 兼容检查与构建复验正在收口；首次失败见下表，不据此宣称所有门禁已过。
+- `python -m pytest tests/t2/test_codex.py -q --tb=short`：默认 OS temp 下 11 passed，旧安全门/代码/断言未改；保留初次源码树 --basetemp 失败。
+- 已有项目 Python 3.12 .venv 的 `python -m build --outdir tests/native_agents/.runtime/dist`，仅该子进程设 PIP_INDEX_URL=https://pypi.org/simple / PIP_EXTRA_INDEX_URL=''：sdist 与由 sdist 构建 wheel 均成功，isolated poetry-core=2.5.0；未改全局 pip 配置、源码依赖或锁。
+- wheel 分发检查：10 native Python 文件 + ORCA_LICENSE.txt 均在 wheel；无 .reference/.runtime 产物。解包到本轨 ignored wheel-site，隔离 cwd 导入分发包后运行真实 subprocess mock headless（含 Windows 屏障/Job），PACKAGE_SMOKE_EXIT=0。非 native/model验收。
 
 历史失败保留，不覆盖：
 
@@ -26,10 +31,23 @@
 | native pytest-third，新增启动屏障 | 62 passed / 2 failed | native 未启动却误用屏障 exit，修复独立 launch-error 日志使 exit 保持 None；保留 0.2 秒 timeout 阈值，错误留存测试用确定 observer clock 等待真实 subprocess 发出错误，另加真实 wall timeout 检查 |
 | native binding strict | 1 object-not-indexable error | 使用窄化的 dict payload 修复；未加 ignore |
 | 系统 Python `-m build --no-isolation` | No module named build | 复用原项目已有 .venv 作构建检查，不动公共依赖/锁 |
+| 原项目 .venv `-m build --no-isolation` | Backend poetry.core.masonry.api unavailable | 改用构建工具标准 isolated build，不往原 venv 安装后端 |
+| isolated build 默认镜像 | sdist成功，wheel fresh backend 下载 HTTP403 | 原失败日志保留；仅 build 子进程显式选择官方 PyPI，sdist/wheel完整同候选复验通过 |
+| wheel smoke 初次临时 harness | SyntaxError：嵌套引号，native未调用 | 修正 harness 用 repr 构造 Python 字面量，包内代码不改；实际分发 mock subprocess smoke exit=0 |
 | 旧 tests/t2/test_codex.py，源码树 --basetemp | 2 passed / 9 failed：既有 executor 要求 OS temp | 原门禁、断言和旧代码保持不变；默认 OS temp 复验单列 |
 
 首次 readiness timeout 为开发终端历史：已 skip 升级提示，用户只读 cwd/SHA/branch 探针通过后沿同 Task retry；这不是产品门禁。
 
-接口 Handoff：B 提供官方 FastMCP stdio `python -m swarm.research --config ABS_TRUSTED_JSON`，host 身份权限不由工具参数决定。A 不合并 B 分支；canonical claim 回包新 attempt_id 随 B 最终 SHA 交付，旧阶段29446a0只有 Lease，A 不凭空补身份。native-bound 只是可追溯报告，不替代 B authoritative ledger / fencing / 科研判据。
+接口 Handoff：B 提供官方 FastMCP stdio `python -m swarm.research --config ABS_TRUSTED_JSON`，host 身份权限不由工具参数决定。A 不合并 B 分支；canonical claim 回包新 attempt_id 随 B 最终 SHA 交付，旧阶段29446a0只有 Lease，A 不凭空补身份。B已通知工具面最终收敛为11工具，claim入口为 lease_task(action=claim)；测试覆盖旧/新名称，bootstrap示例对应最终面，以I候选实际metadata为准。native-bound 只是可追溯报告，不替代 B authoritative ledger / fencing / 科研判据。
+
+实现证据（基于运行代码5623ee73，以下行号属于该SHA；测试/文档收口不改变源文件）：
+
+- `orchestration/native_agents/registry.py:49`：实际 npm bin map，拒绝 package逃逸与未知Windowsshim；`:95`：有界版本/认证，不执行模型；`:90`：原认证位置继承、ORCA环境能力剔除。
+- `orchestration/native_agents/launch.py:10`：typed argv / 原生权限 / 逐次MCP配置 / trusted host binding；`:76`：MCP文件独占创建。
+- `orchestration/native_agents/models.py:83`：复用既有AgentId身份；`:103`：原事件与报告的AttemptId；`:129`：bootstrap只提供空间/角色/规则/工具，不挑选任务。
+- `orchestration/native_agents/events.py:38`：只解析原canonical attempt_id，不构造新身份；`:57`：未知事件/原始回包/真实CLI结构化事件保留。
+- `orchestration/native_agents/process.py:24`：attached取消无权限；`:35`：仅own Popen/Job取消；`:93` 与 `_windows_exec.py:12`：Windows归属后才启动CLI；`:124`：单次有界headless、无重试；`:192`：host/session/原回包持久trace；`:251`：exit与terminal同时判定，不冒充科研通过。
+
+ignored原始检查日志保留在 `tests/native_agents/.runtime/`（pytest-second/third/fourth/binding/stage1/final、legacy与legacy-os-temp、mypy-binding、build-existing-venv/build-isolated/build-official-index、package-smoke等）；初次setup/strict/错误CLI路径的准确命令/原错误同时保留在本报告和终端记录。秘密、prompt运行数据和缓存未入库。
 
 限制与未执行：真实原生模型、MCP工具连接、真实 claim/实验/复现/adoption、原生持久 session 恢复与交互 TUI 均 NOT_RUN，由最终 I 在统一候选按最多3会话运行；Linux/WSL实际进程组及原生环境尚 NOT_RUN。无硬 token/cost 封顶，observer工具限制不能撤回已发出请求，费用/远端效果 unknown不重试；附着会话无 stdin 接管，后台脱离进程组资源无清理保证。Hub/生产部署/tag/公共主线合并未执行。

@@ -213,11 +213,13 @@ def test_claude_tool_and_result_shapes() -> None:
 
 
 @pytest.mark.parametrize("runtime", ["codex", "claude"])
-def test_canonical_attempt_parsed_from_mcp_result_without_new_identity(runtime: str) -> None:
+@pytest.mark.parametrize("tool_name", ["claim_task", "lease_task"])
+def test_canonical_attempt_parsed_from_mcp_result_without_new_identity(runtime: str, tool_name: str) -> None:
     attempt = {"task_id": "science-1", "agent": {"role": "builder", "instance": 0}, "attempt": 2}
     lease = {"task_id": "science-1", "worker_id": "native-author", "attempt_id": attempt}
     if runtime == "codex":
-        raw = {"type": "item.completed", "item": {"id": "t1", "type": "mcp_tool_call", "tool": "claim_task",
+        raw = {"type": "item.completed", "item": {"id": "t1", "type": "mcp_tool_call", "server": "morph_research", "tool": tool_name,
+                "arguments": {"action": "claim", "task_id": "science-1"},
                 "result": {"structured_content": {"result": lease}}}}
     else:
         raw = {"type": "user", "session_id": SESSION, "message": {"content": [
@@ -225,6 +227,7 @@ def test_canonical_attempt_parsed_from_mcp_result_without_new_identity(runtime: 
     event, = parse_event(runtime, json.dumps(raw))
     assert event.kind == "tool_result" and event.tool_id == "t1"
     assert event.reported_attempt.model_dump() == attempt
+    assert event.raw == raw
 
 
 def test_old_lease_result_does_not_invent_attempt_id() -> None:
