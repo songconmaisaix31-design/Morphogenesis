@@ -118,3 +118,13 @@ I 后续独立 GET404、按 morph-run 未发现容器并单独保存 cleanup.jso
 - C 最小修复 `b4b403cd098df5cf2194e32377f7bd9f18a54ade` 已 push 并由主控 exact ls-remote 核验，工作树在源码冻结时 clean；仅 backend 与新 HTTP 边界测试，SDK、锁和固定镜像不变。标准 shlex.join 保留参数字面值，前台/后台调用官方 string command，输入约束和附着归属保护保留。
 - 主控读取 C 同 SHA 原日志/退出记录：官方 SDK MockTransport 请求回归 `10 passed`（0.41s）、strict97文件、lock/build均 exit0；sdist/wheel实际构建。修复前正确新测试基线4 failed/6 passed保留，原 SDK list 发 argv 的400负对照继续存在。此前工作区 experiments40 passed属于源码相同的本地专项证据，均非 live。
 - I 明确释放后 C 独占该 Python 窗口，C `msg_0d20f69bf003` 明确完成验证并交回 I；主控 `msg_15aa05987913` 授 I 窗口及新不可变候选门禁。只有新适用本地门禁和新 exact-head Ubuntu CI 全部通过、Windows未新失败时，才能继续已授权新唯一接口 smoke；原 unknown 不重放，最多三科研身份窗口尚未使用。
+
+### 新集成与真实接口通过，原生授权拒绝保留
+
+I 冻结 `7d04d9c4759a14c91dd75aff2aa9162a84b4c397`，remote一致、clean；主控机械检查 C b4 为祖先且 C/A84/B428 领域树 diff--exit-code 均0，I仅新增两个明确阶段的原生观察/只读证据检查脚本，无新调度器或完成证明设施。主控实际读取新本机 focused `150 passed`（47.44s）、strict116、SDK、实际wheel13包与Node、旧ef77资产迁移、mock桥接隔离及原missing-effect one-call/unconfirmed断言，均通过。exact-head CI `36736123569` 的 Ubuntu原全部门禁由主控实际读取success；Windows仍运行，双平台新候选未预写通过。
+
+唯一新接口 `interface-i-0930-7d04-02` **interface_live=passed**。主控读取持久 summary、interface、独立复算记录：sandbox `78189de1-196d-469e-9f00-1e552634bada`，known/succeeded/destroyed；实际 binary roundtrip、CPU cgroup `100000 100000`、memory `536870912`，后台命令由 running true 变 false、exit -1/signal terminated并保留原log。科研样本方差 `0.01000000011175871`、绝对误差 `1.1175870992530257e-10`，在原1e-9内；I的独立Fraction1001残差复算exact mean `50000001/5`、variance `1/100`。usage/cost仍null。这是SDK接口与公开脚本通过，原生科研task_live尚未通过，不改两个旧失败run。
+
+作者真实Codex第一调用的UUID `01a0f2ee-ae2a-7ce3-9470-e485066fb8d2`，51.9734652秒、1个工具调用、原生reported tokens36750/cost null。主控读取原native JSONL：discover_tasks 被工具层以 `MCP tool call requires approval, but approval policy is never` 拒绝，随后自然exit0；账本仍available、无claim/renew/experiment，actual_interruption=false。保留原interrupt-observation/native/audit，不把自然退出写成中断。原生模型目录刷新超时、priority省略与fallback metadata警告保持原样，不更换账号/模型/provider。
+
+用户全部权限已覆盖此隔离科研流程。主控核对[官方MCP配置](https://learn.chatgpt.com/docs/extend/mcp)、[官方配置参考](https://learn.chatgpt.com/docs/config-file/config-reference)及I保存的0.159.0 schema：批准官方per-tool approve仅用于上述11个可信科研工具，serverdefault prompt、enabled11、read-only/never及禁用其它工具保持。I仅修改授权内观察脚本配置胶水，原生领域问题仍退A；新脚本冻结并验证实际有效配置/适用契约后，显式interrupt-recovery接续同一UUID，累计计入首次51.973秒/1调用。原失败不重放、不覆盖，科研实验仍每任务至多一次；最终新代码head双平台CI与原真实科学/恢复/fencing/adoption标准仍全部必需。
