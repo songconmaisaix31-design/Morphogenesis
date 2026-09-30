@@ -27,6 +27,7 @@
 | B 科研空间与 MCP | morph-research-space-0930 | swarm/research/**；local_assets/**；swarm/task_ledger.py（仅必要扩展）；tests/research/**；tests/local_assets/**；docs/research/**；docs/tracks/research-space-0930.md；README.md；THIRD_PARTY_NOTICES.md |
 | C OpenSandbox / T0 | morph-research-sandbox-0930 | orchestration/experiments/**；tests/experiments/**；demo/research_case/**；deploy/opensandbox/**；docs/experiments/**；docs/tracks/research-sandbox-0930.md；pyproject.toml；poetry.lock；tools/typecheck.py |
 | 主控 | morph-research-plan-0930 | docs/PLAN.md；本计划；docs/RESEARCH_INTEGRATION_ACCEPTANCE_0930.md（仅状态/决策/验收） |
+| I 独立集成 | morph-research-integration-0930（待 A/B/C 冻结交付后启动） | 合并既有精确提交；tests/integration/**；docs/tracks/research-integration-0930.md；必要导入/配置/类型/路由胶水，领域问题退原 Owner |
 
 每轨一个 Agent、一个 worktree、一个分支，开发/测试/文档/返修持续同 Owner；阶段 commit + push。A/B/C 首个检查点交付薄接口 Handoff（启动 MCP 参数、实验计划/结果、科研准入），跨轨不写文件。集成 I 最后只合并并补少量导入/配置/类型/路由胶水，领域问题退回 Owner。
 
@@ -63,3 +64,5 @@
 - B 当前 `ctx_e16666128554` / `term_3516bdc3-902c-4b75-ba47-a8ca3620b0e5`，C 当前 `ctx_054ccfdf62bf` / `term_c215414b-8849-4e7c-a0ca-b358cfb42fdf`；当前注入成功，unsupervised 放置仍如实记录。CLI 使用同一已加载技能的可执行文件绝对路径，不切换版本。
 - B 独占当前 Python 验证窗口，修复已有四项 CI 失败并保留原断言；C 先收尾文档、诊断已有十二项本机失败、准备自有服务与 I Handoff，不重复实验或启动全量并发。
 - I 尚未启动；待 B/C 冻结交付后按原标准验证两种原生工具循环、同空间主动认领续租、三份干净实验、独立判据、准入及实际 AdoptionReceipt、中断/同会话接续/陈旧 token 拒绝。上限三个科研会话、未知效果不重放，工程 CI 和真实科研通过分别判断。
+
+最终 I 的研究调用窗口：最多三个原生研究 session 身份（作者、复现者、继承者）；每个身份累计 wall 上限 900 秒、观测工具上限 64 次，作者中断与明确恢复合计在该窗口内。此为实际调用前声明的观测停止条件，并非 Token/美元硬封顶；未知 usage/cost 保留未知，不以环境变量或认证状态推断额度。仅由 I 在冻结源码、原生权限与受保护科研状态确认后执行；任何未知外部实验效果停止依赖路径，原 invocation 不重放。
