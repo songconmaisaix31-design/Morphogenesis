@@ -65,3 +65,7 @@
 用户明确授权隔离开发全部权限，解决上述开发 Worker 配置等待。主控只取消两条自有待审批请求；读到两者 Conversation interrupted 后，停止旧低层 Dispatch（processAction=none），再关闭精确自有终端，两个回执均 ptyKilled=true。同一 B/C 原会话在原 worktree 以标准 CLI 参数 `--sandbox danger-full-access --ask-for-approval never` 恢复；不代按原审批，不复制凭据，不把开发权限写成产品能力。
 
 当前 B Dispatch `ctx_e16666128554`、C `ctx_054ccfdf62bf` 均实际 injected=true；领域返修指令分别由 `msg_5b89bc3f5db9`、`msg_e53e560870c8` 持久发送。授权恢复本身不组成测试、科学或 live 通过。原八节任务及八项端到端标准已从历史终端完整读取；新候选与 I live 尚待执行。
+
+- C 仅恢复自有 `morph-research-c-0930-server`，未创建新科研沙箱；主控使用私有 key 路径（未输出内容）独立 GET `/sandboxes`，HTTP200。此为服务可达性，不是修复后的实验通过。
+- B `fb280e6a6e2d30c66b45fbe8c693084727b11221` 已 push，Owner 新 focused35/strict98通过。主控读取实际 diff 确认 fixture 只加 write=True，原拒绝断言不变；该阶段解释器 resolve 仍可能把 Linux venv 入口替换为 base executable，已以 `msg_d08c09b2835d`、`msg_40c0fc577caf` 退原 Owner，尚未最终接收。
+- I 原标准中的“旧持有者不能提交生效结果”必须在真实公开工具提交路径观察陈旧 token 拒绝；单独 renew 拒绝只能证明续租门禁。中断安排在作者认领/续租后、任何外部实验前，由实际 native/ledger 证据确认；原生取消的未知字段保留，不能据此自动重试外部实验。
