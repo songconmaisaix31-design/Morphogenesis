@@ -128,3 +128,12 @@ I 冻结 `7d04d9c4759a14c91dd75aff2aa9162a84b4c397`，remote一致、clean；主
 作者真实Codex第一调用的UUID `01a0f2ee-ae2a-7ce3-9470-e485066fb8d2`，51.9734652秒、1个工具调用、原生reported tokens36750/cost null。主控读取原native JSONL：discover_tasks 被工具层以 `MCP tool call requires approval, but approval policy is never` 拒绝，随后自然exit0；账本仍available、无claim/renew/experiment，actual_interruption=false。保留原interrupt-observation/native/audit，不把自然退出写成中断。原生模型目录刷新超时、priority省略与fallback metadata警告保持原样，不更换账号/模型/provider。
 
 用户全部权限已覆盖此隔离科研流程。主控核对[官方MCP配置](https://learn.chatgpt.com/docs/extend/mcp)、[官方配置参考](https://learn.chatgpt.com/docs/config-file/config-reference)及I保存的0.159.0 schema：批准官方per-tool approve仅用于上述11个可信科研工具，serverdefault prompt、enabled11、read-only/never及禁用其它工具保持。I仅修改授权内观察脚本配置胶水，原生领域问题仍退A；新脚本冻结并验证实际有效配置/适用契约后，显式interrupt-recovery接续同一UUID，累计计入首次51.973秒/1调用。原失败不重放、不覆盖，科研实验仍每任务至多一次；最终新代码head双平台CI与原真实科学/恢复/fencing/adoption标准仍全部必需。
+
+### 真实中断、陈旧提交拒绝与已知实验后的本地阻塞
+
+- 主控实际读取 exact `dec579889af7c3853c9a7f76ba1fe5d835299716` CI `36738222386`：Ubuntu、Windows 全部步骤 success，包括原 full pytest、严格类型、build、SDK 与实际 wheel 分发。该工程通过不等于 task_live 完成；后续领域修复需要新的不可变候选及适用门禁。
+- 同一作者 UUID 的 interrupt-recovery 实际 discover/context/search/claim/renew 成功。token1 在实验前续租后由自有原生进程归属取消，exit1、actual_interruption=true、没有实验调用；取消阶段 usage/cost 和远端效果保持 unknown，不写成零。51.973秒/1调用的首次拒绝记录完整保留。
+- 实际 TTL 到期后，同 UUID 的 resume 先通过公开工具提交原结构合法 Candidate 和旧 AttemptId；旧 token1 的 renew 与 submit 均真实拒绝 `lease_expired_or_not_claimed`。随后认领 token2/attempt2，作者唯一实验 `a79578f21ff148c6a86708bddd9f611b` 实际 succeeded/known/destroyed，sandbox `14580dc2-65ee-4c0c-b724-9e70fb4f04dd`，原科学判据通过；没有重跑实验。
+- 作者候选 `sha256:ddd070985e6ee0d895d0c8a3270a4688208c4d4051907a4c79711b40c97b90f5` 已提交但仍 quarantined。随后额外调用 validate_files，原生 item18 真实 tools/call 300秒超时；持久报告 `a9b79ce344fe4a24ac8547efcd69c320` passed=false、reasons=[TimeoutExpired]，没有 research observation、完成、审批或 adoption。原报告和日志不修改、不补通过。
+- 三次作者调用累计517.595秒/24工具；同 UUID 仅余382.405秒/40工具，仍受原900秒/64工具约束。token2 又自然到期；旧实验的执行上下文、旧 candidate AttemptId 必须保留，新租约不得把旧执行重标为新执行，已知实验不得自动重跑。原作者完成只要求可信科学观察及 quarantined 提交；额外静态验证不是作者完成前置，peer/child 的真实文件与审批门禁仍必需。
+- 原 B 同 worktree/branch/会话接续 `task_21c39c9f2ff3` / `ctx_72dae7cfe06d`，独占 Python 诊断窗口。官方 FastMCP 同步工具直接占事件循环已核对；Windows timeout 后继承管道的排空是待有界复现的假设，不能冒称当前实机根因。仅返修原本地验证边界，并核对既有 known-effect continuation/fencing 合约；不得提高15/30秒超时、绕过门禁或写 live 状态。I 等待该领域决策；Claude 复现与第三任务实际采用尚 NOT_RUN，完整 task_live 尚未通过。
