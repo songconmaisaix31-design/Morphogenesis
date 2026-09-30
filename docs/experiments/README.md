@@ -20,8 +20,10 @@ verified = read_result(protected_evidence_root, run_id,
 
 每个 `run_id` 创建新目录，先存计划和保守 unknown 状态，之后只 create 一次新沙箱。
 同 `run_id` 再 execute 会拒绝，不会自动恢复或重放；异常、HTTP timeout、缺退出信息保持 unknown。
-正式复现必须用不同 worker/run/sandbox；脚本是新 Python 进程。作者结果、独立复现和后续 reverse
-参数本地验证是三次不同实验；C 的接口烟测不能代替两个原生 Agent 的任务验收。
+正式复现必须用不同 worker/run/sandbox；脚本是新 Python 进程。作者结果、独立复现和继承再验证
+各自实际运行，本轮 B 正向准入三次科学计划只变 role，order 均为 original。
+reverse 是显式不同条件，只能作等价继承拒绝对照或新的预注册实验；不能把先前 original 通过迁移过去。
+C 的接口烟测不能代替两个原生 Agent 的任务验收。
 
 计划固定 code/data SHA、镜像、Python版本、参数、seed、判据、CPU/内存/最长生命周期/command timeout。
 `public_case` 只生成计划，不生成通过结论。候选内容必须逐字匹配被执行并归档的 code，
