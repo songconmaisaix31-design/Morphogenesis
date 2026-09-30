@@ -5,10 +5,12 @@ from __future__ import annotations
 from collections.abc import Iterator
 from datetime import timedelta
 from pathlib import PurePosixPath
+import shlex
 from typing import Any, Literal, Protocol
 
 from code_interpreter.sync import CodeInterpreterSync
 from opensandbox.config import ConnectionConfigSync
+from opensandbox.exceptions import InvalidArgumentException
 from opensandbox.models import WriteEntry
 from opensandbox.models.execd import Execution, RunCommandOpts
 from opensandbox.models.sandboxes import PVC, Volume
@@ -20,6 +22,14 @@ from orchestration.experiments.models import ExperimentContext, ExperimentPlan
 
 class UnsupportedCapability(ValueError):
     """Requested backend feature is not enabled; never silently downgrade."""
+
+
+def _command_text(argv: list[str]) -> str:
+    # SDK 1.1.0 accepts argv, but pinned execd v1.1.0 requires shell command text.
+    # Keep the SDK's input constraints and quote each literal for its Linux shell.
+    if not argv or not argv[0] or any(not isinstance(arg, str) or "\0" in arg for arg in argv):
+        raise InvalidArgumentException("argv requires a non-empty executable and strings without NUL")
+    return shlex.join(argv)
 
 
 class ExperimentSession(Protocol):
@@ -84,7 +94,7 @@ class OpenSandboxSession:
     def run(self, argv: list[str], seconds: int, directory: str) -> Execution:
         if not self.owned:
             raise PermissionError("attached_session_read_only")
-        execution = self.sandbox.commands.run(argv, opts=RunCommandOpts(
+        execution = self.sandbox.commands.run(_command_text(argv), opts=RunCommandOpts(
             timeout=timedelta(seconds=seconds), working_directory=directory))
         if execution.id:
             self.command_ids.add(execution.id)
@@ -94,7 +104,7 @@ class OpenSandboxSession:
         """Delegate background execution and cancellation to official command APIs."""
         if not self.owned:
             raise PermissionError("attached_session_read_only")
-        execution = self.sandbox.commands.run(argv, opts=RunCommandOpts(background=True,
+        execution = self.sandbox.commands.run(_command_text(argv), opts=RunCommandOpts(background=True,
             timeout=timedelta(seconds=seconds), working_directory=directory))
         if execution.id:
             self.command_ids.add(execution.id)
