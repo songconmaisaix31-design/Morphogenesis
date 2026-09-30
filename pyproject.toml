@@ -32,6 +32,10 @@ faiss-cpu = ">=1.12,<2"
 numpy = ">=2.0,<3"
 scikit-learn = ">=1.7,<2"
 cachetools = "^7.2.0"
+opensandbox = "1.1.0"
+opensandbox-code-interpreter = "1.1.0"
+nbclient = "0.10.4"
+nbformat = "5.10.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8,<10"

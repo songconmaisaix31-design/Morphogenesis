@@ -1,0 +1,20 @@
+name: morph-research-c-0930
+services:
+  server:
+    image: opensandbox/server:release-1.1.0@sha256:68ca0212a2749b2c73096ce2ec0264455c64442c45f81007db442f52bf84c9d1
+    container_name: morph-research-c-0930-server
+    network_mode: bridge
+    cpus: 1
+    mem_limit: 512m
+    pids_limit: 128
+    ports:
+      - "127.0.0.1:8097:8090"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config.toml:/etc/opensandbox/config.toml:ro
+    environment:
+      SANDBOX_CONFIG_PATH: /etc/opensandbox/config.toml
+      OPENSANDBOX_SERVER_API_KEY: ${OPENSANDBOX_SERVER_API_KEY:?Supply a private local service key}
+    labels:
+      morph.owner: research-c-0930
+    restart: "no"

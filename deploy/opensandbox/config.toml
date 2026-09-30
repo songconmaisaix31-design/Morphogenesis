@@ -1,0 +1,28 @@
+# Adapted from OpenSandbox release-1.1.0 server/docker-compose.example.yaml,
+# source 836b182e208e66c046026fa0f633e089321f1efb, Apache-2.0.
+[server]
+host = "0.0.0.0"
+port = 8090
+
+[proxy]
+# The service and sandboxes both use Docker's default bridge.
+resolve_internal = true
+
+[log]
+level = "INFO"
+
+[runtime]
+type = "docker"
+execd_image = "opensandbox/execd:v1.1.0@sha256:6cf7dba2f21f0b536e100563d841ac58a9f31c2b0a081b7ac76796a24d6f47e2"
+
+[docker]
+network_mode = "bridge"
+host_ip = "127.0.0.1"
+port_range_min = 47100
+port_range_max = 47300
+drop_capabilities = ["AUDIT_WRITE", "MKNOD", "NET_ADMIN", "NET_RAW", "SYS_ADMIN", "SYS_MODULE", "SYS_PTRACE", "SYS_TIME", "SYS_TTY_CONFIG"]
+no_new_privileges = true
+pids_limit = 128
+
+[ingress]
+mode = "direct"

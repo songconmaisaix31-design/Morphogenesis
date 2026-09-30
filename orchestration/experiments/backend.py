@@ -1,0 +1,181 @@
+"""Thin official SDK adapter, including explicit attached-session ownership."""
+
+from __future__ import annotations
+
+from collections.abc import Iterator
+from datetime import timedelta
+from pathlib import PurePosixPath
+from typing import Any, Literal, Protocol
+
+from code_interpreter.sync import CodeInterpreterSync
+from opensandbox.config import ConnectionConfigSync
+from opensandbox.models import WriteEntry
+from opensandbox.models.execd import Execution, RunCommandOpts
+from opensandbox.models.sandboxes import PVC, Volume
+from opensandbox.sync.sandbox import SandboxSync
+from opensandbox.transport import RetryPolicy
+
+from orchestration.experiments.models import ExperimentContext, ExperimentPlan
+
+
+class UnsupportedCapability(ValueError):
+    """Requested backend feature is not enabled; never silently downgrade."""
+
+
+class ExperimentSession(Protocol):
+    id: str
+    owned: bool
+    kernel_id: str | None
+
+    def info(self) -> dict[str, Any]: ...
+    def renew(self, seconds: int) -> dict[str, Any]: ...
+    def upload(self, path: str, data: bytes) -> None: ...
+    def download(self, path: str, limit: int) -> bytes: ...
+    def run(self, argv: list[str], seconds: int, directory: str) -> Execution: ...
+    def run_code(self, code: str) -> Execution: ...
+    def cancel(self, command_id: str) -> None: ...
+    def destroy(self) -> None: ...
+    def close(self) -> None: ...
+
+
+class ExperimentBackend(Protocol):
+    provenance: Literal["live", "replay", "mock"]
+    capabilities: frozenset[str]
+
+    def create(self, plan: ExperimentPlan, context: ExperimentContext) -> ExperimentSession: ...
+
+
+class OpenSandboxSession:
+    def __init__(self, sandbox: SandboxSync, *, owned: bool) -> None:
+        self.sandbox = sandbox
+        self.id = sandbox.id
+        self.owned = owned
+        self.kernel_id: str | None = None
+        self.interpreter: CodeInterpreterSync | None = None
+        self.command_ids: set[str] = set()
+
+    def info(self) -> dict[str, Any]:
+        return self.sandbox.get_info().model_dump(mode="json")
+
+    def renew(self, seconds: int) -> dict[str, Any]:
+        if not self.owned:
+            raise PermissionError("attached_session_read_only")
+        if not 1 <= seconds <= 900:
+            raise ValueError("bounded_renewal_required")
+        return self.sandbox.renew(timedelta(seconds=seconds)).model_dump(mode="json")
+
+    def upload(self, path: str, data: bytes) -> None:
+        if not self.owned:
+            raise PermissionError("attached_session_read_only")
+        self.sandbox.files.create_directories([WriteEntry(path=str(PurePosixPath(path).parent), mode=0o700)])
+        self.sandbox.files.write_file(path, data, mode=0o600)
+
+    def download(self, path: str, limit: int) -> bytes:
+        # SDK binary streaming; never encode binary blobs into MCP text.
+        chunks: Iterator[bytes] = self.sandbox.files.read_bytes_stream(path)
+        data = bytearray()
+        for chunk in chunks:
+            data.extend(chunk)
+            if len(data) > limit:
+                raise ValueError("artifact_size_limit")
+        return bytes(data)
+
+    def run(self, argv: list[str], seconds: int, directory: str) -> Execution:
+        if not self.owned:
+            raise PermissionError("attached_session_read_only")
+        execution = self.sandbox.commands.run(argv, opts=RunCommandOpts(
+            timeout=timedelta(seconds=seconds), working_directory=directory))
+        if execution.id:
+            self.command_ids.add(execution.id)
+        return execution
+
+    def start(self, argv: list[str], seconds: int, directory: str) -> Execution:
+        """Delegate background execution and cancellation to official command APIs."""
+        if not self.owned:
+            raise PermissionError("attached_session_read_only")
+        execution = self.sandbox.commands.run(argv, opts=RunCommandOpts(background=True,
+            timeout=timedelta(seconds=seconds), working_directory=directory))
+        if execution.id:
+            self.command_ids.add(execution.id)
+        return execution
+
+    def command_status(self, command_id: str) -> dict[str, Any]:
+        return self.sandbox.commands.get_command_status(command_id).model_dump(mode="json")
+
+    def command_logs(self, command_id: str) -> dict[str, Any]:
+        return self.sandbox.commands.get_background_command_logs(command_id).model_dump(mode="json")
+
+    def run_code(self, code: str) -> Execution:
+        if not self.owned:
+            raise PermissionError("attached_session_read_only")
+        # Always an explicit fresh context, never the SDK's default shared kernel.
+        self.interpreter = CodeInterpreterSync.create(sandbox=self.sandbox)
+        context = self.interpreter.codes.create_context("python")
+        self.kernel_id = context.id
+        execution = self.interpreter.codes.run(code, context=context)
+        if execution.id:
+            self.command_ids.add(execution.id)
+        return execution
+
+    def cancel(self, command_id: str) -> None:
+        if not self.owned or command_id not in self.command_ids:
+            raise PermissionError("command_ownership_required")
+        if self.interpreter:
+            self.interpreter.codes.interrupt(command_id)
+        else:
+            self.sandbox.commands.interrupt(command_id)
+
+    def destroy(self) -> None:
+        if not self.owned:
+            raise PermissionError("attached_sandbox_must_not_be_killed")
+        self.sandbox.kill()
+
+    def close(self) -> None:
+        # The pinned 1.1.0 interpreter has no public close(); its HTTP adapters
+        # share the sandbox connection transport closed by SandboxSync.close().
+        self.sandbox.close()
+
+
+class OpenSandboxBackend:
+    provenance: Literal["live", "replay", "mock"] = "live"
+
+    def __init__(self, *, domain: str = "127.0.0.1:8097", api_key: str | None = None,
+                 protocol: Literal["http", "https"] = "http", use_server_proxy: bool = True,
+                 codeinterpreter: bool = False, notebook: bool = False, volumes: bool = False) -> None:
+        self.domain = domain
+        self.api_key = api_key
+        self.protocol = protocol
+        self.use_server_proxy = use_server_proxy
+        self.capabilities = frozenset({"script", "cpu", "memory", "duration"} |
+            ({"codeinterpreter"} if codeinterpreter else set()) |
+            ({"notebook"} if notebook else set()) | ({"volumes"} if volumes else set()))
+
+    def connection(self, request_seconds: int = 45) -> ConnectionConfigSync:
+        return ConnectionConfigSync(domain=self.domain, api_key=self.api_key, protocol=self.protocol,
+            request_timeout=timedelta(seconds=request_seconds), use_server_proxy=self.use_server_proxy,
+            retry_policy=RetryPolicy.disabled(), disable_metrics=True)
+
+    def create(self, plan: ExperimentPlan, context: ExperimentContext) -> OpenSandboxSession:
+        required = {plan.mode, "cpu", "memory", "duration"}
+        if plan.persistent_volume:
+            required.add("volumes")
+        if missing := required - self.capabilities:
+            raise UnsupportedCapability(",".join(sorted(missing)))
+        volumes = ([Volume(name="research", pvc=PVC(claimName=plan.persistent_volume),
+                           mountPath="/mnt/research")] if plan.persistent_volume else None)
+        sandbox = SandboxSync.create(plan.environment.image,
+            connection_config=self.connection(plan.resources.command_seconds + 15),
+            resource={"cpu": str(plan.resources.cpu), "memory": f"{plan.resources.memory_mib}Mi"},
+            timeout=timedelta(seconds=plan.resources.lifetime_seconds), ready_timeout=timedelta(seconds=45),
+            entrypoint=(["/opt/code-interpreter/code-interpreter.sh"]
+                        if plan.mode == "codeinterpreter" else ["tail", "-f", "/dev/null"]),
+            env={"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"},
+            metadata={"morph-run": context.run_id, "morph-task": context.task_id,
+                      "morph-worker": context.worker_id, "morph-fence": str(context.fencing_token)},
+            volumes=volumes)
+        return OpenSandboxSession(sandbox, owned=True)
+
+    def connect(self, sandbox_id: str) -> OpenSandboxSession:
+        # Attaching borrows the HTTP handle; it does not confer lifecycle ownership.
+        return OpenSandboxSession(SandboxSync.connect(sandbox_id,
+            connection_config=self.connection()), owned=False)
