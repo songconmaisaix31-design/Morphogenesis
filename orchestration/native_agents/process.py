@@ -39,8 +39,17 @@ class OwnedProcess:
     containing this newly launched process and descendants; no taskkill /T.
     """
 
-    def __init__(self, process: subprocess.Popen[bytes]) -> None:
+    def __init__(self, process: subprocess.Popen[bytes], *, private_group: bool = False) -> None:
         self._process = process
+        # _spawn_owned knows it requested start_new_session, even if the root
+        # exits before construction. Other callers must have a verifiable group.
+        self._pgid: int | None = process.pid if private_group and os.name != "nt" else None
+        if os.name != "nt" and self._pgid is None:
+            try:
+                if getattr(os, "getpgid")(process.pid) == process.pid and getattr(os, "getsid")(process.pid) == process.pid:
+                    self._pgid = process.pid
+            except ProcessLookupError:
+                pass
         self._job: WindowsJob | None = None
         if os.name == "nt" and process.poll() is None:
             try:
@@ -55,6 +64,8 @@ class OwnedProcess:
 
     def cancel(self) -> bool:
         process = self._process
+        if os.name != "nt" and self._pgid is not None:
+            return self._cancel_group()
         if process.poll() is not None:
             if self._job:
                 self._job.close()
@@ -65,17 +76,45 @@ class OwnedProcess:
             else:
                 process.terminate()
         else:
-            getattr(os, "killpg")(process.pid, signal.SIGTERM)
+            process.terminate()  # Root ownership alone does not authorize its group.
         try:
             process.wait(timeout=3)
         except subprocess.TimeoutExpired:
             if os.name == "nt":
                 process.kill()
             else:
-                getattr(os, "killpg")(process.pid, getattr(signal, "SIGKILL"))
+                process.kill()
             process.wait(timeout=3)
         if self._job:
             self._job.close()
+        return True
+
+    def _cancel_group(self) -> bool:
+        process = self._process
+        pgid = self._pgid
+        assert pgid is not None
+        process.poll()  # Reap the root, but keep its private group ownership.
+        try:
+            getattr(os, "killpg")(pgid, signal.SIGTERM)
+        except ProcessLookupError:
+            self._pgid = None
+            return False
+        deadline = time.monotonic() + 3
+        while True:
+            process.poll()
+            try:
+                getattr(os, "killpg")(pgid, 0)
+            except ProcessLookupError:
+                break
+            if time.monotonic() >= deadline:
+                try:
+                    getattr(os, "killpg")(pgid, getattr(signal, "SIGKILL"))
+                except ProcessLookupError:
+                    pass
+                break
+            time.sleep(0.05)
+        self._pgid = None  # Single cleanup; never signal a later reused group ID.
+        process.wait(timeout=3)
         return True
 
     def poll(self) -> int | None:
@@ -95,7 +134,7 @@ def _spawn_owned(plan: LaunchPlan, stdin: BinaryIO | None,
     if os.name != "nt":
         return OwnedProcess(subprocess.Popen(plan.argv, cwd=plan.workspace, env=child_environment(),
                                              stdin=stdin, stdout=stdout, stderr=stderr,
-                                             shell=False, start_new_session=True))
+                                             shell=False, start_new_session=True), private_group=True)
     # Python waits for one startup message. Assign Job ownership BEFORE the native
     # CLI (or any MCP/tool child) can execute, instead of racing CLI initialization.
     barrier = Path(__file__).with_name("_windows_exec.py")
@@ -239,7 +278,9 @@ def run_headless(plan: LaunchPlan, evidence_dir: Path, *, timeout_seconds: float
         reason = f"launch/observation failure: {type(exc).__name__}"
     finally:
         if owner is not None:
-            owner.cancel()
+            cleaned = owner.cancel()
+            if cleaned and os.name != "nt" and reason is None and exit_code is not None:
+                reason = "owned descendants outlived native exit; usage and remote effect may be unknown"
     known_tokens = [item.tokens for item in terminal_usage]
     known_costs = [item.cost_usd for item in terminal_usage]
     tokens = sum(value for value in known_tokens if value is not None) if known_tokens and all(
