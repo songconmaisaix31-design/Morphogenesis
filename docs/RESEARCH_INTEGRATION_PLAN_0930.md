@@ -74,3 +74,11 @@ A、B、C 已分别结算本轨交付（科研 live 尚未通过）。最终输�
 Orca 创建 I worktree 于精确 `ef77af603577d4539d8dbdf780e1536a369b0d12`，分支 `morph-research-integration-0930`，与治理 worktree 建立明确 parent lineage。首个空 shell 经正面核验后直接启动原生开发 Codex 标准全权限配置，没有额外重复 Agent。I Task `task_afa0f9c81b55` / Dispatch `ctx_9e1033019bc7` / terminal `term_1e598676-e019-4b24-ab8d-1d0ca6840ea4`，injected=true 且屏幕 actual Working；此为低层 unsupervised 放置，未冒称 worker-start ready 通过。
 
 I 已获完整原标准、互斥所有权、精确来源与各领域 Handoff，先合并与独立门禁，随后有界真实案例。主控继续独立核验并把领域问题退原 Owner；原始根仓 WIP 保留，最终候选、科研证据和剩余门禁均不得提前写通过。
+
+## 2026-10-01 真实案例中的必要边界返修
+
+当前 I 代码 `dec579889af7c3853c9a7f76ba1fe5d835299716` 的 CI `36738222386` 双平台完整 success，官方 SDK 新接口与作者科学实验通过；任务完成、Claude 独立复现及第三任务实际采用尚未通过。原生中断、同 UUID 续接、真实 TTL 到期及旧持有者公开提交拒绝已有证据。详见独立验收记录，不覆盖此前失败和 NOT_RUN。
+
+原 B 在既有 write_paths 接续 `task_21c39c9f2ff3` / `ctx_72dae7cfe06d`，负责验证超时/事件循环窄修复，以及已知实验在租约到期后的必要续接适配。用户已授权完成该原任务，主控 Handoff `msg_0a57b00acab2` 明确允许扩展既有 verify/complete：当前有效租约控制新增观察与完成，原执行 task/swarm/worker/agent/token、Candidate AttemptId、可信归档和原科学判据保持原身份；只允许同作者、同任务、已持久确认的已知终态结果。禁止重跑实验、把旧执行标作新执行、重写 archive/audit/candidate，拒绝 unknown、缺失、篡改、不同身份/任务/条件及未确认 hold。复用既有账本、观察模型和存储，不新增工具、调度器或 Attempt 基建。
+
+B 独占 Python 测试窗口，修复原行为并保留首红和原断言；I 可并行准备自有 integration 脚本的显式 local-completion 阶段，但不得启动 Python/native 或写 live 状态。I 等 B 冻结并 push 后精确合并与门禁，以同一作者 UUID 的剩余累计382.405秒/40工具收口，所有原调用仍计入900秒/64工具。保持既有 run 的真实 runtime/attempt 上限，不重置时钟或账本；peer/child 原文件检查、独立干净实验、准入、实际应用和 AdoptionReceipt 门禁不变。主控只写本计划与验收，领域返修仍由原 Owner 完成。
