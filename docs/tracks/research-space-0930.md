@@ -37,3 +37,7 @@ Windows同时运行多轨Python门禁导致内存/commit压力：主控独立9f2
 重启后新Dispatch接续；旧WIP pytest进程结束且原exec句柄不可用，最终exit/count unknown，保留已见失败，不填通过。主控独立28dc missing-effect与EF77迁移均exit0；9f20/29446的历史失败不改写。远端28dc CI `36719277559` 原失败4项：plan_identity两项DID NOT RAISE、Linux初始化两项拒绝正常sys.executable链接。Owner核实测试写事务缺write=True，SQLite退出回滚；仅修fixture提交，保留原raises/assert。初始化绑定解析后的可信宿主解释器，数据/权威路径链接拒绝不放宽；使用C锁CPython3.12及BLAS线程1串行复验，未重新盲跑整库。
 
 已直接读取36719277559日志：Ubuntu **4 failed / 955 passed / 1 skipped**, 374.84s；Windows被取消，strict/build/distribution skipped，均不补通过。本轮Owner串行 `C锁CPython3.12 -m pytest tests/research tests/local_assets -q --tb=short` → **35 passed**, 69.80s；`python tools/typecheck.py` → **Success, 98 source files**，两命令仅局部OPENBLAS_NUM_THREADS=1/OMP_NUM_THREADS=1。源码与原测试门槛冻结，待推送后双平台CI真实验证完整回归/build/distribution；不重复付费或本机整库压力运行。
+
+返修阶段 `fb280e6a6e2d30c66b45fbe8c693084727b11221` 已push；主控独立指出直接替换为resolved base解释器会丢Linux venv身份，初始化绿色不足以证明实际MCP可启动，此候选暂不接收。B纠正为只核验解析后的目标，保留原venv executable argv；在原初始化正向测试增加真实解释器subprocess的MCP导入、sys.prefix及返回启动路径一致断言（CI Poetry环境包含Linux解释器链接）。原失败/既有拒绝断言均保留，数据及权威目录链接仍拒绝。
+
+venv身份修正后同一适用命令 **35 passed**, 68.73s，strict **98 source files**通过，均为C锁CPython3.12/局部BLAS线程1串行执行。fb280 exact LF源码归档与C22c21e8归档的离线bridge（含真实初始化→作者quarantine完成→不同worker发现前置结果）已实际passed，provenance=mock，未批准科研或生成adoption。最后业务源码提交后由新双平台CI检验真实Linux venv链接、完整回归/构建/分发；历史被拒收候选不因绿色子集变成通过。

@@ -30,9 +30,9 @@ def seed_case(project: Path, state: Path, *, python: Path, plan: dict[str, JsonV
     for path in (project, state):
         no_links(path)
     # A trusted operator may select a normal venv/system interpreter symlink.
-    # Bind its resolved executable, while data/authority paths remain link-free.
-    python = python.resolve(strict=True)
-    no_links(python)
+    # Check the resolved target, but keep the venv executable as the launch argv:
+    # replacing venv/bin/python with its base target changes sys.prefix/dependencies.
+    no_links(python.resolve(strict=True))
     project, state = project.resolve(), state.resolve()
     if (project == state or project.is_relative_to(state) or state.is_relative_to(project)
             or any(project.is_relative_to(p.resolve()) or state.is_relative_to(p.resolve())

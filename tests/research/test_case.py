@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+import subprocess
 
 import pytest
 
@@ -18,6 +19,12 @@ def plan():
 def test_operator_seeds_discoverable_dependency_chain_without_claim_result_or_approval(tmp_path: Path):
     paths = seed_case(tmp_path / "project", tmp_path / "state", python=Path(sys.executable), plan=plan(),
                       code="answer = 2\n", swarm_id="public-case", domain="127.0.0.1:8097", api_key_env="CASE_API_KEY")
+    assert Path(paths["python"]) == Path(sys.executable)
+    # Real locked interpreter, including Poetry's Linux venv symlink in CI.
+    # A resolved base executable may pass is_file yet lose both prefix and MCP.
+    selected_prefix = subprocess.check_output(
+        [paths["python"], "-c", "import sys, mcp; print(sys.prefix)"], text=True, timeout=15).strip()
+    assert selected_prefix == sys.prefix
     configs = [HostConfig.model_validate_json(Path(paths[r + "_config"]).read_bytes()) for r in ("author", "replication", "inheritance")]
     for config in configs:
         assert config.worker_id in {"author", "replication", "inheritance"}

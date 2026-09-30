@@ -8,7 +8,7 @@
 python -m swarm.research.case --project C:/research-demo/project --state C:/research-demo/host-state --python C:/locked-env/Scripts/python.exe --case-directory C:/integrated-morph/demo/research_case --swarm-id nist-live-0930 --domain 127.0.0.1:8097 --api-key-env MORPH_OPENSANDBOX_API_KEY
 ```
 
-入口拒绝已存在目录、数据/状态路径链接、项目与状态嵌套及受保护源码目录；宿主指定的venv/system解释器可以是正常符号链接，先解析并绑定实际可执行文件。不覆盖WIP，不复制HOME、不改原生认证。输出三份配置的绝对路径、原仓基线revision及解析后的解释器路径。配置只存key的环境变量名。首次创建失败的部分状态保留，不能复用同一root静默重跑。
+入口拒绝已存在目录、数据/状态路径链接、项目与状态嵌套及受保护源码目录；宿主指定的venv/system解释器可以是正常符号链接，解析并核验目标文件，但启动argv保留原venv解释器绝对路径，避免sys.prefix和依赖改变。不覆盖WIP，不复制HOME、不改原生认证。输出三份配置的绝对路径、原仓基线revision及原解释器启动路径。配置只存key的环境变量名。首次创建失败的部分状态保留，不能复用同一root静默重跑。
 
 任务固定 `author → replication → inheritance`，通过既有TaskLedger dependencies发现可认领项；角色资格为 `research.author` / `research.replication` / `research.inheritance`，宿主绑定不同worker/AgentId。副本可以在相同授权scope阅读前置科研上下文，但无法认领不合资格的任务。每个任务最多一次外部实验（未知也计入，绝不自动重放），正常claim还受原RunLimits/attempt预算约束。
 
