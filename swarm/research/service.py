@@ -15,6 +15,7 @@ from local_assets.models import AssetSafetyError, Candidate, ConsumptionContext,
 from local_assets.paths import no_links
 from local_assets.research import require_inheritance
 from local_assets.research_models import ResearchObservation
+from local_assets.snapshot import snapshot_revision
 from local_assets.validate import inspect_candidate
 from swarm.models import Lease, TaskRecord
 from swarm.research.models import HostConfig
@@ -198,6 +199,11 @@ class ResearchService:
         if self.backend is None or candidate.research is None:
             raise AssetSafetyError("research_backend_and_claim_required")
         plan = self._plan(task_id)
+        claim = candidate.research
+        criteria = plan.get("criteria")
+        if (plan.get("plan_id") != claim.plan_id or not isinstance(criteria, dict)
+                or criteria.get("version") != claim.criterion_version):
+            raise AssetSafetyError("research_pre_registered_plan_claim_mismatch")
         try:
             evaluated = self.backend.evaluate(run_id, plan, lease)
         except (ValueError, OSError) as error:
@@ -307,8 +313,13 @@ class ResearchService:
                                      input_context=self.config.project_context or task.signal.task_id)
         consumer = AssetConsumer(self.store)
         injected = consumer.inject(asset_id, context)
+        # Reuse the existing scoped Git snapshot after prior candidate application.
+        # The Agent supplies only the target HEAD anchor; it cannot select stale bytes.
+        snapshot, head = snapshot_revision(self.config.workspace, task.signal.scope, self.store.root / "snapshots")
+        if (base_head or base_revision) != head:
+            raise AssetSafetyError("inheritance_target_head_changed")
         execution = consumer.execute(injected, attempt=AttemptId(task_id=task_id, agent=self.config.agent, attempt=task.attempts),
-                                     base_revision=base_revision, base_head=base_head, path_map=path_map, preimages=preimages)
+                                     base_revision=snapshot, base_head=head, path_map=path_map, preimages=preimages)
         self._lease(task_id, token)
         return _OBJECT.validate_json(execution.model_dump_json())
 

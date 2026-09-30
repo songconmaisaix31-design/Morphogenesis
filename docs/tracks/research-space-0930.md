@@ -29,3 +29,7 @@ Node失败诊断：本 worktree `node_modules/@evomap/gep-sdk` 不存在；按�
 基线迁移：`tests/research/migration_probe.py --baseline-source <ef77af6 exact LF archive>` 用基线实际Candidate/Store/Validator/Promoter生成旧持久证据，新B读取旧candidate_json、official asset_id、report及approval不变并允许静态消费，contract_local passed。新增research=None仅在其独立可选metadata字段省略，旧base_head/before等null和值0不改；科研metadata存在时完整进入canonical JSON/官方资产身份。该探针不加入依赖Git历史的普通CI测试，浅克隆不需旧源码；普通测试覆盖序列化边界。
 
 业务阶段提交：`9f20d34a4e4f1e760a6449d029314957e8c9f210` 已远端核实；97文件strict和隔离wheel/sdist通过。随后主控要求可运行初始化入口，原B负责新增 `python -m swarm.research.case` 与 [I公开case步骤](../research/PUBLIC_CASE.md)，再冻结新SHA；I不建设领域harness。初始化通过原TaskLedger登记三项任务和角色资格、真实依赖、C唯一plan、固定静态policy及三份HostConfig；不自动claim/execute/approve/adopt。2项初始化WIP保护/资格边界通过，19业务文件strict通过；当前最终整库门禁未结算，不能据旧WIP测试宣称新候选通过。
+
+初始化阶段提交 `54d48c8385cb7427cdcd6c185595396514f3e8d7` 已push。主控独立审查9f20指出科学准入缺逐份result effect正向检查、报告可能重贴plan_id/criterion，原失败事实保留；B补unknown拒绝和预注册plan绑定，本地继承也比较完整科学plan。另修继承child沿用旧HEAD作用域树问题，直接复用既有snapshot_revision捕获已apply的scope。没有添加第二快照/哈希系统。
+
+Windows同时运行多轨Python门禁导致内存/commit压力：主控独立9f20 missing-effect及EF77迁移probe在OpenBLAS导入分配阶段exit1，未抵达行为断言，不能算通过或准入行为失败。B两项旧WIP广域pytest仍保留原输出；运行中因新增初始化要求而源码发生变化，结果不能作为新不可变SHA门禁。停止新增并发Python，后续串行候选归档验证仅进程局部设置OPENBLAS_NUM_THREADS=1/OMP_NUM_THREADS=1，不改全局、不停止他人进程。

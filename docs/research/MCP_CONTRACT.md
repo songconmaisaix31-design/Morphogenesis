@@ -37,4 +37,6 @@ claim回包保留原Lease字段，并加既有 `AttemptId` 的 `attempt_id`，�
 
 当前可准入案例限定单个静态安全 Python script：Candidate唯一FileChange.after须逐字节对应被C执行并归档的代码。多文件/Notebook研究资产准入尚不支持（C的Notebook执行能力另行验收），不绕过已有静态语言限制。作者/复现计划比较保留code/data官方完整性值、环境、判据、参数、seed、资源和模式，仅排除role与本地输入路径。inheritance必须明确匹配预注册条件并重验，child通过既有ConsumptionExecution关联parent；child仍须自身静态门禁。mock/replay观察可留痕，但不能approve或继承科研经验；完整正向科研链等待I真实OpenSandbox case，B不伪造live数据取得绿色测试。
 
+每份原作者、复现者及本地再验证的可信结果还必须明确 `effect_state=known|confirmed`；科学passed但cleanup/effect未知仍是原始观察，不能晋级或继承，不把unknown改写known。报告写入前核对预注册plan_id与criteria.version对应claim；继承的完整科学plan也须与原作者相同。`inherit_experience` 的base_revision/base_head是当前目标HEAD锚点，服务在有效租约下复用既有 `snapshot_revision` 捕获当前scope（包含上一任务已apply的bytes），生成child基线；不创建新的哈希或快照系统。昂贵Git操作在账本写事务外，消费完成后再次检查fencing。
+
 官方来源：MCP v1 [Python SDK](https://github.com/modelcontextprotocol/python-sdk/blob/v1.x/README.md)，MIT，当前机器实测 mcp 1.28.1；锁版本由 C 管理。唯一公开 CPU 案例由 C 固定 [NIST NumAcc4](https://www.itl.nist.gov/div898/strd/univ/data/NumAcc4.dat)。接口与科研任务 live 尚待最终 I，配置存在不是验收。

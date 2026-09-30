@@ -24,6 +24,8 @@ A的已冻结原生入口接三份 `HostConfig`，每份MCP形状均为 `command
 
 操作每步均以实际返回为事实源：获取本次 run_id、report_id、child candidate_asset_id、execution_id、result_id，不预填expected ID或通过。反例/失败复现使经验不可继承；missingartifact、failedcriterion、infrastructurefailure、unknown分开，不用exit0代替科学通过。任何unknown停止该live路径，不换mock或手造approved/adoption补齐故事。
 
+三份计划科学条件一致，只变role；继承任务不偷偷改为reverse顺序。报告的plan/判据必须对应预注册claim，各原始结果必须已知effect；科学达标与远端效果确认分别保留。继承输入payload.base_revision作为HEAD锚点，服务复用现有scope快照纳入复现者先前apply的science/experiment.py，再生成science/reused.py child，防止沿用旧scope树造成snapshot_target_changed。
+
 中断/接续安排在作者**claim/renew之后、execute之前**：I根据真实原生日志确定尚无execution_unconfirmed，再只中断自己创建的原生进程；等真实TTL过期，在同一个原生session_id/同一HostConfig恢复。先用原token证明renew拒绝，再主动claim取得更高token并继续作者任务。该安排仍只有三种研究session身份，不新增第四个研究者，也不误杀附着会话。若已越过实验边界或日志无法确认，保留unknown并停止，不能据此声称接续通过；I单独记录 NOT_RUN。
 
 完整live正向链、原生工具调用/认证/会话、干净sandbox及真实adoption由I实际验收。B离线probe明确mock且科研quarantine，只证明接线/失败门禁；初始化输出和固定计划都不等于运行通过。

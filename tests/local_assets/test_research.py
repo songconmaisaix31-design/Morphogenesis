@@ -54,7 +54,7 @@ def setup(tmp_path: Path):
     claim = ResearchClaim(plan_id="numacc", criterion_version="nist-numacc4-v1",
                           conditions={"data": "NIST NumAcc4", "python": "3.12"}, sources=("https://www.itl.nist.gov/div898/strd/univ/data/NumAcc4.dat",))
     policy = ValidationPolicy(version="science-files-v1", expectations=(FileExpectation(path="science/experiment.py", content=BODY),))
-    acceptance = {"experiment_plan": {"plan_id": "numacc", "role": "author"},
+    acceptance = {"experiment_plan": {"plan_id": "numacc", "role": "author", "criteria": {"version": "nist-numacc4-v1"}},
                   "research_claim": claim.model_dump(mode="json"), "file_policy": policy.model_dump(mode="json")}
     service.ledger.enqueue(Signal(task_id="original", workspace=str(target), scope="science", kind="opportunity",
                                   required_capability="research"), acceptance=acceptance)
@@ -159,3 +159,36 @@ def test_counterexample_preserved_and_prevents_research_reuse(tmp_path: Path) ->
     with pytest.raises(AssetSafetyError, match="invalidated_by_counterexample"):
         require_reproduced(service.store, asset)
     assert len(service.store.research_reports(asset)) == 1
+
+
+@pytest.mark.parametrize("effect", [None, "unknown", "unrecognized"])
+@pytest.mark.parametrize("purpose", ["original", "reproduction", "inheritance"])
+def test_successful_science_with_unknown_effect_never_qualifies(tmp_path: Path, effect, purpose) -> None:
+    service, asset, _ = setup(tmp_path)
+    executed = asyncio.run(service.execute("original", 1))
+    raw = service.backend.runs[executed["run_id"]]
+    if effect is None:
+        raw.pop("effect_state")
+    else:
+        raw["effect_state"] = effect
+    report = service.observe("original", 1, asset, executed["run_id"], purpose)
+    assert report["scientific_verdict"] == "passed" and report["provenance"] == "mock"
+    with pytest.raises(AssetSafetyError, match="report_effect_unknown"):
+        require_reproduced(service.store, asset)
+    assert service.store.state(asset) == "quarantined" and not service.store.adoptions()
+
+
+@pytest.mark.parametrize("field", ["plan_id", "criteria"])
+def test_registered_plan_identity_cannot_be_relabelled_by_claim(tmp_path: Path, field) -> None:
+    service, asset, _ = setup(tmp_path)
+    executed = asyncio.run(service.execute("original", 1))
+    from swarm.task_ledger import connection
+    import json
+    with connection(service.ledger.path) as db:
+        row = db.execute("SELECT acceptance FROM tasks WHERE task_id='original'").fetchone()
+        acceptance = json.loads(row[0])
+        acceptance["experiment_plan"][field] = "different" if field == "plan_id" else {"version": "different"}
+        db.execute("UPDATE tasks SET acceptance=? WHERE task_id='original'", (json.dumps(acceptance),))
+    with pytest.raises(AssetSafetyError, match="plan_claim_mismatch"):
+        service.observe("original", 1, asset, executed["run_id"], "original")
+    assert not service.store.research_reports(asset)
