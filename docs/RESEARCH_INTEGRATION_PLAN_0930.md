@@ -40,7 +40,7 @@
 5. 启动单机 Docker/OpenSandbox 与隔离 CPU 案例属于本轮授权范围；GPU 可选。正式复现干净沙箱/内核，探索可保留内核；大文件通过 SDK/存储，必要原始证据在沙箱关闭后保留。
 6. 官方认证保持原状，不复制 HOME、不接管凭证、不绕过原生权限；缺条件写 blocked/NOT_RUN，继续其余实现与门禁。无 DSH 强制评审，无生产 Hub 发布、部署主线覆盖或新 tag。
 
-当前状态（2026-10-01）：I dec579 的双平台完整工程 CI 已通过，新官方 SDK interface_live 与作者唯一科研实验通过；实际原生中断、同会话恢复及旧持有者续租/提交拒绝已有证据。作者文件验证真实 FAILED 后租约自然到期，B 原 Owner 正返修超时/事件循环和已知结果续接；I 准备独立收口。作者完成、Claude 独立复现与第三任务实际采用尚未通过，完整 task_live 尚未完成。首次接口 FAILED 及后续各失败保留。逐项证据见 RESEARCH_INTEGRATION_ACCEPTANCE_0930.md。
+当前状态（2026-10-01）：原A最终b219（源码3c4）、B970、Cbb2均已push并独立核验。I最终代码bde3412d2257fd1581ce1d7f88b254fb0c13a269已push、clean，原full本地回归与新双平台CI36746045909运行中，Ubuntu全部步骤success、Windows待完成。官方SDK新接口、作者唯一科学实验、实际中断/同UUID恢复/真实TTL/旧公开提交拒绝及新有效租约下原可信结果收口通过；作者completed但候选quarantined。Claude真实10次401 authentication_failed后exit1/tools0，没有复现；第三任务NOT_RUN，完整task_live未达成。原3600秒run已到期，不重置；认证身份选择待用户回复。原失败及unknown保留，详细证据见RESEARCH_INTEGRATION_ACCEPTANCE_0930.md。
 
 ## 继续开发检查点（2026-09-30）
 

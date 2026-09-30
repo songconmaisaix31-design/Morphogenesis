@@ -147,3 +147,11 @@ I 冻结 `7d04d9c4759a14c91dd75aff2aa9162a84b4c397`，remote一致、clean；主
 - 主控只读核对环境变量存在状态：Process有ANTHROPIC_AUTH_TOKEN/ANTHROPIC_BASE_URL，User/Machine无；只解析非秘密endpoint为 api.deepseek.com/anthropic。官方auth status显示loggedIn=true/oauth_token/firstParty，A child_environment保留非ORCA变量。[官方认证文档](https://code.claude.com/docs/en/authentication#authentication-precedence)说明 bearer环境优先于保存登录；因此真实失败可能是已配置gateway认证，不推断OAuth过期，不更换provider/model/account、不读或输出秘密。向用户发单次身份选择，等待答案期间不做依赖调用；elapsed或默认选项不是批准。
 - 真实 swarm_runs.started_at=1790782122.151175，原3600秒deadline=1790785722.151175（16:28:42.151UTC）已到期，max_attempts3/runtime3600不重置。原三角色完整checker原样运行exit1，缺inheritance-observation.json原日志/退出保留；独立作者档案检查只能证明对应范围，不能替代完整task_live。Claude复现AUTH_BLOCKED，第三任务实际采用NOT_RUN，没有审批或adoption。
 - 原A正面核验上次completed后idle，同会话/同分支/同write_paths接续 `task_527f87788de5` / `ctx_cd11934cb2dd` 修复模糊失败zero用量归一化。规则为失败/未确认终态逐字段将合成zero置null，真实成功zero和失败已知正值保留，raw原值/is_error优先/cancel未知不变；需真实process/stdout/exit路径与原native门禁。I已明确释放Python给A，等待新冻结提交后才合并和最终完整门禁；无新模型、实验或认证配置变更。
+
+### 最终代码冻结与原完整门禁
+
+A源码 `3c4bc28e19abff7863007a2452b331762d10802e`、最终报告 `b2199c2fcc03a41389f69c3a8ac20e69ec7eb87c` 已push并remote/clean核验，代码/测试/指南相对源码diff0。生产只改Claude错误用量逐字段归一化和真实失败exit的zero处理；成功真实zero、失败已知正值/partial、raw和原终态/取消guard保留。主控实际读取原89 passed7.49秒日志、Windows与Linux类型目标各10源文件strict成功；首红7 failed/7 passed3.97秒保留。新回归经过真实owned Popen/stdout/exit，传输只MockTransport，401 case10次mock请求/1次process invocation，无网络或新live。A worker_done succeeded，精确release retained/no_owned_resource/processAction=none，不声称PTY退出。
+
+I最终代码 `bde3412d2257fd1581ce1d7f88b254fb0c13a269` 已push、remote一致、完整本地gate启动时clean；主控独立验证A3c4/B970/Cbb2均祖先且三个领域树精确diff0。原完整pytest正在运行，不以此前候选测试代替；新CI `36746045909` exact headSha由主控核验，Ubuntu全部步骤success、Windows原pytest仍运行。完整CI日志取回的Azure Blob EOF是只读证据下载失败，不是门禁失败，不触发代码CI重跑或改变测试。新全门禁完成后才作工程最终结论。
+
+主控在不并发Python的情况下，对原作者归档独立作decimal精确复算：1001原数据的mean=10000000.2、sample variance=0.01；全部1001输出residuals满足原1e-8，样本方差误差0.0000000001117587满足原1e-9，原七份artifact摘要已逐份匹配。这是旧真实作者证据的独立只读复核，不是Claude新沙箱复现或第三任务实际采用；完整task_live仍AUTH_BLOCKED/未达成，原失败checker不改写。
