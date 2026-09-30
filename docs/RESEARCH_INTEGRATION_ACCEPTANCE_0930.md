@@ -76,3 +76,12 @@
 - C `5feb507727c19812edcbcdccfc27c12bf9576899` 已 remote 一致、clean；相对已核验 CI 的 `23417b09ffc93fbc432da0f63a7abec2546fd825` 仅4份文档。主控复核 I_HANDOFF 与 README 均使用 inheritance order=original，不把 reverse 不同条件迁移成正向继承；源码/测试/依赖未更改。原本机失败完整分类，不把所有根因归成 OOM。
 - B/C accepted worker_done 后各自精确 worker-release 均为 retained/no_owned_resource/processAction=none，这是 unsupervised 归属结果，不声称开发 PTY 已退出。原 A 旧资源 release_unknown 仍保留。
 - I 已在上述固定基线与治理输入启动 `task_afa0f9c81b55` / `ctx_9e1033019bc7`，真实屏幕 Working。主控未写领域代码；合并候选全门禁及科学 live 仍待 I 实际完成。
+
+### 第一个精确合并候选及真实拒收
+
+- I `85a921c49addcdd46c2cb4a307c3515356b3e186` 已 push、remote 一致、clean；主控先在其源码相同的 `12f99ee9cd224d4301599ae6c159ad217109641b` 验证 A/B/C 均为祖先，三份领域树与 Owner 最终提交 diff --exit-code 全为0。`85a921` 相对 `12f99` 仅合并最终治理文档。
+- I 自有最终锁 CPython3.13 环境中领域 focused140 passed（73.18s），原 package-lock npm 安装 exit0。完整原 pytest 正在串行运行，不能提前写通过。
+- 主控独立读取 exact headSha CI `36728997575`：Ubuntu `1 failed / 1062 passed / 2 skipped / 75 warnings`，388.10s；Windows cancelled，后续 strict/build/SDK/distribution 未完成。首个合并 gate 为 FAILED，原日志由 I 保存 `morph-research-integration-0930-state/ci-36728997575-first-failure.log`。
+- 唯一失败 `tests/native_agents/test_process.py::test_unknown_launch_exit_and_mock_cannot_be_live`：CI 没有 Codex，resolve_executable 先抛 FileNotFoundError，未到原 `pytest.raises(ValueError, match="official CLI")` 防伪断言。不是实际 live 放行；不能靠安装/登录 native CLI、删除/跳过或修改原断言取得绿。已退 A 原 Owner，只在外部发现 fixture 边界修确定性，真实 guard 保留。
+- A 原会话实际显示既有 completed worker_done 后 final idle，再在原 worktree/分支恢复标准授权配置，创建返修 Task `task_b73e5e520a3e` / Dispatch `ctx_85eecf66ce51` / terminal `term_e24cbaa2-8435-47fb-9e02-9bf97a625886`；injected=true 且 actual Working。原 A 交付及原资源 release_unknown 不改写，不广泛清理。I 独占 Python 窗口，A 先做原 fixture/文档的窄返修，不并发测试。
+- I 原无模型权限 probe 被 PowerShell ExecutionPolicy 拒绝，尚未触及目标文件，原失败保留。I 后续报告同一官方 read-only sandbox 的 Node 写 sibling sentinel 实际 EPERM、sentinel 不变；主控要求按本案例实际 read-only 模式记录，不把启动脚本拒绝当文件边界实证。科研 native session 及新外部实验尚未开始。
