@@ -85,3 +85,11 @@
 - 唯一失败 `tests/native_agents/test_process.py::test_unknown_launch_exit_and_mock_cannot_be_live`：CI 没有 Codex，resolve_executable 先抛 FileNotFoundError，未到原 `pytest.raises(ValueError, match="official CLI")` 防伪断言。不是实际 live 放行；不能靠安装/登录 native CLI、删除/跳过或修改原断言取得绿。已退 A 原 Owner，只在外部发现 fixture 边界修确定性，真实 guard 保留。
 - A 原会话实际显示既有 completed worker_done 后 final idle，再在原 worktree/分支恢复标准授权配置，创建返修 Task `task_b73e5e520a3e` / Dispatch `ctx_85eecf66ce51` / terminal `term_e24cbaa2-8435-47fb-9e02-9bf97a625886`；injected=true 且 actual Working。原 A 交付及原资源 release_unknown 不改写，不广泛清理。I 独占 Python 窗口，A 先做原 fixture/文档的窄返修，不并发测试。
 - I 原无模型权限 probe 被 PowerShell ExecutionPolicy 拒绝，尚未触及目标文件，原失败保留。I 后续报告同一官方 read-only sandbox 的 Node 写 sibling sentinel 实际 EPERM、sentinel 不变；主控要求按本案例实际 read-only 模式记录，不把启动脚本拒绝当文件边界实证。科研 native session 及新外部实验尚未开始。
+
+### 窄返修与原标准范围裁定
+
+A阶段 `f37ada292f61a28899666a84a8c988da5a4c0a40` 已 remote 一致、clean，主控实际 diff：只有原 test_process.py 的外部 resolve_executable fixture 与本轨报告，生产树未变，原 raises 类型/quote、unknown 和禁止 fake live 的断言未变。本机验证尚 NOT_RUN，排在 I 串行 full 后；不把阶段提交当最终验收。I 若 full 在当前 worktree 运行，则退出后才合并，不让变化中的运行冒充不可变 gate。
+
+I审查指出科研资产路径没有生成旧 `metabolism.models.UseRecord`。主控重新核对原终端任务：用户要求沿用现有 adoption、区分检索/注入/实际采用及可追溯继承，没有要求该具体旧类。当前 `ConsumptionExecution` 与 `AdoptionReceipt` 复用既有 adoptions 表，绑定 source/child/context/result/时间；record_adoption 先核验真实 completed fenced task、result 一致和目标 bytes，符合原任务的实际使用记录语义。I spec 中多列 UseRecord 是主控范围假设，已以 `msg_ad610e51738d` 纠正；不得为此追加 Gene/代谢存储或手造 UseRecord。
+
+正向科研验收仍必须核验真实持久 Receipt、ConsumptionExecution、canonical attempt/claim/result/bytes 完整链、源经验与子任务关系及检索/注入/采用的区别；没有放宽科学、文件、fencing 或任何原断言/阈值。若既有真实采用链有缺口仍退 B 原 Owner。此为范围裁定，尚无 live 通过证据。
