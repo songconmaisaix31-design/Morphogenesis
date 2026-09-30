@@ -59,3 +59,9 @@
 - ORCA 来源独立核对：`.reference` 为下载文件集而不是 Git clone，不能把其中 `git rev-parse` 向上找到的 Morphogenesis HEAD 当上游 SHA。主控重新从官方 raw URL 的固定 `85f8d6b5f507df795cd3cef1cdea08124cf801ee` 读取 LICENSE 和 print-mode-headless-command.ts；以 `git -c core.autocrlf=false diff --no-index` 对照 A 许可与提交的未改动 TS，均 exit0。Node 实际执行原 TS 的11种 print/json/resume/option-terminator 输入，与显式期望相同，exit0；Node 的 MODULE_TYPELESS_PACKAGE_JSON 非致命警告保留。证据与下载原文件在上述主控 TEMP 目录。这只证明明确来源与原模块协议行为，不替代整个上游 Electron/Vitest 或原生 live。
 - OpenSandbox 上游目录确为独立 Git clone：主控 `rev-parse --show-toplevel`、HEAD 实测 `C:/Users/DW/AppData/Local/Temp/morph-opensandbox-0930` / `b1a29cf93a823a95913f7943010febb3f29de05c`，已读取 release-1.1.0 的官方 Python SDK pyproject。产品 backend 直接调用 SandboxSync、ConnectionConfigSync、RetryPolicy.disabled、官方文件/命令/状态/interrupt API；没有新增容器运行时。真实修复后 live 仍待统一候选。
 - B 两个 plan fixture 失败的源码诊断已交原 Owner：测试用默认 `connection(write=False)` 执行 UPDATE，而既有 context 仅 write=True 时 commit；退出后更新回滚，不能证明生产 guard 缺失。该判断仍为推断，待 B 核实真实持久更新后以原 raises/error/no_reports 断言复验；主控没有修改其实现或测试。
+
+### 用户授权后的执行配置恢复
+
+用户明确授权隔离开发全部权限，解决上述开发 Worker 配置等待。主控只取消两条自有待审批请求；读到两者 Conversation interrupted 后，停止旧低层 Dispatch（processAction=none），再关闭精确自有终端，两个回执均 ptyKilled=true。同一 B/C 原会话在原 worktree 以标准 CLI 参数 `--sandbox danger-full-access --ask-for-approval never` 恢复；不代按原审批，不复制凭据，不把开发权限写成产品能力。
+
+当前 B Dispatch `ctx_e16666128554`、C `ctx_054ccfdf62bf` 均实际 injected=true；领域返修指令分别由 `msg_5b89bc3f5db9`、`msg_e53e560870c8` 持久发送。授权恢复本身不组成测试、科学或 live 通过。原八节任务及八项端到端标准已从历史终端完整读取；新候选与 I live 尚待执行。
