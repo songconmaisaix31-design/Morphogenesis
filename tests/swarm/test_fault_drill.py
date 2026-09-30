@@ -6,6 +6,7 @@ Assertions live outside Worker callbacks. Formal live acceptance is NOT_RUN.
 import json
 from importlib.resources import files
 from pathlib import Path
+import sqlite3
 import subprocess
 import sys
 import time
@@ -18,7 +19,6 @@ from orchestration.fc_logging import validate_event
 from demo.fault_drill import (
     LABELS, executor, make_worker, peer_sequence, prepare, process, reservations, run_drill,
 )
-from swarm.worker_loop import ExecutionResult
 from swarm.models import BudgetPolicy, RunLimits
 
 
@@ -100,8 +100,8 @@ def test_cooldown_probe_and_recovery_watermark(completed):
 
 def test_all_unified_log_rows_match_frozen_schema_and_actual_facts(completed):
     directory, result = completed
-    # A packages the be4fb7a frozen fence; the older source-tree draft may differ.
-    # Reuse that contract, never a copied/reinvented schema.
+    # Resource validity is separate from the SHA-scoped H3 equality evidence
+    # archived in docs/tracks/fc-stable-drill-0930.md.
     schema = json.loads(files("orchestration").joinpath("fc_log_schema.json").read_text(encoding="utf-8"))
     validator = Draft202012Validator(schema)
     path = Path(result["fc_log_path"])
@@ -130,21 +130,22 @@ def test_all_unified_log_rows_match_frozen_schema_and_actual_facts(completed):
 def test_unknown_effect_default_policy_stops_without_releasing_hold(tmp_path):
     config = prepare(tmp_path / "unknown")
     config = config.model_copy(update={"budget": config.budget.model_copy(update={"allow_unknown_usage": False})})
-    first, second = executor("alpha"), executor("beta")
-    first.execute.return_value = ExecutionResult(None, None, uncertain=True, metadata={
-        "classification": "unknown_effect", "normalized_reason": "read_timeout"})
-    first.execute.side_effect = None
+    first = executor("alpha", reject_tasks=("fixture-0",), rejection_status=503)
+    second = executor("beta")
     worker = make_worker(config, [first, second])
     outcome = process(worker, "fixture-0")
     assert outcome["outcome"] == "sleeping"
-    assert first.execute.call_count == 1 and second.execute.call_count == 0
+    assert len(first.calls) == 1 and len(second.calls) == 0
     row, = reservations(worker)
     assert row["status"] == "uncertain" and row["reserved_usd"] == 0.2
     assert row["tokens"] is None and row["cost"] == "unknown"
     assert worker.budget.snapshot().reason == "unknown_usage"
+    fact, = worker.fault_observation_store.read().records
+    assert fact.failure_class == "unknown_effect" and fact.switched_to is None
+    assert fact.cost_state == "unknown" and fact.evidence_ref
     restarted = make_worker(config, [first, second])
     assert restarted.run()["state"] == "sleeping"
-    assert first.execute.call_count == 1 and second.execute.call_count == 0
+    assert len(first.calls) == 1 and len(second.calls) == 0
     assert reservations(restarted) == [row]
 
 
@@ -157,7 +158,7 @@ def test_all_suspended_exits_without_send_or_new_hold(tmp_path):
         before = reservations(worker_a)
         outcome = process(contender, "fixture-3")
     assert outcome["outcome"] == "sleeping"
-    assert blocked.bound.call_count == 1 and blocked.execute.call_count == 0
+    assert len(blocked.bound_calls) == 1 and len(blocked.calls) == 0
     assert reservations(contender) == before
     assert not outcome["task"]["effect_applied"] and outcome["task"]["result_id"] is None
 
@@ -169,7 +170,7 @@ def test_mock_policy_still_enforces_budget_capacity(tmp_path):
     worker = make_worker(config, [first, second])
     outcome = process(worker, "fixture-0")
     assert outcome["outcome"] == "sleeping"
-    assert first.execute.call_count == 1 and second.execute.call_count == 0
+    assert len(first.calls) == 1 and len(second.calls) == 0
     row, = reservations(worker)
     assert row["reserved_usd"] == 0.2 and row["status"] == "uncertain"
     assert worker.budget.snapshot().reserved_estimate_usd == 0.2
@@ -183,10 +184,131 @@ def test_mock_policy_still_enforces_attempt_limit(tmp_path):
     worker = make_worker(config, [first, second])
     outcome = process(worker, "fixture-0")
     assert outcome["outcome"] == "sleeping"
-    assert first.execute.call_count == 1 and second.execute.call_count == 0
+    assert len(first.calls) == 1 and len(second.calls) == 0
     row, = reservations(worker)
     assert row["status"] == "uncertain" and row["reserved_usd"] == 0.2
     assert row["request_id"] == "fixture-0:1:0"
+
+
+def test_worker_calls_explicit_executor_and_persists_its_unbounded_contract(tmp_path):
+    config = prepare(tmp_path / "contract")
+    first = executor("alpha", reject_tasks=("fixture-0",))
+    second = executor("beta")
+    worker = make_worker(config, [first, second])
+    result = process(worker, "fixture-0")
+    assert result["outcome"] == "completed"
+    assert len(first.calls) == len(second.calls) == 1
+    rows = reservations(worker)
+    assert len(rows) == 2
+    for adapter, row in zip((first, second), rows, strict=True):
+        call, = adapter.calls
+        signal, = adapter.bound_calls
+        assert call.signal == signal == worker.ledger.get("fixture-0").signal
+        assert call.attempt.task_id == signal.task_id
+        assert call.attempt.agent == config.agent and call.attempt.attempt == 0
+        assert call.repository == config.target
+        assert call.directory.is_relative_to(config.state / "execution")
+        assert call.base_revision and call.base_head and call.experience is None
+        bound = json.loads(row["body"])["bound"]
+        assert (bound["provider"], bound["model"]) == (adapter.provider, "fixture")
+        assert bound["request_bound"] == "unbounded" and bound["provider_enforced"] is False
+        assert bound["max_cost_usd"] is bound["bound_evidence"] is None
+        assert row["worker_id"] == worker.worker_id
+        assert row["reserved_usd"] == 0.2 and row["tokens"] is None
+    fact, = worker.fault_observation_store.read().records
+    assert fact.failure_class == "confirmed_rejection" and fact.switched_to == "beta:fixture"
+    assert fact.normalized_reason == "billing_arrearage" and fact.cost_state == "unknown"
+
+
+@pytest.mark.parametrize("policy_update", [
+    {"unbounded_reservation_usd": None}, {"max_tokens": 1},
+])
+def test_explicit_bound_cannot_bypass_real_budget_admission(tmp_path, policy_update):
+    config = prepare(tmp_path / "no-admission")
+    config = config.model_copy(update={"budget": config.budget.model_copy(update=policy_update)})
+    first, second = executor("alpha"), executor("beta")
+    worker = make_worker(config, [first, second])
+    result = process(worker, "fixture-0")
+    assert result["outcome"] == "sleeping"
+    assert len(first.bound_calls) == 1 and second.bound_calls == []
+    assert first.calls == second.calls == []
+    assert reservations(worker) == []
+    assert not result["task"]["effect_applied"] and result["task"]["result_id"] is None
+
+
+def test_fixture_input_limit_survives_explicit_bound_before_reservation(tmp_path):
+    config = prepare(tmp_path / "invalid-input")
+    adapter = executor("alpha")
+    worker = make_worker(config, [adapter])
+    signal = worker.ledger.get("fixture-0").signal
+    lease = worker.leases.acquire(signal.task_id, worker.worker_id, ttl_seconds=60,
+                                  locality=config.locality)
+    assert lease is not None
+    invalid = signal.model_copy(update={"payload": {"changes": []}})
+    assert worker._process(invalid, lease) == "failed"
+    assert len(adapter.bound_calls) == 1 and adapter.calls == []
+    assert reservations(worker) == []
+    assert not worker.ledger.get(signal.task_id).effect_applied
+
+
+def test_unknown_effect_stops_even_when_unknown_usage_is_allowed(tmp_path):
+    config = prepare(tmp_path / "unknown-allowed")
+    first = executor("alpha", reject_tasks=("fixture-0",), rejection_status=503)
+    second = executor("beta")
+    worker = make_worker(config, [first, second])
+    result = process(worker, "fixture-0")
+    assert result["outcome"] == "sleeping" and result["task"]["status"] == "blocked"
+    assert len(first.calls) == 1 and second.calls == []
+    row, = reservations(worker)
+    assert row["status"] == "uncertain" and row["reserved_usd"] == 0.2
+    assert row["tokens"] is row["estimate_usd"] is row["admitted_usd"] is None
+    restarted = make_worker(config, [first, second], instance=1)
+    assert restarted.leases.acquire("fixture-0", restarted.worker_id, ttl_seconds=60,
+                                    locality=config.locality) is None
+    assert reservations(restarted) == [row] and len(first.calls) == 1
+
+
+def test_stale_token_is_fenced_before_executor_bound_and_admission(tmp_path):
+    config = prepare(tmp_path / "stale-token")
+    adapter = executor("alpha")
+    worker = make_worker(config, [adapter])
+    signal = worker.ledger.get("fixture-0").signal
+    old = worker.leases.acquire(signal.task_id, worker.worker_id, ttl_seconds=60,
+                                locality=config.locality)
+    assert old is not None and worker.leases.release(old)
+    current = worker.leases.acquire(signal.task_id, "peer", ttl_seconds=60,
+                                    locality=config.locality)
+    assert current is not None and current.token > old.token
+    assert worker._process(signal, old) == "failed"
+    assert adapter.bound_calls == adapter.calls == [] and reservations(worker) == []
+    assert worker.leases.is_valid(current)
+    record = worker.ledger.get(signal.task_id)
+    assert record.owner == "peer" and record.token == current.token and not record.effect_applied
+
+
+def test_expired_execution_lease_keeps_hold_and_cannot_apply_or_retry(tmp_path):
+    with time_machine.travel(1800000000.0, tick=False) as clock:
+        config = prepare(tmp_path / "expired-send")
+        first = executor("alpha", before_execute=lambda: clock.shift(60.0))
+        second = executor("beta")
+        worker = make_worker(config, [first, second])
+        before = (config.target / "module_0" / "task_0.py").read_bytes()
+        result = process(worker, "fixture-0")
+        assert result["outcome"] == "failed" and result["task"]["status"] != "completed"
+        assert len(first.calls) == 1 and second.calls == []
+        assert not result["task"]["effect_applied"] and result["task"]["result_id"] is None
+        assert (config.target / "module_0" / "task_0.py").read_bytes() == before
+        row, = reservations(worker)
+        assert row["status"] == "uncertain" and row["reserved_usd"] == 0.2
+        assert row["tokens"] is None and row["cost"] == "unknown"
+        with sqlite3.connect(worker.ledger.path) as db:
+            request_id, = db.execute("SELECT unconfirmed_request_id FROM tasks WHERE swarm_id=? AND task_id=?",
+                                     (config.swarm_id, "fixture-0")).fetchone()
+        assert request_id == row["request_id"]
+        restarted = make_worker(config, [first, second], instance=1)
+        assert restarted.leases.acquire("fixture-0", restarted.worker_id, ttl_seconds=60,
+                                        locality=config.locality) is None
+        assert len(first.calls) == 1 and reservations(restarted) == [row]
 
 
 def test_cli_refuses_existing_directory_without_mutation(tmp_path):
