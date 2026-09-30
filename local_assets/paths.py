@@ -7,6 +7,7 @@ from pathlib import Path, PurePosixPath
 import re
 import stat
 import subprocess
+import sys
 
 from local_assets.models import AssetSafetyError
 
@@ -53,10 +54,11 @@ def no_links(path: Path) -> None:
             continue
         # Reuse one non-following snapshot for the same checks as pathlib's
         # is_symlink/is_junction/is_file, without repeated filesystem reads.
-        reparse_tag = getattr(metadata, "st_reparse_tag", None)
-        if stat.S_ISLNK(metadata.st_mode) or (reparse_tag is not None
-                                            and reparse_tag == stat.IO_REPARSE_TAG_MOUNT_POINT):
+        if stat.S_ISLNK(metadata.st_mode):
             raise AssetSafetyError("symlink_or_junction")
+        if sys.platform == "win32":
+            if metadata.st_reparse_tag == stat.IO_REPARSE_TAG_MOUNT_POINT:
+                raise AssetSafetyError("symlink_or_junction")
         if stat.S_ISREG(metadata.st_mode) and metadata.st_nlink > 1:
             raise AssetSafetyError("hardlinked_path")
 
