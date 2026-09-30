@@ -159,11 +159,14 @@ class ExperimentExecutor:
                     capture(f"outputs/{name}", session.download(f"{DIRECTORY}/{name}", plan.resources.artifact_bytes))
                 except Exception as error:
                     capture(f"download-{name}.json", json.dumps({"error_type": type(error).__name__}).encode())
-                    if name == "metrics.json" and state == "succeeded":
+                    if state == "succeeded":
                         result = result.model_copy(update={"execution_state": "missing_artifact",
                             "reasons": (*result.reasons, "required_artifact_unreadable")})
             if plan.mode == "notebook" and (root / "outputs/kernel.json").is_file():
                 result = result.model_copy(update={"kernel_id": json.loads((root / "outputs/kernel.json").read_bytes()).get("kernel_id")})
+            if plan.mode != "script" and not result.kernel_id and result.execution_state == "succeeded":
+                result = result.model_copy(update={"execution_state": "missing_artifact",
+                    "reasons": (*result.reasons, "fresh_kernel_identity_missing")})
             if result.execution_state == "succeeded":
                 result = result.model_copy(update={"scientific": assess(plan, inputs["data"],
                     (root / "outputs/metrics.json").read_bytes())})
@@ -232,9 +235,20 @@ def read_result(archive_root: Path | str, run_id: str, *, expected_plan: Experim
     if result.execution_state == "succeeded":
         names = {artifact.archive_path for artifact in result.artifacts}
         required = {f"inputs/{result.plan.code.name}", f"inputs/{result.plan.data.name}",
-                    "execution.json", "runtime.json", "outputs/metrics.json"}
+                    "sandbox.json", "execution.json", "runtime.json", "outputs/metrics.json"}
+        if result.plan.mode == "notebook":
+            required |= {"outputs/kernel.json", "outputs/executed.ipynb"}
         if not required <= names:
             raise ValueError("missing_durable_evidence")
+        sandbox_info = json.loads((root / "sandbox.json").read_bytes())
+        metadata = sandbox_info.get("metadata", {})
+        expected_metadata = {"morph-run": result.context.run_id, "morph-task": result.context.task_id,
+                             "morph-worker": result.context.worker_id, "morph-fence": str(result.context.fencing_token)}
+        if (not result.sandbox_id or sandbox_info.get("id") != result.sandbox_id or
+                any(metadata.get(key) != value for key, value in expected_metadata.items())):
+            raise ValueError("sandbox_identity_binding_mismatch")
+        if result.plan.mode != "script" and not result.kernel_id:
+            raise ValueError("fresh_kernel_identity_missing")
         for input_item in (result.plan.code, result.plan.data):
             if digest((root / "inputs" / input_item.name).read_bytes()) != input_item.sha256:
                 raise ValueError("input_digest_mismatch")

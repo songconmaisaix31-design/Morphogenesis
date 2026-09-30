@@ -23,15 +23,18 @@ class LocalContractSession:
     kernel_id = None
     id = "mock-sandbox"
 
-    def __init__(self, root: Path, mode: str = "success") -> None:
+    def __init__(self, root: Path, mode: str = "success", ctx=None) -> None:
         self.root = root
         self.mode = mode
         self.destroyed = self.closed = False
         self.calls = 0
+        self.context = ctx
         root.mkdir()
 
     def info(self):
-        return {"id": self.id, "status": {"state": "RUNNING"}}
+        return {"id": self.id, "status": {"state": "RUNNING"},
+                "metadata": {"morph-run": self.context.run_id, "morph-task": self.context.task_id,
+                             "morph-worker": self.context.worker_id, "morph-fence": str(self.context.fencing_token)}}
 
     def renew(self, seconds):
         return {"seconds": seconds}
@@ -102,7 +105,7 @@ class LocalContractBackend:
         self.create_calls += 1
         if self.mode == "create_unknown":
             raise httpx.ReadTimeout("secret")
-        self.session = LocalContractSession(self.root, self.mode)
+        self.session = LocalContractSession(self.root, self.mode, context)
         return self.session
 
 
@@ -169,6 +172,12 @@ def test_binding_integrity_and_raw_recalculation(tmp_path):
     fake["scientific"]["metrics"]["sample_variance"] = 999
     record.write_text(json.dumps(fake))
     assert read_result(tmp_path / "archive", context().run_id).scientific.metrics["sample_variance"] != 999
+    fake["sandbox_id"] = "other-sandbox"
+    record.write_text(json.dumps(fake))
+    with pytest.raises(ValueError, match="sandbox_identity_binding_mismatch"):
+        read_result(tmp_path / "archive", context().run_id)
+    fake["sandbox_id"] = result.sandbox_id
+    record.write_text(json.dumps(fake))
     (Path(result.archive_path) / "outputs/metrics.json").write_text("{}")
     with pytest.raises(ValueError, match="artifact_digest_mismatch"):
         read_result(tmp_path / "archive", context().run_id)

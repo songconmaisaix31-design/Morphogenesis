@@ -67,8 +67,9 @@ class OpenSandboxSession:
     def upload(self, path: str, data: bytes) -> None:
         if not self.owned:
             raise PermissionError("attached_session_read_only")
-        self.sandbox.files.create_directories([WriteEntry(path=str(PurePosixPath(path).parent), mode=0o700)])
-        self.sandbox.files.write_file(path, data, mode=0o600)
+        # execd interprets decimal digit strings as octal: mode=700, not 0o700.
+        self.sandbox.files.create_directories([WriteEntry(path=str(PurePosixPath(path).parent), mode=700)])
+        self.sandbox.files.write_file(path, data, mode=600)
 
     def download(self, path: str, limit: int) -> bytes:
         # SDK binary streaming; never encode binary blobs into MCP text.
@@ -111,6 +112,8 @@ class OpenSandboxSession:
         # Always an explicit fresh context, never the SDK's default shared kernel.
         self.interpreter = CodeInterpreterSync.create(sandbox=self.sandbox)
         context = self.interpreter.codes.create_context("python")
+        if not context.id:
+            raise RuntimeError("fresh_kernel_identity_missing")
         self.kernel_id = context.id
         execution = self.interpreter.codes.run(code, context=context)
         if execution.id:

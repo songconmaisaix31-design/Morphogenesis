@@ -1,6 +1,7 @@
 """Reject weakened scientific policy and unsafe attached-session operations."""
 
 from pathlib import Path
+import json
 from unittest.mock import Mock
 
 import pytest
@@ -70,6 +71,48 @@ def test_owned_command_id_required_for_cancellation():
     session.command_ids.add("our-command")
     session.cancel("our-command")
     sandbox.commands.interrupt.assert_called_once_with("our-command")
+
+
+def test_sdk_upload_uses_octal_digits_not_python_octal_integer():
+    sandbox = Mock(id="owned")
+    session = OpenSandboxSession(sandbox, owned=True)
+    session.upload("/tmp/research/file.bin", b"\x00\xff")
+    entry = sandbox.files.create_directories.call_args.args[0][0]
+    assert entry.path == "/tmp/research" and entry.mode == 700
+    sandbox.files.write_file.assert_called_once_with("/tmp/research/file.bin", b"\x00\xff", mode=600)
+
+
+def test_official_110_directory_and_binary_upload_wire_contract():
+    import httpx
+    from opensandbox.config import ConnectionConfigSync
+    from opensandbox.models.sandboxes import SandboxEndpoint
+    from opensandbox.sync.adapters.filesystem_adapter import FilesystemAdapterSync
+
+    requests = []
+
+    def capture(request):
+        body = request.read()
+        requests.append((request.url.path, body, request.headers["content-type"]))
+        return httpx.Response(200, content=b"{}", request=request)
+
+    config = ConnectionConfigSync(transport=httpx.MockTransport(capture), use_server_proxy=True)
+    files = FilesystemAdapterSync(config, SandboxEndpoint(endpoint="localhost:44772"))
+    sandbox = Mock(id="wire", files=files)
+    session = OpenSandboxSession(sandbox, owned=True)
+    try:
+        session.upload("/tmp/research/file.bin", b"\x00\xff\x80")
+        path, raw, _ = requests[0]
+        assert path == "/directories"
+        body = json.loads(raw)
+        assert body["/tmp/research"]["mode"] == 700
+        assert "8" not in str(body["/tmp/research"]["mode"])
+        path, raw, content_type = requests[1]
+        assert path == "/files/upload" and content_type.startswith("multipart/form-data")
+        assert b'"mode": 600' in raw and b"\x00\xff\x80" in raw
+    finally:
+        # Official 1.1.0 has no public FilesystemAdapterSync.close method.
+        # In production SandboxSync owns this shared connection transport.
+        files._httpx_client.close()
 
 
 def test_plan_roundtrip_preserves_missing_zero_and_unknown_semantics():
