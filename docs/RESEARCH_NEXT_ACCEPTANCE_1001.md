@@ -1,6 +1,6 @@
 # 1001主控状态与独立验收
 
-Run run_e54c8f113bfd，主控term_bdbac2dc-861f-4ba9-af30-f44bd35cc2d7。只分发/校验，领域代码由固定Owner负责。A进程轨contract_local已交付并独立核对，B闭环契约prepared已交付；新累计工程与完整task_live仍未通过。
+Run run_e54c8f113bfd，主控term_bdbac2dc-861f-4ba9-af30-f44bd35cc2d7。只分发/校验，领域代码由固定Owner负责。冻结核心CBC的完整本地工程及双平台CI已通过；正式case01启动配置失败，原完整科研检查器RED，三角色task_live仍未完成。以下记录按阶段保留，当前状态见末尾。
 
 | 轨道 | Task / 当前Dispatch | 实际启动状态 |
 |---|---|---|
@@ -35,3 +35,17 @@ B最终a060564dee6d7fa790b64583fd76301e95eadb54已remote一致/clean；主控实
 - CBC CI36762330605 Ubuntu真实1106pass/3skip/75warnings483.27s、strict116/build/SDK/实际wheel13-node passed；主控实际读job完整step success及归档rawlog。I本机strict116/build/SDK/actualwheel13/新增模块/原桥接隔离和旧ef77迁移通过，首继承镜像poetry_core下载403保留，仅自身构建进程选官方index。原fullWindows运行中；一次GitHub read transport timeout只标unverified，不当CI失败/成功、不重跑CI或改全局网络。
 
 P独立安装和B完整审核与I工程门禁并行；无具体产品胶水时不额外创建integration worktree/branch，I可在自己的sibling state安装固定9dd并使用正式setup/doctor。正式case clock仍未创建，所有科研native/实验仍NOT_RUN；只有适用全量工程、独立产品入口与完整角色契约审核通过后，root明确放行新命名案例，原fullchecker真实通过后才抽离NIST/第二类任务/扩更多Agent。
+
+## 20:22 UTC累计工程通过与正式case01原红
+
+主控实际读取冻结CBC原完整Windows日志1104pass/5skip/75warnings662.09s及双平台CI36762330605原日志：Ubuntu1106pass/3skip，Windows1104pass/5skip，原strict116/build/SDK/wheel13+Node均通过。第一次temp配置红、构建403及网络读取错误保留，不改断言或重跑CI。
+
+A同Owner独立生产安装报告776992fcd0a1d4d1993e455d9e76c7732df54093已核对remote/clean/文档范围：新env实际88冻结依赖、13产品Git/archive/wheel/site bytes一致、正式setup/doctor/双角色inspect/只读observe与未满足依赖拒绝通过。B独立审核c4d46b9325884687571166fa0227ca1214d8c0d9已核对remote/clean，两授权文档；仅prepared/local，无模型/API/实验。两Owner已正常结算并保留终端，没有代签live。
+
+msg_6787ea8873ad释放唯一research-formal-1001-01。I通过安装的P9dd正式入口init后，首interrupt真实失败exit1：`invalid transport in mcp_servers.\"motionsites\"`，native UUID=null、JSONL空、wall0.2250438s、interruption=false，native usage/cost=null、remote_effect=unknown。原完整checker39948d9615bce07b40b96eeaf5dfb263b993c6d3真实执行exit1/line91（MCP尚未创建assets）；依赖的resume/peer/child/三实验/adoption全部NOT_RUN。失败clock/raw/ledger不重置、不移植。I原红证据9bc43b5c8541669755eaa74e9cc9eee3eee36c53与当前ac2d9714dde0517ebf2620c4be80cf6cc1a7ef8d仅自身报告，主控实际remote/clean核对后者。
+
+P原Owner同worktree/branch接续修复task_f097d52044ab/ctx_7fc78623748b，实际ready/turn_started。P已报告官方0.159 `config/overrides.rs:23`按点拆路径但不去引号；产品`json.dumps(name)`的dotted禁用键制造enabled-only的带引号phantom，transport先于enabled反序列化。已有正常根表具有transport，当前证据不归罪用户全局配置。官方root空表override递归合并不能删除继承项。
+
+主控msg_3bdde9184074批准最小正式修复：root inline TOML保留合法继承配置但禁用，运行时只有研究MCP有效；真正非法继承配置fail-closed。原11许可调用/read-only/never/per11approve/defaultprompt及原完整checker不变。只允许无secret无auth临时测试子进程CODEX_HOME fixture验证真实官方parser旧RED→新PASS；生产HOME/账号/provider/model与凭据不改、不复制。产品修复、测试、文档和push继续由同P负责，I只能独立安装验收。
+
+精确reply msg_a58c340c02ad已解除I原ask msg_a75a214684f4：sole owned server可在短期修复期间保持运行（full ID eb6152fbdee01a0044cc1fdd881cf05c00dbbf3905411bc6c5a480f6a7141ec6，owner research-c-0930）；不得额外API/smoke/管理其他容器。case01未知效果保留，不重试失败阶段。新命名case02须P准确修复冻结、适用测试及I独立正式入口验证之后另行明确释放；目前未释放。完整三角色原checker通过前不抽离NIST、不开展第二任务或更多Agent运行时。
