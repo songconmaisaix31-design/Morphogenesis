@@ -1,0 +1,5 @@
+# Keep the fetched NIST bytes and executable source identical on every checkout.
+NumAcc4.dat -text
+*.py text eol=lf
+*.ipynb text eol=lf
+*.json text eol=lf

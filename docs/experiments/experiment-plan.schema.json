@@ -1,0 +1,253 @@
+{
+  "$defs": {
+    "ExperimentCriteria": {
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": "nist-numacc4-v1",
+          "default": "nist-numacc4-v1",
+          "title": "Version",
+          "type": "string"
+        },
+        "sample_variance": {
+          "default": 0.01,
+          "maximum": 0.01,
+          "minimum": 0.01,
+          "title": "Sample Variance",
+          "type": "number"
+        },
+        "variance_absolute_tolerance": {
+          "default": 1e-09,
+          "maximum": 1e-09,
+          "minimum": 1e-09,
+          "title": "Variance Absolute Tolerance",
+          "type": "number"
+        },
+        "mean_absolute_tolerance": {
+          "default": 1e-08,
+          "maximum": 1e-08,
+          "minimum": 1e-08,
+          "title": "Mean Absolute Tolerance",
+          "type": "number"
+        },
+        "residual_absolute_tolerance": {
+          "default": 1e-08,
+          "maximum": 1e-08,
+          "minimum": 1e-08,
+          "title": "Residual Absolute Tolerance",
+          "type": "number"
+        },
+        "observations": {
+          "const": 1001,
+          "default": 1001,
+          "title": "Observations",
+          "type": "integer"
+        }
+      },
+      "title": "ExperimentCriteria",
+      "type": "object"
+    },
+    "ExperimentEnvironment": {
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "python_version": {
+          "const": "3.12",
+          "default": "3.12",
+          "title": "Python Version",
+          "type": "string"
+        },
+        "sdk_version": {
+          "const": "1.1.0",
+          "default": "1.1.0",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "backend": {
+          "const": "opensandbox",
+          "default": "opensandbox",
+          "title": "Backend",
+          "type": "string"
+        }
+      },
+      "required": [
+        "image"
+      ],
+      "title": "ExperimentEnvironment",
+      "type": "object"
+    },
+    "ExperimentInput": {
+      "additionalProperties": false,
+      "properties": {
+        "local_path": {
+          "title": "Local Path",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "local_path",
+        "name",
+        "sha256",
+        "source"
+      ],
+      "title": "ExperimentInput",
+      "type": "object"
+    },
+    "ExperimentResources": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "default": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "title": "Cpu",
+          "type": "integer"
+        },
+        "memory_mib": {
+          "default": 512,
+          "maximum": 2048,
+          "minimum": 256,
+          "title": "Memory Mib",
+          "type": "integer"
+        },
+        "lifetime_seconds": {
+          "default": 180,
+          "maximum": 900,
+          "minimum": 30,
+          "title": "Lifetime Seconds",
+          "type": "integer"
+        },
+        "command_seconds": {
+          "default": 30,
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Command Seconds",
+          "type": "integer"
+        },
+        "artifact_bytes": {
+          "default": 1048576,
+          "maximum": 16777216,
+          "minimum": 1024,
+          "title": "Artifact Bytes",
+          "type": "integer"
+        }
+      },
+      "title": "ExperimentResources",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "plan_id": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "claim": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "title": "Claim",
+      "type": "string"
+    },
+    "role": {
+      "enum": [
+        "author",
+        "replication",
+        "inheritance"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "code": {
+      "$ref": "#/$defs/ExperimentInput"
+    },
+    "data": {
+      "$ref": "#/$defs/ExperimentInput"
+    },
+    "environment": {
+      "$ref": "#/$defs/ExperimentEnvironment"
+    },
+    "criteria": {
+      "$ref": "#/$defs/ExperimentCriteria"
+    },
+    "resources": {
+      "$ref": "#/$defs/ExperimentResources"
+    },
+    "mode": {
+      "default": "script",
+      "enum": [
+        "script",
+        "notebook",
+        "codeinterpreter"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "parameters": {
+      "default": [
+        "original"
+      ],
+      "items": {
+        "enum": [
+          "original",
+          "reverse"
+        ],
+        "type": "string"
+      },
+      "title": "Parameters",
+      "type": "array"
+    },
+    "seed": {
+      "const": 0,
+      "default": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "output_name": {
+      "const": "metrics.json",
+      "default": "metrics.json",
+      "title": "Output Name",
+      "type": "string"
+    },
+    "persistent_volume": {
+      "anyOf": [
+        {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,62}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Persistent Volume"
+    }
+  },
+  "required": [
+    "plan_id",
+    "claim",
+    "role",
+    "code",
+    "data",
+    "environment"
+  ],
+  "title": "ExperimentPlan",
+  "type": "object"
+}

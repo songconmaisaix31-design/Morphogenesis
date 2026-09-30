@@ -1,0 +1,5 @@
+# Optional formal NotebookClient environment; building/running is a separate gate.
+FROM python:3.12.13-slim@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36
+RUN python -m pip install --no-cache-dir nbclient==0.10.4 nbformat==5.10.4 ipykernel==6.31.0
+ENV OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
+CMD ["tail", "-f", "/dev/null"]
