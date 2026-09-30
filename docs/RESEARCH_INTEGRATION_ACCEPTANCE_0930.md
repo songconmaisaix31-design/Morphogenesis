@@ -27,3 +27,14 @@
 | 无ORCA产品链 | NOT_RUN | 独立入口、无ORCA argv/env/运行时依赖，原生认证不复制HOME、不绕过权限 |
 
 所有 Owner 自测与主控独立验收分列；最终报告不合并 mock/live 或工程CI/科研 task_live 结论。
+
+## 主控检查点：原失败及冻结候选（2026-09-30）
+
+- A最终648f43c54203f555b1b05827cfe119c8e3dfa622已push，remote/HEAD一致、工作树clean、19个改动路径均在A所有权内。Owner报告75个新contract、11个旧Codex兼容测试、10个严格类型文件及build/wheel通过。主控在同SHA独立运行 `python -m orchestration.native_agents probe`：Codex 0.159.0与Claude Code 2.1.238均版本匹配、官方认证true、版本/认证exit0。此为真实前置探测，不是模型调用、MCP或task_live。A固定Owner保留至集成返修结束。
+- B阶段29446a0bf6619310a448599292b9197662425dc9的独立LF archive门禁失败(exit1)：真实TaskLedger调用一次mock backend，backend返回succeeded/exit0但缺effect_state，`assert_execution_confirmed`错误放行。原断言为缺effect必须保留unconfirmed，未改变；修复候选9f20d34a4e4f1e760a6449d029314957e8c9f210已push，待同断言独立复验。不将Owner新增自测代替原失败门禁。
+- B同时退回旧Candidate canonical JSON兼容问题及科学计划role/local_path等价问题。完整原计划必须保存；只排除运行角色和本地输入路径，代码/数据/参数/条件/环境仍相同才可复现。旧literal资产身份、报告、批准、consumption、adoption必须用实际ef77持久记录核验。
+- C首次live `interface-c-0930-01`（6179d41b336443e915b76d4da87b5267bec5193a）exit1：官方create/status/connect/renew已发生，目录API把0o700转换的448发送到wire而HTTP500，科研command_request_count=0。原result的execution/cleanup/remote effect保持unknown、科学not_evaluated、usage/cost=null。该run不重放，也不事后改绿。
+- 同sandbox 96c5f98a-a204-4a69-8830-b5a34a91618c的后续独立只读GET=404、官方DELETE日志204且按ID/标签无残余容器，是后续清理事实，不改变首次失败。C修复SDK wire700/600并保留原失败及官方MockTransport回归；新候选23417b09ffc93fbc432da0f63a7abec2546fd825已远端核验，修复后interface/task尚NOT_RUN。
+- C初全库诊断exit1：98 failed、785 passed、69 errors；运行期间SHA曾变化且Node锁依赖未安装，因此不能当不可变候选验收。保留失败及工具截断说明；允许仅npm ci --ignore-scripts补原锁依赖，在新冻结SHA用原测试/阈值作一轮门禁，不修改Node manifests/lock、不跳过失败测试。
+- OpenSandbox发行SDK1.1.0官方重试及遥测disabled；公开NumAcc4原CRLF bytes完整性值固定，不把LF归一化数据当原bytes。正式验证通过原始输入和Fraction重算，不信Agent指标、自评或exit0。
+- 最终I须使用实际宿主初始化入口和两种原生运行时；只合并与少量胶水，缺案例领域入口退回B/C原Owner。科研mock/replay仍不能批准；所有live门禁尚未通过。
