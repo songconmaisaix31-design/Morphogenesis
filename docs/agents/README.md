@@ -74,6 +74,8 @@ Windows headless 使用一次 Python 启动屏障：先给新进程分配官方 
 
 headless 的 timeout / max_tool_calls 是观察上限，不能阻止 CLI 在事件被观察前已发出工具请求，不能充当硬美元/Token封顶；interactive 只有 wall timeout，不承诺工具轮次限制。Codex 不提供本适配器可依赖的硬美元上限，Claude 可选 --max-budget-usd 也不能等同 OAuth 实际账单。CLI 报告 usage 与真实费用结算分开；缺失、null、异常值保持 unknown，测得零才是零，Codex cost 一直 unknown。超时/取消/失去观察后整次 usage 保守回到 unknown，原始已报告值仍保留日志。
 
+Claude result 的 is_error=true / error_* 终态优先于 success 字样。失败或未确认终态可能合成 tokens=0 / cost=0：normalized usage 对每个零字段分别置为 null，保留每个有效正数字段及原 raw 数值；成功明确报告的零保持零。真实进程非零 exit 即便 result 写 success-zero，失败 NativeOutcome 的零仍为 null，原成功 event 的已报告零不重写。缺失/部分无效 token 分量不补数；现有多终态汇总须各项已知才汇总，取消/unknown/远端效果规则不变。reported 正数也不等同完整账单，unknown 不能证明没有消耗。
+
 NativeOutcome completed 仅表示原生 terminal event 与 exit=0 相符，不是科研通过；Acceptance 各门禁始终 not_run，由独立验收基于证据另行判定。原失败留存，错误后出现 completed 不抹去错误，evidence_dir 已存在则拒绝再次调用，不重放原 invocation。
 
 ## 新增第三种 Agent

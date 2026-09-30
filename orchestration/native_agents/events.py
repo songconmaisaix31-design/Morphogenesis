@@ -103,8 +103,14 @@ def parse_event(runtime: RuntimeId, line: str) -> list[NativeEvent]:
                 terminal = "failed"
             elif error is False and raw.get("subtype") == "success":
                 terminal = "completed"
-            usage = Usage(tokens=_tokens(raw.get("usage"), runtime),
-                          cost_usd=_cost(raw.get("total_cost_usd")))
+            tokens = _tokens(raw.get("usage"), runtime)
+            cost = _cost(raw.get("total_cost_usd"))
+            # Error/unconfirmed results can synthesize zeros (e.g. auth failure).
+            # Keep raw reports and positive fields; zero is known only on success.
+            if terminal != "completed":
+                tokens = None if tokens == 0 else tokens
+                cost = None if cost == 0 else cost
+            usage = Usage(tokens=tokens, cost_usd=cost)
         elif native_type in {"assistant", "user"}:
             kind = "message"
             message = raw.get("message")
