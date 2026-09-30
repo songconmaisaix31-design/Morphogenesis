@@ -81,3 +81,20 @@ The coordinator selected existing Claude first-party OAuth for the new named cas
 After explicit launch release, the installed formal CLI must initialize a new disjoint project/state and prove the original full path: three native UUIDs/two brands; author owned interruption before experiment, real TTL, same UUID resume and legal stale renew+submit rejection; each role900s/64 observed tools, runtime3600/attempts3, ONE actual sandbox execution per task; author candidate/original verify/evidence completion; independent reproduction and source file validate/approve/apply; active search, third fresh local validation, inherit child/file validate/approve/apply and actual unique existing AdoptionReceipt/ConsumptionExecution. Then execute the **original byte-unchanged** `tests/integration/check_research_live.py --state <formal-state>` and retain its actual result.
 
 Linux/WSL model live, other Agent runtimes/SDKs, Notebook/Jupyter/Code Interpreter/GPU/volumes, second-case abstraction and Hub/EvoMap remain NOT_RUN. No success of an author-only check, terminal exit, offline fixture or engineering CI substitutes for full task_live.
+
+## Released formal case: first RED, dependent live stopped
+
+Coordinator release `msg_6787ea8873ad` explicitly authorized frozen CBC/P9dd and the selected existing Claude OAuth profile. The engineering checkpoint above preceded that release. I subsequently checked the sole owned service's exact full ID `eb6152fbdee01a0044cc1fdd881cf05c00dbbf3905411bc6c5a480f6a7141ec6`, name `/morph-research-c-0930-server`, owner `research-c-0930` and compose project `morph-research-c-0930`, then restored only that container. Its limits are512MiB/1CPU/pids128; no other container or Docker setting changed. The installed product owns credential handling; no credential value was printed, put in argv or committed.
+
+Actual installed `morph-research init --profile S/research-formal-1001-01-profile.json` succeeded at2026-09-30T20:06:42Z, creating previously absent disjoint `S/research-formal-1001-01-project` and `S/research-formal-1001-01-state`. The swarm is `research-formal-1001-01`, original base revision `57e0765abeb5efb5ab634c11320fddd978d31662`, core pin CBC, installed case inputs and original thresholds. Auth declarations are Codex inherited-selected / Claude inherited-oauth. No observer supplied permission or native argv overrides. Original role budgets and runtime clock are unchanged.
+
+Formal `inspect --phase interrupt` succeeded. First actual `run --phase interrupt` **failed exit1**: native wall0.2250438s, session=null, tool calls0, author available/attempts0/token0, actual interruption=false. Official Codex stderr is exactly:
+
+```text
+Error loading config.toml: invalid transport
+in `mcp_servers."motionsites"`
+```
+
+The native JSONL is empty. Native usage/cost remain null and remote_effect remains unknown; no zero-cost or no-effect inference replaces them. Author discover/claim/renew/interruption, TTL/resume/stale refusals, all three experiments, peer/child and adoption are NOT_RUN. No phase was replayed or overwritten, and no config/HOME/account/provider/model was edited. This launch/config domain failure was handed to the coordinator for the original P Owner (`msg_e3f3c3703b5c`); dependent live paths stopped.
+
+The **original full checker was executed once**, byte-unchanged blob39948d9, against this actual state: `python tests/integration/check_research_live.py --state S/research-formal-1001-01-state`. It **failed exit1 at line91**, authoritative assets directory absent before any MCP session/candidate. This is a full-checker RED, not scientific acceptance; no assertion was removed or relaxed. Original commands, timestamps, exits and raw logs are `S/formal-1001-init.*`, `S/formal-1001-inspect-interrupt.*`, `S/formal-1001-interrupt.*`, `S/formal-1001-full-checker-first.*`; native stderr, launch, observation and ledger audit are under `S/research-formal-1001-01-state`. The failed case's clock, files and old0930 evidence remain intact. The owned service is currently running pending coordinator disposition; the original complete task remains unfinished.
