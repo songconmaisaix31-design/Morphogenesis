@@ -90,3 +90,26 @@ ignored 原始日志为 `.runtime/ci-portability-ffi-native.log`、`ci-portabili
 证据：`tests/native_agents/test_process.py:138` 的外部发现 fixture 与原异常/unknown/live-dir 后置断言；`orchestration/native_agents/windows_job.py:35` 原平台拒绝及其后的原生 FFI 绑定。最终文档提交仅更新本报告，代码/测试树需与 `2f4b515` 机械 diff=0；不为文档重复 suite/strict。
 
 源码候选分支 CI run `36732932318` 在收口时 in_progress，尚无双平台通过结论；合并候选的原完整 gate 仍由 I 执行，不能用本机75或 Linux 静态目标替代。`f37ada2` 的 CI run `36731189645` 保持 failure（Ubuntu strict failure，Windows cancelled）；原 `85a921c` 的首 CI failure 也保持。真实科研 live、原生 SDK、Linux/WSL runtime 仍 NOT_RUN，本轮没有任何模型/OpenSandbox live、公共 main/tag 操作或其它轨道修改。
+
+## 原 Owner 用量返修（2026-10-01）
+
+本次 Task `task_527f87788de5` / Dispatch `ctx_cd11934cb2dd` 从原 A `84d59c167dd7fbb96081ce40b5cdfa5ba32d3bf3`、同 worktree/branch/write_paths 接续；原交付和前述各失败保留，不创建新 Agent/身份，不修改 B/C/I、锁或门禁。
+
+触发记录：I 候选 `363cac52f515f5e810de2e3a65fa83bc8c7b859e` 的真实 Claude 2.1.238 session `5c787eb6-602b-4e03-9fea-313af2b5c826`（依据本次 I Handoff）实际 10 次 api_retry / 401 authentication_failed 后自然 exit1、tools0。只读核对 `C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-integration-0930-state/research-host-7d04/replication-native/native.jsonl` 的结构和允许字段：10 条 system/api_retry，result 为 subtype=success、is_error=true、terminal_reason=api_error，四个 token 分量及 total_cost_usd 均0。原 Usage(0,0) 观察、认证阻塞、原文件和原第三任务 NOT_RUN 不覆盖；没有读取 prompt、凭据值或重新调用模型来验证修复。
+
+规则先与主控明确后实施：Claude failed/未确认终态的零字段分别 normalized=None，有效正 tokens / 正 cost 独立保留；成功明确报告的零保持零。原 is_error=true / error_* 先于 success 的终态 guard 不改。真实 nonzero exit 可使 Invocation 失败，即使 event 明确 success-zero，失败 Outcome 的零也为 None，原 event/raw 报告不重写。原 missing/invalid 分量、多终态须各项已知才汇总、cancel/观察失败整次 unknown、远端效果 unknown、无自动重试规则保持。reported 数据不是可信完整账单，失败零不能证明无消耗。
+
+最小生产改动仅 `events.py:106` 的 Claude result 用量字段与 `process.py:259` 的 failed Outcome 零字段；没有把全部失败清空，已知正数和 partial 字段继续保留。使用指南 `docs/agents/README.md:77` 对应明确此规则。
+
+主控 `msg_ee6955b7c43f` 在 I 所有 Python/原生进程结束后明确移交短窗口。使用 `C:/Python313/python.exe`，仅进程局部 OPENBLAS_NUM_THREADS / OMP_NUM_THREADS / MKL_NUM_THREADS / NUMEXPR_NUM_THREADS=1：
+
+- 首红：原 `84d59c1` 运行源码 + 新回归，`python -m pytest tests/native_agents/test_error_usage.py -q --basetemp=tests/native_agents/.runtime/pytest-error-usage-first --tb=short`，7 failed / 7 passed，3.97s、exit1；七个失败均为模糊零仍被当作已知零，正数/partial/cancel 原正向已通过。原日志 `.runtime/error-usage-first.log` 保留，断言和阈值不修改。
+- 修复：`python -m pytest tests/native_agents -q --basetemp=tests/native_agents/.runtime/pytest-error-usage-fixed --tb=short`，89 passed，7.49s、exit0（原75 + 新14）。原 fixture/断言/阈值保持。
+- `python -m mypy --strict orchestration/native_agents`，Windows 默认目标，10 source files 成功、exit0。
+- `python -m mypy --strict --platform linux orchestration/native_agents`，Linux 类型目标，10 source files 成功、exit0；这是本机静态检查，不是 Linux 原生模型实测。
+
+新 `test_error_usage.py:74` 的12种结果经过真实 run_headless / owned Popen / Windows barrier / stdout /实际 exit，Popen spy 使用 wraps 转发真实实现、每 case 调用1次，子进程 invocation marker 恰一条。子进程 httpx.MockTransport handler 的实际调用数由子进程记录：401复现 case 恰10，其它 case 恰1；Client 使用内存 transport + trust_env=False，无网络/model/API/MCP/sandbox 调用，不读取或变更账号/proxy/认证配置。raw stdout / on_event.raw 保留原数字，tools0，remote_effect 仍 unknown，acceptance 仍 not_run。`:103` 覆盖原失败不会被后 success 抹去及已报告正数保留，`:114` 覆盖正数报告之后实际取消仍 unknown、raw正数保留。这些是 contract_local/mock 传输数据，不能冒充真实401的新 live 或真实模型费用。
+
+运行源码与新测试/指南冻结并 commit+push `3c4bc28e19abff7863007a2452b331762d10802e`，远端 full SHA 一致、clean。最终源码注释已纠正为 failure zeros cannot establish absent billing；纯注释澄清不改变已测试的可执行语句。Python 窗口完成后明确回交 I，随后只收口此报告，不重复 full/native/strict。ignored 原日志还有 `.runtime/error-usage-fixed-native.log`、`error-usage-strict-windows.log`、`error-usage-strict-linux.log`；秘密和本地运行产物未入库。
+
+分支源码候选 CI run `36745648723` 在收口时 in_progress，尚无新双平台/full/build通过结论。I 负责精确合并、原完整门禁与真实 case 收尾；本次仅修正归一化，不解除真实 Claude 认证失败、不补第三任务通过，完整科研 task_live 仍未达成。模型/账号/认证/proxy 原状，原失败 JSONL/归档只读，未新调用任何模型/MCP/OpenSandbox，未操作 main/tag。最终文档提交仅本报告；代码/测试/指南树与 `3c4bc28` 保持机械 diff=0。
