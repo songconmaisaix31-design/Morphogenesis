@@ -50,3 +50,19 @@
 - **三态验收**：`contract_local` = **passed**（合并 SHA 代码与 db283ea 字节一致，CI run `36670085486` 双平台 success：pytest 910 + strict + build/SDK/分发）；`interface_live` = **not_run**（无 live 网关请求，fault_drill 为 mock/SIMULATED）；`task_live` = **not_run**（本轮无真实模型任务执行）。
 - **Tag**：`git tag -a demo-build 86ade3d` → push；`ls-remote` 核 `refs/tags/demo-build = 77becf85`（peeled `86ade3d`），远端无既有同名 tag，未覆盖。
 - **Phase 2（架构切稳定接口）未启动**：本轮未开展，作为后续项保留；perf（全历史扫描）已在本轮轨道 A 内完成。
+
+## Phase 2 接续计划（2026-09-30，保留以上历史记录）
+
+基线固定为 `7cc64e3eb0031a6b06b9482e95707de17dfe0885`。本轮使用 Codex `gpt-6.1-sol`，总控只分配、协调返修和验收；每轨一个 Agent、一个 worktree、一个分支。
+
+| 轨 | Worktree / Branch | 独占 write_paths | 验收责任 |
+|---|---|---|---|
+| R | `morph-fc-stable-runtime-0930` / `songconmaisaix31-design/morph-fc-stable-runtime-0930` | `swarm/worker_loop.py`、`swarm/failure_chain.py`、`tests/swarm/test_failure_chain_boundaries.py`、`tests/swarm/test_failure_chain_runtime.py`、`docs/tracks/fc-stable-runtime-0930.md` | 现有运行时明确类型与模块边界；预算、租约、熔断行为保持；Owner focused/strict |
+| D | `morph-fc-stable-drill-0930` / `songconmaisaix31-design/morph-fc-stable-drill-0930` | `demo/fault_drill.py`、`tests/swarm/test_fault_drill.py`、`docs/tracks/fc-stable-drill-0930.md`、本计划的 Phase 2 追加记录 | 显式离线 Executor 契约、真实 Worker 准入与六阶段模拟行为；独立归档旧候选与 H3 Schema 一致性；Owner focused/strict/离线 CLI |
+| I | 两轨精确 SHA 交付后由总控派发 | 普通精确合并、`tests/integration/**`、必要配置/类型/导入胶水及集成报告 | 独立复验、全量测试、构建、SDK、分发；领域问题回原 Owner |
+
+执行顺序：R/D 在互斥路径开发、各自阶段 commit/push → 总控核对 immutable SHA、remote、diff 和原始退出证据 → I 串行合并及独立检查。D 不预写 R/I 通过。跨轨变更只交 Handoff，不修改内核、冻结 Schema、锁文件、签字材料或他轨实现。
+
+旧 A 的代码 `db283ea` 与 CI 交付事实，和旧 Orca Dispatch abandoned/失败的生命周期事实分列，不能把其中任何一个改写为另一个。此次 R/D 首次启动在 `agent_readiness` 超时；恢复派发后回收旧启动资源误关终端，两个工作树当时无 diff。`codex resume --last` 又继承了总控历史/cwd；总控随后明确更正 D 身份，所有 D 工具显式使用本 worktree。上述机械中断不证明业务失败，也不证明开发完成；实际接续与退出回执在本轨报告记录。
+
+David 的 H1 有条件接收仅锚定原 `db283ea`；本轮源码变化不是原字节，也不自动继承新候选人工签字。DSH 原调用 exit 1，用户已选择接受推理流为评审实质，但它仍非合格结构化正式评审；不重试、不新增调用。`demo-build` 原 Tag 保留。离线入口始终 `provenance=mock` / `SIMULATED`；`interface_live`、`task_live`、Live/Hub/部署 NOT_RUN。本节是接续计划，不是冻结、发布或最终验收证明。
