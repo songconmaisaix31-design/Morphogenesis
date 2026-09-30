@@ -1,6 +1,6 @@
 # I1001 independent integration and acceptance
 
-Engineering and installed-product local gates passed. **New formal task_live is NOT_RUN; the original full live checker has not passed.** This is the engineering checkpoint before the coordinator's explicit formal launch release, not completion of the original research task.
+Engineering and installed-product local gates passed. **The released formal case's first native launch and original full checker failed; three-role scientific task_live remains NOT_RUN.** The original research task is unfinished. The engineering checkpoint and subsequent first RED are recorded separately below.
 
 ## Immutable inputs and ownership
 
@@ -72,7 +72,7 @@ Exact P wheel, frozen requirements, install, source identity and logs are `produ
 
 Product owns permissions and role prompts. Original accepted boundary is11 permitted MCP calls, original exact argv/permissions and no outside calls. Codex0.159 automatically exposes resource helpers/model-selected apply_patch; total catalogue=11 is unsupported. Original checker is unchanged. A raw/normalized outside-tool attempt must remain RED; observation cancellation is not a pre-effect guarantee.
 
-## Formal live checkpoint
+## Pre-release formal live checkpoint
 
 New `research-formal-1001-01` project/state and runtime clock have **not** been created. No model, auth probe, scientific sandbox or service request was made in this phase. Existing owned service remains stopped; its name/full ID/owner label must be checked before any coordinator-released restart. No other Docker resource is managed.
 
@@ -97,4 +97,6 @@ in `mcp_servers."motionsites"`
 
 The native JSONL is empty. Native usage/cost remain null and remote_effect remains unknown; no zero-cost or no-effect inference replaces them. Author discover/claim/renew/interruption, TTL/resume/stale refusals, all three experiments, peer/child and adoption are NOT_RUN. No phase was replayed or overwritten, and no config/HOME/account/provider/model was edited. This launch/config domain failure was handed to the coordinator for the original P Owner (`msg_e3f3c3703b5c`); dependent live paths stopped.
 
-The **original full checker was executed once**, byte-unchanged blob39948d9, against this actual state: `python tests/integration/check_research_live.py --state S/research-formal-1001-01-state`. It **failed exit1 at line91**, authoritative assets directory absent before any MCP session/candidate. This is a full-checker RED, not scientific acceptance; no assertion was removed or relaxed. Original commands, timestamps, exits and raw logs are `S/formal-1001-init.*`, `S/formal-1001-inspect-interrupt.*`, `S/formal-1001-interrupt.*`, `S/formal-1001-full-checker-first.*`; native stderr, launch, observation and ledger audit are under `S/research-formal-1001-01-state`. The failed case's clock, files and old0930 evidence remain intact. The owned service is currently running pending coordinator disposition; the original complete task remains unfinished.
+The **original full checker was executed once**, byte-unchanged blob39948d9, against this actual state: `python tests/integration/check_research_live.py --state S/research-formal-1001-01-state`. It **failed exit1 at line91**, authoritative assets directory absent before any MCP session/candidate. This is a full-checker RED, not scientific acceptance; no assertion was removed or relaxed. Original commands, timestamps, exits and raw logs are `S/formal-1001-init.*`, `S/formal-1001-inspect-interrupt.*`, `S/formal-1001-interrupt.*`, `S/formal-1001-full-checker-first.*`; native stderr, launch, observation and ledger audit are under `S/research-formal-1001-01-state`. The failed case's clock, files and old0930 evidence remain intact.
+
+Coordinator follow-up `msg_858f90d47bd2` assigned the same P Owner the supported configuration repair, kept core/checker fixed and explicitly allowed this sole service to remain temporarily running. Case01 must remain unchanged; a future named02 requires the precise repair, applicable installed gates and explicit launch decision. One formal read-only `observe` succeeded (`S/formal-1001-observe-first-red.*`): all three tasks available/attempts0/token0, exactly three creation events, original runtime_remaining2821.151165s. No experiment, claim, candidate or adoption was fabricated. The original complete task remains unfinished.
