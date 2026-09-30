@@ -34,7 +34,11 @@ class WindowsJob:
     def __init__(self) -> None:
         if os.name != "nt":
             raise OSError("Windows Job Objects are unavailable on this platform")
-        self._api = ctypes.WinDLL("kernel32", use_last_error=True)
+        # These official ctypes APIs are absent from non-Windows typeshed.
+        # Resolve them only after the runtime platform guard, retaining native FFI.
+        self._win_error = getattr(ctypes, "WinError")
+        self._last_error = getattr(ctypes, "get_last_error")
+        self._api = getattr(ctypes, "WinDLL")("kernel32", use_last_error=True)
         signatures = {
             "CreateJobObjectW": ([ctypes.c_void_p, wintypes.LPCWSTR], wintypes.HANDLE),
             "SetInformationJobObject": ([wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p,
@@ -50,27 +54,27 @@ class WindowsJob:
             function.restype = restype
         self._handle = self._api.CreateJobObjectW(None, None)
         if not self._handle:
-            raise ctypes.WinError(ctypes.get_last_error())
+            raise self._win_error(self._last_error())
         limits = _ExtendedLimits()
         limits.BasicLimitInformation.LimitFlags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
         if not self._api.SetInformationJobObject(self._handle, 9, ctypes.byref(limits), ctypes.sizeof(limits)):
-            error = ctypes.get_last_error()
+            error = self._last_error()
             self.close()
-            raise ctypes.WinError(error)
+            raise self._win_error(error)
 
     def assign(self, pid: int) -> None:
         process = self._api.OpenProcess(0x0100 | 0x0001, False, pid)  # SET_QUOTA | TERMINATE
         if not process:
-            raise ctypes.WinError(ctypes.get_last_error())
+            raise self._win_error(self._last_error())
         try:
             if not self._api.AssignProcessToJobObject(self._handle, process):
-                raise ctypes.WinError(ctypes.get_last_error())
+                raise self._win_error(self._last_error())
         finally:
             self._api.CloseHandle(process)
 
     def terminate(self) -> None:
         if self._handle and not self._api.TerminateJobObject(self._handle, 1):
-            raise ctypes.WinError(ctypes.get_last_error())
+            raise self._win_error(self._last_error())
 
     def close(self) -> None:
         if self._handle:
