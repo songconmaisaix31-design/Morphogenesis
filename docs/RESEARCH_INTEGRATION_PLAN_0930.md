@@ -27,7 +27,7 @@
 | B 科研空间与 MCP | morph-research-space-0930 | swarm/research/**；local_assets/**；swarm/task_ledger.py（仅必要扩展）；tests/research/**；tests/local_assets/**；docs/research/**；docs/tracks/research-space-0930.md；README.md；THIRD_PARTY_NOTICES.md |
 | C OpenSandbox / T0 | morph-research-sandbox-0930 | orchestration/experiments/**；tests/experiments/**；demo/research_case/**；deploy/opensandbox/**；docs/experiments/**；docs/tracks/research-sandbox-0930.md；pyproject.toml；poetry.lock；tools/typecheck.py |
 | 主控 | morph-research-plan-0930 | docs/PLAN.md；本计划；docs/RESEARCH_INTEGRATION_ACCEPTANCE_0930.md（仅状态/决策/验收） |
-| I 独立集成 | morph-research-integration-0930（待 A/B/C 冻结交付后启动） | 合并既有精确提交；tests/integration/**；docs/tracks/research-integration-0930.md；必要导入/配置/类型/路由胶水，领域问题退原 Owner |
+| I 独立集成 | morph-research-integration-0930（已在固定基线启动） | 合并既有精确提交；tests/integration/**；docs/tracks/research-integration-0930.md；必要导入/配置/类型/路由胶水，领域问题退原 Owner |
 
 每轨一个 Agent、一个 worktree、一个分支，开发/测试/文档/返修持续同 Owner；阶段 commit + push。A/B/C 首个检查点交付薄接口 Handoff（启动 MCP 参数、实验计划/结果、科研准入），跨轨不写文件。集成 I 最后只合并并补少量导入/配置/类型/路由胶水，领域问题退回 Owner。
 
@@ -40,7 +40,7 @@
 5. 启动单机 Docker/OpenSandbox 与隔离 CPU 案例属于本轮授权范围；GPU 可选。正式复现干净沙箱/内核，探索可保留内核；大文件通过 SDK/存储，必要原始证据在沙箱关闭后保留。
 6. 官方认证保持原状，不复制 HOME、不接管凭证、不绕过原生权限；缺条件写 blocked/NOT_RUN，继续其余实现与门禁。无 DSH 强制评审，无生产 Hub 发布、部署主线覆盖或新 tag。
 
-当前状态：三轨已按固定所有权启动；A已提交并核验真实前置探测，B/C正进行返修与适用门禁。首次OpenSandbox接口烟测FAILED，完整科研task_live与集成候选验收仍NOT_RUN。最终只报告实现、分支/完整 SHA、命令/结果、真实限制、未执行/人工操作。
+当前状态：A最终84d59c、B最终428de06、C最终bb2cc07均已交付、push并独立核验；领域返修持续由原Owner完成。I冻结候选7d04d9c4759a14c91dd75aff2aa9162a84b4c397已push、clean，专项150测试、strict116、build/实际wheel及兼容/缺effect原断言通过，新双平台CI36736123569运行中。此前bc4候选双平台工程全门禁通过，但其interface烟测FAILED；原失败unknown不改、不重放。I待新Ubuntu原门禁通过后执行唯一新interface smoke及已授权三身份科研链，task_live尚NOT_RUN。逐项原失败和当前证据见RESEARCH_INTEGRATION_ACCEPTANCE_0930.md。
 
 ## 继续开发检查点（2026-09-30）
 

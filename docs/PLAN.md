@@ -269,4 +269,4 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 收口状态：主控 11:13 补齐 D 报告 `969d3274622538a36ac8a60e09c41be86bea9c60` 并通知封存；A 最终 `3d8bb856efadbb1bee4a69bc37c56d3ef4d24cfd` Owner focused 20/full 699/strict 87，D 独立 focused/mutation 通过，但 cost_state 独立语义 exit 1 仍 OPEN、待队长授权。B 独立 44/44；C 独立 T5 53/双 bundle/3 run replay 通过，越契约输入既有限制单列。I 接续 A/B 隔离候选、组合门禁待实际交付；C 与 FC 存在前端冲突，本轮分别保留候选，不强合或触生产分支/tag。B 已补 D 索引并封存 [审批/下一步包](FC_CLOSEOUT_0929.md)；FC 整体 BLOCKED，FC-E 仅 CLI 帮助可用、原隔离配置/正式通道未验证，无模型或付费调用。
 # 2026-09-30 当前任务：异构 Agent 与科研环境集成
 
-当前一页计划、固定 Owner/write_paths、基线及三态验收见 [RESEARCH_INTEGRATION_PLAN_0930.md](RESEARCH_INTEGRATION_PLAN_0930.md)。以下历史计划保留；本轮用户指令优先。
+当前一页计划、固定 Owner/write_paths、基线及三态验收见 [RESEARCH_INTEGRATION_PLAN_0930.md](RESEARCH_INTEGRATION_PLAN_0930.md)。以上历史计划保留；本轮用户指令优先。三条领域轨已交付，独立 I 正在冻结候选上验证修复后的官方 SDK 接口与真实科研链；当前证据及原失败见 [RESEARCH_INTEGRATION_ACCEPTANCE_0930.md](RESEARCH_INTEGRATION_ACCEPTANCE_0930.md)，不将工程 CI 与 task_live 合并判断。
