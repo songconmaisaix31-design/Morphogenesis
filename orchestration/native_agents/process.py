@@ -254,6 +254,11 @@ def run_headless(plan: LaunchPlan, evidence_dir: Path, *, timeout_seconds: float
             state = "failed"
         elif terminal == "completed":
             state = "completed"
+    # A real failed exit can contradict a successful zero-valued result event.
+    # Preserve positive reports; failure zeros cannot establish absent billing.
+    if state == "failed":
+        usage = Usage(tokens=None if usage.tokens == 0 else usage.tokens,
+                      cost_usd=None if usage.cost_usd == 0 else usage.cost_usd)
     return NativeOutcome(runtime=plan.runtime, session_id=session_id, exit_code=exit_code,
                          state=state, usage=usage, observed_tool_calls=len(tool_ids) + anonymous_tools,
                          reason=reason, provenance=provenance,
