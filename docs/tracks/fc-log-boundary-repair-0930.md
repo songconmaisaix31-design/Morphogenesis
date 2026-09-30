@@ -60,3 +60,31 @@ canonical-only 修改后的同一有限 profiler 诊断：exit 0；产物 `morph
 NOT_RUN：本次全量、build、SDK 专项、分发、双平台 CI、I 独立 merge SHA；Windows native symlink 创建（本环境原生创建拒绝后走 junction），Linux/native 无 tag 分支实际运行；模型 API/DSH/Hub/Live/部署/H1/原 tag 操作。38 deselected 不属于本次适用安全选择。
 
 `contract_local=PASS`（本次固定 SHA、上述 Owner self-test 范围，不是 I 验收）；`interface_live=NOT_RUN`；`task_live=NOT_RUN`。旧 R/D/外部旧代码失败证据保持 failed，不改 H1、Schema、原 tag 或三 TODO。
+
+## 第二次窄返修：Windows reparse API 的平台类型边界
+
+- 本阶段 Run `run_5b66cce8b4b8`；Task `task_3652d4ea5fe4`；Dispatch `ctx_2d01027925fc`。同一 Owner/worktree/branch，开始时 HEAD/remote exact `973fe64a6403112dfd72b7de69b5661f74b7237e` 且 clean。唯一 write_paths：`local_assets/paths.py`（仅 no_links/stdlib import）和本报告（仅追加本阶段）。前面记录和原 R 失败报告原样保留，不改旧 Task 结果。
+- 本次派发提供 I 新整体候选 `20ddb85562872f2e93a84295da14fd0688fcf986` 的 CI `36696567218` 真实失败：Ubuntu `python tools/typecheck.py` exit 1，`local_assets/paths.py:58` 的 `IO_REPARSE_TAG_MOUNT_POINT [attr-defined]`，89 files / 1 error；Windows matrix cancelled。此处记录派发事实，未独立重取 CI。此前运行时短路与 Windows strict green 不证明平台类型可移植性；本次修复不抹去该失败。
+- FIFO `msg_00be64c8a981` 明确通知 I 实际测试父/子/后代停止 `survivors=0`、原 full 为 INTERRUPTED 且 partial/exit 留存，并准许本阶段串行验证；已处理并 ack，未把 elapsed 当许可。沿用锁定环境，不安装依赖或改工具/锁/CI。
+- 最小源码 diff **5 insertions / 3 deletions**：增加 stdlib `sys`；`local_assets/paths.py:57` 继续普遍拒 symlink，`:59` 显式 `sys.platform == "win32"` 分支中 `:60` 直接读取 `metadata.st_reparse_tag` 与 `stat.IO_REPARSE_TAG_MOUNT_POINT`。mypy 据平台分支选择类型桩；Linux 不访问两项 Windows API。Windows 原生字段/常量意外缺失会抛错，未用 getattr/default/ignore 吞成成功。每组件一次 lstat、regular hardlink 拒绝、ENOENT/ENOTDIR 与其余异常 failclosed、返回 None 不变；50ms、logger 和所有其他领域/测试原位不动，无新增测试或 guard/队列/重试。
+- 代码 SHA **`9f6d57417d16125d45cc2ce920c400f358b44776`**（`fix(paths): type narrow Windows reparse metadata by platform`，`Swarm-Agent: codex`）；先 commit+push，无 force，再核验 remote exact/clean 后执行下列真实检查。本阶段代码 commit 只改一条源码路径；最后纯报告 commit SHA 由 Handoff 单列，不自引用。
+
+本阶段全部命令在上述精确代码 SHA，无 profiler，slow checks 串行；进程内 `OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=1`。Python 全部为本树 `.venv/Scripts/python.exe`；状态/默认 pytest tmp 与 log 均 OS TEMP，无 source-tree basetemp。日志前缀 `morph-fc-portable-9f6d574-`（windows-strict/linux-platform-strict/path-safety.log）。
+
+| 实际验证 | exit / 结果 |
+|---|---|
+| `.venv/Scripts/python.exe tools/typecheck.py`（原 Windows strict） | 0；Success: no issues found in 89 source files |
+| `.venv/Scripts/python.exe -` wrapper 读取 `tools.typecheck.PACKAGES`，按原工具相同 `is_dir()`/`any(rglob("*.py"))` 选择、cwd/config 不变，执行下列实际子命令 | 0；Success: no issues found in 89 source files；是 Linux **平台类型检查**，非 Linux 实际行为 |
+| `.venv/Scripts/python.exe -m pytest tests/swarm/test_assets.py -q -k 'no_links or hardlink_path or alias_link or protected_target or unsafe_paths or prepared_baseline_and_own_swarm_tree or fixed_frozen_mainline or native_worktree'` | 0；21 passed / 38 deselected / 32.81s；现有原断言/真实 subprocess，不新增或修改测试 |
+
+Linux 类型检查实际完整子命令（与工具同一 15 包源集合，argv 已写真实 log）：
+
+```powershell
+.venv/Scripts/python.exe -m mypy --strict --platform linux contracts persistence bootstrap tools hub_client bridge_node orca_provision orchestration topology metabolism mocks viz demo swarm local_assets
+```
+
+路径回归含既有真实 regular hardlink/保护目录拒绝、missing/regular ancestor/dangling alias 与 metadata 异常回归；后者是原有 primitive PermissionError 注入，不冒充原生权限测试。只读检查此次 pytest-287 留存的 alias 与 dangling，均 `symlink=False / junction=True / tag=2684354563`，证明新 Windows 分支实际经过真实 junction；未将 Windows 无权创建 symlink 的 fallback 或 Linux 类型检查说成 Linux native 验收。
+
+本阶段核对：源码 fixed SHA 时 tree clean；原测试、logger/50ms、预算/租约/ledger/breaker/fault store/provider/Schema/锁/CI/TODO 和旧 R 报告未改。最终纯报告提交前后逐路径/blob 与 remote exact/clean 回执由最终 Handoff 提供，只两条授权路径；纯报告提交不重复源码未变的门禁。
+
+本阶段 `contract_local=PASS`，仅 Owner 的 Windows native 适用路径回归及 Windows/Linux-target strict；`interface_live=NOT_RUN`；`task_live=NOT_RUN`。本次不重复不受影响的完整日志套件；全量/actual wheel/分发/Linux 实际行为/双平台 CI/新 merge SHA 独立验收与 target 推进均由 I，**NOT_RUN** 于本阶段。没有模型 API/Live/DSH/Hub/部署、tag 移动或 H1 签字；原 R/D/logger/旧 CI 的失败及 I INTERRUPTED 保持原事实。
