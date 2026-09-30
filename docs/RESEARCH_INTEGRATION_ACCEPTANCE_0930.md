@@ -45,3 +45,14 @@
 - B9f20科学准入还需对每份author/replication/inheritance可信结果检查effect为已知；仅科学判据通过的unknown效果观察不能跨持有者用于批准。科研claim的plan_id/criteria必须绑定预注册实验计划，不把不同顺序或适用条件虚报为相同。这些只读发现已退回B原Owner。
 - C报告exact23417b09的CI36717414791 Ubuntu各门禁success、Windows仍pending；此为Owner自报待独立核验，不能组成完整候选通过，更不能证明科研task_live。
 - OpenSandbox release-1.1.0的836b182e208e66c046026fa0f633e089321f1efb是annotated tag对象；独立git peel得到实际源码commit b1a29cf93a823a95913f7943010febb3f29de05c，与C文档一致。
+
+## 接续总控独立检查点（2026-09-30）
+
+- 原 Run 绑定当前 `term_bdbac2dc-861f-4ba9-af30-f44bd35cc2d7`，generation=2；B/C 原终端缺失派发已被运行时结算 failed，原 Task 恢复 ready。原 A 已 succeeded，但其旧终端的两次精确 release 均返回 `release_unknown`；没有广泛关闭或把未知资源写成已释放。B/C 原 settled 资源 release 返回 released/processAction=none。
+- 同一原 B/C provider session 已分别恢复到原 worktree。两个 `worker-start --terminal` 均在 agent_readiness 超时，未投递任务；终端实际显示原 Codex 会话 idle 且 agentIdentity=codex，之后以低层 `dispatch --inject` 接续原 Task，当前 B `ctx_108469c068ef`、C `ctx_2a47ef3ebb5e`。实际 transcript 已证实开始工作；这种放置明确为 unsupervised，不冒称 supervised readiness 通过。
+- 恢复会话继承原 workspace sandbox/审批配置，当前在读取技能文件的 require_escalated 弹窗等待；主控已请求用户选择开发 Worker 配置，未代按批准或绕过原审批。主控工具自身仍按本会话权限执行独立只读验收；后续依赖 Worker 的返修等待该配置确认。
+- C exact `23417b09ffc93fbc432da0f63a7abec2546fd825` 的 CI `36717414791` 已由主控实际读取，Ubuntu/Windows pytest、strict、build、SDK、wheel 安装/分发全部 success。这不抹去 C 本机 full 的真实 `12 failed / 943 passed / 2 warnings`，原失败归档与诊断交回 C。
+- B exact `28dc6d0b4ff73edd6da7c27d8ef6f359b95bc126` 的 CI `36719277559` 实际 failure：Ubuntu `4 failed / 955 passed / 1 skipped / 75 warnings`；预注册 plan_id/criteria 两个拒绝用例 DID NOT RAISE，两个 case 初始化用例被 symlink_or_junction 拒绝。原日志 `C:/Users/DW/AppData/Local/Temp/morph-research-B-ci-36719277559.log` 已交 B；不修改保护或删除失败取得绿色结果。
+- 主控在原 B `28dc` LF archive 复用了最初 independent missing-effect gate 的相同 backend/真实 TaskLedger/原断言；只更新观察 SHA，进程局部 BLAS 线程为1。实际 backend calls=1、missing_effect_still_unconfirmed=True、exit0。原 `29446a0` 的 exit1 不改写；新门禁只证明缺 effect 不清除 execution_unconfirmed，provenance=mock/contract_local。该 archive 的 service.py blob 与 `28dc:swarm/research/service.py` 均为 `0c85b0dd8b5ca71357b0b1517da59d0297b1caa3`。
+- 主控在 clean exact `28dc` 工作树实际运行原 `tests/research/migration_probe.py --baseline-source <ef77 exact LF archive>`，C 锁环境、进程局部 BLAS=1，exit0：实际 ef77 candidate JSON/address/report/approval/consumption/adoption 均保持。此为旧静态资产兼容契约证据，不是科学晋级或 live。
+- 上述两个独立 probe 的原日志、真实退出和 missing-effect harness 保留 `C:/Users/DW/AppData/Local/Temp/morph-research-rootaccept-continue-0930/`。科研新候选完整 contract_local、原生 MCP、sandbox 修复后新 live、科学复现及实际科研 adoption 尚未据此放行。
