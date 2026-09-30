@@ -69,3 +69,10 @@
 - C 仅恢复自有 `morph-research-c-0930-server`，未创建新科研沙箱；主控使用私有 key 路径（未输出内容）独立 GET `/sandboxes`，HTTP200。此为服务可达性，不是修复后的实验通过。
 - B `fb280e6a6e2d30c66b45fbe8c693084727b11221` 已 push，Owner 新 focused35/strict98通过。主控读取实际 diff 确认 fixture 只加 write=True，原拒绝断言不变；该阶段解释器 resolve 仍可能把 Linux venv 入口替换为 base executable，已以 `msg_d08c09b2835d`、`msg_40c0fc577caf` 退原 Owner，尚未最终接收。
 - I 原标准中的“旧持有者不能提交生效结果”必须在真实公开工具提交路径观察陈旧 token 拒绝；单独 renew 拒绝只能证明续租门禁。中断安排在作者认领/续租后、任何外部实验前，由实际 native/ledger 证据确认；原生取消的未知字段保留，不能据此自动重试外部实验。
+
+### 领域交付与 I 起点
+
+- B `428de06dcaaa780a2e5c617402508ae07179480b` 已 remote 一致、clean；相对源码 `9ad7387c34bd0995df51f2dbb5cba8fc8bb7e7e7` 只有本轨报告变更。Owner在该源码35 focused、strict98、实际锁解释器 MCP 导入/venv prefix/原入口保持、exact archive 离线 C 桥与隔离 sdist/wheel 均 exit0。新 CI `36727919838` / `36728382126` 在交付时 pending，尚未当完整候选通过。真实 live NOT_RUN。
+- C `5feb507727c19812edcbcdccfc27c12bf9576899` 已 remote 一致、clean；相对已核验 CI 的 `23417b09ffc93fbc432da0f63a7abec2546fd825` 仅4份文档。主控复核 I_HANDOFF 与 README 均使用 inheritance order=original，不把 reverse 不同条件迁移成正向继承；源码/测试/依赖未更改。原本机失败完整分类，不把所有根因归成 OOM。
+- B/C accepted worker_done 后各自精确 worker-release 均为 retained/no_owned_resource/processAction=none，这是 unsupervised 归属结果，不声称开发 PTY 已退出。原 A 旧资源 release_unknown 仍保留。
+- I 已在上述固定基线与治理输入启动 `task_afa0f9c81b55` / `ctx_9e1033019bc7`，真实屏幕 Working。主控未写领域代码；合并候选全门禁及科学 live 仍待 I 实际完成。

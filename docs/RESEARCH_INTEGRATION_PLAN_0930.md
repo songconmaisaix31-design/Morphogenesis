@@ -66,3 +66,11 @@
 - I 尚未启动；待 B/C 冻结交付后按原标准验证两种原生工具循环、同空间主动认领续租、三份干净实验、独立判据、准入及实际 AdoptionReceipt、中断/同会话接续/陈旧 token 拒绝。上限三个科研会话、未知效果不重放，工程 CI 和真实科研通过分别判断。
 
 最终 I 的研究调用窗口：最多三个原生研究 session 身份（作者、复现者、继承者）；每个身份累计 wall 上限 900 秒、观测工具上限 64 次，作者中断与明确恢复合计在该窗口内。此为实际调用前声明的观测停止条件，并非 Token/美元硬封顶；未知 usage/cost 保留未知，不以环境变量或认证状态推断额度。仅由 I 在冻结源码、原生权限与受保护科研状态确认后执行；任何未知外部实验效果停止依赖路径，原 invocation 不重放。
+
+## 独立集成启动
+
+A、B、C 已分别结算本轨交付（科研 live 尚未通过）。最终输入 A `648f43c54203f555b1b05827cfe119c8e3dfa622`，B `428de06dcaaa780a2e5c617402508ae07179480b`（代码 `9ad7387c34bd0995df51f2dbb5cba8fc8bb7e7e7`），C `5feb507727c19812edcbcdccfc27c12bf9576899`（代码 `23417b09ffc93fbc432da0f63a7abec2546fd825`），治理输入 `9521f876547702ca1223253ac862ac314dbf390d`。主控已实际核验最终 remote、clean 和文档差异。
+
+Orca 创建 I worktree 于精确 `ef77af603577d4539d8dbdf780e1536a369b0d12`，分支 `morph-research-integration-0930`，与治理 worktree 建立明确 parent lineage。首个空 shell 经正面核验后直接启动原生开发 Codex 标准全权限配置，没有额外重复 Agent。I Task `task_afa0f9c81b55` / Dispatch `ctx_9e1033019bc7` / terminal `term_1e598676-e019-4b24-ab8d-1d0ca6840ea4`，injected=true 且屏幕 actual Working；此为低层 unsupervised 放置，未冒称 worker-start ready 通过。
+
+I 已获完整原标准、互斥所有权、精确来源与各领域 Handoff，先合并与独立门禁，随后有界真实案例。主控继续独立核验并把领域问题退原 Owner；原始根仓 WIP 保留，最终候选、科研证据和剩余门禁均不得提前写通过。
