@@ -1,0 +1,122 @@
+{
+  "observed": "2026-09-29T20:25:27.1055303+08:00",
+  "powershell": "7.6.6",
+  "tools": [
+    {
+      "name": "pwsh",
+      "exists": true,
+      "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+    },
+    {
+      "name": "git",
+      "exists": true,
+      "path": "C:\\Program Files\\Git\\cmd\\git.exe"
+    },
+    {
+      "name": "node",
+      "exists": true,
+      "path": "C:\\Program Files\\nodejs\\node.exe"
+    },
+    {
+      "name": "codex",
+      "exists": true,
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\codex.ps1"
+    },
+    {
+      "name": "dsh",
+      "exists": true,
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\npm\\dsh.ps1"
+    },
+    {
+      "name": "uv",
+      "exists": true,
+      "path": "C:\\Users\\DW\\AppData\\Roaming\\Python\\Python313\\Scripts\\uv.exe"
+    },
+    {
+      "name": "poetry",
+      "exists": false,
+      "path": null
+    },
+    {
+      "name": "orca",
+      "exists": true,
+      "path": "C:\\Users\\DW\\AppData\\Local\\Programs\\orca\\resources\\bin\\orca.exe"
+    }
+  ],
+  "environment_presence": [
+    {
+      "name": "MORPH_EVOMAP_API_KEY",
+      "present": false
+    },
+    {
+      "name": "DASHSCOPE_API_KEY",
+      "present": false
+    },
+    {
+      "name": "OPENAI_API_KEY",
+      "present": false
+    },
+    {
+      "name": "CODEX_HOME",
+      "present": false
+    },
+    {
+      "name": "DSH_HOME",
+      "present": false
+    }
+  ],
+  "credential_presence": {
+    "codex_config_exists": true,
+    "codex_auth_exists": true,
+    "dsh_home_set": false,
+    "values_read": false
+  },
+  "ports": [
+    {
+      "port": 7526,
+      "listening": false,
+      "processes": []
+    },
+    {
+      "port": 7527,
+      "listening": false,
+      "processes": []
+    },
+    {
+      "port": 7844,
+      "listening": false,
+      "processes": []
+    },
+    {
+      "port": 7861,
+      "listening": false,
+      "processes": []
+    },
+    {
+      "port": 7862,
+      "listening": false,
+      "processes": []
+    },
+    {
+      "port": 7863,
+      "listening": false,
+      "processes": []
+    }
+  ],
+  "matching_processes": [
+    {
+      "pid": 73716,
+      "parent": 73772,
+      "name": "pwsh.exe",
+      "executable": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+      "created": "2026-09-29T20:25:24.923583+08:00",
+      "viz_server": false,
+      "rehearsal": false,
+      "swarm": false,
+      "command_line_not_exported": true
+    }
+  ],
+  "disk_free_gb": 46.5,
+  "inventory_correction": "matching_processes PID 73716 was the inventory PowerShell itself (matched its own command text), not a demo service; no claimed live service from this row.",
+  "aliyun_config_exists": true
+}

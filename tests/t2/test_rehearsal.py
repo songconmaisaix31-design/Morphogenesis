@@ -12,9 +12,11 @@ from contracts.resolution import Gene
 from contracts.results import TaskResult
 from contracts.runtime import RunConfig
 from orchestration.codex import CodexExecutor
+from orchestration.fc_logging import FCLogWriter
 from orchestration.rehearsal import Rehearsal, RehearsalOptions, read_rehearsal
 from orchestration.rehearsal_models import RehearsalDocument, RehearsalSnapshot, Stage
 from tests.t2.test_codex import fake_cli
+from tests.swarm.test_fc_logging import read_events
 
 
 class FixtureExecutor:
@@ -74,6 +76,16 @@ def test_complete_rehearsal_routes_actual_second_execution_and_metabolizes(
     started = time.time()
     document = app.run()
     assert document.current.stage == "completed", document.current.failure
+    fc_events = read_events(app.fc_log.path)
+    assert len(fc_events) == len(document.history)
+    for event, snapshot in zip(fc_events, document.history, strict=True):
+        assert event["rehearsal"] == snapshot.model_dump(mode="json")
+        assert event["sequence"] == snapshot.sequence and event["at"] == snapshot.at
+        assert event["task_id"] == snapshot.task_id and event["run_id"] == document.rehearsal_id
+        assert event["duration_seconds"] > 0
+        assert event["provenance"] == "mock" and event["evidence_label"] == "SIMULATED"
+        assert "audit_confirmed_issue_events" not in event
+    assert read_rehearsal(app.root / "rehearsal.json") == document
     assert len(attempts) == 2 and len(entered) == 1
     assert attempts[0].task_id != attempts[1].task_id
     assert attempts[0].agent != attempts[1].agent
@@ -119,6 +131,13 @@ def test_complete_rehearsal_routes_actual_second_execution_and_metabolizes(
     assert all(r.provenance == "replay" for r in replay.current.results)
     assert all(u.provenance == "replay" for u in replay.current.adoptions)
     assert artifacts == {path: (path.stat().st_mtime_ns, path.stat().st_size) for path in artifacts}
+    replay_writer = FCLogWriter(tmp_path / "replay-export", replay.rehearsal_id, provenance="replay",
+                                original_run_uri=replay.original_run_uri)
+    replay_writer.append("rehearsal", task_id=replay.current.task_id, at=replay.current.at,
+                         sequence=replay.current.sequence, rehearsal=replay.current)
+    replay_event, = read_events(replay_writer.path)
+    assert replay_event["rehearsal"] == replay.current.model_dump(mode="json")
+    assert replay_event["original_run_uri"] == replay.original_run_uri
     with pytest.raises(ValueError, match="empty root"):
         Rehearsal(options(tmp_path), provenance="mock", executor_factory=lambda p, _: FixtureExecutor(p, attempts))
     assert len(attempts) == 2
@@ -164,3 +183,14 @@ def test_live_requires_two_explicit_new_task_authorizations_before_effects(tmp_p
     with pytest.raises(ValueError, match="authorization"):
         Rehearsal(options(tmp_path))
     assert not (tmp_path / "run").exists()
+
+
+def test_rehearsal_log_failure_preserves_published_document_and_execution(tmp_path: Path, caplog) -> None:
+    attempts: list[AttemptId] = []
+    app = Rehearsal(options(tmp_path), provenance="mock",
+                    executor_factory=lambda evidence, _: FixtureExecutor(evidence, attempts))
+    (app.root / "fc-logs").write_text("occupied")
+    document = app.run()
+    assert document.current.stage == "completed" and len(attempts) == 2
+    assert read_rehearsal(app.root / "rehearsal.json") == document
+    assert "fc_log_projection_failed" in caplog.text

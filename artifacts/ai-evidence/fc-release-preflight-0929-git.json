@@ -1,0 +1,200 @@
+[
+  {
+    "label": "remote",
+    "command": "git ls-remote origin refs/heads/decentralized-swarm refs/heads/codex/morphogenesis-mainline refs/heads/morph-fc-candidate-0929 refs/heads/morph-fc-governance-final-0929 refs/heads/feat/fault-drill refs/tags/demo-build*",
+    "exit": 0,
+    "output": [
+      "2957b408ce922369a595a8acd43a882eb85897d3\trefs/heads/codex/morphogenesis-mainline",
+      "73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db\trefs/heads/decentralized-swarm",
+      "c552250c0d07f5f70f09eb0a5ab3c322195e34ec\trefs/heads/morph-fc-candidate-0929",
+      "403909204c8b589d33943298e1cde0a2094bb15e\trefs/heads/morph-fc-governance-final-0929"
+    ]
+  },
+  {
+    "label": "refs",
+    "command": "git for-each-ref --format=%(refname) %(objectname) refs/heads/decentralized-swarm refs/heads/codex/morphogenesis-mainline refs/heads/morph-fc-candidate-0929 refs/heads/morph-fc-governance-final-0929 refs/heads/feat/fault-drill refs/remotes/origin/feat/fault-drill refs/tags/demo-build*",
+    "exit": 0,
+    "output": [
+      "refs/heads/codex/morphogenesis-mainline 2957b408ce922369a595a8acd43a882eb85897d3",
+      "refs/heads/decentralized-swarm 73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db",
+      "refs/heads/morph-fc-candidate-0929 c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+      "refs/heads/morph-fc-governance-final-0929 403909204c8b589d33943298e1cde0a2094bb15e"
+    ]
+  },
+  {
+    "label": "target-status",
+    "command": "git -C C:/Users/DW/orca/workspaces/Morphogenesis/decentralized-swarm status --short --branch",
+    "exit": 0,
+    "output": [
+      "## decentralized-swarm...origin/decentralized-swarm"
+    ]
+  },
+  {
+    "label": "first-gen-status",
+    "command": "git -C C:/Users/DW/orca/Morphogenesis status --short --branch",
+    "exit": 0,
+    "output": [
+      "## codex/morphogenesis-mainline...origin/codex/morphogenesis-mainline",
+      " M docs/SWARM_SOL_PLAN.md"
+    ]
+  },
+  {
+    "label": "candidate-ancestor",
+    "command": "git merge-base --is-ancestor 73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "exit": 0,
+    "output": []
+  },
+  {
+    "label": "delta-count",
+    "command": "git rev-list --left-right --count decentralized-swarm...c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "exit": 0,
+    "output": [
+      "0\t44"
+    ]
+  },
+  {
+    "label": "delta-stat",
+    "command": "git diff --stat decentralized-swarm c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "exit": 0,
+    "output": [
+      " TASKS.md                                           |  38 ++",
+      " artifacts/ai-evidence/acceptance-0929-closeout.md  | 112 +++",
+      " .../fc-remediation-breaker-0929-report.md          | 156 +++++",
+      " .../fc-remediation-breaker-0929-reproduction.md    |  38 ++",
+      " .../fc-remediation-classification-0929-report.md   | 103 +++",
+      " .../fc-remediation-runtime-0929-mutations.py       |  77 +++",
+      " .../fc-remediation-runtime-0929-report.md          | 161 +++++",
+      " .../fc-remediation-runtime-0929-repro.md           |  61 ++",
+      " .../fc-tests-0929-cost-state-handoff.md            |  39 ++",
+      " .../fc-tests-0929-cost-state-repro.json            |  44 ++",
+      " artifacts/ai-evidence/fc-tests-0929-focused.log    |   2 +",
+      " artifacts/ai-evidence/fc-tests-0929-mutation.json  |  22 +",
+      " artifacts/ai-evidence/fc-tests-0929-mutation.log   |  46 ++",
+      " .../ai-evidence/fc-tests-0929-pytest-full.log      |  23 +",
+      " artifacts/ai-evidence/fc-tests-0929-report.md      |  75 ++",
+      " artifacts/ai-evidence/fc-tests-0929-restored.log   |   2 +",
+      " artifacts/ai-evidence/fc-tests-0929-typecheck.log  |   1 +",
+      " artifacts/ai-evidence/integration-0929-closeout.md |  33 +",
+      " artifacts/ai-evidence/schema-0929-after.exit       |   1 +",
+      " artifacts/ai-evidence/schema-0929-after.json       | 745 ++++++++++++++++++++",
+      " artifacts/ai-evidence/schema-0929-after.log        |  40 ++",
+      " artifacts/ai-evidence/schema-0929-before.exit      |   1 +",
+      " artifacts/ai-evidence/schema-0929-before.json      | 756 +++++++++++++++++++++",
+      " artifacts/ai-evidence/schema-0929-before.log       |  40 ++",
+      " .../ai-evidence/schema-0929-environment-check.exit |   1 +",
+      " .../ai-evidence/schema-0929-environment-check.log  |   8 +",
+      " .../ai-evidence/schema-0929-exact-summary.json     |  56 ++",
+      " artifacts/ai-evidence/schema-0929-exact.exit       |   1 +",
+      " artifacts/ai-evidence/schema-0929-exact.log        |  40 ++",
+      " artifacts/ai-evidence/schema-0929-report.md        |  58 ++",
+      " artifacts/ai-evidence/schema-0929-validate.py      | 178 +++++",
+      " docs/FC_ACCEPTANCE.md                              |  75 ++",
+      " docs/FC_CLOSEOUT_0929.md                           |  33 +",
+      " docs/FC_DAY_PLAN_0929.md                           |  32 +",
+      " docs/FC_LOG_SCHEMA_DRAFT_0928.md                   |  19 +-",
+      " docs/FC_REMEDIATION_0929.md                        |  19 +",
+      " docs/FC_RUNTIME_ACCEPTANCE.md                      | 139 ++++",
+      " docs/PLAN.md                                       |  12 +",
+      " orchestration/gateway_transport.py                 |   6 +-",
+      " orchestration/provider_adapters/base.py            | 106 +++",
+      " orchestration/provider_adapters/dashscope.py       | 145 ++++",
+      " orchestration/provider_adapters/evomap.py          | 148 ++++",
+      " swarm/breaker.py                                   | 712 +++++++++++++++++++",
+      " swarm/budget.py                                    |  44 +-",
+      " swarm/evomap_executor.py                           | 138 +++-",
+      " swarm/failure_chain.py                             | 213 ++++++",
+      " swarm/fault_observations.py                        | 278 ++++++++",
+      " swarm/task_ledger.py                               |  33 +-",
+      " swarm/worker_loop.py                               | 387 +++++++++--",
+      " tests/fixtures/fault_injection/__init__.py         |  83 +++",
+      " .../fault_injection/bailian_400_arrearage.py       |  31 +",
+      " .../fault_injection/bailian_403_freetier.py        |  31 +",
+      " .../rfc6585_429_with_retry_after.py                |  35 +",
+      " tests/integration/test_demo_environment.py         |   2 +-",
+      " tests/orchestration/test_fc_a_comprehensive.py     | 205 ++++++",
+      " tests/orchestration/test_gateway_transport.py      |  73 ++",
+      " tests/orchestration/test_integration.py            | 232 +++++++",
+      " tests/orchestration/test_provider_adapters.py      | 220 ++++++",
+      " .../test_rejection_classification_boundaries.py    |  71 ++",
+      " tests/orchestration/test_retry_after_parsing.py    | 109 +++",
+      " tests/orchestration/test_success_responses.py      |  94 +++",
+      " tests/swarm/test_breaker.py                        | 681 +++++++++++++++++++",
+      " tests/swarm/test_failure_chain_boundaries.py       | 207 ++++++",
+      " tests/swarm/test_failure_chain_runtime.py          | 255 +++++++",
+      " tests/swarm/test_fault_observations.py             | 303 +++++++++",
+      " tests/swarm/test_probe_lifecycle_recovery.py       | 210 ++++++",
+      " tests/swarm/test_rejection_runtime_boundaries.py   | 195 ++++++",
+      " tests/swarm/test_reservation_cost_state.py         |  51 ++",
+      " tests/swarm/test_unknown_effect_recovery.py        | 146 ++++",
+      " 69 files changed, 8649 insertions(+), 82 deletions(-)"
+    ]
+  },
+  {
+    "label": "merge-base",
+    "command": "git merge-base decentralized-swarm c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "exit": 0,
+    "output": [
+      "73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db"
+    ]
+  },
+  {
+    "label": "governance-delta",
+    "command": "git diff --name-status e6ac45ffefc171a7215f8db19bc4a28af24ec4fc morph-fc-governance-final-0929",
+    "exit": 0,
+    "output": [
+      "M\tTASKS.md",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-d-evidence.json",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-final-check.json",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-h1-quotes.json",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-h1-quotes.md",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-h1-verification.json",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-history-preservation.json",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-i-evidence.json",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-independent-report.md",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-integration-report.md",
+      "A\tartifacts/ai-evidence/fc-remediation-governance-0929-report.md",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-call.cjs",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-call.json",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-input-check.json",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-input.json",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-input.md",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-items.json",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-raw.txt",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-report.md",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-response.json",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-verification.json",
+      "A\tartifacts/ai-evidence/review-0929-formal-v2-verify.py",
+      "M\tdocs/FC_CLOSEOUT_0929.md",
+      "A\tdocs/FC_HUMAN_REVIEW_0929.md",
+      "M\tdocs/FC_REMEDIATION_0929.md"
+    ]
+  },
+  {
+    "label": "drill-history",
+    "command": "git log --all --format=%H %s -- demo/fault_drill.py tests/swarm/test_fault_drill.py",
+    "exit": 0,
+    "output": []
+  },
+  {
+    "label": "drill-refs",
+    "command": "git for-each-ref --format=%(refname) %(objectname) *fault*drill*",
+    "exit": 0,
+    "output": []
+  },
+  {
+    "label": "target-merge-tree",
+    "command": "git merge-tree 73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db 73798cd6f05210f2bd9b1eebfd6f9f0dd6e842db c552250c0d07f5f70f09eb0a5ab3c322195e34ec",
+    "exit": 0,
+    "output": [
+      "9242 lines, 0 conflict markers; readonly legacy 3-tree mode, no merge performed"
+    ]
+  },
+  {
+    "label": "governance-merge-tree",
+    "command": "git merge-tree e6ac45ffefc171a7215f8db19bc4a28af24ec4fc c552250c0d07f5f70f09eb0a5ab3c322195e34ec 403909204c8b589d33943298e1cde0a2094bb15e",
+    "exit": 0,
+    "output": [
+      "2693 lines, 0 conflict markers; readonly legacy 3-tree mode, no merge performed"
+    ]
+  }
+]

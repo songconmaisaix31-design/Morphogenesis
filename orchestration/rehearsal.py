@@ -32,6 +32,7 @@ from metabolism import LocalMetabolism
 from metabolism.models import UseRecord
 from orchestration.codex import CodexExecutor, Proposal
 from orchestration.events import export_events
+from orchestration.fc_logging import FCLogWriter
 from orchestration.gateway import EVOMAP_MODEL, GatewayExecutor
 from orchestration.rehearsal_models import (
     Checkpoint, Checkpoints, ExecutorKind, MemberAvailability, RehearsalDocument,
@@ -135,6 +136,7 @@ class Rehearsal:
         self.wait_for_offline, self.on_snapshot = wait_for_offline, on_snapshot
         self.executor_factory = executor_factory or (self._gateway if options.executor == "evomap" else self._codex)
         self.rehearsal_id = f"rehearsal-{uuid4().hex}"
+        self.fc_log = FCLogWriter(root, self.rehearsal_id, provenance=provenance)
         self.store = SQLiteStore(root / "metadata.db")
         provision = FixedProvisioner(5, roles=("planner", "builder", "builder", "reviewer", "aggregator")).provision(
             self.rehearsal_id, 5)
@@ -181,6 +183,7 @@ class Rehearsal:
             time.sleep(min(0.1, max(0, deadline - time.monotonic())))
 
     def _emit(self, stage: Stage, message: str = "", failure: str | None = None) -> RehearsalDocument:
+        publish_started = time.perf_counter()
         now = time.time()
         self.metabolism.decay_weights(now)
         genes = self.metabolism.snapshot()
@@ -230,6 +233,9 @@ class Rehearsal:
         pending = self.root / "rehearsal.next.json"
         pending.write_text(document.model_dump_json(indent=2), encoding="utf-8")
         pending.replace(self.root / "rehearsal.json")
+        self.fc_log.emit("rehearsal", task_id=snapshot.task_id, at=snapshot.at,
+                         sequence=snapshot.sequence, duration_seconds=time.perf_counter() - publish_started,
+                         rehearsal=snapshot)
         if self.on_snapshot:
             self.on_snapshot(document)
         if failure is None and stage != "completed":

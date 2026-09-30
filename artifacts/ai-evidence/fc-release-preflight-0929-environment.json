@@ -1,0 +1,38 @@
+[
+  {
+    "path": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-release-preflight-0929",
+    "venv": false,
+    "nodeModules": false,
+    "sdk": false,
+    "echarts": false,
+    "bundle": true,
+    "envFile": false
+  },
+  {
+    "path": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\decentralized-swarm",
+    "venv": true,
+    "nodeModules": true,
+    "sdk": true,
+    "echarts": true,
+    "bundle": true,
+    "envFile": false
+  },
+  {
+    "path": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-fc-candidate-0929",
+    "venv": false,
+    "nodeModules": false,
+    "sdk": false,
+    "echarts": false,
+    "bundle": true,
+    "envFile": false
+  },
+  {
+    "path": "C:\\Users\\DW\\orca\\Morphogenesis",
+    "venv": true,
+    "nodeModules": true,
+    "sdk": true,
+    "echarts": true,
+    "bundle": true,
+    "envFile": false
+  }
+]
