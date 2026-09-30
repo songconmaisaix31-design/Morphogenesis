@@ -32,12 +32,14 @@ def write(path, value):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--phase", choices=("interrupt", "resume", "replication", "inheritance"), required=True)
+    parser.add_argument("--phase", choices=("interrupt", "interrupt-recovery", "resume", "replication", "inheritance"), required=True)
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--key-file", type=Path, required=True)
+    parser.add_argument("--inspect-only", action="store_true", help="Probe and persist actual launch bindings without a model invocation")
     args = parser.parse_args()
     root = args.state.resolve(strict=True)
-    role = "author" if args.phase in {"interrupt", "resume"} else args.phase
+    interrupting = args.phase in {"interrupt", "interrupt-recovery"}
+    role = "author" if interrupting or args.phase == "resume" else args.phase
     runtime = "claude" if role == "replication" else "codex"
     config_path = root / (role + "-host.json")
     config = HostConfig.model_validate_json(config_path.read_bytes())
@@ -47,7 +49,7 @@ def main():
     if observation.exists() or evidence.exists():
         raise RuntimeError("an invocation is never replayed")
     previous = []
-    for phase in ("interrupt", "resume", "replication", "inheritance"):
+    for phase in ("interrupt", "interrupt-recovery", "resume", "replication", "inheritance"):
         path = root / (phase + "-observation.json")
         if path.exists():
             record = json.loads(path.read_text(encoding="utf-8"))
@@ -58,6 +60,18 @@ def main():
     if wall_remaining <= 0 or tools_remaining <= 0:
         raise RuntimeError("declared identity observation window exhausted")
     session = None
+    if args.phase == "interrupt-recovery":
+        denied = json.loads((root / "interrupt-observation.json").read_text(encoding="utf-8"))
+        denied_raw = (root / "interrupt-native/native.jsonl").read_text(encoding="utf-8")
+        denied_audit = json.loads((root / "interrupt-ledger-audit.json").read_text(encoding="utf-8"))
+        if (denied["held_task"]["status"] != "available" or denied["interruption_observed"]
+                or ledger.get("author").status != "available"
+                or any(r["event"] in {"claimed", "execution_unconfirmed"} for r in denied_audit)
+                or "MCP tool call requires approval, but approval policy is never" not in denied_raw):
+            raise RuntimeError("explicit permission recovery requires original denial and no prior claim/experiment")
+        session = denied["outcome"]["session_id"]
+        if not session:
+            raise RuntimeError("permission recovery requires the original observed UUID")
     rules = [
         "Use only the eleven morph_research MCP tools. Never use shell, file writes, browser, subagents, or other MCP servers.",
         "Never write host config, authoritative SQLite, approved files or raw archives directly. Only trusted MCP can mutate them.",
@@ -70,14 +84,15 @@ def main():
         "Candidate.research, base_revision, changes and summary come from project_context, never invented IDs or results.",
         "For inherit_experience use base_revision from task payload, path_map science/experiment.py to science/reused.py, preimages science/reused.py null.",
     ]
-    if args.phase == "interrupt":
+    if interrupting:
         rules += [
             "INTERRUPTION PHASE: discover eligible work, choose author, read context, claim with ttl_seconds=60, then renew with ttl_seconds=30.",
             "DO NOT request/run any experiment, publish/submit candidate, verify, approve, apply, release or complete. Experiment execution is forbidden until an explicit resumed turn.",
             "After renewal, keep reading project_context until the host interrupts your owned process; do not end naturally.",
         ]
     elif args.phase == "resume":
-        old = json.loads((root / "interrupt-observation.json").read_text(encoding="utf-8"))
+        interruption_phase = "interrupt-recovery" if (root / "interrupt-recovery-observation.json").exists() else "interrupt"
+        old = json.loads((root / (interruption_phase + "-observation.json")).read_text(encoding="utf-8"))
         session = old["outcome"]["session_id"]
         if not session or not old.get("interruption_observed"):
             raise RuntimeError("resume requires an observed actual interruption")
@@ -113,7 +128,8 @@ def main():
     if measured.version_matches is not True or measured.authenticated is not True:
         write(root / (args.phase + "-probe.json"), measured.model_dump(mode="json"))
         raise RuntimeError("official runtime version/auth precondition failed")
-    mcp_path = root / (args.phase + "-mcp.json")
+    prefix_name = args.phase + ("-inspection" if args.inspect_only else "")
+    mcp_path = root / (prefix_name + "-mcp.json")
     plan = build_launch(request, claude_mcp_path=mcp_path)
     if runtime == "codex":
         native_home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
@@ -128,7 +144,11 @@ def main():
             "web_search": "disabled", "mcp_servers.morph_research.required": True,
             "mcp_servers.morph_research.env_vars": [config.experiment_backend["api_key_env"]],
             "mcp_servers.morph_research.enabled_tools": list(TOOLS),
+            "mcp_servers.morph_research.default_tools_approval_mode": "prompt",
         }
+        # Official per-tool policy for this already-authorized trusted MCP only.
+        # Enabled-tools is visibility; it is not an approval grant by itself.
+        overrides.update({f"mcp_servers.morph_research.tools.{tool}.approval_mode": "approve" for tool in TOOLS})
         overrides.update({f"mcp_servers.{name}.enabled": False for name in existing.get("mcp_servers", {}) if name != "morph_research"})
         prefix = []
         for key, value in overrides.items():
@@ -138,14 +158,19 @@ def main():
     else:
         plan = plan.model_copy(update={"argv": plan.argv + ("--strict-mcp-config", "--tools", "", "--disable-slash-commands")})
         write_mcp_config(plan, mcp_path)
-    write(root / (args.phase + "-launch.json"), {"request": request.model_dump(mode="json"), "plan": plan.model_dump(mode="json"), "probe": measured.model_dump(mode="json")})
+    write(root / (prefix_name + "-launch.json"), {"request": request.model_dump(mode="json"), "plan": plan.model_dump(mode="json"), "probe": measured.model_dump(mode="json")})
+    if args.inspect_only:
+        print(json.dumps({"inspect_only": True, "session_id": plan.session_id,
+                          "wall_remaining": wall_remaining, "tools_remaining": tools_remaining,
+                          "launch_path": str(root / (prefix_name + "-launch.json"))}))
+        return 0
     stop = False
     native_renew_observed = False
     crossed_experiment = False
     reported_old_attempt = None
     def on_event(event):
         nonlocal stop, native_renew_observed, crossed_experiment, reported_old_attempt
-        if args.phase != "interrupt":
+        if not interrupting:
             return
         if event.reported_attempt is not None:
             reported_old_attempt = event.reported_attempt.model_dump(mode="json")
@@ -177,7 +202,7 @@ def main():
     record = {"phase": args.phase, "role": role, "wall_seconds": wall,
         "outcome": outcome.model_dump(mode="json"), "held_task": task.model_dump(mode="json"),
         "old_attempt": reported_old_attempt,
-        "interruption_observed": args.phase == "interrupt" and native_renew_observed and not crossed_experiment
+        "interruption_observed": interrupting and native_renew_observed and not crossed_experiment
             and reported_old_attempt is not None
             and outcome.reason == "cancelled; usage and remote effect may be unknown" and outcome.exit_code is not None
             and outcome.exit_code != 0 and not any(r["event"] == "execution_unconfirmed" for r in audit)}
@@ -185,7 +210,7 @@ def main():
     print(json.dumps({"phase": args.phase, "role": role, "wall_seconds": wall,
         "native": outcome.model_dump(mode="json"), "task_status": task.status,
         "actual_interruption": record["interruption_observed"]}))
-    if args.phase == "interrupt":
+    if interrupting:
         return 0 if record["interruption_observed"] else 1
     return 0 if outcome.state == "completed" and task.status == "completed" else 1
 

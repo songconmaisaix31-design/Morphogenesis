@@ -93,16 +93,26 @@ def main():
     store = LocalAssetStore(config.assets_root)
     tasks = {role: ledger.get(role) for role in configs}
     audit = ledger.audit(limit=10000)
-    observations = {phase: load(root / f"{phase}-observation.json")
-                    for phase in ("interrupt", "resume", "replication", "inheritance")}
-    interrupted = observations["interrupt"]
+    phases = ["interrupt", "resume", "replication", "inheritance"]
+    if (root / "interrupt-recovery-observation.json").exists():
+        phases.insert(1, "interrupt-recovery")
+    observations = {phase: load(root / f"{phase}-observation.json") for phase in phases}
+    interruption_phase = "interrupt-recovery" if "interrupt-recovery" in observations else "interrupt"
+    interrupted = observations[interruption_phase]
     resumed = observations["resume"]
     assert interrupted["interruption_observed"] is True
     assert interrupted["outcome"]["exit_code"] not in (None, 0)
     assert interrupted["outcome"]["reason"] == "cancelled; usage and remote effect may be unknown"
-    assert not any(a["event"] == "execution_unconfirmed" for a in load(root / "interrupt-ledger-audit.json"))
+    assert not any(a["event"] == "execution_unconfirmed" for a in load(root / f"{interruption_phase}-ledger-audit.json"))
     assert interrupted["old_attempt"] is not None
     assert interrupted["outcome"]["session_id"] == resumed["outcome"]["session_id"]
+    if interruption_phase == "interrupt-recovery":
+        denied = observations["interrupt"]
+        assert denied["interruption_observed"] is False and denied["held_task"]["status"] == "available"
+        assert denied["outcome"]["session_id"] == interrupted["outcome"]["session_id"]
+        assert not any(a["event"] in {"claimed", "execution_unconfirmed"}
+                       for a in load(root / "interrupt-ledger-audit.json"))
+        assert "MCP tool call requires approval, but approval policy is never" in (root / "interrupt-native/native.jsonl").read_text(encoding="utf-8")
     uuids = {resumed["outcome"]["session_id"], observations["replication"]["outcome"]["session_id"],
              observations["inheritance"]["outcome"]["session_id"]}
     assert len(uuids) == 3 and None not in uuids
@@ -132,6 +142,9 @@ def main():
         else:
             assert launch["request"]["sandbox"] == "read-only"
             assert 'default_permissions=":read-only"' in argv and 'approval_policy="never"' in argv
+            if phase != "interrupt" or interruption_phase == "interrupt":
+                assert 'mcp_servers.morph_research.default_tools_approval_mode="prompt"' in argv
+                assert all(f'mcp_servers.morph_research.tools.{tool}.approval_mode="approve"' in argv for tool in TOOLS)
     for phase in ("resume", "replication", "inheritance"):
         assert observations[phase]["outcome"]["state"] == "completed"
         calls = native_calls(root, phase)
