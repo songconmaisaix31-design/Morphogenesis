@@ -19,7 +19,7 @@ from swarm.failure_chain import (
     CAPABILITY_MISMATCH, CONFIRMED_REJECTION, UNKNOWN_EFFECT,
     FailureObservationFact, candidate_identity, decide,
 )
-from swarm.fault_observations import FaultObservationStore
+from swarm.fault_observations import FaultObservation, FaultObservationStore
 from swarm.models import BudgetPolicy, ExecutionBound, RunLimits
 from swarm.pheromone import PheromoneField
 from swarm.task_ledger import TaskLedger
@@ -159,6 +159,10 @@ def test_confirmed_rejection_switches_provider_and_submits_success(tmp_path):
     first = _executor("alpha", result=_failure())
     second = _executor("beta")
     worker = _worker(config, [first, second])
+    assert isinstance(worker.fault_observation_store, FaultObservationStore)
+    assert isinstance(worker.shared_breaker, SharedBreaker)
+    append = Mock(wraps=worker.fault_observation_store.append)
+    worker.fault_observation_store.append = append
     signal, lease = _claim(worker)
     admitted_before_send = []
     fixture = FixtureExecutor()
@@ -185,6 +189,13 @@ def test_confirmed_rejection_switches_provider_and_submits_success(tmp_path):
     assert snapshot.admission_charged_usd == 0
     assert snapshot.actual_cost_usd is snapshot.estimated_cost_usd is None
     fact, = _facts(worker)
+    append.assert_called_once()
+    submitted, = append.call_args.args
+    assert isinstance(submitted, FaultObservation)
+    assert submitted == fact  # Includes the one persisted observation_id.
+    logged = [json.loads(line) for line in worker.fc_log.path.read_text().splitlines()]
+    logged_fact, = [row["fault_observation"] for row in logged if row["event"] == "fault_observation"]
+    assert logged_fact["observation_id"] == fact.observation_id
     assert (fact.provider, fact.switched_to, fact.cost_state) == ("alpha", "beta:fixture", "unknown")
     assert fact.request_id == rows[0]["request_id"] and fact.attempt == 0
     task = worker.ledger.get(signal.task_id)

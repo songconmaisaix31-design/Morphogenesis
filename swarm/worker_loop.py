@@ -12,7 +12,7 @@ import random
 import sqlite3
 from threading import Event, Lock, Thread
 import time
-from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, cast
+from typing import Literal, Protocol, TypeVar, cast
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, TypeAdapter
@@ -32,6 +32,8 @@ from local_assets.store import LocalAssetStore
 from local_assets.validate import AssetValidator, blast_radius, inspect_candidate
 from orchestration.gateway import _usage
 from orchestration.fc_logging import EventKind, FCLogWriter
+from orchestration.provider_adapters.base import FailureClassification
+from swarm.breaker import BreakerConfig, SharedBreaker
 from swarm.budget import BudgetBlocked, BudgetLedger
 from swarm.hub_mirror import HubMirror
 from swarm.lease import LeaseManager
@@ -39,7 +41,7 @@ from swarm.models import (BudgetPolicy, BudgetSnapshot, ExecutionBound, Lease, L
                           Signal)
 from swarm.pheromone import PheromoneField
 from swarm.router import Router
-from swarm.fault_observations import FaultObservationStore
+from swarm.fault_observations import FailureClass, FaultObservation, FaultObservationStore
 from swarm.task_ledger import LeaseLost, RunLimitReached, TaskLedger
 
 from swarm.failure_chain import (
@@ -54,30 +56,12 @@ from swarm.failure_chain import (
     guard_provider,
 )
 
-if TYPE_CHECKING:
-    from swarm.breaker import BreakerConfig
-
 _JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 _CHANGES = TypeAdapter(tuple[FileChange, ...])
 _SOURCE = Path(__file__).resolve().parents[1]
 _FIXTURE_USAGE: JsonValue = {"usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}}
-_KNOWN_FAILURE_CLASSES = frozenset({"confirmed_rejection", "unknown_effect",
-                                    "budget_exhausted", "capability_mismatch"})
+_KNOWN_FAILURE_CLASSES = frozenset(item.value for item in FailureClassification)
 _T = TypeVar("_T")
-
-
-def _load_failure_components() -> tuple[Any, Any]:
-    """Import the real FC-B store and FC-C breaker only when present.
-
-    The baseline tree runs without them (no fault observations, no routing
-    guard); a composed tree gets the genuine shared modules, never copies.
-    """
-    try:
-        from swarm.fault_observations import FaultObservationStore
-        from swarm.breaker import SharedBreaker
-        return FaultObservationStore, SharedBreaker
-    except ImportError:
-        return None, None
 
 
 def _safe_failure(error: Exception) -> dict[str, JsonValue]:
@@ -408,15 +392,12 @@ class Worker:
                                      Provenance, str | None]] = []
         self._fc_source = self.executor
         self._fc_sources: dict[str, Executor] = {}
-        store_cls, breaker_cls = _load_failure_components()
-        self.fault_observation_store: FaultStoreLike | None = None
+        self.fault_observation_store: FaultStoreLike = FaultObservationStore(
+            self.state / "fault_observations.jsonl", config.swarm_id)
         self.shared_breaker: SharedBreakerLike | None = None
-        if store_cls is not None:
-            self.fault_observation_store = cast(FaultStoreLike, store_cls(
-                self.state / "fault_observations.jsonl", config.swarm_id))
-        if breaker_cls is not None and breaker_config is not None:
-            self.shared_breaker = cast(SharedBreakerLike, breaker_cls(
-                self.state / "breaker.sqlite3", config.swarm_id, breaker_config))
+        if breaker_config is not None:
+            self.shared_breaker = SharedBreaker(
+                self.state / "breaker.sqlite3", config.swarm_id, breaker_config)
 
     def _status(self, state: str, reason: str = "") -> dict[str, JsonValue]:
         result: dict[str, JsonValue] = {
@@ -626,9 +607,7 @@ class Worker:
                 for name, path in paths.items()}
 
     def _append_observation(self, fact: FailureObservationFact) -> None:
-        store = self.fault_observation_store
-        if store is not None:
-            store.append(fact)
+        self.fault_observation_store.append(FaultObservation.model_validate(fact.model_dump()))
         source = self._fc_sources.get(fact.request_id, self.executor)
         self._fc_pending.append(("fault_observation", fact.task_id, fact.occurred_at, None,
                                  {"fault_observation": fact}, source.provenance, source.original_run_uri))
@@ -745,7 +724,7 @@ class Worker:
         evidence = fact_fields["evidence_ref"]
         return FailureObservationFact(
             run_id=self.config.swarm_id, task_id=task_id, request_id=request_id, attempt=index,
-            provider=provider, model=model, failure_class=cast(Any, classification),
+            provider=provider, model=model, failure_class=cast(FailureClass, classification),
             normalized_reason=str(fact_fields["normalized_reason"]),
             retry_after_seconds=retry if isinstance(retry, float) else None,
             switched_to=None, cost_state=cost_state, occurred_at=occurred_at,
@@ -809,7 +788,7 @@ class Worker:
             enter_phase("reserve")
 
             breaker = self.shared_breaker
-            if breaker is not None and self.fault_observation_store is not None:
+            if breaker is not None:
                 # One genuine FC-B -> FC-C observation cycle before routing.
                 breaker.observe(self.fault_observation_store, now=time.time())
 

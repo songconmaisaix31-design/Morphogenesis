@@ -2,14 +2,57 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
-from swarm.worker_loop import FixtureExecutor
+from swarm.fault_observations import FaultObservationStore
+from swarm.worker_loop import FixtureExecutor, Worker
 from tests.swarm.test_failure_chain_runtime import (
     _assert_calls, _claim, _events, _executor, _facts, _failure, _reservations,
     _worker, _worker_config,
 )
+
+
+@pytest.mark.parametrize("module", ["swarm.breaker", "swarm.fault_observations"])
+def test_missing_distribution_component_fails_explicitly(module):
+    # A fresh real interpreter catches both missing modules and internal import
+    # failures instead of letting Worker silently disable the routing guard.
+    script = """
+import importlib.abc
+import sys
+
+class Unavailable(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path, target=None):
+        if fullname == sys.argv[1]:
+            raise ImportError('required_fc_component_unavailable')
+
+sys.meta_path.insert(0, Unavailable())
+import swarm.worker_loop
+"""
+    result = subprocess.run([sys.executable, "-c", script, module],
+                            cwd=Path(__file__).resolve().parents[2],
+                            capture_output=True, text=True, timeout=30)
+    assert result.returncode != 0
+    assert "required_fc_component_unavailable" in result.stderr
+
+
+def test_worker_without_breaker_config_keeps_fault_store(tmp_path):
+    config = _worker_config(tmp_path)
+    rejected = _executor(result=_failure())
+    worker = Worker(config, rejected)
+    assert worker.shared_breaker is None  # Existing explicit operator choice.
+    assert isinstance(worker.fault_observation_store, FaultObservationStore)
+    signal, lease = _claim(worker)
+
+    assert worker._process(signal, lease) == "rejected", _events(worker)
+    _assert_calls(rejected, signal, lease)
+    fact, = _facts(worker)
+    assert fact.failure_class == "confirmed_rejection" and fact.switched_to is None
+    row, = _reservations(worker)
+    assert row["status"] == "uncertain" and row["reserved_usd"] == 0.2
 
 
 @pytest.mark.parametrize("known_usage", [False, True])
