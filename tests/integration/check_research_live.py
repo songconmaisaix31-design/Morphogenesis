@@ -96,6 +96,8 @@ def main():
     phases = ["interrupt", "resume", "replication", "inheritance"]
     if (root / "interrupt-recovery-observation.json").exists():
         phases.insert(1, "interrupt-recovery")
+    if (root / "local-completion-observation.json").exists():
+        phases.insert(phases.index("resume") + 1, "local-completion")
     observations = {phase: load(root / f"{phase}-observation.json") for phase in phases}
     interruption_phase = "interrupt-recovery" if "interrupt-recovery" in observations else "interrupt"
     interrupted = observations[interruption_phase]
@@ -106,6 +108,18 @@ def main():
     assert not any(a["event"] == "execution_unconfirmed" for a in load(root / f"{interruption_phase}-ledger-audit.json"))
     assert interrupted["old_attempt"] is not None
     assert interrupted["outcome"]["session_id"] == resumed["outcome"]["session_id"]
+    if "local-completion" in observations:
+        local = observations["local-completion"]
+        assert local["outcome"]["session_id"] == resumed["outcome"]["session_id"]
+        assert local["outcome"]["state"] == "completed" and not local["forbidden_local_action"]
+        local_calls = native_calls(root, "local-completion")
+        assert any(name == "discover_tasks" for name, _, _ in local_calls)
+        assert any(name == "lease_task" and a.get("action") == "claim" for name, a, _ in local_calls)
+        assert any(name == "lease_task" and a.get("action") == "renew" for name, a, _ in local_calls)
+        assert any(name == "verify_research" and a.get("purpose") == "original" for name, a, _ in local_calls)
+        assert any(name == "complete_research_task" for name, _, _ in local_calls)
+        assert all(name not in {"research_candidate", "research_experiment", "approve_candidate",
+                                "apply_candidate", "inherit_experience"} for name, _, _ in local_calls)
     if interruption_phase == "interrupt-recovery":
         denied = observations["interrupt"]
         assert denied["interruption_observed"] is False and denied["held_task"]["status"] == "available"
@@ -182,7 +196,17 @@ def main():
     assert tasks["replication"].result["candidate_asset_id"] == source
     original = store.fetch_approved(source)
     assert original.attempt.agent == configs["author"].agent
-    assert original.attempt.attempt == tasks["author"].attempts
+    original_claims = [e for e in events(root, "resume") if e.get("reported_attempt") is not None
+                       and e["raw"].get("item", {}).get("arguments", {}).get("action") == "claim"]
+    assert any(e["reported_attempt"] == original.attempt.model_dump(mode="json") for e in original_claims)
+    if "local-completion" in observations:
+        assert original.attempt.attempt == resumed["held_task"]["attempts"] < tasks["author"].attempts <= 3
+        diagnosis = load(root / "author-validation-diagnosis.json")
+        failed = diagnosis["validation_rows"]
+        assert len(failed) == 1 and failed[0]["passed"] is False
+        assert store.get_report(failed[0]["report_id"]).model_dump(mode="json") == failed[0]
+    else:
+        assert original.attempt.attempt == tasks["author"].attempts
     assert tasks["author"].result["approved"] is False
     run_summaries = []
     for role, task in tasks.items():
@@ -192,18 +216,45 @@ def main():
         body = executed[0]["body"]
         if isinstance(body, str):
             body = json.loads(body)
-        assert body["worker_id"] == configs[role].worker_id and body["token"] == task.token
+        assert body["worker_id"] == configs[role].worker_id
+        if role == "author" and "local-completion" in observations:
+            local_launch = load(root / "local-completion-launch.json")
+            assert local_launch["known_execution"] == body and local_launch["source_asset"] == source
+            assert body["token"] == resumed["held_task"]["token"] < task.token
+            assert any(a["event"] == "execution_confirmed" and a["task_id"] == "author" for a in audit)
+            assert any(name == "verify_research" and a.get("token") == task.token
+                       and a.get("asset_id") == source and a.get("run_id") == body["run_id"]
+                       for name, a, _ in local_calls)
+        else:
+            assert body["token"] == task.token
         plan = ExperimentPlan.model_validate(task.acceptance["experiment_plan"])
         assert plan.role == role and plan.parameters == ("original",)
         context = ExperimentContext(run_id=body["run_id"], task_id=role, worker_id=configs[role].worker_id,
-                                    fencing_token=task.token)
+                                    fencing_token=body["token"])
         result = read_result(configs[role].evidence_root, body["run_id"], expected_plan=plan, expected_context=context)
         assert result.provenance == "live" and result.execution_state == "succeeded"
         assert result.scientific.verdict == "passed" and result.remote_effect == "known"
         assert result.cleanup_state == "destroyed" and result.sandbox_id
         assert result.usage is None and result.cost_usd is None
+        role_reports = [r for r in store.research_reports(source)
+                        if r.task_id == role and r.run_id == body["run_id"]]
+        assert len(role_reports) == 1
+        report = role_reports[0]
+        assert report.source_swarm_id == configs[role].swarm_id
+        assert report.source_fencing_token == context.fencing_token
+        assert report.source_attempt is not None
+        assert report.source_attempt.task_id == role and report.source_attempt.agent == configs[role].agent
+        if role == "author":
+            assert report.source_attempt == original.attempt
+            assert task.result["source_swarm_id"] == report.source_swarm_id
+            assert task.result["source_fencing_token"] == context.fencing_token
+            assert task.result["source_attempt"] == original.attempt.model_dump(mode="json")
+            assert task.result["observation_fencing_token"] == task.token
+        else:
+            assert report.source_attempt.attempt == task.attempts
         assert (Path(result.archive_path) / "inputs/experiment.py").read_bytes() == original.changes[0].after.encode()
         run_summaries.append({"role": role, "run_id": context.run_id, "sandbox_id": result.sandbox_id,
+                              "immutable_execution_token": context.fencing_token, "current_write_token": task.token,
                               "archive": result.archive_path, "fraction": fraction_check(result)})
     assert len({r["run_id"] for r in run_summaries}) == len({r["sandbox_id"] for r in run_summaries}) == 3
     reports = store.research_reports(source)

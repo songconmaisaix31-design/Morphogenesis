@@ -6,6 +6,7 @@ experiments, approve assets, write the ledger, or retry a failed invocation.
 import argparse
 import json
 import os
+import sqlite3
 from pathlib import Path
 import sys
 import time
@@ -17,6 +18,8 @@ from orchestration.native_agents import (
 )
 from swarm.research.models import HostConfig
 from swarm.task_ledger import TaskLedger
+from orchestration.experiments.executor import read_result
+from orchestration.experiments.models import ExperimentContext, ExperimentPlan
 
 TOOLS = (
     "discover_tasks", "project_context", "lease_task", "search_evidence",
@@ -32,14 +35,14 @@ def write(path, value):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--phase", choices=("interrupt", "interrupt-recovery", "resume", "replication", "inheritance"), required=True)
+    parser.add_argument("--phase", choices=("interrupt", "interrupt-recovery", "resume", "local-completion", "replication", "inheritance"), required=True)
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--key-file", type=Path, required=True)
     parser.add_argument("--inspect-only", action="store_true", help="Probe and persist actual launch bindings without a model invocation")
     args = parser.parse_args()
     root = args.state.resolve(strict=True)
     interrupting = args.phase in {"interrupt", "interrupt-recovery"}
-    role = "author" if interrupting or args.phase == "resume" else args.phase
+    role = "author" if interrupting or args.phase in {"resume", "local-completion"} else args.phase
     runtime = "claude" if role == "replication" else "codex"
     config_path = root / (role + "-host.json")
     config = HostConfig.model_validate_json(config_path.read_bytes())
@@ -49,7 +52,7 @@ def main():
     if observation.exists() or evidence.exists():
         raise RuntimeError("an invocation is never replayed")
     previous = []
-    for phase in ("interrupt", "interrupt-recovery", "resume", "replication", "inheritance"):
+    for phase in ("interrupt", "interrupt-recovery", "resume", "local-completion", "replication", "inheritance"):
         path = root / (phase + "-observation.json")
         if path.exists():
             record = json.loads(path.read_text(encoding="utf-8"))
@@ -60,6 +63,8 @@ def main():
     if wall_remaining <= 0 or tools_remaining <= 0:
         raise RuntimeError("declared identity observation window exhausted")
     session = None
+    known_execution = None
+    source_asset = None
     if args.phase == "interrupt-recovery":
         denied = json.loads((root / "interrupt-observation.json").read_text(encoding="utf-8"))
         denied_raw = (root / "interrupt-native/native.jsonl").read_text(encoding="utf-8")
@@ -72,6 +77,42 @@ def main():
         session = denied["outcome"]["session_id"]
         if not session:
             raise RuntimeError("permission recovery requires the original observed UUID")
+    if args.phase == "local-completion":
+        prior = json.loads((root / "resume-observation.json").read_text(encoding="utf-8"))
+        if prior["held_task"]["status"] == "completed" or prior["outcome"]["state"] != "completed":
+            raise RuntimeError("explicit local completion requires the settled incomplete prior turn")
+        session = prior["outcome"]["session_id"]
+        first = json.loads((root / "interrupt-observation.json").read_text(encoding="utf-8"))
+        if not session or session != first["outcome"]["session_id"]:
+            raise RuntimeError("local completion must retain the original UUID")
+        historical = json.loads((root / "resume-ledger-audit.json").read_text(encoding="utf-8"))
+        executions = [r["body"] for r in historical if r["task_id"] == "author" and r["event"] == "research_execution"]
+        if len(executions) != 1:
+            raise RuntimeError("local completion requires exactly one actual historical execution")
+        known_execution = executions[0]
+        task = ledger.get("author")
+        context = ExperimentContext(run_id=known_execution["run_id"], task_id="author",
+            worker_id=known_execution["worker_id"], fencing_token=known_execution["token"])
+        actual = read_result(config.evidence_root, context.run_id,
+            expected_plan=ExperimentPlan.model_validate(task.acceptance["experiment_plan"]), expected_context=context)
+        with sqlite3.connect(Path(config.ledger_path).resolve().as_uri() + "?mode=ro", uri=True) as database:
+            pending = database.execute("SELECT unconfirmed_request_id FROM tasks WHERE swarm_id=? AND task_id=?",
+                                       (config.swarm_id, "author")).fetchone()
+        if (context.worker_id != config.worker_id or actual.provenance != "live"
+                or actual.execution_state != "succeeded" or actual.scientific.verdict != "passed"
+                or actual.remote_effect != "known" or actual.cleanup_state != "destroyed"
+                or pending is None or pending[0] is not None):
+            raise RuntimeError("local completion refuses unknown, changed or other-worker experiments")
+        native = [json.loads(line) for line in (root / "resume-native/native.jsonl").read_text(encoding="utf-8").splitlines()]
+        published = [e["item"] for e in native if e.get("type") == "item.completed"
+            and e.get("item", {}).get("tool") == "research_candidate"
+            and e["item"].get("status") == "completed" and e["item"]["arguments"].get("action") == "submit"
+            and e["item"]["arguments"].get("token") == context.fencing_token]
+        if len(published) != 1:
+            raise RuntimeError("local completion requires the original actual published candidate")
+        source_asset = published[0]["result"]["structured_content"]["result"]
+        if not isinstance(source_asset, str) or not source_asset.startswith("sha256:"):
+            raise RuntimeError("original candidate return is not an actual asset address")
     rules = [
         "Use only the eleven morph_research MCP tools. Never use shell, file writes, browser, subagents, or other MCP servers.",
         "Never write host config, authoritative SQLite, approved files or raw archives directly. Only trusted MCP can mutate them.",
@@ -107,6 +148,15 @@ def main():
             + f". Use task_id=author and OLD token={lease['token']}. This legal public submit MUST also reject stale fencing.",
             "Do not fix or bypass these expected stale rejections. After BOTH rejections, actively discover/claim author again, obtaining higher token and current canonical attempt_id.",
             "Continue the author workflow with the CURRENT token/attempt only: request, ONE run, submit original candidate, verify purpose original, complete evidence while quarantined.",
+        ]
+    elif args.phase == "local-completion":
+        rules += [
+            "EXPLICIT LOCAL COMPLETION ONLY: the previous optional file check has a FAILED TimeoutExpired report; preserve it. The external scientific experiment is already known succeeded and destroyed.",
+            "Actively discover and reclaim author with a fresh current token, then renew. This is the original final claim budget, not a new task or run.",
+            f"Use ONLY original candidate {source_asset} and existing run {known_execution['run_id']}; its immutable execution token is {known_execution['token']}, while your newly claimed token fences CURRENT verification/report/completion writes.",
+            "Do not publish a new candidate, validate_files, request/run an experiment, approve, apply, release or change identity. No new experiment, sandbox, candidate or fabricated result is permitted.",
+            "Read current context, verify_research purpose=original against that existing candidate/run using your CURRENT token, renew, then complete_research_task for the same original candidate/run while quarantined.",
+            "If trusted known-result continuation rejects the original execution context, stop and report; never bypass its fence or change archived context. No automatic retry.",
         ]
     elif args.phase == "inheritance":
         rules += [
@@ -158,7 +208,8 @@ def main():
     else:
         plan = plan.model_copy(update={"argv": plan.argv + ("--strict-mcp-config", "--tools", "", "--disable-slash-commands")})
         write_mcp_config(plan, mcp_path)
-    write(root / (prefix_name + "-launch.json"), {"request": request.model_dump(mode="json"), "plan": plan.model_dump(mode="json"), "probe": measured.model_dump(mode="json")})
+    write(root / (prefix_name + "-launch.json"), {"request": request.model_dump(mode="json"), "plan": plan.model_dump(mode="json"), "probe": measured.model_dump(mode="json"),
+        "known_execution": known_execution, "source_asset": source_asset})
     if args.inspect_only:
         print(json.dumps({"inspect_only": True, "session_id": plan.session_id,
                           "wall_remaining": wall_remaining, "tools_remaining": tools_remaining,
@@ -168,8 +219,16 @@ def main():
     native_renew_observed = False
     crossed_experiment = False
     reported_old_attempt = None
+    forbidden_local_action = False
     def on_event(event):
-        nonlocal stop, native_renew_observed, crossed_experiment, reported_old_attempt
+        nonlocal stop, native_renew_observed, crossed_experiment, reported_old_attempt, forbidden_local_action
+        if args.phase == "local-completion" and event.kind == "tool":
+            raw_item = event.raw.get("item", {}) if isinstance(event.raw, dict) else {}
+            action = raw_item.get("arguments", {}).get("action")
+            if (event.tool_name in {"research_candidate", "approve_candidate", "apply_candidate", "inherit_experience"}
+                    or event.tool_name == "research_experiment" and action != "result"):
+                forbidden_local_action = True
+                stop = True
         if not interrupting:
             return
         if event.reported_attempt is not None:
@@ -201,7 +260,7 @@ def main():
     write(root / (args.phase + "-ledger-audit.json"), audit)
     record = {"phase": args.phase, "role": role, "wall_seconds": wall,
         "outcome": outcome.model_dump(mode="json"), "held_task": task.model_dump(mode="json"),
-        "old_attempt": reported_old_attempt,
+        "old_attempt": reported_old_attempt, "forbidden_local_action": forbidden_local_action,
         "interruption_observed": interrupting and native_renew_observed and not crossed_experiment
             and reported_old_attempt is not None
             and outcome.reason == "cancelled; usage and remote effect may be unknown" and outcome.exit_code is not None
@@ -212,7 +271,7 @@ def main():
         "actual_interruption": record["interruption_observed"]}))
     if interrupting:
         return 0 if record["interruption_observed"] else 1
-    return 0 if outcome.state == "completed" and task.status == "completed" else 1
+    return 0 if outcome.state == "completed" and task.status == "completed" and not forbidden_local_action else 1
 
 
 if __name__ == "__main__":
