@@ -38,6 +38,25 @@ canonical-only 修改后的同一有限 profiler 诊断：exit 0；产物 `morph
 
 中途准备/身份守卫 WIP 已保存在 OS TEMP `morph-fc-log-guard-wip-0930.patch`、`morph-fc-log-guard-wip-0930.py`、`morph-fc-log-guard-wip-test-0930.py`；未验证、未入最小 candidate。Windows 原生 stat/lstat/fstat 身份一致探针、open 子文件后的父目录 rename 被 OS 拒绝，均只是诊断，非验收。新回归覆盖真实锁拒绝不补 partial tail、锁取得后出现真实 hardlink 的新鲜检查、缺失路径/regular 祖先、dangling alias，以及注入底层 metadata PermissionError 的 failclosed。
 
-代码 SHA 与实际无 profiler gates **PENDING**：先原失败单节点一次；成功再完整 FC logger（含真实 Worker）与适用路径安全选择、strict。最后报告 doc SHA、remote exact/clean 和五路径核对另记。
+代码阶段：`f72f82efc0119e2fc59a3d83536aab073bb4f4e5` 增最小源码与五项回归；随后 `f0d6f520c3e230af0c2718dbcc993a4a53a9ee7d` 增 native reparse tag 不存在时的短路，避免非 Windows 访问 Windows 专有常量。复用现有 CPython 3.12.13 stdlib 原生 lstat/mode/reparse API；没有复制第三方实现。两次 conventional commit 均有 `Swarm-Agent: codex`，无 force；f0d6f52 push 后 `git ls-remote --heads origin songconmaisaix31-design/morph-fc-stable-runtime-0930` exact match、tree clean 后才开始以下检查。guard WIP 不在提交中。
 
-`contract_local=PENDING`（Owner，不是 I 验收）；`interface_live=NOT_RUN`；`task_live=NOT_RUN`。不调用模型/DSH/Hub/Live/部署，不改 H1、Schema、原 tag 或三 TODO。
+## 实际门禁与 Handoff
+
+以下全部在精确代码 SHA `f0d6f520c3e230af0c2718dbcc993a4a53a9ee7d`，无 profiler、串行 slow checks；进程内 `OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=1`，pytest 默认 OS TEMP，无 source-tree basetemp。命令均前缀 `.venv/Scripts/python.exe`；OS TEMP log 前缀 `morph-fc-log-f0d6f52-`（node/full-logger/path-safety/strict.log）。
+
+| 真实命令（上述 Python 前缀） | exit / 结果 |
+|---|---|
+| `-m pytest tests/swarm/test_fc_logging.py::test_concurrent_append_and_partial_tail_preserve_facts -q` | 0；1 passed / 6.49s，修改源码后原失败节点单次实跑 |
+| `-m pytest tests/swarm/test_fc_logging.py -q` | 0；29 passed / 50.74s，全部原文件加两项 native 回归 |
+| `-m pytest tests/swarm/test_assets.py -q -k 'no_links or hardlink_path or alias_link or protected_target or unsafe_paths or prepared_baseline_and_own_swarm_tree or fixed_frozen_mainline or native_worktree'` | 0；21 passed / 38 deselected / 21.84s；未把 deselected 说成通过 |
+| `tools/typecheck.py` | 0；Success: no issues found in 89 source files |
+
+精确依据：`local_assets/paths.py:47` canonical 单 lstat、`:56` native tag 缺失短路；`fc_logging.py:114` 完整保护检查、`:143` 原 50ms transaction/锁内重检查与 open 仍在原位。`test_fc_logging.py:136` 原三线程六 append / partial tail / 序列节点不变；`:188` 真实 Worker 的 14 字段与未知成本 hold；`:212` 日志失败仍 completed 且不重发；`:287` 新真实 SQLite 锁拒绝保持原 bytes，`:310` 新锁后 hardlink 拒绝。`test_assets.py:25/:35/:54` 增 missing/regular-ancestor、dangling alias 和 metadata PermissionError 回归，`:255/:263` 既有真实 hardlink / alias；只读检查测试遗留 alias 与 dangling 两者均 **Windows junction**（tag `2684354563`），未冒充 native symlink 或 Linux gate。PermissionError 项是 primitive 异常注入，其他对应项为真实文件/锁操作。
+
+核对：基线至代码 SHA 只五条授权路径；源码实际 **15 insertions / 5 deletions**，两个测试只增 51 / 44 行。AST 对比全部原 logger 17、asset 37 个顶层 function/class 定义不变；原 R 四个代码/测试与旧失败报告逐路径 diff 空。代码 SHA 所有命令后 tree clean。最后仅本报告增实际证据，报告 doc SHA 与最后 remote exact/clean 回执由最终 Handoff 单列，避免自引用 SHA；不在 doc SHA 重跑源码不变的门禁。
+
+限制：带 profiler 的局部竞争仍失败且观察开销未知，不删除该诊断、不据局部实际 green 宣称 Windows 全量或稳定时延保证；根因的所有贡献与环境影响保持未知。现有安全策略位置与检查保留，single-lstat 对非 link 组件给同一 mode/nlink 决策，symlink/junction 不跟随；仅明确 missing 继续、其余 metadata 异常更保守 failclosed。没有新 prepare/身份层的检查移动或替换窗口。最终最小修复 Owner 门禁已过，独立 I 仍须精确合并 SHA 验收。
+
+NOT_RUN：本次全量、build、SDK 专项、分发、双平台 CI、I 独立 merge SHA；Windows native symlink 创建（本环境原生创建拒绝后走 junction），Linux/native 无 tag 分支实际运行；模型 API/DSH/Hub/Live/部署/H1/原 tag 操作。38 deselected 不属于本次适用安全选择。
+
+`contract_local=PASS`（本次固定 SHA、上述 Owner self-test 范围，不是 I 验收）；`interface_live=NOT_RUN`；`task_live=NOT_RUN`。旧 R/D/外部旧代码失败证据保持 failed，不改 H1、Schema、原 tag 或三 TODO。
