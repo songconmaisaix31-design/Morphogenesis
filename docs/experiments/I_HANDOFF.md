@@ -1,6 +1,7 @@
 # C → I：可信配置、证据与自有资源交接
 
-代码候选 `23417b09ffc93fbc432da0f63a7abec2546fd825` 已 push；本次收口只增加/更新文档。
+当前命令兼容修复候选 `b4b403cd098df5cf2194e32377f7bd9f18a54ade` 已 push，后续收口只更新文档。
+历史23417候选CI/原失败继续留存，不移称为新候选通过；[I首个命令失败与修复](interface-i-0930-bc4-01-command.md)见独立记录。
 集成后 I 需固定自己的完整集成 SHA 重新验证，不复用 C 作为集成通过。
 本轨依赖唯一 Owner 的改动是 `pyproject.toml` / `poetry.lock`；锁中原有版本均未升级。
 版本、来源、许可证见 [upstream.md](upstream.md)，接口与支持矩阵见 [README.md](README.md)。
@@ -48,7 +49,7 @@ try {
 
 ## 新 CPU 接口案例与宿主计划
 
-C 原唯一 live `interface-c-0930-01` **FAILED**，见 [原失败](interface-c-0930-01.md)。
+C 原唯一 live `interface-c-0930-01` **FAILED**，见 [原失败](interface-c-0930-01.md)；I后续新 `interface-i-0930-bc4-01` 也FAILED。
 原目录/result 不改，禁止重复这个 run 或在 unknown 后自动重建。
 I 在已批准的完整集成 SHA 上自行选择全新唯一 run_id（以下只是说明，不应直接复制占用名称）：
 
@@ -99,6 +100,7 @@ Script 已实现；connect 仅借用、禁止远端修改/续期/取消/销毁�
 持久卷、Code Interpreter、新 Jupyter kernel 是显式 opt-in 且本轮 **NOT_RUN**，默认unsupported。
 Notebook Dockerfile 未 build/run，不能宣称已可用；正式复现需固定镜像、全新 kernel/context 与完整产物。
 原烟测在目录权限 wire 失败前未发送 binary/cgroup/cancel/科研 command；700/600已修复且官方 SDK wire contract 测试通过，
-修复后上述 live 能力仍待 I 独立新案例。原生两个 Agent task_live **NOT_RUN**。
+随后I新案例已观测binary roundtrip，但cgroup首命令被旧execd要求command拒绝；SDK字符串兼容修复后命令/cgroup/cancel/科学live仍待I新的独立案例。
+修复不升级SDK/execd镜像，参数用标准POSIX shlex.join保持literal；原生两个 Agent task_live **NOT_RUN**。
 
 完整本机12失败与同 SHA CI结果见 [full gate](full-gate-23417b09.md)；文档提交不把它们改为通过。

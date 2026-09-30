@@ -43,13 +43,13 @@ read_result 比对期望计划/身份、常规文件 SHA、真实 SDK completion
 |---|---|---|
 | create/status/connect/renew | `SandboxSync` 官方生命周期 | 首次烟测实际完成，随后失败；不算整体通过 |
 | attached保护 | connect仅借用；拒绝run/upload/renew/cancel/destroy，close仅释放本地连接 | mock契约与首次live拒杀 |
-| argv/logs/exit/server timeout | 官方 commands.run + RunCommandOpts | 官方1.1.0 contract测试；科研live未执行 |
+| command/logs/exit/server timeout | argv用标准POSIX shlex.join进入官方字符串commands.run + RunCommandOpts，兼容固定execd1.1.0 | I首次cgroup因SDK argv wire被旧execd HTTP400拒绝；已补实际SDK HTTP边界回归，修复后live NOT_RUN |
 | background/status/logs/cancel | 官方后台run、get_command_status/logs、interrupt；只允许自有command ID | contract；首次live在此前失败，NOT_RUN |
-| binary upload/download | 官方 filesystem write/read_bytes_stream，限产物大小 | 首次目录权限 wire 参数失败；修复700/600并补官方wire测试，修复后live NOT_RUN |
+| binary upload/download | 官方 filesystem write/read_bytes_stream，限产物大小 | C首次目录权限wire失败；修复700/600后I新案例实际binary_roundtrip=true，随后命令失败，整体interface仍FAILED |
 | persistent volume | 官方 Volume/PVC 指向预先创建的卷，`volumes=True`显式开启 | 本轨没有建卷，不删除外部卷；NOT_RUN |
 | Code Interpreter | `codeinterpreter=True`，官方SDK create_context新内核，固定官方入口 | 默认unsupported；镜像未拉/未跑，NOT_RUN |
 | Jupyter notebook | `notebook=True`，固定runner调用nbclient的新kernel，保存executed notebook/kernel ID | 默认unsupported；可选Dockerfile.notebook未build/run，NOT_RUN |
-| CPU/memory/duration | 官方resource/timeout映射，smoke原始cgroup读取准备就绪 | 原live在读取前失败；实际enforcement=unknown，不把配置当验证 |
+| CPU/memory/duration | 官方resource/timeout映射，smoke原始cgroup读取 | I新案例首个cgroup命令HTTP400，无资源读数；实际enforcement=unknown，不把配置当验证 |
 | GPU | 无本轮支持 | 请求不能静默降级；不需要GPU，不扩围 |
 
 官方SDK重试设为disabled，遥测disabled。command超时由官方execd强制；Code Interpreter流的网络超时
@@ -68,7 +68,9 @@ docker compose -f deploy/opensandbox/compose.yaml up -d
 python -m orchestration.experiments.smoke --case-dir demo/research_case --archive-root <private-absolute-path> --run-id <new-approved-run>
 ```
 
-首次运行 `interface-c-0930-01` 已失败并留痕；不得重放它。修复后的live由I在冻结SHA另作独立案例。
+首次运行 `interface-c-0930-01` 与后续I的 `interface-i-0930-bc4-01` 均已失败并留痕；不得重放。
+后者已观测二进制往返，随后命令契约不兼容；[最小修复及原失败](interface-i-0930-bc4-01-command.md)记录清楚。
+新命令修复的live须由I在新的冻结集成SHA取得新唯一run决策后独立执行。
 服务通过loopback8097+原生key认证；server和sandbox在默认bridge，SDK走server代理。
 发行1.1.0的sandbox桥接端口会动态发布到宿主，不能声称是网络强隔离；本配置只供受控本地公开CPU输入。
 服务拥有Docker socket权限，不能提供生产或不可信公开入口。认证/设置仅本次私有服务，不复制Agent HOME或原生登录凭据。
