@@ -51,3 +51,13 @@
 ignored原始检查日志保留在 `tests/native_agents/.runtime/`（pytest-second/third/fourth/binding/stage1/final、legacy与legacy-os-temp、mypy-binding、build-existing-venv/build-isolated/build-official-index、package-smoke等）；初次setup/strict/错误CLI路径的准确命令/原错误同时保留在本报告和终端记录。秘密、prompt运行数据和缓存未入库。
 
 限制与未执行：真实原生模型、MCP工具连接、真实 claim/实验/复现/adoption、原生持久 session 恢复与交互 TUI 均 NOT_RUN，由最终 I 在统一候选按最多3会话运行；Linux/WSL实际进程组及原生环境尚 NOT_RUN。无硬 token/cost 封顶，observer工具限制不能撤回已发出请求，费用/远端效果 unknown不重试；附着会话无 stdin 接管，后台脱离进程组资源无清理保证。Hub/生产部署/tag/公共主线合并未执行。
+
+## 原 Owner 返修：CI fixture 可移植性
+
+原交付 `648f43c54203f555b1b05827cfe119c8e3dfa622` 与其 accepted worker_done 保留。其本机 75 passed 是安装了 Codex 的 Windows Owner self-test，不能据此推断无原生 CLI 的 contract CI 通过。
+
+首次合并候选 `85a921c49addcdd46c2cb4a307c3515356b3e186` 的 CI run `36728997575` 原结果永久保留为 failure：Ubuntu job `109933248463` 为 1 failed / 1062 passed / 2 skipped / 75 warnings，388.10s；Windows job `109933248105` cancelled，下游 strict/build 未通过。唯一失败是 `tests/native_agents/test_process.py::test_unknown_launch_exit_and_mock_cannot_be_live`：原行143的 `pytest.raises(ValueError, match="official CLI")` 在无 Codex 环境先遇到 `registry.py:58` 的 `FileNotFoundError`。
+
+此次仅固定该测试的外部 `process.resolve_executable` 发现边界，返回确定的 official command prefix（不创建或认证可执行文件），与 Python fake_plan / missing.exe argv 均不同。真实 `run_headless` 和 `_require_native_command`、原 ValueError 类型/quote 断言、mock missing launch 的 exit=None/state=unknown 断言与 live 目录不存在断言保持不变；未修改生产文件、安装 CLI 或执行模型。`process.py:140` 的防伪 guard 在 `:144` 创建 evidence 目录、`:207` 调用 `_spawn_owned` 之前，原 live 目录不存在后置断言验证拒绝发生在任何 live Popen 之前；没有替换 guard 或 Popen。
+
+阶段静态检查为 `git diff --check` 和完整 diff 审核。当前返修的本地原 test / native suite / strict 均 NOT_RUN，等待主控提供 Python 窗口；返修 CI 尚待新候选运行，不替换原失败结果。完整合并门禁、真实科研 live、SDK 仍未由本次返修执行，归 I 统一验收。

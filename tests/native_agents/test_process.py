@@ -135,7 +135,11 @@ def test_resume_mismatch_remains_unknown(tmp_path: Path) -> None:
     assert "different session" in result.reason
 
 
-def test_unknown_launch_exit_and_mock_cannot_be_live(tmp_path: Path) -> None:
+def test_unknown_launch_exit_and_mock_cannot_be_live(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Installed CLI discovery is external to this contract. Keep the real live
+    # guard, with a deterministic official prefix distinct from either fake argv.
+    official_command = (str(tmp_path / "official-codex.exe"),)
+    monkeypatch.setattr("orchestration.native_agents.process.resolve_executable", lambda spec: official_command)
     bad = fake_plan(tmp_path, "pass").model_copy(update={"argv": (str(tmp_path / "missing.exe"),)})
     result = run_headless(bad, tmp_path / "out", timeout_seconds=5, max_tool_calls=5, provenance="mock")
     assert result.exit_code is None and result.state == "unknown"
