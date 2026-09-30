@@ -44,3 +44,9 @@
 - A 工作树 `morph-fc-closeout-fix-0930`，基线 `8c76af7`，分支 `songconmaisaix31-design/morph-fc-closeout-fix-0930`，codex 有效模型 GPT-6-Astra xhigh（终端回显）。codex 账户周额度告警（剩约 2%），已记录为运行风险，不自动换模型/充值。
 - A 交付（自验回执）：CI 修复 `f0add30`（`test_fc_logging.py` 改读打包 `orchestration/fc_log_schema.json`，去 `git show be4fb7a`；聚焦 27 passed，`grep 'git show'` 无残留）；性能修复 `db283ea`（`fault_observations.py` 崩溃可恢复持久索引，append 不再全文件重扫；聚焦 101 passed）。strict 89 文件 exit 0，全量 **910 passed / 2 warnings / exit 0（619.88s）**，边界检查（仅 3 授权文件、冻结 Schema blob 不变、双 trailer、clean）通过。已 push，远端 `db283eaa1f1d71d36e7b8a3520aafbce5becf1dd`。
 - **A 验收通过**：主控独立核对 diff 恰为 3 文件、`orchestration/fc_log_schema.json` 字节不变；CI run `36615184218` **双平台 success**（Ubuntu 6m / Windows ~29m，pytest 910 全绿 + build/SDK/分发）。**新固定 SHA = `db283eaa1f1d71d36e7b8a3520aafbce5becf1dd`**（受限 FC 入口已打通：CI 绿 + 六阶段 drill + 五不变量 + cost_state 一致 + 结果可判定）。
+- **H1 人工签字归档**：David 2026.9.30 12:31 有条件接收（场景 A/B 结论「两者都不是/证据不足」+ breaker 六点 + 材料修正），见 `docs/FC_HUMAN_REVIEW_0930.md`。
+- **DSH 评审归档**：一次真实 `dsh --profile headless`（deepseek-flash）62s，推理流实质评审了 inv1–5/repair1–5/fencing/budget_ab/false_green1–6/limitations；但 exit 1、输出预算耗尽，未产出结构化 fact/hypothesis 且 16 矩阵未覆盖。按用户确认以推理流为评审实质归档，如实标注「非合格正式评审」，见 `artifacts/ai-evidence/review-0930-dsh-report.md`。
+- **主线合并**：`git merge --no-ff db283ea` → `86ade3d`（父 `86b1830` 治理 + `db283ea` 代码），`merge-tree` 无冲突，合并后 `swarm/orchestration/tests` 及共享文档/配置与 db283ea 字节一致，治理文件保留。已 push。
+- **三态验收**：`contract_local` = **passed**（合并 SHA 代码与 db283ea 字节一致，CI run `36670085486` 双平台 success：pytest 910 + strict + build/SDK/分发）；`interface_live` = **not_run**（无 live 网关请求，fault_drill 为 mock/SIMULATED）；`task_live` = **not_run**（本轮无真实模型任务执行）。
+- **Tag**：`git tag -a demo-build 86ade3d` → push；`ls-remote` 核 `refs/tags/demo-build = 77becf85`（peeled `86ade3d`），远端无既有同名 tag，未覆盖。
+- **Phase 2（架构切稳定接口）未启动**：本轮未开展，作为后续项保留；perf（全历史扫描）已在本轮轨道 A 内完成。
