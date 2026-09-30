@@ -75,7 +75,7 @@ Windows 原生 symlink 创建走已有权限失败后的 junction fallback，**�
 - 21 条事件均 mock/SIMULATED/drill，writer_failure_count=0；每条经与 H3 相同的 Git Schema validator 验证，审计未知仍 None。
 - 唯一真实故障 fact 的 14 字段与统一日志精确一致：`fixture-1:1:0`、confirmed_rejection、billing_arrearage、switched_to=beta:fixture、cost_state=unknown。
 - 5 行真实 reservations 全 uncertain/unknown、tokens=None、estimate_usd/admitted_usd=None、request_bound=unbounded，每行 reserved_usd=0.2，累计仍 **1.0 USD hold**。顶层 usage/cost_usd 仍 None，没有用 0 填未知或释放 hold。
-- 4 个实际 tasks 和 4 个 task_attempts completed；claim 日志 sequence/at/token 与持久 ledger 对应。probe token=1，历史保留。所有原 JSONL/SQLite/工作区留在 `L/drill-cli`。
+- 任务总表实际共 **6 行：4 completed（fixture-0..3），2 available（fixture-4/5，未进入本次演练）**；task_attempts 共 4 行，实际 outcome 全 completed。原独立 reader 明确按 fixture-0..3 过滤后读取这 4 个 completed tasks，并未断言任务总表只有 4 行；收到总控范围澄清后，I 再次只读完整总表，证据 `cli-task-table-clarification.json`。claim 日志 sequence/at/token 与持久 ledger 对应，probe token=1，历史保留；所有原 JSONL/SQLite/工作区留在 `L/drill-cli`。fixture-4/5 没有执行，不把六阶段演练说成六个任务全部完成。
 
 **推断限制**：这些是本地真实 Worker/存储/官方 SDK 的模拟 executor 行为；不证明远端模型效果、生产 50 ms 时延保证、Hub 或 Live 成功。Owner profiler 竞争失败及未知观察开销保留在原 R 报告，I 没用 profiler 或单节点 green 代替全量。
 
@@ -108,7 +108,8 @@ Windows 原生 symlink 创建走已有权限失败后的 junction fallback，**�
 - **interface_live=NOT_RUN；task_live=NOT_RUN**。模型 API、DSH、Hub、任何 Live、部署、新候选 H1 人工签字及 tag 操作均 NOT_RUN。
 - **人工**：David 原 H1 仅 `db283ea` 的有条件接收，不自动继承新 source SHA。原 DSH 用户已接受预算耗尽的推理流为评审实质，但原 exit 1、非合格正式评审、引用机械校验未完成仍保留；没有再调用或索取密钥。三 TODO 没有关闭。
 - **真实安装限制**：独立 wheel site 必须实际供给 npm 锁定的官方 SDK/Ajv 前置依赖；wheel 本身不包含 node_modules。源树 SDK gate 或 CI 在源码祖先内的 wheel site 通过，不消除这项 TEMP 独立安装要求。
-- **推进前事实**：全部当前核心门禁完成后，18:17（UTC+8）初次读取目标 `decentralized-swarm` 本地 clean，HEAD/remote 均仍 `7cc64e3eb0031a6b06b9482e95707de17dfe0885`，原 tag object/peeled 不变。本报告写入时尚未执行目标推进，**不预写推进通过**。
-- 本报告提交后，仅当纯报告 diff 恰为本文件及计划追加、所有其余逐路径 code/test/package/config blobs 与 `7430605` 一致，且紧邻执行前再次确认目标 clean/HEAD/remote 仍固定基线，才依原授权对完整候选执行 `merge --ff-only` 和普通 push。最终 I/report SHA、target SHA、实际命令/exit/remote/clean 由本次 exact Dispatch 终态 Handoff 给出；漂移则交总控，不覆盖贡献。
+- **推进前事实**：全部当前核心门禁完成后，18:17（UTC+8）初次读取目标 `decentralized-swarm` 本地 clean，HEAD/remote 均仍 `7cc64e3eb0031a6b06b9482e95707de17dfe0885`，原 tag object/peeled 不变。本报告初次写入时尚未执行目标推进，没有预写推进通过。
+- **实际首次推进**：初次纯报告提交 **`707e3570566800efdcdb5bc0f65b14b5df4d51c6`** 已 push；与 `7430605` 的 diff 只含本报告及计划追加，独立逐路径检查其余 **382** 个 tracked path 的 blob/mode 完全相同，原受保护基线也不变。紧邻执行前再次核目标 clean、HEAD/remote 仍固定 `7cc64` 后，实际 `git -C <decentralized-swarm> merge --ff-only 707e357...` 和 `git -C <decentralized-swarm> push origin HEAD:refs/heads/decentralized-swarm` 均 **exit 0**。18:24（UTC+8）最终读取 I 与目标 HEAD/remote 均 `707e357`、双方 clean，原 tag object/peeled 不变；真实证据 `report-blob-proof.json`、`target-preflight.json`、`target-advance.log/.exit`、`final-refs.json`。
+- 首次推进后收到总控 `msg_93990b7388eb` 要求补明总任务表 6 行的准确演练范围；此次仅更正文档并补上述真实推进记录，不修改源码/测试/状态、不重复已通过门禁。总控同时披露其两个辅助 reader 错误（错误断言总表仅 4 行、误用 task_attempts.status 列），按消息记录保留为 coordinator reader 错误，不能当作产品门禁失败或通过。最终澄清报告 SHA 与 `7430605` 的逐路径对照、目标实际最终 ref/clean 及任何后续纯文档推进由本次 exact Dispatch 终态 Handoff 单列；目标如今已离开初始基线，不假称仍 `7cc64` 或覆盖其他贡献。
 
 没有未完成的源码返修；生产人工放行/正式 DSH 机械校验及 Live 均仍是独立限制，不以本地验收冒称完成。
