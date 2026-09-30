@@ -41,8 +41,9 @@ def test_active_discovery_scope_and_capabilities_are_host_bound(tmp_path: Path) 
     for task in ("forbidden", "unqualified"):
         with pytest.raises(PermissionError):
             s.claim(task)
-        with pytest.raises(PermissionError):
-            s.context(task)
+    with pytest.raises(PermissionError):
+        s.context("forbidden")
+    assert s.context("unqualified")["task"]["signal"]["task_id"] == "unqualified"
     assert s.context("original")["worker_id"] == "native-a"
 
 

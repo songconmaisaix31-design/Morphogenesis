@@ -27,3 +27,5 @@ Node失败诊断：本 worktree `node_modules/@evomap/gep-sdk` 不存在；按�
 离线桥接：`tests/research/bridge_probe.py --c-source <C6179d41 exact LF archive>` 使用C锁环境且B当前源码，调用C唯一Executor/expected_plan+context/read_result与真实公共CPU脚本产物；mock provenance，科研quarantine拒绝批准，contract_local passed。
 
 基线迁移：`tests/research/migration_probe.py --baseline-source <ef77af6 exact LF archive>` 用基线实际Candidate/Store/Validator/Promoter生成旧持久证据，新B读取旧candidate_json、official asset_id、report及approval不变并允许静态消费，contract_local passed。新增research=None仅在其独立可选metadata字段省略，旧base_head/before等null和值0不改；科研metadata存在时完整进入canonical JSON/官方资产身份。该探针不加入依赖Git历史的普通CI测试，浅克隆不需旧源码；普通测试覆盖序列化边界。
+
+业务阶段提交：`9f20d34a4e4f1e760a6449d029314957e8c9f210` 已远端核实；97文件strict和隔离wheel/sdist通过。随后主控要求可运行初始化入口，原B负责新增 `python -m swarm.research.case` 与 [I公开case步骤](../research/PUBLIC_CASE.md)，再冻结新SHA；I不建设领域harness。初始化通过原TaskLedger登记三项任务和角色资格、真实依赖、C唯一plan、固定静态policy及三份HostConfig；不自动claim/execute/approve/adopt。2项初始化WIP保护/资格边界通过，19业务文件strict通过；当前最终整库门禁未结算，不能据旧WIP测试宣称新候选通过。

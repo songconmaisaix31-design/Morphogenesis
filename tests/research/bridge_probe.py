@@ -32,6 +32,7 @@ def main() -> None:
     from swarm.research.experiments import OfficialExperiments
     from swarm.research.models import HostConfig
     from swarm.research.service import ResearchService
+    from swarm.research.case import seed_case
     spec = importlib.util.spec_from_file_location("c_contract_fixture", args.c_source / "tests/experiments/test_execution.py")
     assert spec is not None and spec.loader is not None
     fixture = importlib.util.module_from_spec(spec)
@@ -84,6 +85,26 @@ def main() -> None:
         done = service.complete_research("author", 1, asset_id, executed["run_id"])
         assert done["status"] == "completed" and not done["effect_applied"]
         assert service.store.state(asset_id) == "quarantined" and not service.store.adoptions()
+        seeded = seed_case(root / "seed-project", root / "seed-state", python=Path(sys.executable),
+                           plan=plan.model_dump(mode="json"), code=body, swarm_id="seeded-case",
+                           domain="127.0.0.1:8097")
+        author_config = HostConfig.model_validate_json(Path(seeded["author_config"]).read_bytes())
+        replica_config = HostConfig.model_validate_json(Path(seeded["replication_config"]).read_bytes())
+        author_backend = OfficialExperiments(author_config)
+        author_backend.executor = ExperimentExecutor(fixture.LocalContractBackend(root / "seed-mock-work"))
+        author = ResearchService(author_config, backend=author_backend)
+        replica = ResearchService(replica_config)
+        assert [t["signal"]["task_id"] for t in author.discover()] == ["author"]
+        assert not replica.discover()
+        lease = author.claim("author")
+        template = author.context("author")["task"]["signal"]["payload"]["candidate_template"]
+        candidate = Candidate.model_validate({**template, "attempt": lease["attempt_id"]})
+        seeded_asset = author.publish("author", 1, candidate)
+        executed = asyncio.run(author.execute("author", 1))
+        author.observe("author", 1, seeded_asset, executed["run_id"], "original")
+        author.complete_research("author", 1, seeded_asset, executed["run_id"])
+        assert [t["signal"]["task_id"] for t in replica.discover()] == ["replication"]
+        assert replica.context("replication")["dependency_results"][0]["result"]["asset_id"] == seeded_asset
         print("contract_local=passed; provenance=mock; C trusted raw NumAcc4 reader + B ledger/assets bridge; mock remains quarantined")
 
 

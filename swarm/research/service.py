@@ -49,7 +49,7 @@ class ResearchService:
         return [_OBJECT.validate_json(t.model_dump_json()) for t in self.ledger.candidates(
             self.locality, limit=limit, capabilities=self.config.capabilities)]
 
-    def _task(self, task_id: str) -> TaskRecord:
+    def _task(self, task_id: str, *, require_capability: bool = False) -> TaskRecord:
         # Query uses authoritative locality and capability filters, including held tasks.
         query, args = self.ledger._local_filter(self.locality)
         with connection(self.ledger.path) as db:
@@ -58,7 +58,7 @@ class ResearchService:
             if row is None:
                 raise PermissionError("task_outside_host_scope")
             task = self.ledger._record(db, row)
-        if (task.signal.required_capability or task.signal.task_kind) not in self.config.capabilities:
+        if require_capability and (task.signal.required_capability or task.signal.task_kind) not in self.config.capabilities:
             raise PermissionError("task_capability_required")
         return task
 
@@ -66,10 +66,12 @@ class ResearchService:
         task = self._task(task_id)
         return {"task": _OBJECT.validate_json(task.model_dump_json()),
                 "project_context": self.config.project_context,
+                "dependency_results": [{"task_id": d, "status": self._task(d).status,
+                                        "result": self._task(d).result} for d in task.dependencies],
                 "worker_id": self.config.worker_id, "agent": _OBJECT.validate_json(self.config.agent.model_dump_json())}
 
     def claim(self, task_id: str, ttl_seconds: float = 60) -> dict[str, JsonValue] | None:
-        self._task(task_id)
+        self._task(task_id, require_capability=True)
         lease = self.ledger.claim(task_id, self.config.worker_id, locality=self.locality, ttl_seconds=ttl_seconds)
         if lease is None:
             return None
@@ -79,7 +81,7 @@ class ResearchService:
         return response
 
     def _lease(self, task_id: str, token: int) -> Lease:
-        task = self._task(task_id)
+        task = self._task(task_id, require_capability=True)
         if (task.owner != self.config.worker_id or task.token != token or task.expires_at is None
                 or isinstance(token, bool)):
             raise LeaseLost("host_identity_or_fencing_token_mismatch")
