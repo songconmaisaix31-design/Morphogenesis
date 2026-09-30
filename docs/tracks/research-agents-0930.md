@@ -73,3 +73,20 @@ ignored原始检查日志保留在 `tests/native_agents/.runtime/`（pytest-seco
 阶段分支 CI run `36731189645`、固定 `f37ada2` 的 Ubuntu job `109940929487`：原 pytest 998 passed / 2 skipped / 75 warnings，360.84s；随后原 strict/typecheck 失败，`windows_job.py` 的 ctypes.WinDLL / WinError / get_last_error 在 Linux 类型定义下共 11 errors / 99 source files。该新失败保留，已经跨轨 Handoff 主控；Windows job `109940929018` 查阅时仍运行，下游 build/分发未通过。Windows 本机 strict 通过不能替代 Linux strict。可用 `gh api repos/songconmaisaix31-design/Morphogenesis/actions/jobs/109940929487/logs` 读取原完成 job 日志，不改变 workflow 或门禁。
 
 完整合并门禁、真实科研 live、SDK 仍未由本次 fixture 返修执行，归 I 统一验收；原 `85a921c` CI failure 保持 failure。
+
+### 同 Owner 追加：Linux strict 的 Windows FFI 类型绑定
+
+主控收到上述新失败后明确授权原 A 在原路径内窄修 `windows_job.py` 并继续短 Python 窗口。`os.name != "nt"` 的原运行时拒绝保持；仅在其后通过 `getattr` 绑定官方 ctypes.WinDLL / WinError / get_last_error，避免非 Windows typeshed 缺少专用符号的静态错误。没有 type ignore、检查排除、Linux gate 改为 win32、认证/权限更改或新 Job 系统。原 kernel32 签名、Windows Job 归属、启动屏障、cancel、关闭句柄与原生错误码保持。
+
+新运行源码冻结为 `2f4b51587e53ecd31dfaf070957f638deed77d4a`（父 `a77317933c00537853e80204a5de6520d8a03152`），已 commit+push、远端 full SHA 一致、工作区 clean。仅这一源码文件相比父提交改变；固定上述代码重新运行原门禁，同样进程局部 BLAS 线程1：
+
+- `python -m pytest tests/native_agents -q --basetemp=tests/native_agents/.runtime/pytest-ci-portability-ffi --tb=short`：75 passed，25.14s，含真实 Windows owned Job / 外部 attached 保留检查。
+- `python -m mypy --strict orchestration/native_agents`：Windows 默认平台，10 source files 成功。
+- `python -m mypy --strict --platform linux orchestration/native_agents`：Linux 类型目标，10 source files 成功；这是 Windows 主机上的静态检查，不是 Linux runtime 实测。
+- 实际 Windows FFI 边界：创建/关闭真实 WindowsJob，检查绑定函数分别为 ctypes.WinError / get_last_error 本身；使用官方 set_last_error(123) 调用 error factory，实际 OSError.winerror=123，恢复原 thread-local error 后关闭 Job。`WINDOWS_NATIVE_FFI_BINDING_OK error.winerror=123`、exit=0；没有替换 native API 或假装 Linux 环境。
+
+ignored 原始日志为 `.runtime/ci-portability-ffi-native.log`、`ci-portability-ffi-strict-windows.log`、`ci-portability-ffi-strict-linux.log`、`ci-portability-ffi-binding.log`。完成源码冻结推送后再次明确释放 Python 窗口给 I，文档收口不再启动 Python。
+
+证据：`tests/native_agents/test_process.py:138` 的外部发现 fixture 与原异常/unknown/live-dir 后置断言；`orchestration/native_agents/windows_job.py:35` 原平台拒绝及其后的原生 FFI 绑定。最终文档提交仅更新本报告，代码/测试树需与 `2f4b515` 机械 diff=0；不为文档重复 suite/strict。
+
+源码候选分支 CI run `36732932318` 在收口时 in_progress，尚无双平台通过结论；合并候选的原完整 gate 仍由 I 执行，不能用本机75或 Linux 静态目标替代。`f37ada2` 的 CI run `36731189645` 保持 failure（Ubuntu strict failure，Windows cancelled）；原 `85a921c` 的首 CI failure 也保持。真实科研 live、原生 SDK、Linux/WSL runtime 仍 NOT_RUN，本轮没有任何模型/OpenSandbox live、公共 main/tag 操作或其它轨道修改。
