@@ -60,4 +60,16 @@ ignored原始检查日志保留在 `tests/native_agents/.runtime/`（pytest-seco
 
 此次仅固定该测试的外部 `process.resolve_executable` 发现边界，返回确定的 official command prefix（不创建或认证可执行文件），与 Python fake_plan / missing.exe argv 均不同。真实 `run_headless` 和 `_require_native_command`、原 ValueError 类型/quote 断言、mock missing launch 的 exit=None/state=unknown 断言与 live 目录不存在断言保持不变；未修改生产文件、安装 CLI 或执行模型。`process.py:140` 的防伪 guard 在 `:144` 创建 evidence 目录、`:207` 调用 `_spawn_owned` 之前，原 live 目录不存在后置断言验证拒绝发生在任何 live Popen 之前；没有替换 guard 或 Popen。
 
-阶段静态检查为 `git diff --check` 和完整 diff 审核。当前返修的本地原 test / native suite / strict 均 NOT_RUN，等待主控提供 Python 窗口；返修 CI 尚待新候选运行，不替换原失败结果。完整合并门禁、真实科研 live、SDK 仍未由本次返修执行，归 I 统一验收。
+阶段静态检查为 `git diff --check` 和完整 diff 审核，通过后先 commit+push `f37ada292f61a28899666a84a8c988da5a4c0a40`，远端 SHA 一致且 clean；该阶段本地 test / suite / strict 均准确记录为 NOT_RUN 待窗口，没有预写通过。
+
+主控释放短时 Python 窗口后，固定上述 SHA，使用 `C:/Python313/python.exe` 与进程局部 OPENBLAS_NUM_THREADS / OMP_NUM_THREADS / MKL_NUM_THREADS / NUMEXPR_NUM_THREADS=1 串行执行：
+
+- 仅此子进程 PATH=''，`python -m pytest tests/native_agents/test_process.py::test_unknown_launch_exit_and_mock_cannot_be_live -q --basetemp=tests/native_agents/.runtime/pytest-ci-portability-empty-path --tb=short`：1 passed，1.06s，原 guard/异常 quote/unknown/live-dir 断言均通过，不依赖 installed native CLI。
+- 恢复 PATH，`python -m pytest tests/native_agents -q --basetemp=tests/native_agents/.runtime/pytest-ci-portability-native --tb=short`：75 passed，25.66s，contract_local/mock。
+- `python -m mypy --strict orchestration/native_agents`：10 source files 成功，Windows 本机静态验证。
+
+串行命令 exit=0，原始日志为 ignored `.runtime/ci-portability-empty-path.log`、`ci-portability-native.log`、`ci-portability-strict.log`；完成后立即明确释放 Python 窗口给 I，没有重跑全库或任何模型/沙箱 live。
+
+阶段分支 CI run `36731189645`、固定 `f37ada2` 的 Ubuntu job `109940929487`：原 pytest 998 passed / 2 skipped / 75 warnings，360.84s；随后原 strict/typecheck 失败，`windows_job.py` 的 ctypes.WinDLL / WinError / get_last_error 在 Linux 类型定义下共 11 errors / 99 source files。该新失败保留，已经跨轨 Handoff 主控；Windows job `109940929018` 查阅时仍运行，下游 build/分发未通过。Windows 本机 strict 通过不能替代 Linux strict。可用 `gh api repos/songconmaisaix31-design/Morphogenesis/actions/jobs/109940929487/logs` 读取原完成 job 日志，不改变 workflow 或门禁。
+
+完整合并门禁、真实科研 live、SDK 仍未由本次 fixture 返修执行，归 I 统一验收；原 `85a921c` CI failure 保持 failure。
