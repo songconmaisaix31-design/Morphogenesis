@@ -30,3 +30,13 @@
 ## 真实待完成
 
 P 在新产品正式CLI中承接11工具白名单/只读原生权限/HostConfig/启动归档，冻结核心完整SHA；A完成自有进程树回收修复；主控解决Claude认证身份选择；I冻结后按完整原checker实际执行新三角色、真实中断接续、独立复现和实际继承采用。B后续领域返修仍由本Owner负责，具体源码缺口先Handoff取授权。本阶段未证实需改领域代码的新bug。
+
+## 接续：冻结正式产品独立审核
+
+新Task task_2077dc5da4e7 / Dispatch ctx_c027aae6f986，不复用旧生命周期消息。审核P `9dd4addf4a141a42040574fef3b614ca62b22a57` / core `cbc4dede782eb79b9c007520d96d7958857da0af`；写路径只允许 [正式产品审核](../research/FORMAL_PRODUCT_REVIEW_1001.md) 与本track，所有代码/锁/测试/checker只读。root已明确新正式案例采用现存Claude官方OAuth，此决策更新此前准备阶段的认证待定状态，不假装用户已回答可选偏好；真实OAuth empty-env/currentmodel仍NOT_RUN。
+
+按冻结git show/archive审核实际entry/权限/完整三角色prompt/恢复/TTL/预算/unknown/前序依赖/静态门禁和原adoption链。结论是静态契约及有限本地核验未见必改阻塞，prepared，不签interface_live/task_live；原checker CBC/c458同blob39948d9615bce07b40b96eeaf5dfb263b993c6d3。薄Handoff已向主控msg_46378c646e94和I msg_97d1c07799aa发送，个别近邻行定位在最终报告纠正。
+
+独立4个已有专项 `python -m pytest -q -p no:cacheprovider --basetemp=<B-review>/pytest-bounded <four exact nodes>`：4 passed/1.58s，非全产品/全库；正式installed morph-research version/doctor exit0（仅原SDK本地操作）。只读现有P inspection身份/权限与prepared状态，7条Node原lock记录完全一致；13模块/资源仅archive CRLF与wheel LF差异、Python AST相同。逐字节比较首AssertionError和一次Windows rg wildcard error123保留在报告，未改业务/测试/原checker来消除失败。B没有重新安装/修改P venv，I独立fresh安装与全量core门禁仍归I。
+
+模型/API/沙箱/Hub/EvoMap调用0，旧案例/认证全局状态不动。新research-formal-1001-01等待root release后I正式三角色全原checker；后续领域返修由原Owner经授权负责。文档commit/push及remote/clean完整SHA由本轮Handoff回传。
