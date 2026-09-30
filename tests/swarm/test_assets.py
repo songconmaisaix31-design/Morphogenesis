@@ -22,6 +22,50 @@ from local_assets import (
 from local_assets.paths import check_target, git, safe_join
 
 
+def test_no_links_missing_components_and_regular_file_ancestor(tmp_path: Path) -> None:
+    from local_assets.paths import no_links
+
+    no_links(tmp_path / "missing" / "file")
+    regular = tmp_path / "regular"
+    regular.write_bytes(b"unchanged")
+    no_links(regular / "not_a_directory" / "missing")
+    assert regular.read_bytes() == b"unchanged"
+
+
+def test_no_links_dangling_alias_is_rejected(tmp_path: Path) -> None:
+    from local_assets.paths import no_links
+
+    alias = tmp_path / "dangling"
+    target = tmp_path / "absent"
+    try:
+        alias.symlink_to(target, target_is_directory=True)
+    except OSError:
+        if sys.platform != "win32":
+            raise
+        result = subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(alias), str(target)], capture_output=True,
+        )
+        assert result.returncode == 0
+    with pytest.raises(AssetSafetyError, match="symlink_or_junction"):
+        no_links(alias / "future")
+    assert not target.exists()
+
+
+def test_no_links_metadata_errors_fail_closed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from local_assets.paths import no_links
+
+    native_lstat = Path.lstat
+
+    def denied(path: Path):
+        if path == tmp_path:
+            raise PermissionError("metadata denied")
+        return native_lstat(path)
+
+    monkeypatch.setattr(Path, "lstat", denied)
+    with pytest.raises(PermissionError, match="metadata denied"):
+        no_links(tmp_path / "future")
+
+
 @dataclass
 class Fixture:
     repository: Path

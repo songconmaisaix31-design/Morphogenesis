@@ -282,3 +282,54 @@ def test_foreign_ledger_worker_claims_are_not_projected(tmp_path):
         db.execute("UPDATE task_attempts SET worker_id='other' WHERE token=?", (lease.token,))
     worker.fc_log.observe_ledger(worker.ledger, worker.worker_id)
     assert not worker.fc_log.path.exists()
+
+
+def test_append_real_sqlite_rejection_preserves_partial_tail(tmp_path, monkeypatch):
+    import orchestration.fc_logging as fc
+
+    writer = FCLogWriter(tmp_path, "lock", provenance="mock")
+    writer.path.parent.mkdir(parents=True)
+    original = b'{"incomplete":'
+    writer.path.write_bytes(original)
+    lock = writer.path.with_name(writer.path.name + ".lock.sqlite3")
+    real_connection = fc.connection
+    calls = []
+
+    def recorded(path, **kwargs):
+        calls.append(kwargs)
+        return real_connection(path, **kwargs)
+
+    monkeypatch.setattr(fc, "connection", recorded)
+    with real_connection(lock, write=True):
+        with pytest.raises(sqlite3.OperationalError, match="database is locked"):
+            task(writer)
+    assert calls == [{"write": True, "timeout": 0.05}]
+    assert writer.path.read_bytes() == original
+
+
+def test_append_rechecks_native_hardlink_after_preflight(tmp_path, monkeypatch):
+    from contextlib import contextmanager
+
+    from local_assets.models import AssetSafetyError
+    import orchestration.fc_logging as fc
+
+    writer = FCLogWriter(tmp_path, "recheck", provenance="mock")
+    writer.path.parent.mkdir(parents=True)
+    original = b'{"incomplete":'
+    writer.path.write_bytes(original)
+    linked = tmp_path / "linked"
+    real_connection = fc.connection
+    calls = []
+
+    @contextmanager
+    def changed(path, **kwargs):
+        calls.append(kwargs)
+        with real_connection(path, **kwargs) as db:
+            linked.hardlink_to(writer.path)
+            yield db
+
+    monkeypatch.setattr(fc, "connection", changed)
+    with pytest.raises(AssetSafetyError, match="hardlinked_path"):
+        task(writer)
+    assert calls == [{"write": True, "timeout": 0.05}]
+    assert writer.path.read_bytes() == linked.read_bytes() == original

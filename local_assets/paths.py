@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path, PurePosixPath
 import re
+import stat
 import subprocess
 
 from local_assets.models import AssetSafetyError
@@ -46,9 +47,15 @@ def relative_path(value: str, *, allow_root: bool = False) -> str:
 def no_links(path: Path) -> None:
     absolute = Path(os.path.abspath(path))
     for component in (*reversed(absolute.parents), absolute):
-        if component.is_symlink() or component.is_junction():
+        try:
+            metadata = component.lstat()
+        except (FileNotFoundError, NotADirectoryError):
+            continue
+        # Reuse one non-following snapshot for the same checks as pathlib's
+        # is_symlink/is_junction/is_file, without repeated filesystem reads.
+        if stat.S_ISLNK(metadata.st_mode) or getattr(metadata, "st_reparse_tag", 0) == stat.IO_REPARSE_TAG_MOUNT_POINT:
             raise AssetSafetyError("symlink_or_junction")
-        if component.exists() and component.is_file() and component.stat().st_nlink > 1:
+        if stat.S_ISREG(metadata.st_mode) and metadata.st_nlink > 1:
             raise AssetSafetyError("hardlinked_path")
 
 

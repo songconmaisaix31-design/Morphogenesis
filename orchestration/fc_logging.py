@@ -114,9 +114,10 @@ class FCLogWriter:
     def _check_path(self) -> None:
         no_links(self.path)
         root = self.root.resolve()
-        if any(root == protected.resolve() or root.is_relative_to(protected.resolve())
-               for protected in (_SOURCE, FROZEN_MAINLINE)):
-            raise ValueError("protected_runtime_state")
+        for protected in (_SOURCE, FROZEN_MAINLINE):
+            resolved = protected.resolve()
+            if root == resolved or root.is_relative_to(resolved):
+                raise ValueError("protected_runtime_state")
 
     def append(self, event: EventKind, *, task_id: str | None, at: float,
                sequence: int | None = None, duration_seconds: float | None = None,
