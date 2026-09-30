@@ -1,9 +1,8 @@
 """Bounded candidate-chain decisions and shared-breaker routing guards.
 
 Data-only module: it holds no budget, lease or attempt authority and never
-sends a request. The real FC-B/FC-C modules are consumed through structural
-protocols, so the baseline runtime keeps working when they are absent, while a
-composed tree gets the genuine shared store/breaker without copied code.
+sends a request. Runtime protocols consume the complete distribution's
+existing fault-store and breaker contracts without copying their authority.
 
 Red lines honored here:
 - ``switched_to`` is decided by the caller only after the next candidate was
@@ -16,20 +15,20 @@ Red lines honored here:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Sequence
 import math
-from typing import Any, Literal, Protocol
+from typing import Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-FailureClass = Literal[
-    "confirmed_rejection", "unknown_effect", "budget_exhausted", "capability_mismatch"
-]
-CostState = Literal["settled", "unknown", "reserved"]
+from orchestration.provider_adapters.base import FailureClassification
+from swarm.breaker import FaultStoreLike as BreakerFaultStoreLike, ObservationReport
+from swarm.fault_observations import CostState, FailureClass, FaultObservation
 
-CONFIRMED_REJECTION = "confirmed_rejection"
-UNKNOWN_EFFECT = "unknown_effect"
-BUDGET_EXHAUSTED = "budget_exhausted"
-CAPABILITY_MISMATCH = "capability_mismatch"
+CONFIRMED_REJECTION = FailureClassification.CONFIRMED_REJECTION.value
+UNKNOWN_EFFECT = FailureClassification.UNKNOWN_EFFECT.value
+BUDGET_EXHAUSTED = FailureClassification.BUDGET_EXHAUSTED.value
+CAPABILITY_MISMATCH = FailureClassification.CAPABILITY_MISMATCH.value
 
 ChainAction = Literal[
     "switch",
@@ -60,7 +59,7 @@ class BreakerViewLike(Protocol):
 class SharedBreakerLike(Protocol):
     """Structural mirror of the FC-C methods the runtime consumes."""
 
-    def views(self, *, limit: int = 1000) -> list[BreakerViewLike]: ...
+    def views(self, *, limit: int = 1000) -> Sequence[BreakerViewLike]: ...
 
     def eligible(self, provider: str, reason: str, *, worker_id: str | None = None,
                  now: float | None = None) -> bool: ...
@@ -75,13 +74,13 @@ class SharedBreakerLike(Protocol):
                              probe_token: int, retry_after_until: float | None = None,
                              now: float | None = None) -> bool: ...
 
-    def observe(self, store: Any, *, now: float | None = None) -> Any: ...
+    def observe(self, store: BreakerFaultStoreLike, *, now: float | None = None) -> ObservationReport: ...
 
 
-class FaultStoreLike(Protocol):
-    """Structural mirror of the FC-B store methods the runtime consumes."""
+class FaultStoreLike(BreakerFaultStoreLike, Protocol):
+    """Canonical append contract plus the breaker's existing read contract."""
 
-    def append(self, observation: Any) -> bool: ...
+    def append(self, observation: FaultObservation) -> bool: ...
 
 
 @dataclass(frozen=True)
