@@ -66,3 +66,24 @@
 旧 A 的代码 `db283ea` 与 CI 交付事实，和旧 Orca Dispatch abandoned/失败的生命周期事实分列，不能把其中任何一个改写为另一个。此次 R/D 首次启动在 `agent_readiness` 超时；恢复派发后回收旧启动资源误关终端，两个工作树当时无 diff。`codex resume --last` 又继承了总控历史/cwd；总控随后明确更正 D 身份，所有 D 工具显式使用本 worktree。上述机械中断不证明业务失败，也不证明开发完成；实际接续与退出回执在本轨报告记录。
 
 David 的 H1 有条件接收仅锚定原 `db283ea`；本轮源码变化不是原字节，也不自动继承新候选人工签字。DSH 原调用 exit 1，用户已选择接受推理流为评审实质，但它仍非合格结构化正式评审；不重试、不新增调用。`demo-build` 原 Tag 保留。离线入口始终 `provenance=mock` / `SIMULATED`；`interface_live`、`task_live`、Live/Hub/部署 NOT_RUN。本节是接续计划，不是冻结、发布或最终验收证明。
+
+### Phase 2 D 实际过程（原 Dispatch `ctx_52f16a4a4b06`）
+
+- D 计划阶段 `4ab0b2e` 已 commit/push，保留先前计划 WIP。实际 preamble 能力用于 CLI，已有 heartbeat/status receipt；不沿用此前基于隐藏 dispatch-show 推测的能力缺失结论。
+- 首次 focused 在 collection 前 exit 1（`.venv` 缺 pytest），保留原始日志；按总控接续授权完成独立锁环境 `uv tool run poetry install --no-interaction` 与 `npm ci --ignore-scripts --no-audit --no-fund`，均 exit 0，依赖声明/锁不改。运行时/SDK 不用 Mock 代替。
+- 显式 OfflineExecutor 复用 fixture 输入验证及真实物化、本地 ProviderAdapter 分类；无动态 Mock.bound/execute 覆盖，真实预算继续走 unbounded operator allowance，usage/cost 未观测、hold 保留。strict 已实际 exit 0（89 source files）。
+- 唯一六阶段离线 CLI 实际 exit 0，Run `fault-drill-07e1cc4f9dfc4030a8261f208d1acd14`，21 条 FC 日志、5 个 unknown/uncertain hold 合计 1.0 USD，usage/cost=null，mock/SIMULATED；focused 完整结果仍待本轮实际退出，不预写最终通过。
+- H1 附带独立读取：旧 `db283eaa1f1d71d36e7b8a3520aafbce5becf1dd` 资源 Git blob 与 H3 `be4fb7a685e951c9e42d8dc0c7eeb900cb5518f1` 文档唯一 fence（96–1913）的 JSON 内容/精确内容字节相等，38,309 bytes；当前 importlib 资源 bytes 为 40,124，仅 LF→CRLF checkout 转换，原 bytes 不等仍明列。H3 当时无打包资源（cat-file exit 128）；首次错误计入 fence 分隔 LF/断言 checkout 与 blob 原字节相同的比较 exit 1 原样保留，清晰提取内容后的对照 exit 0，不改 Schema、不以 CI 合法性冒充冻结对照。
+- 完整证据与命令见 [D 轨报告](tracks/fc-stable-drill-0930.md)，忽略产物 `.runtime/fc-stable-drill-0930/`，运行状态 OS TEMP。新源码不继承旧 H1 签字；R/I 独立验收、全量/build/SDK/分发及模型/Hub/Live/部署均不由此条放行。
+
+### Phase 2 D focused 实际失败与代码阶段交付
+
+- D 实现提交 `0ad1a0d06f88197c70e8909d505a6db261d2aee0`，仅修改两个自有代码/测试文件，`Swarm-Agent: codex`；strict/唯一 CLI exit 0，未改预算、fencing、breaker、Schema 或依赖锁。
+- 指定 focused 实际 exit **1：42 passed / 1 failed / 797.77s**。D 16 个 drill case 无失败；唯一失败为只读 `test_fc_logging.py::test_concurrent_append_and_partial_tail_preserve_facts` 的 SQLite 50 ms 写锁等待（`fc_logging.py:142` → `task_ledger.py:47 BEGIN IMMEDIATE`，`database is locked`）。原失败完整保留，未以绿色子集冒充整套通过。
+- 有界只读诊断确认写锁覆盖日志 append/flush/fsync，相关实现及测试在指定基线上未改；不能仅凭 traceback 断定机器负载原因。已经真实 CLI escalation/ask 交总控决定同源码/同门禁的受限串行复验或他轨修复；D 无该路径写权，不改变 50 ms 超时、断言、线程数或 mock 持久化。
+
+### Phase 2 D 最终处置（不覆盖历史失败）
+
+- 总控曾有条件批准 D 固定相同实现 SHA、等 R 回归退出后做一次原两文件串行复验。D 固定/推送 `0ad1a0d` 后持续等明确准入；首次测试时 HEAD 为计划提交、源码未提交，报告如实区分事后固定提交与当时 HEAD。
+- 16:35（UTC+8）D 实际收到 `msg_7b345a26cc5b`：总控因 R 回归与日志节点诊断重复锁失败而撤销尚未开始的 D 复验。D 串行复验 **NOT_RUN（零次启动，授权撤销）**；共同 focused gate 仍为 **exit 1 / 42 passed / 1 failed**。日志域后续交原 Owner，不修改超时/测试/持久化绕过。总控交接的 R 结果不是 D 代验事实。
+- D 开发阶段已交付显式 adapter，Owner strict/唯一 mock CLI exit 0；Schema 附带字节证据仅针对旧 db283ea，并保留首次比较错误与当前 CRLF 原 bytes 不等。最终文档归档后按真实原 Dispatch `worker_done --outcome failed` 结算，再 idle；实现交付与任务验收失败是两个事实。I/全量/build/SDK 专项/分发/新 CI、新签字及模型/Hub/Live/部署仍 NOT_RUN，本条不冒写最终通过或放行 I。
