@@ -102,3 +102,11 @@ I审查指出科研资产路径没有生成旧 `metabolism.models.UseRecord`。�
 - I 当前冻结候选 `bc4d017924d8d08454b97e6d0c1b5a84d4064fd6` 已 remote 一致、clean。主控实际读取本机 native `75 passed`（9.84s）、全局严格 `116 source files`、Linux-target native 严格 `10 source files`，均 exit0；sdist/wheel 构建成功，实际安装 wheel 的隔离检查报告13个包、资源/验证器/Node依赖均通过。桥接探针仍明确 mock/contract_local/quarantined。
 - 主控实际读取 exact headSha CI `36733427101`：Ubuntu 原 pytest、strict、build、SDK、wheel、隔离分发全部 success；Windows 原 pytest 正在运行，尚无失败，不能预写双平台通过。I 继续旧资产迁移与原 missing-effect 独立探针；这些通过后按已授权窗口进行唯一的新 interface smoke 与三身份科研案例，同时等待 Windows CI。最终验收仍必须同时满足双平台工程门禁与真实科学/恢复/fencing/adoption。
 - 上述许可由持久 Handoff `msg_0c1846e43609` 传给固定 I；不是生产发布、未知效果重放或新增科研身份许可。此刻真实新科研 task_live 尚 NOT_RUN。
+
+### 新接口失败及原 Owner 返修
+
+I 在 exact `bc4d017924d8d08454b97e6d0c1b5a84d4064fd6` 执行唯一新接口 run `interface-i-0930-bc4-01`，FAILED。主控实际读取原日志与 interface.json：官方 create/connect/renew、附着拒杀和 binary roundtrip 成功，sandbox `d96ce63e-c418-40e0-82b5-b483b356af6e`；第一条 cgroup 命令被官方 execd 拒绝 `RunCommandRequest.Command required`，request_id `cf19659930344f89b642c9ff2622449b`。原 result 的 execution/cleanup/remote effect 为 unknown、科学 not_evaluated、usage/cost null；没有科研脚本或原生科研会话通过证据。
+
+I 后续独立 GET404、按 morph-run 未发现容器并单独保存 cleanup.json，只是清理观察，不改写原 unknown。失败原日志/plan/result/interface 持久保留 `morph-research-integration-0930-state/interface-live/interface-i-0930-bc4-01` 及其同名 log，不重放旧 run。依赖的 native 科研路径停止，未消耗科研会话身份。
+
+原 C 终端正面核验既有 completed 后 idle，原 session/worktree/branch 接续新 Task `task_35e461a0d4ac` / Dispatch `ctx_4d59586b114d`，实际 injected=true、屏幕开始核对 SDK。仅返修官方 SDK command JSON 与固定 execd 兼容；先核对官方源代码和实际 HTTP payload，优先必要适配或官方兼容配置，不新增容器运行时，不放宽归属/判据或全局升级。I 不修改 C 领域代码；Python 窗口明确移交后才测试，新 candidate 工程门禁后才能决定唯一新 live。
