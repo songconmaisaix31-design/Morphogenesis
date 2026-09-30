@@ -9,19 +9,21 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Callable, Sequence
-from dataclasses import replace
+from dataclasses import dataclass, replace
 import json
 from pathlib import Path
 import sqlite3
 import tempfile
 import time
-from typing import Any, cast
-from unittest.mock import Mock
+from typing import Any, Literal, cast
 from uuid import uuid4
 
 import httpx
 from pydantic import JsonValue
 
+from contracts.identity import AttemptId
+from contracts.provenance import Provenance
+from local_assets.models import ConsumptionExecution
 from orchestration.fc_logging import FCLogWriter, validate_event
 from swarm.breaker import BreakerConfig, SharedBreaker
 from swarm.cli import demo_config, seed_demo
@@ -79,11 +81,11 @@ def prepare(directory: Path, *, policy: BudgetPolicy | None = None) -> WorkerCon
     return config
 
 
-def rejection() -> ExecutionResult:
+def rejection(status_code: int = 400) -> ExecutionResult:
     # Reuse production classification AND evidence hashing, in its explicit
     # in-process mock mode. A literal offline key is never a real credential.
     transport = httpx.MockTransport(lambda request: httpx.Response(
-        400, json={"error": {"code": "Arrearage", "message": "SIMULATED"}},
+        status_code, json={"error": {"code": "Arrearage", "message": "SIMULATED"}},
         headers={"x-request-id": "SIMULATED-rejection"}))
     reply = _request({"model": "fixture", "messages": []}, "offline-drill-key", 1.0,
                      transport=transport, provenance="mock")
@@ -94,27 +96,75 @@ def rejection() -> ExecutionResult:
     })
 
 
-def executor(provider: str, *, reject_tasks: tuple[str, ...] = (),
-             before_execute: Callable[[], object] | None = None) -> Mock:
-    fixture = FixtureExecutor()
-    boundary = Mock(spec_set=FixtureExecutor, wraps=fixture)
-    boundary.provenance = "mock"
-    boundary.usage_source = "fixture_mock"
-    boundary.original_run_uri = None
-    boundary.bound.return_value = ExecutionBound(
-        provider=provider, model="fixture", input_tokens=1, max_output_tokens=1,
-        provider_enforced=False, request_bound="unbounded")
+@dataclass(frozen=True)
+class ExecutionCall:
+    """Passive call evidence at the injected Executor boundary."""
 
-    def execute(signal: Signal, *args: Any, **kwargs: Any) -> ExecutionResult:
-        if before_execute is not None:
-            before_execute()
-        if signal.task_id in reject_tasks:
-            return rejection()
+    signal: Signal
+    attempt: AttemptId
+    repository: Path
+    directory: Path
+    base_revision: str
+    base_head: str
+    experience: ConsumptionExecution | None
+
+
+class OfflineExecutor:
+    """Local simulated provider plus the existing literal-file fixture.
+
+    Fixture input limits are validated before admission. Its synthetic verified
+    price is deliberately not a price for this simulated provider: this adapter
+    exposes no contractual cost ceiling, so the real budget must reserve the
+    explicit operator allowance. No observed usage or billed cost is supplied.
+    """
+
+    provenance: Provenance = "mock"
+    usage_source: Literal["fixture_mock", "provider_reported", "replay"] = "fixture_mock"
+    original_run_uri: str | None = None
+
+    def __init__(self, provider: str, *, reject_tasks: tuple[str, ...] = (),
+                 rejection_status: int = 400,
+                 before_execute: Callable[[], object] | None = None) -> None:
+        self.provider = provider
+        self.reject_tasks = reject_tasks
+        self.rejection_status = rejection_status
+        self.before_execute = before_execute
+        self.fixture = FixtureExecutor()
+        self.bound_calls: list[Signal] = []
+        self.calls: list[ExecutionCall] = []
+
+    def check_paths(self, target: Path, state: Path) -> None:
+        self.fixture.check_paths(target, state)
+
+    def bound(self, signal: Signal) -> ExecutionBound:
+        self.bound_calls.append(signal)
+        fixture_bound = self.fixture.bound(signal)
+        return ExecutionBound(provider=self.provider, model=fixture_bound.model,
+                              input_tokens=fixture_bound.input_tokens,
+                              max_output_tokens=fixture_bound.max_output_tokens,
+                              provider_enforced=False, request_bound="unbounded")
+
+    def execute(self, signal: Signal, attempt: AttemptId, repository: Path,
+                directory: Path, *, base_revision: str, base_head: str,
+                experience: ConsumptionExecution | None = None) -> ExecutionResult:
+        self.calls.append(ExecutionCall(signal, attempt, repository, directory,
+                                        base_revision, base_head, experience))
+        if self.before_execute is not None:
+            self.before_execute()
+        if signal.task_id in self.reject_tasks:
+            return rejection(self.rejection_status)
+        result = self.fixture.execute(signal, attempt, repository, directory,
+                                      base_revision=base_revision, base_head=base_head,
+                                      experience=experience)
         # Synthetic fixture tokens are not provider observations.
-        return replace(fixture.execute(signal, *args, **kwargs), usage=None)
+        return replace(result, usage=None, metadata={**result.metadata, **LABELS})
 
-    boundary.execute.side_effect = execute
-    return boundary
+
+def executor(provider: str, *, reject_tasks: tuple[str, ...] = (),
+             rejection_status: int = 400,
+             before_execute: Callable[[], object] | None = None) -> OfflineExecutor:
+    return OfflineExecutor(provider, reject_tasks=reject_tasks, rejection_status=rejection_status,
+                           before_execute=before_execute)
 
 
 def make_worker(config: WorkerConfig, candidates: Sequence[Executor], instance: int = 0, *,
@@ -167,12 +217,12 @@ def peer_sequence(config: WorkerConfig, *, fc_log: FCLogWriter | None = None
     writer = fc_log or FCLogWriter(config.state.parent, config.swarm_id, provenance="mock", drill=True)
     worker_a = make_worker(config, [primary, backup], fc_log=writer)
     baseline = process(worker_a, "fixture-0")
-    baseline["calls"] = {"alpha": primary.execute.call_count, "beta": backup.execute.call_count}
+    baseline["calls"] = {"alpha": len(primary.calls), "beta": len(backup.calls)}
     require(baseline["outcome"] == "completed", baseline)
     require(baseline["calls"] == {"alpha": 1, "beta": 0}, baseline)
 
     switched = process(worker_a, "fixture-1")
-    switched["calls"] = {"alpha": primary.execute.call_count - 1, "beta": backup.execute.call_count}
+    switched["calls"] = {"alpha": len(primary.calls) - 1, "beta": len(backup.calls)}
     require(switched["outcome"] == "completed", switched)
     require(switched["calls"] == {"alpha": 1, "beta": 1}, switched)
     snapshot = cast(FaultObservationStore, worker_a.fault_observation_store).read()
@@ -190,7 +240,7 @@ def peer_sequence(config: WorkerConfig, *, fc_log: FCLogWriter | None = None
     before = breaker.view("alpha", "billing_arrearage")
     avoided = process(worker_b, "fixture-2")
     # Behavior first: a broken aggregate transition must change executor calls.
-    avoided["calls"] = {"alpha": blocked.execute.call_count, "beta": alternate.execute.call_count}
+    avoided["calls"] = {"alpha": len(blocked.calls), "beta": len(alternate.calls)}
     require(avoided["calls"] == {"alpha": 0, "beta": 1}, avoided)
     require(avoided["outcome"] == "completed", avoided)
     after = breaker.view("alpha", "billing_arrearage")
@@ -227,7 +277,7 @@ def recover(config: WorkerConfig, worker_a: Worker, worker_b: Worker, *,
     worker_a.executor = primary
     worker_a._candidates = (primary, backup)
     recovered = process(worker_a, "fixture-3")
-    require(primary.execute.call_count == 1 and backup.execute.call_count == 0, recovered)
+    require(len(primary.calls) == 1 and len(backup.calls) == 0, recovered)
     require(recovered["outcome"] == "completed" and len(captured) == 1, recovered)
     probe = captured[0]
     require(probe["state"] == "probing_recovery" and probe["probe_owner"] == worker_a.worker_id, probe)
@@ -242,7 +292,7 @@ def recover(config: WorkerConfig, worker_a: Worker, worker_b: Worker, *,
         require(current.state == "normal" and current.recovery_sequence == store.checkpoint(), current)
         observers[name] = current.model_dump(mode="json")
     require(store.path.read_bytes() == old_bytes, "recovery altered historical observations")
-    recovered.update(calls={"alpha": primary.execute.call_count, "beta": backup.execute.call_count},
+    recovered.update(calls={"alpha": len(primary.calls), "beta": len(backup.calls)},
                      observers=observers, breaker_audit=breaker.audit(),
                      history_preserved=True)
     return {"before_cooldown_routable": before_guard.routable, "probe": probe}, recovered
