@@ -1,5 +1,5 @@
 # Adapted from OpenSandbox release-1.1.0 server/docker-compose.example.yaml,
-# source 836b182e208e66c046026fa0f633e089321f1efb, Apache-2.0.
+# source b1a29cf93a823a95913f7943010febb3f29de05c, Apache-2.0.
 [server]
 host = "0.0.0.0"
 port = 8090

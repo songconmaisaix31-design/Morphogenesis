@@ -24,6 +24,7 @@ from pathlib import Path
 import nbformat
 from nbclient import NotebookClient
 nb = nbformat.read(sys.argv[1], as_version=4)
+nb.cells.insert(0, nbformat.v4.new_code_cell("import sys;sys.argv=" + repr([sys.argv[1],sys.argv[3],sys.argv[4]])))
 client = NotebookClient(nb, timeout=int(sys.argv[2]), kernel_name="python3", allow_errors=False)
 try:
     with client.setup_kernel():
@@ -136,7 +137,8 @@ class ExperimentExecutor:
             elif plan.mode == "notebook":
                 session.upload(f"{DIRECTORY}/notebook_runner.py", NOTEBOOK_RUNNER.encode())
                 execution = session.run(["python3", "notebook_runner.py", plan.code.name,
-                    str(plan.resources.command_seconds)], plan.resources.command_seconds, DIRECTORY)
+                    str(plan.resources.command_seconds), plan.data.name, plan.parameters[0]],
+                    plan.resources.command_seconds, DIRECTORY)
             else:
                 # No default kernel/session and no shell-based validator.
                 code = (f"import os,sys,runpy\nos.chdir({DIRECTORY!r})\n"
