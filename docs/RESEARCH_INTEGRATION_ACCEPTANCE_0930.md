@@ -38,3 +38,10 @@
 - C初全库诊断exit1：98 failed、785 passed、69 errors；运行期间SHA曾变化且Node锁依赖未安装，因此不能当不可变候选验收。保留失败及工具截断说明；允许仅npm ci --ignore-scripts补原锁依赖，在新冻结SHA用原测试/阈值作一轮门禁，不修改Node manifests/lock、不跳过失败测试。
 - OpenSandbox发行SDK1.1.0官方重试及遥测disabled；公开NumAcc4原CRLF bytes完整性值固定，不把LF归一化数据当原bytes。正式验证通过原始输入和Fraction重算，不信Agent指标、自评或exit0。
 - 最终I须使用实际宿主初始化入口和两种原生运行时；只合并与少量胶水，缺案例领域入口退回B/C原Owner。科研mock/replay仍不能批准；所有live门禁尚未通过。
+### 当前基础设施限制与额外领域返修
+
+- 主控在B9f20 LF archive的missing-effect/旧基线迁移两个probe均在Python导入阶段遇到OpenBLAS allocation失败exit1；串行设置进程局部OPENBLAS_NUM_THREADS/OMP_NUM_THREADS=1后，PowerShell模块加载仍System.OutOfMemoryException，未抵达原行为断言。这些是基础设施失败，既不算修复通过，也不替代最初真正失败门禁。
+- 当前Windows只读资源：free physical约383320KiB，free virtual约9701152KiB；两个已存在Python进程各private约5.9GiB。主控停止启动新的Python并发，Worker已有门禁保留，不停他人容器或修改全局pagefile/Docker。C确认本轮full已用单线程BLAS，guest earlier可用并不能消除Windows此刻限制。
+- B9f20科学准入还需对每份author/replication/inheritance可信结果检查effect为已知；仅科学判据通过的unknown效果观察不能跨持有者用于批准。科研claim的plan_id/criteria必须绑定预注册实验计划，不把不同顺序或适用条件虚报为相同。这些只读发现已退回B原Owner。
+- C报告exact23417b09的CI36717414791 Ubuntu各门禁success、Windows仍pending；此为Owner自报待独立核验，不能组成完整候选通过，更不能证明科研task_live。
+- OpenSandbox release-1.1.0的836b182e208e66c046026fa0f633e089321f1efb是annotated tag对象；独立git peel得到实际源码commit b1a29cf93a823a95913f7943010febb3f29de05c，与C文档一致。
