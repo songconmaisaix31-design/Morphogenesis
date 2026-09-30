@@ -93,3 +93,12 @@ A阶段 `f37ada292f61a28899666a84a8c988da5a4c0a40` 已 remote 一致、clean，�
 I审查指出科研资产路径没有生成旧 `metabolism.models.UseRecord`。主控重新核对原终端任务：用户要求沿用现有 adoption、区分检索/注入/实际采用及可追溯继承，没有要求该具体旧类。当前 `ConsumptionExecution` 与 `AdoptionReceipt` 复用既有 adoptions 表，绑定 source/child/context/result/时间；record_adoption 先核验真实 completed fenced task、result 一致和目标 bytes，符合原任务的实际使用记录语义。I spec 中多列 UseRecord 是主控范围假设，已以 `msg_ad610e51738d` 纠正；不得为此追加 Gene/代谢存储或手造 UseRecord。
 
 正向科研验收仍必须核验真实持久 Receipt、ConsumptionExecution、canonical attempt/claim/result/bytes 完整链、源经验与子任务关系及检索/注入/采用的区别；没有放宽科学、文件、fencing 或任何原断言/阈值。若既有真实采用链有缺口仍退 B 原 Owner。此为范围裁定，尚无 live 通过证据。
+
+### 串行返修后的集成检查点
+
+- 主控实际读取 `85a921c49addcdd46c2cb4a307c3515356b3e186` 的本机 full 原日志和退出文件：`1065 passed / 75 warnings`，763.09s，exit0；这是首个 Windows 本地完整门禁。该结果不消除同候选首次 CI 的 missing-Codex fixture 失败。
+- 原 A 确定性外部发现 fixture 修复 `f37ada292f61a28899666a84a8c988da5a4c0a40` 合并后，I `ea2072db5c9d21ed40c08fd729e99cf66ff2806f` 的 CI `36731765767` 再次 FAILED：Linux 严格类型检查报告 Windows ctypes 属性不可见，原 pytest 已通过，Windows cancelled。原日志保留 `ci-36731765767-first-failure.log`；没有排除文件或放宽严格检查。
+- 同一 A Owner 只在原 `os.name == "nt"` guard 后绑定官方 WinDLL、WinError、get_last_error，保持 FFI、归属和取消行为。代码 `2f4b51587e53ecd31dfaf070957f638deed77d4a`，最终交付 `84d59c167dd7fbb96081ce40b5cdfa5ba32d3bf3`（之后仅报告）；A worker_done succeeded，精确 release 为 retained/no_owned_resource/processAction=none。Python 窗口已交回 I。
+- I 当前冻结候选 `bc4d017924d8d08454b97e6d0c1b5a84d4064fd6` 已 remote 一致、clean。主控实际读取本机 native `75 passed`（9.84s）、全局严格 `116 source files`、Linux-target native 严格 `10 source files`，均 exit0；sdist/wheel 构建成功，实际安装 wheel 的隔离检查报告13个包、资源/验证器/Node依赖均通过。桥接探针仍明确 mock/contract_local/quarantined。
+- 主控实际读取 exact headSha CI `36733427101`：Ubuntu 原 pytest、strict、build、SDK、wheel、隔离分发全部 success；Windows 原 pytest 正在运行，尚无失败，不能预写双平台通过。I 继续旧资产迁移与原 missing-effect 独立探针；这些通过后按已授权窗口进行唯一的新 interface smoke 与三身份科研案例，同时等待 Windows CI。最终验收仍必须同时满足双平台工程门禁与真实科学/恢复/fencing/adoption。
+- 上述许可由持久 Handoff `msg_0c1846e43609` 传给固定 I；不是生产发布、未知效果重放或新增科研身份许可。此刻真实新科研 task_live 尚 NOT_RUN。
