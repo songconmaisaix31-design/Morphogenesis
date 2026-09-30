@@ -1,0 +1,93 @@
+{
+  "candidate": "db283eaa1f1d71d36e7b8a3520aafbce5becf1dd",
+  "bytes": 265062,
+  "characters": 265044,
+  "token_count": null,
+  "complete_final_files": [
+    {
+      "path": "orchestration/gateway_transport.py",
+      "lines": 72,
+      "blob_bytes": 2921,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/base.py",
+      "lines": 106,
+      "blob_bytes": 4310,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/dashscope.py",
+      "lines": 145,
+      "blob_bytes": 7125,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/provider_adapters/evomap.py",
+      "lines": 148,
+      "blob_bytes": 7349,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "orchestration/fc_logging.py",
+      "lines": 205,
+      "blob_bytes": 10561,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/budget.py",
+      "lines": 314,
+      "blob_bytes": 20686,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/worker_loop.py",
+      "lines": 1158,
+      "blob_bytes": 61936,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/task_ledger.py",
+      "lines": 515,
+      "blob_bytes": 30831,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/breaker.py",
+      "lines": 712,
+      "blob_bytes": 32300,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/fault_observations.py",
+      "lines": 348,
+      "blob_bytes": 15831,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/failure_chain.py",
+      "lines": 213,
+      "blob_bytes": 7780,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/evomap_executor.py",
+      "lines": 409,
+      "blob_bytes": 21633,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "swarm/lease.py",
+      "lines": 32,
+      "blob_bytes": 1436,
+      "reconstruction": "PASS"
+    },
+    {
+      "path": "demo/fault_drill.py",
+      "lines": 298,
+      "blob_bytes": 15938,
+      "reconstruction": "PASS"
+    }
+  ],
+  "submitted": false
+}

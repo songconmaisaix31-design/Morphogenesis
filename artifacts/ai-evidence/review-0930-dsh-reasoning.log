@@ -1,0 +1,984 @@
+dsh: reasoning:
+The user wants a formal FC-E review of the complete final core files. I need to produce a JSON array with fact and hypothesis items.
+
+Let me think about what's being asked. I need to:
+
+1. Provide facts: exact quotes from the source files with line numbers matching, UTF-8 bytes exact. Each fact must match its start line exactly.
+
+2. Provide hypotheses: for every coverage ID (inv1..inv5, repair1..repair5, fencing, budget_ab, false_green1..6, limitations, and all 16 matrix cells), include a hypothesis with that exact dimension.
+
+I don't have tools to run code, so everything is analysis. Facts need exact quotes.
+
+Let me carefully collect exact quotes from the files. I have the numbered context. Let me pick quotes carefully and ensure they match the start line exactly (including whitespace).
+
+Let me plan facts across files. I'll do maybe 30-50 facts and then hypotheses for each required coverage ID (that's 5+5+1+1+6+1+16 = 35 coverage IDs). Plus general hypotheses.
+
+Maximum 100 items total. Let me aim for something like 40 facts + 40 hypotheses, or fewer to be safe. Actually I need at least one hypothesis per coverage ID (35). Plus facts to evidence them. Let me budget: ~35 hypotheses, ~50 facts = 85. That's under 100.
+
+Let me carefully note exact source lines.
+
+Let me start with key facts.
+
+**orchestration/gateway_transport.py**
+- Line 17: `EVOMAP_BASE_URL = "https://api.evomap.ai/v1"`
+- Line 34-35: single_request signature.
+- Line 37: `if not 0 < phase_timeout <= 180:`
+- Line 61-62: `except httpx.HTTPError as exc:` / `error_kind = type(exc).__name__`
+- Line 46: `with httpx.Client(transport=transport, trust_env=False, follow_redirects=False,`
+
+**provider_adapters/base.py**
+- Line 59: `if re.fullmatch(r'\d+', stripped) and all(ord(c) < 128 for c in stripped):`
+- Line 84: `delta = (dt - current_time).total_seconds()`
+
+**dashscope.py**
+- Line 44-50: 5xx handling -> UNKNOWN_EFFECT.
+- Line 74: Arrearage -> CONFIRMED_REJECTION (only after 5xx check).
+
+**evomap.py**
+- Line 42-50: 5xx comment and handling.
+
+**fc_logging.py**
+- Line 53-56 nested task mismatch.
+- Line 147: `valid["sequence"] = sum(1 for _ in stream)`
+- Line 164: `except Exception:` / diagnostic.
+
+**swarm/budget.py**
+- Line 137: unbounded admission.
+- Line 145-151: verified bound.
+- Line 179-181: task_already_reserved_no_retry.
+- Line 192-195: capacity check.
+- Line 213-225: reservation_cost_state.
+- Line 227-250: mark_uncertain / mark_unknown_rejection.
+- Line 259-314 settle.
+- Line 280-284: reported None -> uncertain, trip unknown_usage.
+- Line 285-294: estimate None handling.
+- Line 295-301: settled.
+- Line 302-313: violated and trip.
+
+**worker_loop.py**
+- Line 766: attempt.
+- Line 817-843: candidate loop, guard, reserve.
+- Line 835-836: reserve request_id.
+- Line 857-858: begin_execution.
+- Line 875-884: settle / mark_unknown_rejection / reservation_cost_state.
+- Line 892-895: confirm_execution.
+- Line 897-914: uncertain non-rejection.
+- Line 915-919: sleeping check.
+- Line 920-923: success break.
+- Line 931-969: decide and actions.
+- Line 971-978: all candidates skipped.
+- Line 1044-1048: handoff and submit.
+- Line 1058-1070: exception handling.
+- Line 1071-1089: finally.
+
+**task_ledger.py**
+- Line 41-56: connection.
+- Line 291-317: claim.
+- Line 319-327: _owned.
+- Line 329-339: renew.
+- Line 349-356: release.
+- Line 358-372: begin_execution.
+- Line 374-382: confirm_execution.
+- Line 454-481: submit.
+- Line 483-489: _complete.
+
+**breaker.py**
+- Line 193-249: transition.
+- Line 210-226: aggregate.
+- Line 228-239: cooldown_expired.
+- Line 241-249: probe_success/failure.
+- Line 569-614: try_claim_probe.
+- Line 629-695: _finish_probe.
+
+**fault_observations.py**
+- Line 325-348: aggregate.
+- Line 105-117: after_recovery.
+
+**failure_chain.py**
+- Line 113-147: guard_provider.
+- Line 158-175: decide.
+
+**evomap_executor.py**
+- Line 100-203: _request.
+- Line 111-123: transport errors precedence.
+- Line 187-192.
+- Line 380-405: execute.
+
+**demo/fault_drill.py**
+- Entire file is a drill / test-ish.
+
+Now hypotheses. Each needs dimension matching the coverage ID exactly. Let me write hypotheses with severity, content, status='寰呴獙璇?, evidence=[fact IDs], suggested_check.
+
+Let me assign fact IDs like F1, F2, ...
+
+Important: The user says "For EVERY coverage ID below include a hypothesis with that exact dimension (including each of the 16 state/event cells)". So dimension field = "inv1", etc. Actually dimension may be things like "inv1", "matrix:normal:probe_success". Let me use those exact strings.
+
+Also each hypothesis should have guard/target/actions/evidence for the matrix cells. I'll include guard/target/action info in content.
+
+Let me now be very careful about exact quotes. Since I can't run code, I must copy from the provided numbered context. The quote must include exact contiguous source including whitespace, and match START line. So quote should start at the line indicated by file:start_line.
+
+Let me be careful: the marker format is `N|` then the source line. So line content after `N|`.
+
+E.g., line 17 of gateway_transport.py: `EVOMAP_BASE_URL = "https://api.evomap.ai/v1"`.
+
+Let me now build facts.
+
+Fact F1: gateway_transport.py:34
+quote: `def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: float,`
+Wait, line 34 is `def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: float,`. Yes.
+
+Actually let me use multi-line quotes to be useful. But safer to quote contiguous lines. Let me quote a few lines.
+
+Let me pick:
+
+F1: gateway_transport.py:37
+`    if not 0 < phase_timeout <= 180:`
+
+F2: gateway_transport.py:61
+`    except httpx.HTTPError as exc:`
+
+F3: gateway_transport.py:62
+`        error_kind = type(exc).__name__`
+
+F4: provider_adapters/dashscope.py:44
+```
+        if status_code >= 500:
+            return ClassificationResult(
+                classification=FailureClassification.UNKNOWN_EFFECT,
+                normalized_reason=f"http_{status_code}",
+```
+Hmm, quote must be contiguous and start at line 44. Multi-line quote is fine as long as it's exact. Let me include lines 44-47. Actually simpler to quote line 44 only plus comment line 42-43. Let me quote:
+
+F4: dashscope.py:42
+```
+        # A server/gateway failure does not prove that the request was rejected
+        # before execution. Body codes and billing/quota text cannot override it.
+```
+That's lines 42-43.
+
+F5: dashscope.py:44
+`        if status_code >= 500:`
+
+F6: dashscope.py:53
+`        if status_code == 429:`
+
+F7: evomap.py:44
+`        if status_code >= 500:`
+
+F8: fc_logging.py:147
+`                    valid["sequence"] = sum(1 for _ in stream)`
+
+F9: fc_logging.py:164
+`        except Exception:`
+
+Hmm line 164 is `        except Exception:` yes.
+
+F10: budget.py:137
+`        if bound.request_bound == "unbounded" and (allowance is None or self.policy.admission_control != "enabled"):`
+
+F11: budget.py:149
+`            if bound.max_cost_usd < estimate:`
+
+F12: budget.py:179
+`            if db.execute("SELECT 1 FROM budget_reservations WHERE swarm_id=? AND (request_id=? OR (task_id=? AND status='pending'))",`
+
+F13: budget.py:194
+`            if self.policy.admission_control == "enabled" and spent + state.reserved_estimate_usd + reservation_amount > self.policy.max_cost_usd:`
+
+F14: budget.py:213
+`    def reservation_cost_state(self, reservation: Reservation) -> Literal["reserved", "settled", "unknown"]:`
+
+F15: budget.py:221
+`            if row["status"] == "pending":`
+
+F16: budget.py:230
+`    def mark_unknown_rejection(self, reservation: Reservation) -> BudgetSnapshot:`
+
+F17: budget.py:245
+`            if row["status"] != "pending":`
+
+F18: budget.py:280
+`            if reported is None:`
+
+F19: budget.py:283
+`                if not self.policy.allow_unknown_usage:`
+
+F20: budget.py:289
+`                    status = "unknown_cost_allowed" if self.policy.allow_unknown_cost else "uncertain"`
+
+F21: budget.py:298
+`                    admitted = max(estimate, reservation.reserved_estimate_usd)`
+
+F22: budget.py:307
+`                violated = violated or (reservation.bound.request_bound == "verified" and estimate is not None`
+
+F23: worker_loop.py:766
+`        attempt = AttemptId(task_id=signal.task_id, agent=self.config.agent, attempt=lease.token - 1)`
+
+F24: worker_loop.py:821
+`                    guard = guard_provider(breaker, bound.provider, self.worker_id, now=time.time())`
+
+F25: worker_loop.py:835
+`                reservation = self.budget.reserve(self.worker_id, signal.task_id, bound,`
+
+F26: worker_loop.py:842
+`                    self._append_observation(deferred.model_copy(update={`
+
+F27: worker_loop.py:875
+`                if result.uncertain and classification == CONFIRMED_REJECTION:`
+
+F28: worker_loop.py:878
+`                    settled = self.budget.mark_unknown_rejection(self._active)`
+
+F29: worker_loop.py:892
+`                if classification != "unknown_effect" and (not result.uncertain or classification == CONFIRMED_REJECTION):`
+
+F30: worker_loop.py:897
+`                if result.uncertain and classification != CONFIRMED_REJECTION:`
+
+F31: worker_loop.py:936
+`                decision = decide(str(classification), has_later_candidate=index < last_index)`
+
+F32: worker_loop.py:971
+`            if result is None or settled is None:`
+
+F33: worker_loop.py:1045
+`            lease = keeper.handoff()`
+
+F34: worker_loop.py:1048
+`            self.leases.submit(lease, result_id, result_data, apply=apply)`
+
+F35: worker_loop.py:1077
+`                if self._active is not None:`
+
+F36: task_ledger.py:47
+`        db.execute("BEGIN IMMEDIATE" if write else "BEGIN")`
+
+F37: task_ledger.py:323
+`        if (lease.swarm_id != self.swarm_id or row["owner"] != lease.worker_id or row["token"] != lease.token or`
+
+F38: task_ledger.py:325
+`            lease.expires_at <= self.now() or canonical_scope(lease.scope) != lease.scope):`
+
+F39: task_ledger.py:368
+`            if row["unconfirmed_request_id"] is not None:`
+
+F40: task_ledger.py:464
+`            if row["status"] == "completed" and same_owner:`
+
+F41: task_ledger.py:462
+`            same_owner = (lease.swarm_id == self.swarm_id and row["token"] == lease.token and`
+
+F42: breaker.py:210
+`    if event == "aggregate":`
+
+F43: breaker.py:222
+`        if _suspension_required(params):`
+
+F44: breaker.py:224
+`        if state == "insufficient_evidence" and params.sample_count >= params.config.min_samples:`
+
+F45: breaker.py:228
+`    if event == "cooldown_expired":`
+
+F46: breaker.py:241
+`    if event == "probe_success":`
+
+F47: breaker.py:247
+`    if state == "probing_recovery" and _live_probe(params):`
+
+F48: breaker.py:594
+`            cursor = db.execute(`
+
+F49: breaker.py:675
+`            cursor = db.execute(`
+
+F50: fault_observations.py:105
+`    def after_recovery(self, at: float, sequence: int | None) -> FaultAggregate | None:`
+
+F51: fault_observations.py:113
+`        samples = tuple(sample for sample in self.samples if (`
+
+F52: failure_chain.py:130
+`        if state == "suspended":`
+
+F53: failure_chain.py:165
+`    if classification == CONFIRMED_REJECTION:`
+
+F54: evomap_executor.py:111
+`    # Check for transport errors first - these take precedence over status/body`
+
+F55: evomap_executor.py:187
+`    if response.status != 200:`
+
+F56: evomap_executor.py:139
+`    classification_result = EvoMapAdapter.interpret(`
+
+F57: worker_loop.py:1087
+`                    self.leases.release(keeper.current)`
+
+F58: worker_loop.py:1065
+`                owned = self.leases.is_valid(keeper.current)`
+
+F59: base.py:59
+`        if re.fullmatch(r'\d+', stripped) and all(ord(c) < 128 for c in stripped):`
+
+F60: demo/fault_drill.py:257
+`    require(len(rows) == 5 and all(row["reserved_usd"] == 0.2 for row in rows), rows)`
+
+That's 60 facts. Plus 35 hypotheses = 95. Cutting close. Let me reduce facts to maybe 45 and hypotheses 35-40. Let me target ~48 facts + 37 hypotheses = 85.
+
+Actually the limit is 100 items total. Let me aim for ~85.
+
+Let me reduce. Actually, I need to be careful about byte-exactness. Since I cannot verify, I should keep quotes short and copy exactly. The risk: trailing whitespace. Looking at the provided text, lines seem to have no trailing whitespace except possibly. I'll avoid multi-line where line breaks matter... actually multi-line is fine.
+
+Hmm, one thing: line 120 of dashscope is `            except json.JSONDecodeError:`. Fine.
+
+Let me now think about the hypotheses content and ensure reasonable analysis.
+
+Key observations to analyze:
+
+**inv1: Provider switch shares task budget and accumulated consumption.**
+In worker_loop._process, the for loop iterates candidates; each reserve uses `signal.task_id` and request_id `f"{signal.task_id}:{lease.token}:{index}"`. BudgetLedger.reserve checks `task_count` for max_attempts_per_task and `request_id` uniqueness, and blocks only if pending same task. So a switch to index 1 under same task_id shares the task's budget; accumulated consumption (holds) count via snapshot's holds summing all non-settled reservations. So each attempt separately counted. However, note: on switch, the first reservation (confirmed rejection) is settled as "uncertain" via mark_unknown_rejection, which keeps hold. So inv1 seems satisfied structurally. But there's a subtlety: attempt accounting in TaskLedger: begin_execution sets unconfirmed_request_id, confirm_execution clears it on confirmed rejection; then switch continues. Each request reserves. Fact: reserve uses task_id; request_id includes index. Hypothesis dimension inv1.
+
+**inv2: Unknown cost hold never automatically released by fallback.**
+settle with reported None -> status uncertain, keeps reserved_usd. On fallback (switch), the settlement mark_unknown_rejection keeps hold. `_snapshot` holds = sum reserved_usd for status != settled. uncertain rows included. Good. But what about `allow_unknown_cost` path: status "unknown_cost_allowed" 鈥?is that in the excluded set in burn rate? Yes burn rate excludes 'settled','unknown_cost_allowed'. But holds: status != 'settled' includes unknown_cost_allowed, so hold retained. So inv2 structurally holds. Possible issue: `settle` for estimate None uses `_estimate` which requires prices; if prices None then `_estimate` raises BudgetBlocked caught -> estimate None. Fine.
+
+**inv3: Every actual external request covered by attempt accounting.**
+EvoMapExecutor._send: if transport is None, launches subprocess (one request child). Each execute calls _send once. In worker_loop, `begin_execution` is called before execute under keeper.lock. But for a candidate skipped by guard, no reserve/no request. For candidate where bound() raises... The reserve happens before execute. Good. But note: EvoMapExecutor._send uses subprocess with timeout config.timeout_seconds+5; the child does single_request (one POST). Also `_request` may be called once. Attempt accounting: budget reservation created before execute; TaskLedger.begin_execution persists request_id. So each external request is counted. Potential gap: in `bound()` for evomap, check_paths and credential check; no request. Fine. Another gap: on crash between `budget.reserve` and `begin_execution`, reservation pending; `_resume` marks uncertain. Fine.
+
+But there's a subtle gap: `keeper.check()` is called after `bound()` and before reserve; if it raises, no request. Fine.
+
+Another: in the `except BaseException` around execute path, `self.budget.mark_uncertain(self._active)` 鈥?so a request that actually happened but raised is marked uncertain. Good.
+
+Hmm, what about `_consume` 鈫?consumer.inject/execute: does it make external requests? AssetConsumer presumably local. Not external.
+
+**inv4: Worker losing lease cannot submit even a successful result.**
+ledger.submit -> _owned(db, lease) checks token/owner/expiry/status. Also has submitting. `apply` calls assert_owned twice within transaction. And `_complete`. So a lost lease -> LeaseLost. Also in worker_loop, keeper.handoff() before submit; handoff calls stop then _renew_locked; if fails stale_lease. But handoff doesn't check expiry vs current time? _renew_locked calls manager.renew which checks `_owned` -> expiry <= now -> LeaseLost caught? renew catches LeaseLost and returns None -> failed=True -> handoff raises stale_lease. Good. So inv4 holds structurally. But subtle: `submit`'s `same_owner` idempotent replay path: if row status completed and same_owner returns record without checking expiry! That's a potential gap: a lease with same token/owner/scope/expiry but expired could replay a completed result. But that's idempotent replay, returns existing record, not re-submitting. Not a new submission. Hypothesis can note it.
+
+**inv5: All candidates unavailable leads to bounded exit, never chain restart.**
+When all candidates skipped by guard, `result is None` -> returns "sleeping" with failure CandidatesBlocked. Also decision.exit_candidates_rejected -> reject_task. No wraparound (loop is range). Good.
+
+**repair1: Unknown effect with known cost remains quarantined across restart/worker/handoff.**
+Unknown effect -> result.uncertain and classification != confirmed_rejection -> mark_uncertain + record failure + return sleeping. Reservation status uncertain, hold retained. `_resume` marks pending uncertain. Since effect unknown, task status? In _process, returns sleeping without ledger.fail; the finally calls keeper.stop then release. release -> _finish_attempt sets status failed or available, but if unconfirmed_request_id not None -> status blocked. Wait: for unknown_effect classification, is confirm_execution called? Line 892: `if classification != "unknown_effect" and ...: confirm_execution`. So unknown_effect skips confirm, leaving unconfirmed_request_id set. Then release 鈫?_finish_attempt 鈫?status blocked. Good, so task not eligible again. Quarantined. On restart, _resume marks pending uncertain; task blocked. Good.
+
+**repair2: Exact TTL expiry obtains fresh token through actual Worker route.**
+claim: row eligible includes `(t.status='claimed' AND t.expiry<=?)`. claim updates token=row["token"]+1. So fresh token. The worker route: Worker.run 鈫?leases.acquire 鈫?ledger.claim. Good. But boundary: `_owned` requires `lease.expires_at > now`. Eligible at expiry<=now. Fine.
+
+**repair3: Recovery excludes old faults; equal-time new appended faults remain effective.**
+after_recovery: with sequence not None: `sample.sequence > sequence and sample.occurred_at >= at`. So equal timestamp with later sequence included. Without checkpoint (sequence None): `sample.occurred_at > at` strictly. Breaker `_apply_aggregate` passes current.recovery_sequence which is set on recovery via checkpoint(). So uses sequence. Good. But note window cache: `_apply_aggregate` filters aggregate.after_recovery. Good.
+
+**repair4: 5xx and transport unknown override Chinese/English/code rejection bodies.**
+DashScope/EvoMap adapters check status>=500 before body parsing; transport status_code==0. evomap_executor checks response.error_kind first. Good. Chinese wording: the regex _CREDENTIAL irrelevant. Body codes don't override. Good.
+
+**repair5: FaultObservation cost_state reads this reservation, not global aggregate.**
+worker_loop line 882: `cost_state = self.budget.reservation_cost_state(reservation)`. reservation is the current one. reservation_cost_state reads _stored(reservation). Good.
+
+**fencing:** same-owner old token, expiry boundary, transaction/rowcount, crash/restart.
+- try_claim_probe: guarded UPDATE with probe_token=current.probe_token and rowcount==1. 
+- _finish_probe: fenced on probe_token.
+- ledger._owned checks token.
+- Potential issue: `_finish_probe` checks `current.probe_token != probe_token` then UPDATE with probe_token=probe_token; fine.
+- Same-owner stale: token advances on reclaim.
+
+**budget_ab: pending collision vs capacity, cumulative holds, late reconciliation, lower usage.**
+- reserve: pending same task blocks even if capacity available.
+- cumulative holds: snapshot holds all status != settled.
+- capacity check: spent + state.reserved_estimate_usd + reservation_amount > max_cost. Note uses `admitted_usd` sum for spent, not estimate_usd. Hmm line 192: `SELECT COALESCE(SUM(admitted_usd),0)`. And state.reserved_estimate_usd = holds = sum reserved_usd for non-settled. So capacity double counts? For settled rows, admitted_usd is charged; reserved_usd excluded. For non-settled, reserved_usd counted. Seems intentional. But note: `_snapshot` spent uses estimate_usd; `admission_charged_usd` uses admitted_usd. reserve uses admitted_usd for spent. Good.
+- lower usage: line 298 `admitted = max(estimate, reservation.reserved_estimate_usd)` 鈥?never free committed allowance. Good.
+
+**false_green patterns** 鈥?need to inspect demo/fault_drill.py. It is a demo drill, not a test suite. Points:
+- false_green1: assertions swallowed by production catch 鈥?`require` runs outside handlers; but `recover` uses `wait_until`. `_fc_flush` catches Exception. The drill's requirements are outside worker try/except. However, `process()` calls `worker._process` which swallows exceptions in its own try/except returning "failed"; the drill then requires outcome == "completed" etc.
+- false_green2: Mock replacing production Worker/adapter/route 鈥?demo uses `Mock(spec_set=FixtureExecutor, wraps=fixture)` for executors (boundary). This mocks executor behavior (bound returns fabricated unbounded ExecutionBound). Also rejection() uses `_request` real classification. It replaces the executor boundary, which is legitimate "only executor responses are simulated". But `executor()` overrides `bound.return_value` 鈥?so the real `FixtureExecutor.bound` is not used; budget bound may not reflect production. That's a boundary mock.
+- false_green3: Budget-only assertions without request-count/persistent-task checks 鈥?demo does check calls counts and reservations. Actually it does check calls.
+- false_green4: weakened predicates/deleted tests 鈥?no tests present; cannot verify.
+- false_green5: field presence without semantics 鈥?drill checks cost_state == "unknown", switched_to == "beta:fixture".
+- false_green6: Mutation remains green / restore not byte-identical 鈥?unknown; no mutation harness.
+
+**limitations**: missing source (many imported modules not shown, e.g., orchestration/gateway.py `_usage`, swarm/models, swarm/hub_mirror, swarm/router, local_assets.*), untested live paths, historical evidence vs new execution.
+
+Now matrix cells (16). States: insufficient_evidence, normal, suspended, probing_recovery. Events: aggregate, cooldown_expired, probe_success, probe_failure.
+
+transition function:
+- insufficient_evidence + aggregate: if _suspension_required -> suspended (persist_state, set_cooldown); elif sample_count >= min_samples -> normal (persist_state); else unchanged () . guard: state not suspended/probing; target state; action.
+- insufficient_evidence + cooldown_expired: returns state,() (only suspended/probing handled). ignored.
+- insufficient_evidence + probe_success: state==probing_recovery required -> false -> unchanged.
+- insufficient_evidence + probe_failure: same.
+- normal + aggregate: _suspension_required -> suspended; else unchanged (state != insufficient_evidence so no normal transition). 
+- normal + cooldown_expired: unchanged.
+- normal + probe_success: unchanged.
+- normal + probe_failure: unchanged.
+- suspended + aggregate: if retry_after_until is not None and (cooldown_until None or retry_after > cooldown) -> suspended (persist_state, set_cooldown) i.e. extend. else unchanged. Note _suspension_required not evaluated while suspended.
+- suspended + cooldown_expired: if cooldown_until not None and <= now -> probing_recovery (persist, claim). else unchanged.
+- suspended + probe_success: requires probing_recovery -> unchanged (probe outcomes arrive via probe_* but from suspended no-op).
+- suspended + probe_failure: unchanged.
+- probing_recovery + aggregate: state in ("suspended","probing_recovery") -> returns state, () (no change; the suspended branch requires state=="suspended").
+- probing_recovery + cooldown_expired: if probe_expires_at <= now -> probing_recovery (persist, claim_probe_slot). else unchanged.
+- probing_recovery + probe_success: _live_probe -> normal (persist, release, reset_window); else unchanged.
+- probing_recovery + probe_failure: _live_probe -> suspended (persist, release, set_cooldown); else unchanged.
+
+Good, I can describe each.
+
+Now let me carefully craft JSON. Each item is an object. fact items need fields: id, dimension, type, commit, file, quote, content, verification. Hypothesis: id, dimension, type, severity, content, status, evidence, suggested_check.
+
+The user says "EXACTLY TWO item types". So for fact, type='fact'; hypothesis type='hypothesis'.
+
+For facts, "id, dimension, type='fact', commit=..., file='path:start_line', quote=..., content=..., verification='NOT_RUN'". So fact also has a dimension field. Hmm, the schema for fact includes dimension. I'll set dimension to something meaningful, e.g., "inv1" or "general"/"coverage". The instructions say "Every fact must match its START line". Dimension for facts isn't specified to match coverage IDs, but the item template includes dimension. I'll assign relisted coverage dimension where relevant, else "general".
+
+Actually wait鈥攔e-reading: "fact: id, dimension, type='fact', commit=..., file=..., quote=..., content=..., verification='NOT_RUN'." So yes facts have dimension too. I'll use relevant dimension names.
+
+For hypotheses: "id, dimension, type='hypothesis', severity=..., content, status='寰呴獙璇?, evidence=[fact IDs], suggested_check."
+
+Dimension must be the exact coverage ID for the required ones.
+
+Let me make sure the `commit` value is the candidate hash: 'db283eaa1f1d71d36e7b8a3520aafbce5becf1dd'.
+
+File paths as given: 'orchestration/gateway_transport.py', etc.
+
+Now, one concern: the answer must be ONLY one JSON array, no fences or residue. And "Answer in Chinese." So content in Chinese. Quotes are source (English). Fine.
+
+Let me limit total items. I'll do ~48 facts and ~38 hypotheses = 86.
+
+Actually, let me reconsider: each coverage ID needs a hypothesis. There are:
+inv1-5 (5), repair1-5 (5), fencing (1), budget_ab (1), false_green1-6 (6), limitations (1), matrix 16 = 35. Plus maybe a couple extra. So 35-37 hypotheses.
+
+Facts can be ~45-50.
+
+Let me now finalize fact list, keeping quotes exact. I'll double-check each line by referencing the given text.
+
+Let me re-extract each:
+
+gateway_transport.py:
+Line 17: `EVOMAP_BASE_URL = "https://api.evomap.ai/v1"` 鈥?yes.
+Line 37: `    if not 0 < phase_timeout <= 180:` 鈥?yes (4 spaces indent).
+Line 46: `        with httpx.Client(transport=transport, trust_env=False, follow_redirects=False,` 鈥?8 spaces.
+Line 61: `    except httpx.HTTPError as exc:` 鈥?4 spaces.
+Line 62: `        error_kind = type(exc).__name__` 鈥?8 spaces.
+Line 65: `        body: JsonValue = json.loads(raw)` 鈥?8 spaces.
+
+base.py:
+Line 59: `        if re.fullmatch(r'\d+', stripped) and all(ord(c) < 128 for c in stripped):` 鈥?8 spaces.
+Line 84: `                delta = (dt - current_time).total_seconds()` 鈥?16 spaces.
+
+dashscope.py:
+Line 34: `        if status_code == 0:  # Represents connection issues` 鈥?8 spaces.
+Line 42: `        # A server/gateway failure does not prove that the request was rejected` 鈥?8 spaces.
+Line 44: `        if status_code >= 500:` 鈥?8 spaces.
+Line 53: `        if status_code == 429:` 鈥?8 spaces.
+Line 74: `                    if "Arrearage" in str(error_code) or "arrearage" in str(error_code):` 鈥?20 spaces.
+Line 93: `                    if any(keyword in error_message for keyword in budget_keywords):` 鈥?20 spaces.
+
+evomap.py:
+Line 44: `        if status_code >= 500:` 鈥?8 spaces.
+Line 74: `                        # Arrearage indicates billing issue` 鈥?wait line 77 is the code. Let me use line 77: `                        if "arrearage" in str(error_code).lower():` 鈥?24 spaces.
+
+fc_logging.py:
+Line 147: `                    valid["sequence"] = sum(1 for _ in stream)` 鈥?20 spaces.
+Line 164: `        except Exception:` 鈥?8 spaces.
+Line 165: `            self.diagnostic()` 鈥?12 spaces.
+
+budget.py:
+Line 137: `        if bound.request_bound == "unbounded" and (allowance is None or self.policy.admission_control != "enabled"):` 鈥?8 spaces.
+Line 149: `            if bound.max_cost_usd < estimate:` 鈥?12 spaces.
+Line 179: `            if db.execute("SELECT 1 FROM budget_reservations WHERE swarm_id=? AND (request_id=? OR (task_id=? AND status='pending'))",` 鈥?12 spaces.
+Line 180: `                          (self.swarm_id, request_id, task_id)).fetchone():` 鈥?26 spaces. Hmm the continuation. Count: `                          (` is 26 spaces? Let me count from the text: "                          (self.swarm_id, request_id, task_id)).fetchone():" I'll avoid this line.
+Line 194: `            if self.policy.admission_control == "enabled" and spent + state.reserved_estimate_usd + reservation_amount > self.policy.max_cost_usd:` 鈥?12 spaces.
+Line 213: `    def reservation_cost_state(self, reservation: Reservation) -> Literal["reserved", "settled", "unknown"]:` 鈥?4 spaces.
+Line 221: `            if row["status"] == "pending":` 鈥?12 spaces.
+Line 222: `                return "reserved"` 鈥?16 spaces.
+Line 223: `            if row["status"] == "settled" and row["cost"] != "unknown":` 鈥?12 spaces.
+Line 230: `    def mark_unknown_rejection(self, reservation: Reservation) -> BudgetSnapshot:` 鈥?4 spaces.
+Line 245: `            if row["status"] != "pending":` 鈥?12 spaces.
+Line 248: `            db.execute("UPDATE budget_reservations SET status='uncertain',settled_at=? WHERE reservation_id=?",` 鈥?12 spaces.
+Line 280: `            if reported is None:` 鈥?12 spaces.
+Line 281: `                db.execute("UPDATE budget_reservations SET status='uncertain',settled_at=? WHERE reservation_id=?",` 鈥?16 spaces.
+Line 289: `                    status = "unknown_cost_allowed" if self.policy.allow_unknown_cost else "uncertain"` 鈥?20 spaces.
+Line 298: `                    admitted = max(estimate, reservation.reserved_estimate_usd)` 鈥?20 spaces.
+Line 302: `                spent = db.execute("SELECT COALESCE(SUM(estimate_usd),0) FROM budget_reservations WHERE swarm_id=?",` 鈥?16 spaces.
+Line 307: `                violated = violated or (reservation.bound.request_bound == "verified" and estimate is not None` 鈥?16 spaces.
+
+worker_loop.py:
+Line 766: `        attempt = AttemptId(task_id=signal.task_id, agent=self.config.agent, attempt=lease.token - 1)` 鈥?8 spaces.
+Line 821: `                    guard = guard_provider(breaker, bound.provider, self.worker_id, now=time.time())` 鈥?20 spaces.
+Line 835: `                reservation = self.budget.reserve(self.worker_id, signal.task_id, bound,` 鈥?16 spaces.
+Line 836: `                                                  request_id=f"{signal.task_id}:{lease.token}:{index}")` 鈥?50 spaces. Avoid.
+Line 842: `                    self._append_observation(deferred.model_copy(update={` 鈥?20 spaces.
+Line 875: `                if result.uncertain and classification == CONFIRMED_REJECTION:` 鈥?16 spaces.
+Line 878: `                    settled = self.budget.mark_unknown_rejection(self._active)` 鈥?20 spaces.
+Line 880: `                    settled = (self.budget.mark_uncertain(self._active) if result.uncertain else` 鈥?20 spaces.
+Line 882: `                cost_state = self.budget.reservation_cost_state(reservation)` 鈥?16 spaces.
+Line 892: `                if classification != "unknown_effect" and (not result.uncertain or classification == CONFIRMED_REJECTION):` 鈥?16 spaces.
+Line 897: `                if result.uncertain and classification != CONFIRMED_REJECTION:` 鈥?16 spaces.
+Line 914: `                    return "sleeping"` 鈥?20 spaces.
+Line 936: `                decision = decide(str(classification), has_later_candidate=index < last_index)` 鈥?16 spaces.
+Line 971: `            if result is None or settled is None:` 鈥?12 spaces.
+Line 977: `                outcome = "all_candidates_suspended"` 鈥?16 spaces.
+Line 1045: `            lease = keeper.handoff()` 鈥?12 spaces.
+Line 1048: `            self.leases.submit(lease, result_id, result_data, apply=apply)` 鈥?12 spaces.
+Line 1065: `                owned = self.leases.is_valid(keeper.current)` 鈥?16 spaces.
+Line 1077: `                if self._active is not None:` 鈥?16 spaces.
+Line 1087: `                    self.leases.release(keeper.current)` 鈥?20 spaces.
+Line 440: `            self.budget.mark_uncertain(reservation)` 鈥?wait line 440 is `            self.budget.mark_uncertain(reservation)` 鈥?12 spaces.
+
+task_ledger.py:
+Line 41: `def connection(path: Path, *, write: bool = False, timeout: float = 10) -> Iterator[sqlite3.Connection]:` 鈥?0 spaces.
+Line 47: `        db.execute("BEGIN IMMEDIATE" if write else "BEGIN")` 鈥?8 spaces.
+Line 313: `            db.execute("UPDATE tasks SET status='claimed',attempts=attempts+1,token=?,owner=?,expiry=?,updated_at=? "` 鈥?12 spaces.
+Line 323: `        if (lease.swarm_id != self.swarm_id or row["owner"] != lease.worker_id or row["token"] != lease.token or` 鈥?8 spaces.
+Line 325: `            lease.expires_at <= self.now() or canonical_scope(lease.scope) != lease.scope):` 鈥?12 spaces.
+Line 336: `            renewed = lease.model_copy(update={"expires_at": self.now() + ttl_seconds})` 鈥?12 spaces.
+Line 368: `            if row["unconfirmed_request_id"] is not None:` 鈥?12 spaces.
+Line 462: `            same_owner = (lease.swarm_id == self.swarm_id and row["token"] == lease.token and` 鈥?12 spaces.
+Line 464: `            if row["status"] == "completed" and same_owner:` 鈥?12 spaces.
+Line 478: `            assert_owned()` 鈥?12 spaces. Actually line 478 is `            assert_owned()`. Let me use line 476: `            def assert_owned() -> None:` 鈥?12 spaces, and line 477 `                self._owned(db, lease, submitting=True)`.
+
+breaker.py:
+Line 210: `    if event == "aggregate":` 鈥?4 spaces.
+Line 211: `        if state in ("suspended", "probing_recovery"):` 鈥?8 spaces.
+Line 222: `        if _suspension_required(params):` 鈥?8 spaces.
+Line 224: `        if state == "insufficient_evidence" and params.sample_count >= params.config.min_samples:` 鈥?8 spaces.
+Line 228: `    if event == "cooldown_expired":` 鈥?4 spaces.
+Line 230: `            if params.cooldown_until is not None and params.cooldown_until <= params.now:` 鈥?12 spaces.
+Line 236: `            if params.probe_expires_at is not None and params.probe_expires_at <= params.now:` 鈥?12 spaces.
+Line 241: `    if event == "probe_success":` 鈥?4 spaces.
+Line 242: `        if state == "probing_recovery" and _live_probe(params):` 鈥?8 spaces.
+Line 247: `    if state == "probing_recovery" and _live_probe(params):` 鈥?4 spaces.
+Line 599: `                "OR (state='probing_recovery' AND probe_expires_at IS NOT NULL AND probe_expires_at<=?))",` 鈥?16 spaces.
+Line 603: `            if cursor.rowcount != 1:` 鈥?12 spaces.
+Line 655: `            if not actions or current.probe_token != probe_token:` 鈥?12 spaces.
+Line 676: `                f"UPDATE breaker_states SET {fields} WHERE swarm_id=? AND provider=? AND reason=? "` 鈥?16 spaces.
+Line 681: `            if cursor.rowcount != 1:` 鈥?12 spaces.
+
+fault_observations.py:
+Line 105: `    def after_recovery(self, at: float, sequence: int | None) -> FaultAggregate | None:` 鈥?4 spaces.
+Line 113: `        samples = tuple(sample for sample in self.samples if (` 鈥?8 spaces.
+Line 114: `            sample.occurred_at > at if sequence is None else` 鈥?12 spaces.
+Line 115: `            sample.sequence > sequence and sample.occurred_at >= at` 鈥?12 spaces.
+
+failure_chain.py:
+Line 130: `        if state == "suspended":` 鈥?8 spaces.
+Line 131: `            claimed = breaker.try_claim_probe(provider, view.reason, worker_id, now=now)` 鈥?12 spaces.
+Line 141: `            elif breaker.eligible(provider, view.reason, worker_id=worker_id, now=now):` 鈥?12 spaces.
+Line 147: `    return GuardResult(routable=not blocked, claims=tuple(claims), blocked_reasons=tuple(blocked))` 鈥?4 spaces.
+Line 165: `    if classification == CONFIRMED_REJECTION:` 鈥?4 spaces.
+Line 169: `    if classification == UNKNOWN_EFFECT:` 鈥?4 spaces.
+
+evomap_executor.py:
+Line 111: `    # Check for transport errors first - these take precedence over status/body` 鈥?4 spaces.
+Line 112: `    if response.error_kind:` 鈥?4 spaces.
+Line 121: `            classification=FailureClassification.UNKNOWN_EFFECT.value,` 鈥?12 spaces.
+Line 139: `    classification_result = EvoMapAdapter.interpret(` 鈥?4 spaces.
+Line 188: `        return reply.model_copy(update={"error_kind": "http_rejected", "uncertain": measured is None})` 鈥?8 spaces.
+Line 191: `    if measured is None:` 鈥?4 spaces.
+Line 192: `        return reply.model_copy(update={"error_kind": "unknown_usage", "uncertain": True})` 鈥?8 spaces.
+Line 380: `        if not reply.error_kind and not reply.uncertain and reply.content is not None:` 鈥?8 spaces.
+Line 405: `                               consumed_asset_ids=consumed, uncertain=reply.uncertain)` 鈥?31 spaces. Avoid; use line 403: `        return ExecutionResult(candidate, usage, str(directory) if candidate else None,` 鈥?8 spaces.
+
+demo/fault_drill.py:
+Line 3: `Only executor responses are simulated. FixtureExecutor supplies its existing file` 鈥?0 spaces.
+Line 100: `    boundary = Mock(spec_set=FixtureExecutor, wraps=fixture)` 鈥?4 spaces.
+Line 104: `    boundary.bound.return_value = ExecutionBound(` 鈥?4 spaces.
+Line 171: `    require(baseline["outcome"] == "completed", baseline)` 鈥?4 spaces.
+Line 194: `    require(avoided["calls"] == {"alpha": 0, "beta": 1}, avoided)` 鈥?4 spaces.
+Line 257: `    require(len(rows) == 5 and all(row["reserved_usd"] == 0.2 for row in rows), rows)` 鈥?4 spaces.
+Line 258: `    require(all(row["tokens"] is None and row["cost"] == "unknown" and row["status"] == "uncertain"` 鈥?4 spaces.
+
+OK. Let me now assemble. I'll keep it under 100.
+
+Let me plan the final list:
+
+Facts (I'll number f1...f45):
+1. gateway_transport.py:37
+2. gateway_transport.py:61
+3. gateway_transport.py:62
+4. dashscope.py:42
+5. dashscope.py:44
+6. dashscope.py:53
+7. dashscope.py:74
+8. evomap.py:44
+9. base.py:59
+10. base.py:84
+11. fc_logging.py:147
+12. fc_logging.py:164
+13. budget.py:137
+14. budget.py:149
+15. budget.py:179
+16. budget.py:194
+17. budget.py:213
+18. budget.py:221
+19. budget.py:223
+20. budget.py:230
+21. budget.py:245
+22. budget.py:280
+23. budget.py:289
+24. budget.py:298
+25. budget.py:307
+26. worker_loop.py:766
+27. worker_loop.py:821
+28. worker_loop.py:835
+29. worker_loop.py:875
+30. worker_loop.py:878
+31. worker_loop.py:882
+32. worker_loop.py:892
+33. worker_loop.py:897
+34. worker_loop.py:936
+35. worker_loop.py:971
+36. worker_loop.py:1045
+37. worker_loop.py:1048
+38. worker_loop.py:1065
+39. worker_loop.py:1077
+40. worker_loop.py:1087
+41. task_ledger.py:47
+42. task_ledger.py:323
+43. task_ledger.py:325
+44. task_ledger.py:368
+45. task_ledger.py:462
+46. task_ledger.py:464
+47. breaker.py:210
+48. breaker.py:211
+49. breaker.py:222
+50. breaker.py:224
+51. breaker.py:228
+52. breaker.py:230
+53. breaker.py:236
+54. breaker.py:242
+55. breaker.py:247
+56. breaker.py:599
+57. breaker.py:655
+58. breaker.py:676
+59. fault_observations.py:105
+60. fault_observations.py:113
+61. fault_observations.py:115
+62. failure_chain.py:130
+63. failure_chain.py:131
+64. failure_chain.py:165
+65. evomap_executor.py:111
+66. evomap_executor.py:112
+67. evomap_executor.py:121
+68. evomap_executor.py:188
+69. evomap_executor.py:191
+70. evomap_executor.py:380
+71. demo/fault_drill.py:100
+72. demo/fault_drill.py:104
+73. demo/fault_drill.py:194
+74. demo/fault_drill.py:257
+75. demo/fault_drill.py:258
+
+That's 75 facts, too many with 35 hypotheses = 110. Need to cut to ~50 facts. Let me trim to 48 facts + 37 hypotheses = 85.
+
+Let me select 48 most relevant facts. I'll drop some redundant ones.
+
+Final fact list (48):
+1. gateway_transport.py:37
+2. gateway_transport.py:61
+3. dashscope.py:42
+4. dashscope.py:44
+5. dashscope.py:74
+6. evomap.py:44
+7. base.py:59
+8. fc_logging.py:147
+9. fc_logging.py:164
+10. budget.py:137
+11. budget.py:149
+12. budget.py:179
+13. budget.py:194
+14. budget.py:213
+15. budget.py:221
+16. budget.py:223
+17. budget.py:230
+18. budget.py:245
+19. budget.py:280
+20. budget.py:289
+21. budget.py:298
+22. budget.py:307
+23. worker_loop.py:766
+24. worker_loop.py:821
+25. worker_loop.py:835
+26. worker_loop.py:875
+27. worker_loop.py:878
+28. worker_loop.py:882
+29. worker_loop.py:892
+30. worker_loop.py:897
+31. worker_loop.py:936
+32. worker_loop.py:971
+33. worker_loop.py:1045
+34. worker_loop.py:1048
+35. worker_loop.py:1065
+36. worker_loop.py:1077
+37. worker_loop.py:1087
+38. task_ledger.py:47
+39. task_ledger.py:323
+40. task_ledger.py:325
+41. task_ledger.py:368
+42. task_ledger.py:462
+43. task_ledger.py:464
+44. breaker.py:210
+45. breaker.py:222
+46. breaker.py:224
+47. breaker.py:228
+48. breaker.py:230
+49. breaker.py:236
+50. breaker.py:242
+51. breaker.py:247
+52. breaker.py:599
+53. breaker.py:655
+54. breaker.py:676
+55. fault_observations.py:105
+56. fault_observations.py:115
+57. failure_chain.py:130
+58. failure_chain.py:131
+59. failure_chain.py:165
+60. evomap_executor.py:111
+61. evomap_executor.py:112
+62. evomap_executor.py:188
+63. evomap_executor.py:191
+64. evomap_executor.py:380
+65. demo/fault_drill.py:100
+66. demo/fault_drill.py:104
+67. demo/fault_drill.py:194
+68. demo/fault_drill.py:257
+
+That's 68. Still too many. Hmm. 68 + 37 = 105 > 100.
+
+I need to trim. Let's do 55 facts + 40 hypotheses = 95. Actually 37 hypotheses minimum. Let me target 55 facts + 38 = 93.
+
+Cut 13 facts. Let me drop: base.py:59 (keep? repair4 needs it? not exactly), budget.py:149, budget.py:213 (reservation_cost_state) keep, budget.py:221 or 223 keep one, budget.py:307, worker_loop.py:766 keep, worker_loop.py:1077, task_ledger.py:325 (combine with 323? keep 323 and 325 both useful), breaker.py:228, breaker.py:230, breaker.py:236, breaker.py:599, breaker.py:676, fault_observations.py:115 (combine with 105), failure_chain.py:131, evomap_executor.py:112.
+
+Let me just decide a final 55.
+
+Final facts (55):
+f1 gateway_transport.py:37
+f2 gateway_transport.py:61
+f3 dashscope.py:42
+f4 dashscope.py:44
+f5 dashscope.py:74
+f6 evomap.py:44
+f7 base.py:59
+f8 fc_logging.py:147
+f9 fc_logging.py:164
+f10 budget.py:137
+f11 budget.py:149
+f12 budget.py:179
+f13 budget.py:194
+f14 budget.py:213
+f15 budget.py:221
+f16 budget.py:223
+f17 budget.py:230
+f18 budget.py:245
+f19 budget.py:280
+f20 budget.py:289
+f21 budget.py:298
+f22 budget.py:307
+f23 worker_loop.py:766
+f24 worker_loop.py:821
+f25 worker_loop.py:835
+f26 worker_loop.py:875
+f27 worker_loop.py:878
+f28 worker_loop.py:882
+f29 worker_loop.py:892
+f30 worker_loop.py:897
+f31 worker_loop.py:936
+f32 worker_loop.py:971
+f33 worker_loop.py:1045
+f34 worker_loop.py:1048
+f35 worker_loop.py:1065
+f36 worker_loop.py:1087
+f37 task_ledger.py:47
+f38 task_ledger.py:323
+f39 task_ledger.py:325
+f40 task_ledger.py:368
+f41 task_ledger.py:462
+f42 task_ledger.py:464
+f43 breaker.py:210
+f44 breaker.py:222
+f45 breaker.py:224
+f46 breaker.py:228
+f47 breaker.py:230
+f48 breaker.py:236
+f49 breaker.py:242
+f50 breaker.py:247
+f51 breaker.py:599
+f52 breaker.py:655
+f53 breaker.py:676
+f54 fault_observations.py:105
+f55 fault_observations.py:115
+f56 failure_chain.py:130
+f57 failure_chain.py:131
+f58 failure_chain.py:165
+f59 evomap_executor.py:111
+f60 evomap_executor.py:112
+f61 evomap_executor.py:188
+f62 evomap_executor.py:380
+f63 demo/fault_drill.py:100
+f64 demo/fault_drill.py:104
+f65 demo/fault_drill.py:194
+f66 demo/fault_drill.py:257
+
+That's 66. Ugh. OK, 66 + 35 = 101. Just over. Let me cut 2 facts to get 64+35=99. Actually let me just make 62 facts + 35 hypotheses = 97. Cut 4 more.
+
+Cut: f15 (budget 221) since f16 covers, f47 (breaker 230) since f46/f48 cover, f61 (evomap 188?) keep for repair4... hmm. Cut f11 budget 149, f22 budget 307.
+
+Actually let me be systematic. I'll cut:
+- f11 budget.py:149 (keep note in f10)
+- f15 budget.py:221 (keep f16)
+- f39 task_ledger.py:325 (keep f38)
+- f47 breaker.py:230 (keep f48)
+
+Now 62 facts. 62+35 = 97. Good, under 100.
+
+Hmm, but 35 hypotheses 鈥?do I need exactly the 35 coverage IDs? Yes at minimum. Let me also add maybe 2-3 extra hypotheses about specific risks (e.g., submit idempotent replay), but that would push to 100. Let me keep extras minimal: maybe add 3 extra = 100 exactly. Risky but allowed max 100. Let me instead keep 35 and maybe 2 extra = 99.
+
+Actually, I could reduce fact count more to allow extra hypotheses. Let me do 58 facts + 38 hypotheses = 96. Let me cut a few more facts.
+
+Cut: f7 base.py:59 (retry after parsing not central), f32 worker_loop:971 (covered by f30/f31? it's the all-suspended path, important for inv5 - keep). Hmm inv5 needs f32.
+
+Let me reconsider essential facts per coverage:
+- inv1: f25 (reserve call), f12 (pending block).
+- inv2: f19, f17, f18, f13.
+- inv3: f37? no; begin_execution is task_ledger 358-372, I don't have a fact for it! Let me add task_ledger.py:370 or 368. I have f40 = 368 (`if row["unconfirmed_request_id"] is not None:`). Good. And f23 attempt.
+- inv4: f34 submit, f38/f39 _owned, f33 handoff, f35 is_valid.
+- inv5: f32, f31.
+- repair1: f30, f27, f28.
+- repair2: task_ledger claim 313 (need fact!). Let me add task_ledger.py:313.
+- repair3: f54, f55, f53 (breaker 676).
+- repair4: f2, f3, f4, f5, f6, f59, f60.
+- repair5: f28.
+- fencing: f51, f52, f53, f38, f39.
+- budget_ab: f12, f13, f21, f22, f18.
+- false_green: f63, f64, f65, f8, f9.
+- limitations: no specific fact needed.
+
+So I should add task_ledger.py:313. Let me include it and remove base.py:59 and maybe f7.
+
+Let me also verify I have breaker 242 for probe_success. Yes f49. And 247 for probe_failure f50.
+
+OK final facts (62):
+Let me list IDs as F01..F62.
+
+F01 gateway_transport.py:37
+F02 gateway_transport.py:61
+F03 dashscope.py:42
+F04 dashscope.py:44
+F05 dashscope.py:74
+F06 evomap.py:44
+F07 fc_logging.py:147
+F08 fc_logging.py:164
+F09 budget.py:137
+F10 budget.py:179
+F11 budget.py:194
+F12 budget.py:213
+F13 budget.py:221
+F14 budget.py:223
+F15 budget.py:230
+F16 budget.py:245
+F17 budget.py:280
+F18 budget.py:289
+F19 budget.py:298
+F20 budget.py:307
+F21 worker_loop.py:766
+F22 worker_loop.py:821
+F23 worker_loop.py:835
+F24 worker_loop.py:875
+F25 worker_loop.py:878
+F26 worker_loop.py:882
+F27 worker_loop.py:892
+F28 worker_loop.py:897
+F29 worker_loop.py:936
+F30 worker_loop.py:971
+F31 worker_loop.py:1045
+F32 worker_loop.py:1048
+F33 worker_loop.py:1065
+F34 worker_loop.py:1087
+F35 task_ledger.py:47
+F36 task_ledger.py:313
+F37 task_ledger.py:323
+F38 task_ledger.py:325
+F39 task_ledger.py:368
+F40 task_ledger.py:462
+F41 task_ledger.py:464
+F42 breaker.py:210
+F43 breaker.py:222
+F44 breaker.py:224
+F45 breaker.py:228
+F46 breaker.py:230
+F47 breaker.py:236
+F48 breaker.py:242
+F49 breaker.py:247
+F50 breaker.py:599
+F51 breaker.py:655
+F52 breaker.py:676
+F53 fault_observations.py:105
+F54 fault_observations.py:115
+F55 failure_chain.py:130
+F56 failure_chain.py:131
+F57 failure_chain.py:165
+F58 evomap_executor.py:111
+F59 evomap_executor.py:112
+F60 evomap_executor.py:188
+F61 evomap_executor.py:380
+F62 demo/fault_drill.py:100
+F63 demo/fault_drill.py:104
+F64 demo/fault_drill.py:194
+F65 demo/fault_drill.py:257
+
+That's 65. Hmm I keep adding. 65 + 35 = 100 exactly. That's allowed (max 100). But no room for extra hypotheses. Let me cut 5 facts to have room: target 60 facts + 38 hypotheses = 98.
+
+Cut F13 (budget221), F20 (budget307), F38 (tl325), F46 (breaker230), F59 (evomap112). That's 60 facts. 60+38=98.
+
+Hmm but F59 (evomap 112) is useful for repair4. Keep F58 (comment 111) and maybe skip. Actually the transport precedence is shown in _request lines 112-123. Comment 111 plus line 112. Let me keep F59 and cut something else, e.g., F33 worker_loop 1065. Actually fencing needs is_valid. Hmm.
+
+Let me just settle: 60 facts. Cut: F13, F20, F38, F46, and F65 (demo drill 257) - but budget_ab/false_green benefits. Instead cut F34 (worker_loop 1087 release)? Release is relevant to inv4/fencing. Hmm.
+
+Alternatively, cut F08 (fc_logging 164) since F07 enough? But false_green1 uses both. Keep.
+
+Let me cut F06 (evomap.py:44) since F04 (dashscope 44) shows 5xx; but repair4 mentions both adapters. Keep F06.
+
+Let me cut F07 or F08 - keep F07 only. Cut F08.
+Cut F13, F20, F38, F46, F08 鈫?60 facts.
+
+Then hypotheses: 35 required + maybe 3 extra = 38. Total 98. 
+
+Actually, I realize facts also need a `dimension`. I'll assign each fact a dimension corresponding to the coverage it supports (or 'general'). Since the requirement of exact dimension matching is for hypotheses, facts can use any dimension string. I'll use relevant coverage IDs.
+
+Now let me carefully write hypotheses. For each, content in Chinese, include guard/target/action/evidence.
+
+Let me draft each.
+
+**inv1**: dimension "inv1", severity "low"/"info". content: 瑙傚療 Worker._process 鐨勫€欓€夐摼锛氭瘡涓€欓€夊湪 guard 閫氳繃鍚庝互鍚屼竴 signal.task_id 璋冪敤 budget.reserve锛宺equest_id=f"{task_id}:{lease.token}:{index}"锛汢udgetLedger.reserve 鍙寜 (request_id) 鎴栧悓 task 鐨?pending 闃诲锛屽苟鎶婃湰娆?reservation_amount 璁″叆 holds銆傛墍浠ュ垏鎹㈡彁渚涘晢浠嶅湪鍚屼竴 task 棰勭畻涓嬫柊澧炵嫭绔嬭鏁帮紝绱鎸佹湁鐢?_snapshot 鐨?holds锛堟墍鏈夐潪 settled 琛?reserved_usd锛夋眹鎬汇€傛湭楠岃瘉锛氱湡瀹炲鍊欓€?live 閾句笌璺ㄨ繘绋嬪苟鍙戜笅鐨勫疄闄呰仛鍚堛€俥vidence [F23, F10, F11]. suggested_check: 鏋勯€犱袱鍊欓€夈€佺涓€鍊欓€?confirmed_rejection 鐨?drill锛屾柇瑷€鍚屼竴 task 涓嬬浜屾潯 reservation 瀛樺湪涓?holds 绱姞锛屽苟鏍稿 max_attempts_per_task銆?
+**inv2**: severity low. content: settle 鍦?reported is None 鏃舵妸琛岀疆 uncertain锛宻ettled_at 鏇存柊浣?reserved_usd 涓嶅彉锛泂ettle 鐨?financial 鍒嗘敮 (estimate None) 缃?uncertain/unknown_cost_allowed 骞朵繚鐣?reserved_usd锛沵ark_unknown_rejection 鍙敼 status/settled_at銆俖snapshot 鐨?holds 瀵规墍鏈?status != 'settled' 姹傚拰锛屽洜姝?fallback/鍒囨崲涓嶄細閲婃斁鏈煡鎴愭湰鎸佹湁銆倂erification 璇佹嵁锛欶17,F18,F19,F16,F09/F11銆傛湭璇佸疄锛氭棤 鈥斺€?but must give concrete? It's not a race. State verified-by-inspection but no execution. suggested_check.
+
+**inv3**: severity medium. content: 姣忎釜鐪熷疄鍊欓€夊湪 execute 鍓嶅厛 reserve锛岀劧鍚?TaskLedger.begin_execution 鎸佷箙鍖?request_id锛汦voMapExecutor._send 姣?execute 鍙皟涓€娆★紙transport None 鏃跺惎鍔ㄤ竴涓?child锛夈€傚洜姝?external request 鍦ㄥ彂閫佸墠宸叉湁 reservation + unconfirmed_request_id銆傛綔鍦ㄧ己鍙ｏ細reserve 涓?begin_execution 涔嬮棿宕╂簝浼氱暀涓?pending reservation锛坃resume 缃?uncertain锛夛紝浣嗚姹傚皻鏈彂鍑猴紱subprocess 瓒呮椂鍙兘宸插彂鍑鸿姹傝€?child 鏈繑鍥?鈫?settle unknown/uncertain銆傞渶瑕?live child 璇佹嵁銆俥vidence [F23,F21,F39,F58?,F61]. Actually F21 is attempt, F39 begin_execution block. Hmm.
+
+**inv4**: severity low. content: submit 鍏?_owned锛堟牎楠?swarm/owner/token/scope/expiry/status 涓?now锛夛紝apply 鍓嶅悗鍚勪竴娆?assert_owned銆傚け鍘?lease锛坱oken 鍙樺寲/杩囨湡锛夆啋 LeaseLost銆備絾娉ㄦ剰 idempotent replay 鍒嗘敮鍦?row.status=='completed' and same_owner 鏃剁洿鎺ヨ繑鍥烇紝鏈啀娆℃牎楠?expiry<=now锛涘彧鏄噸鏀捐繑鍥炴棫缁撴灉锛屼笉浜х敓鏂版彁浜ゃ€俥vidence [F32,F41,F40,F37,F38,F33].
+
+**inv5**: severity low. content: for index in range(len(chain)) 鏃犲洖缁曪紱鍏ㄩ儴琚?guard 璺宠繃鏃?result is None 鈫?杩斿洖 sleeping + all_candidates_suspended锛沞xit_candidates_rejected 璧?reject_task銆傚洜姝ゆ湁鐣岄€€鍑恒€俥vidence [F30,F29,F55,F56].
+
+**repair1**: severity medium. content: unknown_effect 鏃?line 897 鍒嗘敮淇濈暀 unknown hold銆佽褰?observation 骞?return "sleeping"锛涗笉璋冪敤 confirm_execution锛坙ine 892 鎺掗櫎 unknown_effect锛夛紝鏁?unconfirmed_request_id 淇濇寔锛宺elease鈫抇finish_attempt 缃?blocked锛沖resume 瀵?pending 涓?active 鍧?mark_uncertain銆傝法閲嶅惎/鎹?worker/handoff 閮戒笉鍙噸鏀俱€傛湭璇佸疄鐨勭偣锛歨andoff 鍙湪璋冪敤鑰呬富鍔ㄨ皟鐢ㄦ椂鍙戠敓锛屼唬鐮佷腑 _process 鏈皟鐢?handoff锛涢渶纭鏄惁鏈夊叾浠栬矾寰勩€俥vidence [F28,F27,F39,F16]. 
+
+Wait, worker_loop uses keeper.handoff() (lease renewal handoff), not ledger.handoff. That's a different handoff. The "handoff" in repair1 likely means worker handoff. Fine.
+
+**repair2**: severity low. content: claim 鐨?_eligible 鍏佽 status='claimed' AND expiry<=now锛屽苟鎶?token 鏇存柊涓?row["token"]+1锛坙ine 313锛夛紝浜х敓鏂?fencing token锛沇orker.run 閫氳繃 leases.acquire鈫抍laim 璧扮湡瀹炶矾鐢便€俥xpiry boundary: _owned 瑕佹眰 expiry>now锛宔ligible 瑕佹眰 expiry<=now锛屾棤閲嶅彔銆俥vidence [F36, F37, F38]. suggested_check: 鍐荤粨 clock 鍒?expiry 杈圭晫锛屾柇瑷€鏃?token renew/submit 澶辫触銆佹柊 claim 寰楀埌 token+1銆?
+**repair3**: severity medium. content: FaultAggregate.after_recovery 鍦ㄦ湁 sequence 鏃朵繚鐣?sequence>recovery_sequence 涓?occurred_at>=at 鐨勬牱鏈紙绛変簬鏃堕棿浣嗗悗杩藉姞鐨勬湁鏁堬級锛涙棤 checkpoint 鏃朵粎涓ユ牸 occurred_at>at銆俠reaker._apply_aggregate 璇?durable recovered_at/recovery_sequence 骞惰繃婊わ紝pop 缂撳瓨銆傛湭璇佸疄鐨勭偣锛氬鏋?store 鏈疄鐜?checkpoint锛圧ecoveryStoreLike 涓嶆槸 isinstance锛夊垯閫€鍖栦负涓ユ牸鏃堕棿锛岀瓑鏃舵柊浜嬪疄浼氳涓㈠純銆俥vidence [F53,F54,F52].
+
+**repair4**: severity low. content: DashScope/EvoMap adapter 鍦ㄨВ鏋?body 鍓嶅厛鍒?status>=500鈫扷NKNOWN_EFFECT锛宻tatus==0鈫抍onnection_failure锛沞vomap_executor._request 鍏堝垽 response.error_kind 鐩存帴杩斿洖 UNKNOWN_EFFECT銆傛墍浠?Arrearage/Chinese/quota body 鍦?5xx 鎴?transport 閿欒鏃朵笉浼氶檷绾т负 rejection銆傛湭璇佸疄锛歮ock_spec 璺緞锛坉emo child锛変笌 live HTTP 鐨勭湡瀹?5xx 琛屼负銆俥vidence [F03,F04,F05,F06,F58,F59?]. 
+
+Hmm F59 was cut. Let me re-add evomap112. Actually I decided to cut F59 but maybe keep. Let me adjust: keep F59, cut something else like F65 demo257. Let me finalize facts later.
+
+**repair5**: severity low. content: line 882 cost_state = reservation_cost_state(reservation)锛屼紶鍏ュ綋鍓?reservation锛況eservation_cost_state 鐢?_stored(reservation) 鍙璇ヨ锛宲ending鈫抮eserved锛宻ettled 涓?cost!='unknown'鈫抯ettled锛屽惁鍒?unknown锛屼粠涓嶈 swarm 鑱氬悎銆俥vidence [F26,F12,F13,F14].
+
+**fencing**: severity medium. content: try_claim_probe 鍦?BEGIN IMMEDIATE 鍐呬互 probe_token=current.probe_token 涓庣姸鎬?cooldown 鏉′欢鍋?guarded UPDATE锛宺owcount!=1 杩斿洖 None锛沖finish_probe 浠?caller 鐨?probe_token + worker_id + state='probing_recovery' + probe_expires_at>now 鍋?guarded UPDATE锛宺owcount!=1 杩斿洖 False銆傚悓 owner 鍦?TTL 杩囨湡鍚庤 reclaim 浼?+1 token锛屾棫缁撴灉琚?fence銆傛湭璇佸疄锛氳法杩涚▼鐪熷疄绔炰簤锛堟棤骞跺彂鎵ц璇佹嵁锛夈€佸穿婧冨湪 UPDATE 涓?audit 涔嬮棿鐨勭獥鍙ｃ€俥vidence [F50,F51,F52,F42,F48,F49].
+
+**budget_ab**: severity medium. content: reserve 鍏堝仛 capacity锛坰pent from admitted_usd + holds + reservation_amount > max_cost锛夛紝鍐嶅鍚?task pending 鎴栧悓 request_id 闃诲锛坱ask_already_reserved_no_retry锛夛紱settle 鐨勪綆 usage 鐢?max(estimate, reserved_estimate_usd) 涓嶉噴鏀炬壙璇猴紱_snapshot holds 姹囨€婚潪 settled銆俵ate reconciliation: row 闈?pending 鏃?settle 骞傜瓑涓斿啿绐?settlement 鎶涢敊銆傛湭璇佸疄锛氱湡瀹炲苟鍙?reserve 鐨?A/B 浜ら敊銆丼QLite busy timeout=10 涓嬬殑琛岄攣鎺掗槦銆俥vidence [F11,F10,F19,F17,F14].
+
+**false_green1**: severity medium. content: fault_drill.require 鍦?Worker 寮傚父澶勭悊涓?executor 鍥炶皟涔嬪鎵ц锛坉ocstring line 42锛夛紝浣?Worker._process 鑷韩鍚炴帀寮傚父骞惰繑鍥?failed锛宺equire 鏂█ outcome 鍥犳浠嶈兘澶辫触锛沖fc_flush 鐨?except Exception 鍙皟鐢?diagnostic銆俤emo 鐨勬柇瑷€涓嶈兘琚敓浜?catch 瀹屽叏鍚炴病锛屼絾 reader 闇€娉ㄦ剰 _process 鐨?try/except Exception 浼氭妸鐪熷疄寮傚父杞负 "failed"锛岃嫢鏂█鍙鏌?writer.failure_count 鍙兘鍋囩豢銆俥vidence [F08, F64?]. Hmm need to reference. Actually false_green1 is about tests, and the only test-like thing shown is fault_drill. I'll cite F07/F08 and F64.
+
+**false_green2**: severity high. content: demo/fault_drill.py 鐢?Mock(spec_set=FixtureExecutor, wraps=fixture) 鏇挎崲 executor 杈圭晫锛屽苟瑕嗙洊 boundary.bound.return_value 涓?unbounded ExecutionBound锛宐ound() 涓嶅啀鏄敓浜?FixtureExecutor.bound锛況ejection() 閫氳繃鐪熷疄 EvoMapAdapter 鍒嗙被浣嗚蛋 MockTransport銆傝繖灞炰簬"鏇挎崲 executor/adapter 杈圭晫"鑰岄潪鏇挎崲 Worker/ledger/breaker 鐢熶骇琛屼负锛堥偅浜涙槸鐪熷疄绫伙級銆傞渶瑕佸尯鍒嗭細budget/lease/breaker 鏈鏇挎崲锛屼絾 executor.bound 鐨勮姹傝竟鐣岃涔夎 mock 瑕嗙洊銆俥vidence [F62,F63].
+
+**false_green3**: severity medium. content: demo 鍚屾椂鏂█ execute call_count锛坅lpha/beta锛変笌鎸佷箙 reservation 琛屾暟鍜?budget.snapshot锛屼笉鍙槸棰勭畻銆傛墍浠ユ湭鍑虹幇"浠呴绠楁柇瑷€"鐨勫亣缁匡紱浣?live 璺緞锛堢湡瀹?subprocess child銆丠TTP锛夋湭瑕嗙洊锛屽彧娴?mock transport銆俥vidence [F64,F65].
+
+**false_green4**: severity medium. content: 鏈壒鏂囦欢涓嶅惈 test 鏂囦欢锛沠ault_drill 鏃?pytest skip/decorator/寮卞寲璋撹瘝璇佹嵁锛屼絾涔熸病鏈夋祴璇曟敹闆嗛厤缃紝鏃犳硶纭鏄惁瀛樺湪琚垹闄?璺宠繃鐨勬祴璇曘€俵imitations銆?
+**false_green5**: severity medium. content: demo 鏂█ fact.failure_class銆乻witched_to銆乧ost_state=='unknown'銆乪vidence_ref 闈炵┖锛屽睘浜庤涔夋柇瑷€鑰岄潪浠呭瓧娈靛瓨鍦紱浣嗘湭鏂█ usage/cost 鏁板€艰涔夛紙usage 鍏?None锛夈€俥vidence [F24? etc]. I have fault_drill line 181/182 not in fact list. Hmm. Let me add a fact for demo lines 181-182? I could cite F65 (line 257) for cost_state and status uncertain. Let me add a fact demo/fault_drill.py:182: `    require(fact.cost_state == "unknown" and bool(fact.evidence_ref), fact)`. Good, add as F66.
+
+**false_green6**: severity medium. content: recover() 鏂█ store.path.read_bytes()==old_bytes锛堝巻鍙?JSONL 瀛楄妭涓嶅彉锛夛紝浣嗘湰浠撳簱鏈彁渚?mutation 宸ュ叿鎴?restore 瀛楄妭鏍￠獙锛屾棤娉曡瘉鏄?mutation 鍚庝粛 green 鎴栨仮澶嶅瓧鑺備竴鑷淬€俵imitations銆?
+**limitations**: severity info. content: 鏈壒鍙粰鍑?12 涓枃浠剁殑鏈€缁堝唴瀹癸紱orchestration/gateway.py (_usage, _Completion)銆乻warm/models銆乻warm/router銆乻warm/pheromone銆乻warm/hub_mirror銆乴ocal_assets/* 涓庢墍鏈夋祴璇曟枃浠剁己澶憋紝鏃犳硶楠岃瘉璺ㄦā鍧楀绾︺€乴ive HTTP銆佺湡瀹?subprocess child銆傚巻鍙茶瘉鎹紙demo 娉ㄩ噴澹扮О锛変笉绛変簬鏈鎵ц锛涙湰娆℃湭杩愯浠讳綍浠ｇ爜锛寁erification 鍏ㄤ负 NOT_RUN銆?
+Now matrix cells
