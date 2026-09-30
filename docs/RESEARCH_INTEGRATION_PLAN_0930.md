@@ -2,6 +2,8 @@
 
 业务事实源：2026-09-30 用户本轮指令优先；现行包见 docs/source/README_包内说明.md。主控只分发、决策和独立验收，领域开发及返修由同一个 Owner 完成。
 
+当前结算（2026-10-01）：领域代码已精确集成至 bde3412d2257fd1581ce1d7f88b254fb0c13a269；该冻结源码双平台完整 CI success，本机 full1104 passed，原strict/build/SDK/实际wheel分发、桥接隔离、ef77资产迁移、missing-effect one-call/unconfirmed及错误用量回放全部exit0。工程集成已验证。官方 SDK interface_live 及作者真实实验、中断恢复、真实 TTL 和陈旧合法提交拒绝已有通过证据。Claude 复现实测401 AUTH_BLOCKED，第三角色 NOT_RUN，无实际采用回执；原3600秒案例到期，不改时钟或上限，完整原标准未完成。旧 FC Windows 锁失败及全部原失败独立保留。详细事实见主控验收记录，工程与真实任务分别结算。
+
 ## 核验与基线
 
 - 开发基线：origin/decentralized-swarm = ef77af603577d4539d8dbdf780e1536a369b0d12；foundation CI 36702905606 success。

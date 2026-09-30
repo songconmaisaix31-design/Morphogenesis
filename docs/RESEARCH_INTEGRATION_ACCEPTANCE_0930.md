@@ -160,3 +160,18 @@ I最终代码 `bde3412d2257fd1581ce1d7f88b254fb0c13a269` 已push、remote一致�
 - `363cac52f515f5e810de2e3a65fa83bc8c7b859e` 的 CI `36743307157` 最终为 failure：Ubuntu 全步骤 success；Windows 原 full pytest 为 `1 failed / 1089 passed / 75 warnings`，2094.27秒，未进入后续门禁。原日志保存在集成 sibling state 的 `ci-363cac5-first-windows-failure.log`。
 - 主控实际读取原 traceback：`tests/swarm/test_fc_logging.py::test_concurrent_append_and_partial_tail_preserve_facts` 在 `orchestration/fc_logging.py:143` 的 `connection(lock, write=True, timeout=0.05)` 进入 `swarm/task_ledger.py:47` 的 BEGIN IMMEDIATE 时，抛 `sqlite3.OperationalError: database is locked`。主控机械比较当前 bde 与 ef77 基线的该 FC 实现及原测试，diff exit0；这不是本轮领域改动。未修改事务、断言、超时或跳过测试，未重跑旧 CI；确切环境诱因尚未证实。
 - 最终源码 `bde3412d2257fd1581ce1d7f88b254fb0c13a269` 是已合并必要 A 错误用量修复的新候选，其原完整门禁独立结算。主控已核验 CI `36746045909` 的 Ubuntu 全步骤 success，Windows 仍在原 pytest；本机完整 pytest 进至71%，尚无失败。这些进行中状态不构成工程或 task_live 完成。
+
+### 最终冻结源码双平台完整门禁通过
+
+主控已实际读取 completed CI `36746045909` 的 exact headSha 为 `bde3412d2257fd1581ce1d7f88b254fb0c13a269`，overall/Ubuntu/Windows 全部 success；完整原日志已成功保存 sibling state 的 `ci-36746045909-root-verified.log`，先前 Azure EOF 作为证据下载失败单列保留，未重跑 CI。Ubuntu 原 pytest 为 `1101 passed / 3 skipped / 75 warnings`，399.83秒；Windows 为 `1104 passed / 75 warnings`，1481.75秒。双平台严格116文件、sdist/wheel构建、官方SDK检查、实际安装wheel的13包/资源/installed verifier/Node依赖检查全部通过。
+
+主控实际读取同冻结源码、本机完整原 `python -m pytest -q` 日志为 `1104 passed / 75 warnings`，1708.98秒，退出文件0；期间源码保持clean、未合入文档或代码。I正在收齐剩余本地strict/build/SDK/wheel和兼容性记录，不重复已通过full。旧363的Windows FC锁首红仍为FAILED，未修改相关实现/测试、断言或timeout，也不据新候选通过推断其环境根因已证实。
+
+本节只结算工程证据。原完整三角色科研checker的exit1仍保留；作者部分证据及interface_live通过不能替代Claude新沙箱独立复现和第三角色实际采用。当前task_live仍AUTH_BLOCKED/未完成，usage/cost未知保持null；原3600秒时钟/attempts3不重置，未创建新科研身份或重跑实验。
+
+### 最终独立结算及自有资源清理
+
+- I 明确 handoff `msg_f3591684d9ec` 后交回唯一 Python 窗口，原全部本地门禁已经退出0，源码 bde保持冻结。主控逐份读取 strict116/native-Linux10、build、SDK、实际wheel13包/资源/验证器/Node以及四个新模块实际wheel导入/MIT资源结果。桥接mock记录仍quarantined；实际ef77资产JSON/address/report/approval/consumption/adoption不变；原missing-effect探针 calls=1、missing_effect_still_unconfirmed=true；旧实际Claude错误回放 failed/tokens=null/cost=null、原raw及旧观察不变、model/research calls=0。这些是contract_local/replay，不升级为真实三角色科研通过。
+- 主控独立临时验收脚本只用标准库及 SQLite `mode=ro`/`query_only=ON`，不调用会初始化schema的领域构造器。第一次误把GEP assets.body当Candidate而KeyError，原脚本/日志/exit1完整保留；按既有strategy[1]的local_candidate_json封装修正读取后，所有原身份/状态/上限断言不变，`original-case-readonly-schema-corrected.log` exit0。实际核验同UUID作者累计602.586241秒/36工具、唯一原实验、source token2/Attempt2及当前写token3、原失败静态报告未改、作者completed但无approval/adoption、Claude10次401零工具、第三角色NOT_RUN、原attempts3/runtime3600及已到期时钟不变。该只读检查无模型/实验调用，不能替代完整task_live checker。
+- 2026-09-30T17:22:07Z 主控正面核验容器全ID `eb6152fbdee01a0044cc1fdd881cf05c00dbbf3905411bc6c5a480f6a7141ec6`、name `/morph-research-c-0930-server`、owner=research-c-0930及compose_project=morph-research-c-0930 后，仅停止该自有服务；stop exit0，running→exited。容器、私钥与全部原归档保留，未删除文件或操作其它资源；独立cleanup.json在主控sibling state。原根仓仍为2957b408，既有docs/SWARM_SOL_PLAN.md WIP未触碰。
+- 原任务整体仍未完成：Claude401认证身份选择尚无回复，不能擅自切换provider/account/model；独立复现和第三角色实际采用尚未运行。原案例已到期，不能将重置时钟或新案例冒充原案例通过。未合入主线、打tag、发布Hub或执行可选notebook/volumes/GPU。最终只合并已验证来源的文档和交付记录，业务代码候选SHA与后续治理/evidence SHA分列；不重复已通过的测试或CI。
