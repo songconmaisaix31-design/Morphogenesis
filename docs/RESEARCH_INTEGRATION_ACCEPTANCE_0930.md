@@ -110,3 +110,11 @@ I 在 exact `bc4d017924d8d08454b97e6d0c1b5a84d4064fd6` 执行唯一新接口 run
 I 后续独立 GET404、按 morph-run 未发现容器并单独保存 cleanup.json，只是清理观察，不改写原 unknown。失败原日志/plan/result/interface 持久保留 `morph-research-integration-0930-state/interface-live/interface-i-0930-bc4-01` 及其同名 log，不重放旧 run。依赖的 native 科研路径停止，未消耗科研会话身份。
 
 原 C 终端正面核验既有 completed 后 idle，原 session/worktree/branch 接续新 Task `task_35e461a0d4ac` / Dispatch `ctx_4d59586b114d`，实际 injected=true、屏幕开始核对 SDK。仅返修官方 SDK command JSON 与固定 execd 兼容；先核对官方源代码和实际 HTTP payload，优先必要适配或官方兼容配置，不新增容器运行时，不放宽归属/判据或全局升级。I 不修改 C 领域代码；Python 窗口明确移交后才测试，新 candidate 工程门禁后才能决定唯一新 live。
+
+### 工程门禁通过与命令契约窄修复
+
+- 主控实际读取完整 `36733427101` exact `bc4d017924d8d08454b97e6d0c1b5a84d4064fd6` CI：Windows `1065 passed / 75 warnings`（1022.80s），Ubuntu `1063 passed / 2 skipped / 75 warnings`（377.61s）；双平台严格116文件、sdist/wheel、SDK、实际 wheel13包/资源/验证器/Node检查全部 success。这是工程通过，不改变同候选 interface-live 失败及科研 NOT_RUN。
+- 直接读取官方上游 `docker/execd/v1.1.0^{commit}` 得 `48b0215f1bd097b31d0f022a44640e00c11ac49d`；该 Docker tag 源的 RunCommandRequest 为 required command string，执行器实际使用 bash 或 sh 的 `-c`。它与 release 源 `b1a29cf` 的新增 argv 契约不同；版本相同字样不能推断镜像和 SDK 支持同一请求形式。
+- C 最小修复 `b4b403cd098df5cf2194e32377f7bd9f18a54ade` 已 push 并由主控 exact ls-remote 核验，工作树在源码冻结时 clean；仅 backend 与新 HTTP 边界测试，SDK、锁和固定镜像不变。标准 shlex.join 保留参数字面值，前台/后台调用官方 string command，输入约束和附着归属保护保留。
+- 主控读取 C 同 SHA 原日志/退出记录：官方 SDK MockTransport 请求回归 `10 passed`（0.41s）、strict97文件、lock/build均 exit0；sdist/wheel实际构建。修复前正确新测试基线4 failed/6 passed保留，原 SDK list 发 argv 的400负对照继续存在。此前工作区 experiments40 passed属于源码相同的本地专项证据，均非 live。
+- I 明确释放后 C 独占该 Python 窗口，C `msg_0d20f69bf003` 明确完成验证并交回 I；主控 `msg_15aa05987913` 授 I 窗口及新不可变候选门禁。只有新适用本地门禁和新 exact-head Ubuntu CI 全部通过、Windows未新失败时，才能继续已授权新唯一接口 smoke；原 unknown 不重放，最多三科研身份窗口尚未使用。
