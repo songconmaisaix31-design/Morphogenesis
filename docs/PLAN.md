@@ -1,3 +1,17 @@
+# 当前主线：Qwen / 阿里云 / 科研提效（2026-10-02）
+
+用户当前指令优先：将默认main的README主叙事调整为Qwen、阿里云与科研提效，EvoMap仅保留一句“可选的外部经验源”。云端本地算力协同以可核验状态和明确实施路线表达，不把方向性文档冒充已实现功能。先完成文档调整；实际Qwen推理与跨环境计算实现范围已异步询问，未回答按本轮定位和路线工作推进。
+
+基线：官方远端main 0e7826819c6780f637ff4049adfc61e8069638d9；当前用户工作区codex/morphogenesis-mainline 2957b408ce922369a595a8acd43a882eb85897d3及docs/SWARM_SOL_PLAN.md原WIP只读保留。科研已验收CORE bf67 / PRODUCT dfbc / REPORT7b66属于另冻结分支，不能冒称默认main已含这些代码，也不重跑科研。
+
+| 轨道 | 固定Owner / Worktree / Branch | write_paths与验收 |
+|---|---|---|
+| D 文档定位 | 单Orca Codex Worker / morph-qwen-research-positioning-1002 / songconmaisaix31-design/morph-qwen-research-positioning-1002 | README.md、docs/QWEN_ALIYUN_RESEARCH.md；EvoMap在README精确一句、首页Qwen/阿里云/科研、云模型与本地CPU/GPU及可选云计算的职责/数据流/配置与执行边界清楚，当前状态不虚报，原CLI/源码路径链接准确，Markdown链接/图/差异检查。领域修改与返修始终同Owner，normal commit/push。 |
+| I 集成验收 | 独立Orca Codex Worker / morph-qwen-research-positioning-integration-1002 / 单独分支 | 正常合入D完整SHA及主控一页计划、只少量文档链接胶水，检查仅三Markdown路径变化；确认远端main基线与祖先后正常push HEAD:main，远端exact与clean、保存当前用户WIP。未授权改业务/锁/全局auth/云端部署/模型调用。 |
+
+主控只本计划与状态/验收；不写README正文/产品路线正文或检查脚本。最少两名依次接续，无人为并行重构。正式main更新已由用户当前指令授权，须在可审查候选和检查完成后执行，不force；远端若推进则重新核对保留历史。历史开发包和失败记录不改，EvoMap集成代码不删。不得声称实测Qwen或新阿里云科研compute尚未运行；文档提交不重复科学实验。
+
+---
 # Morphogenesis 接手与核心闭环一页计划
 
 ## 项目 review、部署恢复与 computer-use 验收（2026-09-24）
