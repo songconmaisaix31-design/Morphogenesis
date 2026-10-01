@@ -38,8 +38,8 @@ flowchart LR
 | 冻结身份 | 固定远端内容 |
 |---|---|
 | CORE `bf67c1a4134a25d009cff2acccbfab027999bea6` | [科研执行核心](https://github.com/songconmaisaix31-design/Morphogenesis/tree/bf67c1a4134a25d009cff2acccbfab027999bea6) |
-| PRODUCT `dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa` | [独立 morph-research 正式入口源码](https://github.com/songconmaisaix31-design/Morphogenesis-Research/blob/dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa/src/morph_research/cli.py) |
-| REPORT `7b66f0dd0a285c1b6cf789aa3c5a41d22d655993` | [完整双案例验收、命令、首失败与限制](https://github.com/songconmaisaix31-design/Morphogenesis/blob/7b66f0dd0a285c1b6cf789aa3c5a41d22d655993/docs/tracks/research-integration-cases-1002.md) |
+| PRODUCT `dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa` | 源码位于私有独立产品仓库 `songconmaisaix31-design/Morphogenesis-Research`；需要仓库访问权限，由有权限的审查者按此完整 SOURCE 核对。公共验收入口见下行 REPORT |
+| REPORT `7b66f0dd0a285c1b6cf789aa3c5a41d22d655993` | [公开完整双案例验收、命令、首失败与限制](https://github.com/songconmaisaix31-design/Morphogenesis/blob/7b66f0dd0a285c1b6cf789aa3c5a41d22d655993/docs/tracks/research-integration-cases-1002.md) |
 
 冻结 CORE 完整双平台工程门禁通过：Windows 1154 passed / 5 skipped，Linux 1153 passed / 6 skipped，类型检查、构建、SDK 与实际 wheel 分发检查通过。这些结果属于精确冻结版本，不能当作当前 main 或未来 Qwen 版本的验收。
 
