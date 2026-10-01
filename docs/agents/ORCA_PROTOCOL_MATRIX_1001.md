@@ -140,6 +140,24 @@ metadata 与 effects 边界：官方 [globals.rs:22–48,70–101](https://githu
 
 原 checker :141–144 的实际调用⊆11及 :153–161 的权限断言可原样保留；真正是否成功须原三角色完整 checker 判断。若模型仍调用额外 discovery/exec/helper，应保持 RED，不能修改原11标准。当前候选仅 source-prepared；modelrequest、开启 host、模型/提供方更换均 NOT_RUN，由根主控裁决。没有必须换模型/开代码执行的源码结论，也没有当前模型实际成功的证据。
 
+### 验收返修：startup notice 不是 fatal，但必须精确兼容
+
+上一轮遗漏了 notice 语义，surface proof 本身不足以释放入口。以下仍固定官方 `687a119`，不扩工具盘点。**CodeModeOnly + host=false 的首次警告必发一次，与 direct11 exposure 无关；它是 WarningEvent，不是 fatal ErrorEvent。** [turn_input.rs:353–365,485–487](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/session/turn_input.rs#L353-L365) 在启动 turn task 前调用；[turn_context.rs:1312–1324](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/session/turn_context.rs#L1312-L1324) 仅检查 host availability、requested CodeMode/CodeModeOnly、service 的 once 状态，不检查 MCP/tool exposure；[code_mode/mod.rs:108–121](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/code_mode/mod.rs#L108-L121) 用 availability.err 和 AtomicBool.swap 生成一次文字，再由 caller send_event(WarningEvent)。direct11 候选不会消除警告；服务已经发过时不重复，不能把“首次条件满足”说成所有 turn 无条件发。
+
+官方 [bespoke_event_handling.rs:274–281,1017–1024](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/app-server/src/bespoke_event_handling.rs#L274-L281) 将 Warning/DeprecationNotice 保留为各自 ServerNotification；[exec JSONL:409–418,442–472](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/exec/src/event_processor_with_jsonl_output.rs#L409-L472) 却把两者都变为 `item.completed` / `item.type=error`，返回 Running、不写 last_critical_error。真正 Error notification 在同文件 :447–457 发顶层 `type=error` 并记录 critical error；[:525–557](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/exec/src/event_processor_with_jsonl_output.rs#L525-L557) 按 TurnStatus 发 turn.completed 或 turn.failed，因此官方 startup notice 后仍 completed 正常；completed 不证明科研成功。
+
+memory_tool 是同类非fatal弃用通知：[legacy.rs:40–43,85–94](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/features/src/legacy.rs#L85-L94) 的 Some(false) 也记录 alias usage；[features/lib.rs:743–757](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/features/src/lib.rs#L743-L757) 生成 summary/details，[session.rs:1231–1238,1812–1842](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/session/session.rs#L1231-L1238) 装为 DeprecationNotice，在 SessionConfigured 后发。case02 raw :1–4 确认为 thread.started → deprecated ErrorItem → host warning ErrorItem → turn.started，:7 completed；bound :2–3 仍 unknown/null。归档状态、原红、模型响应/用量不回写。
+
+**支持决定按 root `msg_3de099d9d0f9` / P `msg_0230d128ca92` 收窄：仅固定版本、已审 direct-only own MCP/required11/per11/defaultprompt/read-only/never/hostfalse 正式 plan 下，官方 item.completed/error envelope 加完整 host-disabled message 可单列 compatibility_notice，保留 raw 与单独计数。** 完整 message 必须保留反引号和标点：
+
+```text
+Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`.
+```
+
+D 的初始两notice语义识别提议不扩大 root 批准：memory_tool deprecated **不豁免**，P 删除 alias、保留 memories=false。未知 ErrorItem、ConfigWarning、model reroute、顶层 error、turn.failed，以及同文字的顶层 fatal 均继续停止；真实非研究工具调用仍按原权限停止，科研工具预期业务拒绝按原合同/checker处理。
+
+[exec_events.rs:8–36,308–312](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/exec/src/exec_events.rs#L308-L312) 的 ErrorItem 只有 message（外层 id/type），**wire 已丢源 severity/notice 类型**；wording/启动顺序是固定已知 case 的佐证，不能通用可靠反推所有 item.error 严重性，不以 contains/prefix/单纯位置或最后 completed 豁免。未知版本、文字、上下文保持 fail closed；若需完整 typed severity，官方 ServerNotification 保有 Warning/Deprecation/Error 区别，但换入口不属于本次授权。此 known warning 不是必发 fatal 的 block，不必开启 host/换模型；实际模型是否选择 direct11仍 NOT_RUN。另 [execute_handler.rs:85–100](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/code_mode/execute_handler.rs#L85-L100) 将 disabled host 的真实执行失败映射 RespondToModel；router stderr ERROR 不是 startup notice，也不必导致 turn.failed，不能被 notice 分类掩盖。
+
 ## 固定来源索引
 
 以下均为 `85f8d6b5f507df795cd3cef1cdea08124cf801ee`，表内引用的行号以官方LF文件为准。
