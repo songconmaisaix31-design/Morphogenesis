@@ -99,3 +99,11 @@ I正式c25入口case03 init产生base d38239b31c7c6f18bc9a3d7490b22106c5c3bc42�
 主控实际读取原完整checker日志与exit1（line101缺resume-observation.json），并核对I报告06ee5e4beec2fb92d88fdc0e172ce3dc7de12fed remote exact/clean、较CBC只有文档、原checker blob39948d9615bce07b40b96eeaf5dfb263b993c6d3不变。resume/peer/child/科学判定/adoption未执行，原三角色任务尚未完成。case01/02/03所有失败与clock保留，不以工程绿或作者检查替代完整验收。
 
 原D task_6380bf533d6d/ctx_8407b4465f3a同terminal/worktree/branch接续，仅原两授权文档及新私人诊断state；startup unobserved保留，正面读取composer后只补Enter一次，随后实际Working。核对官方固定687a119元数据刷新/cache/auth/provider/tier机制、有界无凭据DNS/TCP/TLS检查及Orca已选账户与默认目录关系；不自动换模型、改全局账号/HOME/网络或扩大错误豁免。D当前cache0.158与native0.159不匹配、缺目标model是当前事实，不能冒充case03历史cache证据。I补实际launch/probe与当前安全键存在性，仅只读配合；主控精确reply msg_a8d2b80b01fa解除原ask msg_499e50aba770，保持原Task等待具体修复/处置，不另开科研UUID或重放未知效果。sole owned8097暂留短期诊断，无额外API/smoke。NIST抽离/第二任务/更多Agent运行时仍须原完整闭环之后，EvoMap协议继续后置。
+
+## 03:38 UTC同身份官方metadata检查通过与新case04明确释放
+
+msg_883d378dd578在用户全部授权内批准D使用官方0.159非bundled debug models作一次有界元数据检查，允许官方正常cache写入及既有auth的官方内存使用/必要正常刷新；无科学turn/UUID，不改config/HOME/provider/model/tier、不复制凭据或记录header。只有默认失败才可一次进程级官方respect_system_proxy对照（msg_96aabbb0c304），默认成功故未执行，也未自制认证GET或目录cachepatch。
+
+D实际03:36:26.927Z同原formal03 cwd/default C:/Users/DW/.codex执行官方检查，2.774s exit0/stderr空，目标gpt-6.1-sol存在、tool_mode=code_mode_only、service_tiers包含priority；官方cache刷新至0.159。主控直接读取私人default.json核对。当前Orca account CLI公开摘要与default的provider/workspace身份在内存比较相等，但两路径不同且不代替03历史环境快照。官方元数据当前prepared通过，不能证明原03超时底层原因或科研完成；原unknown/null与checkerRED不回写。没有已证明需更改的产品业务问题，不换模型/删tier/放宽警告或新增外围健康框架。
+
+主控msg_9316444471c9于03:38:14Z明确释放唯一全新research-formal-1001-04，仍只读使用A冻结安装c25/coreCBC，产品正式入口拥有全部启动参数/权限/角色，所有新case写入I自有state。I不把D诊断命令变成测试预热或关键参数补丁；原生CLI按官方正常机制刷新/读取元数据。先验证新路径不存在，正式init新clock；本case三UUID/两品牌、原真实owned中断/TTL同UUID恢复/两stale拒绝、900s/64tools/3600runtime/3attempts/每task唯一真实实验、完整文件验证批准应用/第三fresh验证/继承消费adoption及原byte39948完整checker均不变。04是当前真实支持已验证的明确独立验收，不恢复/重放/消费01–03，不重置旧clock。真正未知效果、其它nativeerror或越界立即停止报root，不自动重试。source/安装门禁不重跑；完整PASS前NIST/第二任务/更多Agent仍后置，EvoMap协议不开发。
