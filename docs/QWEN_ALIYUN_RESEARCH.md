@@ -9,8 +9,8 @@ CaseDefinition 将科学定义与执行平台分开，声明程序、数据、�
 | 固定版本 | 可核对来源 |
 |---|---|
 | CORE `bf67c1a4134a25d009cff2acccbfab027999bea6` | [CaseDefinition](https://github.com/songconmaisaix31-design/Morphogenesis/blob/bf67c1a4134a25d009cff2acccbfab027999bea6/orchestration/experiments/case.py)、[执行器与可信读取](https://github.com/songconmaisaix31-design/Morphogenesis/blob/bf67c1a4134a25d009cff2acccbfab027999bea6/orchestration/experiments/executor.py)、[科研 MCP](https://github.com/songconmaisaix31-design/Morphogenesis/tree/bf67c1a4134a25d009cff2acccbfab027999bea6/swarm/research) |
-| PRODUCT `dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa` | [独立正式 CLI](https://github.com/songconmaisaix31-design/Morphogenesis-Research/blob/dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa/src/morph_research/cli.py)、[权限配置](https://github.com/songconmaisaix31-design/Morphogenesis-Research/blob/dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa/src/morph_research/permissions.py) |
-| REPORT `7b66f0dd0a285c1b6cf789aa3c5a41d22d655993` | [实际运行、检查器与继承回执](https://github.com/songconmaisaix31-design/Morphogenesis/blob/7b66f0dd0a285c1b6cf789aa3c5a41d22d655993/docs/tracks/research-integration-cases-1002.md) |
+| PRODUCT `dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa` | 源码位于私有独立产品仓库 `songconmaisaix31-design/Morphogenesis-Research`；需要仓库访问权限，由有权限的审查者按此完整 SOURCE 核对 CLI 与权限配置。公共验收入口见下行 REPORT |
+| REPORT `7b66f0dd0a285c1b6cf789aa3c5a41d22d655993` | [公开实际运行、检查器与继承回执](https://github.com/songconmaisaix31-design/Morphogenesis/blob/7b66f0dd0a285c1b6cf789aa3c5a41d22d655993/docs/tracks/research-integration-cases-1002.md) |
 
 | 科学案例 | 科学差别 | 共用路径 |
 |---|---|---|
