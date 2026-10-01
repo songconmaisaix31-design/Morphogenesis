@@ -6,6 +6,8 @@
 
 ## 原始任务与顺序
 
+07:01 UTC中国版本进度：P SOURCE e7ecd6958b6b6447f832b57c518ab50dd83fdebe与doc-only REPORT b35a3c1565d3594b08046858854d83847ef4d10b已push、remote exact/clean；仅auth/config/README/tests窄改，原40+2必要CN回归42pass36.35s与最后新增测试env恢复专项1pass2.94s保留，P新Task已正常settle-retain。原A task_a30bbb885488/ctx_660fbdafe8d1在同固定Agent/worktree/branch实际turn_started，精确新SOURCE与新独占安装完整42一次；安装完成后才能原I fresh正式科研case，旧artifact/科学clock不可混用。
+
 06:42 UTC本阶段结算：原I已普通精确合并A/root报告并push最终证据81357f1fb857843d745b0f657a988a9c51914312，业务/原检查器未变。P/A/I本轮窄任务均succeeded且按固定Owner要求retain，所有Delivery已处理ACK、reclaimable为0；这只结算工程及installed prepared，不是原完整科研目标完成。StepFun实际402仍待可调用额度，之后才能继续新冻结案例与原完整checker。
 
 1. 继续复用 ORCA 各 Agent 接入的全部接口；盘点固定上游源码、版本和许可证，按真实支持情况逐项映射，不搬入桌面基础设施。
