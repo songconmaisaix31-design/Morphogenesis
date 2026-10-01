@@ -6,6 +6,8 @@
 
 ## 原始任务与顺序
 
+07:08 UTC正式case05放行：A REPORT83c78d86e2d70cfa1c5bd0ad0d42d18c78ff71b7已push、remote exact/clean，精确中国SOURCEe7ecd新独立安装原42一次42pass35.23s及来源/SDK/正式入口门禁通过，P/A均正常settle-retain。原I只读采用morph-research-agents-install-cn-1001-state-ctx660fbdafe8d1，获准在自己新research-formal-1001-05 project/state/profile创建一次新clock，正式Codex作者中断→真实TTL→同UUID恢复及stale拒绝→Claude/StepFun中国独立复现→文件验证批准应用→第三Codex本地再验证/真实继承adoption→原完整checker；三角色distinct UUID、原全部科学/预算/权限不变。不混旧case或fixture。只可恢复原唯一owner核对的8097 sandbox fullID，不创建新服务/大实验；未知实际远端效果或原生错误立即停报，不自动重放。范围完成后只报告，后续扩容/抽离/EvoMap仍未放行。
+
 07:01 UTC中国版本进度：P SOURCE e7ecd6958b6b6447f832b57c518ab50dd83fdebe与doc-only REPORT b35a3c1565d3594b08046858854d83847ef4d10b已push、remote exact/clean；仅auth/config/README/tests窄改，原40+2必要CN回归42pass36.35s与最后新增测试env恢复专项1pass2.94s保留，P新Task已正常settle-retain。原A task_a30bbb885488/ctx_660fbdafe8d1在同固定Agent/worktree/branch实际turn_started，精确新SOURCE与新独占安装完整42一次；安装完成后才能原I fresh正式科研case，旧artifact/科学clock不可混用。
 
 06:42 UTC本阶段结算：原I已普通精确合并A/root报告并push最终证据81357f1fb857843d745b0f657a988a9c51914312，业务/原检查器未变。P/A/I本轮窄任务均succeeded且按固定Owner要求retain，所有Delivery已处理ACK、reclaimable为0；这只结算工程及installed prepared，不是原完整科研目标完成。StepFun实际402仍待可调用额度，之后才能继续新冻结案例与原完整checker。
