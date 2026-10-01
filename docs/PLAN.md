@@ -13,7 +13,9 @@
 
 共享规则：B/C优先发送窄 API Handoff（策略版本与recommend、可信事实恢复/历史先验契约），A读私库先给调用链诊断和接入缺口。允许精确 merge 已推送对方提交以消费接口，不改对方路径；返修仍原 Owner。核心 poetry.lock/T0不变；产品依赖锁由 A独占。没有模型公式搜索、额外 Agent兼容、案例抽离、外围算法比赛或桌面基础设施。所有新测试必须验证行为边界/崩溃恢复或正式入口，不堆实现镜像测试。
 
-C启动恢复：原sandbox terminal agent_readiness明确failed且无Task输入/写入，已release(no_owned_resource)；同Task唯一retry-of转给已识别native Owner term_e24，在原morph-research-agents-0930固定新C分支，原native旧分支保留，C范围不变。`n`n独立 I：四线完成后在空闲原 morph-agent-protocols-1001 新分支 songconmaisaix31-design/morph-policy-release-v01-1002 精确合 B/C/D及治理提交，仅少量 imports/config/type胶水；领域缺陷退原 Owner。核心候选完整工程/双平台门禁通过，A再pin该核心并推产品冻结SHA；I独立新环境/非editable安装核心产品验证 origin、正式入口trace、原完整checker与现有档案证据绑定，不把旧科学执行冒称新版本task_live。发布与新增科学运行按用户回复执行，未知阻塞须如实报告，不假冻结。
+C启动恢复：原sandbox terminal agent_readiness明确failed且无Task输入/写入，已release(no_owned_resource)；同Task唯一retry-of转给已识别native Owner term_e24，在原morph-research-agents-0930固定新C分支，原native旧分支保留，C范围不变。
+
+独立 I：四线完成后在空闲原 morph-agent-protocols-1001 新分支 songconmaisaix31-design/morph-policy-release-v01-1002 精确合 B/C/D及治理提交，仅少量 imports/config/type胶水；领域缺陷退原 Owner。核心候选完整工程/双平台门禁通过，A再pin该核心并推产品冻结SHA；I独立新环境/非editable安装核心产品验证 origin、正式入口trace、原完整checker与现有档案证据绑定，不把旧科学执行冒称新版本task_live。发布与新增科学运行按用户回复执行，未知阻塞须如实报告，不假冻结。
 
 停止条件（五项全部具备即冻结 v0.1，停止扩张）：①安装后正式入口实际使用共享策略，推荐/实际选择/覆盖、版本与候选条件有记录；②至少两个合法候选，可信反馈前后推荐或概率变化可解释；③依赖/能力/scope/租约/预算/未知效果限制不被评分绕过；④同一事实不重复学习、崩溃恢复/重建不重跑模型或实验；⑤核心、产品、策略、检查器与既有证据清单版本一致，新安装与完整工程门禁通过。contract_local/interface_live/task_live分别报告，NOT_RUN不改绿。达到五项即停止。
 
