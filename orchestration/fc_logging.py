@@ -30,6 +30,9 @@ EventKind = Literal["task", "asset_call", "routing", "claim", "fault_observation
 _OBJECT = TypeAdapter(dict[str, JsonValue], config=ConfigDict(allow_inf_nan=False))
 _LOG = logging.getLogger(__name__)
 _SOURCE = Path(__file__).resolve().parents[1]
+# SQLite waits only to acquire this side-channel's BEGIN IMMEDIATE lock.
+# Exhaustion still fails before JSONL writes; append/fsync/commit are not retried.
+APPEND_LOCK_TIMEOUT_SECONDS = 1.0
 # Reject the entire projection rather than corrupting immutable nested facts.
 _CREDENTIAL = re.compile(
     r"(?i)\bbearer\s+\S+|\bsk-[a-z0-9_-]+|"
@@ -140,7 +143,7 @@ class FCLogWriter:
         lock = self.path.with_name(self.path.name + ".lock.sqlite3")
         no_links(lock)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        with connection(lock, write=True, timeout=0.05):
+        with connection(lock, write=True, timeout=APPEND_LOCK_TIMEOUT_SECONDS):
             self._check_path()
             with self.path.open("a+b") as stream:
                 stream.seek(0)

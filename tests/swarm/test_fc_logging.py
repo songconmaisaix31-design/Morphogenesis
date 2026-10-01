@@ -303,7 +303,7 @@ def test_append_real_sqlite_rejection_preserves_partial_tail(tmp_path, monkeypat
     with real_connection(lock, write=True):
         with pytest.raises(sqlite3.OperationalError, match="database is locked"):
             task(writer)
-    assert calls == [{"write": True, "timeout": 0.05}]
+    assert calls == [{"write": True, "timeout": fc.APPEND_LOCK_TIMEOUT_SECONDS}]
     assert writer.path.read_bytes() == original
 
 
@@ -331,5 +331,170 @@ def test_append_rechecks_native_hardlink_after_preflight(tmp_path, monkeypatch):
     monkeypatch.setattr(fc, "connection", changed)
     with pytest.raises(AssetSafetyError, match="hardlinked_path"):
         task(writer)
-    assert calls == [{"write": True, "timeout": 0.05}]
+    assert calls == [{"write": True, "timeout": fc.APPEND_LOCK_TIMEOUT_SECONDS}]
     assert writer.path.read_bytes() == linked.read_bytes() == original
+
+
+def test_contended_append_waits_for_real_sqlite_lock(tmp_path, monkeypatch):
+    from contextlib import contextmanager
+    from threading import Barrier, local
+    import time
+
+    import orchestration.fc_logging as fc
+
+    # Warm schema validation separately; every contender then reaches real BEGIN.
+    task(FCLogWriter(tmp_path / "warm", "warm", provenance="mock"))
+    writers = [FCLogWriter(tmp_path, "r", provenance="mock") for _ in range(3)]
+    path = writers[0].path
+    path.parent.mkdir(parents=True)
+    path.write_bytes(b'{"incomplete":')
+    lock = path.with_name(path.name + ".lock.sqlite3")
+    real_connection = fc.connection
+    entered = Barrier(4)
+    thread = local()
+
+    @contextmanager
+    def coordinated(path, **kwargs):
+        if not getattr(thread, "entered", False):
+            thread.entered = True
+            entered.wait(timeout=5)
+        with real_connection(path, **kwargs) as db:
+            yield db
+
+    def append_two(writer):
+        task(writer)
+        task(writer)
+
+    monkeypatch.setattr(fc, "connection", coordinated)
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        with real_connection(lock, write=True):
+            futures = [pool.submit(append_two, writer) for writer in writers]
+            entered.wait(timeout=5)
+            time.sleep(0.2)
+        for future in futures:
+            future.result(timeout=5)
+
+    lines = path.read_bytes().splitlines()
+    assert lines[0] == b'{"incomplete":'
+    assert len(lines) == 7
+    records = [json.loads(line) for line in lines[1:]]
+    assert [record["sequence"] for record in records] == list(range(1, 7))
+    for record in records:
+        validate_event(record)
+    assert all(writer.failure_count == 0 for writer in writers)
+
+
+def test_process_writers_share_real_sqlite_append_lock(tmp_path):
+    import subprocess
+    import sys
+    import time
+
+    from swarm.task_ledger import connection
+
+    writer = FCLogWriter(tmp_path, "r", provenance="mock")
+    writer.path.parent.mkdir(parents=True)
+    writer.path.write_bytes(b'{"incomplete":')
+    lock = writer.path.with_name(writer.path.name + ".lock.sqlite3")
+    script = """
+import os
+from pathlib import Path
+import sys
+from orchestration.fc_logging import FCLogWriter
+root = Path(sys.argv[1])
+def append(writer):
+    writer.append("task", task_id="t", at=123.5,
+                  dag_node={"task_id": "t", "dependencies": [], "status": "available"})
+append(FCLogWriter(root / str(os.getpid()), "warm", provenance="mock"))
+writer = FCLogWriter(root, "r", provenance="mock")
+print("READY", flush=True)
+assert sys.stdin.readline().strip() == "GO"
+for _ in range(3):
+    append(writer)
+print("DONE", writer.failure_count, flush=True)
+"""
+    processes = []
+    pool = ThreadPoolExecutor(max_workers=2)
+    try:
+        for _ in range(2):
+            processes.append(subprocess.Popen(
+                [sys.executable, "-I", "-c", script, str(tmp_path)], shell=False,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            ))
+        ready = [pool.submit(process.stdout.readline) for process in processes]
+        for future in ready:
+            assert future.result(timeout=30).strip() == "READY"
+        with connection(lock, write=True):
+            for process in processes:
+                process.stdin.write("GO\n")
+                process.stdin.flush()
+            time.sleep(0.2)
+        for process in processes:
+            stdout, stderr = process.communicate(timeout=30)
+            assert process.returncode == 0, stderr
+            assert stdout.strip() == "DONE 0"
+    finally:
+        # Only children created by this test are owned; always reap them.
+        for process in processes:
+            if process.poll() is None:
+                process.kill()
+            process.communicate(timeout=5)
+        pool.shutdown(wait=True)
+
+    lines = writer.path.read_bytes().splitlines()
+    assert lines[0] == b'{"incomplete":'
+    assert len(lines) == 7
+    records = [json.loads(line) for line in lines[1:]]
+    assert [record["sequence"] for record in records] == list(range(1, 7))
+    for record in records:
+        validate_event(record)
+
+
+def test_exhausted_append_lock_emits_failure_without_writing(tmp_path, caplog):
+    import time
+
+    import orchestration.fc_logging as fc
+
+    writer = FCLogWriter(tmp_path, "r", provenance="mock")
+    task(writer)
+    before = writer.path.read_bytes()
+    lock = writer.path.with_name(writer.path.name + ".lock.sqlite3")
+    with fc.connection(lock, write=True):
+        start = time.monotonic()
+        assert writer.emit("task", task_id="t", at=123.5,
+                           dag_node={"task_id": "t", "dependencies": [], "status": "available"}) is False
+        elapsed = time.monotonic() - start
+    assert 0.9 <= elapsed < 3
+    assert writer.failure_count == 1
+    assert writer.path.read_bytes() == before
+    assert "fc_log_projection_failed" in caplog.text
+    assert len(read_events(writer.path)) == 1
+
+
+@pytest.mark.parametrize("strict", [True, False])
+def test_postwrite_fsync_failure_is_not_retried(tmp_path, monkeypatch, strict):
+    import orchestration.fc_logging as fc
+
+    writer = FCLogWriter(tmp_path, "r", provenance="mock")
+    task(writer)
+    before = writer.path.read_bytes()
+    fsync_calls = []
+
+    def failed_fsync(fd):
+        fsync_calls.append(fd)
+        raise OSError("fixture fsync failure after write")
+
+    monkeypatch.setattr(fc.os, "fsync", failed_fsync)
+    if strict:
+        with pytest.raises(OSError, match="fixture fsync failure after write"):
+            task(writer)
+        assert writer.failure_count == 0
+    else:
+        assert writer.emit("task", task_id="t", at=123.5,
+                           dag_node={"task_id": "t", "dependencies": [], "status": "available"}) is False
+        assert writer.failure_count == 1
+    assert len(fsync_calls) == 1
+    assert writer.path.read_bytes().startswith(before)
+    # Visible bytes do not imply durable success; one call never repeats them.
+    records = read_events(writer.path)
+    assert len(records) == 2
+    assert [record["sequence"] for record in records] == [0, 1]
