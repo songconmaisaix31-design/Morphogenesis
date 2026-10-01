@@ -157,3 +157,11 @@ P SOURCE12845c2f53eba43cbf1dfb3e37a662c9a34c84f9已push至原产品分支；主�
 主控读取P原gate03日志40pass26.22s（原33+7必要回归）；first旧安装缺新符号1fail/14.63s、首39pass25.64s、随后模型绑定包装导致原mock方法期望37pass3fail25.34s均保留，最终只对新增API使用包装，旧guard直接callback保持，未删改原断言。官方2.1.238仅假凭据与临时user fixture证明user source可选bedrock/third_party而空source为oauth_token/firstParty；无model/API/MCP，本地标签不能冒称Anthropic订阅或真实额度，managed policy仍保留。
 
 原A task_432c0ffea86e/ctx_b141ba84f5dd同原终端/工作树/分支实际turn_started，仅自己的安装报告和全新private sibling state可写，精确12845 archive→fresh-wheel/非editable venv、原40一次及正式离线门禁，旧4428安装只读；P并行自身fresh安装。实际StepFun402未解除，不派I作者或创建新科研clock/UUID，不用fixture代签task_live/adoption，所有旧RED/unknown继续保留。
+
+## 06:34 UTC产品及独立安装门禁完成，原I仅接收成果与阻塞封存
+
+P REPORT ec62e5eb5334a76eb793456461c6b09e0135eb6c已push；主控核对remote exact/clean、较12845仅自身报告41行，业务树相同。实际读取fresh88分发包copy/noneditable direct_urls、七项正式入口exit0、依赖拒绝exit2及fake-only status/selectedFalse两份JSON；认证mock/local层级独立，实际用户key/API/model/science均未调用。合法worker_done succeeded后按固定Owner要求retain/processAction none再ACK。
+
+A首次独立安装原40pass27.08s，但严格来源bytes门禁RED：本机默认archive将auth.py从Git9715bytes/LF转为9896bytes/181CRLF，wheel/site跟随archive。主控读取首诊断，授权仅命令级git -c core.autocrlf=false精确同12845导出到全新独占stepfun-exact state，不改global/source，也不以换行等价冒bytes通过；首次artifact/RED/40PASS全部只读保留。最终exact archive/wheel/site13产品文件和2CBC科学输入逐bytes全等/nlink1、95冻结集合、7Node完整锁、core direct_url固定CBC及产品wheel非editable通过；由于artifact实际字节变更，只对新artifact原40一次必要复验，真实40pass36.64s/exit0，主控已读原log及provenance/inventory JSON。正式pending和StepFun初始化/双runtime inspect/observe均通过；真实installed entrypoint复制原main仅做CPython audit/call观察，依赖guard1，其余认证/probe/key/Popen/socket/MCP/native全0，replication预期exit2。观察器首次要求整JSON全等RED保留；只有只读派生runtime_remaining递减，tasks/audit全等，另存校正观察器通过，无业务/测试/科学断言变更。
+
+A REPORT d1beaf69afb2a412a30550fa613c3d60bdaa15e9已push；主控remote exact/clean、只增自身报告86行。最终只读artifact为morph-research-agents-install-stepfun-exact-1001-state-ctxb141ba84f5dd，旧安装不借用/覆写。对旧settled I邮箱一次handoff明确被拒绝，未重发，root负责原I新Task交接。此次实际科研就绪仍没有：最小StepFun messages402 insufficient_quota保留，实际usage/cost unknown/null；12845上完整三角色与adoption仍NOT_RUN，旧case04原完整checker exit1缺inheritance不回写。I本阶段只合并准确报告、核对来源/冻结边界与记录阻塞，不再跑已绿40/coreCI或旧科研请求，不创建新clock/UUID，不启动已停止sandbox。后续实际额度就绪后才释放新正式案例，完整闭环后必须运行原完整checker，不能由作者阶段替代。扩容/案例抽离/EvoMap仍后置，未main/tag/Hub发布。
