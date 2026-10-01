@@ -1,6 +1,6 @@
 # 1001主控状态与独立验收
 
-Run run_e54c8f113bfd，主控term_bdbac2dc-861f-4ba9-af30-f44bd35cc2d7。只分发/校验，领域代码由固定Owner负责。冻结核心CBC的完整本地工程及双平台CI已通过；正式case01启动配置失败，原完整科研检查器RED，三角色task_live仍未完成。以下记录按阶段保留，当前状态见末尾。
+Run run_e54c8f113bfd，主控term_bdbac2dc-861f-4ba9-af30-f44bd35cc2d7。只分发/校验，领域代码由固定Owner负责。冻结核心CBC的完整本地工程及双平台CI已通过；case01配置失败、修复后的case02研究工具发现入口失败，两次原完整科研检查器RED，三角色task_live仍未完成。以下记录按阶段保留，当前状态见末尾。
 
 | 轨道 | Task / 当前Dispatch | 实际启动状态 |
 |---|---|---|
@@ -59,3 +59,15 @@ P修复源599fe9425ce3172e2775a0f56b77b5b0044d55c2，最终报告4f0b4152161af91
 I精确599 Git archive→wheel→新CPython3.13.13 copy-mode env独立安装95分发包；主控读取实际13产品文件Git byte一致、固定CBC core身份、NumAcc4.dat/experiment.py字节与核心archive一致且nlink1、24pass17.59s及各原exit0。正式version/setup-assets/doctor/init/双角色inspect/只读observe通过，只offline fixture，无科研调用。核心CBC/原完整checker/locks不变，不重复完整核心测试。
 
 主控正式release msg_73ead66c374e在现有用户全部授权内释放唯一全新research-formal-1001-02：安装的冻结599产品/coreCBC正式CLI owns启动参数与权限，生产身份/HOME/currentmodel和已选Claude OAuth profile不变，测试fixture HOME不可进入生产。保留原三UUID/两品牌/owned中断/真实TTL同UUIDresume与合法stale拒绝、每role900s/64tools、runtime3600/attempts3/每task ONE真实实验。完整独立复现→源文件验证批准应用→第三fresh local再验证→继承child验证批准应用→原消费与唯一adoption，完成后运行原byte-unchanged完整checker；不能作者阶段或prepared替代。越界或真正unknown远端效果停止依赖、不自动重试，领域问题返原Owner。case01/旧case的所有失败、窗口、null/unknown只读保留。当前新案例完整task_live尚未通过，NIST抽离/第二任务/更多Agent/Hub/EvoMap仍未释放；不main/tag发布。
+
+## 10月1日02:42 UTC case02真实入口失败与同Owner并行返修
+
+工具时间从前一阶段20:38 UTC跳至02:36 UTC；实际核对新case02此前尚不存在，I在跳变后02:37 UTC才通过正式CLI创建新项目/state/clock（base de8fcba6b07d5770171f16010294105d6526974f），初始只读observe仅三项creation。未重置旧窗口，msg_b26181988a81确认后才运行interrupt。
+
+正式P599/coreCBC第一次interrupt wall11.9720355s，真实authorUUID01a0f553-a495-7c12-98b6-afa311fce378，实际toolcalls0、任务available/attempts0、未claim/renew/实验。官方router报code-mode host is disabled，Agent真实响应说明研究元数据入口不可用。raw最终包含两item.type=error（memory_tool弃用及Code Mode不可用），turn.started/两agentmessages/turn.completed和真实报告usage input30763/cached15104/output349/reasoning119；确实发生模型响应，不能类比case01的preAPI配置失败。产品guard把两个error item当forbidden而取消；原NativeOutcome stateunknown/remotefxunknown、tokens/costnull、interruptionfalse保留，不事后改成known或zero。
+
+I已停止resume/peer/child/sandbox/新native UUID。主控读取原完整checker实际exit1缺resume-observation.json（line101），不作为科学否定或作者阶段替代；全部原命令/日志保留formal-1001-02-full-checker-first.*。I证据7dc31c67b0df88d6c790715aebc55de41fd45d08已remote exact/clean，主控实际核对非docs差异空、checker blob39948d9615bce07b40b96eeaf5dfb263b993c6d3不变。
+
+两条互斥原Owner轨接续：P task_fe6dc265bbb3/ctx_55e87a116825负责产品guard错误分类及正式权限适配；首次turn_start_unobserved保留，主控正面读到既有内容在composer后只补Enter一次（没有重派），随后实际Working/读取原任务并发alive。D task_3d034a5a0a8b/ctx_ba461612dfdc原终端实际idle后ready/turn_started，仅原两授权docs，核对固定0.159 source687a119的code-mode/MCP deferred metadata和模型条件，给P/I来源Handoff。所有核心源/原checker只读、不私改模型身份、不开代码执行绕过原11许可科研工具、不扩运行时。P先证明真实error envelope与真正outside工具尝试不同且error保持fail-closed；不能丢raw/错误或伪造调用。
+
+精确reply msg_7f3fa70ef728回答I原ask msg_a24aaef775ed：保留02的真实模型/UUID和原红，不能无claim/renew伪装同UUIDresume、重放未知效果、增加第四UUID或重置clock。当前等待准确官方机制与支持修复及适用离线检查，未来真实案例处置由主控另作明确决定；sole owned service仅短期诊断暂留，无额外API/smoke。完整原三角色task_live仍未完成，NIST/第二任务/更多Agent继续后置，EvoMap协议不开发。
