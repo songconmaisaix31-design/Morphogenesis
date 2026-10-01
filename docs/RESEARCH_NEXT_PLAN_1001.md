@@ -2,9 +2,15 @@
 
 事实源为本轮用户任务及 docs/source/README_包内说明.md；用户最新指令将本轮限定为“最终正式版本上的两品牌、三角色、一次真实成果继承”。扩大Agent兼容范围和抽离通用科研案例须在完成后另行决定，不因检查通过自动启动。EvoMap协议开发继续后置。原冻结交付 c45888f64c1cec60e5f9df45677b6547c4527cac，业务代码 bde3412d2257fd1581ce1d7f88b254fb0c13a269。主控只分发、决策、读取证据和独立校验，不写业务代码。
 
-当前冻结核心CBC（cbc4dede782eb79b9c007520d96d7958857da0af）及StepFun产品SOURCE12845c2f53eba43cbf1dfb3e37a662c9a34c84f9，正式入口拥有显式私密凭据文件、国际端点/模型和旧设置隔离。P原33+7必要回归40pass26.22s、自身fresh安装通过，报告ec62e5eb5334a76eb793456461c6b09e0135eb6c已push。A精确Git字节的新独立安装40pass36.64s、来源/SDK/正式离线入口通过，报告d1beaf69afb2a412a30550fa613c3d60bdaa15e9已push；首次CRLF来源核验RED和观察器动态字段RED均保留。原I接收最终成果并记录真实阻塞。真实国际models目录200，但最小消息请求402/额度不足；新版本三角色仍NOT_RUN。原case04及完整checker RED保留，不等待已被取代的订阅登录，不提前放行扩容/案例抽离。详情见本轮验收记录。
+当前用户改用中国站并提供新凭据：06:52 UTC https://api.stepfun.com/v1/models及唯一极小/v1/messages均200，响应model为step-3.5-flash、usage16输入/32输出、费用null；输出预算耗尽未出现text，仅证实认证/极小模型调用而非原生工具或科研通过。原P窄改正式profile以显式选择中国或已有国际端点，原A独立全新精确字节安装，原I之后用新冻结安装完成唯一新三角色案例和原完整checker；不用国际402继续阻塞中国新凭据，也不把它回写成成功。核心CBC、原11工具/科学/预算/检查器和Codex身份模型不变。旧产品12845/Pec62/Ad1be/I81357的工程与installed prepared门禁已完成，新中国版source/install/task尚未冻结通过；所有旧RED/clock/unknown只读，Agent扩容/案例抽离/EvoMap后置。
 
 ## 原始任务与顺序
+
+07:08 UTC正式case05放行：A REPORT83c78d86e2d70cfa1c5bd0ad0d42d18c78ff71b7已push、remote exact/clean，精确中国SOURCEe7ecd新独立安装原42一次42pass35.23s及来源/SDK/正式入口门禁通过，P/A均正常settle-retain。原I只读采用morph-research-agents-install-cn-1001-state-ctx660fbdafe8d1，获准在自己新research-formal-1001-05 project/state/profile创建一次新clock，正式Codex作者中断→真实TTL→同UUID恢复及stale拒绝→Claude/StepFun中国独立复现→文件验证批准应用→第三Codex本地再验证/真实继承adoption→原完整checker；三角色distinct UUID、原全部科学/预算/权限不变。不混旧case或fixture。只可恢复原唯一owner核对的8097 sandbox fullID，不创建新服务/大实验；未知实际远端效果或原生错误立即停报，不自动重放。范围完成后只报告，后续扩容/抽离/EvoMap仍未放行。
+
+07:01 UTC中国版本进度：P SOURCE e7ecd6958b6b6447f832b57c518ab50dd83fdebe与doc-only REPORT b35a3c1565d3594b08046858854d83847ef4d10b已push、remote exact/clean；仅auth/config/README/tests窄改，原40+2必要CN回归42pass36.35s与最后新增测试env恢复专项1pass2.94s保留，P新Task已正常settle-retain。原A task_a30bbb885488/ctx_660fbdafe8d1在同固定Agent/worktree/branch实际turn_started，精确新SOURCE与新独占安装完整42一次；安装完成后才能原I fresh正式科研case，旧artifact/科学clock不可混用。
+
+06:42 UTC本阶段结算：原I已普通精确合并A/root报告并push最终证据81357f1fb857843d745b0f657a988a9c51914312，业务/原检查器未变。P/A/I本轮窄任务均succeeded且按固定Owner要求retain，所有Delivery已处理ACK、reclaimable为0；这只结算工程及installed prepared，不是原完整科研目标完成。StepFun实际402仍待可调用额度，之后才能继续新冻结案例与原完整checker。
 
 1. 继续复用 ORCA 各 Agent 接入的全部接口；盘点固定上游源码、版本和许可证，按真实支持情况逐项映射，不搬入桌面基础设施。
 2. 先修进程清理：补父进程先退出的真实 POSIX 回归。科研权限、窄工具集、正式启动参数放入新产品仓库 Morphogenesis-Research；验收从安装后的正式入口运行，测试脚本只观察，不补关键权限/启动参数。
