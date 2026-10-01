@@ -422,7 +422,8 @@ print("DONE", writer.failure_count, flush=True)
             ))
         ready = [pool.submit(process.stdout.readline) for process in processes]
         for future in ready:
-            assert future.result(timeout=30).strip() == "READY"
+            # Cold imports precede the lock test; the post-GO budget stays 30s.
+            assert future.result(timeout=120).strip() == "READY"
         with connection(lock, write=True):
             for process in processes:
                 process.stdin.write("GO\n")
