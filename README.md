@@ -54,7 +54,6 @@ EvoMap 是可选的外部经验源。现场落地验收仍按独立证据记录�
 
 Agent 是可替换的执行成员，任务事实与经验留在共享环境。适配层负责接入原生 CLI 的启动、事件、会话与工具权限，保留各品牌官方运行机制；模型接口和计算后端分别接入，不把它们混成一种能力。
 
-参照 [Orca 的 Agent 适配表述](https://github.com/stablyai/orca/blob/92cb71765ed5094fefe0d6a2f29635b3cebafc61/README.md#supported-agents)：“Works with any CLI agent”。下表沿用其内联小 logo 与品牌链接样式，列出本项目的对应边界；Orca 的支持范围不等于本项目的验收范围。
 
 | Agent / 接口 | 适配定位与当前状态 |
 |---|---|
