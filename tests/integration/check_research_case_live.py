@@ -9,10 +9,10 @@ trusted core read_result owns every case-specific scientific calculation.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 from pathlib import Path
 
-from check_research_live import TOOLS, events, load, native_calls
 from local_assets import LocalAssetStore
 from local_assets.models import Candidate
 from orchestration.experiments.case import get_case
@@ -20,6 +20,17 @@ from orchestration.experiments.executor import read_result
 from orchestration.experiments.models import ExperimentContext, ExperimentPlan
 from swarm.research.models import HostConfig
 from swarm.task_ledger import TaskLedger
+
+
+# Isolated Python omits the script directory from sys.path. Load only the
+# unchanged, adjacent original checker, without adding a source root or an
+# operator-controlled search directory to the installed environment.
+_helpers_spec = importlib.util.spec_from_file_location(
+    "_research_live_helpers", Path(__file__).with_name("check_research_live.py"))
+assert _helpers_spec is not None and _helpers_spec.loader is not None
+_helpers = importlib.util.module_from_spec(_helpers_spec)
+_helpers_spec.loader.exec_module(_helpers)
+TOOLS, events, load, native_calls = _helpers.TOOLS, _helpers.events, _helpers.load, _helpers.native_calls
 
 
 def main():
