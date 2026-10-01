@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import PurePosixPath
-from typing import Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, field_validator, model_validator
 
@@ -66,6 +66,23 @@ class ExperimentCriteria(Contract):
     observations: Literal[1001] = 1001
 
 
+CaseId = Literal["nist-numacc4-v1", "synthetic-linear-regression-v1"]
+
+
+class LinearRegressionCriteria(Contract):
+    version: Literal["synthetic-linear-regression-v1"] = "synthetic-linear-regression-v1"
+    observations: Literal[7] = 7
+    slope: float = Field(default=1.5, ge=1.5, le=1.5)
+    intercept: float = Field(default=2.0, ge=2.0, le=2.0)
+    sum_squared_error: float = Field(default=0.25, ge=0.25, le=0.25)
+    coefficient_absolute_tolerance: float = Field(default=1e-12, ge=1e-12, le=1e-12)
+    residual_absolute_tolerance: float = Field(default=1e-12, ge=1e-12, le=1e-12)
+    sse_absolute_tolerance: float = Field(default=1e-12, ge=1e-12, le=1e-12)
+
+
+ScientificCriteria = Annotated[ExperimentCriteria | LinearRegressionCriteria, Field(discriminator="version")]
+
+
 class ExperimentPlan(Contract):
     plan_id: str = Field(min_length=1, max_length=120)
     claim: str = Field(min_length=1, max_length=2048)
@@ -73,13 +90,21 @@ class ExperimentPlan(Contract):
     code: ExperimentInput
     data: ExperimentInput
     environment: ExperimentEnvironment
-    criteria: ExperimentCriteria = Field(default_factory=ExperimentCriteria)
+    criteria: ScientificCriteria = Field(default_factory=ExperimentCriteria)
     resources: ExperimentResources = Field(default_factory=ExperimentResources)
     mode: Literal["script", "notebook", "codeinterpreter"] = "script"
     parameters: tuple[Literal["original", "reverse"], ...] = ("original",)
     seed: Literal[0] = 0
     output_name: Literal["metrics.json"] = "metrics.json"
     persistent_volume: str | None = Field(default=None, pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,62}$")
+
+    @field_validator("criteria", mode="before")
+    @classmethod
+    def legacy_criteria_default(cls, value: Any) -> Any:
+        # Archives predating the union may omit the old default discriminator.
+        if isinstance(value, dict) and "version" not in value:
+            return {"version": "nist-numacc4-v1", **value}
+        return value
 
     @model_validator(mode="after")
     def distinct_input_files(self) -> ExperimentPlan:
@@ -110,7 +135,7 @@ class ScientificAssessment(Contract):
     verdict: Literal["passed", "failed", "not_evaluated"] = "not_evaluated"
     reasons: tuple[str, ...] = ()
     metrics: dict[str, float] = Field(default_factory=dict)
-    criteria_version: Literal["nist-numacc4-v1"] = "nist-numacc4-v1"
+    criteria_version: CaseId = "nist-numacc4-v1"
 
 
 class ExperimentResult(Contract):

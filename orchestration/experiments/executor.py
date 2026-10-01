@@ -14,7 +14,8 @@ from orchestration.experiments.backend import ExperimentBackend, ExperimentSessi
 from orchestration.experiments.models import (
     ExperimentArtifact, ExperimentContext, ExperimentPlan, ExperimentResult, ScientificAssessment,
 )
-from orchestration.experiments.scientific import NIST_DATA_SHA256, assess
+from orchestration.experiments.case import get_case
+from orchestration.experiments.scientific import assess
 
 
 DIRECTORY = "/tmp/morph-research"
@@ -72,11 +73,14 @@ class ExperimentExecutor:
 
     def execute(self, plan: ExperimentPlan, context: ExperimentContext,
                 archive_root: Path | str) -> ExperimentResult:
+        plan = ExperimentPlan.model_validate(plan.model_dump(mode="json"))
+        definition = get_case(plan.criteria.version)
         root = Path(archive_root).resolve() / context.run_id
         # Reusing a run after unknown effects is forbidden; no automatic replay.
         root.mkdir(parents=True, exist_ok=False)
         result = ExperimentResult(plan=plan, context=context, archive_path=str(root),
-                                  provenance=self.backend.provenance)
+                                  provenance=self.backend.provenance,
+                                  scientific=ScientificAssessment(criteria_version=plan.criteria.version))
         _write_json(root / "plan.json", plan.model_dump(mode="json"))
         _write_json(root / "result.json", result.model_dump(mode="json"))
         session: ExperimentSession | None = None
@@ -102,8 +106,7 @@ class ExperimentExecutor:
                     raise ValueError("input_digest_mismatch")
                 inputs[label] = raw
                 capture(f"inputs/{item.name}", raw)
-            if plan.data.sha256 != NIST_DATA_SHA256:
-                raise ValueError("unregistered_nist_input")
+            definition.validate_inputs(plan, inputs["code"], inputs["data"])
             required = {plan.mode, "cpu", "memory", "duration"}
             if plan.persistent_volume:
                 required.add("volumes")
@@ -231,7 +234,8 @@ def read_result(archive_root: Path | str, run_id: str, *, expected_plan: Experim
         raw = path.read_bytes()
         if len(raw) != item.size_bytes or digest(raw) != item.sha256:
             raise ValueError("artifact_digest_mismatch")
-    scientific = ScientificAssessment()
+    definition = get_case(result.plan.criteria.version)
+    scientific = ScientificAssessment(criteria_version=result.plan.criteria.version)
     if result.execution_state == "succeeded":
         names = {artifact.archive_path for artifact in result.artifacts}
         required = {f"inputs/{result.plan.code.name}", f"inputs/{result.plan.data.name}",
@@ -252,6 +256,8 @@ def read_result(archive_root: Path | str, run_id: str, *, expected_plan: Experim
         for input_item in (result.plan.code, result.plan.data):
             if digest((root / "inputs" / input_item.name).read_bytes()) != input_item.sha256:
                 raise ValueError("input_digest_mismatch")
+        definition.validate_inputs(result.plan, (root / "inputs" / result.plan.code.name).read_bytes(),
+                                   (root / "inputs" / result.plan.data.name).read_bytes())
         execution = Execution.model_validate_json((root / "execution.json").read_bytes())
         if _execution_state(execution, codeinterpreter=result.plan.mode == "codeinterpreter") != "succeeded":
             raise ValueError("execution_evidence_mismatch")

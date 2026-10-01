@@ -150,6 +150,67 @@
       },
       "title": "ExperimentResources",
       "type": "object"
+    },
+    "LinearRegressionCriteria": {
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": "synthetic-linear-regression-v1",
+          "default": "synthetic-linear-regression-v1",
+          "title": "Version",
+          "type": "string"
+        },
+        "observations": {
+          "const": 7,
+          "default": 7,
+          "title": "Observations",
+          "type": "integer"
+        },
+        "slope": {
+          "default": 1.5,
+          "maximum": 1.5,
+          "minimum": 1.5,
+          "title": "Slope",
+          "type": "number"
+        },
+        "intercept": {
+          "default": 2.0,
+          "maximum": 2.0,
+          "minimum": 2.0,
+          "title": "Intercept",
+          "type": "number"
+        },
+        "sum_squared_error": {
+          "default": 0.25,
+          "maximum": 0.25,
+          "minimum": 0.25,
+          "title": "Sum Squared Error",
+          "type": "number"
+        },
+        "coefficient_absolute_tolerance": {
+          "default": 1e-12,
+          "maximum": 1e-12,
+          "minimum": 1e-12,
+          "title": "Coefficient Absolute Tolerance",
+          "type": "number"
+        },
+        "residual_absolute_tolerance": {
+          "default": 1e-12,
+          "maximum": 1e-12,
+          "minimum": 1e-12,
+          "title": "Residual Absolute Tolerance",
+          "type": "number"
+        },
+        "sse_absolute_tolerance": {
+          "default": 1e-12,
+          "maximum": 1e-12,
+          "minimum": 1e-12,
+          "title": "Sse Absolute Tolerance",
+          "type": "number"
+        }
+      },
+      "title": "LinearRegressionCriteria",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -185,7 +246,22 @@
       "$ref": "#/$defs/ExperimentEnvironment"
     },
     "criteria": {
-      "$ref": "#/$defs/ExperimentCriteria"
+      "discriminator": {
+        "mapping": {
+          "nist-numacc4-v1": "#/$defs/ExperimentCriteria",
+          "synthetic-linear-regression-v1": "#/$defs/LinearRegressionCriteria"
+        },
+        "propertyName": "version"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ExperimentCriteria"
+        },
+        {
+          "$ref": "#/$defs/LinearRegressionCriteria"
+        }
+      ],
+      "title": "Criteria"
     },
     "resources": {
       "$ref": "#/$defs/ExperimentResources"

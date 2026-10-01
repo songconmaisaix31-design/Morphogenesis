@@ -1,0 +1,2 @@
+# Keep the predeclared raw dataset identical in Windows checkout and wheels.
+data.csv -text
