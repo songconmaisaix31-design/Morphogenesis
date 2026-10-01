@@ -32,3 +32,21 @@
 41族核心运行时尚未实现；19种installer/24种hook只是源码能力，未证明本机已安装。Agent提供方许可、真实auth、SDK/stdio/MCP/file-scope未知项需后续官方证据/授权实测，不能猜统一接口；成本未知保持null。公开Codex完整模型目录exact11要求尚未满足支持证据，原checker字节/断言保持，不自行改验收定义。
 
 实现放行必须按主控原序：A进程清理与P正式安装入口 → 冻结三角色原完整checker真实通过 → NIST抽离与第二类任务通过 → 本D同Owner获新增native路径后实现。Claude认证身份由用户/主控决定，旧401/过期案例/第三NOT_RUN保留；EvoMap后置。无需主控阅读transcript或搬入ORCA桌面。
+
+## 接续只读诊断（case02，非 live 验收）
+
+本次从 clean `8530b1bb8df1c8f5272ff19e8b731c6eea62289a` 接续。固定 Codex rust-v0.159.0 官方 commit `687a119f0fcaace47e1f1abcc77cec6c813fd6da` / Apache-2.0；仅这两文档可写。官方 fail-closed/router、模型 metadata 优先级、DirectModelOnly 完整暴露链和最小候选详见 [矩阵 case02 节](../agents/ORCA_PROTOCOL_MATRIX_1001.md#case02-只读诊断code-mode-与直接-mcp-候选)。
+
+- 小 Handoff `msg_e4734973e5e9` 先给根主控；完整固定来源与 effect/checker 限制分别给 P `msg_2c0fda02b176`、I `msg_5fc700aee148`、root `msg_c2a9577e6fc2`。P 独占 guard/error 分类及产品权限返修；D 不共写、不新增运行时。
+- 根因解释：模型的 CodeModeOnly 可覆盖 feature=false，host=false 继续 fail closed；当前 model/cache 的选择性读取支持这一路径，但不是 case02 实际请求 metadata 的证明。服务器 omit deferred/code_mode 可把原11变为 DirectModelOnly，无需开启 host；provider/真实模型接受或选择仍 NOT_RUN。全目录 exact11 未满足，原实际调用11/权限/完整 checker 均不改。
+- 实际 case02 已有模型响应；0研究工具、未认领/实验不等于无模型外部效果。原 raw/error、cancelled、unknown/null 与完整 checker RED 保留；当前诊断不能代签科研通过。metadata 实际调用名没有 raw 证据，保持 unknown。
+
+| 本次验证 | 结果 |
+|---|---|
+| `git rev-parse HEAD` / `git status --porcelain` 开工、只读官方 GitHub commit tree/raw | clean 8530b1b；tree exact 687a119、非截断；只读文件行判断链已引用，不运行官方 mock 测试 |
+| Node 标准库 Git blob SHA1 比较既有 P 官方 copy | `codex-repair-source/codex-rs_config_src_mcp_types.rs` = `4b627edc7769cdbe3c20e8903bb06234b9f6f8b5`；`codex-rs_core_src_config_mod.rs` = `571fc2d81b51d77f34084f28b296ebd1931b31e2`；2/2 与官方固定 tree 匹配 |
+| 只读 forensics / 原 checker / 本机顶层 model 与该条 cache 字段 | 仅打印非秘密选定字段；bound error 项为 unknown/null；checker 原断言保留；未读取 auth、dump provider/全模型配置，未做模型请求 |
+| `git diff --check` / Node 标准库 ownership、源码引用范围及关键判断链检查 | exit0；仅两授权文档；固定13个官方文件 HTTP200、20/20引用行界有效、3/3关键判断锚点匹配；无产品/核心/锁/原 checker 变更 |
+| commit+push / `git ls-remote` / clean | 本次提交完整 SHA、remote exact 和 clean 收口结果在最终 Handoff 回传 |
+
+本次检索的真实限制保留：P 官方副本为扁平文件而非完整 clone，初始目录模式检索无匹配；大范围源码输出截断后收缩为必要行；推测的 `tools/src/registry.rs`、`codex-mcp/src/mcp.rs` 返回404，按真实源码转用 tool_executor.rs/tools.rs。未据失败伪造接口，没有落盘新的官方源副本、修改全局配置或安装依赖。所有 modelrequest/auth/API/sandbox/session/烟测/live 诊断 NOT_RUN；NIST抽离、第二类任务及更多Agent仍须原三角色完整 checker 通过后再放行，EvoMap后置。

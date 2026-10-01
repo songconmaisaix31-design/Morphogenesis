@@ -110,6 +110,36 @@ MCP 配置发现：`src/shared/mcp-config.ts:24–70` 只定义 stdio/http/unkno
 
 原 `tests/integration/check_research_live.py:141–144` 只断言**实际调用名**属于11个MCP工具，`:153–161` 断言launch权限；不检查完整模型目录恰好11项。本轮保持checker字节与基线一致、不运行、不削弱它。三项必须分别留痕：server tools/list=11、允许/实际调用⊆11、完整模型工具曝光exact11；前两项不能代替第三项，更不能把源码推断标为live。若用户要求第三项，主控/P需记录未满足限制并决定官方支持路径，不能默改验收定义。发现已通过 `msg_e5d6b19309d3` 发主控转P。
 
+## Case02 只读诊断：Code Mode 与直接 MCP 候选
+
+本节固定官方 [Codex rust-v0.159.0 / 687a119f0fcaace47e1f1abcc77cec6c813fd6da](https://github.com/openai/codex/tree/687a119f0fcaace47e1f1abcc77cec6c813fd6da)，[Apache-2.0](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/LICENSE)。仅源码诊断 prepared；不代表模型可用或 live 通过。
+
+实际 case02 的只读证据位于 `morph-research-integration-1001-state/research-formal-1001-02-state`：`interrupt-native/native.jsonl:1–7` 记录 UUID `01a0f553-a495-7c12-98b6-afa311fce378`、两个官方 error item（memory_tool 弃用及 host disabled）、Agent 报研究入口不可达与 turn.completed；`stderr.txt:1` 为 router 的 `code-mode host is disabled`。`native-bound.jsonl:2–3` 的 event 是 unknown、tool_name=null，不能将官方 error 当已执行工具。P 的 guard 分类返修与研究入口可达性是两个问题。实际研究工具调用为0、未认领/实验；raw :7 已响应 input30763/output349（cached_input15104、reasoning_output119），不能声称没有模型外部效果或零费用。旧 raw、cancelled、unknown/null 和原完整 checker RED 均保留。
+
+当前终端仅选择性读取顶层非秘密 `model` 得 `gpt-6.1-sol`，本机该模型缓存 `tool_mode=code_mode_only`；launch request.model=null，**当前配置/缓存不是 case02 实际请求 metadata 的证明**。官方 [tools/mod.rs:75–96](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/mod.rs#L75-L96) 让 model_info.tool_mode 优先于 code_mode/code_mode_only features；host 不可用的 Direct 回退只适用于 CodeMode，CodeModeOnly 继续 fail closed。[disabled provider:88–101](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/code-mode/src/remote_session.rs#L88-L101) 拒绝创建 session，[warning:108–121](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/code_mode/mod.rs#L108-L121) 与实际 raw 一致。故三个 feature=false 并不覆盖模型指定模式；对 CodeModeOnly 的默认 nested/deferred MCP 暴露，关闭 host 使 discovery/执行路径不可用。这是源码支持的根因解释，未重建 case02 模型请求。
+
+给 P 的最小官方配置候选，仅增加服务器级参数：
+
+```text
+-c mcp_servers.morph_research.omit_tools_from=["deferred","code_mode"]
+```
+
+原 enabled_tools=11、defaultprompt、per11approve、read-only、never、禁 host/shell/js_repl 等继续保持；D 不改产品配置。完整来源判断链：
+
+| 官方源码（同一固定 commit） | 结论 |
+|---|---|
+| [mcp_types.rs:267–270](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/config/src/mcp_types.rs#L267-L270)、[config_types.rs:396–407](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/protocol/src/config_types.rs#L396-L407) | server 支持 omit_tools_from，枚举为 snake_case direct/deferred/code_mode。 |
+| [spec_plan.rs:235–268](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/spec_plan.rs#L235-L268) | ALL 减去 deferred/code_mode，得到 DirectModelOnly，不经过 deferred 选择。 |
+| [tool_executor.rs:68–96](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/tools/src/tool_executor.rs#L68-L96)、[spec_plan.rs:553–590](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/spec_plan.rs#L553-L590)、[794–805](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/spec_plan.rs#L794-L805) | DirectModelOnly 是 direct、不是 code-mode available；进入模型列表，CodeModeOnly 的 nested 隐藏条件不命中。provider 不支持 namespace 时仍会过滤 namespace spec，不能推定所有 provider 可用。 |
+| [spec_plan.rs:825–839](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/spec_plan.rs#L825-L839)、[653–665](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/spec_plan.rs#L653-L665) | DirectModelOnly 被排除出 nested；search 取决于模型与 provider 能力，旧 tool_search feature=false 不能作为关闭 discovery 的证明。该11工具候选不再以 metadata/tool_search 为必经路径。 |
+| [官方测试:1003–1067](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/tests/suite/mcp_tool_exposure.rs#L1003-L1067) | mock 请求断言 direct-only MCP 在 CodeModeOnly 仍 top-level、不 deferred、不 nested；D 未运行该测试，也不能用它证明真实模型接受。 |
+
+P 提到的 direct_only_tool_namespaces 是另一官方方案：[feature_configs.rs:39–46](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/features/src/feature_configs.rs#L39-L46) 与 [config/mod.rs:2990–2994](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/config/mod.rs#L2990-L2994) 表明配置来自 features.code_mode 对象；不是裸 code_mode 表。它要求规范化后的 exact namespace，[MCP tools.rs:107–142,225–233](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/codex-mcp/src/tools.rs#L107-L142) 存在前缀/消毒/碰撞处理；本轮未取得 case02 tools/list 的实际 wire metadata，故不猜名称，优先服务器级 omit 候选。
+
+metadata 与 effects 边界：官方 [globals.rs:22–48,70–101](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/code-mode-runtime/src/runtime/globals.rs#L22-L48) 的 ALL_TOOLS 是 exec 内工具元数据，不是独立科研业务调用；读它仍需能运行该 JS cell。raw 未保存 metadata 函数的实际调用名，不能补造。开启 host 会允许 [V8 JS 模块执行:9–43](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/code-mode-runtime/src/runtime/module_loader.rs#L9-L43)，[imports:225–237](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/code-mode-runtime/src/runtime/module_loader.rs#L225-L237) 拒绝外部模块；不因此自动执行 Python/shell，也不能声称无 effect：nested 调用会 [dispatch 到真实工具:335–412](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/code_mode/mod.rs#L335-L412)。此候选继续禁 host；已有资源 helpers、model-driven apply_patch 和 [exec/wait 注册:932–936](https://github.com/openai/codex/blob/687a119f0fcaace47e1f1abcc77cec6c813fd6da/codex-rs/core/src/tools/spec_plan.rs#L932-L936) 不会因此全局移除，完整目录 exact11 仍未满足。
+
+原 checker :141–144 的实际调用⊆11及 :153–161 的权限断言可原样保留；真正是否成功须原三角色完整 checker 判断。若模型仍调用额外 discovery/exec/helper，应保持 RED，不能修改原11标准。当前候选仅 source-prepared；modelrequest、开启 host、模型/提供方更换均 NOT_RUN，由根主控裁决。没有必须换模型/开代码执行的源码结论，也没有当前模型实际成功的证据。
+
 ## 固定来源索引
 
 以下均为 `85f8d6b5f507df795cd3cef1cdea08124cf801ee`，表内引用的行号以官方LF文件为准。
