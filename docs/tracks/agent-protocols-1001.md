@@ -70,3 +70,17 @@ ORCA当前host选中managed id2a305740-3098-46da-a63f-2d9e42ae9d72，实际供�
 验证：最终固定官方引用21/21行界、18文件HTTP200及此前5/5关键源码断言通过；只读归档/真实installed/安全键和network-free bundled检查通过，新增官方有界nonbundled检查如上。仅非秘密cache时间/版本与选定公共metadata写新private sibling `morph-agent-protocols-1001-state/metadata-diagnostic-2026-10-01T03-36-26-923Z/{cache-before,default}.json`；无凭据/header/整auth/env/catalog输出，无模型/沙箱/科学UUID，未改I状态。仅两docs入Git；diff/cached、commitpush、remoteexactclean结果在最终Handoff回传。I旧fullchecker exit1缺resume（证据06ee5e4）不重跑/改checker/阈值；case01/02/03 raw/outcomeunknown/null不回写，无研究calls不等于零远端模型效果。当前metadata可达不代签科研/live，旧timeout底层原因仍UNKNOWN。
 
 检索限制如实保留：初始路径模式models_manager/model_provider_info未匹配新的dash包名；`login/src/default_client.rs`为404后按固定tree定位auth/default_client.rs；过宽03路径输出截断后只读精确顶层文件，未据截断推断缺文件。用户要求继续同Task实际检查，未提前结算/新派发；实际检查后root `msg_4d5819c9ed4d` 直接核对default.json并接受当前metadata PASS，明确不再检查/API及按原Owner两docs commit/push收口。没有产品业务修复依据；root另释放I唯一case04，D不辅助预热或参与科学/native，原完整三角色未通过前后续放行顺序不变。
+
+## Case04 Claude OAuth 同配置预检 Handoff
+
+基线clean `b581825e4556aadbdcb8bdd5bb50f40f6bf42ae5`，同Owner/terminal/worktree/branch、只两docs。已读AGENTS、原docs/PLAN及实际现行 `morph-research-plan-1001/docs/RESEARCH_NEXT_PLAN_1001.md`；D当前只盘点/Handoff权限，P新ctx_c27b10cbf84b独占产品返修，I ctx_c6bb0ebb6ad6原状态只读。未重盘43族或metadata门禁。[矩阵 case04节](../agents/ORCA_PROTOCOL_MATRIX_1001.md#case04-claude-正式-oauth-与-orca-账户复用) 给官方机制、现装compiled byte定位和最小P建议。
+
+实际读取04 launch/probe/observation/native :1–3/stderr：Claude2.1.238 UUID40438687-3d24-437d-893a-c5c3a51ed848，MCPconnected/11tools/dontAsk/claude-sonnet-4-6/apiKeySourcenone后authentication_failed，4.053978s/exit1/工具0；原failed/unknown/null与raw syntheticusage0分别保留。I `a3dcc85`原完整checker exit1缺inheritance，不重跑；作者ONE科学实验passed/known/destroyed、源quarantine/同UUID中断恢复与两stale拒绝不改变，不重放01–04/clock。
+
+实际有界官方状态对照：同真实bin/claude.exe与formal04 cwd、child pop两gateway键；普通auth status --json 1189ms/exit0/loggedIntrue/oauth_token，正式root --setting-sources user --settings同plan两env空值/disableAllHooks后557ms/exit1/loggedInfalse/none，stderr均空。apiKeySource字段两次缺失，不造none；现装source证明oauth_token含gateway generic bearer、claude.ai还需排除Consolemanagedkey，status不等于server模型验证。当前ORCA Claude accounts0/activeIdnull，默认CLAUDE_CONFIG_DIR absent，C:/Users/DW/.claude存在而credentials file不存在；user settings两gateway键存在（只查布尔），没有可复用已选Claude OAuth或可做身份比较的账户，不能混Codex。
+
+具体薄Handoff root `msg_8f15f0f45e1f` / P `msg_ca7a9373df99` / I `msg_bd12ab59e6b7`；官方成功method/source分支 root `msg_c607053fd63f` / P `msg_9c8d1539f225`。P复用原command/registry/child env做**正式plan同配置**auth预检，普通probe单列，失败先于native/MCP/sandbox-key读取；只接受已证明的官方subscription来源，unknown/Consolekey/第三方failclosed，fixtures验证拒绝顺序/字段缺失/timeout/版本/parent env恢复，不更改core或I补参。现存真正OAuth成功仍未发生，产品修复不能创造登录。
+
+准确外部步骤已交root `msg_4fa48999b5b9` / P `msg_397d917865a8`：官方auth login --claudeai（同formal settings与child env/default目录），后同设置auth status --json；已装login --help确认claudeai/console含义，**仅help，本D不login**。新private sibling `claude-auth-diagnostic-2026-10-01T03-47-34-719Z`仅probe/formal安全字段/exit/wall和provenance，无凭据/wholeJSON/config/env、原件不改；无额外真实status/模型/沙箱/新UUID。Git仅两docs，commitpush/remoteexactclean在最终Handoff回传；科研闭环/有效用户登录/live及后续NIST抽离/第二任务/更多Agent/EvoMap不冒签。
+
+验证：当前case04引用5/5官方文件HTTP200/行界有效，安全实际probe→formal差异及apiKeySource缺失原件断言通过，ownership仅两docs、git diff --check通过；不运行原checker或工程测试。根主控 `msg_20770b312aaa` 直接读formal.json接受真实缺登录及方法来源，已请求用户自行浏览器OAuth，不假定完成；明确D停止新增探测、同Task两docs交付，不等待人工登录。来源检索GitHub tree一次timeout后复用固定raw文件；猜测runtime-auth-service-*三个路径404后沿真实imports定位runtime-auth/，不把不存在文件写成来源。
