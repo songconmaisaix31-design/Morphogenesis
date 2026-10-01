@@ -49,3 +49,13 @@ P原Owner同worktree/branch接续修复task_f097d52044ab/ctx_7fc78623748b，实�
 主控msg_3bdde9184074批准最小正式修复：root inline TOML保留合法继承配置但禁用，运行时只有研究MCP有效；真正非法继承配置fail-closed。原11许可调用/read-only/never/per11approve/defaultprompt及原完整checker不变。只允许无secret无auth临时测试子进程CODEX_HOME fixture验证真实官方parser旧RED→新PASS；生产HOME/账号/provider/model与凭据不改、不复制。产品修复、测试、文档和push继续由同P负责，I只能独立安装验收。
 
 精确reply msg_a58c340c02ad已解除I原ask msg_a75a214684f4：sole owned server可在短期修复期间保持运行（full ID eb6152fbdee01a0044cc1fdd881cf05c00dbbf3905411bc6c5a480f6a7141ec6，owner research-c-0930）；不得额外API/smoke/管理其他容器。case01未知效果保留，不重试失败阶段。新命名case02须P准确修复冻结、适用测试及I独立正式入口验证之后另行明确释放；目前未释放。完整三角色原checker通过前不抽离NIST、不开展第二任务或更多Agent运行时。
+
+## 20:37 UTC产品返修冻结、独立门禁与新case02释放
+
+P修复源599fe9425ce3172e2775a0f56b77b5b0044d55c2，最终报告4f0b4152161af917ce90308a8cb98ee516ea01be已push原分支、remote exact/clean；主控核对报告较源码提交只自身track文档，业务树相同。主控直接读取真实官方parser first-red/first-pass输出：研究MCP启用、原motionsites禁用、quoted phantom查询not found。P首新回归20pass/4fail因pytest自身PYTEST_CURRENT_TEST阶段变化；改在每次调用前取父环境快照，完整不变断言保留，最终24pass11.95s。首次原红不删除。P同Owner合法succeeded后worker-retain user_requested/processAction none，继续保留返修责任。
+
+官方0.159 tag精确源码687a119f0fcaace47e1f1abcc77cec6c813fd6da的exec/lib.rs第一次bootstrap解析480–489、报错exit822–828先于auth/cloud/session初始化；主控实际读取该路径。此证据支持另建修复后案例，不改写case01 NativeOutcome默认unknown或伪造zero，不重放失败阶段。
+
+I精确599 Git archive→wheel→新CPython3.13.13 copy-mode env独立安装95分发包；主控读取实际13产品文件Git byte一致、固定CBC core身份、NumAcc4.dat/experiment.py字节与核心archive一致且nlink1、24pass17.59s及各原exit0。正式version/setup-assets/doctor/init/双角色inspect/只读observe通过，只offline fixture，无科研调用。核心CBC/原完整checker/locks不变，不重复完整核心测试。
+
+主控正式release msg_73ead66c374e在现有用户全部授权内释放唯一全新research-formal-1001-02：安装的冻结599产品/coreCBC正式CLI owns启动参数与权限，生产身份/HOME/currentmodel和已选Claude OAuth profile不变，测试fixture HOME不可进入生产。保留原三UUID/两品牌/owned中断/真实TTL同UUIDresume与合法stale拒绝、每role900s/64tools、runtime3600/attempts3/每task ONE真实实验。完整独立复现→源文件验证批准应用→第三fresh local再验证→继承child验证批准应用→原消费与唯一adoption，完成后运行原byte-unchanged完整checker；不能作者阶段或prepared替代。越界或真正unknown远端效果停止依赖、不自动重试，领域问题返原Owner。case01/旧case的所有失败、窗口、null/unknown只读保留。当前新案例完整task_live尚未通过，NIST抽离/第二任务/更多Agent/Hub/EvoMap仍未释放；不main/tag发布。
