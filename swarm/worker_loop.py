@@ -410,6 +410,7 @@ class Worker:
             if self._active is not None else None,
             "pending_finalization": self._pending,
             "failure": self._last_failure,
+            "fc_projection": self.fc_log.projection_status(),
         }
         _write_json(self.status_path, result)
         return result
@@ -461,6 +462,7 @@ class Worker:
             "provenance": self.executor.provenance, "original_run_uri": self.executor.original_run_uri,
             "evidence_class": "contract_local", "created_at": time.time(),
             "interface_live": "not_run", "task_live": "not_run", "execution": metadata or {},
+            "fc_projection": self.fc_log.projection_status(),
         }
         if self.executor.provenance == "live" and metadata is not None:
             value["evidence_class"] = "interface_live"
@@ -517,8 +519,13 @@ class Worker:
         if not pending.get("feedback_started"):
             pending["feedback_started"] = True
             self._status("finalizing")
-            self.field.feedback(task.signal.signal_id, success=True)
-            self.router.reinforce(self.worker_id, task.signal, success=True)
+            from swarm.feedback import trusted_facts
+            facts = [fact for fact in trusted_facts(self.ledger, self.assets.root) if fact.source_id == result_id]
+            if len(facts) != 1:
+                raise AssetSafetyError("trusted_feedback_source_required")
+            with self.field.trusted_pair(facts[0]):
+                self.field.feedback(task.signal.signal_id, success=True)
+                self.router.reinforce(self.worker_id, task.signal, success=True)
             pending["feedback_complete"] = True
             self._status("finalizing")
         # An interrupted feedback pair is explicitly incomplete, never replayed.

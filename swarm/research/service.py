@@ -18,6 +18,9 @@ from local_assets.research_models import ResearchObservation
 from local_assets.snapshot import snapshot_revision
 from local_assets.validate import inspect_candidate
 from swarm.models import Lease, TaskRecord
+from swarm.feedback import trusted_facts
+from swarm.pheromone import PheromoneField
+from swarm.router import Router
 from swarm.research.models import HostConfig
 from swarm.task_ledger import LeaseLost, TaskLedger, canonical_scope, connection
 
@@ -45,10 +48,22 @@ class ResearchService:
             raise ValueError("host_ledger_identity_mismatch")
         self.store = store or LocalAssetStore(config.assets_root)
         self.backend = backend
+        self.field = PheromoneField(self.ledger.path.with_name("policy-field.sqlite3"), ledger=self.ledger,
+                                    clock=self.ledger.clock)
+        self.router = Router(self.field, strategy_version="v0.1")
 
     def discover(self, limit: int = 100) -> list[dict[str, JsonValue]]:
-        return [_OBJECT.validate_json(t.model_dump_json()) for t in self.ledger.candidates(
-            self.locality, limit=limit, capabilities=self.config.capabilities)]
+        self.field.synchronize(trusted_facts(self.ledger, self.store.root))
+        recommendation = self.router.recommend(self.config.worker_id, self.locality,
+                                                {key: 1.0 for key in self.config.capabilities}, limit=limit)
+        responses = []
+        for task in self.ledger.candidates(self.locality, limit=limit, capabilities=self.config.capabilities):
+            response = _OBJECT.validate_json(task.model_dump_json())
+            response["policy_recommendation"] = (recommendation if not responses else {
+                "routing_sequence": recommendation["routing_sequence"], "policy_version": recommendation["policy_version"],
+                "selected": recommendation["selected"], "reference_only": True})
+            responses.append(response)
+        return responses
 
     def _task(self, task_id: str, *, require_capability: bool = False) -> TaskRecord:
         # Query uses authoritative locality and capability filters, including held tasks.
@@ -79,7 +94,56 @@ class ResearchService:
         response = _OBJECT.validate_json(lease.model_dump_json())
         response["attempt_id"] = _OBJECT.validate_json(AttemptId(task_id=task_id, agent=self.config.agent,
                                                                attempt=self.ledger.get(task_id).attempts).model_dump_json())
+        # Re-read the authoritative recommendation row, not an Agent-supplied ID.
+        with connection(self.ledger.path) as db:
+            routing = db.execute("SELECT sequence,body FROM task_audit WHERE swarm_id=? AND event='routing' "
+                                 "ORDER BY sequence DESC", (self.config.swarm_id,)).fetchall()
+            selections = db.execute("SELECT sequence,body FROM task_audit WHERE swarm_id=? AND event='policy_selection'",
+                                    (self.config.swarm_id,)).fetchall()
+        used = max((r[0] for r in selections if _OBJECT.validate_json(r[1]).get("worker_id") == self.config.worker_id), default=0)
+        associated = next((r for r in routing if r[0] > used and self._recommendation_context(_OBJECT.validate_json(r[1]))), None)
+        decision = _OBJECT.validate_json(associated[1]) if associated is not None else None
+        selection: dict[str, JsonValue] = {"actual_task_id": task_id, "worker_id": self.config.worker_id,
+                                           "token": lease.token, "routing_sequence": associated[0] if associated is not None else None,
+                                           "policy_version": decision.get("policy_version") if decision else None,
+                                           "recommended_task_id": decision.get("selected") if decision else None,
+                                           "overridden": task_id != decision.get("selected") if decision else None,
+                                           "recommendation_present": decision is not None,
+                                           "conditions": decision.get("constraints") if decision else None,
+                                           "candidate_conditions": decision.get("policy_candidates", decision.get("signals")) if decision else None,
+                                           "feedback_source": "existing_authoritative_facts"}
+        self.ledger.record_event("policy_selection", selection, task_id=task_id)
+        response["policy_selection"] = selection
         return response
+
+    def _recommendation_context(self, decision: dict[str, JsonValue]) -> bool:
+        if (decision.get("worker_id") != self.config.worker_id
+                or decision.get("authorized_scopes") != list(self.locality.authorized_scopes)
+                or decision.get("modules") != list(self.locality.modules)
+                or decision.get("dependency_of") != list(self.locality.dependency_of)
+                or decision.get("policy_version") != self.router.strategy_version
+                or not isinstance(decision.get("selected"), str)):
+            return False
+        candidates = decision.get("policy_candidates", decision.get("signals"))
+        if not isinstance(candidates, list) or not candidates:
+            return False
+        for candidate in candidates:
+            if not isinstance(candidate, dict) or not isinstance(candidate.get("task_id"), str):
+                return False
+            candidate_id = candidate.get("task_id")
+            if not isinstance(candidate_id, str):
+                return False
+            try:
+                task = self._task(candidate_id, require_capability=True)
+            except (PermissionError, KeyError):
+                return False
+            if (candidate.get("scope") != task.signal.scope
+                    or candidate.get("module") != task.signal.module
+                    or candidate.get("required_capability") != (task.signal.required_capability or task.signal.task_kind)
+                    or candidate.get("capability_match") != 1.0
+                    or candidate.get("dependencies") != list(task.dependencies)):
+                return False
+        return True
 
     def _lease(self, task_id: str, token: int) -> Lease:
         task = self._task(task_id, require_capability=True)
@@ -308,6 +372,7 @@ class ResearchService:
                            "source_attempt": _OBJECT.validate_json(last.source_attempt.model_dump_json()),
                            "observation_fencing_token": last.fencing_token})
         task = self.ledger.submit(lease, uuid4().hex, result)
+        self.field.synchronize(trusted_facts(self.ledger, self.store.root))
         return _OBJECT.validate_json(task.model_dump_json())
 
     def approve(self, task_id: str, token: int, asset_id: str, report_id: str) -> dict[str, JsonValue]:
@@ -386,7 +451,7 @@ class ResearchService:
         if canonical_scope(prepared.scope) != lease.scope:
             raise AssetSafetyError("application_lease_scope_mismatch")
         result_id = uuid4().hex
-        result: dict[str, JsonValue] = {"candidate_asset_id": asset_id, "applied": True}
+        result: dict[str, JsonValue] = {"candidate_asset_id": asset_id, "report_id": report_id, "applied": True}
         if execution_id is not None:
             execution = self.store.consumption(execution_id)
             if (execution.candidate_asset_id != asset_id or execution.context.task_id != task_id
@@ -405,4 +470,5 @@ class ResearchService:
         if execution_id is not None:
             receipt = AssetConsumer(self.store).record_adoption(execution_id, result_id, self.ledger)
             response.update({"stage": "adopted", "adopted": True, "adoption": _OBJECT.validate_json(receipt.model_dump_json())})
+        self.field.synchronize(trusted_facts(self.ledger, self.store.root))
         return response
