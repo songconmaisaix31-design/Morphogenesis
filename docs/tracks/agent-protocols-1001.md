@@ -58,3 +58,15 @@
 薄 Handoff 先交 root `msg_ab4a19e90e87` / P `msg_0eb9b49dac5d` / I `msg_7a2fb95f17f5`，再按 root 仅 host notice 的批准收窄并补齐 caller 至 root `msg_5688452d4b43` / P `msg_516624f91c7d` / I `msg_c6355910c248`。P 去除 memory_tool alias但 memoriesfalse 保留；弃用通知虽然官方非fatal，**不列入批准兼容名单**。D只交源码语义，不修改产品实现或原checker，不冻结签署live。
 
 验证：10个固定官方文件 HTTP200、11/11引用行界有效，caller Warning/无exposure判断、fatal映射及完整notice与原raw逐字节匹配检查exit0，原 :1–7顺序核对通过；仅两docs ownership、`git diff --check`通过，cached检查和完整commit、push、remote exact、clean在最终Handoff回传。只读原 case02 为0研究calls但已模型响应，outcome cancelled/unknown/null与原红全部保留；没有API/model/auth/sandbox/新UUID、host开启、HOME/catalog/provider改动。检索推测文件 `event_processor_with_json_output.rs` 返回404后按官方tree使用真实 `event_processor_with_jsonl_output.rs`，不伪造映射。真正模型接受/选择 direct11及完整三角色checker仍未在本诊断执行，后续科研/更多Agent放行顺序不变。
+
+## Case03 metadata 有界只读诊断
+
+基线 clean `8acb7d3f3c7a3dcea85c20c2494f74c1377cd437`，固定官方0.159 / `687a119` / Apache-2.0；[矩阵 case03 节](../agents/ORCA_PROTOCOL_MATRIX_1001.md#case03-metadata-网络与继承配置诊断) 收录真实installed继承路径、官方refresh/cache/deadline/fallback/tier来源和联通结果。首批给root `msg_875e67787ae8` / I `msg_33ab5f6fd401`；完整诊断与安全authGET方案给root `msg_c592f176ff07`（请转未来P Owner，旧P settled不复用）/ I `msg_e3e7087780d7`，installed与官方路由候选补充 `msg_3fcf9c17a378` / `msg_0ecc2ed0bc64`；收到I现有环境边界 `msg_02bceade7532`，未要求新科学case。
+
+已确定metadata刷新deadline失败→metadata缺失→fallback/tier omit；未定位旧5秒timeout的底层网络/auth/server原因。早先当前缓存0.158/超300s/无slug和bundled无slug只是观测，不能补造03原cache/env快照；无凭据HTTP405本身也不是authenticated metadata恢复证明。root三条授权 `msg_7b6072e819f8/msg_883d378dd578/msg_96aabbb0c304` 已读取并ACK，明确允许官方正常cache/auth行为；本轮新增实际检查如下，保留此前第一失败和历史RED。
+
+ORCA当前host选中managed id2a305740-3098-46da-a63f-2d9e42ae9d72，实际供给目录AppData/Roaming/orca/codex-accounts/<id>/home与default ~/.codex不同；CLI公开摘要在内存比较provider/workspace身份相等，两边top model/tier相同，无身份原值输出。这只证明当前身份关系，非03历史快照；既有selected-home无副作用解析来源已列矩阵。保持formal默认HOME、原model/tier/项目cwd，现装官方 `codex debug models` 于03:36:26.927Z执行，2.774s exit0、stderr空、10 models，目标gpt-6.1-sol `code_mode_only`/search=true/priority advertised；调用前cache0.158无目标，官方调用后0.159有目标。因此当前metadata刷新成功，无需换模型/删tier/放行fallback/开codehost。默认已成功，按root条件授权不额外proxy比较、不另发自制GET。实际结果薄交root `msg_a9c58e43b03c` / I `msg_0b6fb1c63506`，未来P由root转交。
+
+验证：最终固定官方引用21/21行界、18文件HTTP200及此前5/5关键源码断言通过；只读归档/真实installed/安全键和network-free bundled检查通过，新增官方有界nonbundled检查如上。仅非秘密cache时间/版本与选定公共metadata写新private sibling `morph-agent-protocols-1001-state/metadata-diagnostic-2026-10-01T03-36-26-923Z/{cache-before,default}.json`；无凭据/header/整auth/env/catalog输出，无模型/沙箱/科学UUID，未改I状态。仅两docs入Git；diff/cached、commitpush、remoteexactclean结果在最终Handoff回传。I旧fullchecker exit1缺resume（证据06ee5e4）不重跑/改checker/阈值；case01/02/03 raw/outcomeunknown/null不回写，无研究calls不等于零远端模型效果。当前metadata可达不代签科研/live，旧timeout底层原因仍UNKNOWN。
+
+检索限制如实保留：初始路径模式models_manager/model_provider_info未匹配新的dash包名；`login/src/default_client.rs`为404后按固定tree定位auth/default_client.rs；过宽03路径输出截断后只读精确顶层文件，未据截断推断缺文件。用户要求继续同Task实际检查，未提前结算/新派发；实际检查后root `msg_4d5819c9ed4d` 直接核对default.json并接受当前metadata PASS，明确不再检查/API及按原Owner两docs commit/push收口。没有产品业务修复依据；root另释放I唯一case04，D不辅助预热或参与科学/native，原完整三角色未通过前后续放行顺序不变。
