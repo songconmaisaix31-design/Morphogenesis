@@ -149,3 +149,11 @@ A原Owner task_a4ce04726749/ctx_6b8aed6cdba5实际ready/turn_started，仅自身
 私有安全结果位于专用Temp目录，不含secret/header/raw错误消息。06:03:35Z国内官方GET /v1/models首次401保留；06:03:58Z国际官方GET https://api.stepfun.ai/v1/models实际200（模型目录含step-3.5-flash、step-3.5-flash-2603、step-3.7-flash），仅证实密钥认证与目录，不是native/task就绪。06:04:45Z唯一极小Anthropic接口POST https://api.stepfun.ai/v1/messages（step-3.5-flash、max_tokens32、无工具/科学输入）实际402，安全错误归类insufficient_quota，未自动重放。模型turn尝试1、实际usage未知/费用null，不把HTTP拒绝改成科学完成或零花费。用户已获实际额度问题说明，未自动充值/购买。
 
 原P在自身产品业务/测试/报告路径内完成必要API凭据正式配置及离线回归，真实secret只由正式产品live子进程使用；P开发/fixture不读取真实key、不调用API。新产品冻结和独立安装通过后，实际可用额度仍是三角色科研前置。旧案例clock/RED/unknown全部保留，服务器仍停止，不预先新建科研窗口。原完整任务尚未完成；扩容、案例抽离、EvoMap协议继续后置。
+
+## 06:21 UTC StepFun正式入口SOURCE冻结与独立安装接续
+
+P SOURCE12845c2f53eba43cbf1dfb3e37a662c9a34c84f9已push至原产品分支；主控实际核对remote exact/clean、只改README及auth/config/permissions/runner/tests六路径，guard/coreCBC/全部锁/原checker不变。正式profile显式stepfun-api、外置绝对key文件、https://api.stepfun.ai/、step-3.5-flash；Claude依赖/doctor/version后才读取凭据，官方同正式command/settings/model/cwd/env本地status只输出安全允许字段，MCP子进程清空供应商凭据，父进程环境finally恢复。实际model仅取native init，缺失/不符/完全无init均不能升级成功，旧认证及Codex路径不改。
+
+主控读取P原gate03日志40pass26.22s（原33+7必要回归）；first旧安装缺新符号1fail/14.63s、首39pass25.64s、随后模型绑定包装导致原mock方法期望37pass3fail25.34s均保留，最终只对新增API使用包装，旧guard直接callback保持，未删改原断言。官方2.1.238仅假凭据与临时user fixture证明user source可选bedrock/third_party而空source为oauth_token/firstParty；无model/API/MCP，本地标签不能冒称Anthropic订阅或真实额度，managed policy仍保留。
+
+原A task_432c0ffea86e/ctx_b141ba84f5dd同原终端/工作树/分支实际turn_started，仅自己的安装报告和全新private sibling state可写，精确12845 archive→fresh-wheel/非editable venv、原40一次及正式离线门禁，旧4428安装只读；P并行自身fresh安装。实际StepFun402未解除，不派I作者或创建新科研clock/UUID，不用fixture代签task_live/adoption，所有旧RED/unknown继续保留。
