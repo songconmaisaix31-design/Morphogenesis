@@ -14,6 +14,8 @@ from swarm.pheromone import PheromoneField
 
 StrategyVersion = Literal["v0", "v0.1"]
 _DECISION = TypeAdapter(dict[str, JsonValue])
+_LEGACY_SIGNAL_FIELDS = ("task_id", "concentration", "capability_match", "w_history", "urgency",
+                         "base_urgency", "age_weight", "score")
 
 
 class Router:
@@ -46,11 +48,23 @@ class Router:
         audit = _DECISION.validate_python(audit)
         if not record_audit:
             return {**audit, "routing_sequence": None, "audited": False}
+        details = audit["signals"]
+        if not isinstance(details, list):
+            raise ValueError("routing candidates must be a list")
+        legacy_signals: list[JsonValue] = []
+        for detail in details:
+            if not isinstance(detail, dict):
+                raise ValueError("routing candidate must be an object")
+            legacy_signals.append({key: detail[key] for key in _LEGACY_SIGNAL_FIELDS})
+        # FC 1.0 consumes signals verbatim and forbids added candidate fields.
+        # Keep its original shape; retain every new condition/factor in this
+        # same authoritative audit row, rather than losing strategy evidence.
+        persisted = {**audit, "signals": legacy_signals, "policy_candidates": details}
         # Reuse the authoritative audit row as the recommendation reference.
         # The same short transaction/connection prevents a concurrent writer's
         # row from being mistaken for this decision. No lease is acquired here.
         with self.field.ledger.transaction() as db:
-            self.field.ledger._event(db, None, "routing", audit)
+            self.field.ledger._event(db, None, "routing", persisted)
             sequence = int(db.execute("SELECT last_insert_rowid()").fetchone()[0])
         return {**audit, "routing_sequence": sequence, "audited": True}
 
