@@ -15,6 +15,8 @@ import math
 import os
 from pathlib import Path
 import re
+import sqlite3
+from threading import RLock
 from typing import Any, Literal
 
 from jsonschema import Draft202012Validator  # type: ignore[import-untyped]
@@ -113,6 +115,9 @@ class FCLogWriter:
         self._cursor = 0
         # Measured local diagnostic count since construction, NOT issue_audit.
         self.failure_count = 0
+        self._ledger_stopped = False
+        self._ledger_truncated = False
+        self._observe_lock = RLock()
 
     def _check_path(self) -> None:
         no_links(self.path)
@@ -177,33 +182,82 @@ class FCLogWriter:
         except Exception:
             pass
 
-    def observe_ledger(self, ledger: TaskLedger, worker_id: str) -> None:
+    def projection_status(self) -> dict[str, JsonValue]:
+        """Secret-free visibility only; available never proves execution coverage."""
+        from swarm.fc_projection import read_projection
+
+        view = read_projection(self.path)
+        reasons = list(view.reasons)
+        if self.failure_count:
+            reasons.append("write_or_read_failure")
+        if self._ledger_stopped:
+            reasons.append("ledger_projection_stopped")
+        if self._ledger_truncated:
+            reasons.append("ledger_window_incomplete")
+        return {"state": "incomplete" if reasons else view.state,
+                "scope": "fc_sidechannel", "failure_count": self.failure_count,
+                "ledger_cursor": self._cursor, "record_count": len(view.records),
+                "reasons": list(dict.fromkeys(reasons))}
+
+    def observe_ledger(self, ledger: TaskLedger, worker_id: str, *, limit: int = 1000) -> None:
         """Read exact persisted routing/claim facts, outside authority transactions.
 
         The in-memory cursor only avoids duplicate reads during this process.
         Restarts may repeat source sequences; consumers must not sum snapshots.
         """
-        try:
-            with connection(ledger.path, timeout=0.05) as db:
-                rows = db.execute(
-                    "SELECT a.*, t.worker_id AS attempt_worker FROM task_audit a LEFT JOIN task_attempts t "
-                    "ON t.swarm_id=a.swarm_id AND t.task_id=a.task_id AND t.token=json_extract(a.body,'$.token') "
-                    "WHERE a.swarm_id=? AND a.sequence>? ORDER BY a.sequence",
-                    (ledger.swarm_id, self._cursor),
-                ).fetchall()
-            for row in rows:
-                self._cursor = row["sequence"]
-                body = json.loads(row["body"])
-                if row["event"] == "routing" and body["worker_id"] == worker_id:
-                    candidates = [dict(signal, probability=probability) for signal, probability in
-                                  zip(body["signals"], body["probabilities"], strict=True)]
-                    self.emit("routing", task_id=body["selected"], at=row["at"], sequence=row["sequence"],
-                              routing=dict(worker_id=worker_id, selected=body["selected"], candidates=candidates,
-                                           filtered_task_ids=[item["task_id"] for item in body["filtered"]],
-                                           beta=body["beta"], exploration=body["exploration"]))
-                elif row["event"] in {"claimed", "released", "completed"} and row["attempt_worker"] == worker_id:
-                    self.emit("claim", task_id=row["task_id"], at=row["at"], sequence=row["sequence"],
-                              claim=dict(task_id=row["task_id"], worker_id=worker_id, token=body["token"],
-                                         outcome="submitted" if row["event"] == "completed" else row["event"]))
-        except Exception:
-            self.diagnostic()
+        with self._observe_lock:
+            if self._ledger_stopped:
+                return  # A failed fsync may already have written bytes. Never retry implicitly.
+            try:
+                rows, self._ledger_truncated = ledger_projection_rows(ledger, after=self._cursor, limit=limit)
+                for row in rows:
+                    fact = ledger_projection_fact(row, worker_id)
+                    if fact is not None:
+                        event, task_id, facts = fact
+                        if not self.emit(event, task_id=task_id, at=row["at"], sequence=row["sequence"],
+                                         duration_seconds=None, **facts):
+                            self._ledger_stopped = True
+                            return
+                    self._cursor = row["sequence"]
+            except Exception:
+                self._ledger_stopped = True
+                self.diagnostic()
+
+
+def ledger_projection_rows(ledger: TaskLedger, *, after: int = 0,
+                           limit: int = 1000) -> tuple[list[sqlite3.Row], bool]:
+    """One bounded readonly snapshot; never initialize, expire or mutate a ledger."""
+    if not 1 <= limit <= 10000:
+        raise ValueError("fc_projection_limit_out_of_range")
+    no_links(ledger.path)
+    db = sqlite3.connect(ledger.path.resolve().as_uri() + "?mode=ro", uri=True, timeout=0.05)
+    try:
+        db.row_factory = sqlite3.Row
+        db.execute("PRAGMA query_only=ON")
+        db.execute("BEGIN")
+        rows = db.execute(
+            "SELECT a.*, t.worker_id AS attempt_worker FROM task_audit a LEFT JOIN task_attempts t "
+            "ON t.swarm_id=a.swarm_id AND t.task_id=a.task_id AND t.token=json_extract(a.body,'$.token') "
+            "WHERE a.swarm_id=? AND a.sequence>? ORDER BY a.sequence LIMIT ?",
+            (ledger.swarm_id, after, limit + 1),
+        ).fetchall()
+        return rows[:limit], len(rows) > limit
+    finally:
+        db.close()
+
+
+def ledger_projection_fact(row: sqlite3.Row, worker_id: str) -> tuple[EventKind, str | None, dict[str, object]] | None:
+    """Project only fields actually persisted by the original ledger."""
+    body = json.loads(row["body"])
+    if row["event"] == "routing" and body["worker_id"] == worker_id:
+        candidates = [dict(signal, probability=probability) for signal, probability in
+                      zip(body["signals"], body["probabilities"], strict=True)]
+        return "routing", body["selected"], {"routing": dict(
+            worker_id=worker_id, selected=body["selected"], candidates=candidates,
+            filtered_task_ids=[item["task_id"] for item in body["filtered"]],
+            beta=body["beta"], exploration=body["exploration"])}
+    if row["event"] in {"claimed", "released", "completed"} and row["attempt_worker"] == worker_id:
+        return "claim", row["task_id"], {"claim": dict(
+            task_id=row["task_id"], worker_id=worker_id, token=body["token"],
+            outcome="submitted" if row["event"] == "completed" else row["event"])}
+    return None
