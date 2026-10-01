@@ -30,6 +30,9 @@ def test_registered_case_same_executor_and_durable_recalculation(tmp_path, case_
     assert backend.create_calls == 1 and backend.session.destroyed and backend.session.closed
     assert result.provenance == "mock" and result.usage is result.cost_usd is None
     assert read_result(tmp_path / "archive", context().run_id, expected_plan=plan, expected_context=context()) == result
+    with pytest.raises(FileExistsError):
+        ExperimentExecutor(backend).execute(plan, context(), tmp_path / "archive")
+    assert backend.create_calls == 1
     record = Path(result.archive_path) / "result.json"
     forged = json.loads(record.read_bytes())
     forged["scientific"]["metrics"] = {"forged": 999}
@@ -106,7 +109,8 @@ def test_other_code_or_data_rejected_even_with_matching_plan_digest(tmp_path, ca
 
 
 @pytest.mark.parametrize("mode,state", [("failed", "failed"), ("timeout", "timeout"),
-    ("unknown", "unknown"), ("missing", "missing_artifact"), ("transport_timeout", "unknown")])
+    ("unknown", "unknown"), ("missing", "missing_artifact"), ("transport_timeout", "unknown"),
+    ("create_unknown", "unknown")])
 def test_second_case_preserves_execution_failure_semantics(tmp_path, mode, state):
     plan = get_case(IDS[1]).build_plan()
     backend = LocalContractBackend(tmp_path / "work", mode)
@@ -115,6 +119,29 @@ def test_second_case_preserves_execution_failure_semantics(tmp_path, mode, state
     assert result.scientific.criteria_version == IDS[1] and backend.create_calls == 1
     assert read_result(tmp_path / "archive", context().run_id).scientific.verdict == "not_evaluated"
     assert result.cost_usd is result.usage is None
+
+
+@pytest.mark.parametrize("case_id", IDS)
+def test_registered_case_cleanup_unknown_remains_unknown_after_readback(tmp_path, case_id):
+    plan = get_case(case_id).build_plan()
+    backend = LocalContractBackend(tmp_path / "work", "cleanup_unknown")
+    result = ExperimentExecutor(backend).execute(plan, context(), tmp_path / "archive")
+    assert result.scientific.verdict == "passed"
+    assert result.cleanup_state == result.remote_effect == "unknown"
+    assert backend.create_calls == 1 and backend.session.closed
+    assert read_result(tmp_path / "archive", context().run_id, expected_plan=plan) == result
+    with pytest.raises(FileExistsError):
+        ExperimentExecutor(backend).execute(plan, context(), tmp_path / "archive")
+    assert backend.create_calls == 1
+
+
+@pytest.mark.parametrize("case_id", IDS)
+def test_registered_case_missing_volume_capability_never_creates(tmp_path, case_id):
+    plan = get_case(case_id).build_plan().model_copy(update={"persistent_volume": "not-provisioned"})
+    backend = LocalContractBackend(tmp_path / "work")
+    result = ExperimentExecutor(backend).execute(plan, context(), tmp_path / "archive")
+    assert result.execution_state == "unsupported" and result.scientific.verdict == "not_evaluated"
+    assert result.scientific.criteria_version == case_id and backend.create_calls == 0
 
 
 @pytest.mark.parametrize("mutation", ["bool", "nonfinite", "missing", "residual", "slope", "intercept", "sse", "summary"])
