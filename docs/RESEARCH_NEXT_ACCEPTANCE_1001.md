@@ -137,3 +137,15 @@ A原Owner task_a4ce04726749/ctx_6b8aed6cdba5实际ready/turn_started，仅自身
 原I同终端/工作树/分支接续窄准入核查：仅自己的集成报告和新私人诊断state有写权，采用A最终4428独立安装只读，核对真实产品selected-profile状态和冻结证据；不重复已通过33测试、安装、全量CI或作者实验。所有旧case只读，服务器保持停止，真实OAuth未就绪不得新建科研clock/UUID。已再次向用户给出同正式settings的官方Claude.ai浏览器登录操作；不要求重复开发授权、不自动登录/换账号/复制secret。后续只有真实ready通过，才明确释放全新独立案例完成三角色与一次成果继承，再运行原byte39948完整checker。
 
 04:53 UTC结算：I新task_ba5433b9ed27/ctx_6c5a74c3bc3e初始turn_start_unobserved保留；正面屏幕composer证明输入待提交，仅补一次Enter后实际Working/live，未重复派发。最终报告38f31381baaa4493e7a73bc6cf3c3a33a4ed4dca已push，主控实际remote exact/clean、只增自身报告30行，业务diff0/checker39948不变。主控读取I新私人selected-readiness-safe.json：实际安装4428产品helper同正式plan/env/cwd，唯一version及status分别exit0/exact2.1.238与exit1/loggedInfalse/none/firstParty/apiKeySource缺失/readyfalse；未调用普通probe、模型、新科学UUID或实验。首次observer跨导入的parent_environment_not_restored保留；另份离线environment-only-safe.json证明导入仅改KMP_DUPLICATE_LIB_OK/KMP_INIT_AT_FORK，认证context前后全环境及两gateway键恢复true，后续无第二次auth请求。原完整任务仍因官方用户登录未完成，I合法worker_done failed/msg_505c6985b406后主控retain user_requested/processAction=none再ack，reclaimable total0。无新的业务缺陷证据，不额外派发外围开发；下一阶段仍只准入→新冻结三角色闭环→原完整checker，后续扩容/抽离由用户另行决定。
+
+## 06:04 UTC用户授权StepFun API接续，认证有效而真实调用额度不足
+
+用户明确要求computer-use复用本机Chrome登录。主控读取版本匹配computer-use指南，发现现有Chrome pid18496/window133414；启动官方2.1.238同产品认证settings的auth login --claudeai（仅此子进程屏蔽旧gateway/ORCA键），浏览器实际进入该现有Chrome。第一次Continue with Google操作返回stale element，未重发；刷新后官方授权页明确显示Claude Code需要Max/Pro，不能将网页会话当CLI已授权。05:57:53Z同正式配置auth status仍exit1/loggedInfalse/none/firstParty/apiKeySource缺失。后续Claude标签选择/读取工具在用户主动中断时可能部分执行，不冒称成功；不再改浏览器会话。
+
+随后用户提供API凭据并明确“这是stepfun的api，自己试试”，当前授权取代Claude订阅登录等待。主控仅把用户新提供的secret放入Git/model workspace外的本机专用Temp目录，关闭ACL继承，只有当前Windows用户一条FullControl规则；未复制任何既有凭据、未把值写入Git/报告/Worker任务/模型参数、未改全局环境或设置。原唯一自有OAuth login PTY26548收到Ctrl+C后实际exit1；未停止其它Agent/终端或浏览器。
+
+官方第一方资料 https://github.com/stepfun-ai/Step-3.5-Flash/blob/main/README.zh-CN.md 的7.2节说明Claude Code直连：ANTHROPIC_AUTH_TOKEN、国际base_url=https://api.stepfun.ai/、model=step-3.5-flash。本轮不改用户全局settings，交原P实现产品子进程明确定义的凭据/端点/模型配置，复用native Claude CLI，实际供应商/模型如实标为StepFun。固定核心/科学标准/原检查器/权限/预算不变，不扩Agent兼容范围。
+
+私有安全结果位于专用Temp目录，不含secret/header/raw错误消息。06:03:35Z国内官方GET /v1/models首次401保留；06:03:58Z国际官方GET https://api.stepfun.ai/v1/models实际200（模型目录含step-3.5-flash、step-3.5-flash-2603、step-3.7-flash），仅证实密钥认证与目录，不是native/task就绪。06:04:45Z唯一极小Anthropic接口POST https://api.stepfun.ai/v1/messages（step-3.5-flash、max_tokens32、无工具/科学输入）实际402，安全错误归类insufficient_quota，未自动重放。模型turn尝试1、实际usage未知/费用null，不把HTTP拒绝改成科学完成或零花费。用户已获实际额度问题说明，未自动充值/购买。
+
+原P在自身产品业务/测试/报告路径内完成必要API凭据正式配置及离线回归，真实secret只由正式产品live子进程使用；P开发/fixture不读取真实key、不调用API。新产品冻结和独立安装通过后，实际可用额度仍是三角色科研前置。旧案例clock/RED/unknown全部保留，服务器仍停止，不预先新建科研窗口。原完整任务尚未完成；扩容、案例抽离、EvoMap协议继续后置。
