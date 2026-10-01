@@ -91,3 +91,11 @@ P最终报告c64e2b88696ef26453cc441903afa5a7e7536c20已remote exact/clean、较
 I msg_5e9b5b08d0d6/msg_050da66fc5cc确认不重复已通过30/SDK/入口门禁，只读核对A原结果，采用A固定安装artifact只读（Astate/venv/Scripts/morph-research.exe），所有后续科研project/profile/state/账本/归档仍I独占，A环境与报告不修改，observer不补关键启动参数。I仍原独立集成Owner，源码/core/checker不变。
 
 主控msg_66f86288a8ee释放唯一全新research-formal-1001-03进行冻结c25/coreCBC原完整三角色验收：先确认新路径不存在，再正式CLI创建新隔离clock；新case3UUID/两品牌、真实owned interruption实验前/真实TTL同UUIDresume/原合法stale拒绝，每role900s/64tools、runtime3600/attempts3/每task ONE真实sandbox，完整独立复现→文件验证批准应用→第三fresh local再验证→真实inheritance/child批准应用→原消费与adoption，完成后byte-unchanged原完整checker。原权限、模型身份及selectedOAuth保持，仅已审精确通知分类；未知native错误/非11调用/真正未知科研外部效果停止依赖，不自动重试。新case是冻结修复后的明确独立验收，不接续/恢复/重放02请求或引用其任何结果，02已有真实模型响应、旧unknown/null/原checkerRED与01所有clock/raw一律保留。当前case03完整task_live未通过；NIST抽离/第二任务/更多Agent/EvoMap/Hub/main/tag继续后置或未授权发布。
+
+## 03:29 UTC case03元数据刷新失败，原Owner只读诊断
+
+I正式c25入口case03 init产生base d38239b31c7c6f18bc9a3d7490b22106c5c3bc42与新clock，初始剩余3586.397688s。03:20:13 UTC首interrupt exit1/native12.6056163s，真实UUID01a0f57a-2412-7dd1-9392-685f15a75fd3。原stderr两次models_manager refresh request timed out；原JSONL仅thread.started及两个item.error：priority未被gpt-6.1-sol元数据声明、model metadata缺失而fallback。没有turn/reply/tool/claim/renew/实验，实际interruption=false；这些不是获准的精确Code Mode通知，产品正确停止。原native state/remotefx unknown与usage/cost null不改成零或无远端效果。
+
+主控实际读取原完整checker日志与exit1（line101缺resume-observation.json），并核对I报告06ee5e4beec2fb92d88fdc0e172ce3dc7de12fed remote exact/clean、较CBC只有文档、原checker blob39948d9615bce07b40b96eeaf5dfb263b993c6d3不变。resume/peer/child/科学判定/adoption未执行，原三角色任务尚未完成。case01/02/03所有失败与clock保留，不以工程绿或作者检查替代完整验收。
+
+原D task_6380bf533d6d/ctx_8407b4465f3a同terminal/worktree/branch接续，仅原两授权文档及新私人诊断state；startup unobserved保留，正面读取composer后只补Enter一次，随后实际Working。核对官方固定687a119元数据刷新/cache/auth/provider/tier机制、有界无凭据DNS/TCP/TLS检查及Orca已选账户与默认目录关系；不自动换模型、改全局账号/HOME/网络或扩大错误豁免。D当前cache0.158与native0.159不匹配、缺目标model是当前事实，不能冒充case03历史cache证据。I补实际launch/probe与当前安全键存在性，仅只读配合；主控精确reply msg_a8d2b80b01fa解除原ask msg_499e50aba770，保持原Task等待具体修复/处置，不另开科研UUID或重放未知效果。sole owned8097暂留短期诊断，无额外API/smoke。NIST抽离/第二任务/更多Agent运行时仍须原完整闭环之后，EvoMap协议继续后置。
