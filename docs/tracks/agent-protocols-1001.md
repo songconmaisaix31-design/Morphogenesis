@@ -84,3 +84,17 @@ ORCA当前host选中managed id2a305740-3098-46da-a63f-2d9e42ae9d72，实际供�
 准确外部步骤已交root `msg_4fa48999b5b9` / P `msg_397d917865a8`：官方auth login --claudeai（同formal settings与child env/default目录），后同设置auth status --json；已装login --help确认claudeai/console含义，**仅help，本D不login**。新private sibling `claude-auth-diagnostic-2026-10-01T03-47-34-719Z`仅probe/formal安全字段/exit/wall和provenance，无凭据/wholeJSON/config/env、原件不改；无额外真实status/模型/沙箱/新UUID。Git仅两docs，commitpush/remoteexactclean在最终Handoff回传；科研闭环/有效用户登录/live及后续NIST抽离/第二任务/更多Agent/EvoMap不冒签。
 
 验证：当前case04引用5/5官方文件HTTP200/行界有效，安全实际probe→formal差异及apiKeySource缺失原件断言通过，ownership仅两docs、git diff --check通过；不运行原checker或工程测试。根主控 `msg_20770b312aaa` 直接读formal.json接受真实缺登录及方法来源，已请求用户自行浏览器OAuth，不假定完成；明确D停止新增探测、同Task两docs交付，不等待人工登录。来源检索GitHub tree一次timeout后复用固定raw文件；猜测runtime-auth-service-*三个路径404后沿真实imports定位runtime-auth/，不把不存在文件写成来源。
+
+## Case05 Codex Warning 导致产品取消的窄诊断
+
+同Owner/terminal/worktree/branch，基线clean `6dd0eb4d05590d464eff74cfa1cd6e010e88f852`，只两docs与自身新private sibling；已读AGENTS/现行一页计划，不增Agent/Run/43族盘点。[矩阵case05](../agents/ORCA_PROTOCOL_MATRIX_1001.md#case05-codex-领取前退出已知-warning-分类与取消链) 列真实安装触发行、固定官方source与P候选。
+
+冻结productsource e7ecd695/report b35a3c、coreCBC、原checker39948不改/不重gate。原05 UUID01a0f652-4072-79b1-90f8-bf59957a8a8d/11.09431s/0tools、reason cancelled而非timeout、native_errors2/warnings0，author available/token0/attempt0/无实验/actualinterruptfalse，保留unknown/remoteeffectunknown/tokenscostnull和所有raw。真实Ainstalled guard.py71–80第一priority通知设stop，runner202–204 stop_requested传CBC process253–265→owned cancel；guard/runner与P当前repo逐字节相等，不把退出1当官方fatal自行退出。
+
+固定Codex0.159/687a119/Apache2的两文本来源均WarningEvent；exec.collect_warning丢severity输出item.completed/ErrorItem并Running，真实Error/turn.failed仍分别顶层fatal/terminalfailed。fallback构造复制原model slug不reroute，priority可能由官方omit请求字段，不改global配置不能等于请求始终priority。旧timeout底层原因UNKNOWN，未做任何auth/API/metadata探测或实际key读取。
+
+先交root `msg_aee81225a027` / 仅当前I ctx_6c355b373448 `msg_a67b7d8222d3`；真实installed parser/guard离线9/9 root `msg_6a33dd36d772`，结果 `case05-cancellation-diagnostic-2026-10-01T07-21-10-477Z/offline-result.json`，脚本同目录。原三行误分/停止与hostnotice、topfatal/turnfailed同文案/未知item/错context/重复/禁shell全部行为断言通过；这是diagnosis contract_local，不是P实现或live。没有core副本/新dispatcher/proof，-B导入避免改冻结安装，原I state只读。
+
+root `msg_09ba112e308d` 明确允许官方fallback继续、不新增strict metadata readiness；已ACK，并交当前P ctx_db42387e7670 `msg_9805d74c4f9a`，再按其 `msg_41b2e16f3945` 补manager/model_info原slug确切行。P最小分类限定version/direct11/thread-pre-turn/exact原model-tier消息、每种一次且host可并存；未知/重复/fatal/认证执行网络错误仍stop，完整警告raw保留；不改科学断言/预算/timeout/模型/provider/HOME。旧case03规则的后续政策变化不改历史RED，修复后真实科学新验收仍由root/P/I决定，D不启动任何新case/UUID/科学/认证/沙箱。
+
+fallback专项来源已交P `msg_9514ffda8eb8`；验证8/8引用行界有效、6个固定官方文件HTTP200、离线9/9及case05原unknown/null/actualinterruptfalse只读不变核对通过。仅源码/原件/离线分类，未运行原完整checker/CI/42安装gate；两docs diff/cached、commitpush/remoteexactclean在最终Handoff回传。原科研仍未通过，unknown保持unknown，国际402和中国200不得冒充三角色成功；NIST/第二任务/更多Agent/EvoMap顺序保留。
