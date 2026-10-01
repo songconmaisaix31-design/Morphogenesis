@@ -81,3 +81,49 @@ D补证8acb7d3f3c7a3dcea85c20c2494f74c1377cd437已remote exact/clean、较450只
 主控msg_928314f115d7/msg_ba1eb538f9c8批准唯一精确兼容：固定版本已验证、已审own研究MCP DirectModelOnly+required11/per11/defaultprompt/readonly/never/禁host正式plan，在thread.started后首turn.started前一次、精确完整官方host-disabled item.completed/error才作为native_warning单列并保留raw。未知/改字/其它时序/重复通知、顶层fatal即使同文字、turn.failed与真正非11调用仍停止；memory_tool弃用alias移除但memoriesfalse保留，不豁免其它弃用。合法stale renew/submit科研工具业务拒绝按原合同观察，不一概升级nativefatal。无host执行、模型替换、目录隐藏、原checker或白名单放宽。
 
 P源码c25aa100ec6e10d8edc691f5c3154cebab365c86已push/remote exact/clean，主控读取guard/runner/permissions改动：原24+6必要回归30pass31.90s，依赖锁/coreCBC不变，新增warning/raw/count及native_error/count防伪中断和后继成功。原599 guard对02 error,error的原红仍保留。P自己的freshinstalled入口/报告继续原Owner完成；I已获msg_abe2db2d2970授权并行准确c25不可变archive/wheel/copyenv适用独立30/正式入口验证，无核心重跑。当前没有新科研case/clock/UUID/model/API释放，真实11可达性、Claude兼容及原完整三角色仍NOT_RUN/RED；下一实际运行只能在精确冻结独立门禁完成后由主控明确处置，旧case与unknown一概只读保留。
+
+## 03:20 UTC产品交付、独立门禁完成与新case03释放
+
+P最终报告c64e2b88696ef26453cc441903afa5a7e7536c20已remote exact/clean、较源码c25只自身track文档，src/tests树一致。主控读取原30pass31.90s及新88runtime installed7正式命令全exit0，P正常succeeded后retain。同一冻结依赖不变；I首次下载真实timeout exit1/205.232s保留，主控允许复用I自己同锁官方缓存，不改全局index/网络、不复制其它env。I长等待期间原Task未结算，主控仅对精确自有I terminal中断当前协调长等待、提交同Task恢复提示；没有worker-stop/revoke、科学调用重放或停止其它终端。I原ctx_c6bb0ebb6ad6实际heartbeatalive恢复，压缩上下文后自有缓存offline续装12.889s/exit0。原失败、partial env/cache保留。
+
+为减少单点等待，原A安装Owner task_16936c7acdbb/ctx_22e488c4a387同Agent/terminal/worktree/branch仅自身报告+新独立state并行验证；初startup unobserved与正面composer旧input保留，补Enter一次后实际Working/薄Handoff，没有重复派发。同c25/coreCBC archive→wheel→freshCPython3.13.13 copyenv95冻结分发包，原30首次30pass30.06s、全部正式version/setup/doctor/offlineinit/双inspect/observe passed、13产品Git/archive/wheel/site byte一致+两CBC输入nlink1/原7SDK锁一致。主控实际读取原logs/provenance；A报告eabc4583f52963ee380a0857ba3ca934e348329e已remote exact/clean、较776只自身安装报告，正常succeeded/retain。A未调用模型/科研/API，仍installed prepared。
+
+I msg_5e9b5b08d0d6/msg_050da66fc5cc确认不重复已通过30/SDK/入口门禁，只读核对A原结果，采用A固定安装artifact只读（Astate/venv/Scripts/morph-research.exe），所有后续科研project/profile/state/账本/归档仍I独占，A环境与报告不修改，observer不补关键启动参数。I仍原独立集成Owner，源码/core/checker不变。
+
+主控msg_66f86288a8ee释放唯一全新research-formal-1001-03进行冻结c25/coreCBC原完整三角色验收：先确认新路径不存在，再正式CLI创建新隔离clock；新case3UUID/两品牌、真实owned interruption实验前/真实TTL同UUIDresume/原合法stale拒绝，每role900s/64tools、runtime3600/attempts3/每task ONE真实sandbox，完整独立复现→文件验证批准应用→第三fresh local再验证→真实inheritance/child批准应用→原消费与adoption，完成后byte-unchanged原完整checker。原权限、模型身份及selectedOAuth保持，仅已审精确通知分类；未知native错误/非11调用/真正未知科研外部效果停止依赖，不自动重试。新case是冻结修复后的明确独立验收，不接续/恢复/重放02请求或引用其任何结果，02已有真实模型响应、旧unknown/null/原checkerRED与01所有clock/raw一律保留。当前case03完整task_live未通过；NIST抽离/第二任务/更多Agent/EvoMap/Hub/main/tag继续后置或未授权发布。
+
+## 03:29 UTC case03元数据刷新失败，原Owner只读诊断
+
+I正式c25入口case03 init产生base d38239b31c7c6f18bc9a3d7490b22106c5c3bc42与新clock，初始剩余3586.397688s。03:20:13 UTC首interrupt exit1/native12.6056163s，真实UUID01a0f57a-2412-7dd1-9392-685f15a75fd3。原stderr两次models_manager refresh request timed out；原JSONL仅thread.started及两个item.error：priority未被gpt-6.1-sol元数据声明、model metadata缺失而fallback。没有turn/reply/tool/claim/renew/实验，实际interruption=false；这些不是获准的精确Code Mode通知，产品正确停止。原native state/remotefx unknown与usage/cost null不改成零或无远端效果。
+
+主控实际读取原完整checker日志与exit1（line101缺resume-observation.json），并核对I报告06ee5e4beec2fb92d88fdc0e172ce3dc7de12fed remote exact/clean、较CBC只有文档、原checker blob39948d9615bce07b40b96eeaf5dfb263b993c6d3不变。resume/peer/child/科学判定/adoption未执行，原三角色任务尚未完成。case01/02/03所有失败与clock保留，不以工程绿或作者检查替代完整验收。
+
+原D task_6380bf533d6d/ctx_8407b4465f3a同terminal/worktree/branch接续，仅原两授权文档及新私人诊断state；startup unobserved保留，正面读取composer后只补Enter一次，随后实际Working。核对官方固定687a119元数据刷新/cache/auth/provider/tier机制、有界无凭据DNS/TCP/TLS检查及Orca已选账户与默认目录关系；不自动换模型、改全局账号/HOME/网络或扩大错误豁免。D当前cache0.158与native0.159不匹配、缺目标model是当前事实，不能冒充case03历史cache证据。I补实际launch/probe与当前安全键存在性，仅只读配合；主控精确reply msg_a8d2b80b01fa解除原ask msg_499e50aba770，保持原Task等待具体修复/处置，不另开科研UUID或重放未知效果。sole owned8097暂留短期诊断，无额外API/smoke。NIST抽离/第二任务/更多Agent运行时仍须原完整闭环之后，EvoMap协议继续后置。
+
+## 03:38 UTC同身份官方metadata检查通过与新case04明确释放
+
+msg_883d378dd578在用户全部授权内批准D使用官方0.159非bundled debug models作一次有界元数据检查，允许官方正常cache写入及既有auth的官方内存使用/必要正常刷新；无科学turn/UUID，不改config/HOME/provider/model/tier、不复制凭据或记录header。只有默认失败才可一次进程级官方respect_system_proxy对照（msg_96aabbb0c304），默认成功故未执行，也未自制认证GET或目录cachepatch。
+
+D实际03:36:26.927Z同原formal03 cwd/default C:/Users/DW/.codex执行官方检查，2.774s exit0/stderr空，目标gpt-6.1-sol存在、tool_mode=code_mode_only、service_tiers包含priority；官方cache刷新至0.159。主控直接读取私人default.json核对。当前Orca account CLI公开摘要与default的provider/workspace身份在内存比较相等，但两路径不同且不代替03历史环境快照。官方元数据当前prepared通过，不能证明原03超时底层原因或科研完成；原unknown/null与checkerRED不回写。没有已证明需更改的产品业务问题，不换模型/删tier/放宽警告或新增外围健康框架。
+
+主控msg_9316444471c9于03:38:14Z明确释放唯一全新research-formal-1001-04，仍只读使用A冻结安装c25/coreCBC，产品正式入口拥有全部启动参数/权限/角色，所有新case写入I自有state。I不把D诊断命令变成测试预热或关键参数补丁；原生CLI按官方正常机制刷新/读取元数据。先验证新路径不存在，正式init新clock；本case三UUID/两品牌、原真实owned中断/TTL同UUID恢复/两stale拒绝、900s/64tools/3600runtime/3attempts/每task唯一真实实验、完整文件验证批准应用/第三fresh验证/继承消费adoption及原byte39948完整checker均不变。04是当前真实支持已验证的明确独立验收，不恢复/重放/消费01–03，不重置旧clock。真正未知效果、其它nativeerror或越界立即停止报root，不自动重试。source/安装门禁不重跑；完整PASS前NIST/第二任务/更多Agent仍后置，EvoMap协议不开发。
+
+## 03:49 UTC case04作者科学通过、Claude认证首红与并行产品返修
+
+新case04正式init base3ba73e9bbb2586acd2775c68c1b977443f68e041，authorUUID01a0f58b-5e5c-7201-89be-f32784a09207。主控直接读取interrupt-observation：25.9048275s/5tools/interruption_observed=true、claimed token1/renewed、无越界/nativeerror，取消后的unknown/null保留。真实TTL到期后同UUID resume观察旧token1 renew/submit两合法拒绝，随后fresh claim token2/renew2，唯一实验03748c9c347b4b2394f50bd5f31864f0；作者resume115.148s/15tools完成可信证据任务，累计141.053s/20tools，候选未批准/quarantined。I按原可信read_result和Fraction1001/mean50000001/5/variance1/100及所有既定阈值只读验证通过；实验effect=known/cleanup=destroyed，resource_enforcement=unknown、费用null，与native generic remote_effect=unknown分开，不假装完整闭环通过。
+
+Claude replication唯一新UUID40438687-3d24-437d-893a-c5c3a51ed848正式OAuth profile首次native4.0539779s exit1/statefailed：原MCP恰11工具connected/dontAsk/modelclaude-sonnet4-6/apiKeySourcenone，实际authentication_failed/Not logged in。工具0、未claim/attempt/renew/实验；原syntheticusage/cost0及duration_api_ms0保留但NativeOutcome remotefxunknown/usagecostnull不改成零。第三角色/inheritance/批准应用/adoption停止。主控实际读取原完整checker04 log/exit1（缺inheritance-observation.json），读取peer observation并核对I证据a3dcc85eb9ce41c25abb0e78ec0453e27ac435fa remoteexactclean/较CBC仅docs/checker39948不变；作者检查不能替代原完整checkerRED。
+
+I验证实际installed原probe解析JSON.loggedIn为true，但只临时pop两gateway env；正式plan还传--setting-sources user/--settings env两键空值，有效认证配置不同，普通probe不能证明selected OAuth可用。原D同Owner新task_e470acdd70c9/ctx_defc5fffdd94实际turn_started，仅两原docs+私有state，核对Orca当前Claude账户/home供给与默认目录、官方同配置authstatus语法/来源；明确授权有界官方只读status与已有凭据正常内存访问/refresh，不login/复制secret/科学UUID。原P task_6daf17d3b929/ctx_c27b10cbf84b独占产品业务接续准入返修；startup unobserved保留，正面composer后只补Enter一次，随后实际Working。
+
+主控msg_e81e8ab5caa0批准P最小设计：保留core普通probe为unscoped证据，新增同正式plan认证argv/env/cwd的官方selected-profile preflight，按D实证OAuth方法/来源判定；unknown/缺字段/非法JSON/timeout未登录failclosed，拒绝在native/session/MCP/sandbox-key读取前。离线doctor/inspect与依赖拒绝仍无auth，父环境恢复、所有原权限/科学断言/coreCBC/locks不变，仅必要产品认证回归。P不等新login才修false-positive，D不写业务；若存在既有有效OrcaOAuth只能正式产品接入，不允许I脚本补关键home。若确无可用OAuth，准确报告需官方用户登录。case04及旧01–03不重放/重置/消费，当前完整原任务未完成，NIST/第二任务/更多Agent继续后置。D上一metadata文档b581825e4556aadbdcb8bdd5bb50f40f6bf42ae5已主控核对remoteexactclean/仅两docs并正常settle-retain，I已普通精确合并；无代签live。
+
+## 04:09 UTC认证契约修复、独立安装完成，完整任务仍受外部登录阻塞
+
+D实际官方2.1.238同formal cwd/有效设置：ordinary status1189ms exit0/loggedIntrue/authMethod oauth_token；formal rootsettings status557ms exit1/loggedInfalse/authMethod none，apiKeySource缺失保留。Orca Claude accounts=[]/activeIdnull，当前没有选中已登录Claude供给目录；主控直接读取私人formal.json验证。官方内嵌源码说明oauth_token不能证明subscription（gateway token可产生同值），真正受支持成功判定为claude.ai/firstParty且无任何显式APIkey source。D来源报告6dd0eb4d05590d464eff74cfa1cd6e010e88f852已主控remoteexactclean/仅两docs核对，正常settle-retain。官方auth login --help确认--claudeai订阅选项；主控已异步请求用户完成同设置的官方浏览器登录，尚无完成回复，不将 elapsed time 或代码fixture当登录批准/成功。
+
+P SOURCE4428fdadfb0a5dfe8adc9e04c7fd881784f2807e，报告d75bed7d4585797e47a5894ae7fd85f25f71bba6，原分支remoteexactclean。主控读取auth.py/runner.py最小差异：同正式plan认证argv/env/cwd官方status、version/command匹配、成功源严格判定，普通probe与selected检查分开，拒绝先于sandbox-key/MCP/native，旧归档不覆盖，unknown/missing/timeout failclosed。permissions/guard/coreCBC及所有锁不变。首必要回归RED1test/17.85s保留，完整原30+3必要回归33pass19.55s；P fresh不可编辑88runtime安装、7正式入口全exit0与mock认证拒绝通过。主控核对source/report仅自身doc差异、src/tests树相等，并实际读取7项原exit0/provenance；没有真实P auth/model调用，成功OAuth仍fixture。
+
+A原Owner task_a4ce04726749/ctx_6b8aed6cdba5实际ready/turn_started，仅自身报告与全新private state。独立精确4428 Git archive→wheel→freshCPython3.13.13 copy env95冻结分发包，原33一次首次exit0/33pass25.60s；主控实际读取原log和source/install JSON，13产品Git/archive/wheel/site bytes相等、2科研输入与CBC相等且nlink1，core非editable direct_url精确CBC、原UV/7Node锁/version/integrity/licenses一致及真实SDK正负门禁通过。正式version/setup-assets/doctor/pending offline init/双inspect/只读observe通过；pending selection拒绝与fixture依赖拒绝/selectedFalse拒绝明确区分。未借旧env/node_modules/artifacts、未读实际认证或调用科学API。报告7576bb6b8b752021c0ec736bc8f1a0b5e2f28cd9已主控remoteexactclean/仅自身doc核对，正常settle-retain；I已普通精确合并，准备只读采用其installed artifact，所有科研写入仍I独占。
+
+当前所有可行的工程与安装工作已完成，但原完整三角色任务没有完成：最近case04原checker仍exit1，作者passed/known/destroyed/quarantined与peer failed/unknown/null、全部历史clock/raw/RED保留。新产品4428的真实三角色尚NOT_RUN；用户完成官方OAuth后还需同设置真实status验证和主控明确新案例放行，不能混换04 source或重放旧调用、用作者阶段代替完整checker。资源收尾仅I正面核对本任务sole owned8097服务后停止，保留所有state/账本/secret/其它终端，不管理其它容器。NIST抽离/第二类任务/41待扩Agent运行时尚未放行；EvoMap协议继续后置，未main/tag/Hub发布。I最终集成报告记录精确分支SHA、收尾实际结果与外部登录阻塞，不能以工程stage交付代签完整目标。

@@ -2,6 +2,8 @@
 
 事实源为本轮用户任务及 docs/source/README_包内说明.md；用户最新指令将 EvoMap 协议开发推迟。原冻结交付 c45888f64c1cec60e5f9df45677b6547c4527cac，业务代码 bde3412d2257fd1581ce1d7f88b254fb0c13a269。主控只分发、决策、读取证据和独立校验，不写业务代码。
 
+当前冻结核心CBC（cbc4dede782eb79b9c007520d96d7958857da0af）及产品4428fdadfb0a5dfe8adc9e04c7fd881784f2807e的工程/独立安装门禁通过。case04作者科学通过但Claude正式OAuth未登录、无Orca已选Claude账户；原完整checker仍RED，产品新冻结三角色尚NOT_RUN。只等待官方用户登录及准确新案例处置；不得提前放行阶段4或冒称原任务完成。详情见本轮验收记录。
+
 ## 原始任务与顺序
 
 1. 继续复用 ORCA 各 Agent 接入的全部接口；盘点固定上游源码、版本和许可证，按真实支持情况逐项映射，不搬入桌面基础设施。
@@ -25,6 +27,6 @@
 
 - 先启动A/D/B/P独立波；源码互斥、各自环境和sibling state，轻量专项可并行，BLAS进程局部1。全量工程验证及同一真实科研案例由I独占；所有跨轨修改走Handoff。
 - 所有轨道先小型接口Handoff，再开发/测试/文档/返修持续同Owner，阶段commit+push。未知用量/费用保持null，未知远端效果不重试，secret及运行state不入库。
-- 上一轮Claude实测401，当前继承DeepSeek gateway并另有官方OAuth登录；用户认证身份选择尚待回答，不擅自换账号/provider/model。已有案例runtime3600/attempts3已到期，保存原红和账本；新的正式验收窗口使用明确新案例命名并保留原历史，不能重置旧案例来冒充通过。原角色、科学阈值、中断/同UUID恢复/真实TTL/合法陈旧提交拒绝及完整checker标准全部保留。
+- 上一轮Claude实测DeepSeek gateway401；本轮用户全部授权下已明确选择正式产品Claude OAuth profile（治理3c859ff阶段），仅产品子进程屏蔽旧gateway两键并恢复，不修改全局账号/HOME/current model、不复制凭据，旧401保留。Codex继承既有选中身份及模型。已有案例到期或入口失败的原红和账本保留；新的正式验收窗口须明确新案例命名，不能重置旧案例来冒充通过。原角色、科学阈值、中断/同UUID恢复/真实TTL/合法陈旧提交拒绝及完整checker标准全部保留。
 - 新仓库使用Python/Pydantic及既有官方依赖，固定核心依赖提交，private远端；保留根仓docs/SWARM_SOL_PLAN.md WIP。无main/tag/Hub发布、批量删除或全局配置/认证修改。
 - 只有原完整checker及适用核心/产品门禁真实通过才放行C抽象和D新增运行时；没有真实账号的接口明确NOT_RUN，不以几十个外围测试替代科研闭环。
