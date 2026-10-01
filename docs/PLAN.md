@@ -1,5 +1,7 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+2026-10-01用户新授权：[下一轮一页计划](RESEARCH_NEXT_PLAN_1002.md)。顺序为日志锁竞争最小修复与新冻结完整双平台工程结果→真实有效续租及无秘密验收清单→案例分离与第二类任务；更多Agent/EvoMap后置。原case06闭环和历史失败不回写；主控仍只分发/治理/独立验收，固定Orca Owner与互斥write_paths。
+
 2026-10-01 07:52 UTC：用户本轮收敛的“两品牌、三角色、一次真实成果继承”在冻结正式安装版完成，原完整检查器首次实际PASS/exit0；产品SOURCE48ddc916a0072dea50e8caf2773775a0030942b0、I证据874a6330febd8d8dcaf5cfc043f0254d466f6d71均已push/remote exact/clean。case06使用Codex及Claude原生CLI（实际供应商StepFun中国/step-3.5-flash），三独立科研执行known/destroyed、真实AdoptionReceipt和文件落地验证通过；原owned服务已停止，31 retained/reclaimable0。真实费用/实验资源执行仍unknown、peer未成功续租、无额外UseRecord；旧失败保留，不扩Agent/NIST/EvoMap或发布。详见现行执行计划与验收日志。
 
 2026-10-01当前工作采用[Agent协议与正式科研产品计划](RESEARCH_NEXT_PLAN_1001.md)。用户最新收敛：先完成最终正式版本上的两品牌、三角色、一次真实成果继承，运行原完整检查器；完成后再由用户决定扩大Agent兼容范围和抽离通用科研案例，不自动放行这两项。EvoMap协议开发后置。主控只分发和独立验收，原历史和根仓WIP保留。
