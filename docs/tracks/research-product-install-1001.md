@@ -437,3 +437,80 @@ Claude中国plan明确 **空setting-sources/dontAsk/strictMCP/11 allowed_tools/�
 原42含两个端点的真实官方Claude本地status/parser（fake sentinel、隔离CLAUDE_CONFIG_DIR）及原Codex0.159无auth CODEX_HOME parser；未调用真实用户认证/login/API/model/MCP科学实验。双端点mock status失败各仅一次，实际endpoint/env/settings/archive声明绑定；有效其它端点也不能偷偷替换profile来源，非法近似域名仍原ValueError，finally恢复父测试环境。正面status或mock绑定仅local fixture，原unknown/null语义保持；原离线MCP仅list/discover/context及越权拒绝。没有改原断言/科学标准/预算、跑core全量CI/43family/旧case或外围重复健康测试。
 
 **本Task结果仅为 e7ecd 固定 wheel independent installed prepared/contract_local通过。** root已有中国站200有界请求不等于native工具兼容、三角色task_live/真实继承/adoption通过；这些仍 **NOT_RUN，由root随后交原I的新准确Task/Dispatch正式释放验收**。成本仍null，旧国际402/原RED/clock/raw/unknown不回写或重放。A只将新只读artifact和实际42/正式入口证据交root，不投递settled I邮箱、不启动sandbox/Docker或触碰真实secret；本轨报告commit/push/remoteexact/clean后正常worker_done结算。
+
+## 2026-10-01：48dd startup warning 修复的独立冻结安装
+
+对应 **task_2b55277a86d5 / ctx_06d123e8ffc9**，产品 **SOURCE=48ddc916a0072dea50e8caf2773775a0030942b0**，核心 **CBC=cbc4dede782eb79b9c007520d96d7958857da0af**。产品分支仍 `songconmaisaix31-design/research-product-1001`；A固定工作树/分支 `morph-research-agents-0930 / songconmaisaix31-design/morph-research-agents-0930`，起点 REPORT `83c78d86e2d70cfa1c5bd0ad0d42d18c78ff71b7` 实际clean。新 A REPORT 在commit/push后Handoff单列，与产品SOURCE不同。本次只更新本报告，不写business/core/checker或任何P/I状态。
+
+已读当前AGENTS/PLAN、root现行 `RESEARCH_NEXT_PLAN_1001.md`、固定README/guard/runner/原测试和本轮TASK。新源只修正式Codex0.159/direct11下的精确启动诊断分类，核心/锁、模型/tier/全局配置不动；不扩Agent、NIST或EvoMap。按TASK/root计划，**真实case05已失败封存**：UUID `01a0f652-4072-79b1-90f8-bf59957a8a8d`、11.09431s/tools0、未claim/实验，旧guard主动cancel、unknown/null，原完整checker首exit1缺resume，原owned8097服务exited。A没有重试05、创建正式科研clock/nativeUUID、恢复服务或复发StepFun endpoint探针；这些不是本轮local绿可改写的历史。
+
+### 最终新只读安装 artifact
+
+新私有sibling根创建前确认不存在；全部archive/venv/wheel/site/Node dependencies/fixtures/logs本轮新建。只有A自有same-lock官方UV下载cache和观察工具源码复用，未复制/激活旧已安装环境、node_modules、wheel或测试结果，也未从产品working-tree src或工作树科研输入import。原CRLF bytes RED/首40PASS27.08s/新exact40PASS36.64s、旧观察器全动态JSON equality RED和上轮42PASS35.23s均只读保留。
+
+| 交接项 | 本轮准确绝对路径 |
+|---|---|
+| 独占根 | `C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-agents-install-cn-warning-1001-state-ctx06d123e8ffc9` |
+| 正式console | `C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-agents-install-cn-warning-1001-state-ctx06d123e8ffc9/venv/Scripts/morph-research.exe` |
+| Python | `C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-agents-install-cn-warning-1001-state-ctx06d123e8ffc9/venv/Scripts/python.exe` |
+| installed case_directory | `C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-agents-install-cn-warning-1001-state-ctx06d123e8ffc9/venv/Lib/site-packages/demo/research_case` |
+
+全新CPython **3.13.13** venv，wheel非editable、安装`--link-mode copy`。TEMP/TMP为本私有父根并包含所有basetemp，BLAS/OMP/MKL各进程局部1，npm cache为本根 `cache/npm`；UV只复用A自有 `morph-research-agents-install-1001-state-ctxb9ec0f8a8fcd/cache/uv`。无global index/network/HOME/账号/模型/tier改动。
+
+```powershell
+$R = 'C:/Users/DW/orca/workspaces/Morphogenesis-Research/research-product-1001'
+$X = 'C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-agents-install-cn-warning-1001-state-ctx06d123e8ffc9'
+$S = '48ddc916a0072dea50e8caf2773775a0030942b0'
+git -C $R -c core.autocrlf=false archive --format=tar --output="$X/archives/product-48dd-lf.tar" $S
+tar -xf "$X/archives/product-48dd-lf.tar" -C "$X/product-source"
+# export/build实际cwd=$X/product-source；autocrlf只用于该archive命令。
+uv export --frozen --no-emit-project --no-hashes --output-file "$X/locked-test-requirements.txt"
+uv venv "$X/venv" --python C:/Python313/python.exe
+uv build --wheel --out-dir "$X/dist"
+uv pip install --link-mode copy --python "$X/venv/Scripts/python.exe" -r "$X/locked-test-requirements.txt" "$X/dist/morphogenesis_research-0.1.0-py3-none-any.whl"
+& "$X/venv/Scripts/morph-research.exe" version
+& "$X/venv/Scripts/morph-research.exe" setup-assets
+& "$X/venv/Scripts/morph-research.exe" doctor
+& "$X/venv/Scripts/python.exe" -I "$X/verify_provenance.py"
+& "$X/venv/Scripts/python.exe" -I "$X/verify_install.py"
+& "$X/venv/Scripts/python.exe" -I -m pytest -q -rA "--basetemp=$X/pytest-original44-first" "--junitxml=$X/logs/08-pytest-original44-first.xml" "$X/product-source/tests"
+```
+
+安装01至04、正式version/setup-assets/doctor日志05至07 **首次全exit0**。13+2精确bytes门禁、SDK和安装集合先通过，随后 **最终SOURCE完整原44仅一次：44 passed / 41.24s / exit0**，完整first log/XML为 `$X/logs/08-pytest-original44-first.*`。archive原importlib mode加`-I`让业务来自本轮installed wheel，不以作者P的44PASS39.09s代签；P原旧guard1FAIL/42deselected/3.06s首RED仍保留，A未改任何原assert/阈值或新建外围测试。
+
+`09-install-verification-first.log`/`08-install-verification.json`记录 **95个frozen runtime+dev distribution集合及每个版本匹配**，core direct_url的VCS commit/requested_revision精确CBC，product direct_url指向本根dist新wheel、非editable。`10-source-provenance-first.log/json`记录 **13产品文件Git/archive/wheel/site bytes精确全等/nlink1**，原tests/README/pyproject/uv.lock/产品报告同固定SOURCE Git bytes；2个CBC科学输入bytes/nlink1一致。config/auth/permissions与e7ecd逐字节相同，guard/runner按新SOURCE核对，不误称旧guard未变化。uv及两份Node manifests与原9dd/599固定bytes一致。
+
+原完整checker在CBC的Git blob确认为 **39948d9615bce07b40b96eeaf5dfb263b993c6d3**，只读、未执行或修改。7个Node完整version/resolved/integrity/license条目与CBC一致，实际版本匹配；正式setup-assets只在本轮site装原依赖。真实NodeBridge canonical和invalid Gene schema/id rejection成功，schema1.14.0，两次被动观察Node Popen只用本轮installed脚本、无非空NODE_PATH，未借旧node_modules或复制SDK算法。
+
+### 原44 warning 边界及正式prepared入口
+
+两个新增回归在本轮installed guard/runner上实际执行；外部native/测量边界仍明确mock。正面原thread→两条官方固定priority/metadata warning（host可并存、各一次）→turn→合法lease event不提前cancel，完整raw归档，warnings不是工具调用或科研中断证明；fixture账本仍available/attempts0、native provenance=mock、effect unknown、usage/cost null、task_live=not_run。反面覆盖toperror/turn.failed、非精确envelope/文案/id、未知/reroute、版本/policy不匹配、错误时序/重复、不同model/tier及越界shell，仍停止。固定gpt-6.1-sol/priority文案分类没有修改全局模型/tier，也不证明metadata网络或实际model/tool就绪。
+
+原42中的真实本机CLI parser/status仍只使用假sentinel及隔离CODEX_HOME/CLAUDE_CONFIG_DIR、无真实secret；原离线MCP仅list/discover/context和越权拒绝。没有模型、科研实验、真实登录/认证/API或sandbox活动；没有未改core全量CI/43family/新inventory实验。
+
+本轮正式fixture为 `offline-install-a1001-cn-warning-pending-01` 和 `offline-install-a1001-cn-warning-api-01`，两套新project/state/profile，只复用原CBC本地seed/账本。日志11至15 pending init/双runtime inspect/readonlyobserve及读计划核对 **首次exit0**。日志16至19显式中国profile同入口 **首次exit0**：codex=inherited-selected、claude=stepfun-api、base=`https://api.stepfun.com/`、model=`step-3.5-flash`，key_file=`$X/nonexistent-stepfun.key`在Git和模型workspace外且不存在；sandbox key也不存在。
+
+```powershell
+& "$X/venv/Scripts/morph-research.exe" init --profile "$X/offline-pending-profile.json"
+& "$X/venv/Scripts/morph-research.exe" inspect --state "$X/offline-install-a1001-cn-warning-pending-01-state" --phase interrupt
+& "$X/venv/Scripts/morph-research.exe" inspect --state "$X/offline-install-a1001-cn-warning-pending-01-state" --phase replication
+& "$X/venv/Scripts/morph-research.exe" observe --state "$X/offline-install-a1001-cn-warning-pending-01-state"
+& "$X/venv/Scripts/python.exe" -I "$X/verify_prepared.py"
+& "$X/venv/Scripts/morph-research.exe" init --profile "$X/offline-stepfun-profile.json"
+& "$X/venv/Scripts/morph-research.exe" inspect --state "$X/offline-install-a1001-cn-warning-api-01-state" --phase interrupt
+& "$X/venv/Scripts/morph-research.exe" inspect --state "$X/offline-install-a1001-cn-warning-api-01-state" --phase replication
+& "$X/venv/Scripts/morph-research.exe" observe --state "$X/offline-install-a1001-cn-warning-api-01-state"
+& "$X/venv/Scripts/morph-research.exe" run --state "$X/offline-install-a1001-cn-warning-api-01-state" --phase replication
+& "$X/venv/Scripts/python.exe" -I "$X/observe_installed_cli.py" run --state "$X/offline-install-a1001-cn-warning-api-01-state" --phase replication
+& "$X/venv/Scripts/morph-research.exe" observe --state "$X/offline-install-a1001-cn-warning-api-01-state"
+& "$X/venv/Scripts/python.exe" -I "$X/verify_stepfun_prepared_corrected.py"
+& "$X/venv/Scripts/python.exe" -I "$X/verify_registered_inputs.py"
+```
+
+请求/argv/HostBinding/venv MCP参数、安全env、模型/endpoint及权限均由正式产品owns，观察脚本不mock业务、补flags或手工claim/approve/results。pending/中国inspect都是prepared/probe=null/model_invoked=false/session_id=null；Codex仍原read-only/never/direct11，Claude空setting-sources/dontAsk/strictMCP/11allowed/空tools/禁hooks、slash、chrome，MCP供应商credential变量清空，token不进argv/MCP/prompt/archive。预算895s/64tools（原900s含5s停止裕量）、core3600s/attempts3保持。安全auth把CLI品牌Claude/provider StepFun/requested_model明确分列，actual_model未观测/quota未知；managed policy仍由原native保留，oauth_token/firstParty本地标签不等于Anthropic模型或远端quota。
+
+日志21正式中国replication依赖未完成 **预期exit2/formal_role_dependency_not_completed**。日志22同installed console entry原main被动CPythonaudit/profile：**require_phase_ready=1，Popen/socket.connect/socket.bind/os.system/key open/require_auth/probe/native/MCP write/sandbox credential/selected auth context/probe/auth status全0**，没有参数或认证环境补造。无副作用观察第二次同一拒绝入口不是未知远端重放。
+
+日志23/25和 `15-prepared-inspection-verification.json`、`22-run-entrypoint-call-counts.json`、`24-stepfun-prepared-verification.json`证明task/audit全等，派生runtime_remaining从3587.597456正常降至3575.559725，不要求整个动态JSON相等；三task始终available/attempts0/owner与result null/effect_applied=false，无probe/MCP/native/实验/科研observation。`26-registered-inputs-first.log/json` **首次exit0**，读取正式两fixture六角色registered experiment_plan的code/data，全部准确指向本轮installed CBC的两个输入、bytes一致/nlink1、modelworkspace外。
+
+**交付仅48dd fixedwheel independent installed prepared/contract_local。** 精确exe/python/sitecase路径、原first44/来源/正式门禁JSON已立即Handoff root；报告commit+正常push/remoteexact/clean后仅当前Task/Dispatch一次worker_done，不向旧I capability投递。真实native兼容、唯一新科研案例、原完整checker、三角色继承/adoption仍 **NOT_RUN**，由root之后明确放行原I新Task完成；case05的首RED/unknown/null不回写，旧国际402亦不当中国新凭据当前阻塞。本轮未读取/复制/输出/散列真实key或凭据，没有改global/Codex model/tier、操作他人终端/容器或根仓SWARM WIP。
