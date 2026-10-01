@@ -1,5 +1,7 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+2026-10-01 07:52 UTC：用户本轮收敛的“两品牌、三角色、一次真实成果继承”在冻结正式安装版完成，原完整检查器首次实际PASS/exit0；产品SOURCE48ddc916a0072dea50e8caf2773775a0030942b0、I证据874a6330febd8d8dcaf5cfc043f0254d466f6d71均已push/remote exact/clean。case06使用Codex及Claude原生CLI（实际供应商StepFun中国/step-3.5-flash），三独立科研执行known/destroyed、真实AdoptionReceipt和文件落地验证通过；原owned服务已停止，31 retained/reclaimable0。真实费用/实验资源执行仍unknown、peer未成功续租、无额外UseRecord；旧失败保留，不扩Agent/NIST/EvoMap或发布。详见现行执行计划与验收日志。
+
 2026-10-01当前工作采用[Agent协议与正式科研产品计划](RESEARCH_NEXT_PLAN_1001.md)。用户最新收敛：先完成最终正式版本上的两品牌、三角色、一次真实成果继承，运行原完整检查器；完成后再由用户决定扩大Agent兼容范围和抽离通用科研案例，不自动放行这两项。EvoMap协议开发后置。主控只分发和独立验收，原历史和根仓WIP保留。
 
 ## 封板夜进化链路冲刺（2026-09-23）

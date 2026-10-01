@@ -1,8 +1,10 @@
 # 2026-10-01 Agent 协议与正式科研产品：一页执行计划
 
+**07:52 UTC当前结论：本轮限定目标已完成。** 冻结SOURCE48ddc916a0072dea50e8caf2773775a0030942b0、coreCBC、原A独立安装44pass41.24s；正式case06的Codex/Claude中国StepFun两品牌三角色、真实中断与TTL同UUID恢复、独立科学/文件批准应用/第三角色再验证及一次真实继承AdoptionReceipt全部实际完成，原完整checker首次exit0/6.2295885s。I证据874a6330febd8d8dcaf5cfc043f0254d466f6d71已push/root remote exact clean、业务和checker39948未变，所有expected Task结算并retain、reclaimable0。原失败及unknown只读保留；peer续租未成功、费用未核实、实验resource_enforcement未知、未生成额外UseRecord如实列明。扩Agent/案例抽离/EvoMap/main/tag/Hub未执行，下一步由用户另决定。
+
 事实源为本轮用户任务及 docs/source/README_包内说明.md；用户最新指令将本轮限定为“最终正式版本上的两品牌、三角色、一次真实成果继承”。扩大Agent兼容范围和抽离通用科研案例须在完成后另行决定，不因检查通过自动启动。EvoMap协议开发继续后置。原冻结交付 c45888f64c1cec60e5f9df45677b6547c4527cac，业务代码 bde3412d2257fd1581ce1d7f88b254fb0c13a269。主控只分发、决策、读取证据和独立校验，不写业务代码。
 
-当前用户改用中国站并提供新凭据：06:52 UTC https://api.stepfun.com/v1/models及唯一极小/v1/messages均200，响应model为step-3.5-flash、usage16输入/32输出、费用null；输出预算耗尽未出现text，仅证实认证/极小模型调用而非原生工具或科研通过。原P窄改正式profile以显式选择中国或已有国际端点，原A独立全新精确字节安装，原I之后用新冻结安装完成唯一新三角色案例和原完整checker；不用国际402继续阻塞中国新凭据，也不把它回写成成功。核心CBC、原11工具/科学/预算/检查器和Codex身份模型不变。旧产品12845/Pec62/Ad1be/I81357的工程与installed prepared门禁已完成，新中国版source/install/task尚未冻结通过；所有旧RED/clock/unknown只读，Agent扩容/案例抽离/EvoMap后置。
+06:55 UTC历史前置：用户改用中国站并提供新凭据，06:52 UTC https://api.stepfun.com/v1/models及唯一极小/v1/messages均200，响应model为step-3.5-flash、usage16输入/32输出、费用null；输出预算耗尽未出现text，仅证实认证/极小模型调用而非原生工具或科研通过。原P窄改正式profile以显式选择中国或已有国际端点，原A独立全新精确字节安装，原I之后用新冻结安装完成唯一新三角色案例和原完整checker；不用国际402继续阻塞中国新凭据，也不把它回写成成功。核心CBC、原11工具/科学/预算/检查器和Codex身份模型不变。旧产品12845/Pec62/Ad1be/I81357的工程与installed prepared门禁已完成，当时新中国版source/install/task尚未冻结通过；所有旧RED/clock/unknown只读，Agent扩容/案例抽离/EvoMap后置。
 
 ## 原始任务与顺序
 
