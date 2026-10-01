@@ -81,3 +81,13 @@ D补证8acb7d3f3c7a3dcea85c20c2494f74c1377cd437已remote exact/clean、较450只
 主控msg_928314f115d7/msg_ba1eb538f9c8批准唯一精确兼容：固定版本已验证、已审own研究MCP DirectModelOnly+required11/per11/defaultprompt/readonly/never/禁host正式plan，在thread.started后首turn.started前一次、精确完整官方host-disabled item.completed/error才作为native_warning单列并保留raw。未知/改字/其它时序/重复通知、顶层fatal即使同文字、turn.failed与真正非11调用仍停止；memory_tool弃用alias移除但memoriesfalse保留，不豁免其它弃用。合法stale renew/submit科研工具业务拒绝按原合同观察，不一概升级nativefatal。无host执行、模型替换、目录隐藏、原checker或白名单放宽。
 
 P源码c25aa100ec6e10d8edc691f5c3154cebab365c86已push/remote exact/clean，主控读取guard/runner/permissions改动：原24+6必要回归30pass31.90s，依赖锁/coreCBC不变，新增warning/raw/count及native_error/count防伪中断和后继成功。原599 guard对02 error,error的原红仍保留。P自己的freshinstalled入口/报告继续原Owner完成；I已获msg_abe2db2d2970授权并行准确c25不可变archive/wheel/copyenv适用独立30/正式入口验证，无核心重跑。当前没有新科研case/clock/UUID/model/API释放，真实11可达性、Claude兼容及原完整三角色仍NOT_RUN/RED；下一实际运行只能在精确冻结独立门禁完成后由主控明确处置，旧case与unknown一概只读保留。
+
+## 03:20 UTC产品交付、独立门禁完成与新case03释放
+
+P最终报告c64e2b88696ef26453cc441903afa5a7e7536c20已remote exact/clean、较源码c25只自身track文档，src/tests树一致。主控读取原30pass31.90s及新88runtime installed7正式命令全exit0，P正常succeeded后retain。同一冻结依赖不变；I首次下载真实timeout exit1/205.232s保留，主控允许复用I自己同锁官方缓存，不改全局index/网络、不复制其它env。I长等待期间原Task未结算，主控仅对精确自有I terminal中断当前协调长等待、提交同Task恢复提示；没有worker-stop/revoke、科学调用重放或停止其它终端。I原ctx_c6bb0ebb6ad6实际heartbeatalive恢复，压缩上下文后自有缓存offline续装12.889s/exit0。原失败、partial env/cache保留。
+
+为减少单点等待，原A安装Owner task_16936c7acdbb/ctx_22e488c4a387同Agent/terminal/worktree/branch仅自身报告+新独立state并行验证；初startup unobserved与正面composer旧input保留，补Enter一次后实际Working/薄Handoff，没有重复派发。同c25/coreCBC archive→wheel→freshCPython3.13.13 copyenv95冻结分发包，原30首次30pass30.06s、全部正式version/setup/doctor/offlineinit/双inspect/observe passed、13产品Git/archive/wheel/site byte一致+两CBC输入nlink1/原7SDK锁一致。主控实际读取原logs/provenance；A报告eabc4583f52963ee380a0857ba3ca934e348329e已remote exact/clean、较776只自身安装报告，正常succeeded/retain。A未调用模型/科研/API，仍installed prepared。
+
+I msg_5e9b5b08d0d6/msg_050da66fc5cc确认不重复已通过30/SDK/入口门禁，只读核对A原结果，采用A固定安装artifact只读（Astate/venv/Scripts/morph-research.exe），所有后续科研project/profile/state/账本/归档仍I独占，A环境与报告不修改，observer不补关键启动参数。I仍原独立集成Owner，源码/core/checker不变。
+
+主控msg_66f86288a8ee释放唯一全新research-formal-1001-03进行冻结c25/coreCBC原完整三角色验收：先确认新路径不存在，再正式CLI创建新隔离clock；新case3UUID/两品牌、真实owned interruption实验前/真实TTL同UUIDresume/原合法stale拒绝，每role900s/64tools、runtime3600/attempts3/每task ONE真实sandbox，完整独立复现→文件验证批准应用→第三fresh local再验证→真实inheritance/child批准应用→原消费与adoption，完成后byte-unchanged原完整checker。原权限、模型身份及selectedOAuth保持，仅已审精确通知分类；未知native错误/非11调用/真正未知科研外部效果停止依赖，不自动重试。新case是冻结修复后的明确独立验收，不接续/恢复/重放02请求或引用其任何结果，02已有真实模型响应、旧unknown/null/原checkerRED与01所有clock/raw一律保留。当前case03完整task_live未通过；NIST抽离/第二任务/更多Agent/EvoMap/Hub/main/tag继续后置或未授权发布。
