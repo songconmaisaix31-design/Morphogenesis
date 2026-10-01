@@ -40,3 +40,13 @@ P 在新产品正式CLI中承接11工具白名单/只读原生权限/HostConfig/
 独立4个已有专项 `python -m pytest -q -p no:cacheprovider --basetemp=<B-review>/pytest-bounded <four exact nodes>`：4 passed/1.58s，非全产品/全库；正式installed morph-research version/doctor exit0（仅原SDK本地操作）。只读现有P inspection身份/权限与prepared状态，7条Node原lock记录完全一致；13模块/资源仅archive CRLF与wheel LF差异、Python AST相同。逐字节比较首AssertionError和一次Windows rg wildcard error123保留在报告，未改业务/测试/原checker来消除失败。B没有重新安装/修改P venv，I独立fresh安装与全量core门禁仍归I。
 
 模型/API/沙箱/Hub/EvoMap调用0，旧案例/认证全局状态不动。新research-formal-1001-01等待root release后I正式三角色全原checker；后续领域返修由原Owner经授权负责。文档commit/push及remote/clean完整SHA由本轮Handoff回传。
+
+## 阶段3：受信案例桥接（1002）
+
+当前 Task `task_ee0b6f8ea056` / Dispatch `ctx_12f73e32dbfb`，沿用原 B Owner/worktree/branch。先 READ_ONLY_PREPARE；收到 root `STAGE3_BRIDGE_WRITE_RELEASE` 后才 ff-only 消费 C 固定接口 `789181538c694d8677297b0e0bdfbf879bcc8138`。完整来源、门禁、首红及接续见 [受信案例桥接报告](../research/REGISTERED_CASE_BRIDGE_1002.md)。
+
+元数据 SOURCE `b74fb531df9f3b68686aad9865f780fd78a32bde`；最终领域 SOURCE `5fb0cee3753b5169856f7ea8e0490c2daa2bad4f` 正常 push、remote exact、clean。仅 own case适配/注册案例契约测试，加 root 授权的 Windows Git timeout fixture；TaskLedger、生产 Git helper、C 科学实现、A WindowsJob、锁和原 checker 不变。C 最终08b测试收尾由 I 集成，B 不追逐其它 Owner 源码。
+
+准确5fb归档本地相关范围197PASS/240.99秒，strict8通过；全新copy安装的7文件Git/wheel/site字节一致且nlink1，两installed seed CLI exit0、每例仅3项未claim任务，无实验/批准/adoption。原默认hardlink安装13/14首红与15未发布未测试草稿保留，未放宽no_links。Git fixture保留实际timeout0.2和总<3原断言，计入完整READY准备；复用专属WindowsJob在原断言之后回收实际自有句柄，无附着会话误杀。
+
+root已接受领域SOURCE并放行I消费C08b+B5fb；本报告为prepared/contract_local，原生模型/API/OpenSandbox/Hub/真实科研adoption均NOT_RUN。I负责最终累计冻结、独立安装、完整双平台及root授权的两案例三角色live；旧红/unknown/clock/原checker不改。REPORT仅本文件与桥接报告，准确提交/remote/clean由收尾Handoff回传；后续领域返修仍原Owner负责。
