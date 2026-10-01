@@ -2,6 +2,7 @@
 
 import math
 import random
+import sqlite3
 
 import pytest
 
@@ -11,11 +12,11 @@ from swarm.router import Router
 from swarm.task_ledger import TaskLedger
 
 
-def setup(tmp_path):
+def setup(tmp_path, **field_options):
     now = [100.0]
     ledger = TaskLedger(tmp_path / "tasks.db", "policy", clock=lambda: now[0],
                         limits=RunLimits(max_runtime_seconds=1e12))
-    field = PheromoneField(tmp_path / "field.db", ledger=ledger, clock=lambda: now[0])
+    field = PheromoneField(tmp_path / "field.db", ledger=ledger, clock=lambda: now[0], **field_options)
     locality = Locality(workspace=str(tmp_path), authorized_scopes=("allowed",))
     return ledger, field, locality, now
 
@@ -83,6 +84,31 @@ def test_operator_readonly_diagnostic_uses_shared_math_without_writing(tmp_path,
     assert preview["probabilities"] == recorded["probabilities"]
 
 
+@pytest.mark.parametrize("success", [False, True])
+def test_expired_history_returns_to_prior_without_rewriting_old_rows(tmp_path, success):
+    _, field, locality, now = setup(tmp_path)
+    a = deposit(field, tmp_path, "a", "repair")
+    deposit(field, tmp_path, "b", "research")
+    router = Router(field, strategy_version="v0.1")
+    router.reinforce("worker", a, success=success)
+    with sqlite3.connect(field.path) as db:
+        stored = db.execute("SELECT weight,samples,updated_at FROM pipe_history").fetchall()
+    now[0] += 100 * field.tau_seconds
+    decision = router.recommend("worker", locality, {"repair": 1.0, "research": 1.0})
+    assert [s["w_history"] for s in decision["signals"]] == pytest.approx([.25, .25])
+    assert decision["history_prior"] == .25
+    # Explicit legacy view of the same stored row still tends to zero.
+    old = Router(field).recommend("worker", locality, {"repair": 1.0, "research": 1.0})
+    assert old["history_prior"] is None
+    assert old["signals"][0]["w_history"] < 1e-40
+    with sqlite3.connect(field.path) as db:
+        assert db.execute("SELECT weight,samples,updated_at FROM pipe_history").fetchall() == stored
+    # New feedback must read with the same prior used to score, not a zero-
+    # centered history which would make a late success weaker than no history.
+    late_success = router.reinforce("worker", a, success=True)
+    assert late_success.weight == pytest.approx(.2625) and late_success.samples == 2
+
+
 @pytest.mark.parametrize("beta,concentration,urgency,match,elapsed", [
     (0, 0, 0, 1.0, 0),
     (1e6, 1e12, 1e6, 1.0, 0),
@@ -117,6 +143,21 @@ def test_versioned_scale_retains_unit_scale_but_bounds_extreme_dominance(tmp_pat
     assert old["signals"][1]["score"] == new["signals"][1]["score"]
 
 
+@pytest.mark.parametrize("success", [False, True])
+def test_history_endpoints_and_tiny_aging_constant_keep_probability_finite(tmp_path, success):
+    _, field, locality, now = setup(tmp_path, alpha=1.0)
+    a = deposit(field, tmp_path, "a", "repair", concentration=1e12, urgency=1e6)
+    deposit(field, tmp_path, "b", "research", concentration=0)
+    router = Router(field, strategy_version="v0.1", beta=1e6, aging_seconds=1e-300)
+    history = router.reinforce("worker", a, success=success, speedup=1.0, token_saving=1.0)
+    assert history.weight == float(success)
+    now[0] += 1
+    decision = router.recommend("worker", locality, {"repair": 1.0, "research": 1.0})
+    assert all(s["age_weight"] == 11 for s in decision["signals"])
+    assert all(math.isfinite(p) and p >= .025 for p in decision["probabilities"])
+    assert sum(decision["probabilities"]) == pytest.approx(1)
+
+
 def test_scope_capability_dependency_and_unknown_effect_cannot_win(tmp_path):
     ledger, field, locality, now = setup(tmp_path)
     deposit(field, tmp_path, "legal", "repair")
@@ -149,6 +190,22 @@ def test_window_excludes_late_high_score_even_from_exploration(tmp_path):
     assert "task-100" not in {s["task_id"] for s in decision["signals"]}
     assert sum(decision["probabilities"]) == pytest.approx(1)
     assert ledger.get("task-100").attempts == 0
+
+
+def test_suggestion_cannot_reserve_a_task_or_override_a_later_lease(tmp_path):
+    ledger, field, locality, _ = setup(tmp_path)
+    deposit(field, tmp_path, "a", "repair")
+    deposit(field, tmp_path, "b", "research")
+    decision = Router(field, strategy_version="v0.1", rng=random.Random(17)).recommend(
+        "worker", locality, {"repair": 1.0, "research": 1.0})
+    selected = decision["selected"]
+    competing = ledger.claim(selected, "other", locality=locality)
+    assert competing is not None
+    assert ledger.claim(selected, "worker", locality=locality) is None
+    next_decision = Router(field, strategy_version="v0.1").recommend(
+        "worker", locality, {"repair": 1.0, "research": 1.0})
+    assert next_decision["selected"] != selected
+    assert ledger.is_valid(competing)
 
 
 def test_empty_and_invalid_inputs_do_not_make_a_claim(tmp_path):
