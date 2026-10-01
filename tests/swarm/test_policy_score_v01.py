@@ -3,9 +3,11 @@
 import math
 import random
 import sqlite3
+import json
 
 import pytest
 
+from orchestration.fc_logging import FCLogWriter, validate_event
 from swarm.models import Locality, RunLimits, Signal
 from swarm.pheromone import PheromoneField
 from swarm.router import Router
@@ -223,3 +225,23 @@ def test_empty_and_invalid_inputs_do_not_make_a_claim(tmp_path):
     with pytest.raises(ValueError):
         Router(field, strategy_version="unknown")
     assert ledger.snapshot() == []
+
+
+@pytest.mark.parametrize("version", ["v0", "v0.1"])
+def test_real_routing_projection_retains_frozen_fc_schema(tmp_path, caplog, version):
+    ledger, field, locality, _ = setup(tmp_path)
+    deposit(field, tmp_path, "a", "repair")
+    deposit(field, tmp_path, "b", "research")
+    decision = Router(field, strategy_version=version, rng=random.Random(17)).recommend(
+        "worker", locality, {"repair": 1.0, "research": 1.0})
+    source = ledger.audit()[0]
+    writer = FCLogWriter(tmp_path / "projection", ledger.swarm_id, provenance="mock")
+    writer.observe_ledger(ledger, "worker")
+    assert writer.path.exists(), caplog.text
+    events = [validate_event(json.loads(line)) for line in writer.path.read_bytes().splitlines()]
+    routing, = [event for event in events if event["event"] == "routing"]
+    assert routing["sequence"] == decision["routing_sequence"]
+    assert routing["routing"]["candidates"] == [dict(signal, probability=p) for signal, p in
+        zip(source["body"]["signals"], source["body"]["probabilities"], strict=True)]
+    assert source["body"]["policy_candidates"] == decision["signals"]
+    assert "fc_log_projection_failed" not in caplog.text
