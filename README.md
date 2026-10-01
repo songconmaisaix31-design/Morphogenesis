@@ -1,97 +1,83 @@
-# Morphogenesis：形态发生——Ghost in the Swarm
+# Morphogenesis · Qwen / 阿里云 / 科研提效
 
-## 一、要解决的问题
+**科学任务 → 实验执行 → 独立复现 → 真实成果继承。** Morphogenesis 将任务、实验条件和验证结果保存在可复核的环境中，让后续任务本地重新验证、实际应用已有成果，再记录 adoption。
 
-当前多智能体系统存在两个结构性缺陷。其一是中心化脆弱：无论框架形态如何变化，系统中心总有一个调度器决定任务分配与执行次序；调度器存活则系统存活，调度器失效则群体停摆，且所有协调流量经过单点，形成信息瓶颈。其二是经验孤岛：各 Agent 的经验锁定在各自的上下文窗口内，一个成员踩过的坑，另一个成员原样重踩；任务结束后经验随会话消散，群体规模的增长并不带来能力的增长。
+产品方向是云端 Qwen 推理与本地 CPU/GPU 数据计算协同，本机资源不足时按需使用阿里云算力。目标是减少重复实验准备和无效经验复用；加速收益需要实际测量。
 
-Morphogenesis 对这两个缺陷给出同一个回答：把协调与记忆都交给环境。
+## 云端与本地如何分工
 
-## 二、理念：形态发生与 Ghost in the Swarm
+下面是目标数据流，Qwen 接入与云计算后端均尚未运行：
 
-项目名取自图灵 1952 年的论文《形态发生的化学基础》。图灵证明：对称均匀的初始状态，在局部反应—扩散规则的作用下会自发破缺出稳定结构——秩序不需要总设计师，只需要局部规则与足够的时间。这正是本项目追求的系统性质。
-
-生物学原型是多头绒泡菌。2000 年 Nakagaki 在 Nature 发表的实验显示，单细胞黏菌能在迷宫中找到两处食物源之间的最短路径；2010 年 Tero 团队在 Science 上进一步证明，将食物点按东京都市圈地理摆放，黏菌长出的营养输送网络与关东铁路网高度一致。一个没有大脑的细胞解出了图论与网络规划问题，其原理只有一条：流量塑造管道，管道引导流量。
-
-协调机制的学名是 stigmergy：白蚁筑巢没有总图纸，每只白蚁仅依据其他白蚁留下的痕迹行动，复杂结构从痕迹的累积中涌现。
-
-主题层的致敬来自《攻壳机动队》。公安九课的世界里，义体可以更换、记忆可以改写，唯一不可复制的是个体的 Ghost；素子在故事终点选择融入网络，个体边界溶解而意志延续。本项目的对应命题是：每个 Agent 的经验印记是其个体的 Ghost，当印记在共享环境中相互塑造、彼此继承，蜂群便生长出自己的 Ghost in the Swarm——没有成员拥有全局视野，但群体记住了所有成员的成败。
-
-## 三、系统架构与算法
-
-![Morphogenesis 海报一](docs/assets/img-20260923-193734.png)
-
-系统经历两代演进，两代代码均以完整证据链存档。
-
-第一代，已归档，为中心化编排下的五机制闭环，包含拓扑生长、经验代谢、权重选路、接续与复核、可视化模块。它验证了机制的生物学自洽逻辑，但仍然保留中心调度器，存在传统多智能体系统的单点瓶颈问题。
-
-第二代，当前迭代版本，为完全去中心化蜂群架构，包含七大核心模块，分别是本地资产库、任务账本、局部路由、写权租约、Worker 自主循环、预算代理、观察者与 Hub 镜像。系统准确定位为同机多进程、可信 Worker、共享持久化环境、无常驻任务派发者的自主协作系统。项目彻底消除了中心化派发节点，基于本地环境完成全部协作闭环，不做跨机器去中心化的虚设宣传，工程边界诚实且清晰。
-
-项目核心算法设计具备完整独创性与工程优化逻辑。
-
-经验代谢采用读时衰减机制，每条经验仅存储时间戳与衰减时间常数。权重读取时按 w(t)=w0·e^(-Δt/τ) 动态计算，标准 τ=86400 秒（对应半衰期约 16.6 小时）。经验不会主动写回修改，仅在被调用时完成动态刷新，彻底消除了传统信息素模型持续写回带来的性能损耗，同时规避了多 Worker 并发场景下的共享场污染问题。
-
-任务账本严格遵循事实与偏好分离原则，任务身份、运行状态、依赖关系、尝试次数为永久留存、不衰减的客观事实；仅路由策略、执行偏好、路径优先级具备时间衰减特性。系统仅弱化低效策略路径的权重，不会抹除任务本体记录，所有审计日志永久留存，实现可追溯、可复盘的群体协作。
-
-任务选路摒弃传统贪心最优策略，采用 softmax 加权抽样算法。系统不会让所有 Agent 扎堆涌向当前最优路径，保留群体并行探索能力，兼顾执行效率与探索创新。每一次路由选择的信号参数、约束条件、权重数值、抽样概率全程留痕，实现全链路可审计。
-
-资源写权由租约机制统一裁决，结合原子认领、TTL 超时回收、防并发令牌三重机制保障安全。Worker 暂停重启后，过期操作票据会被系统识别拒绝，避免旧数据覆盖新成果；未完成任务支持主动移交，预算资源随任务同步转移，保障协作连续性。
-
-系统资源消耗遵循先预留、后执行、再结算的安全逻辑，未知开销场景自动触发熔断保护，杜绝无上限资源消耗。在追求自主协作的同时，将系统安全作为第一约束条件。
-
-本项目保持严谨的学术谱系诚实性，黏菌管道连续动力系统经过工程离散化改造，不直接套用原始论文收敛性结论，明确区分理论模型与工程落地差异；信息素迭代逻辑溯源蚁群优化经典研究，在成熟理论基础上完成创新改造。
-
-## 四、工程证据与验收纪律
-
-项目建立独立完整的六层验收门禁体系，从 G0 至 G5 分层校验系统能力，所有运行状态、测试数据、迭代记录全部真实留存。其中机制设计、单元测试、功能验证模块全部通过验收；资源预算模块受上游接口限制，通过参数约束、超时熔断、事后审计三层兜底机制降级保障，完整留存真实用量记录。
-
-外部生态对接模块已完成资产发布，三项可复用智能体资产成功同步至 EvoMap Hub，受生态积分门禁管控，真实保留迭代未完善状态，不做虚假功能宣称。现场落地验收为待执行迭代项，预留后续优化空间。
-
-项目具备完备工程量化证据，第一代归档版本完成二百九十四项测试全覆盖、五十五个文件严格类型校验，双平台持续集成测试全绿通过。第二代去中心化迭代版本，Windows 平台四百九十一项测试、Ubuntu 平台四百九十项测试全部通过，双平台 CI 验证稳定可靠。中心化旧架构已标签归档冻结，主线功能与演示部署完全不受新版本迭代影响，版本管理规范严谨。
-
-## 五、与 EvoMap 的关系
-
-本项目与 EvoMap 生态为互补共生关系，不存在功能竞争与赛道重合。EvoMap 主打跨设备、跨主体的全局经验网络，通过 Hub 托管智能体基因与能力胶囊，依靠量化评分机制完成能力晋级，以贡献者经济驱动全局经验流通，解决多主体跨生态的经验交换问题。
-
-Morphogenesis 主打单机本地自治蜂群，智能体验证、能力晋级、经验复用全部在本地完成闭环，EvoMap Hub 仅作为可选外部资源来源。网络在线状态下，系统可镜像同步资产，获取生态流量与外部能力补充；离线状态下，本地蜂群可独立运行、自主迭代、自我生长，完全不依赖外部中心化服务。
-
-二者核心定位可精准概括：EvoMap 实现百万级智能体共享单一个体的学习成果，打通全局经验流通；Morphogenesis 实现本地蜂群无中心自主进化，让集群在零外部依赖场景下自主生长、自主学习、自主迭代。本项目深度适配 EvoMap 官方模型网关，属于生态内生创新项目，而非独立竞品系统。
-
-## 六、应用前景
-
-本系统核心内核适配任务可拆分、经验可复用、成本可管控的各类长时程复杂场景，可落地于自动化数据流水线自愈运维、多代码仓库批量巡检与缺陷修复、智能体悬赏市场自主接单执行等场景。
-
-系统可无缝接入 EvoMap 生态交易市场，本地蜂群可自主认领平台悬赏任务、自主拆解执行、自主沉淀复用资产，通过持续任务迭代积累优质智能体能力资产，同时以贡献者经济反哺生态，形成正向循环的智能体进化体系。
-
-项目制定严格统一的经验继承验收标准，单个智能体验证通过的有效资产，可被其他智能体复用迭代，全程留存资产编号、上下文输入、执行日志、复用记录，精准区分无效资产堆积与真实经验驱动的能力增长，保障群体智能持续正向进化。
-
-## 七、使用入口
-
-所有命令收敛到统一控制台脚本 `morphogenesis`（等价 `python -m bootstrap`）。先安装锁定环境：
-
-```powershell
-$env:POETRY_VIRTUALENVS_IN_PROJECT = 'true'
-uv tool run poetry install
-npm ci --ignore-scripts
+```mermaid
+flowchart LR
+    T[科学任务与预注册条件] --> H[本地可信宿主与科研 MCP]
+    H -->|允许发送的任务摘要和工具结果| Q[云端 Qwen 推理：待接入]
+    Q -->|工具请求与候选建议| H
+    H --> L[本地 CPU 或 GPU：执行与数据保管]
+    H -.指定后端与允许上传的输入.-> C[按需阿里云计算：待接入]
+    L --> E[可信原始证据与独立复现]
+    C -.执行结果回传.-> E
+    E --> V[文件验证与批准应用]
+    V --> A[后续任务本地再验证与真实继承]
 ```
 
-| 子命令 | 用途 |
+| 层 | 职责 | 当前边界 |
+|---|---|---|
+| Qwen / 阿里云百炼 | 理解任务、提出工具调用、分析允许发送的证据摘要 | 接入目标，NOT_RUN；云推理不等于实验执行 |
+| 本地计算与可信宿主 | 保管原始数据、裁决权限和租约、执行与读取证据 | 冻结科研版本完成 CPU 案例；GPU 科研未运行 |
+| 指定阿里云计算后端 | 本机资源不足时执行已批准的计算任务 | NOT_RUN；未实现跨机器调度或测得加速 |
+
+原始数据默认留在本地。云端只接收操作者允许的必要摘要；模型不能直接写权威账本、批准结果或获取计算凭据。具体接口、资源与验收见 [Qwen / 阿里云科研协同路线](docs/QWEN_ALIYUN_RESEARCH.md)。
+
+## 已完成的科学证据与当前 main
+
+独立冻结科研版本完成 NIST NumAcc4 与项目自有七行 synthetic 线性回归两案例：每类两个原生 CLI 品牌、三个不同角色会话、三个真实 CPU 实验。独立复现后验证文件、批准应用，再由第三角色本地再验证并真实继承。两个完整检查器首次通过，三角色当前 token 有效续租通过，两例各有唯一 AdoptionReceipt。
+
+证据来自 Codex 与 Claude CLI；Claude 实际使用 StepFun 模型。**它不是 Qwen 实测。** 本轮 main 更新只修改文档，没有合入这些冻结科研版本的代码或独立产品。
+
+| 冻结身份 | 固定远端内容 |
 |---|---|
-| `morphogenesis check` | 本地质量门：全量 pytest + strict mypy |
-| `morphogenesis prepare --workspace <dir>` | 生成固定练习 workspace（不执行模型） |
-| `morphogenesis verify --workspace <dir>` | 独立固定验证器复核 |
-| `morphogenesis acceptance ...` | 单次真实模型运行闭环（转发 `python -m orchestration.acceptance`） |
-| `morphogenesis rehearsal ...` | 两项已授权新任务固定彩排（转发 `python -m orchestration.rehearsal`） |
-| `morphogenesis serve ...` | 只读本地 dashboard（转发 `python -m viz.server`） |
-| `morphogenesis swarm` | 占位：异构蜂群尚未合入主线 |
+| CORE `bf67c1a4134a25d009cff2acccbfab027999bea6` | [科研执行核心](https://github.com/songconmaisaix31-design/Morphogenesis/tree/bf67c1a4134a25d009cff2acccbfab027999bea6) |
+| PRODUCT `dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa` | [独立 morph-research 正式入口源码](https://github.com/songconmaisaix31-design/Morphogenesis-Research/blob/dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa/src/morph_research/cli.py) |
+| REPORT `7b66f0dd0a285c1b6cf789aa3c5a41d22d655993` | [完整双案例验收、命令、首失败与限制](https://github.com/songconmaisaix31-design/Morphogenesis/blob/7b66f0dd0a285c1b6cf789aa3c5a41d22d655993/docs/tracks/research-integration-cases-1002.md) |
 
-转发子命令把剩余参数原样交给对应模块，其 `--help`、退出码、阻塞服务与信号处理与 `python -m ...` 完全一致；先看 `morphogenesis <subcommand> --help`。`contract_local`、`interface_live`、`task_live` 相互独立，未知 usage 为 `null`，绝不臆造为零。现场演示见 `demo/run-demo.ps1`，公网部署见 `deploy/README.md`。
+冻结 CORE 完整双平台工程门禁通过：Windows 1154 passed / 5 skipped，Linux 1153 passed / 6 skipped，类型检查、构建、SDK 与实际 wheel 分发检查通过。这些结果属于精确冻结版本，不能当作当前 main 或未来 Qwen 版本的验收。
 
-## 八、结语
+`contract_local`、`interface_live`、`task_live` 分别记录。Mock、检索、注入、退出码 0 不能单独证明科学通过或真实采用；未知远端效果停止重试，未知费用保留 `null`。
 
-![Morphogenesis 海报二](docs/assets/img-20260924-103304.png)
+## 使用当前 main
 
-在《攻壳机动队》的叙事中，素子融入网络，是个体边界的消融，亦是更高维度意志的延续。本项目的设计内核亦是如此，彻底打破传统智能体等待指令、被动执行的运行模式，摆脱中心化调度器的桎梏。
+Python 3.12–3.13；Node.js 至少 22.13。保持本源码 checkout，按提交的锁安装依赖：
 
-当个体经验可以沉淀为群体资产，当协作路径由真实执行反馈自然塑形，当无数独立智能体的个体意志汇聚为集群的整体智能，蜂群便拥有了属于自己的群体意志。
+```powershell
+uv tool run poetry install
+npm ci --ignore-scripts
+uv tool run poetry run python -m bootstrap --help
+uv tool run poetry run python -m swarm --help
+```
 
-Morphogenesis 所构建的不仅是一套自动化协作系统，更是一套无中心、自生长、可进化、可传承的原生群体智能形态。形态发生一旦启动，群体智能的进化便会自主持续，无需人工持续干预，实现真正意义上的自主生长式智能蜂群。
+| 当前入口 | 实际用途 |
+|---|---|
+| `python -m bootstrap` / `morphogenesis` | [统一控制台](bootstrap/cli.py)：prepare、verify、check、acceptance、rehearsal、serve |
+| `morphogenesis swarm` | 当前仍为占位，退出 2；不能用于启动科研产品 |
+| `python -m swarm` / `morphogenesis-swarm` | [独立 swarm CLI](swarm/cli.py)：observe、seed-demo、demo、worker；fixture 演示不是科研 live |
+| 独立仓库的 `morph-research` | 固定版本正式科研入口：init、inspect、run、observe、audit；不由此 main 安装提供 |
+
+本地固定练习无需模型调用：
+
+```powershell
+uv tool run poetry run python -m bootstrap prepare --workspace .runtime/sample
+uv tool run poetry run python -m bootstrap verify --workspace .runtime/sample
+```
+
+初始样例故意有错，首次 verify 预期退出 1；verify 只复核，不启动 Agent 或修复文件。`acceptance`、`rehearsal` 会使用模型，`serve` 启动服务，均不是安装步骤；执行前阅读对应 `--help` 与 [历史验收边界](docs/ACCEPTANCE.md)。既有网关配置不能当作已接入 Qwen。
+
+工程命令为 `python -m bootstrap check`、`python -m build`、`npm run check:sdk`；完整安装包检查见 [原 foundation 工作流](.github/workflows/check.yml)。Python wheel 不包含 Node 运行时、原生模型 CLI 或账号凭据。
+
+## 经验与项目约定
+
+Ghost in the Swarm 表达成员变化之后，经过验证的关系、历史和策略仍可被后续任务取用。它需要真实执行与继承证据，不能由群体规模或架构描述推导。
+
+EvoMap 是可选的外部经验源。
+
+保持 Python / LangGraph / Pydantic / SQLite / MCP 与官方 SDK 的既有实现，不另建调度器、Attempt、Manifest 或完成证明系统。范围与所有权见 [当前计划](docs/PLAN.md)，代码来源与许可证见 [第三方声明](THIRD_PARTY_NOTICES.md)。
