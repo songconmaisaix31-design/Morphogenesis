@@ -30,6 +30,14 @@ class _ExtendedLimits(ctypes.Structure):
                 ("PeakProcessMemoryUsed", ctypes.c_size_t), ("PeakJobMemoryUsed", ctypes.c_size_t)]
 
 
+class _BasicAccounting(ctypes.Structure):
+    _fields_ = [(name, ctypes.c_int64) for name in (
+        "TotalUserTime", "TotalKernelTime", "ThisPeriodTotalUserTime", "ThisPeriodTotalKernelTime",
+    )] + [(name, wintypes.DWORD) for name in (
+        "TotalPageFaultCount", "TotalProcesses", "ActiveProcesses", "TotalTerminatedProcesses",
+    )]
+
+
 class WindowsJob:
     def __init__(self) -> None:
         if os.name != "nt":
@@ -43,6 +51,8 @@ class WindowsJob:
             "CreateJobObjectW": ([ctypes.c_void_p, wintypes.LPCWSTR], wintypes.HANDLE),
             "SetInformationJobObject": ([wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p,
                                           wintypes.DWORD], wintypes.BOOL),
+            "QueryInformationJobObject": ([wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p,
+                                            wintypes.DWORD, ctypes.c_void_p], wintypes.BOOL),
             "OpenProcess": ([wintypes.DWORD, wintypes.BOOL, wintypes.DWORD], wintypes.HANDLE),
             "AssignProcessToJobObject": ([wintypes.HANDLE, wintypes.HANDLE], wintypes.BOOL),
             "TerminateJobObject": ([wintypes.HANDLE, wintypes.UINT], wintypes.BOOL),
@@ -76,7 +86,18 @@ class WindowsJob:
         if self._handle and not self._api.TerminateJobObject(self._handle, 1):
             raise self._win_error(self._last_error())
 
+    def active_processes(self) -> int:
+        if not self._handle:
+            return 0
+        accounting = _BasicAccounting()
+        if not self._api.QueryInformationJobObject(
+            self._handle, 1, ctypes.byref(accounting), ctypes.sizeof(accounting), None,
+        ):  # JobObjectBasicAccountingInformation; includes nested jobs.
+            raise self._win_error(self._last_error())
+        return int(accounting.ActiveProcesses)
+
     def close(self) -> None:
         if self._handle:
-            self._api.CloseHandle(self._handle)
+            if not self._api.CloseHandle(self._handle):
+                raise self._win_error(self._last_error())
             self._handle = None

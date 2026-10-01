@@ -190,3 +190,145 @@ def test_owned_windows_job_terminates_descendant_and_preserves_external(tmp_path
         owner.cancel()
         external.terminate()
         external.wait(timeout=5)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="real Windows venv launcher and Job Objects")
+def test_windows_venv_barrier_owns_actual_interpreter_before_native_start(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import _winapi
+    from orchestration.native_agents import process as native
+    from orchestration.native_agents.windows_job import WindowsJob
+
+    assert sys.prefix != sys.base_prefix  # Run from the private installed venv.
+    ready = tmp_path / "barrier-ready"
+    # Instrument only the startup resource: publish the real interpreter PID
+    # before the unchanged stdin barrier. Job assignment waits for this signal,
+    # forcing the launcher/interpreter race instead of relying on timing luck.
+    original = Path(native.__file__).with_name("_windows_exec.py").read_text()
+    (tmp_path / "_windows_exec.py").write_text(
+        "import os,pathlib\npathlib.Path(" + repr(str(ready)) + ").write_text(str(os.getpid()))\n" + original,
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(native, "__file__", str(tmp_path / "process.py"))
+    assign = WindowsJob.assign
+    assigned: list[int] = []
+
+    def assign_after_interpreter_ready(job: WindowsJob, pid: int) -> None:
+        deadline = time.monotonic() + 3
+        while not ready.exists():
+            assert time.monotonic() < deadline
+            time.sleep(0.01)
+        assigned.append(pid)
+        assign(job, pid)
+
+    monkeypatch.setattr(WindowsJob, "assign", assign_after_interpreter_ready)
+    native_pid = tmp_path / "native-pid"
+    script = ("import os,pathlib,time;pathlib.Path(" + repr(str(native_pid)) + ").write_text(str(os.getpid()));"
+              "print('{\"type\":\"item.started\",\"item\":{\"id\":\"one\",\"type\":\"command_execution\"}}',flush=True);"
+              "time.sleep(30)")
+    # The native stand-in is real Python, with no venv redirector of its own.
+    plan = fake_plan(tmp_path, script).model_copy(update={
+        "argv": (sys._base_executable, "-u", "-c", script),
+    })
+    cleanup = WindowsJob()
+    handle = None
+
+    def observe(event: object) -> None:
+        nonlocal handle
+        if handle is None:
+            pid = int(native_pid.read_text())
+            handle = _winapi.OpenProcess(0x00100000 | 0x0001, False, pid)
+            assign(cleanup, pid)  # Own only this test's child, including on RED.
+
+    external = subprocess.Popen([sys._base_executable, "-c", "import time;time.sleep(30)"])
+    try:
+        result = run_headless(plan, tmp_path / "out", timeout_seconds=5,
+                              max_tool_calls=1, provenance="mock", on_event=observe)
+        assert handle is not None
+        assert _winapi.WaitForSingleObject(handle, 500) == 0
+        assert assigned == [int(ready.read_text())]
+        assert result.state == "unknown" and result.exit_code is not None
+        assert result.usage.tokens is None and result.remote_effect == "unknown"
+        assert AttachedSession("codex", "external").cancel() is False
+        assert external.poll() is None
+    finally:
+        cleanup.terminate()
+        cleanup.close()
+        if handle is not None:
+            _winapi.WaitForSingleObject(handle, 3000)
+            _winapi.CloseHandle(handle)
+        external.terminate()
+        external.wait(timeout=3)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="real Windows Job Object and inherited descriptors")
+def test_windows_cancel_after_parent_exit_cleans_descendant_and_stdio(tmp_path: Path) -> None:
+    child = "import time;print('child ready',flush=True);time.sleep(30)"
+    script = "import subprocess;subprocess.Popen([" + repr(sys._base_executable) + ",'-u','-c'," + repr(child) + "])"
+    parent = subprocess.Popen([sys._base_executable, "-u", "-c", "import sys;exec(sys.stdin.read())"],
+                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    owner = OwnedProcess(parent)
+    external = subprocess.Popen([sys._base_executable, "-c", "import time;time.sleep(30)"])
+    try:
+        assert parent.stdin is not None and parent.stdout is not None
+        parent.stdin.write(script.encode())
+        parent.stdin.close()
+        parent.stdin = None
+        assert parent.stdout.readline() == b"child ready\r\n"
+        assert parent.wait(timeout=3) == 0
+        with pytest.raises(subprocess.TimeoutExpired):
+            parent.communicate(timeout=0.05)
+        started = time.monotonic()
+        assert owner.cancel() is True
+        assert time.monotonic() - started < 4
+        parent.communicate(timeout=0.5)
+        assert owner.cancel() is False
+        assert AttachedSession("codex", "external").cancel() is False
+        assert external.poll() is None
+    finally:
+        owner.cancel()
+        for stream in (parent.stdout, parent.stderr):
+            if stream is not None:
+                stream.close()
+        external.terminate()
+        external.wait(timeout=3)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="real Windows owned descendant after native exit")
+def test_windows_headless_parent_exit_keeps_descendant_cleanup_unknown(tmp_path: Path) -> None:
+    import _winapi
+    from orchestration.native_agents.windows_job import WindowsJob
+
+    child_pid = tmp_path / "child-pid"
+    child = "import time;time.sleep(30)"
+    script = (
+        "import pathlib,subprocess\n"
+        "p=subprocess.Popen([" + repr(sys._base_executable) + ",'-c'," + repr(child) + "])\n"
+        "pathlib.Path(" + repr(str(child_pid)) + ").write_text(str(p.pid))\n"
+        "print('{\"type\":\"turn.completed\",\"usage\":{\"input_tokens\":0,\"output_tokens\":0}}',flush=True)\n"
+    )
+    cleanup = WindowsJob()
+    handle = None
+
+    def observe(event: object) -> None:
+        nonlocal handle
+        pid = int(child_pid.read_text())
+        handle = _winapi.OpenProcess(0x00100000 | 0x0001, False, pid)
+        cleanup.assign(pid)  # A finally-only safety net for this exact test child.
+
+    try:
+        result = run_headless(fake_plan(tmp_path, script), tmp_path / "out", timeout_seconds=5,
+                              max_tool_calls=5, provenance="mock", on_event=observe)
+        assert handle is not None and _winapi.WaitForSingleObject(handle, 500) == 0
+        assert result.exit_code == 0 and result.state == "unknown"
+        assert "descendants" in (result.reason or "")
+        assert result.usage.tokens is None and result.usage.cost_usd is None
+        assert result.remote_effect == "unknown" and result.acceptance.task_live == "not_run"
+        assert json.loads((tmp_path / "out/native.jsonl").read_text())["usage"]["input_tokens"] == 0
+    finally:
+        cleanup.terminate()
+        cleanup.close()
+        if handle is not None:
+            _winapi.WaitForSingleObject(handle, 3000)
+            _winapi.CloseHandle(handle)
