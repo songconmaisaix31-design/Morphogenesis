@@ -20,3 +20,8 @@
 I原morph-research-integration-0930/branch morph-research-integration-0930负责每阶段已冻结输入的独立集成与验收，只tests/integration/**（原checker文件历史版本只读）、自身报告和最少import/config/type胶水；领域问题回原Owner。主控仅docs/PLAN.md、本计划、docs/RESEARCH_NEXT_ACCEPTANCE_1001.md；不写任何业务或观察脚本。
 
 保持Python/LangGraph/Pydantic/SQLite/httpx/MCP/官方SDK及既有目录。核心锁不变，由现有owner管理；产品pin更新不等于新增依赖架构。所有阶段清晰commit+normal push/remoteexact/clean；源代码SHA与报告SHA分列。无force、秘密入库、共享WIP覆盖、未知远端请求重放或吞错冒成功。中国StepFun凭据只正式产品使用且保持外置；不重复quota/auth探针。只原owned sandbox可按身份核对恢复/known清理后停止。更多Agent兼容、EvoMap、Hub/main/tag/发布均不在本轮。
+
+## 当前状态
+阶段1完成：代码SOURCE ec24ebb4519845bf677786e0480260bc76c85407；A报告dbbc08da5b5dbe4200beee6ffac254c913dc8db7，I完整双平台报告90dd1bc418d3adfb9e3151fbde9f74635af25ef8均正常push/root核验。原full CI run36850437153/attempt1 Win1109pass5skip、Linux1111pass3skip以及type/build/SDK/实际wheel分发全通过。
+P阶段2WRITE已root明确放行，core pin固定代码ec24，开发实际renew与readonly紧凑audit清单；既有case06原PASS与peer新增NOT_SATISFIED分列。C/B提前READ_ONLY_PREPARE已完成接口proposal，未有任何Stage3 write，待P阶段2源码/检查/清单验收再按固定互斥路径开发。
+科学只在累计最终正式冻结版本I独立安装后统一运行必要两类live；当前无新native/model/API/科学/服务/真实key读取，docs-only不科学重跑。原所有首失败/unknown/历史证据不回写。
