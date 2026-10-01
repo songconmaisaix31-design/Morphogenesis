@@ -66,9 +66,25 @@ class OwnedProcess:
         process = self._process
         if os.name != "nt" and self._pgid is not None:
             return self._cancel_group()
+        if self._job:
+            # Root exit alone says nothing about descendants still holding stdio
+            # or native session persistence. Retain Job ownership until empty.
+            job = self._job
+            try:
+                active = job.active_processes() > 0
+                if active:
+                    job.terminate()
+                    deadline = time.monotonic() + 3
+                    while job.active_processes():
+                        if time.monotonic() >= deadline:
+                            raise subprocess.TimeoutExpired("owned Windows Job cleanup", 3)
+                        time.sleep(0.01)
+                process.wait(timeout=3)
+                return active
+            finally:
+                job.close()
+                self._job = None
         if process.poll() is not None:
-            if self._job:
-                self._job.close()
             return False
         if os.name == "nt":
             if self._job:
@@ -135,10 +151,15 @@ def _spawn_owned(plan: LaunchPlan, stdin: BinaryIO | None,
         return OwnedProcess(subprocess.Popen(plan.argv, cwd=plan.workspace, env=child_environment(),
                                              stdin=stdin, stdout=stdout, stderr=stderr,
                                              shell=False, start_new_session=True), private_group=True)
-    # Python waits for one startup message. Assign Job ownership BEFORE the native
-    # CLI (or any MCP/tool child) can execute, instead of racing CLI initialization.
+    # The Windows venv executable is itself a native redirector: it can spawn
+    # the interpreter BEFORE the Python stdin gate, outside a late-assigned Job.
+    # Start the actual CPython interpreter directly, with stdlib-only startup;
+    # the barrier needs no venv imports. Native argv/environment remain unchanged.
     barrier = Path(__file__).with_name("_windows_exec.py")
-    process = subprocess.Popen([sys.executable, str(barrier)], cwd=plan.workspace,
+    barrier_python = getattr(sys, "_base_executable", None)
+    if not isinstance(barrier_python, str) or not Path(barrier_python).is_file():
+        raise OSError("Windows startup barrier requires the actual CPython interpreter")
+    process = subprocess.Popen([barrier_python, "-I", "-S", str(barrier)], cwd=plan.workspace,
                                env=child_environment(), stdin=subprocess.PIPE,
                                stdout=stdout, stderr=stderr, shell=False)
     owner = OwnedProcess(process)
@@ -279,7 +300,7 @@ def run_headless(plan: LaunchPlan, evidence_dir: Path, *, timeout_seconds: float
     finally:
         if owner is not None:
             cleaned = owner.cancel()
-            if cleaned and os.name != "nt" and reason is None and exit_code is not None:
+            if cleaned and reason is None and exit_code is not None:
                 reason = "owned descendants outlived native exit; usage and remote effect may be unknown"
     known_tokens = [item.tokens for item in terminal_usage]
     known_costs = [item.cost_usd for item in terminal_usage]
