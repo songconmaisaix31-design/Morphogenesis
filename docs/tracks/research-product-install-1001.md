@@ -279,3 +279,89 @@ pending profile的正式run在读取真实认证之前由原selection前置条�
 安装artifact、源码和实际33/25.60s退出已薄交root与原I，P摘要另行只读，未让其它Owner写本轨state。之后只做本报告commit/push，A REPORT完整SHA/remote exact/clean在最终Handoff中单列，不能把报告SHA当产品源码SHA。
 
 **结论仅为4428固定wheel的独立installed prepared/contract_local通过。** 按root/D当时证据，真实正式OAuth未就绪，用户官方login尚无可用于本轨验收的回复，不能假定已经登录；本轨没有重新检测或代为login。真实正面OAuth/server/model请求和完整三角色科研checker均 **NOT_RUN**。case04作者实验passed/known/destroyed但源候选quarantine、Claude首次Notloggedin/tools0/unknown/null、原fullchecker缺inheritance RED及所有旧clock/raw不变，不能由本地成功fixture补绿；下一登录确认、同配置真实检查与科研case处置由root负责。
+
+## 2026-10-01：12845 StepFun profile 固定 wheel 独立验收
+
+本段属于 `task_432c0ffea86e / ctx_b141ba84f5dd`，只验收 **installed prepared / contract_local**。产品 **SOURCE=12845c2f53eba43cbf1dfb3e37a662c9a34c84f9**，产品分支 `songconmaisaix31-design/research-product-1001`；核心仍为 **CBC=cbc4dede782eb79b9c007520d96d7958857da0af**。A 报告分支为 `songconmaisaix31-design/morph-research-agents-0930`，本段之前的 A REPORT `7576bb6b8b752021c0ec736bc8f1a0b5e2f28cd9` 保留；本段最终 A REPORT SHA 随 commit/push 后的 Handoff 单列，绝不是产品 SOURCE。原 eabc/4428 安装、报告、失败和其它 Owner 状态未覆盖。
+
+按当前 TASK/AGENTS/PLAN、root `RESEARCH_NEXT_PLAN_1001.md` 和 SOURCE README 执行。范围仍为两 CLI 品牌、三角色、一次真实成果继承的后续验收准备；EvoMap、扩 Agent 和 NIST 抽离后置。没有改产品/core/原测试、阈值、锁、checker、认证或全局配置，只有本报告入库。
+
+### 两轮 artifact 与首次失败
+
+两目录创建前都检查不存在；它们各有自己的 archive、全新 CPython **3.13.13** venv、wheel、copy-mode installed distributions、Node dependencies、fixtures、TEMP/TMP 和完整日志。没有复制/激活旧 venv、node_modules 或测试产物。仅复用 A 自有同锁官方下载缓存；沿用并适配的只读观察脚本源码不是安装或测试结果。
+
+```powershell
+$R = 'C:/Users/DW/orca/workspaces/Morphogenesis-Research/research-product-1001'
+$F = 'C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-agents-install-stepfun-1001-state-ctxb141ba84f5dd'
+$X = 'C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-agents-install-stepfun-exact-1001-state-ctxb141ba84f5dd'
+$S = '12845c2f53eba43cbf1dfb3e37a662c9a34c84f9'
+```
+
+首轮 `$F` 使用普通 `git archive`，继承本机 `core.autocrlf=true`：auth.py Git blob **9715 bytes/LF**，archive/wheel/site **9896 bytes/181 CRLF**。`10-source-provenance-first.log` 严格 bytes 比较首次 **exit1/AssertionError**，诊断原样留在 `10-source-first-failure-diagnostic.log`；没有以 CRLF/AST 等价冒充通过。首轮原 40 项从该 installed wheel 读取业务，**40 passed / 27.08s / exit0**，日志/XML为 `$F/logs/08-pytest-original40-first.*`；该绿子集不能替代首轮 bytes RED。
+
+root 通过 `msg_72928694e4cd` 和 ask 回答明确授权必要安装准备修复：保持首轮全套 artifact，只用 **命令级** `git -c core.autocrlf=false archive` 在 `$X` 全新安装；先过严格13+2 bytes/nlink，再对最终安装复验原40一次。没有修改 global Git 或产品源。最终 `$X` 严格门禁 **exit0** 后，原40仅执行一次，**40 passed / 36.64s / exit0**。它是后来的新结果，首RED和首40PASS不改写。
+
+### 实际命令与本轮结果
+
+在各自新 archive 下执行以下安装命令；日志01至04均首次 exit0。进程局部 TEMP/TMP 指向该私有根，所有 pytest basetemp 在其内；OPENBLAS/OMP/MKL 各为1。UV_CACHE_DIR 只指向 A 自有 `morph-research-agents-install-1001-state-ctxb9ec0f8a8fcd/cache/uv`，npm cache 为本轮私有根下 `cache/npm`，未改全局 index/network。
+
+```powershell
+git -C $R -c core.autocrlf=false archive --format=tar --output="$X/archives/product-12845-lf.tar" $S
+tar -xf "$X/archives/product-12845-lf.tar" -C "$X/product-source"
+# 以下 export/build 在 $X/product-source；使用实际安装，不可 editable。
+uv export --frozen --no-emit-project --no-hashes --output-file "$X/locked-test-requirements.txt"
+uv venv "$X/venv" --python C:/Python313/python.exe
+uv build --wheel --out-dir "$X/dist"
+uv pip install --link-mode copy --python "$X/venv/Scripts/python.exe" -r "$X/locked-test-requirements.txt" "$X/dist/morphogenesis_research-0.1.0-py3-none-any.whl"
+& "$X/venv/Scripts/morph-research.exe" version
+& "$X/venv/Scripts/morph-research.exe" setup-assets
+& "$X/venv/Scripts/morph-research.exe" doctor
+& "$X/venv/Scripts/python.exe" -I "$X/verify_install.py"
+& "$X/venv/Scripts/python.exe" -I "$X/verify_provenance.py"
+& "$X/venv/Scripts/python.exe" -I -m pytest -q -rA "--basetemp=$X/pytest-original40-first" "--junitxml=$X/logs/08-pytest-original40-first.xml" "$X/product-source/tests"
+```
+
+正式 version/setup-assets/doctor 为日志05至07，均 **exit0**；doctor 为 `ready_local/schema1.14.0/models_experiments_hub_called=false`。`09-install-verification-first.log`、`08-install-verification.json`、`10-source-provenance-first.log`、`10-source-provenance.json` 记录最终安装来源与严格比较；原40日志/XML为 `$X/logs/08-pytest-original40-first.*`。pytest 的 `-I` 与 archive 原 importlib mode 让业务来自本轮 wheel 的 site-packages，未使用 archive src imports、旧环境或作者测试结果。
+
+实际安装 **95** 个 distribution，集合和每个版本全等本平台 frozen runtime+dev lock。core direct_url 的 commit/requested_revision 都为 CBC；product direct_url 指向 `$X/dist` 的本次 wheel、非 editable。**13 个产品文件 Git/SOURCE archive/wheel/site bytes 全等，安装 st_nlink 全为1**；archive 原测试、README、pyproject、uv.lock 和产品报告也与固定 Git bytes 相等。uv.lock/Node两份manifest与原9dd/599全等，guard.py 与c25全等；permissions.py 已有本次 StepFun 改动，没有错误沿用旧 permissions bytes 等同结论。
+
+CBC `experiment.py` 和 `NumAcc4.dat` installed bytes 等于固定 Git blob、nlink1。`26-registered-inputs-first.log/json` 进一步读取正式两fixture observe中的六角色 registered experiment_plan：code/data local_path 都准确指向本轮 installed CBC，bytes相同，处于各模型 workspace 外；没有改原科学模板或执行实验。原 CBC 标准和原 core/产品门禁未修改，不重跑 core 全量或 CI。
+
+7 个 Node lock 条目的完整 **version/resolved/integrity/license** 与 CBC 全等，实际包版本匹配，详细记录在新 inventory JSON。正式 setup-assets 在本轮 site-packages 安装原依赖；NodeAssetBridge 真实 canonical 和 invalid Gene/schema/id rejection 均通过，两次观测的 Node Popen 使用本轮 installed bridge，NODE_PATH 没有非空注入，未借旧 node_modules。SDK1.14仅为原本地依赖，没有新 EvoMap 协议或网络验收。
+
+### 正式 pending 与 StepFun 离线入口
+
+两个 fixture 各有正式产品创建的独立 project/state/profile：`offline-install-a1001-stepfun-pending-01` 与 `offline-install-a1001-stepfun-api-01`，均无真实科研 sessionUUID、实验、结果或 adoption；初始化只复用原 core seed/本地账本，不创建 I 正式科研 caseclock。以下命令全部调用本轮 installed console entry，关键 argv/权限/身份/预算/MCP 参数由产品构造，没有观察脚本补 flags、手工 claim/approve/result 或改账本。
+
+```powershell
+& "$X/venv/Scripts/morph-research.exe" init --profile "$X/offline-pending-profile.json"
+& "$X/venv/Scripts/morph-research.exe" inspect --state "$X/offline-install-a1001-stepfun-pending-01-state" --phase interrupt
+& "$X/venv/Scripts/morph-research.exe" inspect --state "$X/offline-install-a1001-stepfun-pending-01-state" --phase replication
+& "$X/venv/Scripts/morph-research.exe" observe --state "$X/offline-install-a1001-stepfun-pending-01-state"
+& "$X/venv/Scripts/python.exe" -I "$X/verify_prepared.py"
+& "$X/venv/Scripts/morph-research.exe" init --profile "$X/offline-stepfun-profile.json"
+& "$X/venv/Scripts/morph-research.exe" inspect --state "$X/offline-install-a1001-stepfun-api-01-state" --phase interrupt
+& "$X/venv/Scripts/morph-research.exe" inspect --state "$X/offline-install-a1001-stepfun-api-01-state" --phase replication
+& "$X/venv/Scripts/morph-research.exe" observe --state "$X/offline-install-a1001-stepfun-api-01-state"
+& "$X/venv/Scripts/morph-research.exe" run --state "$X/offline-install-a1001-stepfun-api-01-state" --phase replication
+& "$X/venv/Scripts/python.exe" -I "$X/observe_installed_cli.py" run --state "$X/offline-install-a1001-stepfun-api-01-state" --phase replication
+& "$X/venv/Scripts/morph-research.exe" observe --state "$X/offline-install-a1001-stepfun-api-01-state"
+& "$X/venv/Scripts/python.exe" -I "$X/verify_stepfun_prepared_corrected.py"
+& "$X/venv/Scripts/python.exe" -I "$X/verify_registered_inputs.py"
+```
+
+pending 门禁日志11至15 **exit0**；声明两 auth pending，key不存在，inspect `probe=null/model_invoked=false/acceptance=prepared/session_id=null`，两runtime request/argv/HostBinding/venv MCP参数及预算895s/64tools由产品拥有。原900s/64tools预算和3600s/attempts3 core limits保持。StepFun init/双inspect/observe日志16至19 **exit0**：显式 `claude_auth=stepfun-api`、外部绝对 `claude_api_key_file=$X/nonexistent-stepfun.key`、`claude_api_base_url=https://api.stepfun.ai/`、`claude_model=step-3.5-flash`；key path在Git与模型workspace外且文件不存在，不读取真实secret。
+
+StepFun Claude plan为 **dontAsk/准确11个MCP allowed_tools/strict MCP/空tools/禁hooks、slash commands及chrome/空setting-sources/显式model**，settings只有禁hooks和公开base_url，MCP env清空所有相关credential/provider名字。Codex model仍None、原read-only/never/direct11配置不变；inspect把 **CLI品牌Claude、provider StepFun、requested_model step-3.5-flash** 分列，actual_model=not_observed，quota=unknown。key路径只在可信profile/安全声明，不进argv/MCP；这些路径没有token或真实key。组织 managed policy仍由官方CLI约束，本地 `oauth_token` label不代表Anthropic订阅。
+
+日志21正式 replication run **预期exit2**：`formal_role_dependency_not_completed`，发生于实际依赖guard，先于 require_auth/probe/key读取/native启动。日志22在同installed console entry加载原 main，CPython audit/call profiling没有 mock/参数补造：**require_phase_ready=1，其余Popen/socket.connect/socket.bind/os.system/key open/require_auth/普通和selected probe/native/MCP写入/sandbox key/StepFun credential context全0**。两个 run都因原依赖未满足直接拒绝，没有未知远端效果的重放。
+
+观察脚本首次把整份 observe JSON要求相等，日志24 **exit1**；诊断 `24-observer-first-failure-diagnostic.log` 显示唯一差异是原只读计算字段 `runtime_remaining` 从3589.4864降至3576.0789，tasks/audit全等。原脚本/失败日志保留；另存 corrected 只读脚本按原observe语义比较任务和audit全等、剩余时间正常递减，日志25 **exit0**、`24-stepfun-prepared-verification.json` 记录原始数值与全0计数。没有修改产品/test assertions/阈值。原三task始终available、attempts0、owner/result null、effect_applied=false，无probe、MCP config、native、实验或observation成果文件。
+
+### 原测试与实际限制
+
+原40的7个StepFun新增边界及33个原回归都实际读取本轮 installed业务，断言不删不弱化。真实Claude2.1.238版本/本地status解析测试只使用fake sentinel和隔离CLAUDE_CONFIG_DIR、假user settings；真实Codex0.159 parser只用隔离CODEX_HOME/version/mcp-get。没有读取/复制实际凭据或改父终端HOME/auth/model；通过的status仅local配置解释，不能证明quota/API/model可用。原本地MCP子进程测试仅list/discover/context及越权拒绝，无科研实验。成功正面认证fixture、mock model/source绑定和未知/null断言均保持各自local/mock层级。
+
+只读artifact摘要已发送root。此前向旧I `ctx_c6bb0ebb6ad6` 的投递被CLI明确拒绝（failed dispatch不可读）；root `msg_bbde0fc9761e`确认当前无active I，将在验收本报告后自行交接原I。A未新派Agent/Run、修改I状态或向settled生命周期重发。
+
+**最终仅为12845固定wheel independent installed prepared/contract_local通过。** root已知真实StepFun catalogue200、唯一messages402 insufficient_quota；本轨没有读取那把key、重放请求、尝试login/status真实账号或重新运行case01–04。真实usage/cost仍unknown/null，原失败、case quarantine、fullchecker RED、raw/clock均不回写；本地40绿和fake status不能补绿真实链。三角色一次真实成果继承、task_live和adoption仍 **NOT_RUN**，402额度处置及真实case release由用户/root/I完成。没有模型/科研API/sandbox/Docker/Hub/EvoMap调用、core全量CI、43 inventory或外围重复测试；本次唯一额外40复验有root明确授权和安装字节变更理由。
