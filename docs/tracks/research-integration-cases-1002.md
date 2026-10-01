@@ -1,7 +1,8 @@
 # I / 两类科研案例集成与独立验收
 
-工程和独立安装已通过；root `msg_35c7ce0634cd` 明确释放两类新真实案例。
-本阶段两类新 task_live 尚 NOT_RUN；旧 case06 不能替代新闭环或新有效续租标准。
+工程和独立安装已通过；root `msg_35c7ce0634cd` 曾明确释放两类新真实案例。
+新NIST首同UUID恢复为RED，完整checker首次exit1；root已hold后续native与科学并交原A返修。
+synthetic新科学NOT_RUN；当前完整目标未完成，旧case06不能替代新闭环或有效续租标准。
 
 ## 冻结来源
 
@@ -65,6 +66,41 @@ python -m build、npm run check:sdk、原wheel安装后-I tools/check_distributi
 - X首次完整50为7FAIL43PASS63.82s，因我漏正式setup-assets导致SDK前置失败；原9日志不覆盖。原锁Node安装后相同源码/断言的18完整50绿分列。
 - C原116PASS1FAIL618.16s、08b首121PASS1FAIL204.21s；B3.068s RED、默认hardlink13/14 RED和旧P CRLF安装RED全部保留，不以新绿洗掉。
 - 旧01–06 raw/clock/RED/unknown及旧case06原完整PASS/peer新标准NOT_SAT只读。
+
+## 新NIST首真实失败与安全封存
+
+唯一新swarm `research-formal-1002-nist-01`，R/live下host/project/state/profile在创建前实际不存在；
+固定X正式init首次exit0，仅一次新clock。原精确owned服务安全核验后启动，未新建服务/容器。
+复合准备命令首被工具自动审查拒绝、CreateProcess未执行；root给最小单动作正常审查处置后，
+docker start、纯apply_patch配置和各正式CLI动作分别执行；未禁用/绕过审批。
+
+原始证据分别位于R/live/research-formal-1002-nist-01-host及research-formal-1002-nist-01-state。
+
+| 正式阶段 | 首次实际结果 | 对应host/state内原始证据 |
+|---|---|---|
+| interrupt | CLI exit0；native UUID01a0f7df-bcbd-7cd3-8aec-e2dda578d278，cancelled/exit1，55.5414s/5tools，guard interruption=true、warnings2/errors0 | formal-interrupt.*、interrupt-observation/native/audit、interrupt-actual-summary.json |
+| 实际TTL | token1 expiry1790865114.4019966；观察1790865110.3096352余4.09s，实际5s等待后过期 | ttl-expired-before-resume.json；未手工expire/改账本 |
+| 同UUID resume | 正式首exit1；native failed/exit1，12.0067s/0tools，native stdout空、stderr747bytes，remote/usage/cost未知 | formal-resume.*、resume-observation/native/audit |
+| 原完整固定归档checker | FIRST exit1，FileNotFoundError缺replication-observation.json；未补造文件/放宽断言 | full-checker-first.command/stdout/stderr/exit |
+| 科学事实 | 原账本1claim/1renew、0stale拒绝、0research_execution、0execution_unconfirmed，experiments空；无候选/继承/adoption | resume-first-failure-summary.json、formal-observe-after-failure.* |
+
+首恢复的主错误是官方`thread-store conflict ... already has an active writer (code -32600)`；
+前置两条`codex_models_manager::manager ... failed to refresh available models: request timed out`分列。
+恢复没有完成两个合法旧token拒绝/freshclaim，也未开展任何实验；peer/third和synthetic均停在NOT_RUN。
+原生remote effect未知不能由0tool重标known，trusted科学未派发单独记录。
+
+guard的interruption=true不等于完整owned树退出：14:36只读核验仍存在初次interrupt链
+Node78292→Codex81300→Python82928→77316（原creation14:30:29–37Z、精确新case exec、非resume）。
+与active writer主错误一致，归原A native lifecycle/Windows owned清理域；I不修改领域代码。
+root授权逐PID/creation/完整命令身份复核仅清该owned链；实际操作前四PID已全部退出，
+没有执行任何Stop-Process，退出原因不推断。14:41:03Z精确case/UUID匹配进程集为空。
+保留owned-native-closure.json的首非零、owned-cleanup-actions.json的already_exited和after.json实际零。
+
+原fullID eb6152fbdee01a0044cc1fdd881cf05c00dbbf3905411bc6c5a480f6a7141ec6
+已docker stop exit0并只读核验exited；实际compose_project为morph-research-c-0930。
+未实验故无sandbox创建/销毁可冒称，其他容器/终端/全局配置均未操作。
+原nist-01不重放、不重置clock，不切model/provider/endpoint/key，不把writer清零回写首恢复成功。
+当前I Task保持active等待root原Owner修复、新冻结集成与明确新unique科研释放；未worker_done。
 
 新NIST与synthetic各需三distinct native UUID/twoCLIbrands/三once实验、各role当前token有效成功续租、
 真实作者中断/TTL/sameUUID恢复及两合法stale拒绝、复现/文件验证批准应用、第三role本地再验证继承和唯一adoption。
