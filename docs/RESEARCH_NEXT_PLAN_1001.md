@@ -6,6 +6,8 @@
 
 ## 原始任务与顺序
 
+07:22 UTC当前返修：case05唯一正式作者启动11.09431s/tools0，UUID01a0f652-4072-79b1-90f8-bf59957a8a8d；未claim、未实验、未预期interrupt，后续角色停止。原完整checker首运行exit1缺resume-observation，same owned服务已实际exited/false；原失败/unknown/null只读。原D task_5d8a5c0e07cf/ctx_d68905b1a159核对官方0.159：两条priority/fallback metadata是WarningEvent，被JSONL映射ErrorItem但不fatal，产品guard误判后主动cancel。原P task_c630e2f5f220/ctx_db42387e7670仅产品层最小启动诊断分类及必要离线回归；主控允许按官方fallback metadata逻辑继续，但不换模型/tier/全局配置或放行真实fatal/未知错误，raw警告完整保留。P新冻结来源后原A另建独立安装，root再决定明确唯一新正式案例；旧05不重放、不改clock/完整checker，不扩Agent/案例/EvoMap。
+
 07:08 UTC正式case05放行：A REPORT83c78d86e2d70cfa1c5bd0ad0d42d18c78ff71b7已push、remote exact/clean，精确中国SOURCEe7ecd新独立安装原42一次42pass35.23s及来源/SDK/正式入口门禁通过，P/A均正常settle-retain。原I只读采用morph-research-agents-install-cn-1001-state-ctx660fbdafe8d1，获准在自己新research-formal-1001-05 project/state/profile创建一次新clock，正式Codex作者中断→真实TTL→同UUID恢复及stale拒绝→Claude/StepFun中国独立复现→文件验证批准应用→第三Codex本地再验证/真实继承adoption→原完整checker；三角色distinct UUID、原全部科学/预算/权限不变。不混旧case或fixture。只可恢复原唯一owner核对的8097 sandbox fullID，不创建新服务/大实验；未知实际远端效果或原生错误立即停报，不自动重放。范围完成后只报告，后续扩容/抽离/EvoMap仍未放行。
 
 07:01 UTC中国版本进度：P SOURCE e7ecd6958b6b6447f832b57c518ab50dd83fdebe与doc-only REPORT b35a3c1565d3594b08046858854d83847ef4d10b已push、remote exact/clean；仅auth/config/README/tests窄改，原40+2必要CN回归42pass36.35s与最后新增测试env恢复专项1pass2.94s保留，P新Task已正常settle-retain。原A task_a30bbb885488/ctx_660fbdafe8d1在同固定Agent/worktree/branch实际turn_started，精确新SOURCE与新独占安装完整42一次；安装完成后才能原I fresh正式科研case，旧artifact/科学clock不可混用。

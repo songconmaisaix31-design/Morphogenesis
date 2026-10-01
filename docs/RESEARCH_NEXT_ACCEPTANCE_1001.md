@@ -191,3 +191,9 @@ A REPORT83c78d86e2d70cfa1c5bd0ad0d42d18c78ff71b7已push，主控remote exact/cle
 ## 07:13 UTC case05派发参数纠错，冻结契约不变
 
 I当前task_59e714a5d01e/ctx_6c355b373448前置核对发现主控派发中的reverse与冻结原checker相冲突；主控直接读取原第231行要求所有role plan.parameters==(original,)，明确纠正派发为正式注册original参数。不是修改科学标准/业务/断言，独立复现仍要求独立Claude原生UUID及独立真实执行。原首个Git只读SSL失败保留，后有界正常读remote exact/clean。I未创建科研clock/UUID或读取key前提出此项，root已发当前Dispatch明确纠正并ACK，仍只推进唯一case05。
+
+## 07:22 UTC case05首native误判停止，原D/P窄返修
+
+原I实际turn_started创建一次正式case05后，仅恢复原核对owned服务并正式interrupt；root读取原native/observation/host证据：UUID01a0f652-4072-79b1-90f8-bf59957a8a8d、11.09431s、tools0、author available/token0/attempts0、未claim或科学，actual_interruption=false/native_error_count2/unknown/null。两条priority unsupported将被忽略及metadata fallback诊断被guard记录为error，正式产品主动取消。root立即阻止后续resume/Claude/inherit或任何新case重放；原完整checker首真实exit1缺resume-observation.json，日志原样保存；safe同ID服务inspect实际exited/false、exit0。根仓WIP与冻结core/checker不变，原目标仍未完成。
+
+原D task_5d8a5c0e07cf/ctx_d68905b1a159实际启动只读诊断，固定官方0.159代码证明WarningEvent编码为item.completed ErrorItem/statusRunning，真实Error/turn.failed另有critical路径；guard71-80仅既有hostnotice豁免、runner stop_requested/core取消导致首退出，不能把poll exit1冒报原生致命模型失败。root允许官方fallback metadata继续，暂无额外strict metadata readiness要求，但不证明实际metadata恢复或科学可用、不能改model/tier/provider/global auth。原P task_c630e2f5f220/ctx_db42387e7670实际启动，仅guard/runner和最少必要tests/README/自身报告可写：官方精确version/context/envelope/message、原direct11政策约束内完整保留startup warnings，toperror/turnfailed/未知/mismatch/重复/真实认证执行网络错误仍failclosed。不读取真实key/API/model/MCP/sandbox；保留原42/全部科学预算超时断言，源码freezepush后原A新独立安装，再root明确新案例，不续旧05或重复接口探针。
