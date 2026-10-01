@@ -6,10 +6,10 @@
 
 | 轨道 | 固定Owner / Worktree / Branch | write_paths与验收 |
 |---|---|---|
-| D 文档定位 | 单Orca Codex Worker / morph-qwen-research-positioning-1002 / songconmaisaix31-design/morph-qwen-research-positioning-1002 | README.md、docs/QWEN_ALIYUN_RESEARCH.md；EvoMap在README精确一句、首页Qwen/阿里云/科研、云模型与本地CPU/GPU及可选云计算的职责/数据流/配置与执行边界清楚，当前状态不虚报，原CLI/源码路径链接准确，Markdown链接/图/差异检查。领域修改与返修始终同Owner，normal commit/push。 |
-| I 集成验收 | 独立Orca Codex Worker / morph-qwen-research-positioning-integration-1002 / 单独分支 | 正常合入D完整SHA及主控一页计划、只少量文档链接胶水，检查仅三Markdown路径变化；确认远端main基线与祖先后正常push HEAD:main，远端exact与clean、保存当前用户WIP。未授权改业务/锁/全局auth/云端部署/模型调用。 |
+| D 文档定位 | 复用已验证I终端作新D Owner / morph-research-integration-0930 / 新分支songconmaisaix31-design/morph-qwen-research-readme-1002 | README.md、docs/QWEN_ALIYUN_RESEARCH.md；EvoMap在README精确一句、首页Qwen/阿里云/科研、云模型与本地CPU/GPU及可选云计算的职责/数据流/配置与执行边界清楚，当前状态不虚报，原CLI/源码路径链接准确，Markdown链接/图/差异检查。领域修改与返修始终同Owner，normal commit/push。 |
+| I 集成验收 | 复用已验证B终端作独立I / morph-research-space-0930 / 新分支songconmaisaix31-design/morph-qwen-research-main-1002 | 正常合入D完整SHA及主控一页计划、只少量文档链接胶水，检查仅三Markdown路径变化；确认远端main基线与祖先后正常push HEAD:main，远端exact与clean、保存当前用户WIP。未授权改业务/锁/全局auth/云端部署/模型调用。 |
 
-主控只本计划与状态/验收；不写README正文/产品路线正文或检查脚本。最少两名依次接续，无人为并行重构。正式main更新已由用户当前指令授权，须在可审查候选和检查完成后执行，不force；远端若推进则重新核对保留历史。历史开发包和失败记录不改，EvoMap集成代码不删。不得声称实测Qwen或新阿里云科研compute尚未运行；文档提交不重复科学实验。
+启动恢复：新terminal的两次agent_readiness timeout均Task未执行、owned terminal已正式release；Task2548809a3337以失败保留。改用已验证原I/B idle终端，各在自身clean Worktree从main基线建立本轮新Branch，原科研Branch7b66/d228不动；新scope/newTask非复用settledIDs。主控只本计划与状态/验收；不写README正文/产品路线正文或检查脚本。最少两名依次接续，无人为并行重构。正式main更新已由用户当前指令授权，须在可审查候选和检查完成后执行，不force；远端若推进则重新核对保留历史。历史开发包和失败记录不改，EvoMap集成代码不删。不得声称实测Qwen或新阿里云科研compute尚未运行；文档提交不重复科学实验。
 
 ---
 # Morphogenesis 接手与核心闭环一页计划
