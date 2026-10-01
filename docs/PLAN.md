@@ -1,3 +1,24 @@
+# 策略 v0.1：三条算法线＋一条收尾线（2026-10-02）
+
+事实源：本轮用户今日规划与五项停止条件，优先于历史开发包。采用 Swarm Harness：算法仅提供局部候选偏好，Agent 原 MCP 接口自主认领，原 TaskLedger 裁决合法性；没有全局派发者或第二份任务状态。主控仅计划、分发、决策及独立验收，不写业务代码。四位固定 Owner 在互斥路径开发，统一由独立 I 最后精确集成；未知效果不重试，首失败保留。
+
+核验基线：科研 CORE/REPORT branch 7b66f0dd0a285c1b6cf789aa3c5a41d22d655993（业务冻结 bf67c1a4134a25d009cff2acccbfab027999bea6）；私库产品 branch e9a68668ac1e15038faaa3b04a34e2a5aa0c9f4a（固定核心 bf67）。公开 main 31d7fc9eb1fd372ea2786131f539fe2de8506b53、私库 main 6c1451f5269ce8d7e2f92c8a794a691b41d8145c 均未包含上述正式科研代码，不能从只有初始化文档的 main 重写产品。各 Owner 在原 clean Orca Worktree 新建本轮 branch，保留全部旧分支与根2957/WIP。默认先推送候选，不修改默认 main；已异步询问正式入口验收是否新增有界科研运行及发布目标，等待用户约束，无答案不执行收费/科学新实验。
+
+| 轨 | 固定 Owner / Worktree / Branch | 互斥 write_paths 与交付 |
+|---|---|---|
+| A 正式产品策略入口 | 原产品 P / Morphogenesis-Research/research-product-1001 / songconmaisaix31-design/research-policy-v01-1002（产品 e9a 基线） | 产品 src/**、tests/**、README.md、pyproject.toml、uv.lock、docs/tracks/policy-entry-1002.md；禁止产品AGENTS与治理文档。先只读查全调用链，有接入则代码位置+真实 trace，无则复用 Router/偏好；原11工具与权限复用，策略/推荐/实际选择/覆盖/反馈可关联，版本pin在核心冻结后由同Owner更新。核心接口请求交 C，策略数学交 B，禁止拷贝执行器或第二账本。 |
+| B 有界评分校准 | 原 B / Morphogenesis/morph-research-space-0930 / songconmaisaix31-design/morph-policy-score-v01-1002 | swarm/router.py、必要 swarm/strategy.py；tests/swarm/test_policy_score_v01.py；docs/tracks/policy-score-1002.md。保留探索/衰减/稳定softmax，明确评分尺度、先验、旧/新策略版本及固定种子概率/反馈方向/极值/过期历史，循环求和外提；Pheromone历史读写仅通过 C Handoff，不跨轨改其文件。保持 choose API兼容，提供可关联推荐事件，不承担实际认领。 |
+| C 可信反馈与恢复 | 原 C / Morphogenesis/morph-research-sandbox-0930 / songconmaisaix31-design/morph-policy-feedback-v01-1002 | swarm/pheromone.py、swarm/worker_loop.py、swarm/research/service.py、models.py、server.py、必要 swarm/feedback.py；tests/swarm/test_policy_feedback_v01.py、tests/research/test_policy_entry_v01.py；docs/tracks/policy-feedback-1002.md。复用结果ID/验证报告/adoption事实做同事实同类学习幂等，可信事实重建派生偏好；保留 feedback_incomplete停止自动重放、未知效果无科学奖励。正式 MCP discover/claim复用B策略与现账本，A请求由本Owner落实；只必要局部研究接口/反馈接线，不改科学判定或能力/依赖/scope/租约/预算边界。 |
+| D 有限收尾与候选记录 | 原 I / Morphogenesis/morph-research-integration-0930 / songconmaisaix31-design/morph-policy-closeout-v01-1002 | orchestration/fc_logging.py、必要 swarm/fc_projection.py；tests/swarm/test_fc_projection_v01.py；docs/tracks/policy-closeout-1002.md、docs/STRATEGY_V01_ACCEPTANCE.md、必要 tests/integration/check_strategy_v01.py。日志投影不完整可见性/有界重建，任务事实/执行不得重放；报告当前状态放顶、版本组合与证据统一。Worker接线仅给 C Handoff；声明默认100候选/created_at窗口、窗口外本轮不参与探索，不做轮转或全局调度。原完整科研checkers保持原断言/字节，使用既有产品证据清单，不新造Manifest/hash/证明基础设施。 |
+
+共享规则：B/C优先发送窄 API Handoff（策略版本与recommend、可信事实恢复/历史先验契约），A读私库先给调用链诊断和接入缺口。允许精确 merge 已推送对方提交以消费接口，不改对方路径；返修仍原 Owner。核心 poetry.lock/T0不变；产品依赖锁由 A独占。没有模型公式搜索、额外 Agent兼容、案例抽离、外围算法比赛或桌面基础设施。所有新测试必须验证行为边界/崩溃恢复或正式入口，不堆实现镜像测试。
+
+独立 I：四线完成后在原 morph-research-agents-0930 新分支 songconmaisaix31-design/morph-policy-release-v01-1002 精确合 B/C/D及治理提交，仅少量 imports/config/type胶水；领域缺陷退原 Owner。核心候选完整工程/双平台门禁通过，A再pin该核心并推产品冻结SHA；I独立新环境/非editable安装核心产品验证 origin、正式入口trace、原完整checker与现有档案证据绑定，不把旧科学执行冒称新版本task_live。发布与新增科学运行按用户回复执行，未知阻塞须如实报告，不假冻结。
+
+停止条件（五项全部具备即冻结 v0.1，停止扩张）：①安装后正式入口实际使用共享策略，推荐/实际选择/覆盖、版本与候选条件有记录；②至少两个合法候选，可信反馈前后推荐或概率变化可解释；③依赖/能力/scope/租约/预算/未知效果限制不被评分绕过；④同一事实不重复学习、崩溃恢复/重建不重跑模型或实验；⑤核心、产品、策略、检查器与既有证据清单版本一致，新安装与完整工程门禁通过。contract_local/interface_live/task_live分别报告，NOT_RUN不改绿。达到五项即停止。
+
+---
+
 # Morphogenesis 接手与核心闭环一页计划
 
 2026-10-01当前工作采用[Agent协议与正式科研产品计划](RESEARCH_NEXT_PLAN_1001.md)。用户最新收敛：先完成最终正式版本上的两品牌、三角色、一次真实成果继承，运行原完整检查器；完成后再由用户决定扩大Agent兼容范围和抽离通用科研案例，不自动放行这两项。EvoMap协议开发后置。主控只分发和独立验收，原历史和根仓WIP保留。
