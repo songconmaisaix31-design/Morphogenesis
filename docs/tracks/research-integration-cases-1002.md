@@ -107,3 +107,38 @@ root授权逐PID/creation/完整命令身份复核仅清该owned链；实际操�
 每类完整原checker+正式audit实际PASS前不能签task_live。原900s/64tools/3600runtime/3attempts与阈值保持；
 unknown不重试，usage/cost未知保持null。真实密钥仅产品正式context读，不输出值或hash。
 更多Agent、EvoMap、桌面、Hub/main/tag/发布不在授权范围。
+
+## owned Windows 进程修复后的新冻结工程验收
+
+CORE SOURCE **bf67c1a4134a25d009cff2acccbfab027999bea6**，普通合并A
+56ee35bcc31ab704ba53884b1ba96e3c93d00c4c；仅原native process/windows_job及其测试变化，
+原日志/锁/workflow/科学及两个checker blob保持。产品SOURCE
+**dfbc88cbc5fb90f41f6ba01a0f5d16a5a59294fa**，REPORT
+e9a68668ac1e15038faaa3b04a34e2a5aa0c9f4a仅文档；产品只重新pin该core。
+
+[原完整foundation36879998711 / attempt1](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/36879998711)
+准确head bf67，两个独立平台全部18steps首次success：Windows110429046089
+1154PASS/5SKIP/75warnings/1649.81s，Ubuntu110429046228
+1153PASS/6SKIP/75warnings/359.69s。两平台原poetry/npm安装、全量pytest、strict119files、
+sdist+wheel、SDK1.14、实际wheel13packages/resources/verifier/node检查全通过。
+完整raw及准确run_attempt/head/job/step元数据在R/native-repair-bf67/logs的
+ci-bf67-{windows,linux}-job-api-first.*与ci-bf67-final{,-jobs}-first.*。
+首Linux gh run view --log因整个run尚未完成退出1保留，不属于测试RED。
+
+新独立安装X=`R/native-repair-bf67/installation-dfbc`，CPython3.13.13新venv，
+新GitLF归档/自建wheel/非editable COPY安装及新Node依赖；不复用旧环境或Owner产物。
+Git/archive/实际wheel/site严格bytes为16产品+4注册输入+3native文件，95packages
+完整pins、direct_url准确bf67/noneditable/nlink1和7Node原锁全部通过。
+X/logs/07–17记录原始安装和正式version/双case setup-assets/doctor、两固定归档checker help；
+18原完整产品50首次 **50PASS67.45s**。19只读历史audit首次exit1是原case06
+peer0 NOT_SAT（author5/third6 SAT），subject旧版本与generator新版本分列，六DB/sidecars
+字节与mtime均未变化。08-install-verification.json及10-source-provenance.json绑定准确来源。
+
+额外prepared NIST21与synthetic22正式init/inspect/observe均exit0，未准备replication
+exit2/formal_role_dependency_not_completed，未创建native observations且不存在key仍不存在。
+synthetic21首次误用NIST代码目录导致init exit2，project/state未创建；operator RED原样保留。
+另全新prepared02从可信registered plan取目录demo/research_cases/synthetic_linear_regression
+后通过，未修改业务或原50断言。以上只属engineering/prepared，不能替代实际科研。
+
+新冻结仍等待root明确新unique两case live release；旧nist-01不恢复/重放，owned服务保持停止。
+当前SOURCE与本报告后续doc-only Commit分开；原两个完整checker及有效续租/真实adoption仍必需。
