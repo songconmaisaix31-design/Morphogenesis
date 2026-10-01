@@ -6,6 +6,10 @@
 
 ## 原始任务与顺序
 
+07:30 UTC正式修复SOURCE48ddc916a0072dea50e8caf2773775a0030942b0/REPORT874bda4c4ed697296ac833644ecda76631bc40bb已push/remote exact/clean，root直接核对guard/runner窄分类、原42不变加2必要回归44pass39.09s。D诊断5788ca3和I失败封存d9e7a8e均正常结算retain；原05完整checker首exit1/未知/未claim/无实验只读。原A新task_2b55277a86d5/ctx_06d123e8ffc9在原固定终端实际turn_started，独占全新cn-warning安装state，精确Git bytes→新非editablewheel/venv、原44完整一次与正式offline门禁；无实际key/auth/model/science。A通过后root明确唯一新案例名称/clock，原I才可继续真实三角色与原完整checker，当前不重发旧05或接口probe。
+
+07:22 UTC当前返修：case05唯一正式作者启动11.09431s/tools0，UUID01a0f652-4072-79b1-90f8-bf59957a8a8d；未claim、未实验、未预期interrupt，后续角色停止。原完整checker首运行exit1缺resume-observation，same owned服务已实际exited/false；原失败/unknown/null只读。原D task_5d8a5c0e07cf/ctx_d68905b1a159核对官方0.159：两条priority/fallback metadata是WarningEvent，被JSONL映射ErrorItem但不fatal，产品guard误判后主动cancel。原P task_c630e2f5f220/ctx_db42387e7670仅产品层最小启动诊断分类及必要离线回归；主控允许按官方fallback metadata逻辑继续，但不换模型/tier/全局配置或放行真实fatal/未知错误，raw警告完整保留。P新冻结来源后原A另建独立安装，root再决定明确唯一新正式案例；旧05不重放、不改clock/完整checker，不扩Agent/案例/EvoMap。
+
 07:08 UTC正式case05放行：A REPORT83c78d86e2d70cfa1c5bd0ad0d42d18c78ff71b7已push、remote exact/clean，精确中国SOURCEe7ecd新独立安装原42一次42pass35.23s及来源/SDK/正式入口门禁通过，P/A均正常settle-retain。原I只读采用morph-research-agents-install-cn-1001-state-ctx660fbdafe8d1，获准在自己新research-formal-1001-05 project/state/profile创建一次新clock，正式Codex作者中断→真实TTL→同UUID恢复及stale拒绝→Claude/StepFun中国独立复现→文件验证批准应用→第三Codex本地再验证/真实继承adoption→原完整checker；三角色distinct UUID、原全部科学/预算/权限不变。不混旧case或fixture。只可恢复原唯一owner核对的8097 sandbox fullID，不创建新服务/大实验；未知实际远端效果或原生错误立即停报，不自动重放。范围完成后只报告，后续扩容/抽离/EvoMap仍未放行。
 
 07:01 UTC中国版本进度：P SOURCE e7ecd6958b6b6447f832b57c518ab50dd83fdebe与doc-only REPORT b35a3c1565d3594b08046858854d83847ef4d10b已push、remote exact/clean；仅auth/config/README/tests窄改，原40+2必要CN回归42pass36.35s与最后新增测试env恢复专项1pass2.94s保留，P新Task已正常settle-retain。原A task_a30bbb885488/ctx_660fbdafe8d1在同固定Agent/worktree/branch实际turn_started，精确新SOURCE与新独占安装完整42一次；安装完成后才能原I fresh正式科研case，旧artifact/科学clock不可混用。
@@ -37,3 +41,5 @@
 - 新仓库使用Python/Pydantic及既有官方依赖，固定核心依赖提交，private远端；保留根仓docs/SWARM_SOL_PLAN.md WIP。无main/tag/Hub发布、批量删除或全局配置/认证修改。
 - 原完整checker及适用核心/产品门禁真实通过，只证明本轮闭环完成，不自动授权C抽象或D新增运行时；没有真实账号的接口明确NOT_RUN，不以几十个外围测试替代科研闭环。
 - 当前窄波：P原Owner独占新产品的StepFun显式凭据配置与必要回归，使用已存在Claude CLI及官方直连协议；只用假密钥离线测试，不读真实secret或调用真实API。P源码冻结后由原A在新独立安装核验，最后原I运行新完整科研案例。核心CBC、原11工具/权限/科学/预算/checker不变；真实额度未就绪不创建科研clock/UUID，不重复作者实验。实际供应商/模型必须记录为StepFun/step-3.5-flash，Claude只是复用的原生CLI，不能冒称Anthropic模型。具体供应商和研究子进程模型选择已由用户本次API指令授权，所有全局配置及Codex模型保持原样。
+
+07:37 UTC唯一新正式case06 release：原A新独立48dd artifact原44首一次44pass41.24s/全部精确来源/正式prepared无sideeffect门禁已root直接读取，A REPORT53c4b463aa23e6424921b9fb55c280de6a2c8567已push/root remote exact clean、doc-only，Task正常retain后ACK。root现授权原I使用morph-research-agents-install-cn-warning-1001-state-ctx06d123e8ffc9的installed正式console，只在自己新research-formal-1001-06 project/state/profile init一次clock，原interrupt→TTL→sameUUIDresume/stale拒绝→独立Claude中国StepFun复现→文件验证批准应用→第三Codexfresh再验证/真实inheritadoption→原完整checker。旧05/01–04只读不重放；两条官方startup warning窄分类按新冻结来源保留，真实unknown error/effect停报。只同IDowned8097服务核对恢复/known清理后停止；不重复44/coreCI/探针/安装/外围实验，不改模型/tier/global认证/11工具/预算/原科学标准。完成不自动扩容/抽案例/EvoMap/main/tag/Hub。
