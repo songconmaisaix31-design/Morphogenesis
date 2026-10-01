@@ -50,3 +50,11 @@
 | commit+push / `git ls-remote` / clean | 本次提交完整 SHA、remote exact 和 clean 收口结果在最终 Handoff 回传 |
 
 本次检索的真实限制保留：P 官方副本为扁平文件而非完整 clone，初始目录模式检索无匹配；大范围源码输出截断后收缩为必要行；推测的 `tools/src/registry.rs`、`codex-mcp/src/mcp.rs` 返回404，按真实源码转用 tool_executor.rs/tools.rs。未据失败伪造接口，没有落盘新的官方源副本、修改全局配置或安装依赖。所有 modelrequest/auth/API/sandbox/session/烟测/live 诊断 NOT_RUN；NIST抽离、第二类任务及更多Agent仍须原三角色完整 checker 通过后再放行，EvoMap后置。
+
+## notice 语义验收返修
+
+从 clean `450c9cc1d2554b19436c00be4aaebc8a3c6d6e32` 接续，仅补上一轮遗漏的关键结论：[矩阵 notice 节](../agents/ORCA_PROTOCOL_MATRIX_1001.md#验收返修startup-notice-不是-fatal但必须精确兼容)。官方 caller 在 requested CodeModeOnly、host unavailable、service 首次发出时生成 WarningEvent，完全不看 direct11 exposure；exec 将它及 DeprecationNotice 映射 ErrorItem/Running，真正 Error notification 为顶层 error，turn.failed 另按 TurnStatus 发。wire 无 severity，不能泛化放行 item.error；官方 notice 不等于实际 disabled exec 执行失败。
+
+薄 Handoff 先交 root `msg_ab4a19e90e87` / P `msg_0eb9b49dac5d` / I `msg_7a2fb95f17f5`，再按 root 仅 host notice 的批准收窄并补齐 caller 至 root `msg_5688452d4b43` / P `msg_516624f91c7d` / I `msg_c6355910c248`。P 去除 memory_tool alias但 memoriesfalse 保留；弃用通知虽然官方非fatal，**不列入批准兼容名单**。D只交源码语义，不修改产品实现或原checker，不冻结签署live。
+
+验证：10个固定官方文件 HTTP200、11/11引用行界有效，caller Warning/无exposure判断、fatal映射及完整notice与原raw逐字节匹配检查exit0，原 :1–7顺序核对通过；仅两docs ownership、`git diff --check`通过，cached检查和完整commit、push、remote exact、clean在最终Handoff回传。只读原 case02 为0研究calls但已模型响应，outcome cancelled/unknown/null与原红全部保留；没有API/model/auth/sandbox/新UUID、host开启、HOME/catalog/provider改动。检索推测文件 `event_processor_with_json_output.rs` 返回404后按官方tree使用真实 `event_processor_with_jsonl_output.rs`，不伪造映射。真正模型接受/选择 direct11及完整三角色checker仍未在本诊断执行，后续科研/更多Agent放行顺序不变。
