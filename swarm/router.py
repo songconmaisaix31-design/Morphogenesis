@@ -38,6 +38,10 @@ class Router:
     def pipe_key(signal: Signal) -> str:
         return signal.required_capability or signal.task_kind
 
+    @property
+    def history_prior(self) -> float | None:
+        return 0.25 if self.strategy_version == "v0.1" else None
+
     def _record_decision(self, audit: dict[str, JsonValue], *, record_audit: bool) -> dict[str, JsonValue]:
         audit = _DECISION.validate_python(audit)
         if not record_audit:
@@ -101,7 +105,9 @@ class Router:
             key = self.pipe_key(signal)
             match = capabilities.get(key, 0.0)
             if key not in own_history:
-                own_history[key] = self.field.pipe_history(worker_id, key).weight
+                history = (self.field.pipe_history(worker_id, key, prior=self.history_prior)
+                           if self.strategy_version == "v0.1" else self.field.pipe_history(worker_id, key))
+                own_history[key] = history.weight
             age = 1 + min(10.0, max(0.0, ledger.now() - record.created_at) / self.aging_seconds)
             urgency = signal.urgency * age
             if self.strategy_version == "v0.1":
@@ -128,10 +134,13 @@ class Router:
                                       "filtered": filtered, "signals": signals, "query_limit": limit,
                                       "strategy_version": self.strategy_version,
                                       "policy_version": self.strategy_version,
+                                      "advisory_only": True, "claim_requires_recheck": True,
+                                      "budget_admission": "not_evaluated_by_router",
                                       "window_order": ["created_at", "task_id"],
                                       "reason": "bounded_local_weighted_sample",
                                       "aging_seconds": self.aging_seconds,
                                       "tau_seconds": self.field.tau_seconds, "alpha": self.field.alpha,
+                                      "history_prior": self.history_prior,
                                       "concentration_scale": 1.0, "urgency_scale": 1.0,
                                       "beta": self.beta, "exploration": self.exploration,
                                       "constraints": ["authorized_scope", "module", "dependency_neighborhood",
@@ -159,4 +168,6 @@ class Router:
         if any(not math.isfinite(value) or not 0 <= value <= 1 for value in (speedup, token_saving)):
             raise ValueError("speedup and token_saving must be normalized fractions in [0,1]")
         reward = (0.5 + 0.25 * speedup + 0.25 * token_saving) if success else 0.0
+        if self.strategy_version == "v0.1":
+            return self.field.reinforce(worker_id, self.pipe_key(signal), reward, prior=self.history_prior)
         return self.field.reinforce(worker_id, self.pipe_key(signal), reward)
