@@ -127,3 +127,11 @@ P SOURCE4428fdadfb0a5dfe8adc9e04c7fd881784f2807e，报告d75bed7d4585797e47a5894
 A原Owner task_a4ce04726749/ctx_6b8aed6cdba5实际ready/turn_started，仅自身报告与全新private state。独立精确4428 Git archive→wheel→freshCPython3.13.13 copy env95冻结分发包，原33一次首次exit0/33pass25.60s；主控实际读取原log和source/install JSON，13产品Git/archive/wheel/site bytes相等、2科研输入与CBC相等且nlink1，core非editable direct_url精确CBC、原UV/7Node锁/version/integrity/licenses一致及真实SDK正负门禁通过。正式version/setup-assets/doctor/pending offline init/双inspect/只读observe通过；pending selection拒绝与fixture依赖拒绝/selectedFalse拒绝明确区分。未借旧env/node_modules/artifacts、未读实际认证或调用科学API。报告7576bb6b8b752021c0ec736bc8f1a0b5e2f28cd9已主控remoteexactclean/仅自身doc核对，正常settle-retain；I已普通精确合并，准备只读采用其installed artifact，所有科研写入仍I独占。
 
 当前所有可行的工程与安装工作已完成，但原完整三角色任务没有完成：最近case04原checker仍exit1，作者passed/known/destroyed/quarantined与peer failed/unknown/null、全部历史clock/raw/RED保留。新产品4428的真实三角色尚NOT_RUN；用户完成官方OAuth后还需同设置真实status验证和主控明确新案例放行，不能混换04 source或重放旧调用、用作者阶段代替完整checker。资源收尾仅I正面核对本任务sole owned8097服务后停止，保留所有state/账本/secret/其它终端，不管理其它容器。NIST抽离/第二类任务/41待扩Agent运行时尚未放行；EvoMap协议继续后置，未main/tag/Hub发布。I最终集成报告记录精确分支SHA、收尾实际结果与外部登录阻塞，不能以工程stage交付代签完整目标。
+
+## 04:40 UTC最新范围收敛与正式认证复查
+
+用户最新明确“先完成最终正式版本上的两品牌、三角色、一次真实成果继承，再决定扩大Agent兼容范围和抽离通用科研案例”。本轮仅保留冻结正式入口的原闭环验收；即使原完整checker通过，也不自动放行C案例抽离、第二类任务或D新增兼容运行时。EvoMap协议继续后置。已修改当前一页计划，历史阶段记录不改。
+
+主控重新核对Orca实际runtime22e852ca-d580-4860-80f9-a0e221942273/app1.4.212及I原终端tui-idle=true，继续复用原Owner，不另建Agent/工作树。04:40:04Z首次只读诊断误用了无-project后缀cwd，实际NotADirectoryError，没有执行官方auth；保留该失败。根据D原安全诊断纠正为research-formal-1001-04-project后，04:40:40Z实际官方Claude2.1.238同正式认证root argv/settings/局部child env status：exit1、loggedIn=false、authMethod=none、apiProvider=firstParty、apiKeySource字段缺失、ready=false。只输出安全字段，不读取凭据/身份，不启动科学turn、MCP或sandbox，不修改全局配置/HOME/model/provider。当前登录仍是实际外部依赖，不是以旧记忆推测。
+
+原I同终端/工作树/分支接续窄准入核查：仅自己的集成报告和新私人诊断state有写权，采用A最终4428独立安装只读，核对真实产品selected-profile状态和冻结证据；不重复已通过33测试、安装、全量CI或作者实验。所有旧case只读，服务器保持停止，真实OAuth未就绪不得新建科研clock/UUID。已再次向用户给出同正式settings的官方Claude.ai浏览器登录操作；不要求重复开发授权、不自动登录/换账号/复制secret。后续只有真实ready通过，才明确释放全新独立案例完成三角色与一次成果继承，再运行原byte39948完整checker。
