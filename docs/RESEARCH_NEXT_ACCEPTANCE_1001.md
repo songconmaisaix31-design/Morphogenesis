@@ -169,3 +169,9 @@ A REPORT d1beaf69afb2a412a30550fa613c3d60bdaa15e9已push；主控remote exact/cl
 ## 06:42 UTC本阶段集成交接结算，原完整目标未完成
 
 I新task_f418165ea63f/ctx_d4cf535b9b4e在原终端实际turn_started；最终证据81357f1fb857843d745b0f657a988a9c51914312已push至morph-research-integration-0930。主控直接核对remote exact/clean、相较旧38f只有五份授权docs、CBC业务diff为空、原checker blob39948一致；读取原I自身薄报告与worker_done，包含同12845/ec62业务树、A精确安装40/36.64s与原来源/入口计数、原case04完整checker exit1缺inheritance和安全inspect sole owned sandbox仍exited/false。此Task仅集成交接/阻塞封存succeeded，不代签task_live/adoption；没有重跑原40/科学/CI或读取真实key/API，402和未知成本null不变。正常retain user_requested/processAction none再ACK，Run所有本轮expected Dispatch已结算、reclaimable total0（24 retained历史项）。本轮P/A/I窄Task完成与最初完整科研目标未完成分列；尚需实际StepFun可调用额度、fresh正式案例全部三角色和一次真实继承/adoption，最后原完整checker实际PASS。根仓SWARM_SOL_PLAN.md既有WIP保留，无main/tag/Hub/更多Agent/案例抽离/EvoMap发布。
+
+## 06:55 UTC用户切换中国站，新凭据最小真实请求通过
+
+用户明确改用中国站新密钥；主控确认Git/model workspace外原专用Temp父目录ACL继承关闭且仅当前用户FullControl，新建独立stepfun-cn-api-key-01文件，旧key/档案不覆写、不改全局认证，不把密钥值发Worker。中国站GET https://api.stepfun.com/v1/models06:52:52实际200并包含step-3.5-flash；唯一POST /v1/messages同model、max_tokens32、无工具科学输入实际200/type message/model匹配，usage input16/output32、costnull、未出现text block。安全JSON分别stepfun-cn-models-probe-01-safe.json和stepfun-cn-anthropic-probe-01-safe.json，仅有限字段，无secret/header/raw响应。有限请求被接受，不证明原生工具兼容/科研，未重复请求；国际key的原401/200/402历史不改，不将其额度结论套在新中国凭据上。
+
+官方固定GitHub/raw页面web读取cache miss保留，第一方仓库README搜索结果第7.2明确Claude Code中国base=https://api.stepfun.com/和step-3.5-flash，未依赖第三方文档或改用户global settings。原P新task_c34d10e4cdc9/ctx_f45eeb5708a6只写自身产品业务/必要测试/报告，允许两明确端点但不自动猜地域/fallback/重试；profile、生产settings/env、官方同配置status与档案须取实际显式端点，核心和原guard/checker/40断言/锁/Codex模型/预算不改。start receipt turn_start_unobserved保留；主控正面screen证明任务仍在composer后仅bareEnter一次，未重复派发/stop/revoke。P完成source回归freezepush后原A新独立精确bytes archive及copy/noneditable新安装（命令级autocrlf=false，不借旧artifact），随后原I真实新案例三角色闭环与原完整checker。依赖门禁未通过不新建科研clock/UUID/恢复sandbox，不重复已绿core全量/CI/外围inventory，不用32token接口成功替代task_live/adoption。
