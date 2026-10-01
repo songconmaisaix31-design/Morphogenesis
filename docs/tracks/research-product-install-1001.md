@@ -207,3 +207,75 @@ uv pip install --link-mode copy --python $R/venv/Scripts/python.exe -r $R/locked
 安装身份、第一份原30退出、SDK/双正式 inspection/只读 observe 和限制已薄 Handoff 给 root 与原 I `ctx_c6bb0ebb6ad6`；未重派/停止 I 或修改其 state。此后只追加本报告、commit/push，远端完整 SHA/clean 由最终本轨 Handoff 提供。
 
 **本轮结论：独立固定 c25 安装和原30适用本地回归通过。** 真正 direct11 模型可达性、Claude OAuth/currentmodel 请求兼容、三角色完整科研 checker、科学结果及 adoption 均本轨 **NOT_RUN**；原 case01/02 RED、未知费用/用量/远端效果保持，不能由本地准备推断为零或正式 live 通过。
+
+## 固定 4428 OAuth 准入返修的独立安装验收
+
+本节为同 A Owner 的后续独立结果，原报告 `eabc4583f52963ee380a0857ba3ca934e348329e` 和全部历史日志保留。本轮仅追加本报告和全新自有 sibling state，不修改任何产品/core/process/测试/锁、其它文档或 I state。
+
+### 固定来源、安装身份与原门禁
+
+- Product SOURCE：**`4428fdadfb0a5dfe8adc9e04c7fd881784f2807e`**，原 `Morphogenesis-Research` 分支 `songconmaisaix31-design/research-product-1001`。
+- P 后续 REPORT：**`d75bed7d4585797e47a5894ae7fd85f25f71bba6`**，通过原 P Handoff `msg_39f48b6896d4` 收到；本轨实际固定 Git diff 仅 `docs/tracks/product-1001.md`，并读取其固定 Case04 返修节。P 的首次 RED / 33-pass / fresh install 是作者历史证据，没有用来替代本轨独立运行。
+- Core：**`cbc4dede782eb79b9c007520d96d7958857da0af`**（CBC）。本次源码中 permissions/guard、uv.lock、Node manifests 保持原固定版本；已与不可变 Git blob 核对。
+- 本节私有根（下文 `$O`）：`C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-agents-install-oauth-1001-state-ctx6b8aed6cdba5`。
+- 新建 `$O/venv`，实际 CPython **3.13.13**，从本次 Git archive 构建 wheel 并 **copy-mode 非 editable** 安装，实际 **95** 个冻结 runtime+dev distributions。
+- 只复用本 Owner 先前同锁官方 UV 下载 cache：`C:/Users/DW/orca/workspaces/Morphogenesis/morph-research-agents-install-1001-state-ctxb9ec0f8a8fcd/cache/uv`。未复制/激活旧 env、安装产物、node_modules 或测试输出；仅复用本 Owner 的观察器源码，新建所有本轮记录。CBC Node lock 从固定 Git blob重新读取。
+- process-local `TEMP/TMP=$O`，所有 basetemp/state 在其下；UTF8=1、BLAS/OMP/MKL=1。没有改全局网络/index/HOME/account/provider/model、传实际 sandbox key、复制凭据或清理任何旧目录。
+
+先阅读 AGENTS、固定产品 README/auth/runner/tests 和 root 的 `RESEARCH_NEXT_ACCEPTANCE_1001.md`，然后执行：
+
+```powershell
+git -C C:/Users/DW/orca/workspaces/Morphogenesis-Research/research-product-1001 -c core.autocrlf=false archive --format=tar --output=$O/archives/product-4428fdad.tar 4428fdadfb0a5dfe8adc9e04c7fd881784f2807e
+tar -xf $O/archives/product-4428fdad.tar -C $O/product-source
+# 以下 export/build 的 cwd 为 $O/product-source，UV_CACHE_DIR 为上述自有 cache
+uv export --frozen --no-emit-project --no-hashes --output-file $O/locked-test-requirements.txt
+uv venv $O/venv --python C:/Python313/python.exe
+uv build --wheel --out-dir $O/dist
+uv pip install --link-mode copy --python $O/venv/Scripts/python.exe -r $O/locked-test-requirements.txt $O/dist/morphogenesis_research-0.1.0-py3-none-any.whl
+# 正式 CLI/观察器 cwd 为 $O；pytest 使用本次 archive 原 tests
+& $O/venv/Scripts/morph-research.exe version
+& $O/venv/Scripts/morph-research.exe setup-assets
+& $O/venv/Scripts/morph-research.exe doctor
+& $O/venv/Scripts/python.exe -I -m pytest -q -rA --basetemp=$O/pytest-original33-first --junitxml=$O/logs/08-pytest-original33-first.xml $O/product-source/tests
+& $O/venv/Scripts/python.exe -I $O/verify_install.py
+& $O/venv/Scripts/python.exe -I $O/verify_provenance.py
+& $O/venv/Scripts/morph-research.exe init --profile $O/offline-install-a1001-oauth-01-profile.json
+& $O/venv/Scripts/morph-research.exe inspect --state $O/offline-install-a1001-oauth-01-state --phase interrupt
+& $O/venv/Scripts/morph-research.exe inspect --state $O/offline-install-a1001-oauth-01-state --phase replication
+& $O/venv/Scripts/morph-research.exe observe --state $O/offline-install-a1001-oauth-01-state
+& $O/venv/Scripts/python.exe -I $O/verify_prepared.py
+& $O/venv/Scripts/morph-research.exe run --state $O/offline-install-a1001-oauth-01-state --phase replication
+& $O/venv/Scripts/morph-research.exe observe --state $O/offline-install-a1001-oauth-01-state
+```
+
+| 本轨实际门禁 | 原退出/结果 | 本轮 `$O/logs` 原记录 |
+| --- | --- | --- |
+| frozen export / fresh venv / wheel build / copy install | 首次各 exit0；95 冻结分发包 | `01-export-first.log` 至 `04-install-first.log` |
+| 正式 version / setup-assets / doctor | 首次各 exit0，CBC/ready_local/schema1.14.0 | `05-version-first.log` 至 `07-doctor-first.log` |
+| **原30+3完整必要回归，仅跑一次** | **首次 exit0 / 33 passed / 25.60s**，没有删/弱化断言或改 fixture | `08-pytest-original33-first.log` / `.xml` |
+| 实际安装 inventory/NodeBridge | 首次 exit0，95 集合及全部版本等于 frozen export/lock；7 个原 Node 锁一致 | `09-install-verification-first.log` / `08-install-verification.json` |
+| 固定来源逐 bytes/nlink 核验 | 首次 exit0，实际仍13产品文件 + 2 CBC注册输入 | `10-source-provenance-first.log` / `10-source-provenance.json` |
+| 正式 offline init / 双原生 runtime inspect / readonly observe | 首次各 exit0，prepared，auth pending，probe=null/model_invoked=false/session=null | `11-init-first.log` 至 `14-observe-first.log` |
+| 真实已生成 inspection 的配置核对 | 首次 exit0，selection_only_not_auth_verified；原权限/身份/预算完整 | `15-prepared-inspection-first.log` / `15-prepared-inspection-verification.json` |
+| pending profile 的正式 replication run | **预期 exit2**，`explicit_operator_auth_selection_required`，not_completed | `16-pending-replication-refusal-first.log` |
+| 拒绝后正式 readonly observe | exit0，tasks/audit 与拒绝前完全一致 | `17-observe-after-refusal-first.log`；原 `14-observe-first.log` 对照 |
+
+本轮没有安装或门禁失败后的重跑/续装。原 P false-positive 回归 RED（1 failed/30 deselected/17.85s）、case04真实认证失败及其它旧 RED 不删除、不回写；本轨首次33结果独立于 P 的33/19.55s。
+
+### 实际 wheel/SDK/权限与认证边界
+
+实际 core direct_url 的 Git commit/requested_revision 均为 CBC，product direct_url 指向 `$O/dist` 本次 wheel、非 editable。13 个产品文件的 **Git SOURCE / archive / wheel / site-packages bytes 全等**；本次 archive 原 `tests/test_product.py` bytes 也等于固定 SOURCE。CBC `experiment.py` 和 `NumAcc4.dat` 的 installed bytes 等于固定 Git blob；这15份 installed文件 **st_nlink全部为1**，注册输入在已安装 core 中、处于模型 workspace 外。未以 AST/CRLF 等价或源 import 替代实际安装证明。
+
+uv.lock/两份 Node manifests 与原9dd/599固定 bytes一致，permissions/guard与c25固定 bytes一致；95已安装集合及版本全等当前平台冻结 lock。7个 Node 条目的完整 version/resolved/integrity/license 与CBC对应条目全等，实际包版本与上文7行表一致，完整元数据在本轮 inventory JSON。正式 setup-assets 只在本轮 site-packages 安装，NodeAssetBridge actual canonical 和 invalid Gene schema/id rejection成功；两次独立观察的 Node Popen只用本轮已安装 `bridge_node/asset_bridge.mjs`，没有非空 NODE_PATH、借旧 node_modules、SDK算法复制或新的EvoMap协议。
+
+新离线 fixture 名字 **offline-install-a1001-oauth-01**，project/state/profile 全新、两runtime auth声明均 pending、sandbox key不存在、只有私有变量名和loopback dummy domain。正式init没有模型/实验，inspect由产品自己构造真实Codex/Claude请求、argv、HostBinding、venv MCP参数及安全env；原direct11/逐工具approve/defaultprompt/read-only/never、Claude dontAsk/strict/空tools/禁hook等均保持，895s/64tools及原core limits不变。观察脚本没有补任何关键参数、身份、授权、结果或adoption。没有创建正式科研clock或真实sessionUUID，没有实际 auth status/login。
+
+pending profile的正式run在读取真实认证之前由原selection前置条件拒绝；**这个CLI结果不是 `formal_role_dependency_not_completed`，不冒称执行了更后的依赖guard**。原33中的 `test_role_dependency_refuses_model_start_until_actual_prior_phase_settles` 则按原测试使用无秘密selected声明fixture运行本轮installed原run，真实依赖拒绝先于普通probe/selected probe；两个边界分别保留，没有为让正式CLI产生另一错误修改其pending profile、手工claim/造completed账本或补flags。拒绝后无probe/selected-auth/MCP/native/launch/observation文件，三task仍available/attempts0/owner/result null/effect_applied false，audit完全一致。
+
+新增3个认证回归在本轮installed业务上实际执行，但外部 status/probe 为无秘密 mock：ordinary true/selected false按真实正式settings/command/cwd/env匹配，先于key/MCP/native拒绝；父测试环境恢复，原unscoped证据与脱敏selected证据分列，任意identity/原stdout/stderr/secret sentinel不归档。API-key字段缺失与present null分开；oauth_token、helper/第三方、缺字段/非法JSON/timeout/IO及version/command/有效settings不匹配均fail closed。正面claude.ai/firstParty/no apiKeySource结果仅 **官方来源衍生的local fixture**，不证明当前账号有OAuth、服务器接受或模型可用。
+
+原30项仍验证旧quoted-key真实parser RED→PASS、通知/错误窗口、合法11及真实越界停止、未知效果/中断不伪造等；真实Codex parser只在无auth的测试子进程CODEX_HOME执行允许的version/mcp-get，未登录或改生产HOME。原实际离线MCP测试只initialize/list/discover/context及越权claim拒绝，保持attempts0/无科研执行；不把它当作模型/科研实验。没有核心全量、CI、旧43family、外围健康测试或实际用户认证/模型/sandbox/Hub调用。
+
+安装artifact、源码和实际33/25.60s退出已薄交root与原I，P摘要另行只读，未让其它Owner写本轨state。之后只做本报告commit/push，A REPORT完整SHA/remote exact/clean在最终Handoff中单列，不能把报告SHA当产品源码SHA。
+
+**结论仅为4428固定wheel的独立installed prepared/contract_local通过。** 按root/D当时证据，真实正式OAuth未就绪，用户官方login尚无可用于本轨验收的回复，不能假定已经登录；本轨没有重新检测或代为login。真实正面OAuth/server/model请求和完整三角色科研checker均 **NOT_RUN**。case04作者实验passed/known/destroyed但源候选quarantine、Claude首次Notloggedin/tools0/unknown/null、原fullchecker缺inheritance RED及所有旧clock/raw不变，不能由本地成功fixture补绿；下一登录确认、同配置真实检查与科研case处置由root负责。
