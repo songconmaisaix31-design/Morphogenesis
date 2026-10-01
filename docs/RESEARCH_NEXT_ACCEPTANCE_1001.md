@@ -127,3 +127,41 @@ P SOURCE4428fdadfb0a5dfe8adc9e04c7fd881784f2807e，报告d75bed7d4585797e47a5894
 A原Owner task_a4ce04726749/ctx_6b8aed6cdba5实际ready/turn_started，仅自身报告与全新private state。独立精确4428 Git archive→wheel→freshCPython3.13.13 copy env95冻结分发包，原33一次首次exit0/33pass25.60s；主控实际读取原log和source/install JSON，13产品Git/archive/wheel/site bytes相等、2科研输入与CBC相等且nlink1，core非editable direct_url精确CBC、原UV/7Node锁/version/integrity/licenses一致及真实SDK正负门禁通过。正式version/setup-assets/doctor/pending offline init/双inspect/只读observe通过；pending selection拒绝与fixture依赖拒绝/selectedFalse拒绝明确区分。未借旧env/node_modules/artifacts、未读实际认证或调用科学API。报告7576bb6b8b752021c0ec736bc8f1a0b5e2f28cd9已主控remoteexactclean/仅自身doc核对，正常settle-retain；I已普通精确合并，准备只读采用其installed artifact，所有科研写入仍I独占。
 
 当前所有可行的工程与安装工作已完成，但原完整三角色任务没有完成：最近case04原checker仍exit1，作者passed/known/destroyed/quarantined与peer failed/unknown/null、全部历史clock/raw/RED保留。新产品4428的真实三角色尚NOT_RUN；用户完成官方OAuth后还需同设置真实status验证和主控明确新案例放行，不能混换04 source或重放旧调用、用作者阶段代替完整checker。资源收尾仅I正面核对本任务sole owned8097服务后停止，保留所有state/账本/secret/其它终端，不管理其它容器。NIST抽离/第二类任务/41待扩Agent运行时尚未放行；EvoMap协议继续后置，未main/tag/Hub发布。I最终集成报告记录精确分支SHA、收尾实际结果与外部登录阻塞，不能以工程stage交付代签完整目标。
+
+## 04:40 UTC最新范围收敛与正式认证复查
+
+用户最新明确“先完成最终正式版本上的两品牌、三角色、一次真实成果继承，再决定扩大Agent兼容范围和抽离通用科研案例”。本轮仅保留冻结正式入口的原闭环验收；即使原完整checker通过，也不自动放行C案例抽离、第二类任务或D新增兼容运行时。EvoMap协议继续后置。已修改当前一页计划，历史阶段记录不改。
+
+主控重新核对Orca实际runtime22e852ca-d580-4860-80f9-a0e221942273/app1.4.212及I原终端tui-idle=true，继续复用原Owner，不另建Agent/工作树。04:40:04Z首次只读诊断误用了无-project后缀cwd，实际NotADirectoryError，没有执行官方auth；保留该失败。根据D原安全诊断纠正为research-formal-1001-04-project后，04:40:40Z实际官方Claude2.1.238同正式认证root argv/settings/局部child env status：exit1、loggedIn=false、authMethod=none、apiProvider=firstParty、apiKeySource字段缺失、ready=false。只输出安全字段，不读取凭据/身份，不启动科学turn、MCP或sandbox，不修改全局配置/HOME/model/provider。当前登录仍是实际外部依赖，不是以旧记忆推测。
+
+原I同终端/工作树/分支接续窄准入核查：仅自己的集成报告和新私人诊断state有写权，采用A最终4428独立安装只读，核对真实产品selected-profile状态和冻结证据；不重复已通过33测试、安装、全量CI或作者实验。所有旧case只读，服务器保持停止，真实OAuth未就绪不得新建科研clock/UUID。已再次向用户给出同正式settings的官方Claude.ai浏览器登录操作；不要求重复开发授权、不自动登录/换账号/复制secret。后续只有真实ready通过，才明确释放全新独立案例完成三角色与一次成果继承，再运行原byte39948完整checker。
+
+04:53 UTC结算：I新task_ba5433b9ed27/ctx_6c5a74c3bc3e初始turn_start_unobserved保留；正面屏幕composer证明输入待提交，仅补一次Enter后实际Working/live，未重复派发。最终报告38f31381baaa4493e7a73bc6cf3c3a33a4ed4dca已push，主控实际remote exact/clean、只增自身报告30行，业务diff0/checker39948不变。主控读取I新私人selected-readiness-safe.json：实际安装4428产品helper同正式plan/env/cwd，唯一version及status分别exit0/exact2.1.238与exit1/loggedInfalse/none/firstParty/apiKeySource缺失/readyfalse；未调用普通probe、模型、新科学UUID或实验。首次observer跨导入的parent_environment_not_restored保留；另份离线environment-only-safe.json证明导入仅改KMP_DUPLICATE_LIB_OK/KMP_INIT_AT_FORK，认证context前后全环境及两gateway键恢复true，后续无第二次auth请求。原完整任务仍因官方用户登录未完成，I合法worker_done failed/msg_505c6985b406后主控retain user_requested/processAction=none再ack，reclaimable total0。无新的业务缺陷证据，不额外派发外围开发；下一阶段仍只准入→新冻结三角色闭环→原完整checker，后续扩容/抽离由用户另行决定。
+
+## 06:04 UTC用户授权StepFun API接续，认证有效而真实调用额度不足
+
+用户明确要求computer-use复用本机Chrome登录。主控读取版本匹配computer-use指南，发现现有Chrome pid18496/window133414；启动官方2.1.238同产品认证settings的auth login --claudeai（仅此子进程屏蔽旧gateway/ORCA键），浏览器实际进入该现有Chrome。第一次Continue with Google操作返回stale element，未重发；刷新后官方授权页明确显示Claude Code需要Max/Pro，不能将网页会话当CLI已授权。05:57:53Z同正式配置auth status仍exit1/loggedInfalse/none/firstParty/apiKeySource缺失。后续Claude标签选择/读取工具在用户主动中断时可能部分执行，不冒称成功；不再改浏览器会话。
+
+随后用户提供API凭据并明确“这是stepfun的api，自己试试”，当前授权取代Claude订阅登录等待。主控仅把用户新提供的secret放入Git/model workspace外的本机专用Temp目录，关闭ACL继承，只有当前Windows用户一条FullControl规则；未复制任何既有凭据、未把值写入Git/报告/Worker任务/模型参数、未改全局环境或设置。原唯一自有OAuth login PTY26548收到Ctrl+C后实际exit1；未停止其它Agent/终端或浏览器。
+
+官方第一方资料 https://github.com/stepfun-ai/Step-3.5-Flash/blob/main/README.zh-CN.md 的7.2节说明Claude Code直连：ANTHROPIC_AUTH_TOKEN、国际base_url=https://api.stepfun.ai/、model=step-3.5-flash。本轮不改用户全局settings，交原P实现产品子进程明确定义的凭据/端点/模型配置，复用native Claude CLI，实际供应商/模型如实标为StepFun。固定核心/科学标准/原检查器/权限/预算不变，不扩Agent兼容范围。
+
+私有安全结果位于专用Temp目录，不含secret/header/raw错误消息。06:03:35Z国内官方GET /v1/models首次401保留；06:03:58Z国际官方GET https://api.stepfun.ai/v1/models实际200（模型目录含step-3.5-flash、step-3.5-flash-2603、step-3.7-flash），仅证实密钥认证与目录，不是native/task就绪。06:04:45Z唯一极小Anthropic接口POST https://api.stepfun.ai/v1/messages（step-3.5-flash、max_tokens32、无工具/科学输入）实际402，安全错误归类insufficient_quota，未自动重放。模型turn尝试1、实际usage未知/费用null，不把HTTP拒绝改成科学完成或零花费。用户已获实际额度问题说明，未自动充值/购买。
+
+原P在自身产品业务/测试/报告路径内完成必要API凭据正式配置及离线回归，真实secret只由正式产品live子进程使用；P开发/fixture不读取真实key、不调用API。新产品冻结和独立安装通过后，实际可用额度仍是三角色科研前置。旧案例clock/RED/unknown全部保留，服务器仍停止，不预先新建科研窗口。原完整任务尚未完成；扩容、案例抽离、EvoMap协议继续后置。
+
+## 06:21 UTC StepFun正式入口SOURCE冻结与独立安装接续
+
+P SOURCE12845c2f53eba43cbf1dfb3e37a662c9a34c84f9已push至原产品分支；主控实际核对remote exact/clean、只改README及auth/config/permissions/runner/tests六路径，guard/coreCBC/全部锁/原checker不变。正式profile显式stepfun-api、外置绝对key文件、https://api.stepfun.ai/、step-3.5-flash；Claude依赖/doctor/version后才读取凭据，官方同正式command/settings/model/cwd/env本地status只输出安全允许字段，MCP子进程清空供应商凭据，父进程环境finally恢复。实际model仅取native init，缺失/不符/完全无init均不能升级成功，旧认证及Codex路径不改。
+
+主控读取P原gate03日志40pass26.22s（原33+7必要回归）；first旧安装缺新符号1fail/14.63s、首39pass25.64s、随后模型绑定包装导致原mock方法期望37pass3fail25.34s均保留，最终只对新增API使用包装，旧guard直接callback保持，未删改原断言。官方2.1.238仅假凭据与临时user fixture证明user source可选bedrock/third_party而空source为oauth_token/firstParty；无model/API/MCP，本地标签不能冒称Anthropic订阅或真实额度，managed policy仍保留。
+
+原A task_432c0ffea86e/ctx_b141ba84f5dd同原终端/工作树/分支实际turn_started，仅自己的安装报告和全新private sibling state可写，精确12845 archive→fresh-wheel/非editable venv、原40一次及正式离线门禁，旧4428安装只读；P并行自身fresh安装。实际StepFun402未解除，不派I作者或创建新科研clock/UUID，不用fixture代签task_live/adoption，所有旧RED/unknown继续保留。
+
+## 06:34 UTC产品及独立安装门禁完成，原I仅接收成果与阻塞封存
+
+P REPORT ec62e5eb5334a76eb793456461c6b09e0135eb6c已push；主控核对remote exact/clean、较12845仅自身报告41行，业务树相同。实际读取fresh88分发包copy/noneditable direct_urls、七项正式入口exit0、依赖拒绝exit2及fake-only status/selectedFalse两份JSON；认证mock/local层级独立，实际用户key/API/model/science均未调用。合法worker_done succeeded后按固定Owner要求retain/processAction none再ACK。
+
+A首次独立安装原40pass27.08s，但严格来源bytes门禁RED：本机默认archive将auth.py从Git9715bytes/LF转为9896bytes/181CRLF，wheel/site跟随archive。主控读取首诊断，授权仅命令级git -c core.autocrlf=false精确同12845导出到全新独占stepfun-exact state，不改global/source，也不以换行等价冒bytes通过；首次artifact/RED/40PASS全部只读保留。最终exact archive/wheel/site13产品文件和2CBC科学输入逐bytes全等/nlink1、95冻结集合、7Node完整锁、core direct_url固定CBC及产品wheel非editable通过；由于artifact实际字节变更，只对新artifact原40一次必要复验，真实40pass36.64s/exit0，主控已读原log及provenance/inventory JSON。正式pending和StepFun初始化/双runtime inspect/observe均通过；真实installed entrypoint复制原main仅做CPython audit/call观察，依赖guard1，其余认证/probe/key/Popen/socket/MCP/native全0，replication预期exit2。观察器首次要求整JSON全等RED保留；只有只读派生runtime_remaining递减，tasks/audit全等，另存校正观察器通过，无业务/测试/科学断言变更。
+
+A REPORT d1beaf69afb2a412a30550fa613c3d60bdaa15e9已push；主控remote exact/clean、只增自身报告86行。最终只读artifact为morph-research-agents-install-stepfun-exact-1001-state-ctxb141ba84f5dd，旧安装不借用/覆写。对旧settled I邮箱一次handoff明确被拒绝，未重发，root负责原I新Task交接。此次实际科研就绪仍没有：最小StepFun messages402 insufficient_quota保留，实际usage/cost unknown/null；12845上完整三角色与adoption仍NOT_RUN，旧case04原完整checker exit1缺inheritance不回写。I本阶段只合并准确报告、核对来源/冻结边界与记录阻塞，不再跑已绿40/coreCI或旧科研请求，不创建新clock/UUID，不启动已停止sandbox。后续实际额度就绪后才释放新正式案例，完整闭环后必须运行原完整checker，不能由作者阶段替代。扩容/案例抽离/EvoMap仍后置，未main/tag/Hub发布。
