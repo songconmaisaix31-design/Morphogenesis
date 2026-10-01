@@ -93,23 +93,32 @@ class PheromoneField:
     def snapshot(self, *, limit: int = 100) -> list[Signal]:
         return self.for_records(self.ledger.snapshot(limit=limit))
 
-    def _history(self, db: sqlite3.Connection, worker_id: str, pipe_key: str, now: float) -> PipeHistory:
+    def _history(self, db: sqlite3.Connection, worker_id: str, pipe_key: str, now: float,
+                 prior: float | None = None) -> PipeHistory:
         row = db.execute("SELECT weight,samples,updated_at FROM pipe_history WHERE swarm_id=? AND worker_id=? AND pipe_key=?",
                          (self.ledger.swarm_id,worker_id,pipe_key)).fetchone()
+        baseline = 0.0 if prior is None else prior
         return PipeHistory(worker_id=worker_id,pipe_key=pipe_key,
-                           weight=row[0]*exponential_decay(now-row[2],self.tau_seconds) if row else 0.25,
+                           weight=baseline+(row[0]-baseline)*exponential_decay(now-row[2],self.tau_seconds) if row else 0.25,
                            samples=row[1] if row else 0)
 
-    def pipe_history(self, worker_id: str, pipe_key: str) -> PipeHistory:
-        with connection(self.path) as db:
-            return self._history(db,worker_id,pipe_key,self._now())
+    @staticmethod
+    def _check_prior(prior: float | None) -> None:
+        if prior is not None and (isinstance(prior, bool) or not math.isfinite(prior) or not 0 <= prior <= 1):
+            raise ValueError("prior must be a finite fraction")
 
-    def reinforce(self, worker_id: str, pipe_key: str, reward: float) -> PipeHistory:
+    def pipe_history(self, worker_id: str, pipe_key: str, *, prior: float | None = None) -> PipeHistory:
+        self._check_prior(prior)
+        with connection(self.path) as db:
+            return self._history(db,worker_id,pipe_key,self._now(),prior)
+
+    def reinforce(self, worker_id: str, pipe_key: str, reward: float, *, prior: float | None = None) -> PipeHistory:
+        self._check_prior(prior)
         if not worker_id.strip() or not pipe_key.strip() or not math.isfinite(reward) or not 0 <= reward <= 1:
             raise ValueError("invalid worker, pipe or reward")
         with connection(self.path, write=True) as db:
             now = self._now()
-            previous = self._history(db,worker_id,pipe_key,now)
+            previous = self._history(db,worker_id,pipe_key,now,prior)
             result = PipeHistory(worker_id=worker_id,pipe_key=pipe_key,
                                  weight=(1-self.alpha)*previous.weight+self.alpha*reward,samples=previous.samples+1)
             db.execute("INSERT INTO pipe_history VALUES (?,?,?,?,?,?) ON CONFLICT(swarm_id,worker_id,pipe_key) "
