@@ -6,6 +6,8 @@
 
 ## 原始任务与顺序
 
+06:42 UTC本阶段结算：原I已普通精确合并A/root报告并push最终证据81357f1fb857843d745b0f657a988a9c51914312，业务/原检查器未变。P/A/I本轮窄任务均succeeded且按固定Owner要求retain，所有Delivery已处理ACK、reclaimable为0；这只结算工程及installed prepared，不是原完整科研目标完成。StepFun实际402仍待可调用额度，之后才能继续新冻结案例与原完整checker。
+
 1. 继续复用 ORCA 各 Agent 接入的全部接口；盘点固定上游源码、版本和许可证，按真实支持情况逐项映射，不搬入桌面基础设施。
 2. 先修进程清理：补父进程先退出的真实 POSIX 回归。科研权限、窄工具集、正式启动参数放入新产品仓库 Morphogenesis-Research；验收从安装后的正式入口运行，测试脚本只观察，不补关键权限/启动参数。
 3. 冻结新核心和产品代码后完成现有作者→独立复现→文件验证/批准/应用→第三角色本地再验证→真实继承/adoption完整闭环，并运行原 tests/integration/check_research_live.py，不能以作者检查代替。
