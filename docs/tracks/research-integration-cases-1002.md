@@ -182,6 +182,24 @@ synthetic executionfe0c43d3766f4e0fbe9e07c33e971d71→result5ab232c4e73541a6a48b
 完整source/child资产ID、文件验证批准应用顺序、retrieved/injected/applied/adopted区分与fencing
 在对应正式audit清单和原始receipt中，不手造另一套UseRecord或完成证明系统。
 
+两checker共同SOURCE bf67c1a4134a25d009cff2acccbfab027999bea6；完整Git blob分别
+39948d9615bce07b40b96eeaf5dfb263b993c6d3（NIST）和
+538f6b1852ccbba3f1cef6d09ad16b2a6fe8d4f5（synthetic）。
+
+| 案例/role | 实际run_id | 实际sandbox_id |
+|---|---|---|
+| NIST/author | ee7d2b102cff4a5d942e427b79d485f7 | 481fa3c1-3260-4715-9d4c-d3a86b84560e |
+| NIST/replication | 867461d84a8c4ac582a61e21f68a5ee4 | 9ddcfcb6-7dcd-469f-ba9f-663827021742 |
+| NIST/inheritance | af7ea7178d4a4bf681562d298963a8a3 | fc06a531-8460-485a-bd6c-268b5752eb22 |
+| synthetic/author | 4652267f7bb24b34a93764ec4bcb1994 | 8763e2ae-3eaa-4cf0-9c74-89d301641e6d |
+| synthetic/replication | cdef868b086846c189fe51dace6eb630 | 8581d37c-0203-4da9-94be-72c8f03ad10b |
+| synthetic/inheritance | 2d26481904be4f9685a2055618403fba | f7d92153-55eb-4365-b0b0-d76a0fcf85f4 |
+
+NIST source `sha256:448ba799e76d5c5468a938dfa8e4548058a75c747872ebf3e727ecce77953c00`
+→ child `sha256:64b06772a8926af0a37ef9cde7b1e1fca279e1dd359fa7e7f0c9308ed1d447c2`；
+synthetic source `sha256:1a604a80ee6f4ada38b3316f8efc012cf40c59130e15d3285c1048d447889dc4`
+→ child `sha256:67fcd39a6f435170bf7e41b2e73a4189730b227baf4e070278ac2b04e2b040a6`。
+
 NIST首次audit exit2因我首捕获文件名未遵循.json/.log接口；原错误及原文件保留，实际命令
 元数据与同bytes日志补正后仅只读audit通过，未重跑checker/科研。首generator未传时binding未知
 也保留，后用产品既有参数验证准确来源。安全post汇总首次PowerShell管道语法错误未执行动作，
