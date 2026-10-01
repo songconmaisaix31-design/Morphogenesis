@@ -1,3 +1,18 @@
+# 当前一页计划：README 原文恢复与适配说明（2026-10-02）
+
+用户纠正上一轮改写：以 0e7826819c6780f637ff4049adfc61e8069638d9 的 README 为骨架，恢复 Ghost in the Swarm 标题、八节结构、原理念/算法/结语文风和两张现存配图；局部弱化 EvoMap，补 Qwen 与阿里云算力适配。实际 Orca Agent 适配层的文字、同款小 logo 为参考事实源，查明固定来源与使用许可，不凭空替代。此轮仅文档/原始品牌图标，不新增科研实验或业务适配实现。
+
+主线基线 c767ebf85a7dceaf94c6fc34ec78c2eee4f76d37；根工作区 codex/morphogenesis-mainline 与 docs/SWARM_SOL_PLAN.md WIP 保留。已有 docs/QWEN_ALIYUN_RESEARCH.md 保留；科学冻结 CORE bf67 / PRODUCT dfbc / REPORT 7b66 的对应验收不变，文档不能冒称本次新增 Qwen 或云算力实测。
+
+| 轨 | 固定 Owner / Worktree / 新 Branch | write_paths / 验收 |
+|---|---|---|
+| D 原文与适配 | 原 D Owner，term_1e598676-e019-4b24-ab8d-1d0ca6840ea4 / morph-research-integration-0930 / songconmaisaix31-design/morph-readme-style-restore-1002 | README.md、docs/assets/agents/**；确有许可必要时局部 THIRD_PARTY_NOTICES.md 或 docs/assets/agents/README.md。原文骨架恢复、EvoMap 简短可选外部经验源、Qwen/阿里云与云端本地协同局部补充；使用 Orca 实际同款图标，记录来源/固定版本/许可证，链接/图/Markdown/差异检查。相同 Owner 负责返修、commit + push。 |
+| I 独立验收与主线发布 | 原 I Owner，term_3516bdc3-902c-4b75-ba47-a8ca3620b0e5 / morph-research-space-0930 / songconmaisaix31-design/morph-readme-style-main-1002 | 仅合并确切 D 与治理 SHA，必要极少文档接线；独立对照旧 README、实际 Orca 图标与来源、检查状态不虚报、CLI准确、链接/图片可加载、公开页面和 remote exact/clean。通过后正常 push HEAD:main，保留公共历史，不 force。 |
+
+主控只维护本计划/状态/决策与验收，不写 README 或检查器。两轨接续、不并行争用同文件；复用原已识别 Orca 终端，在原 Worktree 新建此轮分支，新 Task/Dispatch，保留原科研/上一轮文档分支。完成 valid worker_done 后决定 release/再派发再 ACK；attached external terminal 不杀进程。主线发布沿用用户授权，远端若前进重新只读核对，不丢弃任何贡献。最终说明实际完成、分支 SHA、验证与未执行的真实运行。
+
+---
+
 # 当前主线：Qwen / 阿里云 / 科研提效（2026-10-02）
 
 用户当前指令优先：将默认main的README主叙事调整为Qwen、阿里云与科研提效，EvoMap仅保留一句“可选的外部经验源”。云端本地算力协同以可核验状态和明确实施路线表达，不把方向性文档冒充已实现功能。先完成文档调整；实际Qwen推理与跨环境计算实现范围已异步询问，未回答按本轮定位和路线工作推进。
