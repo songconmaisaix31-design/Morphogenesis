@@ -140,5 +140,53 @@ synthetic21首次误用NIST代码目录导致init exit2，project/state未创建
 另全新prepared02从可信registered plan取目录demo/research_cases/synthetic_linear_regression
 后通过，未修改业务或原50断言。以上只属engineering/prepared，不能替代实际科研。
 
-新冻结仍等待root明确新unique两case live release；旧nist-01不恢复/重放，owned服务保持停止。
-当前SOURCE与本报告后续doc-only Commit分开；原两个完整checker及有效续租/真实adoption仍必需。
+以上工程完成时尚待live release；旧nist-01始终不恢复/重放。后续实际结果如下，SOURCE不变。
+
+## 最终两案例完整 task_live 与紧凑验收清单
+
+root release msg_64e4732a7bb4 后，从同一X正式入口执行新
+`research-formal-1002-nist-02`、`research-formal-1002-synthetic-01`。
+各project/state/profile/host先确认不存在，正式init各一次；可信registered plan提供不同程序目录。
+作者均真实claim/renew后owned中断，原生后代实际0、科学派发0，实际TTL过期后同UUID恢复；
+原token合法renew与candidate submit均被拒绝，随后新canonical token2继续。
+每案例三distinct UUID/twoCLIbrands/三fresh sandbox实验，独立复现与第三角色本地再验证。
+Claude是CLI品牌，provider为StepFun，actual native init model均step-3.5-flash匹配；
+Codex原选定身份/model/tier、权限、11tools、900s/64tools/3600s/3attempts均未修改。
+
+| 案例/角色 | 实际native UUID | 累计native秒/tools | 当前token有效成功续租 |
+|---|---|---|---|
+| NIST作者 | 01a0f816-7c60-7a62-95ae-bfa293b66896 | 230.3774/21（中断+同UUID恢复） | 2 / 5次 SAT |
+| NIST复现 | 90fd24dd-3d0a-45ad-8ce0-eb69675f4a3c | 115.8514/26 | 1 / 7次 SAT |
+| NIST继承 | 01a0f81d-fa75-7343-b292-f0a31608e8c5 | 195.2450/19 | 1 / 7次 SAT |
+| synthetic作者 | 01a0f822-96e3-7383-b852-6d0d444720f3 | 128.0820/20（中断+同UUID恢复） | 2 / 5次 SAT |
+| synthetic复现 | f8485353-f13d-4cc3-b9ec-1dbf2c52cc1e | 92.6514/17 | 1 / 3次 SAT |
+| synthetic继承 | 01a0f827-b51e-72e1-b550-43d5e40200ff | 106.7188/18 | 1 / 7次 SAT |
+
+每role只有一次registered original实验，trusted read_result绑定expected_plan/context；
+全部live/succeeded/scientific passed/remote known/cleanup destroyed，科学usage/cost均null。
+NIST三次Fraction重算1001行、mean50000001/5、variance1/100，实际variance绝对误差
+1.1175870992530257e-10；synthetic三次slope/intercept/SSE误差0、SSE0.25，判据由C现有
+ScientificAssessment提供，checker没有复制科学公式。六个run/sandbox完整身份及不可变执行token
+与当前写token见各首完整checker stdout和正式audit；全部distinct。
+
+| 首完整验收 | 命令/真实结果 | R/live下原始证据 |
+|---|---|---|
+| NIST原39948完整checker | X/venv/Scripts/python.exe -I -B 固定bf67归档check_research_live.py --state新NIST；FIRST exit0/task_live passed | research-formal-1002-nist-02-host/full-checker-first.* |
+| synthetic完整538f checker | 同固定归档check_research_case_live.py --state新synthetic；FIRST exit0/task_live passed | research-formal-1002-synthetic-01-host/full-checker-first.* |
+| 两案例正式audit | formal CLI audit +既有generator-installation-evidence；各exit0/checker PASS/allroles SAT，subject/generator corebf67/productdfbc verified | 各host/formal-audit-generator-bound.* |
+| 安全收尾 | 实际owned native0；六实验known/destroyed；仅原fullID docker stop exit0/post exited、Pid0 | two-case-owned-and-science-closure-first.json、owned-service-stopped-first.json |
+
+两案例各真实唯一AdoptionReceipt绑定source/child/ConsumptionExecution/ledger result：
+NIST execution1171ca87bf104107b0e9917ea32fede7→result a879b54ed92a4c4ca2af2a02deeaa775；
+synthetic executionfe0c43d3766f4e0fbe9e07c33e971d71→result5ab232c4e73541a6a48b774cec0190b8。
+完整source/child资产ID、文件验证批准应用顺序、retrieved/injected/applied/adopted区分与fencing
+在对应正式audit清单和原始receipt中，不手造另一套UseRecord或完成证明系统。
+
+NIST首次audit exit2因我首捕获文件名未遵循.json/.log接口；原错误及原文件保留，实际命令
+元数据与同bytes日志补正后仅只读audit通过，未重跑checker/科研。首generator未传时binding未知
+也保留，后用产品既有参数验证准确来源。安全post汇总首次PowerShell管道语法错误未执行动作，
+纠正后才只读核验。所有旧RED/unknown仍原样；未因doc-only报告重跑模型或实验。
+原生中断usage/effect仍unknown/null；后续CLI非零usage与其报告cost保留原raw，不能解释为
+实际已结算费用或把synthetic0当零费用。科学运行usage/cost未知与native报告分列。
+本次只签当前冻结双案例完整闭环；Linux/WSL native现场、Notebook/卷、更多Agent、EvoMap、
+桌面/main/tag/Hub发布未执行且不在本轮。报告Commit与CORE SOURCE分列，文档正常push。
