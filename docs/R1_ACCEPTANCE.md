@@ -1,5 +1,19 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## 04:50 组合与验收边界更新
+
+本节是新的阶段记录，下文所有首失败与历史受测身份保留。A 组合 SOURCE `d85aa95e8da406d598f3658492e3d615bba8a28f` / REPORT `524a81ed7ba0b3550f6ae029e316a56293901d12` 已精确普通合并B/C最终历史。私有COPY非editable VCS、14运行文件与原Git blob一致、103依赖兼容；正式stdio1+SQLite并发5首次6 passed/11.11s，变动store strict通过。B最终230d源码CI37059454013双平台全适用回归、strict/build/SDK/wheel通过；新组合d85的CI37062098247尚运行，不将旧CI直接转移为新组合PASS。
+
+| 对应 AT | 当前工程证据 | 仍需完成 |
+|---|---|---|
+| 01/02/04/09/14/15 | P真实PDF/文本/代码材料与来源版本、权限、稳定项目预算、unknown/resume边界已实现；P7a正式CLI+stdio/字节门2 passed。Q旧installed cc2/24f基础237 passed后发现SQLite和provider新缺陷；后继B230并发与原B边界72 passed，P7a native/provider/resume55 passed，均保留首RED。 | P已交pin d85的SOURCE fd7a79e，但该新组合完整baseline与Q真正installed门未跑；不能按schema或旧237赋予最终通过。 |
+| 03/05/06/08/10/11/12/13/18 | P5b真实HTTP/原GEP/原账本的支持→独立复核→原mock采用→新版本与完整导出、反证可信贡献、unknown保留3 passed/41.23s；正式stdio可作实际choose/claim，核心原始artifact绑定与篡改拒绝通过。 | 执行是inert fixture，mock采用不等于真实科学继承；L2分支、新代码实际运行、独立复核、证据改变实际研究及成果包均NOT_RUN。 |
+| 16 | F42ab静态build通过；P7a合并安装0e6279d产品/static52文件一致。正式SDK缺失导致首aggregate503/双视窗2 RED，按README setup-assets+doctor补齐后同包同配置API200。 | 页面后继在导航后过早读空DOM导致2 RED；仅补panel-ready等待、原DTO断言/30秒阈值不变。支持及反证双视窗最终结果待；主控已查看本次space两视窗截图，不能替代results页或人工观察。 |
+| 17 | A/B/C各Owner精确报告已推送；B并发修复拥有原断言负例及双平台CI。核心旧固定案例/v0.1/literal语义未切换。 | 最终I普通精确合并、新组合独立安装与完整适用回归、产品最后pin、Q与F最终证据仍待。 |
+
+AT07实际沙箱隔离探针、L2真实研究、L3效果比较和未参与实现的人工观察均NOT_RUN；全R1退出条件未达到。控制动作只报告实际夹具计时，原15秒超时和apply8.79秒保留，未宣称整体p95或传播目标通过。系统editable清理被自动审批拒绝的人工残留、旧4项Orca release_unknown继续见C/主控报告。
+
+
 ## 04:13 CI 与产品修复追加
 
 A最终SOURCEcc2e722的Windows/Linux CI37051852669完整适用pytest分别1387/1386通过，skip分别5/6，strict136/build/SDK/wheel均通过。C报告8bc4c28 Windows CI37051183488新1 failed/1348 passed/5 skipped定位B资产库初始化SELECT/INSERT竞态；故最终并发兼容门槛未过，退原B后继任务修复，不能把其他同码CI成功作为该缺陷消失证据。
