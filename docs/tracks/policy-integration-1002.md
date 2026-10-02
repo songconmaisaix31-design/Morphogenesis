@@ -154,6 +154,16 @@ A3最终产品 SOURCE **`c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc`** 精确pin�
 
 五门已具备，停止扩展策略v0.1，冻结只限上述contract_local / prepared_local / manual-MCP行为。100候选窗口按原created_at/task_id，窗口外不评分或探索，不声称全局公平/最优或任意多代恢复。原Windows2.332s耗时组成仍未知，受控节奏缺陷的修复与新完整验证不能保证所有OS长停顿不超过TTL；失效/未知继续fail closed。R1/R2首失败与未知/null成本保持其原身份，不因R3 PASS重标。
 
-新科研、当前版本native Agent自主选择/多角色新task_live、收费模型调用、auth切换、全局HOME修改、main/tag/Hub/EvoMap发布均未执行，范围等待用户；未新增Agent/案例/调度/Manifest/hash/完成证明系统。D最终版本与领域报告仍由D同Owner后续Task补录，root最新PLAN与D REPORT的最终docs-only汇总由其接续I2 Task完成，不能用REPORT HEAD重pin业务源码。
+新科研、当前版本native Agent自主选择/多角色新task_live、收费模型调用、auth切换、全局HOME修改、main/tag/Hub/EvoMap发布均未执行，范围等待用户；未新增Agent/案例/调度/Manifest/hash/完成证明系统。原I验收完成时，D最终领域报告与root最终PLAN汇总留给同Owner接续I2；该文档收口现已完成，详见下节，不能用REPORT HEAD重pin业务源码。
+
+## I2 最终文档收口
+
+原I Task `task_7d601d5de91b` 的 accepted succeeded REPORT 为 `f5e3d33a4ca119d7d173e61fe801d3a4d36cdb09`。同一终端、Worktree和分支接续 `task_3cb35cc31f97`，先完整读取mailbox及deliveryId并逐批ACK，等待root正式交付全部精确输入后才写文档。root最终Handoff `msg_03b9730c8763` 确认原D同Owner Task `task_0ea34920f298` 已有效完成并验收，D docs-only REPORT **`727d74ca69a96176f5d75fc57909219d8e74d853`**、root PLAN-only治理 **`2384776969ce1a156b75423d73159cde54d9c1d6`** 均normalpush/remoteexact。
+
+已精确普通合并上述D REPORT与root治理，无冲突；D的 `docs/tracks/policy-closeout-1002.md` / `docs/STRATEGY_V01_ACCEPTANCE.md` 与root `docs/PLAN.md` 的最终Git blob均与各自交付对象完全一致，I2只补本报告。相对原I REPORT f5e，累计改动恰为这四份文档；完整范围 `git diff --check` 通过。相对冻结核心SOURCE7062，全部非docs文件无diff；两原checker blobs39948/538f、原workflow、poetry/npm locks相对科学基线7b66均无diff。原协议5788分支仍保留，未操作根2957/WIP、README、main或tags。
+
+SOURCE保持核心 **`7062a632b8c625c05b35bdec4c36fce63a31c2a4`** / 产品 **`c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc`**；A REPORT **`3b17cc0a7120f1d2381871b336293ee301b857de`**、原I REPORT f5e、D REPORT727和root治理238均单列，不作为新业务pin。只读确认已有R3原CI36960486155完整双平台结果、原08安装/10provenance、原产品53/JUnit traces与历史audit/checker/重建证据的绑定，未为文档重跑工程、模型或科学。五门冻结仍仅限原contract_local / prepared_local / manual-MCP与历史只读恢复范围；R1/R2首RED、NOT_RUN、冗余CI CANCELLED、未知/null费用和旧subject/newgenerator边界原样保留。
+
+最终docs-only报告以 `[skip ci]` 普通commit与normalpush交付，完整REPORT SHA由本Task的最终worker_done给出，远端exact与clean另行核对，不自引用提交SHA。资源沿用下述原I交接；I2没有新验证环境或后台服务，完成后停止动作，由root释放本Owner终端。
 
 资源交接：R1/R2/R3私有archive、venv、Node依赖和原始日志保留在本文各私有根；本轮自有R3验证Python/Node/uv进程检查为0，无新native/sandbox后台服务，未动旧共享资源。I仅编辑本报告；业务变化为精确合并原Owner提交。原协议5788分支保留，根2957/WIP与用户main贡献未由I操作；不force、不覆盖历史。本报告最终仅文档commit normalpush `[skip ci]`，完整REPORT SHA由最终handoff/worker_done给出，业务核心仍7062、产品仍c2；terminal交root接续，I不自行关闭。
