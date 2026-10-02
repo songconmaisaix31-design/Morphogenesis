@@ -344,3 +344,42 @@ across new task/branch/run and unknown effect, configured P factory and final
 exact core/product combination still require original Owner source delivery and
 Q verification. L2/L3, real probes, scientific execution and external materials
 remain NOT_RUN; no new worker or global environment changes were made.
+
+## Input and advisory first RED after recovery
+
+Coordinator `msg_039c88daa1db` granted only two sequential pure-fixture checks
+in the existing private environment while B installed its private dependencies.
+No Node/native process, candidate, sandbox or network call occurred.
+
+| Exact archive | Q command (after private python -m pytest) | First result |
+| --- | --- | --- |
+| B `d175f7e2f8c3ff41a1ac8a2a4958c68acf57e275` | `tests/integration/r1_security/test_b_input_binding.py -q --tb=short` | **7 failed / 1 passed**, exit 1, 2.35s |
+| C `99cd2997dd024a41c28461228f47a575fef3f9ab` | `tests/integration/r1_security/test_c_advisory_binding.py -q --tb=short` | **6 failed / 1 passed**, exit 1, 3.99s |
+
+B's data may overwrite the candidate path, conflict with the runner, repeat a
+manifest name or exceed the aggregate input bound without failing preparation.
+Its validation also certifies an unrelated asset ID, revision or stored byte
+payload. Each asset negative first proves the unchanged persisted candidate is
+valid under the same host fixture authority. The disjoint inert-data positive
+also passes. Original B Handoff `msg_1e2cc212b1e7`.
+
+C's advisory retains invented supported/refuted IDs and reuses a real result
+on a foreign branch, under the wrong hypothesis axis, repeatedly, and after
+supersession. Its nonempty positive builds independent original ledger/store
+executions and accepts a refutation once; that real result lowers the linked
+branch opportunity. Original C Handoff `msg_7c0bfd1ca735`.
+
+SOURCE `e7e1805c9f34351a6139de54732cff51d00591b0` preserves tests and raw logs
+`b-d175f7e-input-binding-first.txt` / `c-99cd299-advisory-first.txt`. The latter
+retains pytest's original whitespace-only diff line, so the evidence-inclusive
+`git diff --check` reported that line; source assertions were not changed.
+The older C fixture gains an optional branch_id (default absent) and copies
+the original task payload into its independent review signal. This adds lineage
+for new advice tests without changing the old tests' data or assertions.
+
+Window released by `msg_a44c9f8e4b51`. A new policy/correction tests remain
+NOT_RUN. Read-only review of new generated report code found B requiring the
+candidate author's source_attempt while C requires the current review execution
+attempt; Handoffs `msg_ebc5bf6469cc` and `msg_393526310efc` request one consistent
+original execution lineage and a nonempty independently reviewed positive.
+These repair checkpoints are neither final Owner acceptance nor R1 PASS.
