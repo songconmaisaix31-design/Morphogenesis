@@ -61,3 +61,26 @@ Independent acceptance is in progress. First RED remains unaccepted; original
 owners must return exact pushed repair SHAs before final verification. This report
 does not approve R1 or live science. Budget envelope resets, native process
 containment, and real isolation capability probes need separate evidence.
+
+## Expanded negatives and preserved results
+
+- A48ee: authorized voluntary claim, scope/capability/dependency claim denial,
+  and persistent max_tasks across branch/member reopen passed (5 cases).
+  A private task linked from a note was accepted: 1 new RED.
+  Handoff `msg_811c8b65115c`.
+- Bfbee: succeeded archive without output digest/size binding was accepted:
+  1 new RED. Handoff `msg_b6976c3faaef`.
+- C71bf: a deterministic known-effect submitted counterexample is projected by
+  the original trusted ledger/store chain. Nominating an unknown reviewer or an
+  actor who only claimed an unrelated task both grants acceptance: 2 new RED.
+  The fixture writes existing contracts only and never executes candidate code.
+- C successor changes the store constructor to bind assets_root and removes
+  synchronize. Q's helper recognizes that constructor; removal of the unsafe
+  import entry still requires an empty contribution store. No original
+  assertion/threshold has been loosened; original first RED remains in commit
+  `6ceb2e2` and logs. A successor result-ID acceptance API is exercised directly
+  by the result-bound reviewer negative.
+
+All additional raw results are in the same evidence directory. Task-count
+envelope checks establish only persistent TaskLedger limits, not financial,
+model, data-export, or sandbox runtime enforcement.

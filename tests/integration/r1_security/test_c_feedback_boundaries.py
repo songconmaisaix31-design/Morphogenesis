@@ -1,6 +1,14 @@
 """Persisted research contributions require authoritative facts, not caller labels."""
+import inspect
+import json
+
 import pytest
 
+from contracts.identity import AgentId, AttemptId
+from local_assets.models import Candidate, FileChange
+from local_assets.research_models import ResearchClaim, ResearchObservation
+from local_assets.store import LocalAssetStore
+from swarm.models import Locality, Signal
 from swarm.research.feedback import ResearchFeedbackStore, research_feedback
 from swarm.research.policy import Branch, CorrectionEvent, ResearchPolicy, ThreeAxisResult
 from swarm.task_ledger import TaskLedger
@@ -8,7 +16,12 @@ from swarm.task_ledger import TaskLedger
 
 def store(root):
     ledger = TaskLedger(root / "ledger.db", "q-security", clock=lambda: 100.0)
-    return ResearchFeedbackStore(root / "feedback.db", ledger, clock=lambda: 100.0)
+    # C successor adds an assets-root binding; preserve coverage of both the
+    # original first-RED API and the versioned repair API without importing helpers.
+    kwargs = {"clock": lambda: 100.0}
+    if "assets_root" in inspect.signature(ResearchFeedbackStore).parameters:
+        kwargs["assets_root"] = root / "assets"
+    return ResearchFeedbackStore(root / "feedback.db", ledger, **kwargs)
 
 
 def forged(**updates):
@@ -33,10 +46,12 @@ def test_forged_result_and_reviewer_never_persist(tmp_path, hypothesis):
 
 def test_synchronize_does_not_import_caller_accepted_label(tmp_path):
     s = store(tmp_path)
-    try:
-        s.synchronize([forged(contribution="accepted")])
-    except (ValueError, PermissionError, KeyError):
-        pass
+    synchronize = getattr(s, "synchronize", None)
+    if synchronize is not None:
+        try:
+            synchronize([forged(contribution="accepted")])
+        except (ValueError, PermissionError, KeyError):
+            pass
     assert s.contributions() == []
 
 
@@ -72,3 +87,75 @@ def test_exploration_does_not_authorize_out_of_scope_branch():
     plan = ResearchPolicy().opportunities([Branch(branch_id="private", status="proposed", authorized=False)])
     assert plan.opportunities[0].share == 0
     assert not plan.opportunities[0].eligible
+
+
+def trusted_refutation(root):
+    """Host-only fixture writes through existing ledger/store contracts.
+
+    This constructs a known, submitted counterexample chain and never runs an
+    experiment. It is deterministic contract_local evidence, not live science.
+    """
+    s = store(root)
+    assets = LocalAssetStore(root / "assets")
+    locality = Locality(workspace=str(root / "workspace"), authorized_scopes=("science",))
+    agent = AgentId(role="builder", instance=0)
+    claim = ResearchClaim(plan_id="fixture-plan", criterion_version="v1",
+                          conditions={"data": "fixture"}, sources=("fixture-source",))
+    p = {"plan_id": claim.plan_id, "criteria": {"version": claim.criterion_version}}
+    signal = Signal(task_id="refuted", workspace=locality.workspace, scope="science/refuted",
+                    kind="opportunity", required_capability="research.author")
+    s.ledger.enqueue(signal, acceptance={"research_claim": claim.model_dump(mode="json"),
+                                         "experiment_plan": p})
+    candidate = Candidate(attempt=AttemptId(task_id="refuted", agent=agent, attempt=1),
+                          base_revision="a" * 40, scope=signal.scope,
+                          changes=(FileChange(path="science/refuted/r.txt", before=None, after="fixture"),),
+                          declared_files=1, declared_lines=1, research=claim)
+    asset = {"type": "Gene", "schema_version": "1.14.0", "id": "local_fixture", "category": "repair",
+             "signals_match": ["local_candidate"], "strategy": [candidate.summary,
+             "local_candidate_json:" + candidate.model_dump_json()],
+             "constraints": {"max_files": 1, "forbidden_paths": [".git/**"]},
+             "validation": ["local_assets.AssetValidator"], "asset_id": "fixture-asset"}
+    with assets.connection() as db:
+        db.execute("INSERT INTO assets VALUES (?,?)", ("fixture-asset", json.dumps(asset)))
+    lease = s.ledger.claim("refuted", "author", locality=locality)
+    assert lease is not None
+    raw = {"execution_state": "succeeded", "scientific_verdict": "failed", "effect_state": "known",
+           "provenance": "mock"}
+    s.ledger.begin_execution(lease, "fixture-run", max_executions=1)
+    s.ledger.record_event("research_execution", {"run_id": "fixture-run", "worker_id": "author",
+                                                 "token": lease.token, "result": raw}, task_id="refuted")
+    s.ledger.confirm_execution(lease, "fixture-run")
+    observation = ResearchObservation(report_id="fixture-report", asset_id="fixture-asset", task_id="refuted",
+        worker_id="author", fencing_token=lease.token, run_id="fixture-run", sandbox_id=None,
+        plan_id=claim.plan_id, criterion_version=claim.criterion_version, conditions=claim.conditions,
+        plan_json=json.dumps(p), candidate_json=candidate.model_dump_json(), result_json=json.dumps(raw),
+        provenance="mock", purpose="counterexample", execution_state="succeeded", scientific_verdict="failed",
+        created_at=100, source_swarm_id=s.ledger.swarm_id, source_fencing_token=lease.token,
+        source_attempt=candidate.attempt)
+    with assets.connection() as db:
+        db.execute("INSERT INTO research_reports VALUES (?,?,?)",
+                   (observation.report_id, "fixture-asset", observation.model_dump_json()))
+    s.ledger.submit(lease, "fixture-result", {"asset_id": "fixture-asset", "run_id": "fixture-run",
+        "stage": "evidence_submitted", "scientific_verdict": "failed", "execution_state": "succeeded",
+        "provenance": "mock"})
+    facts = research_feedback(s.ledger, assets.root)
+    assert len(facts) == 1 and facts[0].hypothesis == "refuted"
+    return s, facts[0], locality
+
+
+@pytest.mark.parametrize("known_actor", [False, True])
+def test_nomination_of_unknown_or_unrelated_known_reviewer_cannot_accept(tmp_path, known_actor):
+    s, fact, locality = trusted_refutation(tmp_path)
+    if known_actor:
+        s.ledger.enqueue(Signal(task_id="unrelated", workspace=locality.workspace, scope="science/elsewhere",
+                                kind="opportunity", required_capability="research.author"))
+        assert s.ledger.claim("unrelated", "nominated-reviewer", locality=locality) is not None
+    # Knowing/claiming another task does not establish review of this result.
+    value = fact.result_id if "result_id" in inspect.signature(s.accept).parameters else fact
+    try:
+        decision = s.accept(value, reviewer="nominated-reviewer")
+    except (ValueError, PermissionError, KeyError):
+        pass
+    else:
+        assert not decision.accepted, "nominated identity has no result-bound independent review"
+    assert s.contributions() == []

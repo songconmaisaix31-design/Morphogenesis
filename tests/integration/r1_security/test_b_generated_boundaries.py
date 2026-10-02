@@ -152,3 +152,9 @@ def test_known_execution_with_unknown_effect_cannot_grant_final(tmp_path):
         return
     assert result.assessment.mode == "diagnostic"
     assert result.assessment.contribution != "accepted"
+
+
+def test_succeeded_archive_requires_output_digest_binding(tmp_path):
+    archive(tmp_path)
+    with pytest.raises(ValueError):
+        read_generated_result(tmp_path, "q-run", expected_plan=plan(), expected_context=context())

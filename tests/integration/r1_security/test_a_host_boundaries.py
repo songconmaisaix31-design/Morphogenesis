@@ -4,21 +4,21 @@ from pathlib import Path
 import pytest
 
 from contracts.identity import AgentId
-from swarm.models import Signal
+from swarm.models import RunLimits, Signal
 from swarm.research.models import HostConfig
 from swarm.research.records import ResearchBranch, ResearchEvent, ResearchProject
 from swarm.research.service import ResearchService
-from swarm.task_ledger import TaskLedger
+from swarm.task_ledger import RunLimitReached, TaskLedger
 
 
-def service(root: Path, project="p1"):
+def service(root: Path, project="p1", limits=None):
     config = HostConfig(ledger_path=str(root / "ledger.db"), swarm_id="q-security",
                         workspace=str(root / "workspace"), worker_id="q",
                         agent=AgentId(role="builder", instance=0), authorized_scopes=("science",),
                         capabilities=("research",), assets_root=str(root / "assets"),
                         evidence_root=str(root / "evidence"), project_id=project,
                         authorization_ref="host-authority")
-    ledger = TaskLedger(config.ledger_path, config.swarm_id, clock=lambda: 100.0)
+    ledger = TaskLedger(config.ledger_path, config.swarm_id, clock=lambda: 100.0, limits=limits)
     return ResearchService(config, ledger=ledger)
 
 
@@ -126,3 +126,54 @@ def test_same_event_id_different_payload_rejected(tmp_path):
     with pytest.raises(ValueError):
         s.knowledge.record(event.model_copy(update={"payload": {"value": 2}}))
     assert [e.payload for e in s.knowledge.events("p1") if e.event_id == "same"] == [{"value": 1}]
+
+
+def test_authorized_research_stays_unverified_and_claim_is_voluntary(tmp_path):
+    s = seeded(tmp_path)
+    s.create_branch("p1", "own", "authorized", "authorized")
+    note = s.submit_note("p1", "hypothesis", "candidate idea", branch_id="own")
+    assert note["review_state"] == "unverified"
+    proposal = s.propose_work("p1", "question", "g", "j", "e", branch_id="own")
+    assert s.ledger.get(proposal["task_id"]).owner is None
+    lease = s.claim(proposal["task_id"])
+    assert lease is not None
+    assert s.ledger.get(proposal["task_id"]).owner == s.config.worker_id
+
+
+@pytest.mark.parametrize("field", ["scope", "capability", "dependency"])
+def test_exploration_cannot_bypass_ledger_claim_permissions(tmp_path, field):
+    s = seeded(tmp_path)
+    if field == "dependency":
+        s.ledger.enqueue(Signal(task_id="unfinished", workspace=s.config.workspace,
+                                scope="science", kind="opportunity", required_capability="research"))
+    s.ledger.enqueue(Signal(task_id="forbidden", workspace=s.config.workspace,
+                            scope="private" if field == "scope" else "science",
+                            kind="opportunity", required_capability="admin" if field == "capability" else "research"),
+                     dependencies=("unfinished",) if field == "dependency" else ())
+    try:
+        lease = s.claim("forbidden")
+    except PermissionError:
+        lease = None
+    assert lease is None
+    assert s.ledger.get("forbidden").owner is None
+
+
+def test_branch_and_member_reopen_do_not_reset_task_envelope(tmp_path):
+    limits = RunLimits(max_tasks=1)
+    s = service(tmp_path, limits=limits)
+    s.create_project("p1", "g")
+    s.create_branch("p1", "b1", "first", "first")
+    s.propose_work("p1", "question", "first", "j", "e", branch_id="b1")
+    s.create_branch("p1", "b2", "second", "second")
+    reopened = service(tmp_path, limits=limits)
+    with pytest.raises(RunLimitReached):
+        reopened.propose_work("p1", "question", "second", "j", "e", branch_id="b2")
+    assert len(reopened.ledger.snapshot()) == 1
+
+
+def test_note_link_to_private_task_rejected(tmp_path):
+    s = seeded(tmp_path)
+    s.ledger.enqueue(Signal(task_id="private", workspace=s.config.workspace,
+                            scope="private", kind="opportunity", required_capability="research"))
+    with pytest.raises((PermissionError, ValueError)):
+        s.submit_note("p1", "hypothesis", "leak", task_id="private")
