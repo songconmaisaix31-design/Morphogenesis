@@ -1,6 +1,6 @@
 # 策略 v0.1 独立累计集成与验收（I，1002）
 
-当前状态：**R2 独立验收进行中，尚未冻结 v0.1**。固定累计核心 SOURCE `54bb8d0897eb22c5e8a52ea158606388fe64064a` 与最终产品 SOURCE `e806f667ad9f52409364618472b5f8a6b1c922b0` 已正常推送并 exact 核对，I 独立新安装字节核对、原完整产品53项、正式 CLI、两原完整科学 checker 的只读复核及核心完整本地1211项已通过；最终 Windows CI 尚未结算。R1 核心 `9ceb3aa` / 产品 `35934f1` 保持失败候选，其真实反馈 RED 和本地首全量 1192 PASS / 2 FAIL / 5 SKIP 不被后续通过覆盖。新增科研、收费模型与 main 发布 NOT_RUN。
+当前状态：**R2 验收 BLOCKED，策略 v0.1 NOT_FROZEN**。固定累计核心 SOURCE `54bb8d0897eb22c5e8a52ea158606388fe64064a` 与最终产品 SOURCE `e806f667ad9f52409364618472b5f8a6b1c922b0` 已正常推送并 exact 核对，独立新安装/原完整产品53/正式CLI-MCP/历史只读复核及核心本地1211均通过；最终54bb原完整 CI `36957851632` Linux全门PASS，Windows原墙钟续租测试失败、后续工程门SKIPPED，五项停止条件未齐，不冻结。R1 核心 `9ceb3aa` / 产品 `35934f1` 保持失败候选，其真实反馈 RED 和本地首全量 1192 PASS / 2 FAIL / 5 SKIP 不被后续通过覆盖。新增科研、收费模型与 main 发布 NOT_RUN。
 
 ## 范围与不可变输入
 
@@ -78,7 +78,7 @@ R1 Windows 最终原全门：1194 passed / 5 skipped / 75 warnings，1494.08s；
 
 精确合入 C SOURCE `fa0216aa468ea1bd71f009e4089c1872190843e1`（仅 `swarm/feedback.py` 与本轨新研究入口测试），以及主控治理5a9和R1报告阶段提交。新累计核心 SOURCE `54bb8d0897eb22c5e8a52ea158606388fe64064a` 已 normalpush / ls-remote exact / clean；已立即通知主控供 A2 pin此累计 SHA，不用 C 原分支 SHA。`.github/workflows/check.yml`、`poetry.lock`、Router 公式与两原完整 checker 相对 R1 无 diff，两个 Git blobs仍39948/538f。C docs-only REPORT `a98219a22bdaa9c7dc069b0ee0c6a90035aa87f6` 另行精确合入 `a870d497405cac4b4034970d685e4caf2377b48a`，相对累计 SOURCE 仅 C 文档变化，不替换产品 pin。
 
-R2 私有根：`C:/Users/DW/AppData/Local/Temp/morph-policy-I-r2-1002-f37be5feadfb`。重新 Git LF archive、私有 venv、原锁 hash-sync COPY、完整 build、真实非 editable wheel 安装及全新 Node 依赖；不使用 R1 或 C/A Owner 的 env/node/artifacts。原完整双平台 CI `https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/36957851632`，精确 head54bb，尚在运行。
+R2 私有根：`C:/Users/DW/AppData/Local/Temp/morph-policy-I-r2-1002-f37be5feadfb`。重新 Git LF archive、私有 venv、原锁 hash-sync COPY、完整 build、真实非 editable wheel 安装及全新 Node 依赖；不使用 R1 或 C/A Owner 的 env/node/artifacts。原完整双平台 CI `https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/36957851632`，精确 head54bb，completed/failure；实际Linux PASS / Windows RED 在下文单列，不能签双绿。
 
 R2 已执行 `01-core-export.txt` / `02-core-dependencies.txt` / `03-core-npm-ci.txt`、`04-core-build.txt`、`05-core-typecheck.txt`（121源码）、`06-core-sdk.txt`、`07-core-wheel-install.txt`、`08-core-installed-npm.txt` 与 `09-core-installed-distribution.txt`（13包/verifier/Node），均 exit0。原完整 source workflow 的独立本地 `core-venv/Scripts/python.exe -B -m pytest -q -p no:cacheprovider --basetemp=<私有目标>`：**1211 passed / 5 skipped / 75 warnings，1009.72s，exit0**，原始 `logs/11-core-workflow-full-pytest.txt`。此为新源码/环境完整结果，R1首RED及R2额外-I collection ERROR 不重标。
 
@@ -99,3 +99,19 @@ I 私有 `review_historical_r2.py` 仅使用实装 formal CLI 与原只读facade
 各案例两次 `policy --rebuild-to <I新私有绝对路径>`，派生库三个 learning_facts / 三个 learned_history、各 worker/pipe samples=1，两次完整投影逐值一致；`synchronize(facts+facts)` 后逐值不变。I 子进程只进入原 `trusted_pair` 未完成双反馈便退出该上下文，实际原守卫抛 incomplete_trusted_feedback_pair、派生表逐值不变；这是反馈中断边界契约，非科研重放/远端崩溃恢复。原核心完整测试另覆盖原 fixture Worker 进程终止、权威重启、反馈中断与 SQLite 事务边界。源 authority/state/workspace 各115文件 bytes/mtime 前后一致，new_task_live=not_run。
 
 两原正式 audit `43-audit-{nist,synthetic}` 均 exit0：old subject corebf67/productdfbc/REPORTe9 与新 generated_by core54bb/producte806 均 binding=verified；原续租、三实验科学证据、实际采用与未知/null费用按原清单保留。--core-repository 使用原 checker command 的 research-integration-0930 cwd，不更改原科学 subject。产品单独 docs-only REPORT `da18a5e32e36b44b33cee757ab5e3d8a508974e8` 由 A2 正式 normalpush 交付，相对e806只改私库自身 policy-entry 报告；其作者证据不替代本独立环境。
+
+## R2 原完整工程首 RED 与停止条件
+
+SOURCE54bb 原完整 workflow run `36957851632` / attempt1 已结算 failure。Linux job `110684718173`：**1210 passed / 6 skipped / 75 warnings，403.03s**；121源码 strict、完整sdist/wheel build、npm ci --ignore-scripts、npm run check:sdk、实际wheel target安装与 `python -I tools/check_distribution.py --site-dir tools/.wheel-site --check-node` 均PASS。Windows job `110684718347`：**1210 passed / 1 failed / 5 skipped / 75 warnings，1248.44s，exit1**；pytest后的 strict/build/SDK/wheel安装/distribution 全部SKIPPED，不用I本机成功补标其CI步骤。原始日志 `logs/20-ci-linux.txt` / `22-ci-windows-run-log.txt`；官方head/job/全部steps结果 `23-r2-ci-result.json`。首下载在run进行中暂不可用，没有CI重跑或改变原workflow。
+
+Windows唯一失败为原 `tests/swarm/test_worker_runtime.py::test_real_wall_clock_renewal_outlives_initial_ttl`：原TTL2s、执行fixture sleep2.5s、原断言不改。actual failure_stage=lease_handoff / failure_kind=AssetSafetyError / stale_lease；renewals8、renewal_failed=true、renewal_rejected、max_renew_seconds=2.332128399999874（超过TTL）、max_schedule_gap_seconds=0.6804508000000169。原owner/token/expiry匹配，但观察时实际已过期、effect_applied=false、反馈started/complete均false；FCprojection available/failure_count0，不能直接归咎D投影或SQLite锁，也不能在缺诊断时说偶发负载/flake。I已发 escalation 主控退原Worker/租约Owner，未改领域、旧测试预算/断言、锁或冻结checker，未重试该首RED。
+
+| 五项停止条件 | R2 实际结论与边界 |
+|---|---|
+| 正式入口共享策略 | PASS，原安装11工具MCP、两合法候选、成功claim/主动覆盖与原routing审计相联；manual contract_local |
+| 可信反馈改变偏好 | PASS（contract_local），两候选mock持久可信lineage概率方向与unknown不增事实；实际历史三live事实/唯一采用只读恢复另证，旧completed无新候选 |
+| 安全硬约束保持 | 本地完整与原产品契约PASS，依赖/能力/scope/旧token/预算/unknown拒绝仍在原边界；Windows原续租完成用例RED，整体安全可用性未签 |
+| 恢复不双学习、不重放 | PASS（contract_local），原完整fixture崩溃/反馈恢复断言、历史同事实两新派生库/重复同步样本1、未完成pair不写、源档案不变；未知学习/投影状态不能洗为complete |
+| 版本、安装与工程一致 | 来源/产品pin/字节/原audit/checker及Linux全门PASS；Windows pytest RED / 后续五门SKIPPED，**整体BLOCKED** |
+
+因此不签策略v0.1冻结，保留新SOURCE作为待原Owner诊断的失败验收候选；完整修复若需要新源码，须继续原Owner交付、I累计SOURCE与A产品pin及独立全门，不由I修改领域。100候选窗口按原created_at/task_id，窗口外不评分/探索，不宣称全局公平/最优。未启动新科研、native自主选择/新模型、外部Hub/EvoMap、额外Agent/案例/调度，未修改全局auth/HOME或main/tag；原科学usage/cost unknown/null不变。D最终版本与领域验收文档由D同Owner后续Task写，I只维护本报告。
