@@ -18,6 +18,7 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Literal, Protocol
 
+from opensandbox.models.sandboxes import NetworkPolicy
 from opensandbox.sync.sandbox import SandboxSync
 
 from orchestration.experiments.backend import OpenSandboxBackend, OpenSandboxSession, UnsupportedCapability
@@ -38,11 +39,18 @@ class GeneratedBackend(Protocol):
 
 
 def declared_capability(*, network_deny: bool) -> IsolationCapability:
-    """The capability set a Linux OpenSandbox sandbox is configured to enforce."""
+    """What the pinned OpenSandbox SDK 1.1.0 actually enforces.
+
+    ``SandboxSync.create`` exposes cpu, memory, timeout and an egress
+    ``NetworkPolicy`` (deny default), plus container filesystem/credential/host
+    isolation. It has no pids/process-limit parameter, so ``process_limit`` is
+    declared False (unsupported) and admission fails closed until a backend
+    verifies it. Never inflate a claim into a proof.
+    """
     return IsolationCapability(
         no_host_write=True, no_credentials=True, no_host_control=True, no_privilege=True,
         export_bounded=True, network_deny=network_deny, cpu_limit=True, memory_limit=True,
-        process_limit=True, time_limit=True, self_owned_cleanup=True,
+        process_limit=False, time_limit=True, self_owned_cleanup=True,
     )
 
 
@@ -77,12 +85,18 @@ class LocalCpuSandboxBackend:
         if missing := required - self.capabilities:
             raise UnsupportedCapability(",".join(sorted(missing)))
         profile: BackendProfile = plan.backend
-        image = plan.environment.image_digest or plan.environment.image
+        # The immutable image reference is the effective image sent to the SDK;
+        # admission already rejected mutable tags. image_digest (if set) is the
+        # same digest the host probe ran against and must equal image's digest.
+        image = plan.environment.image
+        if plan.environment.image_digest and not image.endswith("@" + plan.environment.image_digest):
+            raise UnsupportedCapability("image_digest_mismatch")
+        network_policy = NetworkPolicy(defaultAction="deny") if self._network_deny else None
         sandbox = SandboxSync.create(image,
             connection_config=self._opensandbox.connection(profile.command_seconds + 15),
             resource={"cpu": str(profile.cpu), "memory": f"{profile.memory_mib}Mi"},
             timeout=timedelta(seconds=profile.lifetime_seconds), ready_timeout=timedelta(seconds=45),
-            entrypoint=["tail", "-f", "/dev/null"], env=_DENY_ENV,
+            entrypoint=["tail", "-f", "/dev/null"], env=_DENY_ENV, network_policy=network_policy,
             metadata={"morph-run": context.run_id, "morph-task": context.task_id,
                       "morph-worker": context.worker_id, "morph-fence": str(context.fencing_token)})
         return OpenSandboxSession(sandbox, owned=True)

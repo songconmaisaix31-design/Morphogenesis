@@ -22,7 +22,7 @@ def test_poisson_reference_supported_is_diagnostic():
     plan = make_poisson_plan(n_intervals=50, approved=True)
     assessment = evaluate(plan, _output(50), reviewer_independent=True)
     assert assessment.hypothesis == "supported"
-    assert assessment.trusted is True
+    assert assessment.trusted is False
     assert assessment.mode == "diagnostic"
     assert assessment.contribution == "proposed"
     assert assessment.metrics["max_absolute_error"] < 1e-6

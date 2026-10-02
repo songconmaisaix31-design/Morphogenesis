@@ -20,13 +20,22 @@ from orchestration.experiments.generated import (
     GeneratedFile, GeneratedSource, IsolationCapability, IsolationReport,
 )
 from orchestration.experiments.executor import DIRECTORY, RUNTIME_PROBE
-from orchestration.experiments.sandbox_adapter import declared_capability
 from orchestration.experiments.trusted import (
     IsolationProbeRecord, TrustedCriteriaRecord, TrustedCriteriaRegistry, TrustedProbeRegistry,
 )
 
 IMAGE = "python:3.12.13-slim@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36"
 IMAGE_DIGEST = IMAGE.split("@", 1)[1]
+
+
+def full_capability(*, network_deny: bool = True) -> IsolationCapability:
+    """Hypothetical fully-capable backend (mock only). The real OpenSandbox adapter
+    declares process_limit=False in orchestration.experiments.sandbox_adapter."""
+    return IsolationCapability(
+        no_host_write=True, no_credentials=True, no_host_control=True, no_privilege=True,
+        export_bounded=True, network_deny=network_deny, cpu_limit=True, memory_limit=True,
+        process_limit=True, time_limit=True, self_owned_cleanup=True,
+    )
 
 # Inert candidate code: static-checked only, never executed by any fixture.
 GENERATED_CODE = '''\
@@ -107,7 +116,7 @@ def make_context(*, run_id: str = "gen-run-01", author: str = "author-1", review
 
 def probe_record(*, backend: str = "mock") -> IsolationProbeRecord:
     return IsolationProbeRecord(probe_id="probe-1", backend=backend,
-                                declared=declared_capability(network_deny=True),
+                                declared=full_capability(), image_digest=IMAGE_DIGEST,
                                 verified=True, passed=True, evidence_ref="probe-run-1", probed_at=1_000_000.0)
 
 
@@ -116,8 +125,9 @@ def verified_probe_registry(*, backend: str = "mock") -> TrustedProbeRegistry:
 
 
 def mock_isolation(backend: str = "mock") -> IsolationReport:
-    return IsolationReport(backend=backend, declared=declared_capability(network_deny=True),
-                           verified=False, probe="not_run", proof_ref=None, reasons=("isolation_probe_not_run",))
+    return IsolationReport(backend=backend, declared=full_capability(),
+                           verified=False, probe="not_run", proof_ref="probe-1",
+                           reasons=("isolation_probe_not_run",))
 
 
 class MockGeneratedSession:

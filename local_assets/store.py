@@ -5,6 +5,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from pathlib import Path
 import sqlite3
+import time
 from collections.abc import Callable, Iterator
 
 from pydantic import JsonValue, TypeAdapter
@@ -203,30 +204,38 @@ class LocalAssetStore:
                        (report.report_id, report.asset_id, report.model_dump_json()))
 
     def approve_generated(self, report: GeneratedValidationReport,
-                          assert_owned: Callable[[], None] = lambda: None, *,
+                          assert_owned: Callable[[], None] | None = None, *,
                           proof_ref: str | None = None) -> None:
         """Approve a generated candidate under the original fencing authority.
 
-        The report must already be recorded by ``generated_validation``; the FK
-        on ``generated_approvals`` enforces that. Approval never re-writes the
-        immutable report and is guarded by the caller's ownership fence, matching
-        ``AssetPromoter._commit`` rather than an arbitrary new authority.
+        The caller's ``report`` object is never trusted: the immutable persisted
+        report is re-read by ``report_id`` and must equal it. A caller-modified
+        ``passed`` boolean on a recorded failure is rejected. Approval also
+        requires an explicit ownership fence (no no-op default) and never
+        re-writes the immutable report.
         """
-        if not report.passed or report.reasons:
+        persisted = self.generated_report(report.report_id)
+        if persisted != report:
+            raise AssetSafetyError("tampered_generated_report")
+        if not persisted.passed or persisted.reasons:
             raise AssetSafetyError("generated_report_not_passed")
+        if time.time() >= persisted.expires_at:
+            raise AssetSafetyError("stale_report")
+        if assert_owned is None:
+            raise PermissionError("approval_requires_ownership_fence")
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
             assert_owned()
-            row = db.execute("SELECT body FROM generated_approvals WHERE asset_id=?", (report.asset_id,)).fetchone()
+            row = db.execute("SELECT body FROM generated_approvals WHERE asset_id=?", (persisted.asset_id,)).fetchone()
             if row:
                 old = GeneratedApproval.model_validate_json(row[0])
-                if old.report_id != report.report_id:
+                if old.report_id != persisted.report_id:
                     raise AssetSafetyError("generated_asset_already_approved")
                 return
             db.execute("INSERT INTO generated_approvals VALUES (?,?,?)",
-                       (report.asset_id, report.report_id, GeneratedApproval(
-                           asset_id=report.asset_id, report_id=report.report_id,
-                           policy_version=report.policy_version, proof_ref=proof_ref).model_dump_json()))
+                       (persisted.asset_id, persisted.report_id, GeneratedApproval(
+                           asset_id=persisted.asset_id, report_id=persisted.report_id,
+                           policy_version=persisted.policy_version, proof_ref=proof_ref).model_dump_json()))
             assert_owned()
 
     def consumption(self, execution_id: str) -> ConsumptionExecution:

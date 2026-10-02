@@ -42,7 +42,7 @@ def test_generated_validation_passes_with_host_verified_isolation(tmp_path):
     report = generated_validation(store, asset_id, plan, {"experiment.py": GENERATED_CODE.encode()},
                                   mock_isolation(), probe_registry=verified_probe_registry())
     assert report.passed and report.static.passed
-    approve_generated(store, report)
+    approve_generated(store, report, lambda: None)
     assert store.state(asset_id) == "approved"
     assert store.fetch_approved(asset_id) == candidate
 
