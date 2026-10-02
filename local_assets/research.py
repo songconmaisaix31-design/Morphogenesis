@@ -11,9 +11,20 @@ def matching_reports(store: LocalAssetStore, asset_id: str) -> list[ResearchObse
     claim = candidate.research
     if claim is None:
         raise AssetSafetyError("research_claim_required")
-    return [r for r in store.research_reports(asset_id)
+    reports = [r for r in store.research_reports(asset_id)
             if r.plan_id == claim.plan_id and r.criterion_version == claim.criterion_version
             and r.conditions == claim.conditions and r.candidate_json == candidate.model_dump_json()]
+    if claim.conditions.get("schema_version") == '"generated-experiment/v1"':
+        from local_assets.generated_validation import read_generated_observation
+        for report in reports:
+            if report.provenance != store.research_provenance:
+                continue
+            if store.generated_criteria is None:
+                raise AssetSafetyError("generated_criteria_registry_required")
+            # Cached PASS cannot authorize reuse after raw evidence or its
+            # independently approved evaluator has changed.
+            read_generated_observation(report, criteria_registry=store.generated_criteria)
+    return reports
 
 
 def scientific_plan(plan_json: str) -> str:
