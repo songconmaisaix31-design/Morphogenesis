@@ -84,8 +84,8 @@ def test_foreign_project_is_refused_before_trusted_projection_callback(tmp_path,
     core = seeded(tmp_path)
     reads = []
 
-    def projection():
-        reads.append("projection")
+    def projection(project_id=None):
+        reads.append(project_id)
         return [] if operation == "three_axis" else {}
 
     backend = ServiceBackend(core, three_axis_fn=projection, route_fn=projection)
@@ -100,13 +100,13 @@ def test_authorized_project_retains_read_only_projection(tmp_path):
     core = seeded(tmp_path)
     reads = []
 
-    def projection():
-        reads.append("projection")
+    def projection(project_id=None):
+        reads.append(project_id)
         return []
 
     backend = ServiceBackend(core, three_axis_fn=projection)
     assert backend.three_axis("p1") == []
-    assert reads == ["projection"]
+    assert len(reads) == 1 and reads[0] in {None, "p1"}
     assert core.ledger.snapshot() == []
 
 

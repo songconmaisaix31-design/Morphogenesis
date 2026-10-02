@@ -263,3 +263,23 @@ foreign project callbacks, retain valid project read, and do not invent live
 provenance from local service connection. Fixtures use Q-created inert text
 only; there is no user/private file, server socket or scientific result callback.
 Review Handoff `msg_91f820239256`. Owner WIP is not final evidence.
+
+Coordinator `msg_a0775d2500d7` delivers exact B stage
+`d175f7e2f8c3ff41a1ac8a2a4958c68acf57e275`. Fresh archive, single-process
+`.venv-q/Scripts/python.exe -m pytest` on all four `test_b_*.py` files,
+`-q --tb=short`: **21 passed / 8 failed**, exit 1, 20.45 seconds;
+`b-d175f7e-exact-first.txt`, **NOT_ACCEPTED**. Generated14/successor4 pass:
+failed-report forgery and manifest byte substitution are now refused. Two SDK
+configuration cases refuse before create on inconsistent image, which does not
+prove correctly configured SDK admission. Unverified direct backend creation
+and all seven conflicting-probe/configuration negatives remain RED. Original
+B `msg_6497a8e52900`, coordinator `msg_81d03bd42507`.
+
+Coordinator `msg_be9c1eb32b1e` delivers P stage
+`550e1d43b43a9b668d5255fd8f01d0a67c763c49`, archived but Q9 still awaits window.
+Source uses host roots and provenance defaults to unknown. Callback API now
+receives project_id; Q sentinel accepts that argument while preserving zero
+callback reads on foreign project and one read on valid project. Forwarding an
+ID alone does not authorize it; the stage still lacks host project validation
+before projection. Read-only Handoff `msg_a8f584b0b3e7`; no TypeError is counted
+as a safety PASS. Full configured product/PDF/native integration stays pending.

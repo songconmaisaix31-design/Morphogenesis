@@ -1,0 +1,55 @@
+....................FF.FFFFFF                                            [100%]
+================================== FAILURES ===================================
+___________ test_unverified_process_limit_cannot_reach_sdk_creation ___________
+tests\integration\r1_security\test_b_sdk_configuration.py:54: in test_unverified_process_limit_cannot_reach_sdk_creation
+    assert calls == [], "backend created without trusted process-limit/isolation instance verification"
+E   AssertionError: backend created without trusted process-limit/isolation instance verification
+E   assert [(('fixture:1...ds=45), ...})] == []
+E     
+E     Left contains one more item: (('fixture:1',), {'connection_config': ConnectionConfigSync(api_key=None, domain='127.0.0.1:65534', protocol='http', r... 'memory': '512Mi'}, 'timeout': datetime.timedelta(seconds=180), 'ready_timeout': datetime.timedelta(seconds=45), ...})
+E     Use -v to get more diff
+________ test_conflicting_duplicate_probe_id_is_not_silently_replaced _________
+tests\integration\r1_security\test_b_probe_configuration.py:26: in test_conflicting_duplicate_probe_id_is_not_silently_replaced
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+_____ test_same_probe_reference_cannot_admit_changed_configuration[image] _____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+______ test_same_probe_reference_cannot_admit_changed_configuration[cpu] ______
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+____ test_same_probe_reference_cannot_admit_changed_configuration[memory] _____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+____ test_same_probe_reference_cannot_admit_changed_configuration[process] ____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+___ test_same_probe_reference_cannot_admit_changed_configuration[endpoint] ____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+____ test_same_probe_reference_cannot_admit_changed_configuration[network] ____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_sdk_configuration.py::test_unverified_process_limit_cannot_reach_sdk_creation
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_conflicting_duplicate_probe_id_is_not_silently_replaced
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[image]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[cpu]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[memory]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[process]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[endpoint]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[network]
+8 failed, 21 passed in 20.45s
