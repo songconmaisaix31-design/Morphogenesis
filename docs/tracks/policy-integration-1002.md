@@ -1,6 +1,6 @@
 # 策略 v0.1 独立累计集成与验收（I，1002）
 
-当前状态：**R3 新组合独立验收进行中，策略 v0.1 尚未冻结**。累计核心 SOURCE `7062a632b8c625c05b35bdec4c36fce63a31c2a4` / 产品 SOURCE `c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc` 正常推送、remote exact；I独立新安装/53产品测试/正式MCP-CLI/两历史完整只读checker及audit/三原live反馈和两派生库重建均PASS，新完整核心本地pytest与Windows原workflow仍待结算。R2核心54bb/产品e806保持原Windows续租工程RED、NOT_FROZEN，R1核心9ceb/产品359保持真实反馈RED及本地首全量1192 PASS / 2 FAIL / 5 SKIP，不被新结果重标。新增科研、收费模型与main发布NOT_RUN。
+当前状态：**策略v0.1在本轮明确的contract_local / prepared_local / manual-MCP支持范围内冻结，独立I五门全部具备。** 最终核心 SOURCE `7062a632b8c625c05b35bdec4c36fce63a31c2a4` / 产品 SOURCE `c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc`，产品独立 REPORT `3b17cc0a7120f1d2381871b336293ee301b857de`；精确核心原完整Windows/Linux workflow、I新独立核心本地全量1214、实装产品53/正式MCP-CLI/历史完整只读checker与audit/三原live反馈和两派生库重建全部PASS。源码与报告分列，原R1真实反馈RED、R2 Windows续租RED、首次环境/收集错误及两冗余文档CI CANCELLED均保留。新科研task_live/native自主选择/收费模型/main发布NOT_RUN；历史科学subject不变，不因本次冻结升级为新版本科研证据。
 
 ## 范围与不可变输入
 
@@ -122,9 +122,9 @@ Windows唯一失败为原 `tests/swarm/test_worker_runtime.py::test_real_wall_cl
 
 精确普通合入5e及主控治理 `ffb39ca3dfe002288b491371d37245350f738b65`，新累计核心 SOURCE **`7062a632b8c625c05b35bdec4c36fce63a31c2a4`** 已normalpush（无skip）、ls-remote exact/clean/源码冻结，并立即交root供A3 pin。C随后docs-only REPORT `992670b37b1bb8c8a04f024b4af8e5ba8dfe668c` 单独普通合入，仅本轨C文档差异，不替换CORE pin。原54bb与e806不再作为最终候选，但原成功与失败证据均不改。
 
-I两次仅文档阶段push意外自动触发 `36959528356`（6709报告）和 `36959685712`（b2dee阻塞报告）；root只取消这两次冗余运行，官方runlist实测均CANCELLED，不算业务修复或首RED替代。原54bb失败run未更改。后续报告commit用 `[skip ci]`，保持原workflow内容不变；新的业务7062正常push触发原完整run **`36960486155`**，精确head7062，Windows job110692862238 / Linux job110692862438进行中。
+I两次仅文档阶段push意外自动触发 `36959528356`（6709报告）和 `36959685712`（b2dee阻塞报告）；root只取消这两次冗余运行，官方runlist实测均CANCELLED，不算业务修复或首RED替代。原54bb失败run未更改。后续报告commit用 `[skip ci]`，保持原workflow内容不变；新的业务7062正常push触发原完整run **`36960486155`**，精确head7062，Windows job110692862238 / Linux job110692862438，最终attempt1 completed/success，完整结果见下文。
 
-R3私有根 `C:/Users/DW/AppData/Local/Temp/morph-policy-I-r3-1002-29cba60db480`：全新LF Git archive、全新CPython3.13.13私有venv、原poetry.lock重新export/hash-sync COPY、全新原npm锁依赖、完整sdist/wheel build与实际noneditable COPY wheel安装；不复用R1/R2/Owner环境或产物。`logs/01-core-export.txt` / 02依赖 / 03npm / 04build / 05typecheck（121源码strict）/ 06SDK / 07真实wheel安装 / 08安装Node依赖 / 09隔离distribution（13包/verifier/Node）均exit0。按原source workflow在新archive cwd的完整pytest为 `11-core-workflow-full-pytest.txt`，正在运行，不预写PASS；不再重复已知非wheel部署运维模块的额外neutral -I全core收集。
+R3私有根 `C:/Users/DW/AppData/Local/Temp/morph-policy-I-r3-1002-29cba60db480`：全新LF Git archive、全新CPython3.13.13私有venv、原poetry.lock重新export/hash-sync COPY、全新原npm锁依赖、完整sdist/wheel build与实际noneditable COPY wheel安装；不复用R1/R2/Owner环境或产物。`logs/01-core-export.txt` / 02依赖 / 03npm / 04build / 05typecheck（121源码strict）/ 06SDK / 07真实wheel安装 / 08安装Node依赖 / 09隔离distribution（13包/verifier/Node）均exit0。按原source workflow在新archive cwd使用已实际安装core的私有venv运行完整pytest：**1214 passed / 5 skipped / 75 warnings，944.11s，exit0**，`11-core-workflow-full-pytest.txt`；源码工程门与实装分发门分开，不重试已知非wheel部署运维模块的额外neutral -I全core收集。
 
 ## R3 最终产品与原档案独立验收
 
@@ -139,3 +139,21 @@ A3最终产品 SOURCE **`c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc`** 精确pin�
 独立 `review_historical_r3.py` / `logs/45-historical-review-command.txt` exit0；两案例正式CLI默认/重复feedback均含原author/replication/inheritance三result_id、live provenance、两个scientific_result/一个scientific_adoption、唯一真实采用=1；旧completed档案无候选，不用它宣称新两候选排序。各两次formal `--rebuild-to` 写I新私有绝对路径，三个learning_facts/三个learned_history样本各1、两新库投影逐值相同；重复facts同步与未完成trusted_pair拒绝后派生表逐值不变。原authority/state/workspace115文件bytes/mtime无变，不学习原库，不重放模型/实验。细节在 `44-historical-review-{nist,synthetic}.json` 和40/41/42原CLI命令输出。
 
 原audit两案例 `43-audit-{nist,synthetic}` exit0：subject corebf67/productdfbc/REPORTe9，generated_by core7062/productc2c2，两个binding均verified；原effective renewals、三原实验与唯一AdoptionReceipt/ConsumptionExecution/ledger result绑定保留，原usage/cost unknown/null不改。仍使用原旧integration-0930的core-repository argv绑定，不将新生成器换成旧科学subject。所有这些是新版本contract_local行为与historical readonly复核，新科研task_live仍NOT_RUN。
+
+## R3 原完整双平台工程与五项停止条件
+
+官方原完整 workflow [36960486155](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/36960486155)，API确认run_attempt=1 / head7062 / completed / success；两job及全部step均success，无作者定点或旧版本结果替代。完整官方job/step元数据 `logs/23-r3-ci-result.json`，原run API `24-r3-ci-run-api.json`。Linux `21-ci-linux-run-log.txt`：**1213 passed / 6 skipped / 75 warnings，387.33s**；Windows `22-ci-windows-run-log.txt`：**1214 passed / 5 skipped / 75 warnings，1541.58s**。各平台原 `poetry install`、`npm ci --ignore-scripts`、完整 `pytest -q`、`tools/typecheck.py`（121源码strict）、完整build、`npm run check:sdk`、wheel target安装及 `python -I tools/check_distribution.py --site-dir tools/.wheel-site --check-node`（13包/resources/verifier/Node）全部PASS。skipped路径不算已测。首次Linux completed-job直连下载EOF保留20空输出及私有download错误记录；同一completed run标准只读下载成功21，不是CI失败/重跑，不伪称20已取得完整日志。
+
+| 五项停止条件 | 最终7062/c2的实际证据与范围 |
+|---|---|
+| 正式入口共享策略 | PASS：新实装原11 MCP、两合法候选、v0.1共享Router、实际claim/主动覆盖与routing审计关联；manual-MCP / contract_local |
+| 可信反馈改变偏好 | PASS：原formal CLI两合法候选mock持久已验证lineage的明确概率方向，unknown不增事实/样本、墙钟微变单列；真实历史三live事实/唯一采用恢复独立PASS，旧completed档案无新候选 |
+| 安全硬约束保持 | PASS：原产品53、核心本地1214与原完整Windows1214/Linux1213；依赖/能力/scope/当前租约/预算/unknown仍由原账本及执行边界拒绝，建议不授予执行权；新续租边界仍拒绝>TTL及IOerror，不复活过期holder |
+| 恢复不双学习、不重放 | PASS：原完整fixture进程终止/权威重启/反馈中断断言，实际旧三事实重复读取、各两独立新派生库投影一致/样本1/重复同步不增/未完成pair拒绝不写；全部原源bytes/mtime不变，未调用模型/实验；unknown/incomplete不洗绿 |
+| 版本、安装与工程一致 | PASS：核心7062 / 产品c2 / docs-only各REPORT分列，Git/归档/wheel/site实际17+181字节及VCS origin/COPY/noneditable，原两blob固定，原audit旧subject/newgenerator均verified；新精确源码完整双平台原workflow及本机全量全PASS |
+
+五门已具备，停止扩展策略v0.1，冻结只限上述contract_local / prepared_local / manual-MCP行为。100候选窗口按原created_at/task_id，窗口外不评分或探索，不声称全局公平/最优或任意多代恢复。原Windows2.332s耗时组成仍未知，受控节奏缺陷的修复与新完整验证不能保证所有OS长停顿不超过TTL；失效/未知继续fail closed。R1/R2首失败与未知/null成本保持其原身份，不因R3 PASS重标。
+
+新科研、当前版本native Agent自主选择/多角色新task_live、收费模型调用、auth切换、全局HOME修改、main/tag/Hub/EvoMap发布均未执行，范围等待用户；未新增Agent/案例/调度/Manifest/hash/完成证明系统。D最终版本与领域报告仍由D同Owner后续Task补录，root最新PLAN与D REPORT的最终docs-only汇总由其接续I2 Task完成，不能用REPORT HEAD重pin业务源码。
+
+资源交接：R1/R2/R3私有archive、venv、Node依赖和原始日志保留在本文各私有根；本轮自有R3验证Python/Node/uv进程检查为0，无新native/sandbox后台服务，未动旧共享资源。I仅编辑本报告；业务变化为精确合并原Owner提交。原协议5788分支保留，根2957/WIP与用户main贡献未由I操作；不force、不覆盖历史。本报告最终仅文档commit normalpush `[skip ci]`，完整REPORT SHA由最终handoff/worker_done给出，业务核心仍7062、产品仍c2；terminal交root接续，I不自行关闭。
