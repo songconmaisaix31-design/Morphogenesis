@@ -843,3 +843,32 @@ changes. Dynamic MCP20, project/budget6 and all C45 checks give **71 passed**,
 interaction, not final installed product acceptance. P's early fd7 pin is
 explicitly not the final combined product candidate; that delivery and the
 coordinated installation window remain pending.
+
+## d85/fd7 actual installation preparation and later transport delta
+
+Coordinator `msg_9fb72a8763e3` grants a bounded installation while F's observer
+finishes. Q installs exact core `d85aa95e8da406d598f3658492e3d615bba8a28f` and
+product `fd7a79eafbf4aa296ef1348aa001457aaea5cf97` into the same private venv.
+Each canonical VCS installation uses `uv pip install --python
+.venv-q/Scripts/python.exe --no-deps --reinstall --link-mode copy`, a fresh
+Q-only cache, one build/install worker and process-local `core.autocrlf=false`.
+The prior 95-package dependency set is unchanged; no installed bytes are patched.
+
+Isolated `python -I` verifies both actual noneditable `direct_url.json` revisions,
+private site-packages origins and the unmodified product `installed_core` gate.
+Direct `git cat-file --batch` original blobs equal every packaged core129 and
+product34 Python file byte for byte, with no newline normalization. `uv pip check`
+reports all95 compatible. Four `installed-d85aa95-fd7a79e-*-first.txt` logs retain
+the installation, original-byte and dependency evidence.
+
+P subsequently delivers production SOURCE
+`fd0ec1e13aff0ea37fe79f601a865040d1c5b604`, catching actual response header/body
+connection errors so a reply loss cannot be recast as another source-failure
+status. Therefore the fd7 installation is preparation, not final combination
+acceptance. Review Handoff `msg_d47010ce453e` precedes Q's seven new installed
+factory controls: a delivered positive and header/body failures for three
+connection exceptions, retaining the actual outer handler, official MCP,
+original durable proposal/task and same-proposal recovery after reopen.
+These new checks are **NOT_RUN** at this checkpoint: P owns the full baseline
+window. Q keeps the actual fd7 installation for first outcomes, then will
+install the authoritative successor and run the final owned slices.
