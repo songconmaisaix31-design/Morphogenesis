@@ -20,7 +20,9 @@ import json
 import re
 from typing import Literal
 
-from orchestration.experiments.generated import GeneratedExperimentPlan, IsolationReport, StaticSecurityReport
+from orchestration.experiments.generated import (
+    GeneratedExperimentPlan, IsolationReport, StaticSecurityReport, effective_environment,
+)
 from orchestration.experiments.trusted import TrustedProbeRegistry
 
 RESERVED_RUNNER_NAMES = frozenset({
@@ -62,7 +64,8 @@ def _top_level_imports(body: bytes, filename: str) -> set[str]:
     return names
 
 
-def static_checks(plan: GeneratedExperimentPlan, files: dict[str, bytes]) -> StaticSecurityReport:
+def static_checks(plan: GeneratedExperimentPlan, files: dict[str, bytes],
+                  data: dict[str, bytes] | None = None) -> StaticSecurityReport:
     """Return a structured report; a single failure rejects execution (fail-closed)."""
     reasons: list[str] = []
     scope: Literal["pass", "fail"] = "pass"
@@ -72,13 +75,14 @@ def static_checks(plan: GeneratedExperimentPlan, files: dict[str, bytes]) -> Sta
     resource: Literal["pass", "fail"] = "pass"
 
     seen: set[str] = set()
-    for name in files:
+    data = data or {}
+    for name in [entry.name for entry in (*plan.files, *plan.data)]:
         if name in seen or name in RESERVED_RUNNER_NAMES or ".git" in name.split("/"):
             scope = "fail"
             reasons.append("reserved_or_duplicate_path:" + name)
         seen.add(name)
 
-    total = sum(len(body) for body in files.values())
+    total = sum(len(body) for body in (*files.values(), *data.values()))
     if total > plan.backend.artifact_bytes or len(files) != len(plan.files):
         resource = "fail"
         reasons.append("code_size_or_manifest_count_exceeded")
@@ -123,7 +127,8 @@ def static_checks(plan: GeneratedExperimentPlan, files: dict[str, bytes]) -> Sta
                                 danger=danger, resource=resource, reasons=tuple(reasons))
 
 
-def verify_isolation(isolation: IsolationReport, registry: TrustedProbeRegistry | None) -> None:
+def verify_isolation(isolation: IsolationReport, registry: TrustedProbeRegistry | None,
+                     plan: GeneratedExperimentPlan | None = None) -> None:
     """Raise unless a host-owned registry proves the declared capability set.
 
     The report's own ``verified``/``probe`` booleans are advisory and ignored:
@@ -134,3 +139,16 @@ def verify_isolation(isolation: IsolationReport, registry: TrustedProbeRegistry 
         raise SecurityRejection("isolation_capability_incomplete")
     if registry is None or not registry.is_verified(isolation):
         raise SecurityRejection("isolation_capability_unverified")
+    configuration = isolation.configuration
+    if configuration is None:
+        raise SecurityRejection("isolation_configuration_missing")
+    if (not configuration.network_deny
+            or configuration.server_process_limit != configuration.resources.process_limit):
+        raise SecurityRejection("isolation_configuration_unsupported")
+    if plan is not None:
+        try:
+            environment = effective_environment(plan.environment)
+        except ValueError as error:
+            raise SecurityRejection(str(error)) from error
+        if configuration.environment != environment or configuration.resources != plan.backend:
+            raise SecurityRejection("isolation_configuration_mismatch")

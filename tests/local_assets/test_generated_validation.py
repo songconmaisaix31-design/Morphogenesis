@@ -39,12 +39,15 @@ def test_generated_validation_passes_with_host_verified_isolation(tmp_path):
     candidate = generated_candidate(plan, {"experiment.py": GENERATED_CODE.encode()},
                                     attempt=ATTEMPT, scope="science", summary="poisson fd")
     asset_id = store.publish(candidate)
+    plan = plan.model_copy(update={"candidate_asset_id": asset_id})
     report = generated_validation(store, asset_id, plan, {"experiment.py": GENERATED_CODE.encode()},
                                   mock_isolation(), probe_registry=verified_probe_registry())
     assert report.passed and report.static.passed
     approve_generated(store, report, lambda: None)
     assert store.state(asset_id) == "approved"
-    assert store.fetch_approved(asset_id) == candidate
+    assert store.fetch(asset_id) == candidate
+    with pytest.raises(ValueError, match="independent_clean_reproduction_required"):
+        store.fetch_approved(asset_id)  # Static approval is not scientific authority.
 
 
 def test_generated_validation_fails_closed_without_host_probe(tmp_path):
@@ -53,6 +56,7 @@ def test_generated_validation_fails_closed_without_host_probe(tmp_path):
     candidate = generated_candidate(plan, {"experiment.py": GENERATED_CODE.encode()},
                                     attempt=ATTEMPT, scope="science", summary="poisson fd")
     asset_id = store.publish(candidate)
+    plan = plan.model_copy(update={"candidate_asset_id": asset_id})
     report = generated_validation(store, asset_id, plan, {"experiment.py": GENERATED_CODE.encode()},
                                   mock_isolation(), probe_registry=None)
     assert not report.passed
@@ -67,6 +71,7 @@ def test_generated_validation_rejects_dangerous_code(tmp_path):
     candidate = generated_candidate(plan, {"experiment.py": dangerous.encode()},
                                     attempt=ATTEMPT, scope="science", summary="dangerous")
     asset_id = store.publish(candidate)
+    plan = plan.model_copy(update={"candidate_asset_id": asset_id})
     report = generated_validation(store, asset_id, plan, {"experiment.py": dangerous.encode()},
                                   mock_isolation(), probe_registry=verified_probe_registry())
     assert not report.passed and not report.static.passed
@@ -79,6 +84,7 @@ def test_approval_requires_ownership_fence(tmp_path):
     candidate = generated_candidate(plan, {"experiment.py": GENERATED_CODE.encode()},
                                     attempt=ATTEMPT, scope="science", summary="poisson fd")
     asset_id = store.publish(candidate)
+    plan = plan.model_copy(update={"candidate_asset_id": asset_id})
     report = generated_validation(store, asset_id, plan, {"experiment.py": GENERATED_CODE.encode()},
                                   mock_isolation(), probe_registry=verified_probe_registry())
 

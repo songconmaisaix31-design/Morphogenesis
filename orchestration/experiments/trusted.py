@@ -25,7 +25,8 @@ from pydantic import Field
 
 from contracts.base import Contract
 from orchestration.experiments.generated import (
-    EvaluationSpec, GeneratedAssessment, IsolationCapability, IsolationReport,
+    EvaluationSpec, GeneratedAssessment, IsolationCapability, IsolationConfiguration, IsolationReport,
+    effective_environment,
 )
 
 
@@ -58,6 +59,9 @@ class TrustedCriteriaRegistry:
         record = self._by_version.get(version)
         return record.approved_by if record is not None else None
 
+    def approval(self, spec: EvaluationSpec) -> TrustedCriteriaRecord | None:
+        return self._by_version.get(spec.version) if self.is_approved(spec) else None
+
 
 class IsolationProbeRecord(Contract):
     probe_id: str = Field(min_length=1, max_length=120)
@@ -68,23 +72,35 @@ class IsolationProbeRecord(Contract):
     passed: bool
     evidence_ref: str = Field(min_length=1, max_length=240)
     probed_at: float
+    configuration: IsolationConfiguration | None = None
 
 
 class TrustedProbeRegistry:
     def __init__(self, records: tuple[IsolationProbeRecord, ...] = ()) -> None:
         self._by_probe_id: dict[str, IsolationProbeRecord] = {}
         for record in records:
+            record = IsolationProbeRecord.model_validate_json(record.model_dump_json())
+            existing = self._by_probe_id.get(record.probe_id)
+            if existing is not None and existing != record:
+                raise ValueError("probe_id_conflict")
             self._by_probe_id[record.probe_id] = record
 
     def is_verified(self, isolation: IsolationReport) -> bool:
         if not isolation.proof_ref:
             return False
         record = self._by_probe_id.get(isolation.proof_ref)
-        if record is None:
+        if record is None or record.configuration is None or isolation.configuration is None:
+            return False
+        try:
+            environment = effective_environment(isolation.configuration.environment)
+        except ValueError:
             return False
         return (record.verified and record.passed
                 and record.backend == isolation.backend
-                and record.declared == isolation.declared)
+                and record.declared == isolation.declared
+                and record.configuration == isolation.configuration
+                and record.image_digest == environment.image_digest
+                and record.configuration.environment == environment)
 
 
 def finalize_assessment(assessment: GeneratedAssessment, *, spec: EvaluationSpec,
