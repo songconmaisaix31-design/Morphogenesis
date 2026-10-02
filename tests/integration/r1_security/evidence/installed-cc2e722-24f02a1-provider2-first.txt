@@ -1,0 +1,10 @@
+.F                                                                       [100%]
+================================== FAILURES ===================================
+____ test_changed_selected_provider_cannot_reuse_previous_host_data_grant _____
+tests\integration\r1_security\test_p_provider_binding.py:92: in test_changed_selected_provider_cannot_reuse_previous_host_data_grant
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_provider_binding.py::test_changed_selected_provider_cannot_reuse_previous_host_data_grant
+1 failed, 1 passed in 2.34s
