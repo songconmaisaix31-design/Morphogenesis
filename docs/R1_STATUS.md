@@ -2,6 +2,12 @@
 
 ## 01:28 更新：返修、产品接线与资源窗口
 
+01:42 当前 continuation 地址追加（此前地址保持历史，不再投递已完成 Dispatch）：A `task_e0494397f5d1 / ctx_d5449dbccfe8`；B `task_d4353c178376 / ctx_1f61a986ac8a`；C `task_41f47bb34862 / ctx_41e1a87fafb9`；P `task_39c0f7d98ea4 / ctx_c7f25d836553`；F/Q 仍为下表原 Dispatch。同一 Owner、worktree、branch、write_paths；手动 return-preamble 输入后观察并追加 Enter，不能仅按 input_accepted 算实际工作。
+
+阶段精确源码已查远端：A `7fc1e80845128080dfbcd5899aa9a09e37128753`（权限/恢复阶段，待独立 Q archive）；B `d175f7e2f8c3ff41a1ac8a2a4958c68acf57e275`（Owner 18 Q/102 domain/strict 记录不涵盖 Q 新 7 failed / 1 passed 配置诊断，NOT_ACCEPTED）；C `99cd2997dd024a41c28461228f47a575fef3f9ab`（含纯转换，未被可信 generated 投影消费，继续返修）；P `550e1d43b43a9b668d5255fd8f01d0a67c763c49`（宿主目录空=拒绝、项目/来源修复，pypdf 安装与实际服务构造仍待）。不能用部分 worker_done 覆盖原始全功能目标。
+
+环境核实：C 的 `C:/Python313/Lib/site-packages/morphogenesis-0.1.0.dist-info/direct_url.json` 在 01:14 写入 editable 指向 C 工作树，Owner 确认系统 Python 安装了 opensandbox/code_interpreter/poetry-core 与 editable 包。已派原 C 报告先前输出与具体变更、仅恢复可证实的自有 editable 注册并换私有环境；先前状态未知不推定已恢复，不卸载未知旧依赖。F 短窗口因 phase2 DTO 展示接线扩展为适用 R1 页面回归；P 全量 151 passed / 10 环境失败后自有 Python 子进程已退出，可用 commit 内存恢复约 18GB；允许 B 小规模单进程负例，重型回归仍分轨。
+
 以下追加记录不覆盖此前首失败、首源码及未验收状态。五条开发轨继续由原 Owner 维护；F、Q 为 Codex YOLO，A/B/C/P 为原 OpenCode。主控未写业务代码，I 尚未派发。
 
 | 轨 | 当前 Task / Dispatch | 交付与剩余工作 |
