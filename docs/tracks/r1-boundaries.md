@@ -301,3 +301,46 @@ text is read; UI view formatting is a deterministic fixture while actual
 handler routing/parser/persistent store authorize the operation. Four service
 project/provenance cases still await the resource window. This subset is no
 claim of configured product, PDF, installed/native science or R1 acceptance.
+
+## Runtime recovery and exact A/P service checkpoints
+
+Q resumed the same branch/task at `dc8a81c507d1f99674f1341c56f284f57f8c4608`
+after the Orca restart, under replacement dispatch `ctx_e8614b81faa5`. Two
+pre-restart outputs were already durable but untracked; they are preserved in
+the evidence commit together with the separate recovery repeats. No original
+file was overwritten. First retained outcomes: A7fc **26 passed** in 7.11s;
+P550 service **2 failed / 2 passed / 5 deselected** in 2.92s.
+
+The explicitly granted sequential short window reran exact A
+`7fc1e80845128080dfbcd5899aa9a09e37128753` and exact P
+`550e1d43b43a9b668d5255fd8f01d0a67c763c49` from existing private archives,
+using `.venv-q/Scripts/python.exe -m pytest`, `-q --tb=short` and process-only
+OPENBLAS/OMP/MKL thread limits of 1. All Q process/network guards remained on.
+
+- `test_a_host_boundaries.py`: **26 passed**, exit 0, 17.64s;
+  `a-7fc1e80-recovery-repeat.txt`.
+- `test_p_host_boundaries.py -k 'foreign_project or authorized_project or connected_local'`:
+  **2 failed / 2 passed / 5 deselected**, exit 1, 4.31s;
+  `p-550e1d4-service-recovery-repeat.txt`. Both three_axis and route_opportunities
+  invoked the trusted callback for p2 under a p1-bound ResearchService. Merely
+  forwarding project_id to a callback is not authorization.
+
+The window was released by `msg_07f1ab25225c`; original P repair Handoff
+`msg_a266bfb8d5b0`. Coordinator `msg_3de398c9a49f` accepts only these exact
+bounded results. P WIP now checks service.project before callbacks; this is
+not yet Q-tested or an immutable accepted candidate. Raw results were pushed
+in evidence SOURCE commit `967c75a`.
+
+Read-only follow-up Handoffs (new tests are NOT_RUN pending the next serialized
+window): B `msg_0491bb0a84a6` covers candidate identity/revision/byte substitution
+and data/code/runner collisions; C `msg_9fd970eb497b` covers advisory references
+that must resolve to effective accepted original facts; A `msg_310b7bc28009`
+covers newly exposed correction, supersession, project/scope and future-advice
+boundaries. New positive controls retain legitimate data, persisted candidate,
+independent refutation and legal sleep/reopen. The original assertions remain.
+
+The actual generated persisted-trust projection, project-wide budget reservation
+across new task/branch/run and unknown effect, configured P factory and final
+exact core/product combination still require original Owner source delivery and
+Q verification. L2/L3, real probes, scientific execution and external materials
+remain NOT_RUN; no new worker or global environment changes were made.
