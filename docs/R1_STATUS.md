@@ -1,5 +1,18 @@
 # R1 派发状态（2026-10-03）
 
+## 06:43 更新：唯一 I 已启动，最终核心和产品 SOURCE 已推送
+
+原 P 领域 SOURCE `0da6273f54281f5e86231e31234f682598f68ba2` / REPORT `e1a327c940c1987e903972b39b040deb3fc9cf0a` 已接纳阶段交付。合法旧项目的 HostConfig.project_id 是空字符串，旧适配已保留该语义；非空 R1 项目不能进入旧11工具入口，原 build_launch 的绝对路径、workspace 和 HostBinding 校验仍执行。P 精确安装原3失败加绑定/stdio/字节门9 passed/14.86s；Q 真正安装0da/d85，164个原Python blob、VCS origin、95依赖核对通过，相关87 passed/21.74s。原 fbe 完整221/3、0d相关88/3以及Q各首次失败全部保留，不将定向结果冒充完整新包通过。
+
+Q 最终 SOURCE `953e5cf01f06dd2ed3c77f4cebb0f1c1a9bf1b6f` / REPORT `793661391738f5dadb2412af32c7188a60915c7d` 已核实clean/remote并接纳，worker_done succeeded，release retained/no_owned_resource/processAction none。F 最终447/fa6也已接纳同类生命周期回执。原A/B/C/F/Q均已交付，只有原P处理最终pin，以及唯一I做独立安装验收。
+
+I 在独立 Orca worktree/branch `morph-r1-integration-1003` 启动：Task `task_8f2c3d496f12` / Dispatch `ctx_7ab9bc21276f` / terminal `term_563f64a0-4d83-4954-b2ca-e3bdd80573d5`，Codex0.160 YOLO，实际观察 input_accepted及turn_started。I 从主控治理b821普通精确合并A REPORT524a、Q REPORT7936，无冲突，形成核心 **SOURCE `2c63bc7c9e49edff28e26f5930a22d0415fadd65`**。主控核实远端exact，运行源码/锁/tools/CI相对A d85零差异；此SOURCE的 [CI37073582354](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37073582354) 两平台正在运行，未借用旧CI结论。
+
+原 P 已推送最终产品 **SOURCE `c9fcc6e24500ff26cd6600dfa6719278f04b8cb5`**，固定上述I核心，包含F447完整历史。主控核实clean/remote；本次四文件差异限于CORE_SHA、pyproject、uv.lock和README归档示例。P在私有COPY安装做有限入口/字节短门，I在全新私有环境做最终产品全套、原Q安装边界、实际HTTP/MCP及支持/反证双视窗；这些最终组合结果此刻PENDING。I不接管领域实现，领域缺陷回原Owner。
+
+主控只更新治理；根工作树原 `docs/SWARM_SOL_PLAN.md` WIP保持。AT07真实隔离、L2/L3、独立人工观察仍NOT_RUN，全R1退出未达成；C自动审批拒绝的系统editable残留、旧四项release_unknown、原15/180秒失败和两次工具长空档均保留。此次状态更新为后继治理，不改已推送SOURCE或科研历史。
+
+
 ## 06:24 更新：核心组合双平台通过，页面完成，产品兼容收尾
 
 A 最终 SOURCE `d85aa95e8da406d598f3658492e3d615bba8a28f` / REPORT `524a81ed7ba0b3550f6ae029e316a56293901d12` 已接纳本轨交付；worker_done succeeded，release retained/no_owned_resource/processAction none。主控核实该精确源码 [CI37062098247](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37062098247)：Windows 1392 passed/5 skipped/1545.58s，Linux 1391 passed/6 skipped/351.47s；两端strict136、build、官方SDK、wheel检查全部通过。B旧本地180秒超时原因仍UNKNOWN，不被新CI解释或覆盖。

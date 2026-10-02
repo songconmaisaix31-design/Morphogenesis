@@ -1,5 +1,14 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## 06:43 最终组合进入独立验收
+
+本轮受测组合固定为核心 SOURCE `2c63bc7c9e49edff28e26f5930a22d0415fadd65` 与产品 SOURCE `c9fcc6e24500ff26cd6600dfa6719278f04b8cb5`。唯一I已普通合并全部核心领域和独立Q历史，原P负责最终pin/lock；主控核实两者远端精确。最终SOURCE CI37073582354、I全新COPY非editable安装、产品完整Python、Q原安装保护、正式HTTP/MCP及四个实际浏览器观察仍PENDING，旧组合结果不能代替。
+
+此前P0da/d85的原3兼容失败与相关门9 passed，Q同组合相关87 passed，已经验证旧exact11工具兼容、合法空项目与原HostBinding保护。Q最终SOURCE953e5cf/REPORT7936613和F最终SOURCE447d9e0/REPORTfa6bfbd均已接纳；全部首次RED、historical skip和真实耗时继续保留。P fbe完整221/3尚不能写成新组合全绿。
+
+AT07真实探针及AT03/10/12/13/18所需L2研究实例、其他AT的L2部分、L3、独立人工观察均NOT_RUN；整体p95/传播目标未验收。C系统editable清理被自动审批拒绝且未清理、旧四项release_unknown不由本机私有环境验收消除。
+
+
 ## 06:24 验收收尾更新
 
 核心组合d85精确CI37062098247 Windows1392/Linux1391通过，strict136/build/SDK/wheel均通过；F447精确安装的支持与反证两视窗各2通过，主控实际查看默认折叠条件后的截图。Q真正installed fbe/d85独立272 passed/3历史skip；对应身份与原始失败见最新R1_STATUS及各Owner报告。以上不替代最终I组合安装与回归。
