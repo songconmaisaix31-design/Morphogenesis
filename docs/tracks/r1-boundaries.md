@@ -200,6 +200,20 @@ backend name/capability set, without endpoint/runtime/environment/configuration
 binding. Review Handoff `msg_568c2c09267c`, exact reproduction
 `msg_ad45f34519ca`, coordinator `msg_f4c22f417513`.
 
+## C trusted-review repair checkpoint
+
+Coordinator `msg_aaae8ebffdc7` confirms original C owner delivery
+`msg_b8ccbbbec65b`: pushed stage candidate
+`3161048c463b3aa4f434054755afc9787bbda989`. Q used a fresh exact git archive,
+set `R1_SECURITY_SOURCE` to that archive, and ran
+`.venv-q/Scripts/python.exe -m pytest tests/integration/r1_security/test_c_feedback_boundaries.py -q --tb=short`:
+**22 passed**, exit 0, 5.11 seconds. Raw output
+`c-3161048-exact-boundary.txt`. All prior negative assertions and the valid
+distinct-review/history positive control pass. C71bf/C4001176 RED remains
+historical evidence. This is acceptance of the covered counterexample/review
+boundary on this stage candidate only; B generated projection and the merged
+installed native research chain remain pending, not R1 or live science PASS.
+
 ## Integration checklist and limits
 
 Before I accepts the successor, the exact merged source must expose the dynamic
