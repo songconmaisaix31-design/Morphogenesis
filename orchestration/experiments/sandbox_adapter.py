@@ -23,8 +23,10 @@ from opensandbox.sync.sandbox import SandboxSync
 
 from orchestration.experiments.backend import OpenSandboxBackend, OpenSandboxSession, UnsupportedCapability
 from orchestration.experiments.generated import (
-    BackendProfile, GeneratedContext, GeneratedExperimentPlan, IsolationCapability, IsolationReport,
+    BackendProfile, GeneratedContext, GeneratedExperimentPlan, IsolationCapability, IsolationConfiguration,
+    IsolationReport, effective_environment,
 )
+from orchestration.experiments.security import SecurityRejection, verify_isolation
 from orchestration.experiments.trusted import IsolationProbeRecord, TrustedProbeRegistry
 
 _DENY_ENV = {"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"}
@@ -38,7 +40,7 @@ class GeneratedBackend(Protocol):
     def create(self, plan: GeneratedExperimentPlan, context: GeneratedContext) -> OpenSandboxSession: ...
 
 
-def declared_capability(*, network_deny: bool) -> IsolationCapability:
+def declared_capability(*, network_deny: bool, probed_server_process_limit: bool = False) -> IsolationCapability:
     """What the pinned OpenSandbox SDK 1.1.0 actually enforces.
 
     ``SandboxSync.create`` exposes cpu, memory, timeout and an egress
@@ -50,7 +52,7 @@ def declared_capability(*, network_deny: bool) -> IsolationCapability:
     return IsolationCapability(
         no_host_write=True, no_credentials=True, no_host_control=True, no_privilege=True,
         export_bounded=True, network_deny=network_deny, cpu_limit=True, memory_limit=True,
-        process_limit=False, time_limit=True, self_owned_cleanup=True,
+        process_limit=probed_server_process_limit, time_limit=True, self_owned_cleanup=True,
     )
 
 
@@ -64,15 +66,28 @@ class LocalCpuSandboxBackend:
 
     def __init__(self, *, domain: str = "127.0.0.1:8097", api_key: str | None = None,
                  protocol: Literal["http", "https"] = "http", network_deny: bool = True,
-                 probe: IsolationProbeRecord | None = None) -> None:
+                 probe: IsolationProbeRecord | None = None, instance_id: str | None = None,
+                 runtime_profile: str | None = None, server_process_limit: int | None = None) -> None:
         self._opensandbox = OpenSandboxBackend(domain=domain, api_key=api_key, protocol=protocol)
         self._network_deny = network_deny
         self._probe = probe
+        self._instance_id = instance_id
+        self._runtime_profile = runtime_profile
+        self._server_process_limit = server_process_limit
         self.provenance: Literal["live"] = "live"
         self.capabilities = self._opensandbox.capabilities
 
     def isolation(self) -> IsolationReport:
-        declared = declared_capability(network_deny=self._network_deny)
+        # SDK 1.1.0 has no process-limit create argument. Only an exact host
+        # deployment with a probed server-enforced pids limit can support it.
+        config = self._probe.configuration if self._probe is not None else None
+        process_supported = bool(self._probe is not None and self._probe.passed and self._probe.verified
+            and config is not None and self._server_process_limit is not None
+            and config.server_process_limit == self._server_process_limit
+            and config.instance_id == self._instance_id and config.runtime_profile == self._runtime_profile
+            and config.endpoint == self._endpoint())
+        declared = declared_capability(network_deny=self._network_deny,
+                                       probed_server_process_limit=process_supported)
         verified = self._probe is not None and self._probe.verified and self._probe.passed
         return IsolationReport(
             backend="opensandbox", declared=declared,
@@ -80,7 +95,26 @@ class LocalCpuSandboxBackend:
             proof_ref=self._probe.probe_id if self._probe is not None else None,
             reasons=() if verified else ("isolation_probe_not_run",))
 
+    def _endpoint(self) -> str:
+        return self._opensandbox.protocol + "://" + self._opensandbox.domain
+
+    def configuration(self, plan: GeneratedExperimentPlan) -> IsolationConfiguration | None:
+        if self._instance_id is None or self._runtime_profile is None:
+            return None
+        return IsolationConfiguration(
+            endpoint=self._endpoint(), instance_id=self._instance_id, runtime_profile=self._runtime_profile,
+            environment=effective_environment(plan.environment), resources=plan.backend,
+            network_deny=self._network_deny, server_process_limit=self._server_process_limit,
+            use_server_proxy=self._opensandbox.use_server_proxy)
+
     def create(self, plan: GeneratedExperimentPlan, context: GeneratedContext) -> OpenSandboxSession:
+        plan = GeneratedExperimentPlan.model_validate_json(plan.model_dump_json())
+        if plan.task_id != context.task_id:
+            raise SecurityRejection("plan_task_mismatch")
+        isolation = self.isolation().model_copy(update={"configuration": self.configuration(plan)})
+        registry = TrustedProbeRegistry(records=(self._probe,)) if self._probe is not None else None
+        # Independent of the executor: direct SDK adapter callers have the same gate.
+        verify_isolation(isolation, registry, plan)
         required = {"script", "cpu", "memory", "duration"}
         if missing := required - self.capabilities:
             raise UnsupportedCapability(",".join(sorted(missing)))
@@ -88,10 +122,8 @@ class LocalCpuSandboxBackend:
         # The immutable image reference is the effective image sent to the SDK;
         # admission already rejected mutable tags. image_digest (if set) is the
         # same digest the host probe ran against and must equal image's digest.
-        image = plan.environment.image
-        if plan.environment.image_digest and not image.endswith("@" + plan.environment.image_digest):
-            raise UnsupportedCapability("image_digest_mismatch")
-        network_policy = NetworkPolicy(defaultAction="deny") if self._network_deny else None
+        image = effective_environment(plan.environment).image
+        network_policy = NetworkPolicy(defaultAction="deny")
         sandbox = SandboxSync.create(image,
             connection_config=self._opensandbox.connection(profile.command_seconds + 15),
             resource={"cpu": str(profile.cpu), "memory": f"{profile.memory_mib}Mi"},

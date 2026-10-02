@@ -18,6 +18,7 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import cast
+import time
 
 import httpx
 
@@ -28,7 +29,7 @@ from orchestration.experiments.executor import (
 )
 from orchestration.experiments.generated import (
     ExecutionAxis, GeneratedAssessment, GeneratedContext, GeneratedExperimentPlan, GeneratedResult,
-    IsolationReport, StaticSecurityReport,
+    IsolationConfiguration, IsolationReport, StaticSecurityReport, effective_environment,
 )
 from orchestration.experiments.models import ExperimentArtifact
 from orchestration.experiments.sandbox_adapter import GeneratedBackend
@@ -50,8 +51,10 @@ def execution_axis(state: str) -> ExecutionAxis:
 
 
 def _require_immutable_image(plan: GeneratedExperimentPlan) -> None:
-    if not plan.environment.image_digest and "@sha256:" not in plan.environment.image:
-        raise SecurityRejection("immutable_image_digest_required")
+    try:
+        effective_environment(plan.environment)
+    except ValueError as error:
+        raise SecurityRejection(str(error)) from error
 
 
 @dataclass(frozen=True)
@@ -71,6 +74,14 @@ class GeneratedExperimentExecutor:
         self.probe_registry = probe_registry
         self.criteria_registry = criteria_registry
 
+    def _isolation(self, plan: GeneratedExperimentPlan) -> IsolationReport:
+        report = self.backend.isolation()
+        configure = getattr(self.backend, "configuration", None)
+        configuration = configure(plan) if callable(configure) else None
+        if configuration is not None:
+            configuration = IsolationConfiguration.model_validate_json(configuration.model_dump_json())
+        return report.model_copy(update={"configuration": configuration})
+
     def prepare(self, plan: GeneratedExperimentPlan, files: dict[str, bytes],
                 data: dict[str, bytes] | None = None) -> GeneratedPreparation:
         plan = GeneratedExperimentPlan.model_validate(plan.model_dump(mode="json"))
@@ -84,12 +95,17 @@ class GeneratedExperimentExecutor:
             if set(bodies) != set(entries):
                 raise ValueError(label + "_manifest_count_mismatch")
         return GeneratedPreparation(plan=plan, files=dict(files), data=dict(data),
-                                    static=static_checks(plan, files), isolation=self.backend.isolation())
+                                    static=static_checks(plan, files, data), isolation=self._isolation(plan))
 
     def admit(self, preparation: GeneratedPreparation) -> None:
+        # Recheck current host settings and bytes: a prepared snapshot is not an
+        # authorization to reuse a probe after backend or request mutation.
+        current = self.prepare(preparation.plan, preparation.files, preparation.data)
+        if current != preparation:
+            raise SecurityRejection("prepared_configuration_changed")
         if not preparation.static.passed:
             raise SecurityRejection("static_security_failed")
-        verify_isolation(preparation.isolation, self.probe_registry)
+        verify_isolation(preparation.isolation, self.probe_registry, preparation.plan)
         _require_immutable_image(preparation.plan)
         required = {"script", "cpu", "memory", "duration"}
         if missing := required - self.backend.capabilities:
@@ -100,8 +116,13 @@ class GeneratedExperimentExecutor:
                 data: dict[str, bytes] | None = None) -> GeneratedResult:
         preparation = self.prepare(plan, files, data)
         root = Path(archive_root).resolve() / context.run_id
+        started_at = time.time()
+        approval = self.criteria_registry.approval(preparation.plan.evaluation) if self.criteria_registry else None
+        if approval is not None and (approval.approved_at > started_at or approval.approved_by == context.author):
+            approval = None
         result = GeneratedResult(
             plan=preparation.plan, context=context, archive_path=str(root), provenance=self.backend.provenance,
+            started_at=started_at, criteria_approval_json=approval.model_dump_json() if approval else None,
             admission=preparation.static, isolation=preparation.isolation,
             assessment=GeneratedAssessment(execution="not_run", evaluator_version=preparation.plan.evaluation.version))
         root.mkdir(parents=True, exist_ok=False)
@@ -220,12 +241,14 @@ def read_generated_result(archive_root: Path | str, run_id: str, *,
         raw = path.read_bytes()
         if len(raw) != item.size_bytes or digest(raw) != item.sha256:
             raise ValueError("artifact_digest_mismatch")
-    for file in result.plan.files:
-        if digest((root / "inputs" / file.name).read_bytes()) != file.sha256:
+    for file in (*result.plan.files, *result.plan.data):
+        path = root / "inputs" / file.name
+        if path.is_symlink() or not path.resolve().is_relative_to(root):
+            raise ValueError("artifact_path_escape")
+        # Pre-admission refusal has no input upload; keep it readable, not a
+        # scientific result. Any captured input still has to match the manifest.
+        if path.exists() and (digest(path.read_bytes()) != file.sha256 or path.stat().st_size != file.size_bytes):
             raise ValueError("input_digest_mismatch")
-    for file in result.plan.data:
-        if digest((root / "inputs" / file.name).read_bytes()) != file.sha256:
-            raise ValueError("data_digest_mismatch")
     if result.execution_state == "succeeded":
         names = {artifact.archive_path for artifact in result.artifacts}
         required = {f"inputs/{file.name}" for file in result.plan.files}

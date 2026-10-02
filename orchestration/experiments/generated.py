@@ -17,6 +17,7 @@ come from host-owned registries in ``trusted.py``.
 from __future__ import annotations
 
 from pathlib import PurePosixPath
+import re
 from typing import Literal
 
 from pydantic import Field, JsonValue, field_validator, model_validator
@@ -107,6 +108,42 @@ class BackendProfile(Contract):
         if self.command_seconds >= self.lifetime_seconds:
             raise ValueError("command duration must be below sandbox lifetime")
         return self
+
+
+def effective_environment(environment: ApprovedEnvironment) -> ApprovedEnvironment:
+    """Resolve the frozen repository/digest without falling back to a mutable tag."""
+    image = environment.image
+    repository, separator, embedded = image.partition("@")
+    digest = environment.image_digest or (embedded if separator else None)
+    if digest is None or re.fullmatch(r"sha256:[a-f0-9]{64}", digest) is None:
+        raise ValueError("immutable_image_digest_required")
+    if separator and embedded != digest:
+        raise ValueError("image_digest_mismatch")
+    # A registry port is not an image tag.
+    if ":" in repository.rsplit("/", 1)[-1]:
+        repository = repository.rsplit(":", 1)[0]
+    if not repository or "@" in repository:
+        raise ValueError("invalid_image_repository")
+    return environment.model_copy(update={"image": repository + "@" + digest, "image_digest": digest})
+
+
+class IsolationConfiguration(Contract):
+    """Effective host settings bound to a probe, reusing the frozen plan profiles.
+
+    ``instance_id`` and ``runtime_profile`` identify the operator's backend
+    deployment and immutable runtime configuration, not a newly created sandbox.
+    A server-enforced process limit needs a probe of that exact configuration;
+    SDK 1.1.0 cannot set it on the create request.
+    """
+
+    endpoint: str = Field(min_length=1, max_length=512)
+    instance_id: str = Field(min_length=1, max_length=120)
+    runtime_profile: str = Field(min_length=1, max_length=240)
+    environment: ApprovedEnvironment
+    resources: BackendProfile
+    network_deny: bool
+    server_process_limit: int | None = Field(default=None, ge=1, le=1024, strict=True)
+    use_server_proxy: bool = True
 
 
 class EvaluationSpec(Contract):
@@ -256,6 +293,7 @@ class IsolationReport(Contract):
     probe: Literal["not_run", "passed", "failed"] = "not_run"
     proof_ref: str | None = Field(default=None, min_length=1, max_length=120)
     reasons: tuple[str, ...] = ()
+    configuration: IsolationConfiguration | None = None
 
 
 class GeneratedAssessment(Contract):
@@ -284,6 +322,8 @@ class GeneratedResult(Contract):
     context: GeneratedContext
     archive_path: str
     provenance: Literal["live", "replay", "mock"]
+    started_at: float | None = None
+    criteria_approval_json: str | None = None
     admission: StaticSecurityReport = Field(default_factory=StaticSecurityReport)
     isolation: IsolationReport
     execution_state: Literal[

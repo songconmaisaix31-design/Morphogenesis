@@ -10,6 +10,7 @@ import tempfile
 import time
 
 from local_assets.models import ApplicationReceipt, AssetSafetyError, Candidate, ValidationReport
+from local_assets.generated_models import GeneratedValidationReport
 from local_assets.paths import check_target, git, no_links, safe_join
 from local_assets.promote import checked_report
 from local_assets.snapshot import check_snapshot, scope_tree
@@ -51,7 +52,7 @@ class PreparedApplication:
 
     target: Path
     candidate: Candidate
-    report: ValidationReport
+    report: ValidationReport | GeneratedValidationReport
     baseline_files: dict[Path, bytes]
     git_metadata: dict[Path, bytes | None]
 
@@ -122,8 +123,19 @@ class AssetApplicator:
         self.policy_version = policy_version
         self.protected_paths = protected_paths
 
-    def prepare(self, asset_id: str, report_id: str | ValidationReport) -> PreparedApplication:
-        candidate, report = checked_report(self.store, asset_id, report_id, self.policy_version)
+    def prepare(self, asset_id: str, report_id: str | ValidationReport | GeneratedValidationReport) -> PreparedApplication:
+        report: ValidationReport | GeneratedValidationReport
+        if self.policy_version == "generated-isolation-v1":
+            from local_assets.generated_validation import checked_generated_report
+            if isinstance(report_id, ValidationReport):
+                raise AssetSafetyError("validation_policy_mismatch")
+            candidate, report = checked_generated_report(self.store, asset_id, report_id, self.policy_version)
+            # Static admission is insufficient for publishing a scientific asset.
+            self.store.fetch_approved(asset_id)
+        else:
+            if isinstance(report_id, GeneratedValidationReport):
+                raise AssetSafetyError("validation_policy_mismatch")
+            candidate, report = checked_report(self.store, asset_id, report_id, self.policy_version)
         target = check_target(self.target, self.protected_paths)
         # Resolve metadata once outside B's transaction. Re-read these exact native
         # Git files in the callback so ref/branch/HEAD changes invalidate preparation.

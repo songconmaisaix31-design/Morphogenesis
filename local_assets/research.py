@@ -18,6 +18,10 @@ def matching_reports(store: LocalAssetStore, asset_id: str) -> list[ResearchObse
 def scientific_plan(plan_json: str) -> str:
     """Role/local archive paths are lineage, not a scientific condition."""
     plan = json.loads(plan_json)
+    if plan.get("schema_version") == "generated-experiment/v1":
+        from local_assets.generated_validation import generated_conditions
+        from orchestration.experiments.generated import GeneratedExperimentPlan
+        return json.dumps(generated_conditions(GeneratedExperimentPlan.model_validate(plan)), sort_keys=True)
     plan.pop("role", None)
     for name in ("code", "data"):
         if isinstance(plan.get(name), dict):
