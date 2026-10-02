@@ -872,3 +872,27 @@ original durable proposal/task and same-proposal recovery after reopen.
 These new checks are **NOT_RUN** at this checkpoint: P owns the full baseline
 window. Q keeps the actual fd7 installation for first outcomes, then will
 install the authoritative successor and run the final owned slices.
+
+## Actual installed response-loss first RED and fbe72 successor
+
+Coordinator `msg_0c73ccf3c56e` authorizes the bounded first seven checks during
+P's full baseline. Actual installed d85/fd7 gives **1 passed / 6 failed**, 6.16s.
+All six failing cases first confirm one accepted original proposal/task,
+successful same-proposal recovery after reopening ConfiguredResearch, no
+duplicate task and no fabricated adoption/contribution. They then fail the
+unchanged status assertion: the real outer HTTP handler emits `[200, 503]`
+after response header/body loss. The normal delivered-response positive passes.
+No real socket is used. Raw
+`installed-d85aa95-fd7a79e-disconnect7-first.txt` retains the first failures;
+Handoffs `msg_8ced7ade0cda` and `msg_4cf2cd43a4e8` deliver them to P/controller.
+
+P's authoritative successor is
+`fbe72c519a3809ffbd439ecba9b65b0441726585`, pinned to the same d85 core.
+Read-only diff confirms only the reviewed reply-disconnect handling changes
+production Python since fd7. Q updates only the product via exact VCS COPY,
+with no dependency or installed-source edits. Actual noneditable origins,
+the original pin gate, all core129/product34 Python Git blob comparisons and
+`uv pip check`95 pass again; three new `installed-d85aa95-fbe72c5-*-first.txt`
+logs retain this result. Final owned pytest slices await P's baseline exit;
+neither this package verification nor P's ongoing baseline is counted as Q
+final acceptance.
