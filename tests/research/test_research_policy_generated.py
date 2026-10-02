@@ -63,7 +63,7 @@ class GeneratedFixture:
         self.reports = {}
 
     def run(self, task_id, *, source=None, output=None, branch_id=None, worker=None,
-            purpose=None, timeout=False, exit_code=0):
+            purpose=None, timeout=False, exit_code=0, frozen_criteria=True):
         original = source or task_id
         worker = worker or ("independent-reviewer" if source else "candidate-author")
         plan = (self.plans[source] if source else self.plan).model_copy(update={
@@ -90,7 +90,7 @@ class GeneratedFixture:
             output=output if output is not None else poisson_reference_output(4),
             timeout=timeout, entry_exit_code=exit_code, isolation=mock_isolation(plan=plan))
         executor = GeneratedExperimentExecutor(backend, probe_registry=verified_probe_registry(plan=plan),
-                                               criteria_registry=self.criteria)
+                                               criteria_registry=self.criteria if frozen_criteria else None)
         self.ledger.begin_execution(lease, context.run_id, max_executions=1)
         result = executor.execute(plan, context, {"experiment.py": GENERATED_CODE.encode()}, self.root / "archives")
         assert result.provenance == "mock"
@@ -264,3 +264,52 @@ def test_generated_readonly_rebuild_reuses_sources_without_reward_refresh(tmp_pa
     assert rebuilt.accept("source-result").accepted
     assert rebuilt.contributions() == f.feedback.contributions()
     assert before == {str(p): (p.read_bytes(), p.stat().st_mtime_ns) for p in tracked}
+
+
+def test_generated_self_declared_final_trusted_cannot_replace_raw_evaluation(tmp_path):
+    f = GeneratedFixture(tmp_path)
+    f.run("source", output=b'{"candidate_self_score": 1}')
+    f.run("review", source="source")
+    report = f.reports["source"]
+    envelope = json.loads(report.result_json)
+    envelope["scientific_verdict"] = "passed"
+    for key in ("generated_assessment",):
+        envelope[key].update(hypothesis="supported", mode="final", trusted=True, contribution="accepted")
+    envelope["experiment_result"]["assessment"].update(
+        hypothesis="supported", mode="final", trusted=True, contribution="accepted")
+    forged = report.model_copy(update={"scientific_verdict": "passed", "result_json": json.dumps(envelope)})
+    # Even mutually consistent caller claims in report + audit + completion must
+    # meet the independent archive reader's computation on original raw bytes.
+    with f.assets.connection() as db:
+        db.execute("DROP TRIGGER research_reports_UPDATE")
+        db.execute("UPDATE research_reports SET body=? WHERE report_id=?",
+                   (forged.model_dump_json(), report.report_id))
+    with connection(f.ledger.path, write=True) as db:
+        row = db.execute("SELECT sequence,body FROM task_audit WHERE task_id='source' AND event='research_execution'").fetchone()
+        body = json.loads(row[1]); body["result"] = envelope
+        db.execute("UPDATE task_audit SET body=? WHERE sequence=?", (json.dumps(body), row[0]))
+        submitted = f.ledger.get("source").result.copy()
+        submitted["scientific_verdict"] = "passed"
+        db.execute("UPDATE tasks SET result=? WHERE task_id='source'", (json.dumps(submitted),))
+    with pytest.raises(AssetSafetyError, match="generated_observation_result_mismatch"):
+        f.feedback.accept("source-result")
+    assert not f.feedback.contributions()
+
+
+def test_generated_duplicate_raw_source_does_not_reward_a_new_identity(tmp_path):
+    f = GeneratedFixture(tmp_path)
+    f.run("source"); f.run("review", source="source")
+    f.run("copy"); f.run("copy-review", source="copy")
+    assert f.feedback.accept("source-result").accepted
+    decision = f.feedback.accept("copy-result")
+    assert not decision.accepted and decision.reasons == ("duplicate_contribution",)
+    assert len(f.feedback.contributions()) == 1
+
+
+def test_generated_approval_cannot_be_granted_retroactively_or_block_other_facts(tmp_path):
+    f = GeneratedFixture(tmp_path)
+    f.run("unapproved", frozen_criteria=False)
+    f.run("source"); f.run("review", source="source")
+    assert not f.feedback.accept("unapproved-result").accepted
+    assert {fact.task_id for fact in f.feedback.trusted()} == {"source", "review"}
+    assert f.feedback.accept("source-result").accepted
