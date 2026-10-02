@@ -21,7 +21,7 @@ from typing import Literal, Protocol
 from opensandbox.models.sandboxes import NetworkPolicy
 from opensandbox.sync.sandbox import SandboxSync
 
-from orchestration.experiments.backend import OpenSandboxBackend, OpenSandboxSession, UnsupportedCapability
+from orchestration.experiments.backend import ExperimentSession, OpenSandboxBackend, OpenSandboxSession, UnsupportedCapability
 from orchestration.experiments.generated import (
     BackendProfile, GeneratedContext, GeneratedExperimentPlan, IsolationCapability, IsolationConfiguration,
     IsolationReport, effective_environment,
@@ -37,7 +37,7 @@ class GeneratedBackend(Protocol):
     capabilities: frozenset[str]
 
     def isolation(self) -> IsolationReport: ...
-    def create(self, plan: GeneratedExperimentPlan, context: GeneratedContext) -> OpenSandboxSession: ...
+    def create(self, plan: GeneratedExperimentPlan, context: GeneratedContext) -> ExperimentSession: ...
 
 
 def declared_capability(*, network_deny: bool, probed_server_process_limit: bool = False) -> IsolationCapability:
