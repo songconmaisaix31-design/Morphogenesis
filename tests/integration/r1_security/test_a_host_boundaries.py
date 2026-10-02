@@ -191,7 +191,8 @@ def test_official_mcp_tool_arguments_cannot_impersonate_host(tmp_path, deny_cand
 
     s = seeded(tmp_path)
     s.ledger.enqueue(Signal(task_id="authorized", workspace=s.config.workspace, scope="science",
-                            kind="opportunity", required_capability="research"))
+                            kind="opportunity", required_capability="research",
+                            payload={"project_id": "p1"}))
     server = create_server(s)
 
     async def call():

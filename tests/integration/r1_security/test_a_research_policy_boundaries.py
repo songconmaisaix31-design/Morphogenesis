@@ -36,13 +36,15 @@ def test_legal_sleep_and_reopen_change_future_advice_without_deleting_history(tm
     s.create_branch("p1", "local", "legal local work", "bounded research")
     before = opportunities(s.research_advisory("p1"))["local"]
     assert before["eligible"] and before["share"] > 0
-    s.record_correction("local", "sleep", "bounded pause", "fixture-note")
+    pause = s.submit_note("p1", "hypothesis", "bounded pause basis", branch_id="local")
+    s.record_correction("local", "sleep", "bounded pause", pause["note_id"])
     slept = opportunities(s.research_advisory("p1"))["local"]
     assert not slept["eligible"] and slept["share"] == 0, "persisted sleep failed to stop future opportunity"
     s = service(tmp_path)
     reopened_snapshot = opportunities(s.research_snapshot("p1"))["local"]
     assert not reopened_snapshot["eligible"] and reopened_snapshot["share"] == 0
-    s.record_correction("local", "reopen", "conditions reviewed", "fixture-followup")
+    followup = s.submit_note("p1", "hypothesis", "conditions reviewed basis", branch_id="local")
+    s.record_correction("local", "reopen", "conditions reviewed", followup["note_id"])
     after = opportunities(s.research_advisory("p1"))["local"]
     assert after["eligible"] and after["share"] > 0
     assert [event.kind for event in s.feedback_store.corrections("local")] == ["sleep", "reopen"]
