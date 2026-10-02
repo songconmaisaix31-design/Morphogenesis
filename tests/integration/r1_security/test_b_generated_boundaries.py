@@ -15,6 +15,7 @@ from orchestration.experiments.generated import (
     IsolationCapability, IsolationReport,
 )
 from orchestration.experiments.generated_executor import GeneratedExperimentExecutor, read_generated_result
+from orchestration.experiments.models import ExperimentArtifact
 
 
 CODE = b"# inert candidate, never executed by Q\n"
@@ -66,7 +67,7 @@ def raw_output():
     return json.dumps({"x": xs, "u": [math.sin(math.pi * x) for x in xs]}).encode()
 
 
-def archive(root, p=None, **updates):
+def archive(root, p=None, *, bind_artifacts=False, **updates):
     p = p or plan()
     directory = root / "q-run"
     (directory / "inputs").mkdir(parents=True)
@@ -75,6 +76,13 @@ def archive(root, p=None, **updates):
     (directory / "outputs/output.json").write_bytes(raw_output())
     result = GeneratedResult(plan=p, context=context(), archive_path=str(directory), provenance="mock",
                              isolation=isolation(), execution_state="succeeded", remote_effect="known")
+    if bind_artifacts:
+        entries = []
+        for name in ("inputs/candidate.py", "outputs/output.json"):
+            raw = (directory / name).read_bytes()
+            entries.append(ExperimentArtifact(name=name, archive_path=name,
+                            sha256=hashlib.sha256(raw).hexdigest(), size_bytes=len(raw)))
+        result = result.model_copy(update={"artifacts": tuple(entries)})
     result = result.model_copy(update=updates)
     (directory / "plan.json").write_text(p.model_dump_json(), encoding="utf-8")
     (directory / "result.json").write_text(result.model_dump_json(), encoding="utf-8")
@@ -145,7 +153,7 @@ def test_archive_unknown_crash_timeout_cannot_retain_forged_reward(tmp_path, sta
 def test_known_execution_with_unknown_effect_cannot_grant_final(tmp_path):
     p = plan(evaluation=EvaluationSpec(version="forged", kind="poisson_reference_v1", n_intervals=4,
                                      approved=True, approved_by="invented"))
-    archive(tmp_path, p, remote_effect="unknown", cleanup_state="unknown")
+    archive(tmp_path, p, bind_artifacts=True, remote_effect="unknown", cleanup_state="unknown")
     try:
         result = read_generated_result(tmp_path, "q-run", expected_plan=p, expected_context=context())
     except ValueError:
@@ -158,3 +166,14 @@ def test_succeeded_archive_requires_output_digest_binding(tmp_path):
     archive(tmp_path)
     with pytest.raises(ValueError):
         read_generated_result(tmp_path, "q-run", expected_plan=plan(), expected_context=context())
+
+
+def test_bound_archive_recomputes_diagnostic_without_caller_reward(tmp_path):
+    archive(tmp_path, bind_artifacts=True,
+            assessment=GeneratedAssessment(execution="succeeded", hypothesis="refuted",
+                contribution="accepted", mode="final", trusted=True, metrics={"self_score": 1}))
+    result = read_generated_result(tmp_path, "q-run", expected_plan=plan(), expected_context=context())
+    assert result.assessment.mode == "diagnostic"
+    assert result.assessment.hypothesis == "supported"
+    assert result.assessment.contribution == "proposed"
+    assert "self_score" not in result.assessment.metrics

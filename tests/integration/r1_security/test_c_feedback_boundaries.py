@@ -100,7 +100,7 @@ def test_exploration_does_not_authorize_out_of_scope_branch():
     assert not plan.opportunities[0].eligible
 
 
-def trusted_refutation(root):
+def scientific_fixture(root, *, execution="succeeded", verdict="failed", effect="known"):
     """Host-only fixture writes through existing ledger/store contracts.
 
     This constructs a known, submitted counterexample chain and never runs an
@@ -130,7 +130,7 @@ def trusted_refutation(root):
         db.execute("INSERT INTO assets VALUES (?,?)", ("fixture-asset", json.dumps(asset)))
     lease = s.ledger.claim("refuted", "author", locality=locality)
     assert lease is not None
-    raw = {"execution_state": "succeeded", "scientific_verdict": "failed", "effect_state": "known",
+    raw = {"execution_state": execution, "scientific_verdict": verdict, "effect_state": effect,
            "provenance": "mock"}
     s.ledger.begin_execution(lease, "fixture-run", max_executions=1)
     s.ledger.record_event("research_execution", {"run_id": "fixture-run", "worker_id": "author",
@@ -140,16 +140,21 @@ def trusted_refutation(root):
         worker_id="author", fencing_token=lease.token, run_id="fixture-run", sandbox_id=None,
         plan_id=claim.plan_id, criterion_version=claim.criterion_version, conditions=claim.conditions,
         plan_json=json.dumps(p), candidate_json=candidate.model_dump_json(), result_json=json.dumps(raw),
-        provenance="mock", purpose="counterexample", execution_state="succeeded", scientific_verdict="failed",
+        provenance="mock", purpose="counterexample", execution_state=execution, scientific_verdict=verdict,
         created_at=100, source_swarm_id=s.ledger.swarm_id, source_fencing_token=lease.token,
         source_attempt=candidate.attempt)
     with assets.connection() as db:
         db.execute("INSERT INTO research_reports VALUES (?,?,?)",
                    (observation.report_id, "fixture-asset", observation.model_dump_json()))
     s.ledger.submit(lease, "fixture-result", {"asset_id": "fixture-asset", "run_id": "fixture-run",
-        "stage": "evidence_submitted", "scientific_verdict": "failed", "execution_state": "succeeded",
+        "stage": "evidence_submitted", "scientific_verdict": verdict, "execution_state": execution,
         "provenance": "mock"})
     facts = research_feedback(s.ledger, assets.root)
+    return s, facts, locality
+
+
+def trusted_refutation(root):
+    s, facts, locality = scientific_fixture(root)
     assert len(facts) == 1 and facts[0].hypothesis == "refuted"
     return s, facts[0], locality
 
@@ -186,4 +191,19 @@ def test_review_observation_without_ledger_execution_cannot_authorize(tmp_path):
     value = fact.result_id if "result_id" in inspect.signature(s.accept).parameters else fact
     decision = accept(s, value, reviewer="nominated-reviewer")
     assert not decision.accepted, "unbound review report granted independent acceptance"
+    assert s.contributions() == []
+
+
+@pytest.mark.parametrize("execution,verdict,effect", [
+    ("failed", "not_evaluated", "known"),
+    ("timeout", "not_evaluated", "known"),
+    ("unknown", "not_evaluated", "unknown"),
+    ("succeeded", "failed", "unknown"),
+])
+def test_projection_unknown_crash_timeout_and_unknown_effect_earn_no_reward(tmp_path, execution, verdict, effect):
+    s, facts, locality = scientific_fixture(tmp_path, execution=execution, verdict=verdict, effect=effect)
+    assert facts == [], "non-scientific source ledger/store state produced scientific contribution"
+    value = "fixture-result" if "result_id" in inspect.signature(s.accept).parameters else forged(execution="unknown")
+    decision = accept(s, value)
+    assert not decision.accepted
     assert s.contributions() == []

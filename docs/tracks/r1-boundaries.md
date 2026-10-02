@@ -130,3 +130,18 @@ mock-labeled unknown/refused effect permits another phase/retry; known core
 context is blocked solely because its provenance is non-mock. Unapproved
 envelope blocks backend calls. Handoff `msg_8393a49aef40` to original P.
 There is no fake eight-stage mock completion and no model/candidate execution.
+
+## Additional authority coverage
+
+C4001176's authoritative source projection rejects actual submitted records for
+crash, timeout, unknown execution, and succeeded execution with unknown effect:
+**4 passed**, exit 0 (`c-4001176-unknown-projection.txt`). This strengthens the
+earlier caller-object negative; it does not accept the still-failing reviewer path.
+
+B successor WIP: full bound-output recomputation discards caller score/reward,
+and 14 generated cases pass. Two new probe-reference cases fail: a host fixture
+record with probe_id=host-probe authorizes IsolationReport proof_ref=null or
+invented-probe. `verify_isolation` does not bind the claimed reference to the
+registered record. First diagnostic **2 failed / 14 passed**, exit 1; Handoff
+`msg_de80b96316bc`. This is deterministic host-authority input, not a live probe
+or scientific result; the final host construction path still needs Owner Handoff.
