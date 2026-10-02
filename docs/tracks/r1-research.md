@@ -159,3 +159,68 @@ SOURCE `4afe462b08867b4662a0bd01ee89833e56ffb32b` 已 push 且远端 exact，包
 - B 最终领域 SOURCE `5faafe41b1732c83d165251600b688444186c702` 和 C 领域 SOURCE `4f83296af908352660ebf71e633e70a111eb2877` 均为祖先。C 最终 `56de8e3f5d2abd1e1ba02218b422f0aba9847ae2` 相对该 C source 只普通合入同一 B 文件，无新增 C 领域差异；最终 I 可继续按 owner 的精确 SOURCE 合并历史。
 - SOURCE 及具体调用签名已交 P/Q/主控；P 可安装并接原生成员/HTTP，F 可消费 DTO/UI，不等待最终 I。P/F/Q/I 的后续独立结果不计入 A 自测。
 - 验收事实为 owner 的本地 contract 与正式 installed/MCP mock 接口；不宣称完整 R1、`task_live`、真实科学有效性或用户验收。完整 I 集成、P/F/Q 各轨验收仍由原 owner/主控负责；8.3 中自动 PDF 与全部 L2/外部操作限制继续有效。
+
+## 9. 2026-10-03 精确 B/C 最终组合候选
+
+本次新 Task `task_012ff330b0ea` / Dispatch `ctx_08b0b3d7fddb` 只由原 A Owner 准备 P/Q 安装候选，不接管领域实现，也不代替最终 I。前节 SOURCE/REPORT 与原始失败保留。主控提供的 A `37051852669`、B `37059454013` 双平台 CI 通过是各自精确源码的独立记录，不算本节新组合安装结果。
+
+### 9.1 普通精确合并
+
+从干净 HEAD `5a0caf0055d485d6343eaa561589a3be6d43728f` 顺序执行：
+
+```powershell
+git merge --no-ff --no-edit 387338f49045f7be7a184b868f48f325cebd9cbd
+git merge --no-ff --no-edit 8bc4c282ed4db8e2be0798509b28d984240b3a06
+```
+
+两次均无冲突，组合 SOURCE **`d85aa95e8da406d598f3658492e3d615bba8a28f`** 已 push，并以 `git ls-remote` 核对 exact。A 原 SOURCE `cc2e7227e1b423924c99113c9676ef8cc310e92b`、B 最终 SOURCE `230d283848c0879ff9c349096548d3810c4b1954` / REPORT `387338f49045f7be7a184b868f48f325cebd9cbd`、C SOURCE `56de8e3f5d2abd1e1ba02218b422f0aba9847ae2` / REPORT `8bc4c282ed4db8e2be0798509b28d984240b3a06` 全部经 `git merge-base --is-ancestor` 确认为祖先。
+
+相对 A `cc2e722`，生产 Python 仅 `local_assets/store.py` 新增两行注释和配置读取前的 `BEGIN IMMEDIATE`；新增原 B `tests/local_assets/test_store_initialization.py`，其余变化是 owner 报告。C 研究运行代码无差异，A 未修改业务代码、接口、B/C 测试或断言。SOURCE 推送后已立即交主控/P/Q，后续测试不阻塞其精确 repin 准备。
+
+### 9.2 私有 COPY、非 editable VCS 安装
+
+按本次授权沿用 A 自有 `.runtime/acceptance-4afe462/venv`，证据独立保存在 `.runtime/acceptance-d85aa95/`，安装前 `direct_url.json` 另存 `previous-direct-url.json`。没有使用系统 editable 或借改其他轨环境。
+
+```powershell
+# 以下环境仅限本次安装进程；无 git config --global 或全局环境改动。
+$env:UV_CACHE_DIR=Join-Path (Get-Location) '.runtime/acceptance-d85aa95/uv-cache'
+$env:UV_LINK_MODE='copy'
+$env:GIT_CONFIG_COUNT='1'
+$env:GIT_CONFIG_KEY_0='core.autocrlf'
+$env:GIT_CONFIG_VALUE_0='false'
+uv pip install --python .runtime/acceptance-4afe462/venv/Scripts/python.exe --no-deps --reinstall-package morphogenesis 'morphogenesis @ git+https://github.com/songconmaisaix31-design/Morphogenesis.git@d85aa95e8da406d598f3658492e3d615bba8a28f'
+```
+
+`vcs-install-first.log`：构建/安装 exit 0。锁依赖和本轨原有 Node SDK 未变动。隔离 `-I` 导入只来自该私有 site-packages；`direct_url.vcs_info.commit_id` 与 `requested_revision` 均为新组合 SOURCE，无 editable。`uv pip check`：103 packages compatible。
+
+首字节比较 **RED** 保留为 `installed-origin-first.json`：比较用的默认 `git archive` 导出目录是 CRLF，安装包/独立 VCS checkout 是 LF；store 长度分别为21564/21180，差异恰为384个 CR，service 对照也一致。该首失败没有通过改已安装字节、行尾归一或放宽断言消除。保留原 `source.tar` / `source` / `run`，另用单进程 `git -c core.autocrlf=false archive` 生成 `source-lf.tar`，提取至新 `source-lf` / 中立测试目录 `run-lf`；直接 `git show <SHA>:<path>` 原始 blob 是最终比较依据。
+
+`installed-origin-git-blobs.json`：新 `store.py` + 全13个正式 `swarm/research/*.py` 的 **14 文件原始 Git blob、LF archive、installed 包逐字节相等**，没有手工改 installed 文件；真实包含 `BEGIN IMMEDIATE`。该结果是本次重新安装证据，与前节旧包检查分开。
+
+此前“PDF 未实现”只指 A 核心轨没有实现解析器；本次主控确认 P 已实现真实 pypdf 材料入口，不能将 A 轨边界写成整个产品缺功能。P 的材料/HTTP/native/页面证据仍由 P/F/Q 独立报告。C 全局 editable 清理仍是自动审批拒绝且未清理的历史人工事项；本次没有绕过或接管清理。
+
+### 9.3 本次组合的有限适用验证
+
+主控 `msg_ff909d31cd1d` 确认 F 已退出自有进程后授予短窗口。进程 BLAS/OMP/MKL 均为1；中立 cwd 为 `.runtime/acceptance-d85aa95/run-lf`，只有精确归档的 tests/pyproject，下面 bootstrap 只把该测试根加入路径，不加入活动核心源码。
+
+```powershell
+../../acceptance-4afe462/venv/Scripts/python.exe -I -c 'import sys, pytest; from pathlib import Path; sys.path.insert(0, str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))' tests/research/test_stdio_dynamic.py tests/local_assets/test_store_initialization.py -q --tb=short
+```
+
+首次 **6 PASS / 11.11s**，`installed-focused-first.log`，exit0。原 B 并发5项实际使用 SQLite 独立连接和两线程，涵盖同配置一致、冲突配置只允许完整绑定、immutable triggers 和旧库回滚；原网络/进程禁止 guard 保留。正式 stdio1项从新 VCS 安装启动作者与独立 reviewer，走真实 MCP/GEP、原账本、固定 mock backend、接受后实际 choose/claim 引用和成果 export。原文件/业务断言未改，不将 mock 固定输出解释成候选 Python 执行或真实科研。
+
+第一次 strict 指定私有 `site-packages/local_assets/store.py`，mypy 在该根发现 `typing_extensions.py` 遮蔽库模块，exit2；保存 `installed-store-strict-first.log`，这次没有完成代码检查。改从已与原 blob/installed 完全相同的 `.runtime/acceptance-d85aa95/source-lf` 执行同模块检查：
+
+```powershell
+../../acceptance-4afe462/venv/Scripts/python.exe -I -m mypy --strict --follow-imports=silent --cache-dir ../source-mypy-cache local_assets/store.py
+```
+
+结果 **Success: no issues found in 1 source file**，`source-store-strict-first.log`，exit0。仅检查变动模块，没有降低类型规则或改配置文件；不是声称全仓 strict 重跑。`git diff --check` 通过。结束后查询本轨安装路径对应的 Python/Node 进程为0，于消息 `msg_419e0d7d7b05` 立即释放窗口给 P。
+
+### 9.4 交付与未执行边界
+
+SOURCE `d85aa95e8da406d598f3658492e3d615bba8a28f` 保持不变，后继 REPORT 只修改本文件；原分支 `songconmaisaix31-design/morph-r1-research-1003` 普通 push，最终报告 SHA 以交付消息及远端精确核对为准。B/C 最终报告随普通 merge 保留，首次 archive 字节门 RED、首次 strict 调用拒绝以及全部先前失败均未覆盖。
+
+本轮没有重跑全仓1300项，也没有重跑 B 原 worker180秒用例；其本地1 FAIL/21 PASS 的根因继续 **UNKNOWN**，B 精确 SOURCE 的双平台独立 CI 通过不解释该历史超时。本组合的新增实际证据只包括本节私有 VCS 安装、原始字节门、stdio/并发6项及变动模块 strict。
+
+P/Q 可据该已安装组合继续精确 repin 和独立验收；I 仍待主控在 P/F/Q 前置完成后独立派发。本报告不代表完整 R1 或最终产品组合通过。真实科研/模型、资料外发、真实沙箱/隔离探针、云资源、Hub、发布和 L2 均 NOT_RUN；历史人工清理事项仍由主控按 C 报告处理。
