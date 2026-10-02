@@ -1,6 +1,6 @@
 # B 有界评分 v0.1（2026-10-02）
 
-当前状态：B 有界交付完成，最终 SOURCE `b0f3b2ada4b41839c4472cb2ce208a0db93b591e` 已正常推送；83 项相关回归与 Windows/Linux 的 Swarm 23 文件 strict 通过，首 RED 保留。评分与只读推荐属于 `contract_local`。已精确消费 C 先验接口 SOURCE `7844cf21b32145c55f714b12848e878e332f70c5`，B 未修改 C 文件；本文件为随后单独提交的报告。安装后正式产品接线、可信反馈来源及五项整体停止条件由 C/A/独立 I 验收，本报告不代签整体策略冻结。
+当前状态：B 有界交付完成，最终 SOURCE `4ed6561504c56288e2335d88da72bd172b1c2a7f` 已正常推送；包含真实旧 FC 投影兼容复验的 96 项检查与 Windows/Linux 的 Swarm 23 文件 strict 通过，首 RED 保留。评分与只读推荐属于 `contract_local`。已精确消费 C 先验接口 SOURCE `7844cf21b32145c55f714b12848e878e332f70c5`，B 未修改 C 文件；本文件为随后单独提交的报告。安装后正式产品接线、可信反馈来源及五项整体停止条件由 C/A/独立 I 验收，本报告不代签整体策略冻结。
 
 本轮从科研冻结 `7b66f0dd0a285c1b6cf789aa3c5a41d22d655993` 建立 `songconmaisaix31-design/morph-policy-score-v01-1002`，普通合入治理 `5a4fe1d2f5bdaf941493e9c195188c9a7dee408c`。原文档 I 分支 `1cb2d9685fa67fdfc578d25674e7b61fb2819d7b`、原科研 B 分支 `d228d43e9c12ca9743a362a7f1187cda4d8218ee` 保留；未操作公开 main 或用户根工作区 WIP。B 仅写 Router、新的局部测试及本报告；C 拥有信息素、可信反馈、Worker 与科研接口。
 
@@ -41,21 +41,29 @@
 
 `record_audit=False` 只供宿主只读诊断，复用相同算法但不调用写事务；明确返回 `routing_sequence=None, audited=False`。正式 discover 固定 True，不能把此选项开放为 Agent MCP 参数。C 可用原 routing 行号记录成功 claim 的实际选择、是否覆盖和版本/候选条件；选中建议本身不是实际选择、执行或完成。A 从 C 的原 11 MCP 工具消费，不复制算法。
 
+原 FC 1.0 投影直接复制 `audit.body.signals` 到严格候选 schema。写入原账本时，该 `signals` 保持旧八字段（task_id、concentration、capability_match、w_history、urgency、base_urgency、age_weight、score）；同一行的 `policy_candidates` 保留完整新候选条件/尺度因子，对应推荐响应的完整 `signals`。概率、参数、版本、行号不变，不改 schema 或投影代码，不丢完整策略。FC 可用只证明原投影字段可见，不证明全部策略条件已投影。
+
+C 已确认选择关联检查优先读取 `policy_candidates`；其可选 workspace/完整能力映射请求到达时源码已冻结，采用 C 提出的按候选 task ID 绑定权威 TaskRecord.workspace 核验宿主方案。完整 worker、scope/module/依赖邻域、版本及能力条件仍需核验，成功 claim 仍重查合法性。本轮不再追加元数据或调参。
+
 ## 已执行验证与当前限制
 
 私有环境：`C:/Users/DW/AppData/Local/Temp/morph-policy-score-1002-484a581deed8/.venv`，Python 3.13；官方 Poetry 2.3.2 导出本仓锁文件，uv `pip sync --require-hashes` 安装 102 个锁定依赖；未复用旧 venv。BLAS/OMP/MKL 仅本次子进程设为 1。无需 Node/模型/沙箱/Hub 服务。
 
 首 RED：`02-first-red.txt` 中新 API 在原 Router 上因未知 `strategy_version` 参数失败（1 failed，exit 1），原样保留。后续通过是新增证据，未覆盖首失败。
 
-先验实际首 RED：`10-prior-first-red.txt` 用真实偏好库的失败样本经过 `100*tau` 后，已见历史为 `8.835180443049486e-45`，未见历史为 `.25`，原 `[.25,.25]` 断言失败。保留该记录，用它验证 C 接口消费前后的行为差异；不得放宽断言或仅改推荐展示。
+先验实际首 RED：`10-prior-first-red.txt` 用真实偏好库的失败样本经过 `100*tau` 后，已见历史为 `8.835180443049486e-45`，未见历史为 `.25`，原 `[.25,.25]` 断言失败。保留该记录，用它验证 C 接口消费前后的行为差异；没有放宽断言或仅改推荐展示。
+
+FC 实际首 RED：`16-fc-first-red.txt` 在旧投影上运行真实 Router→ledger→FCLogWriter，因新候选字段被原 adapter 原样复制到 `additionalProperties=false` 的 RouteCandidate，投影未写出 JSONL，出现原 `fc_log_projection_failed`；测试明确失败，未吞错。修复仅在本轨 Router 的审计写入边界，原 `fc_log_schema.json`、adapter 及全部旧断言保持不变。此前 SOURCE `b0f3b2ada4b41839c4472cb2ce208a0db93b591e` / REPORT `4752f626237790dd37ba934bab806d5ddf80a096` 含这一缺口，只是保留的阶段证据，不作为最终 FC 通过结果。
 
 - `03-score-tests.txt`：旧 Router 与初版新行为 15 passed；`04-router-strict.txt`：Router strict 通过。
 - `05-early-regression.txt`：Router、新评分、field、ledger、lease、budget、unknown-effect recovery 七个测试文件 76 passed；两个原 Pydantic 非法输入告警保留。
 - `07-readonly-api.txt`：新增只读事务拒绝测试后，旧 Router 与新行为 16 passed；`08-readonly-strict.txt`：Router strict 通过。
 - `09-swarm-strict.txt`：Swarm 全部 23 个源码文件 strict 通过（薄接口阶段）。
-- `11-final-regression.txt`：消费 C SOURCE 并完成全部 B 源码后，八文件 83 passed / 2 个原非法输入告警 / 53.46s，exit 0。
-- `12-final-windows-strict.txt`、`13-final-linux-strict.txt`：同一最终源码 Swarm 23 文件 Windows/Linux strict 均 exit 0。
-- `git diff --check` 通过；`14-source-push.txt` 保存正常推送，实际 `git ls-remote` 核对最终 SOURCE 精确；源文件均已提交，报告单独收尾。
+- `11-final-regression.txt`：消费 C SOURCE 后的八文件阶段复验，83 passed / 2 个原非法输入告警 / 53.46s，exit 0；该范围未覆盖 FC 投影，不能替代后续 FC 修复门禁。
+- `12-final-windows-strict.txt`、`13-final-linux-strict.txt`：上述阶段 Swarm 23 文件 Windows/Linux strict 均 exit 0。
+- `17-fc-final-regression.txt`：最终源码的相关八文件、两个真实 v0/v0.1 FC 投影用例以及原 FC schema/非法记录/来源分区测试，共 96 passed / 2 原告警 / 72.44s，exit 0。
+- `18-fc-windows-strict.txt`、`19-fc-linux-strict.txt`：最终源码 Swarm 23 文件 Windows/Linux strict 均 exit 0。
+- `git diff --check` 通过；`14-source-push.txt`、`15-report-push.txt` 保留阶段推送，`20-fc-source-push.txt` 保存最终正常 SOURCE 推送；实际 `git ls-remote` 核对精确，源文件均已提交，报告单独收尾。
 
 测试使用真实 SQLite 账本与偏好库，种子 17、两个合法候选验证共享 choose/recommend 的一致性及成功/失败反馈概率方向；直接反馈是离线合成输入，不能冒称科学可信证据。极值包含 beta 0/1e6、浓度 0/1e12、紧迫度 0/1e6、近零匹配、历史 0/1 和长年龄及近零 aging 常数；高分缺能力、scope 外、依赖未完成和过期但效果未确认任务不能入选；第 101 个高分候选不进入窗口。只读推荐明确禁止调用 transaction，并核查审计和任务状态不变。建议返回后另一 worker 仍能合法取得租约，原建议方不能凭建议抢占，下一次推荐排除该任务。
 
@@ -65,6 +73,7 @@
 
 ```text
 python -B -m pytest -q tests/swarm/test_router.py tests/swarm/test_policy_score_v01.py tests/swarm/test_field.py tests/swarm/test_policy_feedback_v01.py tests/swarm/test_ledger.py tests/swarm/test_lease.py tests/swarm/test_budget.py tests/swarm/test_unknown_effect_recovery.py -p no:cacheprovider --basetemp <private Temp>/final-regression
+python -B -m pytest -q tests/swarm/test_router.py tests/swarm/test_policy_score_v01.py tests/swarm/test_field.py tests/swarm/test_policy_feedback_v01.py tests/swarm/test_ledger.py tests/swarm/test_lease.py tests/swarm/test_budget.py tests/swarm/test_unknown_effect_recovery.py tests/swarm/test_fc_logging.py::test_packaged_schema_exists_and_is_valid tests/swarm/test_fc_logging.py::test_invalid_records_still_rejected tests/swarm/test_fc_logging.py::test_drill_live_replay_partition_and_origin -p no:cacheprovider --basetemp <private Temp>/fc-final-regression
 python -B -m mypy --strict --cache-dir <private Temp>/mypy-swarm-cache swarm
 python -B -m mypy --strict --platform linux --cache-dir <private Temp>/mypy-linux-cache swarm
 git diff --check
@@ -72,6 +81,6 @@ git push origin HEAD:refs/heads/songconmaisaix31-design/morph-policy-score-v01-1
 git ls-remote origin refs/heads/songconmaisaix31-design/morph-policy-score-v01-1002
 ```
 
-实现位置：[共享 Router](../../swarm/router.py)，行为验收：[本轨新测试](../../tests/swarm/test_policy_score_v01.py)。薄 API SOURCE `17c3bbfd9c0084b17482e6bba796de86555c4641` 是历史阶段，最终算法 SOURCE 为首页 b0f3；C 的原提交保留在 ancestry，不能把它归为 B 自行改动。
+实现位置：[共享 Router](../../swarm/router.py)，行为验收：[本轨新测试](../../tests/swarm/test_policy_score_v01.py)。薄 API SOURCE `17c3bbfd9c0084b17482e6bba796de86555c4641` 及 b0f3 是历史阶段，最终算法/事件兼容 SOURCE 为首页 4ed6561；C 的原提交保留在 ancestry，不能把它归为 B 自行改动。真实 FC 投影回归同时检查原 routing_sequence、原 source 候选/概率逐项一致、完整 policy_candidates 与推荐响应一致以及无投影失败告警。
 
 完整工程、独立安装、正式入口 trace 和五项整体条件：由独立 I 后续验收，当前本轨不宣称已满足。没有全量 pytest、安装后产品或新科学/模型/付费验收，没有账户或全局 HOME 配置变化，所有 live 仍未由本轨新增。本次只推候选分支，不发布 main。
