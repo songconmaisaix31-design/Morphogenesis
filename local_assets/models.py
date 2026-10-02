@@ -132,6 +132,14 @@ class ConsumptionExecution(Contract):
     candidate: Candidate
     candidate_asset_id: str
     created_at: float
+    provenance: Literal["live", "mock"] | None = None
+
+    @model_serializer(mode="wrap")
+    def compatible_execution(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        body: dict[str, Any] = handler(self)
+        if self.provenance is None:
+            body.pop("provenance", None)
+        return body
 
 
 class AdoptionReceipt(Contract):
@@ -140,6 +148,14 @@ class AdoptionReceipt(Contract):
     context: ConsumptionContext
     result_id: str
     adopted_at: float
+    provenance: Literal["live", "mock"] | None = None
+
+    @model_serializer(mode="wrap")
+    def compatible_receipt(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        body: dict[str, Any] = handler(self)
+        if self.provenance is None:
+            body.pop("provenance", None)
+        return body
 
 
 class LeaseGuard(Protocol):

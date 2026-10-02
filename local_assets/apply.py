@@ -137,6 +137,7 @@ class AssetApplicator:
                 raise AssetSafetyError("validation_policy_mismatch")
             candidate, report = checked_report(self.store, asset_id, report_id, self.policy_version)
         target = check_target(self.target, self.protected_paths)
+        self.store.check_fixture_target(target)
         # Resolve metadata once outside B's transaction. Re-read these exact native
         # Git files in the callback so ref/branch/HEAD changes invalidate preparation.
         ref = git(target, "symbolic-ref", "HEAD").decode().strip()

@@ -21,6 +21,7 @@ from contracts.identity import AttemptId
 from local_assets.consume import AssetConsumer
 from local_assets.generated_models import GeneratedApproval, GeneratedValidationReport
 from local_assets.models import AssetSafetyError, Candidate, FileChange
+from local_assets.paths import no_links
 from local_assets.research_models import ResearchClaim, ResearchObservation
 from local_assets.store import LocalAssetStore
 from local_assets.validate import blast_radius
@@ -172,6 +173,8 @@ def record_generated_observation(store: LocalAssetStore, asset_id: str, *, archi
     """
     assert_owned()
     result = read_generated_result(archive_root, context.run_id, expected_plan=plan, expected_context=context)
+    if store.research_provenance == "mock" and result.provenance != "mock":
+        raise AssetSafetyError("mock_fixture_cannot_import_live_result")
     candidate = store.fetch(asset_id)
     files = {entry.name: (Path(result.archive_path) / "inputs" / entry.name).read_bytes() for entry in plan.files}
     _verify_manifest(plan, files)
@@ -215,6 +218,7 @@ def read_generated_observation(report: ResearchObservation, *,
     """Pure verification of an original persisted observation and its raw archive."""
     payload = json.loads(report.result_json)
     saved = GeneratedResult.model_validate(payload["experiment_result"])
+    no_links(Path(saved.archive_path))
     plan = GeneratedExperimentPlan.model_validate_json(report.plan_json)
     context = saved.context
     if (report.run_id != context.run_id or report.task_id != context.task_id

@@ -230,4 +230,5 @@ class MockGeneratedBackend:
         self.session = MockGeneratedSession(self.root, output=self.output,
                                             entry_exit_code=self.entry_exit_code, timeout=self.timeout,
                                             probe_fail=self.probe_fail)
+        self.session.id = "mock-" + context.run_id
         return self.session

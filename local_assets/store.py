@@ -7,6 +7,7 @@ from pathlib import Path
 import sqlite3
 import time
 from collections.abc import Callable, Iterator
+from typing import Literal
 
 from pydantic import JsonValue, TypeAdapter
 
@@ -27,7 +28,9 @@ _OBJECT = TypeAdapter(dict[str, JsonValue])
 
 
 class LocalAssetStore:
-    def __init__(self, root: Path | str, *, bridge: NodeAssetBridge | None = None) -> None:
+    def __init__(self, root: Path | str, *, bridge: NodeAssetBridge | None = None,
+                 research_provenance: Literal["live", "mock"] = "live",
+                 fixture_workspace: Path | str | None = None) -> None:
         self.root = Path(root).absolute()
         no_links(self.root)
         if self.root.resolve().is_relative_to(FROZEN_MAINLINE.resolve()):
@@ -36,9 +39,23 @@ class LocalAssetStore:
         self.database = self.root / "assets.sqlite3"
         no_links(self.database)
         self.bridge = bridge or NodeAssetBridge()
+        if research_provenance not in {"live", "mock"}:
+            raise AssetSafetyError("unsupported_research_provenance")
+        self._research_provenance = research_provenance
+        self.fixture_workspace = Path(fixture_workspace).resolve() if fixture_workspace is not None else None
+        if research_provenance == "mock":
+            if (self.fixture_workspace is None or self.root.resolve() == self.fixture_workspace
+                    or not self.root.resolve().is_relative_to(self.fixture_workspace)):
+                raise AssetSafetyError("mock_research_requires_isolated_fixture_workspace")
+            if fixture_workspace is not None:
+                no_links(Path(fixture_workspace))
+        elif fixture_workspace is not None:
+            raise AssetSafetyError("fixture_workspace_requires_mock_mode")
         with self.connection() as db:
             db.executescript("""
                 PRAGMA journal_mode=WAL;
+                CREATE TABLE IF NOT EXISTS asset_store_settings (
+                    name TEXT PRIMARY KEY, value TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS assets (
                     asset_id TEXT PRIMARY KEY, body TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS reports (
@@ -65,12 +82,34 @@ class LocalAssetStore:
                     asset_id TEXT PRIMARY KEY, report_id TEXT NOT NULL UNIQUE,
                     body TEXT NOT NULL, FOREIGN KEY(report_id) REFERENCES generated_reports(report_id));
             """)
-            for table in ("assets", "reports", "promotions", "approvals", "consumptions", "adoptions",
+            settings = {"generated_research_provenance": research_provenance,
+                        "fixture_workspace": str(self.fixture_workspace) if self.fixture_workspace else ""}
+            for name, value in settings.items():
+                old = db.execute("SELECT value FROM asset_store_settings WHERE name=?", (name,)).fetchone()
+                if old is not None and old[0] != value:
+                    raise AssetSafetyError("asset_store_provenance_conflict")
+                if old is None:
+                    # A legacy store may contain useful mock diagnostics. They
+                    # do not make it a fixture store that can consume them.
+                    populated = db.execute("SELECT 1 FROM assets LIMIT 1").fetchone()
+                    if populated and research_provenance == "mock":
+                        raise AssetSafetyError("existing_store_cannot_become_mock_fixture")
+                    db.execute("INSERT INTO asset_store_settings VALUES (?,?)", (name, value))
+            for table in ("asset_store_settings", "assets", "reports", "promotions", "approvals", "consumptions", "adoptions",
                           "research_reports", "generated_reports", "generated_approvals"):
                 for operation in ("UPDATE", "DELETE"):
                     db.execute(f"CREATE TRIGGER IF NOT EXISTS {table}_{operation} "
                                f"BEFORE {operation} ON {table} BEGIN "
                                "SELECT RAISE(ABORT, 'immutable_local_evidence'); END")
+
+    @property
+    def research_provenance(self) -> Literal["live", "mock"]:
+        return self._research_provenance
+
+    def check_fixture_target(self, target: Path) -> None:
+        if self.research_provenance == "mock" and (self.fixture_workspace is None
+                or not target.resolve().is_relative_to(self.fixture_workspace)):
+            raise AssetSafetyError("mock_target_outside_fixture_workspace")
 
     @contextmanager
     def connection(self) -> Iterator[sqlite3.Connection]:
@@ -170,6 +209,15 @@ class LocalAssetStore:
         if self.state(asset_id) != "approved":
             raise AssetSafetyError("asset_not_approved")
         candidate = self.fetch(asset_id)
+        with self.connection() as db:
+            generated = db.execute("SELECT body FROM generated_approvals WHERE asset_id=?", (asset_id,)).fetchone()
+        if generated is not None:
+            approval = GeneratedApproval.model_validate_json(generated[0])
+            if approval.provenance not in {self.research_provenance, None} or (
+                    self.research_provenance == "mock" and approval.provenance is None):
+                raise AssetSafetyError("generated_approval_provenance_mismatch")
+            if candidate.research is None:
+                raise AssetSafetyError("generated_research_claim_required")
         if candidate.research is not None:
             from local_assets.research import require_reproduced
             require_reproduced(self, asset_id)
@@ -237,7 +285,8 @@ class LocalAssetStore:
             db.execute("INSERT INTO generated_approvals VALUES (?,?,?)",
                        (persisted.asset_id, persisted.report_id, GeneratedApproval(
                            asset_id=persisted.asset_id, report_id=persisted.report_id,
-                           policy_version=persisted.policy_version, proof_ref=proof_ref).model_dump_json()))
+                           policy_version=persisted.policy_version, proof_ref=proof_ref,
+                           provenance=self.research_provenance).model_dump_json()))
             assert_owned()
 
     def consumption(self, execution_id: str) -> ConsumptionExecution:
