@@ -1,0 +1,20 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+__________ test_forged_passed_report_cannot_approve_recorded_failure __________
+tests\integration\r1_security\test_b_successor_authority.py:62: in test_forged_passed_report_cannot_approve_recorded_failure
+    assert store.state("candidate") == "quarantined", "forged passed boolean bypassed stored failure and fencing"
+E   AssertionError: forged passed boolean bypassed stored failure and fencing
+E   assert 'approved' == 'quarantined'
+E     
+E     - quarantined
+E     + approved
+________ test_generated_validation_rejects_manifest_byte_substitution _________
+tests\integration\r1_security\test_b_successor_authority.py:79: in test_generated_validation_rejects_manifest_byte_substitution
+    assert not result.passed, "validation admitted bytes outside the frozen manifest"
+E   AssertionError: validation admitted bytes outside the frozen manifest
+E   assert not True
+E    +  where True = GeneratedValidationReport(report_id='7a94faf23fc143c995a141345d2dadde', asset_id='candidate', plan_json='{"schema_vers...e', reasons=()), created_at=1790961384.6084392, expires_at=1790961684.6084392, policy_version='generated-isolation-v1').passed
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_successor_authority.py::test_forged_passed_report_cannot_approve_recorded_failure
+FAILED tests/integration/r1_security/test_b_successor_authority.py::test_generated_validation_rejects_manifest_byte_substitution
+2 failed, 2 deselected in 2.10s

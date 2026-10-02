@@ -207,3 +207,67 @@ def test_projection_unknown_crash_timeout_and_unknown_effect_earn_no_reward(tmp_
     decision = accept(s, value)
     assert not decision.accepted
     assert s.contributions() == []
+
+
+def independent_review(s, root, locality, *, execution="succeeded", verdict="failed", effect="known"):
+    """A distinct review task with real local ledger claim/confirm/submit facts."""
+    assets = LocalAssetStore(root / "assets")
+    with assets.connection() as db:
+        original = ResearchObservation.model_validate_json(db.execute(
+            "SELECT body FROM research_reports WHERE report_id=?", ("fixture-report",)).fetchone()[0])
+    source_task = s.ledger.get("refuted")
+    s.ledger.enqueue(Signal(task_id="review-task", workspace=locality.workspace,
+        scope=source_task.signal.scope, kind="opportunity", required_capability="research.counterexample"),
+        acceptance=source_task.acceptance)
+    lease = s.ledger.claim("review-task", "nominated-reviewer", locality=locality)
+    assert lease is not None
+    raw = {"execution_state": execution, "scientific_verdict": verdict,
+           "effect_state": effect, "provenance": "mock"}
+    s.ledger.begin_execution(lease, "review-run", max_executions=1)
+    s.ledger.record_event("research_execution", {"run_id": "review-run", "worker_id": "nominated-reviewer",
+        "token": lease.token, "result": raw}, task_id="review-task")
+    s.ledger.confirm_execution(lease, "review-run")
+    observation = original.model_copy(update={"report_id": "review-report", "task_id": "review-task",
+        "worker_id": "nominated-reviewer", "fencing_token": lease.token, "run_id": "review-run",
+        "execution_state": execution, "scientific_verdict": verdict, "result_json": json.dumps(raw),
+        "source_fencing_token": lease.token,
+        "source_attempt": AttemptId(task_id="review-task", agent=AgentId(role="reviewer", instance=1), attempt=1)})
+    with assets.connection() as db:
+        db.execute("INSERT INTO research_reports VALUES (?,?,?)",
+                   (observation.report_id, observation.asset_id, observation.model_dump_json()))
+    s.ledger.submit(lease, "review-result", {"asset_id": observation.asset_id, "run_id": "review-run",
+        "stage": "evidence_submitted", "execution_state": execution,
+        "scientific_verdict": verdict, "provenance": "mock"})
+
+
+def test_trusted_independent_refutation_accepted_once_and_history_retained(tmp_path):
+    s, fact, locality = trusted_refutation(tmp_path)
+    independent_review(s, tmp_path, locality)
+    projected = research_feedback(s.ledger, tmp_path / "assets")
+    assert {f.task_id for f in projected} == {"refuted", "review-task"}
+    value = fact.result_id if "result_id" in inspect.signature(s.accept).parameters else fact
+    assert accept(s, value, reviewer="nominated-reviewer").accepted
+    assert not accept(s, value, reviewer="nominated-reviewer").accepted
+    original = s.contributions()
+    assert len(original) == 1 and original[0].contribution == "accepted"
+    assert store(tmp_path).contributions() == original
+    if hasattr(s, "record_supersession"):
+        from swarm.research.policy import SupersessionEvent
+
+        s.record_supersession(SupersessionEvent(event_id="supersede", result_id=fact.result_id,
+            reason="new evidence", source_ref="fixture-correction", actor="nominated-reviewer", at=101))
+        assert s.contributions() == original
+        assert s.effective_contributions()[0].contribution == "superseded"
+
+
+@pytest.mark.parametrize("execution,verdict,effect", [
+    ("failed", "not_evaluated", "known"),
+    ("unknown", "not_evaluated", "unknown"),
+    ("succeeded", "failed", "unknown"),
+])
+def test_crashed_or_unknown_review_cannot_authorize_original_contribution(tmp_path, execution, verdict, effect):
+    s, fact, locality = trusted_refutation(tmp_path)
+    independent_review(s, tmp_path, locality, execution=execution, verdict=verdict, effect=effect)
+    value = fact.result_id if "result_id" in inspect.signature(s.accept).parameters else fact
+    assert not accept(s, value, reviewer="nominated-reviewer").accepted
+    assert s.contributions() == []

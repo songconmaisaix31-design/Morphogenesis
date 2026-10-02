@@ -158,8 +158,52 @@ tests now explicitly skip with the unmet native integration reason. Six new
 tests prove removal of parallel authority, envelope approval cannot certify
 science, and mock/replay/contract_local product event labels cannot change a real
 core task's owner/status. These do not establish P end-to-end or R1 capability.
-The first P archive command exited 1 with no captured stdout (empty
-`p-f479-exact-boundary.txt`). A verbose retry found a Q test-placement mistake:
+The first P archive command exited 1 with no captured stdout; Tee-Object did not
+create the intended `p-f479-exact-boundary.txt`. A verbose retry found a Q test-placement mistake:
 3 failed / 3 passed / 3 skipped (legacy block appended to a new test). Q corrected
 the placement, preserving this history and the original WIP RED. No domain
 threshold changed. B exact RED coordinator Handoff `msg_04a4509540cd`.
+
+## Independent review and generated admission follow-up
+
+C `40011761c3cce6513bbeef776543740f60d1d03e`: a positive independent
+counterexample uses distinct real local ledger claim/begin/confirm/submit and
+store observation identities. It is accepted once, survives reopening, and
+supersession appends history. **1 passed / 3 failed**, exit 1
+(`c-4001176-review-effect-red.txt`): a review with failed execution, unknown
+execution, or unknown effect still authorizes the original contribution.
+Handoff `msg_ef17d21d6bfc` goes to the original C owner. These ledger fixtures
+are contract_local facts; no experiment or candidate executes.
+
+B `a322cfd53f5c330654e19a6add8438a3f8c5fab4`: initial additional validation
+tests hit Q's subprocess guard when the trusted GEP bridge tried to run Node;
+**2 failed**, preserved in `b-a322-approval-and-manifest-red.txt`. Q then
+supplied an injected bridge which admits only the exact inert, seeded Gene
+dictionary by equality. This fixture does not verify production SDK asset
+validation; the approval, validation and persistent store functions are real.
+The actual domain check is **2 failed**, exit 1
+(`b-a322-approval-manifest-domain.txt`): caller-modified `passed=True` approves
+a persisted failed report with invented proof_ref/default no-op fencing;
+changed source bytes outside the frozen manifest still pass validation.
+Handoff `msg_4e104efa3e61` to current B and `msg_99d8adbdf960` to coordinator.
+All child processes and network remain denied during test calls.
+
+## Integration checklist and limits
+
+Before I accepts the successor, the exact merged source must expose the dynamic
+generated plan through the HostConfig-bound formal MCP/service path and bind
+the three scientific axes to the original ledger/store and independent review
+facts. A's read-only current service/server/experiments scan has no
+GeneratedExperimentPlan or ScientificContributionStore wiring yet; owner WIP
+and future integration glue are not evidence of that capability. P's removal
+repair alone is not a native dynamic research loop. Verify the final installed
+core/product combination separately; Q's source imports and local dependency
+environment are not installed-wheel acceptance.
+
+Q's deterministic crash injection covers proposal-put/enqueue/bind recovery,
+not operating-system process kills or a real remote unknown effect. Task-count
+persistence across branch/member reopening is covered; model/fee/data export
+and sandbox resource enforcement across product runs remain NOT_RUN. Official
+MCP tool tests are in-process, without a live transport. AT07 real isolation
+probe, L2/L3, interface_live and task_live remain NOT_RUN. No candidate, model
+research, new sandbox, probe, paid backend or external data operation was run.

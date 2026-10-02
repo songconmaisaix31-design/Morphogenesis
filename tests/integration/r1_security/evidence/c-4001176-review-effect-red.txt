@@ -1,0 +1,25 @@
+.FFF                                                                     [100%]
+================================== FAILURES ===================================
+_ test_crashed_or_unknown_review_cannot_authorize_original_contribution[failed-not_evaluated-known] _
+tests\integration\r1_security\test_c_feedback_boundaries.py:272: in test_crashed_or_unknown_review_cannot_authorize_original_contribution
+    assert not accept(s, value, reviewer="nominated-reviewer").accepted
+E   AssertionError: assert not True
+E    +  where True = ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)).accepted
+E    +    where ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)) = accept(<swarm.research.feedback.ResearchFeedbackStore object at 0x000001BE635F96D0>, 'fixture-result', reviewer='nominated-reviewer')
+_ test_crashed_or_unknown_review_cannot_authorize_original_contribution[unknown-not_evaluated-unknown] _
+tests\integration\r1_security\test_c_feedback_boundaries.py:272: in test_crashed_or_unknown_review_cannot_authorize_original_contribution
+    assert not accept(s, value, reviewer="nominated-reviewer").accepted
+E   AssertionError: assert not True
+E    +  where True = ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)).accepted
+E    +    where ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)) = accept(<swarm.research.feedback.ResearchFeedbackStore object at 0x000001BE63585CD0>, 'fixture-result', reviewer='nominated-reviewer')
+_ test_crashed_or_unknown_review_cannot_authorize_original_contribution[succeeded-failed-unknown] _
+tests\integration\r1_security\test_c_feedback_boundaries.py:272: in test_crashed_or_unknown_review_cannot_authorize_original_contribution
+    assert not accept(s, value, reviewer="nominated-reviewer").accepted
+E   AssertionError: assert not True
+E    +  where True = ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)).accepted
+E    +    where ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)) = accept(<swarm.research.feedback.ResearchFeedbackStore object at 0x000001BE63586650>, 'fixture-result', reviewer='nominated-reviewer')
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_c_feedback_boundaries.py::test_crashed_or_unknown_review_cannot_authorize_original_contribution[failed-not_evaluated-known]
+FAILED tests/integration/r1_security/test_c_feedback_boundaries.py::test_crashed_or_unknown_review_cannot_authorize_original_contribution[unknown-not_evaluated-unknown]
+FAILED tests/integration/r1_security/test_c_feedback_boundaries.py::test_crashed_or_unknown_review_cannot_authorize_original_contribution[succeeded-failed-unknown]
+3 failed, 1 passed, 18 deselected in 2.64s
