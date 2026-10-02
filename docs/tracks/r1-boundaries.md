@@ -936,3 +936,63 @@ controller separately reports P's full baseline221 passed/3 legacy compatibility
 failures and core CI success; neither is Q's own execution result. Later legacy
 MCP compatibility changes require additional original HostBinding, workspace and
 tool-surface verification before acceptance; they do not inherit this result.
+
+## Final related successor gate and Q handoff
+
+Q SOURCE `953e5cf01f06dd2ed3c77f4cebb0f1c1a9bf1b6f` contains the owned final
+checks and immutable outputs. The complete fbe/d85 gate above remains attributed
+to that exact pair. Coordinator `msg_4f4344b03d13` authorizes the final related
+successor checks and asks Q to stop after completing this scope.
+
+The canonical core launch contract validates an absolute host configuration and
+matching workspace and derives HostBinding only for its original MCP module.
+Read-only Handoff `msg_925411d7f690` precedes Q's new both-runtime controls for
+registered, choice and R1 launches. Separate Handoffs `msg_777f341a59da` and
+`msg_a167c3da1ae9` identify the real legacy sentinel: d85 HostConfig defaults to
+the empty string, whereas the first product adapter incorrectly tested None.
+No invalid HostConfig model_copy(None) is used to manufacture a positive.
+
+| Exact product source with d85 core | Q archive result |
+| --- | --- |
+| `66744c4e005f6b5289bbb370bc7bc54005594155` | **12 failed / 9 passed**, 3.08s: missing original bindings, relative/workspace bypasses and legal legacy refusal |
+| `0dfaceb8af5cc220e555cd3ad4033f02f4ec44cc` | **2 failed / 19 passed**, 2.58s: both valid legacy factories still refused |
+| `0da6273f54281f5e86231e31234f682598f68ba2`, initial positive fixture | **2 failed / 19 passed**, 2.82s: Q fixture used the wrong row key and only one candidate |
+| Same0da, fixture corrected to original contract | **21 passed**, 2.54s |
+| Same0d, corrected valid legacy positives | **2 failed / 19 deselected**, 2.17s, preserving the actual product refusal |
+
+The only fixture correction supplies the original required two legal candidates
+and reads their original `signal.task_id`. Safety, identity, rejection and
+catalogue assertions remain. All first outputs, including Q's fixture failures,
+are preserved. The successful catalogue checks retain every original legacy11
+schema/handler, discover both real ledger tasks, reject direct removed R1 calls,
+retain Choice's science refusal, reject nonempty R1 hosts in the legacy factory,
+and compare the complete original R1 surface before and after narrowing.
+
+Final actual installed pair:
+
+- product `0da6273f54281f5e86231e31234f682598f68ba2`;
+- core `d85aa95e8da406d598f3658492e3d615bba8a28f`.
+
+Q updates only its private product package using exact VCS COPY, the same isolated
+cache and process-local LF Git configuration. Both actual noneditable origins,
+the unmodified installed_core pin gate, core129/product35 original Python blobs
+and all95 installed dependencies pass. All164 Python comparisons use original
+`git cat-file` bytes without normalization; no installed metadata/source is edited.
+The diff since fbe changes only choice_mcp.py, permissions.py, registered_mcp.py
+and F's static product.js. Q does not claim independent browser acceptance.
+
+With `R1_SECURITY_INSTALLED=1`, BLAS1 and the unchanged process/socket denies,
+`.venv-q/Scripts/python.exe -m pytest` on registered21, native22, resume13,
+Codex provider13, Claude7 and actual factory11 (`-q --tb=short`) gives
+**87 passed**, 21.74s. Raw `installed-d85aa95-0da6273-related87-first.txt` and
+the matching install/origins/dependencies logs retain this actual installed
+result. It is a focused successor verification, not an unrun full275 claim.
+
+Q's authorized safety work is complete: own tests/report only, original owner
+repairs, first failures retained and exact installed results separated. All Q
+test/install processes have exited. Independent I's final merges, final combined
+build/acceptance and human run-level approval remain outside this Q task.
+No candidate or native model process, real scientific execution, sandbox/probe,
+external material acquisition, Hub or deployment ran; L2/L3 remain NOT_RUN.
+Original unknown effects/costs stay unknown, and the earlier unexplained long
+tool-return duration is retained without a latency assurance.
