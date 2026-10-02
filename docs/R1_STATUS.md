@@ -1,5 +1,20 @@
 # R1 派发状态（2026-10-03）
 
+## 04:13 更新：远端 CI 新并发缺陷退回 B，产品修复进入安装
+
+主控实时核实 A SOURCEcc2e722 的 CI [37051852669](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37051852669)：Windows 1387 passed/5 skipped，Linux 1386 passed/6 skipped；两端 strict136、build、SDK与wheel安装检查均通过。B SOURCE5faafe4 的 [37049419672](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37049419672) 两端也通过。
+
+但 C REPORT8bc4c28 的 [Windows CI37051183488](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37051183488/job/110984695266) 是真实新失败：1 failed/1348 passed/5 skipped，test_worker_evomap.py:97；子进程在LocalAssetStore.__init__初始化asset_store_settings的SELECT后INSERT发生name UNIQUE冲突，其他进程随后BrokenBarrier。Linux通过不能抵消该竞争，A/B同代码偶然绿也不能豁免。B已在原终端/worktree/branch接续 Task `task_eff1006355f8` / Dispatch `ctx_37f15746c078`，实际观察turn_started；只修B所属原SQLite事务/设置绑定，独立Q新增并发验证。此前B5fa交付降为阶段候选，I继续等待该领域后继。
+
+P修复SOURCE `08afdb8ddb10721ce008fd91d88be1d38a15d3fc`：Q native22/resume9/member5/host12/material9共57通过，原47/1和resume8/1首失败保留。旧输入store不再制造默认三轴结果，5个旧store级KeyError保留后，Q把同一不造假/账本未变断言接到真实public export，6通过，撤回parallel-loop的3个历史skip另计。Q私有依赖checkpoint3.0.1冲突首输出保留，局部修复到4.2.0后83依赖一致；未改全局或别轨环境。
+
+P后继SOURCE `24f02a169a696afd1f4eb769a8c0dbb8ca052f95` pin核心cc2e722，已交Q。Owner全新Python安全解包核对产品131/核心528文件字节、私有COPY非editable wheel/core VCS origin和96依赖通过；Windows tar中文路径首失败及部分目录保留，不把它算完整安装。正式generated HTTP、0.160本地parser与产品大套进行中，Q实际installed_core/factory检查进行中。未来只由原P按I最终组合必要repin，不因B接口不变的局部返修中断当前产品接线验证。
+
+F构建SOURCE `0907ff1a8080f653be3c79f5eb8893abef002331` 首build通过，双视窗38项首36 passed/2 failed：同一候选版本label exact匹配失败。最小DOM修复SOURCE `16c9dc9e0de808c811f6e4efaed26cf7192bad27` / REPORT `e91470ac94c3b761e7d6bbefc8b02c5841cf69b1` 已推送，未削弱断言；后继短build/2项及真实安装observer待P窗口。首轮53.7分钟包括工具层约50分钟返回延迟，真实首报告不改写。
+
+当前重窗口P；F与B仅源码/小fixture，Q获私有有界安装和<=100项单进程确定性检查。回收枚举reclaimable为空；低层自建终端记为retained、旧4项release_unknown仍保留。AT07/L2/L3/人工观察仍NOT_RUN。
+
+
 ## 03:15 更新：核心 Owner 交付，产品边界返修与页面构建
 
 A/B/C 均已交 worker_done succeeded、干净工作树和已推送精确报告；主控已核实远端。接纳各自被测工程范围，仍需最后 I 合并和最终组合安装。P/F/Q 保持原 Owner 继续；I 尚未派发。

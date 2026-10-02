@@ -1,5 +1,12 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## 04:13 CI 与产品修复追加
+
+A最终SOURCEcc2e722的Windows/Linux CI37051852669完整适用pytest分别1387/1386通过，skip分别5/6，strict136/build/SDK/wheel均通过。C报告8bc4c28 Windows CI37051183488新1 failed/1348 passed/5 skipped定位B资产库初始化SELECT/INSERT竞态；故最终并发兼容门槛未过，退原B后继任务修复，不能把其他同码CI成功作为该缺陷消失证据。
+
+P08af新57项独立边界通过；public export6通过、旧parallel-loop3历史skip单列；首usage/resume/旧DTO失败保留。P24f+核心cc2新的真实非editable安装与Q configured factory验收进行中，F38首36/2及label修复已记录，当前不推定最终产品、页面或R1 PASS。Windows tar解包和Q私有依赖首失败均保留；后继安装以完整字节核对和真实origin为准。最新精确身份、CI链接和后继Dispatch见R1_STATUS.md。
+
+
 最新Spec第14节为验收事实源。依据各精确候选源码与实际证据逐阶段登记；后继通过不改写首失败。首次失败记录在docs/R1_STATUS.md。
 
 ## 03:15 当前验收范围（后继证据，不覆盖下文首失败）
