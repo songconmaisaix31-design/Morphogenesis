@@ -1,0 +1,11 @@
+Using Python 3.13.13 environment at: .venv-q
+   Updating https://github.com/songconmaisaix31-design/Morphogenesis.git (d85aa95e8da406d598f3658492e3d615bba8a28f)
+    Updated https://github.com/songconmaisaix31-design/Morphogenesis.git (d85aa95e8da406d598f3658492e3d615bba8a28f)
+Resolved 1 package in 17.49s
+   Building morphogenesis @ git+https://github.com/songconmaisaix31-design/Morphogenesis.git@d85aa95e8da406d598f3658492e3d615bba8a28f
+      Built morphogenesis @ git+https://github.com/songconmaisaix31-design/Morphogenesis.git@d85aa95e8da406d598f3658492e3d615bba8a28f
+Prepared 1 package in 1.76s
+Uninstalled 1 package in 44ms
+Installed 1 package in 331ms
+ - morphogenesis==0.1.0 (from git+https://github.com/songconmaisaix31-design/Morphogenesis.git@cc2e7227e1b423924c99113c9676ef8cc310e92b)
+ + morphogenesis==0.1.0 (from git+https://github.com/songconmaisaix31-design/Morphogenesis.git@d85aa95e8da406d598f3658492e3d615bba8a28f)

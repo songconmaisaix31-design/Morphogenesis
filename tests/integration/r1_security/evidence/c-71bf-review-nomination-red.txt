@@ -1,0 +1,18 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_ test_nomination_of_unknown_or_unrelated_known_reviewer_cannot_accept[False] _
+tests\integration\r1_security\test_c_feedback_boundaries.py:160: in test_nomination_of_unknown_or_unrelated_known_reviewer_cannot_accept
+    assert not decision.accepted, "nominated identity has no result-bound independent review"
+E   AssertionError: nominated identity has no result-bound independent review
+E   assert not True
+E    +  where True = ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)).accepted
+_ test_nomination_of_unknown_or_unrelated_known_reviewer_cannot_accept[True] __
+tests\integration\r1_security\test_c_feedback_boundaries.py:160: in test_nomination_of_unknown_or_unrelated_known_reviewer_cannot_accept
+    assert not decision.accepted, "nominated identity has no result-bound independent review"
+E   AssertionError: nominated identity has no result-bound independent review
+E   assert not True
+E    +  where True = ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)).accepted
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_c_feedback_boundaries.py::test_nomination_of_unknown_or_unrelated_known_reviewer_cannot_accept[False]
+FAILED tests/integration/r1_security/test_c_feedback_boundaries.py::test_nomination_of_unknown_or_unrelated_known_reviewer_cannot_accept[True]
+2 failed, 11 deselected in 2.11s

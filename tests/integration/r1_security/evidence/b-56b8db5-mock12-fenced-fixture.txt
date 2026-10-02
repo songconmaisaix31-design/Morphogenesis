@@ -1,0 +1,22 @@
+........FFF.                                                             [100%]
+================================== FAILURES ===================================
+____ test_original_archive_integrity_rechecked_before_inheritance[output] _____
+tests\integration\r1_security\test_b_mock_adoption.py:271: in test_original_archive_integrity_rechecked_before_inheritance
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+__ test_original_archive_integrity_rechecked_before_inheritance[evaluation] ___
+tests\integration\r1_security\test_b_mock_adoption.py:271: in test_original_archive_integrity_rechecked_before_inheritance
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+__ test_original_archive_integrity_rechecked_before_inheritance[environment] __
+tests\integration\r1_security\test_b_mock_adoption.py:271: in test_original_archive_integrity_rechecked_before_inheritance
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_original_archive_integrity_rechecked_before_inheritance[output]
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_original_archive_integrity_rechecked_before_inheritance[evaluation]
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_original_archive_integrity_rechecked_before_inheritance[environment]
+3 failed, 9 passed in 6.44s

@@ -1,0 +1,26 @@
+FFF........                                                              [100%]
+================================== FAILURES ===================================
+__________ test_forged_result_and_reviewer_never_persist[supported] ___________
+tests\integration\r1_security\test_c_feedback_boundaries.py:30: in test_forged_result_and_reviewer_never_persist
+    assert not decision.accepted, "caller result/reviewer granted scientific contribution"
+E   AssertionError: caller result/reviewer granted scientific contribution
+E   assert not True
+E    +  where True = ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)).accepted
+___________ test_forged_result_and_reviewer_never_persist[refuted] ____________
+tests\integration\r1_security\test_c_feedback_boundaries.py:30: in test_forged_result_and_reviewer_never_persist
+    assert not decision.accepted, "caller result/reviewer granted scientific contribution"
+E   AssertionError: caller result/reviewer granted scientific contribution
+E   assert not True
+E    +  where True = ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)).accepted
+___________ test_synchronize_does_not_import_caller_accepted_label ____________
+tests\integration\r1_security\test_c_feedback_boundaries.py:40: in test_synchronize_does_not_import_caller_accepted_label
+    assert s.contributions() == []
+E   AssertionError: assert [ThreeAxisRes..., reasons=())] == []
+E     
+E     Left contains one more item: ThreeAxisResult(result_id='invented', report_id='invented-report', task_id='missing-task', actor='attacker', source_re...e='live', execution='succeeded', hypothesis='supported', contribution='accepted', branch_id=None, at=100.0, reasons=())
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_c_feedback_boundaries.py::test_forged_result_and_reviewer_never_persist[supported]
+FAILED tests/integration/r1_security/test_c_feedback_boundaries.py::test_forged_result_and_reviewer_never_persist[refuted]
+FAILED tests/integration/r1_security/test_c_feedback_boundaries.py::test_synchronize_does_not_import_caller_accepted_label
+3 failed, 8 passed in 14.84s

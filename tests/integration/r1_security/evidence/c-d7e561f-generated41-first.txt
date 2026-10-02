@@ -1,0 +1,9 @@
+........................................F                                [100%]
+================================== FAILURES ===================================
+_ test_generated_persisted_claims_cannot_replace_original_archive_or_host_approval[report_reviewer] _
+tests\integration\r1_security\test_c_generated_trust.py:166: in test_generated_persisted_claims_cannot_replace_original_archive_or_host_approval
+    db.execute("UPDATE research_reports SET body=? WHERE report_id=?", (forged.model_dump_json(), report.report_id))
+E   sqlite3.IntegrityError: immutable_local_evidence
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_c_generated_trust.py::test_generated_persisted_claims_cannot_replace_original_archive_or_host_approval[report_reviewer]
+1 failed, 40 passed in 10.91s

@@ -1,0 +1,16 @@
+..............FF                                                         [100%]
+================================== FAILURES ===================================
+_ test_registered_probe_cannot_authorize_different_or_missing_reference[None] _
+tests\integration\r1_security\test_b_successor_authority.py:22: in test_registered_probe_cannot_authorize_different_or_missing_reference
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+_ test_registered_probe_cannot_authorize_different_or_missing_reference[invented-probe] _
+tests\integration\r1_security\test_b_successor_authority.py:22: in test_registered_probe_cannot_authorize_different_or_missing_reference
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_successor_authority.py::test_registered_probe_cannot_authorize_different_or_missing_reference[None]
+FAILED tests/integration/r1_security/test_b_successor_authority.py::test_registered_probe_cannot_authorize_different_or_missing_reference[invented-probe]
+2 failed, 14 passed in 0.78s

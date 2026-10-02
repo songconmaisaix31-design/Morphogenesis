@@ -1,0 +1,50 @@
+..F............                                                          [100%]
+================================== FAILURES ===================================
+_ test_official_mcp_generated_inheritance_reaches_only_mock_original_adoption _
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\base.py:101: in run
+    result = await self.fn_metadata.call_fn_with_arg_validation(
+.venv-q\Lib\site-packages\mcp\server\fastmcp\utilities\func_metadata.py:115: in call_fn_with_arg_validation
+    return fn(**arguments_parsed_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-0bcb320\swarm\research\server.py:120: in inherit_experience
+    return service.inherit(task_id, token, asset_id, path_map, preimages, base_revision, base_head)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-0bcb320\swarm\research\service.py:596: in inherit
+    snapshot, head = snapshot_revision(self.config.workspace, task.signal.scope, self.store.root / "snapshots")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-0bcb320\local_assets\snapshot.py:78: in snapshot_revision
+    tree, head = scope_tree(repository, scope, Path(scratch_directory))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-0bcb320\local_assets\snapshot.py:23: in scope_tree
+    head = git(repository, "rev-parse", "HEAD").decode().strip()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-0bcb320\local_assets\paths.py:87: in git
+    result = subprocess.run(
+C:\Python313\Lib\subprocess.py:554: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\conftest.py:29: in denied
+    raise AssertionError("Q forbids host process launch and external network")
+E   AssertionError: Q forbids host process launch and external network
+
+The above exception was the direct cause of the following exception:
+tests\integration\r1_security\test_a_dynamic_mcp.py:182: in test_official_mcp_generated_inheritance_reaches_only_mock_original_adoption
+    consumed = call(loop, consumer, "inherit_experience", task_id=child_task, token=token, asset_id=asset,
+tests\integration\r1_security\test_a_dynamic_mcp.py:93: in call
+    returned = loop.run_until_complete(create_server(service).call_tool(name, arguments))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python313\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\server.py:362: in call_tool
+    return await self._tool_manager.call_tool(name, arguments, context=context, convert_result=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\tool_manager.py:93: in call_tool
+    return await tool.run(arguments, context=context, convert_result=convert_result)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\base.py:117: in run
+    raise ToolError(f"Error executing tool {self.name}: {e}") from e
+E   mcp.server.fastmcp.exceptions.ToolError: Error executing tool inherit_experience: Q forbids host process launch and external network
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_a_dynamic_mcp.py::test_official_mcp_generated_inheritance_reaches_only_mock_original_adoption
+1 failed, 14 passed in 19.17s

@@ -1,0 +1,43 @@
+..................FF.                                                    [100%]
+================================== FAILURES ===================================
+_ test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[False] _
+tests\integration\r1_security\test_p_registered_boundaries.py:117: in test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface
+    assert any(row["task_id"] == "q-legacy-visible" for row in rows)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_p_registered_boundaries.py:117: in <genexpr>
+    assert any(row["task_id"] == "q-legacy-visible" for row in rows)
+               ^^^^^^^^^^^^^^
+E   KeyError: 'task_id'
+_ test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[True] _
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\base.py:101: in run
+    result = await self.fn_metadata.call_fn_with_arg_validation(
+.venv-q\Lib\site-packages\mcp\server\fastmcp\utilities\func_metadata.py:115: in call_fn_with_arg_validation
+    return fn(**arguments_parsed_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-d85aa95-lf\swarm\research\server.py:27: in discover_tasks
+    return service.discover(limit)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\p-0da6273-lf\src\morph_research\choice_mcp.py:38: in discover
+    raise PermissionError("two_current_legal_candidates_required")
+E   PermissionError: two_current_legal_candidates_required
+
+The above exception was the direct cause of the following exception:
+tests\integration\r1_security\test_p_registered_boundaries.py:115: in test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface
+    result = loop.run_until_complete(server.call_tool("discover_tasks", {}))[1]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python313\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\server.py:362: in call_tool
+    return await self._tool_manager.call_tool(name, arguments, context=context, convert_result=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\tool_manager.py:93: in call_tool
+    return await tool.run(arguments, context=context, convert_result=convert_result)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\base.py:117: in run
+    raise ToolError(f"Error executing tool {self.name}: {e}") from e
+E   mcp.server.fastmcp.exceptions.ToolError: Error executing tool discover_tasks: two_current_legal_candidates_required
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[False]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[True]
+2 failed, 19 passed in 2.82s

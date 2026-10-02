@@ -1,0 +1,76 @@
+........................F.....F......                                    [100%]
+================================== FAILURES ===================================
+__________ test_official_mcp_tool_arguments_cannot_impersonate_host ___________
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\base.py:101: in run
+    result = await self.fn_metadata.call_fn_with_arg_validation(
+.venv-q\Lib\site-packages\mcp\server\fastmcp\utilities\func_metadata.py:115: in call_fn_with_arg_validation
+    return fn(**arguments_parsed_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-8fc90a9\swarm\research\server.py:42: in lease_task
+    return service.claim(task_id, ttl_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-8fc90a9\swarm\research\service.py:159: in claim
+    task = self._task(task_id, require_capability=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-8fc90a9\swarm\research\service.py:139: in _task
+    raise PermissionError("task_outside_host_project")
+E   PermissionError: task_outside_host_project
+
+The above exception was the direct cause of the following exception:
+tests\integration\r1_security\test_a_host_boundaries.py:202: in call
+    await server.call_tool("lease_task", {"action": "claim", "task_id": "authorized",
+.venv-q\Lib\site-packages\mcp\server\fastmcp\server.py:362: in call_tool
+    return await self._tool_manager.call_tool(name, arguments, context=context, convert_result=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\tool_manager.py:93: in call_tool
+    return await tool.run(arguments, context=context, convert_result=convert_result)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\base.py:117: in run
+    raise ToolError(f"Error executing tool {self.name}: {e}") from e
+E   mcp.server.fastmcp.exceptions.ToolError: Error executing tool lease_task: task_outside_host_project
+
+During handling of the above exception, another exception occurred:
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\base.py:101: in run
+    result = await self.fn_metadata.call_fn_with_arg_validation(
+.venv-q\Lib\site-packages\mcp\server\fastmcp\utilities\func_metadata.py:115: in call_fn_with_arg_validation
+    return fn(**arguments_parsed_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-8fc90a9\swarm\research\server.py:42: in lease_task
+    return service.claim(task_id, ttl_seconds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-8fc90a9\swarm\research\service.py:159: in claim
+    task = self._task(task_id, require_capability=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-8fc90a9\swarm\research\service.py:139: in _task
+    raise PermissionError("task_outside_host_project")
+E   PermissionError: task_outside_host_project
+
+The above exception was the direct cause of the following exception:
+tests\integration\r1_security\test_a_host_boundaries.py:208: in test_official_mcp_tool_arguments_cannot_impersonate_host
+    deny_candidate_execution_and_network.run_until_complete(call())
+C:\Python313\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_a_host_boundaries.py:206: in call
+    await server.call_tool("lease_task", {"action": "claim", "task_id": "authorized"})
+.venv-q\Lib\site-packages\mcp\server\fastmcp\server.py:362: in call_tool
+    return await self._tool_manager.call_tool(name, arguments, context=context, convert_result=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\tool_manager.py:93: in call_tool
+    return await tool.run(arguments, context=context, convert_result=convert_result)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-q\Lib\site-packages\mcp\server\fastmcp\tools\base.py:117: in run
+    raise ToolError(f"Error executing tool {self.name}: {e}") from e
+E   mcp.server.fastmcp.exceptions.ToolError: Error executing tool lease_task: task_outside_host_project
+__ test_legal_sleep_and_reopen_change_future_advice_without_deleting_history __
+tests\integration\r1_security\test_a_research_policy_boundaries.py:39: in test_legal_sleep_and_reopen_change_future_advice_without_deleting_history
+    s.record_correction("local", "sleep", "bounded pause", "fixture-note")
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-8fc90a9\swarm\research\service.py:973: in record_correction
+    self._require_research_source(bound, source_ref)
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\a-8fc90a9\swarm\research\service.py:1024: in _require_research_source
+    raise PermissionError("research_source_not_in_project_context")
+E   PermissionError: research_source_not_in_project_context
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_official_mcp_tool_arguments_cannot_impersonate_host
+FAILED tests/integration/r1_security/test_a_research_policy_boundaries.py::test_legal_sleep_and_reopen_change_future_advice_without_deleting_history
+2 failed, 35 passed in 10.95s

@@ -1,0 +1,8 @@
+morphogenesis {"url": "https://github.com/songconmaisaix31-design/Morphogenesis.git", "vcs_info": {"commit_id": "d85aa95e8da406d598f3658492e3d615bba8a28f", "requested_revision": "d85aa95e8da406d598f3658492e3d615bba8a28f", "vcs": "git"}}
+morphogenesis-research {"url": "https://github.com/songconmaisaix31-design/Morphogenesis-Research.git", "vcs_info": {"commit_id": "fd7a79eafbf4aa296ef1348aa001457aaea5cf97", "requested_revision": "fd7a79eafbf4aa296ef1348aa001457aaea5cf97", "vcs": "git"}}
+morph_research C:\Users\DW\orca\workspaces\Morphogenesis\morph-r1-boundaries-1003\.venv-q\Lib\site-packages\morph_research\__init__.py
+swarm C:\Users\DW\orca\workspaces\Morphogenesis\morph-r1-boundaries-1003\.venv-q\Lib\site-packages\swarm\__init__.py
+unmodified installed_core: {"core_sha": "d85aa95e8da406d598f3658492e3d615bba8a28f", "core_version": "0.1.0", "python": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-r1-boundaries-1003\\.venv-q\\Scripts\\python.exe"}
+Original Git blob byte equality: d85aa95e8da406d598f3658492e3d615bba8a28f 129 packaged Python files; no newline normalization
+Original Git blob byte equality: fd7a79eafbf4aa296ef1348aa001457aaea5cf97 34 packaged Python files; no newline normalization
+PASS: exact noneditable VCS pair, protected pin gate and original Git Python bytes

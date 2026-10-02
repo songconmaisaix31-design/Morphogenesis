@@ -1,0 +1,22 @@
+FF..                                                                     [100%]
+================================== FAILURES ===================================
+_ test_foreign_project_is_refused_before_trusted_projection_callback[three_axis] _
+tests\integration\r1_security\test_p_host_boundaries.py:97: in test_foreign_project_is_refused_before_trusted_projection_callback
+    assert reads == [], "foreign project invoked the unfiltered trusted fact callback"
+E   AssertionError: foreign project invoked the unfiltered trusted fact callback
+E   assert ['p2'] == []
+E     
+E     Left contains one more item: 'p2'
+E     Use -v to get more diff
+_ test_foreign_project_is_refused_before_trusted_projection_callback[route_opportunities] _
+tests\integration\r1_security\test_p_host_boundaries.py:97: in test_foreign_project_is_refused_before_trusted_projection_callback
+    assert reads == [], "foreign project invoked the unfiltered trusted fact callback"
+E   AssertionError: foreign project invoked the unfiltered trusted fact callback
+E   assert ['p2'] == []
+E     
+E     Left contains one more item: 'p2'
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_host_boundaries.py::test_foreign_project_is_refused_before_trusted_projection_callback[three_axis]
+FAILED tests/integration/r1_security/test_p_host_boundaries.py::test_foreign_project_is_refused_before_trusted_projection_callback[route_opportunities]
+2 failed, 2 passed, 5 deselected in 4.31s

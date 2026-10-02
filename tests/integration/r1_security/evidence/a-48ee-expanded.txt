@@ -1,0 +1,10 @@
+.....F                                                                   [100%]
+================================== FAILURES ===================================
+___________________ test_note_link_to_private_task_rejected ___________________
+tests\integration\r1_security\test_a_host_boundaries.py:178: in test_note_link_to_private_task_rejected
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_note_link_to_private_task_rejected
+1 failed, 5 passed, 18 deselected in 6.89s

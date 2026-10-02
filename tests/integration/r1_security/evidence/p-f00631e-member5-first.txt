@@ -1,0 +1,40 @@
+FFFF.                                                                    [100%]
+================================== FAILURES ===================================
+_ test_url_member_cannot_become_reviewer_without_its_host_credential[missing] _
+tests\integration\r1_security\test_p_member_credentials.py:81: in test_url_member_cannot_become_reviewer_without_its_host_credential
+    assert lookups == [], "untrusted URL/key selected the reviewer backend"
+E   AssertionError: untrusted URL/key selected the reviewer backend
+E   assert ['reviewer'] == []
+E     
+E     Left contains one more item: 'reviewer'
+E     Use -v to get more diff
+__ test_url_member_cannot_become_reviewer_without_its_host_credential[wrong] __
+tests\integration\r1_security\test_p_member_credentials.py:81: in test_url_member_cannot_become_reviewer_without_its_host_credential
+    assert lookups == [], "untrusted URL/key selected the reviewer backend"
+E   AssertionError: untrusted URL/key selected the reviewer backend
+E   assert ['reviewer'] == []
+E     
+E     Left contains one more item: 'reviewer'
+E     Use -v to get more diff
+_ test_url_member_cannot_become_reviewer_without_its_host_credential[other_member] _
+tests\integration\r1_security\test_p_member_credentials.py:81: in test_url_member_cannot_become_reviewer_without_its_host_credential
+    assert lookups == [], "untrusted URL/key selected the reviewer backend"
+E   AssertionError: untrusted URL/key selected the reviewer backend
+E   assert ['reviewer'] == []
+E     
+E     Left contains one more item: 'reviewer'
+E     Use -v to get more diff
+_ test_url_member_cannot_become_reviewer_without_its_host_credential[duplicate] _
+tests\integration\r1_security\test_p_member_credentials.py:81: in test_url_member_cannot_become_reviewer_without_its_host_credential
+    assert lookups == [], "untrusted URL/key selected the reviewer backend"
+E   AssertionError: untrusted URL/key selected the reviewer backend
+E   assert ['reviewer'] == []
+E     
+E     Left contains one more item: 'reviewer'
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_member_credentials.py::test_url_member_cannot_become_reviewer_without_its_host_credential[missing]
+FAILED tests/integration/r1_security/test_p_member_credentials.py::test_url_member_cannot_become_reviewer_without_its_host_credential[wrong]
+FAILED tests/integration/r1_security/test_p_member_credentials.py::test_url_member_cannot_become_reviewer_without_its_host_credential[other_member]
+FAILED tests/integration/r1_security/test_p_member_credentials.py::test_url_member_cannot_become_reviewer_without_its_host_credential[duplicate]
+4 failed, 1 passed in 3.83s
