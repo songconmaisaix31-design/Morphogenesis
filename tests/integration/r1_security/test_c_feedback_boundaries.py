@@ -100,7 +100,7 @@ def test_exploration_does_not_authorize_out_of_scope_branch():
     assert not plan.opportunities[0].eligible
 
 
-def scientific_fixture(root, *, execution="succeeded", verdict="failed", effect="known"):
+def scientific_fixture(root, *, execution="succeeded", verdict="failed", effect="known", branch_id=None):
     """Host-only fixture writes through existing ledger/store contracts.
 
     This constructs a known, submitted counterexample chain and never runs an
@@ -114,7 +114,8 @@ def scientific_fixture(root, *, execution="succeeded", verdict="failed", effect=
                           conditions={"data": "fixture"}, sources=("fixture-source",))
     p = {"plan_id": claim.plan_id, "criteria": {"version": claim.criterion_version}}
     signal = Signal(task_id="refuted", workspace=locality.workspace, scope="science/refuted",
-                    kind="opportunity", required_capability="research.author")
+                    kind="opportunity", required_capability="research.author",
+                    payload={"project_id": "p1", "branch_id": branch_id} if branch_id is not None else {})
     s.ledger.enqueue(signal, acceptance={"research_claim": claim.model_dump(mode="json"),
                                          "experiment_plan": p})
     candidate = Candidate(attempt=AttemptId(task_id="refuted", agent=agent, attempt=1),
@@ -217,7 +218,8 @@ def independent_review(s, root, locality, *, execution="succeeded", verdict="fai
             "SELECT body FROM research_reports WHERE report_id=?", ("fixture-report",)).fetchone()[0])
     source_task = s.ledger.get("refuted")
     s.ledger.enqueue(Signal(task_id="review-task", workspace=locality.workspace,
-        scope=source_task.signal.scope, kind="opportunity", required_capability="research.counterexample"),
+        scope=source_task.signal.scope, kind="opportunity", required_capability="research.counterexample",
+        payload=source_task.signal.payload),
         acceptance=source_task.acceptance)
     lease = s.ledger.claim("review-task", "nominated-reviewer", locality=locality)
     assert lease is not None
