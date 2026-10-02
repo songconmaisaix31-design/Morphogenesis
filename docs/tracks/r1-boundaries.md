@@ -566,3 +566,48 @@ same frozen task is rejected while the original acceptance remains intact.
 Handoffs `msg_47efa881acbc` and `msg_af9c2ec5391e` preserve the first fixture
 failure and exact subsequent result. Native Git/GEP adapter verification and
 the final installed A/P combination remain outside this fixture result.
+
+## One exact combined core and HTTP identity first RED
+
+All three Q slices below use the same exact A SOURCE
+`4afe462b08867b4662a0bd01ee89833e56ffb32b`, including final B SOURCE
+`5faafe41b1732c83d165251600b688444186c702` and C4f. They run sequentially in
+the existing private environment, with no process/socket guard exceptions:
+
+| Owned pytest slice | Result |
+| --- | --- |
+| A host26 + policy5 + project-budget6 + dynamic MCP/artifact20 | **57 passed**, 38.28s |
+| B generated/configuration/input52 + mock adoption16 | **68 passed**, 9.87s |
+| C original22 + advisory7 + generated/locality16 | **45 passed**, 10.91s |
+
+Thus **170 checks pass on one exact combined core**. Five new artifact controls
+first retrieve the actual archived output, then cover input-file requests, path
+escape, size limit and changed output. The public export contains original
+execution and generated-validation facts, keeps `completion_claim=false` and
+does not invent adoption. Native Git/GEP remain deterministic test boundaries.
+
+Coordinator `msg_98a5be1b9b55` requested independent reproduction of P's
+URL-selected member issue. Exact P `f00631e6a11eee776574f8d1ff4319b318fd879a`
+with the same A4afe core runs `test_p_member_credentials.py`: **4 failed /
+1 passed**, 3.83s. Absent, wrong, other-member and duplicate Authorization
+headers all reach the reviewer backend. The tool is the actual official MCP
+`submit_research_note`, and the valid-path control persists an unverified note
+under the reviewer HostConfig identity. This is a real route-boundary failure,
+not a comparison-helper test. Handoff `msg_43a6f3e41fb2`; raw
+`p-f00631e-member5-first.txt` retains pytest's original whitespace diff lines.
+
+Q SOURCE `0f7a609` also prepares currently **NOT_RUN** native19 and installed
+factory4 checks. Native tests use real protected HostConfig files and original
+project/budget stores, with only planner/probe/native-process boundaries mocked.
+They cover explicit native authorization, provider-bound observer limits,
+original pending/uncertain holds, no fabricated usage, forbidden tool events and
+nine closed project/member/runtime/provider/model/scope/data-category egress
+grant negatives. No actual CLI, auth probe or model invocation is authorized.
+
+Installed factory tests keep the original `installed_core` VCS-pin check and
+require actual noneditable site-packages for both packages. They exercise the
+actual protected ConfiguredResearch constructor and handler-to-MCP call path,
+source version links and restart/rebind boundaries, without creating a socket
+server. `R1_SECURITY_INSTALLED=1` only prioritizes that environment's installed
+packages over Q's checkout; it does not alter package metadata or the pin check.
+Exact repaired P delivery and the serialized install window are still required.
