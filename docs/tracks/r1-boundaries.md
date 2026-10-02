@@ -896,3 +896,43 @@ the original pin gate, all core129/product34 Python Git blob comparisons and
 logs retain this result. Final owned pytest slices await P's baseline exit;
 neither this package verification nor P's ongoing baseline is counted as Q
 final acceptance.
+
+## Complete Q installed gate on exact fbe72/d85
+
+Coordinator `msg_c80c845dae24` grants the final sequential slices. Exact tested
+noneditable product `fbe72c519a3809ffbd439ecba9b65b0441726585` and core
+`d85aa95e8da406d598f3658492e3d615bba8a28f` remain unchanged throughout.
+Each command uses `R1_SECURITY_INSTALLED=1`, process-local BLAS1 and
+`.venv-q/Scripts/python.exe -m pytest <owned slice> -q --tb=short`; the P slice
+also uses `-rs`. Original process/socket denies and protected pin admission
+remain active. All raw first outputs are retained under
+`installed-d85aa95-fbe72c5-{factory11,a57,b72,c45,p90}-first.txt`.
+
+| Owned slice | First result |
+| --- | --- |
+| Actual protected factory, HTTP/MCP and response recovery11 | **11 passed**, 7.81s |
+| All A host/project/policy/dynamic checks57 | **57 passed**, 39.30s |
+| All B generated/configuration/adoption/concurrency checks72 | **72 passed**, 4314.57s |
+| All C original/advisory/generated-trust checks45 | **45 passed**, 11.62s |
+| Other P native/resume/provider/member/material/public checks90 | **87 passed / 3 historical skips**, 21.74s |
+
+Total: **272 passed / 3 historical skips**. The three skips retain earlier tests
+for the removed unsafe product loop; present public authority and real configured
+core boundaries are separately exercised. Unchanged response-loss controls now
+pass, retaining one durable task across reopened same-proposal admission and no
+second503 or fabricated adoption/contribution. All earlier first failures remain.
+
+B's original command returned after an approximately72-minute tool-return gap;
+the original pytest session completed successfully with the actual duration above.
+No duplicate execution or replacement log was created. Cause is **UNKNOWN**;
+this run provides no latency/performance assurance. The controller reports a
+similar observed gap separately. All Q pytest processes exit before releasing
+the window in Handoff `msg_b0d6abadad24`.
+
+This is Q's complete bounded local/mock gate for **fbe72/d85**, not all R1 or
+live acceptance. Native processes, real candidate execution, real model/science,
+sandbox/probe, external materials, Hub and deployment remain NOT_RUN. The
+controller separately reports P's full baseline221 passed/3 legacy compatibility
+failures and core CI success; neither is Q's own execution result. Later legacy
+MCP compatibility changes require additional original HostBinding, workspace and
+tool-surface verification before acceptance; they do not inherit this result.
