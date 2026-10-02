@@ -21,3 +21,11 @@
 本轮可执行：开发 Agent、确定性与安装/真实本机 HTTP/MCP/页面测试；模型科研调用、真实沙箱资源与隔离探针、论文外发、GPU/云后端、发布未获运行级授权，不执行。L2 所需研究题/容差/批准环境/账户/预算/数据外发仍需具体授权；建议默认不能变成已批准额度。
 
 验收：每轨先交 FR→源码→契约→AT 映射、最小 API Handoff，再源码+适用测试+报告 commit/push 精确 SHA；保留首 RED、NOT_RUN、既有类型错误身份。I 验证最终核心/产品源码、wheel 安装、pytest、新增边界 strict、前端构建/两视窗真实 HTTP 页面、兼容案例/检查器、幂等与中断。AT07/L2/L3/人工观察未执行时明确列出，不宣称 R1 PASS。
+## 用户追加并行指令（2026-10-03）
+
+用户要求“多开几条codex并行去耦合开发路线，直接开yolo模式”。本条覆盖初始四轨规模及P前端所有权；既有A/B/C/P保持原Owner，不接管其领域源码。
+
+- F / Codex YOLO / 私库 `research-r1-ui-1003` / 同名分支：独占 `frontend/**`, `src/morph_research/web/static/**`, `tests/ui/**`, `docs/tracks/r1-ui.md`（含前端package-lock）。P从现在排除以上路径，只负责产品后端/CLI/正式入口/uv.lock/pyproject及后端测试。F先只读，收到P无WIP交接后写入；HTTP契约通过Handoff，核心机制仍由原Owner负责。
+- Q / Codex YOLO / 核心 `morph-r1-boundaries-1003` / 同名分支：独占新增 `tests/integration/r1_security/**`, `docs/tracks/r1-boundaries.md`；黑盒独立验证A/B/C正式边界、跨项目/注入/伪造批准/未知/中断/额度不重置/宿主不执行。Q不能修改领域实现或原测试阈值，缺陷发原Owner修复。本轮不做真实沙箱探针或模型科研。
+
+新Codex进程用本次argv `codex --no-daemon --dangerously-bypass-approvals-and-sandbox`，不改全局配置；NO-DAEMON用于避开Codex0.160新共享daemon与Orca识别问题。若仍无法识别保留真实失败，不能用OpenCode冒充Codex。YOLO是研发进程执行权限，不赋予收费科学运行/资料外发/新云计算或沙箱授权。最终I仍待领域轨完成后派，合并所有者精确提交和独立安装验收。
