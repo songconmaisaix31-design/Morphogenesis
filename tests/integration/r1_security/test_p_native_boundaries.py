@@ -133,6 +133,37 @@ def test_unknown_native_observation_preserves_unknown_and_blocks_new_invocation(
     assert service.store.adoptions() == [] and service.feedback_store.contributions() == []
 
 
+@pytest.mark.parametrize("reported", ["matching", "mismatched", "missing"])
+def test_completed_native_observation_settles_only_exact_event_usage(tmp_path, monkeypatch, reported):
+    config, service, calls = configured(tmp_path, monkeypatch)
+
+    def completed(*args, **kwargs):
+        calls["native"].append(True)
+        if reported != "missing":
+            event = {"type": "turn.completed", "usage": {"input_tokens": 3, "output_tokens": 2}}
+            for parsed in parse_event("codex", json.dumps(event)):
+                kwargs["on_event"](parsed)
+        return NativeOutcome(runtime="codex", provenance="mock", acceptance=Acceptance(provenance="mock"),
+            state="completed", usage=Usage(tokens=6 if reported == "mismatched" else 5))
+
+    monkeypatch.setattr(native, "run_headless", completed)
+    result, code = native.run_member(config, SPACE, "member-one", str(uuid4()))
+    assert code == 0 and result["acceptance"] == "native_observation_only"
+    assert len(calls["native"]) == len(calls["probe"]) == 1
+    snapshot = service.budget.snapshot()
+    assert snapshot.pending_reservations == 0
+    assert snapshot.actual_cost_usd is None
+    assert result["outcome"]["usage"]["cost_usd"] is None
+    if reported == "matching":
+        assert snapshot.tokens == result["budget"]["tokens"] == 5
+        assert snapshot.uncertain_reservations == 0
+        assert not snapshot.sleeping
+    else:
+        assert snapshot.tokens is None
+        assert snapshot.uncertain_reservations == 1
+    assert service.feedback_store.contributions() == [] and service.store.adoptions() == []
+
+
 @pytest.mark.parametrize("kind", ["foreign_mcp", "host_command", "mismatched_usage"])
 def test_member_observer_does_not_promote_forbidden_calls_or_invent_usage(tmp_path, monkeypatch, kind):
     _, service, calls = configured(tmp_path, monkeypatch)
