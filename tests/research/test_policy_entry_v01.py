@@ -77,7 +77,7 @@ def test_no_recommendation_does_not_claim_compliance_and_readonly_is_secretfree(
     assert all(path.read_bytes() == body for path, body in before.items())
 
 
-@pytest.mark.parametrize("corruption", [None, "unknown_effect", "worker", "scope", "token", "run"])
+@pytest.mark.parametrize("corruption", [None, "unknown_effect", "worker", "scope", "token", "run", "evaluated_verdict", "execution_verdict"])
 def test_offline_persisted_scientific_lineage_is_required_not_caller_passed(tmp_path, corruption):
     from contracts.identity import AttemptId
     from local_assets.models import Candidate, FileChange
@@ -99,7 +99,8 @@ def test_offline_persisted_scientific_lineage_is_required_not_caller_passed(tmp_
     # Static contract-local persisted evidence, no backend/experiment invocation.
     result = {"execution_state": "succeeded", "scientific_verdict": "passed", "effect_state": "known", "provenance": "mock"}
     service.ledger.begin_execution(lease, run_id, max_executions=1)
-    service.ledger.record_event("research_execution", {"run_id": run_id, "worker_id": "worker", "token": 1, "result": result}, task_id="source")
+    execution_result = {**result, "scientific_verdict": "failed"} if corruption == "execution_verdict" else result
+    service.ledger.record_event("research_execution", {"run_id": run_id, "worker_id": "worker", "token": 1, "result": execution_result}, task_id="source")
     service.ledger.confirm_execution(lease, run_id)
     observation = ResearchObservation(report_id="offline-report", asset_id=asset, task_id="source", worker_id="worker",
                                       fencing_token=1, run_id=run_id, sandbox_id=None, plan_id=claim.plan_id,
@@ -110,6 +111,8 @@ def test_offline_persisted_scientific_lineage_is_required_not_caller_passed(tmp_
                                       source_fencing_token=1, source_attempt=candidate.attempt)
     if corruption == "unknown_effect":
         observation = observation.model_copy(update={"result_json": json.dumps({**result, "effect_state": "unknown"})})
+    elif corruption == "evaluated_verdict":
+        observation = observation.model_copy(update={"result_json": json.dumps({**result, "scientific_verdict": "failed"})})
     elif corruption == "worker":
         observation = observation.model_copy(update={"worker_id": "wrong"})
     elif corruption == "scope":

@@ -56,7 +56,7 @@ class ResearchService:
         self.field.synchronize(trusted_facts(self.ledger, self.store.root))
         recommendation = self.router.recommend(self.config.worker_id, self.locality,
                                                 {key: 1.0 for key in self.config.capabilities}, limit=limit)
-        responses = []
+        responses: list[dict[str, JsonValue]] = []
         for task in self.ledger.candidates(self.locality, limit=limit, capabilities=self.config.capabilities):
             response = _OBJECT.validate_json(task.model_dump_json())
             response["policy_recommendation"] = (recommendation if not responses else {

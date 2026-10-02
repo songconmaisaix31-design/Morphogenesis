@@ -166,7 +166,11 @@ def trusted_facts(ledger: TaskLedger, assets_root: Path) -> list[FeedbackFact]:
                 # Ordinary Worker persists its pre-claim, zero-based AttemptId;
                 # research hosts use the post-claim count. Neither is the lease token.
                 expected_attempt = task.attempts - 1 if "worker_id" in result else task.attempts
-                if (not validation.passed or validation.created_at > at or validation.expires_at < at
+                # File reports use wall time; the ledger may use a controlled
+                # clock. Completed effect authority already passed the original
+                # applicator's expiry guard. Do not compare different domains or
+                # revalidate a historical accepted result against today's clock.
+                if (not validation.passed or validation.expires_at <= validation.created_at
                         or validation.report_id != result.get("report_id")
                         or validation.asset_id != result.get("candidate_asset_id")
                         or validation.attempt != candidate.attempt or candidate.attempt.task_id != task.signal.task_id
@@ -210,10 +214,12 @@ def _trusted_science(db: sqlite3.Connection, task: TaskRecord, report: ResearchO
                      result: dict[str, JsonValue], at: float) -> bool:
     candidate = Candidate.model_validate_json(report.candidate_json)
     claim = candidate.research
+    evaluated = _OBJECT.validate_json(report.result_json)
     if (claim is None or candidate.scope != task.signal.scope or report.created_at > at
             or report.scientific_verdict != "passed" or report.execution_state != "succeeded" or not known_effect(report)
             or result.get("scientific_verdict") != report.scientific_verdict
             or result.get("execution_state") != report.execution_state or result.get("provenance") != report.provenance
+            or any(evaluated.get(key) != getattr(report, key) for key in ("scientific_verdict", "execution_state", "provenance"))
             or _OBJECT.validate_json(claim.model_dump_json()) != task.acceptance.get("research_claim")
             or _OBJECT.validate_json(report.plan_json) != task.acceptance.get("experiment_plan")
             or (report.plan_id, report.criterion_version, report.conditions) != (claim.plan_id, claim.criterion_version, claim.conditions)):
@@ -243,7 +249,8 @@ def _trusted_science(db: sqlite3.Connection, task: TaskRecord, report: ResearchO
     matching = [e for e in events if e.get("run_id") == report.run_id and e.get("worker_id") == task.owner and e.get("token") == source_token]
     results = [e.get("result") for e in matching]
     return any(isinstance(r, dict) and r.get("effect_state") in {"known", "confirmed"}
-               and r.get("execution_state") == "succeeded" for r in results) and any(
+               and r.get("execution_state") == "succeeded" and r.get("scientific_verdict") == "passed"
+               and r.get("provenance") == report.provenance for r in results) and any(
                    e.get("request_id") == report.run_id and e.get("token") == source_token for e in confirmations)
 
 
