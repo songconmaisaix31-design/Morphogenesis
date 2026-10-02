@@ -71,3 +71,15 @@ F SOURCE `36b8c0c9dfa400b3574af37a47508796dd5461d6` / REPORT `a1aee14f0b87e4cf1b
 新增接线门槛：A/P 必须实际复用原 BudgetLedger 在稳定项目命名空间准入，跨 branch/run/resume 不重置，未知效果保留预留；C 只能从原账本/资产/归档与独立复核产生贡献及机会，不信任直接填入的 branch refs；FR02 本地代码快照须有界读取内容并提供行定位，metadata-only 不算完成。Owner 正在实现，不能以 schema/docstring/局部通过代替最终固定组合。
 
 C 系统 Python editable 清理被自动审批在进程启动前拒绝（仅返回 `blocked by policy`），没有发生清理；主控明确禁止换工具绕过。C 用私有环境继续，原安装日志与只读 RECORD 清单、人工恢复步骤由 C 报告；未知旧依赖保留，不声称全局环境恢复。该操作限制与科研 L2 NOT_RUN 分开。
+
+## 动态契约复验进展（02:29 追加）
+
+Q 回执：exact B `e8e16a5b9e755a94f8587b76ba9fc288f218b8af` 的原29、输入/候选绑定8、合法SDK配置15，共52 passed / 2.41s。SDK正例捕获一次 SandboxSync.create 调用，未访问真实后端或执行候选；不证明隔离实测。B 后继 d0c834f 的 host mock 原采用链尚待独立重验。
+
+exact P `cedbf3bc52eaabd4814e43068428e89a49ab5cf9` 独立12 passed / 3.17s（原材料/项目/回调/笔记边界与合法正例），证据在 Q SOURCE63fe5ea/REPORT29cb3f0。Owner 的材料18通过另计；此处不证明正式factory、PDF实际安装、native或动态实验闭环。
+
+exact A8fc 新37项首结果35 passed / 2 failed：旧合法MCP任务缺 project payload、休眠重开fixture引用不存在note；Q将绑定实际持久项目/来源再跑，首失败保留，原业务断言不削弱。C99cd旧advisory新增7项首6 failed / 1 passed（杜撰/外分支/错误轴/重复/更正后来源）；C d7e561f Owner29通过，独立复验待。B d175输入8项首7 failed / 1 passed 同样保留，不能用后续52 PASS擦除。
+
+F8e93738 的 build 3906 modules / 15.66s，聚焦两视窗8 passed / 9.2s；Owner实际查看1366x900和390x844截图。只接纳被后端返回的来源定位/多版本/缺失状态展示，不推定 P 真实导入已支持多版本；P import_source按kind+identifier吞并新版本和意见不同适用条件问题已退原 P 并交 Q。新 F8e 的 installed HTTP L1尚未运行。
+
+剩余验收重点是同一组合的正式 configured product/身份MCP/native发现认领、生成候选到可信评价与独立复核、接受证据改变下一实际选择、原消费与采用、完整成果包与三页真实HTTP。所有Owner/独立Q/最终I各自证据须标来源和范围；AT07真实隔离探针、L2研究及L3效果研究仍NOT_RUN。

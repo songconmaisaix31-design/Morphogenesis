@@ -1,5 +1,26 @@
 # R1 派发状态（2026-10-03）
 
+## 02:29 更新：动态核心接线与私有安装
+
+六条恢复后的 Codex YOLO Worker 均已回 ACK 并持续在原 Task/worktree/branch/write_paths 开发。主控只维护治理；I 尚未派发。当前阶段来源及待办如下，不替代最终组合验收。
+
+| 轨 | 新精确交付 | 当前待办 |
+|---|---|---|
+| A | SOURCE `8fc90a9a34d3b47ced952510ea53ce2412dc38ca` | 原项目预算/选择入口阶段，私有环境定向29与strict5通过；合并 B/C 后完成正式 generated/MCP/机会/继承闭环 |
+| B | SOURCE `d0c834fd381fc292443bf85c5ce1e91043143516`（含 e8e16a5） | 原消费/再验证/应用/提交/采用 mock 正例4及组合17 Owner通过；领域全量/strict/独立后继验收待 |
+| C | SOURCE `d7e561f9b4d6155316f12471de050c09b12471b4` | actual generated 归档/判据/原账本可信接受和 advisory 接通；Owner generated25/legacy27/Q29通过，独立Q/安装/strict/原FC失败复核待 |
+| P | SOURCE `cedbf3bc52eaabd4814e43068428e89a49ab5cf9`；REPORT `f194f374cee350bf8980fe89b2b3488eb03bfff6` | PDF及本地commit快照，独立访问边界12通过；实际配置factory/正式native/动态DTO/成果包及多版本来源、意见条件修复待 |
+| F | SOURCE `8e9373862c845298d7130a7c9e167210547bd15b`；REPORT `488cce52514ea962b96ad11080ff8485530b2c78` | 来源回链两视窗8通过、build通过；新provenance展示WIP及实际新后端/动态DTO安装页面待 |
+| Q | SOURCE `63fe5ead51e05fc2f718ebcfe942942d82d90abf`；REPORT `29cb3f08b8bbfc1fbf1c3e2d04010e7d05a9897c` | 精确 A/B/C 后继安全复验及新增 P 版本身份检查；最新窗口结果待独立报告提交 |
+
+A 的历史系统 Python 测试不包装成私有安装证明；现在已建立自有 COPY 锁定环境。B/C 也使用各自私有环境，未借改别轨环境。C 已释放重型窗口；P 正对 exact A8fc 做 COPY 非 editable 安装和配置 HTTP/MCP 验证，之后 B broad/strict，再 C installed/FC。Q <=100 项纯 fixture 单进程检查可并行，原宿主候选/网络禁止 guard 保留。
+
+已决定：原 ResearchObservation.source_attempt 继续表示本次执行 task/agent/attempt，独立复核也绑定当前复核任务；Candidate.attempt 单独保留原作者身份。主控早期混淆两者的建议已纠正，不能为此改写历史字段或断言。
+
+L1 的原采用链正例允许显式隔离 host mock store：只用于 fixture workspace/asset root，模式与根持久绑定，ConsumptionExecution/AdoptionReceipt 如实标 mock，默认 live 仍拒绝 mock 与混合来源。此决定不赋予真实 science 或 AT07/L2 PASS，不新增执行/采用账本。
+
+C 系统 Python editable 清理仍被自动审批拒绝（blocked by policy），没有清理且禁止绕过；只读清单和人工恢复说明由 C 记录。Orca 重启前四个原 supervised 资源的 worker-release 返回 release_unknown/processAction none；当前终端已不存在，不能声称已归档或清理。新六条会话正常工作，该历史资源记账限制单独保留。
+
 ## 02:06 更新：继续原 Task，恢复 Codex YOLO 会话
 
 用户再次要求继续多 Agent 开发。原 OpenCode 的余额错误与 Codex 初次输入仅接受未确认执行的记录保留；不把迁移当功能交付。Orca 在 01:53 重启，当前 runtime `59ad1e4a-cf8f-4053-bc65-bf6865f8d5a9`。Run 仍为 `run_d5306f2e4993`；主控重新绑定 `term_4e00aa4e-4831-4e2b-899f-da01121e6258`（consumer generation 2）。
