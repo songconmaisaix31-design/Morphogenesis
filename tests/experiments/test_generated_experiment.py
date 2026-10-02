@@ -41,7 +41,7 @@ def test_generated_execute_supported_and_recompute(tmp_path):
     assert result.execution_state == "succeeded"
     assert result.assessment.execution == "succeeded"
     assert result.assessment.hypothesis == "supported"
-    assert result.assessment.trusted is True
+    assert result.assessment.trusted is False
     assert result.assessment.mode == "diagnostic"
     assert result.assessment.metrics["max_absolute_error"] < 5e-3
     assert result.provenance == "mock" and result.usage is result.cost_usd is None
@@ -131,20 +131,23 @@ def test_finalize_requires_host_registry():
         _assessment("supported"), spec=plan.evaluation, registry=None,
         execution_state="succeeded", remote_effect="known")
     assert diagnostic.mode == "diagnostic"
+    assert diagnostic.trusted is False
     final = finalize_assessment(
         _assessment("supported"), spec=plan.evaluation, registry=approved_criteria_registry(plan.evaluation),
         execution_state="succeeded", remote_effect="known")
     assert final.mode == "final"
+    assert final.trusted is True
     unknown_effect = finalize_assessment(
         _assessment("supported"), spec=plan.evaluation, registry=approved_criteria_registry(plan.evaluation),
         execution_state="succeeded", remote_effect="unknown")
     assert unknown_effect.mode == "diagnostic"
+    assert unknown_effect.trusted is False
 
 
 def _assessment(hypothesis):
     from orchestration.experiments.generated import GeneratedAssessment
     return GeneratedAssessment(execution="succeeded", hypothesis=hypothesis, contribution="proposed",
-                               mode="diagnostic", trusted=True)
+                               mode="diagnostic", trusted=False)
 
 
 def test_author_cannot_self_review():

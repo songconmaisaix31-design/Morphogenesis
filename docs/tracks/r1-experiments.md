@@ -19,14 +19,32 @@ B 轨（长期 Owner，`morph-r1-experiments-1003`）交付动态 Python 候选�
 `EvaluationSpec.approved/approved_by` 与 `IsolationReport.verified/probe` 均为**仅展示**字段，
 执行器/评价器从不据此授予最终结论或执行准入：
 
-- 评价：`evaluation.evaluate` 只做宿主重算，**恒返回 `mode="diagnostic"`、`contribution="proposed"`**；
+- 评价：`evaluation.evaluate` 只做宿主重算，**恒返回 `mode="diagnostic"`、`trusted=False`、`contribution="proposed"`**；
   最终科学结论由 `trusted.finalize_assessment` 仅在宿主 `TrustedCriteriaRegistry` 批准该 criteria
-  版本、执行 `succeeded` 且 `remote_effect="known"` 时授予 `mode="final"`（贡献接受仍是 C 的独立复核）。
-- 隔离：`GeneratedExperimentExecutor.admit` 只信宿主 `TrustedProbeRegistry`（`backend`+`declared`
-  匹配且真实无害探针 `passed`）；mock/caller 的 `verified=True` 不能放行。无证明 fail-closed，
-  宿主从不执行候选。
+  版本（同版本不同 spec 构造 registry 时 `criteria_version_conflict` 拒绝，不静默覆盖）、执行 `succeeded`
+  且 `remote_effect="known"` 时授予 `mode="final"`+`trusted=True`；诊断路径清 `trusted`、复位 `contribution`。
+- 隔离：`GeneratedExperimentExecutor.admit` 只信宿主 `TrustedProbeRegistry`，**按 `proof_ref`（probe_id）+
+  backend + declared 精确绑定**；report 的 `proof_ref` 为空/异值不能复用 record；mock/caller 的
+  `verified=True` 不能放行。无证明 fail-closed，宿主从不执行候选。
 - `read_generated_result` **总是**从原始输出重算评估（丢弃存档里伪造的 `accepted/final/trusted`），
   并要求 `outputs/output.json` 有 digest 绑定（`missing_durable_evidence`）、输入/data digest 与整计划绑定。
+
+## 第二次返修（Q 扩展 suite + 真实 API 接线条件）
+
+- 隔离证明绑定 `proof_ref`：`TrustedProbeRegistry.is_verified` 以 `probe_id` 为键并要求 report 的
+  `proof_ref`、backend、`declared` 与 record 全等，空/异值引用拒绝（`test_registered_probe_cannot_authorize_different_or_missing_reference`）。
+- 真实 SDK 能力 fail-closed：`sandbox_adapter.declared_capability` 据已装 OpenSandbox 1.1.0 源码声明
+  `process_limit=False`（`SandboxSync.create` 无 pids 参数）→ `complete=False` → 拒绝执行；`network_deny`
+  通过 `network_policy=NetworkPolicy(defaultAction="deny")` 实际下发；`create` 用 `plan.environment.image`
+  （不可变 `@sha256:`，`admit` 已拒可变 tag）作为有效镜像引用发 SDK，`image_digest` 与 image digest 对齐。
+- `finalize_assessment` 诊断路径清 `trusted=False`/`contribution="proposed"`；`evaluate` 恒 `trusted=False`。
+- 准入/批准绑定持久化不可变事实：`store.approve_generated` 按 `report_id` 重读持久化报告并全等校验
+  （伪造 `passed=True` 拒绝 `tampered_generated_report`）、检查未过期、要求显式 `assert_owned`（无 no-op 默认）；
+  `generated_validation` 校验所有字节对冻结 manifest digest（`manifest_digest_mismatch` 拒绝字节替换）。
+- `TrustedCriteriaRegistry` 同版本异模板构造抛 `criteria_version_conflict`；`IsolationProbeRecord` 增 `image_digest`
+  绑定探针环境。
+
+
 
 ## FR → 源码 → 契约 → AT 映射
 
@@ -76,10 +94,11 @@ author/reviewer 授权（宿主身份，非 caller 字符串）。
 - 本轨测试：`tests/experiments/test_generated_{experiment,evaluation}.py`、
   `tests/local_assets/test_generated_validation.py`、`tests/research/test_generated_candidate.py` 共 **28 passed**；
   连同 `tests/experiments/`（含旧两类 registered 全回归）、`tests/research/test_case.py` 共 **102 passed**。
-- 独立 Q 负例 `tests/integration/r1_security/test_b_generated_boundaries.py`（`morph-r1-boundaries-1003`）
-  对返修后代码运行 **13 passed**（unverified/mock boolean 不放行、caller approved+reviewer 不给 final、
-  全计划绑定拒绝变更、自报 score 拒绝、unknown/crash/timeout 不保留伪造奖励、unknown effect 不给 final、
-  succeeded 缺 output digest 绑定拒绝）。
+- 独立 Q 负例（`morph-r1-boundaries-1003`，`R1_SECURITY_SOURCE` 指向本源码）：
+  `test_b_generated_boundaries.py` + `test_b_successor_authority.py` 共 **18 passed**（unverified/mock boolean
+  不放行、proof_ref 空/异值不复用探针 record、caller approved+reviewer 不给 final、全计划绑定拒绝变更、自报 score
+  拒绝、unknown/crash/timeout 不保留伪造奖励、unknown effect 不给 final、succeeded 缺 output digest 绑定拒绝、
+  伪造 passed 不能批准已失败持久化报告、manifest 字节替换拒绝）。
 - 静态边界：`tools/typecheck.py`（mypy --strict，129 文件）**Success，0 错误，未扩大豁免**。
 - AT-07 真实隔离探针与 L2 真实科研切片 **NOT_RUN**（无授权）：`LocalCpuSandboxBackend` 无探针记录时
   fail-closed，dynamic 本轮仅契约 fixture 安全验证实现能力，不声称 live。

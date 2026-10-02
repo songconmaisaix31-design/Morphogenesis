@@ -20,9 +20,20 @@ from local_assets.generated_models import GeneratedApproval, GeneratedValidation
 from local_assets.models import Candidate, FileChange
 from local_assets.store import LocalAssetStore
 from local_assets.validate import blast_radius
+from orchestration.experiments.executor import digest
 from orchestration.experiments.generated import GeneratedExperimentPlan, IsolationReport
 from orchestration.experiments.security import SecurityRejection, static_checks, verify_isolation
 from orchestration.experiments.trusted import TrustedProbeRegistry
+
+
+def _verify_manifest(plan: GeneratedExperimentPlan, files: dict[str, bytes]) -> None:
+    manifest = {file.name: file for file in plan.files}
+    for name, body in files.items():
+        entry = manifest.get(name)
+        if entry is None or digest(body) != entry.sha256 or len(body) != entry.size_bytes:
+            raise ValueError("manifest_digest_mismatch")
+    if set(files) != set(manifest):
+        raise ValueError("manifest_count_mismatch")
 
 
 def generated_validation(store: LocalAssetStore, asset_id: str, plan: GeneratedExperimentPlan,
@@ -31,6 +42,7 @@ def generated_validation(store: LocalAssetStore, asset_id: str, plan: GeneratedE
                          report_ttl_seconds: float = 300) -> GeneratedValidationReport:
     """Admission gate: static security plus host-verified isolation; never byte-equality."""
     plan = GeneratedExperimentPlan.model_validate(plan.model_dump(mode="json"))
+    _verify_manifest(plan, files)
     static = static_checks(plan, files)
     reasons = list(static.reasons)
     if not static.passed:
@@ -49,8 +61,8 @@ def generated_validation(store: LocalAssetStore, asset_id: str, plan: GeneratedE
 
 
 def approve_generated(store: LocalAssetStore, report: GeneratedValidationReport,
-                      assert_owned: Callable[[], None] = lambda: None,
-                      *, proof_ref: str | None = None) -> None:
+                      assert_owned: Callable[[], None] | None = None, *,
+                      proof_ref: str | None = None) -> None:
     """Fence-guarded approval; downstream reuse requires the original approval authority."""
     store.approve_generated(report, assert_owned, proof_ref=proof_ref)
 

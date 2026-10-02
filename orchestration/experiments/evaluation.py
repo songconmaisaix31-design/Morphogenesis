@@ -3,11 +3,11 @@
 The evaluator reads only the frozen ``EvaluationSpec`` from the plan and the
 candidate's *raw output*, recomputing every metric from first principles. It
 never trusts a candidate-reported score and never grants a final verdict: the
-returned assessment is always ``mode="diagnostic"`` and ``contribution="proposed"``
-until a host-owned ``TrustedCriteriaRegistry`` explicitly finalizes it (see
-``trusted.finalize_assessment``). A valid-but-refuted output is a legitimate
-negative result; a crash or invalid/unknown output is ``inconclusive``, never
-``refuted``.
+returned assessment is always ``mode="diagnostic"``, ``trusted=False`` and
+``contribution="proposed"`` until a host-owned ``TrustedCriteriaRegistry``
+explicitly finalizes it (see ``trusted.finalize_assessment``). A
+valid-but-refuted output is a legitimate negative result; a crash or
+invalid/unknown output is ``inconclusive``, never ``refuted``.
 """
 
 from __future__ import annotations
@@ -107,7 +107,7 @@ def evaluate(plan: GeneratedExperimentPlan, raw_output: bytes, *,
     except (ValueError, TypeError, KeyError, UnicodeError, OverflowError) as error:
         return GeneratedAssessment(
             execution="succeeded", hypothesis="inconclusive", contribution="proposed",
-            mode="diagnostic", trusted=True, evaluator_version=spec.version,
+            mode="diagnostic", trusted=False, evaluator_version=spec.version,
             reasons=(str(error),),
         )
     if spec.kind == "poisson_reference_v1":
@@ -116,6 +116,6 @@ def evaluate(plan: GeneratedExperimentPlan, raw_output: bytes, *,
         hypothesis, metrics, reasons = evaluate_generic(spec, xs, us)
     return GeneratedAssessment(
         execution="succeeded", hypothesis=hypothesis, contribution="proposed",
-        mode="diagnostic", trusted=True, evaluator_version=spec.version,
+        mode="diagnostic", trusted=False, evaluator_version=spec.version,
         reasons=tuple(reasons), metrics=metrics,
     )
