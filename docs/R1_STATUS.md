@@ -1,5 +1,22 @@
 # R1 派发状态（2026-10-03）
 
+## 01:28 更新：返修、产品接线与资源窗口
+
+以下追加记录不覆盖此前首失败、首源码及未验收状态。五条开发轨继续由原 Owner 维护；F、Q 为 Codex YOLO，A/B/C/P 为原 OpenCode。主控未写业务代码，I 尚未派发。
+
+| 轨 | 当前 Task / Dispatch | 交付与剩余工作 |
+|---|---|---|
+| A | task_0167ec97bf21 / ctx_aa84c955bb19 | 项目/权限/持久化中断修复中；需精确合并 B/C 候选并由 A 接入正式 ResearchService/MCP，交 P 可安装组合候选 |
+| B | task_c05923f9a0ca / ctx_fb3e4a5ae75f | 第二版 a322cfd53f5c330654e19a6add8438a3f8c5fab4 仍不通过 Q；修 probe 来源、审批/manifest 绑定、SDK 网络/image/direct-create，并交 A/C 具体契约 |
+| C | task_02e30929856d / ctx_ecfa0562db63 | Owner 交付 3161048c463b3aa4f434054755afc9787bbda989；Q 将精确归档重验。advisory 引用贡献 result_id，实际 discover 消费与 B 动态结果薄转换未完成 |
+| P | task_58b3836a39e2 / ctx_2628aeed1e23 | 已撤回自建八阶段循环，保留原提交；真实材料解析及正式 native/HTTP 接线中，需向 F 交冻结 DTO，最后由原 P 更新核心 pin/锁文件 |
+| F | task_00ed68ee0b04 / ctx_9e44657095f7 | 源码 124a71af513cfadf096c6e7f55b7be1be2f913ac；报告 bc2a8ec4c505a680a847221b3950b22609e19cb5；设计报告 efcc405。88 项页面回归通过、独立安装 HTTP 页面 2 项通过，仅当前输入及状态展示；动态分支/实验/评价/贡献 DTO 尚待 P |
+| Q | task_4a3623634511 / ctx_1c2a99ad9c4c | 测试/报告 f4cad21d14dfe16e3ff4a59d13929bb7b57aa434 已推送；维持原安全断言与有效复核正例，只运行隔离的可信 fixture / SDK sentinel，无候选执行 |
+
+系统出现 CreateProcess os1455（页面文件不足），已恢复；不修改系统页面文件，不终止其他任务。代码继续并行，重型安装/回归按轨串行；进程级 BLAS 线程限制只调整资源，不改断言、阈值。F 已结束自有重型进程。A 的 stdio OpenBLAS 失败、C 的 FC 子进程 stdout 失败均保留，尚不能认定无关；C editable 安装实际环境目标待 Owner 报告。每次新版本结果作为新证据追加。
+
+集成顺序保持：A 自有正式入口接 B/C → P/F 候选组合真实安装/HTTP/native/UI → Q 精确组合安全验收 → 单一 I 精确普通合并与非 editable 独立回归 → 原 P 必要最终 repin / 原 F 必要接线返修 → I 最终组合冻结。I 不承担领域开发；不以等待 I 为由跳过前置功能接线。
+
 ## 00:47 更新：五条开发轨与独立验收
 
 用户追加要求 Codex 并行、YOLO。F、Q 已通过 Orca `task-create` / `dispatch --inject` 实际接受任务，终端可见 Codex 0.160.0 正在读规范与代码；启动命令带 `--dangerously-bypass-approvals-and-sandbox`，未改全局账户或 provider。标准 `worker-start` 的就绪检测失败保留如下；低层派发不声称具备自动资源所有权/回收。

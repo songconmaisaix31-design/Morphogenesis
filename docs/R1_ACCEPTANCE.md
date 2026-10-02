@@ -42,3 +42,13 @@ Q 测试与原始证据提交 `6ceb2e2752979259be91415cf5a116df94e6aebd`，远�
 Q 此后新增 B 成功 archive 缺 output.json size/digest 绑定的单项负例，也在同首版 SHA 失败；扩展测试尚未全组合重验，不能将其计为最终结果。Q 首次依赖缺失（faiss）collection RED 另存原报告。修复后的新结果将追加，不能覆盖此处。
 
 P 首版 backend `80ed5e13351a9eab8b36ba03c710e98fd7544fcf` 为产品输入与未接入核心状态投影，尚非科研闭环：Owner 原基线 133 passed / 27 环境失败，仍需独立安装及完整适用回归。UI WIP `44353e35bc745b7542625b85376791b5ac68aa4f` 未 build/未 Playwright，已保留并移交 F；不赋予 AT16 PASS。L2/L3 和真实隔离探针仍 NOT_RUN。
+
+## 后续候选与部分 L1（01:28 追加）
+
+Q 精确 B `a322cfd53f5c330654e19a6add8438a3f8c5fab4` 首批 16 项为 14 passed / 2 failed：缺失或杜撰 probe proof_ref 可复用无关探针。随后独立新增 2 项审批 passed 与冻结 manifest 字节篡改、3 项 SDK 网络策略/合法镜像/direct-create 负例均 RED；均退回 B，不赋予隔离或实验可信 PASS。SDK 测试在调用前使用 sentinel 截断，未访问真实沙箱。
+
+Q 精确 C `40011761c3cce6513bbeef776543740f60d1d03e` 首批 13 passed / 1 failed：假 observation 缺原 ledger 执行仍被当独立复核。新增 failed/unknown/unknown-effect 复核 3 项 RED；有效独立复核正例通过。Owner 新交付 `3161048c463b3aa4f434054755afc9787bbda989` 待 Q 归档重验；B 动态可信结果到 C 的薄转换和 A 实际下一推荐尚未验收。
+
+F 源码 `124a71af513cfadf096c6e7f55b7be1be2f913ac` / 报告 `bc2a8ec4c505a680a847221b3950b22609e19cb5` Owner 已推送：当前三页旧+R1 回归 88 passed / 2 installed skipped，另以 fresh 非 editable 私有安装运行同源真实本机 HTTP 页面 2 passed；现有输入 HTTP 6 passed。未截获接口伪装真实 HTTP，执行后端仍明确为 mock。首次 hardlinked_path 拒绝、错误 selector、mock 时序失败、Node OOM 均保留，修复使用 COPY 私有安装及正确 selector，不弱化安装/业务不变量。该证据仅覆盖现有产品输入及安全状态显示；动态任务分支、候选冻结评价、复核和贡献关系尚待核心 DTO，AT16 总体仍未通过。
+
+P 撤回八阶段新调度/伪造 mock accepted 的 WIP 只证明错误方案已移除；不能据此标 native 自主闭环完成。A 修复诊断和 P 局部输入通过均须对应最终交付重新验收。全 R1、最终安装组合、实际隔离探针及 L2/L3 科研仍未通过/NOT_RUN。
