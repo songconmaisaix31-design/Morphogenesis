@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from collections.abc import Callable
-from typing import Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol
 from uuid import uuid4
 
 from pydantic import JsonValue, TypeAdapter
@@ -39,6 +39,10 @@ from swarm.research.records import (
 )
 from swarm.task_ledger import LeaseLost, TaskConflict, TaskLedger, canonical_scope, connection
 
+if TYPE_CHECKING:
+    from orchestration.experiments.generated_executor import GeneratedExperimentExecutor
+    from swarm.research.dynamic import GeneratedResearch
+
 _OBJECT = TypeAdapter(dict[str, JsonValue])
 Purpose = Literal["original", "reproduction", "inheritance", "counterexample"]
 
@@ -51,7 +55,8 @@ class ExperimentBackend(Protocol):
 
 class ResearchService:
     def __init__(self, config: HostConfig, *, ledger: TaskLedger | None = None,
-                 store: LocalAssetStore | None = None, backend: ExperimentBackend | None = None) -> None:
+                 store: LocalAssetStore | None = None, backend: ExperimentBackend | None = None,
+                 generated_executor: GeneratedExperimentExecutor | None = None) -> None:
         self.config = config
         for value in (config.ledger_path, config.workspace, config.assets_root, config.evidence_root):
             if not Path(value).is_absolute():
@@ -64,7 +69,25 @@ class ResearchService:
             raise ValueError("host_ledger_identity_mismatch")
         if limits is not None and self.ledger.limits != limits:
             raise ValueError("host_ledger_limits_mismatch")
-        self.store = store or LocalAssetStore(config.assets_root)
+        if config.generated_experiments:
+            from swarm.research.dynamic import GeneratedHostSettings
+            from orchestration.experiments.trusted import TrustedCriteriaRegistry
+            settings = GeneratedHostSettings.model_validate(config.generated_experiments)
+            criteria = TrustedCriteriaRegistry(settings.criteria)
+            if config.research_provenance != settings.mode:
+                raise ValueError("generated_host_provenance_mismatch")
+            self.store = store or LocalAssetStore(config.assets_root, research_provenance=settings.mode,
+                                                  fixture_workspace=settings.fixture_workspace, generated_criteria=criteria)
+            if (self.store.research_provenance != settings.mode
+                    or self.store.fixture_workspace != (Path(settings.fixture_workspace).resolve()
+                                                         if settings.fixture_workspace else None)):
+                raise ValueError("host_asset_store_provenance_mismatch")
+            if self.store.generated_criteria is None or any(
+                    self.store.generated_criteria.approval(record.spec) != record for record in settings.criteria):
+                raise ValueError("host_asset_store_evaluation_mismatch")
+            self.store.check_fixture_target(Path(config.workspace))
+        else:
+            self.store = store or LocalAssetStore(config.assets_root)
         if self.store.root != Path(config.assets_root).resolve():
             raise ValueError("host_asset_store_identity_mismatch")
         self.backend = backend
@@ -81,11 +104,21 @@ class ResearchService:
             no_links(Path(config.research_budget_path))
             self.budget = BudgetLedger(config.research_budget_path, config.project_id,
                                        config.research_budget_policy, clock=self.ledger.clock)
+        self.generated: GeneratedResearch | None = None
+        if config.generated_experiments:
+            from swarm.research.dynamic import GeneratedResearch
+            self.generated = GeneratedResearch(self, generated_executor)
+        elif generated_executor is not None:
+            raise AssetSafetyError("generated_executor_requires_host_configuration")
         feedback_path = self.ledger.path.with_name("research-feedback.sqlite3")
         no_links(feedback_path)
         self.feedback_store = ResearchFeedbackStore(feedback_path, ledger=self.ledger,
                                                    assets_root=Path(config.assets_root),
                                                    reviewer=config.worker_id,
+                                                   generated_criteria=self.generated.criteria if self.generated else None,
+                                                   project_id=config.project_id or None,
+                                                   locality=self.locality,
+                                                   archive_root=Path(config.evidence_root),
                                                    clock=self.ledger.clock)
 
     def discover(self, limit: int = 100) -> list[dict[str, JsonValue]]:
@@ -98,7 +131,8 @@ class ResearchService:
         # Preserve the legacy policy unchanged. A mixed-project window cannot
         # be passed through that legacy schema as if it were project scoped.
         recommendation: dict[str, JsonValue]
-        if len(visible) == len(records):
+        inspected = self.ledger.candidates(self.locality, limit=limit, include_blocked=True)
+        if len(visible) == len(records) and all(self._task_visible(t.signal.task_id) for t in inspected):
             recommendation = self.router.recommend(self.config.worker_id, self.locality,
                                                     {key: 1.0 for key in self.config.capabilities}, limit=limit)
         else:
@@ -223,6 +257,8 @@ class ResearchService:
         return True
 
     def _lease(self, task_id: str, token: int) -> Lease:
+        if self.config.project_id:
+            self._authorize_project(self.config.project_id)
         task = self._task(task_id, require_capability=True)
         if (task.owner != self.config.worker_id or task.token != token or task.expires_at is None
                 or isinstance(token, bool)):
@@ -256,12 +292,19 @@ class ResearchService:
 
     def environment(self, task_id: str, token: int) -> dict[str, JsonValue]:
         self._lease(task_id, token)
+        if self._task(task_id).acceptance.get("generated_plan") is not None:
+            generated = self._generated_tools()
+            return {"plan": generated.plan(task_id).model_dump(mode="json"), "backend_configured": True,
+                    "allocation": "on_execute", "execution_started": False,
+                    "provenance": generated.settings.mode}
         return {"plan": self._plan(task_id), "backend_configured": self.backend is not None,
                 "allocation": "on_execute", "isolation_requested": "fresh_sandbox_per_execution",
                 "execution_started": False}
 
     async def execute(self, task_id: str, token: int) -> dict[str, JsonValue]:
         lease = self._lease(task_id, token)
+        if self._task(task_id).acceptance.get("generated_plan") is not None:
+            return await self._generated_tools().execute(task_id, token)
         plan = self._plan(task_id)
         if self.backend is None:
             raise AssetSafetyError("experiment_backend_not_configured")
@@ -309,6 +352,8 @@ class ResearchService:
 
     def result(self, task_id: str, run_id: str) -> dict[str, JsonValue]:
         self._run(task_id, run_id)
+        if self._task(task_id).acceptance.get("generated_plan") is not None:
+            return self._generated_tools().read(task_id, run_id)
         if self.backend is None:
             raise AssetSafetyError("experiment_backend_not_configured")
         return self.backend.read(run_id)
@@ -334,6 +379,8 @@ class ResearchService:
     def validate_files(self, task_id: str, token: int, asset_id: str) -> dict[str, JsonValue]:
         self._asset(task_id, asset_id)
         self._lease(task_id, token)
+        if self._task(task_id).acceptance.get("generated_plan") is not None:
+            return self._generated_tools().validate(task_id, token, asset_id)
         policy = ValidationPolicy.model_validate(self._task(task_id).acceptance.get("file_policy"))
         report = AssetValidator(self.store, self.config.workspace, policy=policy).validate(asset_id)
         self._lease(task_id, token)
@@ -344,6 +391,8 @@ class ResearchService:
         candidate = self.store.fetch(asset_id)
         if candidate.scope != task.signal.scope:
             raise PermissionError("asset_scope_mismatch")
+        if self.config.project_id:
+            self._task(candidate.attempt.task_id)
         return candidate
 
     def _observation_source(self, lease: Lease, candidate: Candidate, lineage: dict[str, JsonValue],
@@ -379,6 +428,8 @@ class ResearchService:
 
     def observe(self, task_id: str, token: int, asset_id: str, run_id: str, purpose: Purpose) -> dict[str, JsonValue]:
         lease = self._lease(task_id, token)
+        if self._task(task_id).acceptance.get("generated_plan") is not None:
+            return _OBJECT.validate_json(self._generated_tools().observe(task_id, token, asset_id, run_id, purpose).model_dump_json())
         candidate = self._asset(task_id, asset_id)
         if purpose == "original" and (candidate.attempt.task_id != task_id or candidate.attempt.agent != self.config.agent):
             raise AssetSafetyError("original_author_identity_mismatch")
@@ -456,10 +507,17 @@ class ResearchService:
                 and (last.scientific_verdict != "passed" or last.execution_state != "succeeded" or not known_effect(last))):
             raise AssetSafetyError("trusted_passed_observation_required_for_completion")
         result: dict[str, JsonValue] = {"asset_id": asset_id, "run_id": run_id,
+                                      "report_id": last.report_id,
                                       "scientific_verdict": last.scientific_verdict,
                                       "execution_state": last.execution_state,
                                       "stage": "evidence_submitted", "approved": False,
                                       "provenance": last.provenance}
+        if self._task(task_id).acceptance.get("generated_plan") is not None:
+            verified = self._generated_tools().read(task_id, run_id)
+            if _OBJECT.validate_json(last.result_json) != verified:
+                raise AssetSafetyError("generated_observation_execution_mismatch")
+            result["generated_assessment"] = verified.get("generated_assessment")
+            result["effect_state"] = verified.get("effect_state")
         if last.source_attempt is not None:
             result.update({"source_swarm_id": last.source_swarm_id,
                            "source_fencing_token": last.source_fencing_token,
@@ -471,6 +529,8 @@ class ResearchService:
 
     def approve(self, task_id: str, token: int, asset_id: str, report_id: str) -> dict[str, JsonValue]:
         self._asset(task_id, asset_id)
+        if self._task(task_id).acceptance.get("generated_plan") is not None:
+            return self._generated_tools().approve(task_id, token, asset_id, report_id)
         policy = ValidationPolicy.model_validate(self._task(task_id).acceptance.get("file_policy"))
         lease = self._lease(task_id, token)
         self.ledger.assert_execution_confirmed(lease)
@@ -483,6 +543,9 @@ class ResearchService:
         return _OBJECT.validate_json(receipt.model_dump_json())
 
     def search(self, query: str, limit: int = 20) -> list[dict[str, JsonValue]]:
+        if self.config.project_id:
+            self._research_action("read")
+            self._authorize_project(self.config.project_id)
         if not 1 <= limit <= 100 or len(query) > 1000:
             raise ValueError("bounded_search_required")
         with self.store.connection() as db:
@@ -491,6 +554,8 @@ class ResearchService:
         results: list[dict[str, JsonValue]] = []
         for asset_id in ids:
             candidate = self.store.fetch(asset_id)
+            if self.config.project_id and not self._task_visible(candidate.attempt.task_id):
+                continue
             target = canonical_scope(Path(self.config.workspace) / candidate.scope)
             if not any(Path(target).is_relative_to(Path(canonical_scope(Path(self.config.workspace) / s)))
                        for s in self.config.authorized_scopes):
@@ -499,7 +564,8 @@ class ResearchService:
                 continue
             results.append({"asset_id": asset_id, "candidate": _OBJECT.validate_json(candidate.model_dump_json()),
                             "state": self.store.state(asset_id),
-                            "research_reports": [_OBJECT.validate_json(r.model_dump_json()) for r in self.store.research_reports(asset_id)],
+                            "research_reports": [_OBJECT.validate_json(r.model_dump_json()) for r in self.store.research_reports(asset_id)
+                                                 if not self.config.project_id or self._task_visible(r.task_id)],
                             "stage": "retrieved", "adopted": False})
             if len(results) >= limit:
                 break
@@ -511,6 +577,8 @@ class ResearchService:
         self.ledger.assert_execution_confirmed(lease)
         task = self._task(task_id)
         candidate = self._asset(task_id, asset_id)
+        if task.acceptance.get("generated_plan") is not None:
+            self._generated_tools().bound_candidate(task_id, token, asset_id)
         claim = candidate.research
         if claim is None or task.acceptance.get("research_claim") != _OBJECT.validate_json(claim.model_dump_json()):
             raise AssetSafetyError("research_condition_mismatch")
@@ -538,9 +606,16 @@ class ResearchService:
         lease = self._lease(task_id, token)
         self.ledger.assert_execution_confirmed(lease)
         candidate = self._asset(task_id, asset_id)
-        policy = ValidationPolicy.model_validate(self._task(task_id).acceptance.get("file_policy"))
+        generated = self._task(task_id).acceptance.get("generated_plan") is not None
+        if generated:
+            self._research_action("apply")
+            self._authorize_project(self.config.project_id)
+            self._generated_tools().bound_candidate(task_id, token, asset_id)
+            policy_version = "generated-isolation-v1"
+        else:
+            policy_version = ValidationPolicy.model_validate(self._task(task_id).acceptance.get("file_policy")).version
         self.store.fetch_approved(asset_id)
-        prepared = AssetApplicator(self.store, self.config.workspace, policy_version=policy.version,
+        prepared = AssetApplicator(self.store, self.config.workspace, policy_version=policy_version,
                                    protected_paths=(self.store.root, Path(self.config.evidence_root), self.ledger.path)).prepare(asset_id, report_id)
         if canonical_scope(prepared.scope) != lease.scope:
             raise AssetSafetyError("application_lease_scope_mismatch")
@@ -596,7 +671,9 @@ class ResearchService:
                 "assets_root": canonical_scope(self.store.root),
                 "budget_path": canonical_scope(self.config.research_budget_path) if self.config.research_budget_path else None,
                 "budget_policy": self.config.research_budget_policy.model_dump(mode="json") if self.config.research_budget_policy else None,
-                "execution_bound": self.config.research_execution_bound.model_dump(mode="json") if self.config.research_execution_bound else None}
+                "execution_bound": self.config.research_execution_bound.model_dump(mode="json") if self.config.research_execution_bound else None,
+                "generated_experiments": self.config.generated_experiments,
+                "max_experiments_per_task": self.config.max_experiments_per_task}
 
     def _research_action(self, action: str) -> None:
         envelope = self.config.research_envelope
@@ -823,6 +900,7 @@ class ResearchService:
         outside the host's authorized scope is hidden) and each collection is
         bounded to ``limit`` with an explicit ``*_truncated`` flag.
         """
+        self._research_action("read")
         if not 1 <= limit <= 1000:
             raise ValueError("limit must be in [1,1000]")
         bound = self._project_id(project_id)
@@ -850,6 +928,75 @@ class ResearchService:
                 "events": [e.model_dump(mode="json") for e in events[:limit]],
                 "events_truncated": len(events) > limit,
                 "research_v1": self.research_snapshot(bound)}
+
+    def research_package(self, project_id: str | None = None, *, limit: int = 100) -> dict[str, JsonValue]:
+        """Read original scoped records for an export; creates no execution or adoption.
+
+        Stored observations and audit results retain their provenance. Every
+        returned run separately reports whether the archive was reread. An
+        incomplete bounded package is explicit and never a completion receipt.
+        """
+        self._research_action("read")
+        if isinstance(limit, bool) or not 1 <= limit <= 1000:
+            raise ValueError("package_limit_must_be_in_1_1000")
+        bound = self._project_id(project_id)
+        context = self.research_context(bound, limit=limit)
+        query, args = self.ledger._local_filter(self.locality)
+        with connection(self.ledger.path) as db:
+            rows = db.execute("SELECT t.* FROM tasks t WHERE " + query +
+                " AND json_extract(t.signal,'$.payload.project_id')=? ORDER BY t.created_at,t.task_id LIMIT ?",
+                [*args, bound, limit + 1]).fetchall()
+            tasks = [self.ledger._record(db, row) for row in rows[:limit]]
+        task_ids = {t.signal.task_id for t in tasks}
+        assets: dict[str, JsonValue] = {}
+        observations: list[JsonValue] = []
+        executions: list[JsonValue] = []
+        audit: list[JsonValue] = []
+        audit_truncated = False
+        for task in tasks:
+            with connection(self.ledger.path) as db:
+                events = db.execute("SELECT sequence,event,at,body FROM task_audit WHERE swarm_id=? AND task_id=? "
+                    "ORDER BY sequence LIMIT ?", (self.config.swarm_id, task.signal.task_id, limit + 1)).fetchall()
+            audit_truncated = audit_truncated or len(events) > limit
+            for event in events[:limit]:
+                body = _OBJECT.validate_json(event["body"])
+                record: dict[str, JsonValue] = {"sequence": event["sequence"], "task_id": task.signal.task_id,
+                    "event": event["event"], "at": event["at"], "body": body}
+                audit.append(record)
+                run_id = body.get("run_id")
+                if event["event"] == "research_execution" and isinstance(run_id, str):
+                    execution: dict[str, JsonValue] = {"task_id": task.signal.task_id, "run_id": run_id,
+                        "audit_sequence": event["sequence"], "recorded_result": body.get("result")}
+                    try:
+                        execution["verified_result"] = self.result(task.signal.task_id, run_id)
+                        execution["archive_status"] = "verified"
+                    except (ValueError, OSError, KeyError) as error:
+                        execution.update({"archive_status": "refused", "refusal": type(error).__name__})
+                    executions.append(execution)
+            asset_ids: set[str] = set()
+            plan = task.acceptance.get("generated_plan")
+            if isinstance(plan, dict) and isinstance(plan.get("candidate_asset_id"), str):
+                asset_ids.add(str(plan["candidate_asset_id"]))
+            for key in ("asset_id", "candidate_asset_id"):
+                value = (task.result or {}).get(key)
+                if isinstance(value, str):
+                    asset_ids.add(value)
+            for asset_id in asset_ids:
+                if asset_id in assets:
+                    continue
+                candidate = self._asset(task.signal.task_id, asset_id)
+                assets[asset_id] = {"asset_id": asset_id, "candidate": candidate.model_dump(mode="json"),
+                                    "stored_state": self.store.state(asset_id)}
+                observations.extend(r.model_dump(mode="json") for r in self.store.research_reports(asset_id)
+                                    if r.task_id in task_ids and self._task_visible(r.task_id))
+        receipts: list[JsonValue] = [_OBJECT.validate_json(r.model_dump_json()) for r in self.store.adoptions()
+                                    if r.context.task_id in task_ids and r.context.swarm_id == self.config.swarm_id]
+        return {"schema_version": "research-package/v1", "project_id": bound, "context": context,
+                "tasks": [t.model_dump(mode="json") for t in tasks], "tasks_truncated": len(rows) > limit,
+                "limit": limit, "assets": list(assets.values()), "persisted_observations": observations,
+                "executions": executions, "task_audit": audit, "audit_truncated": audit_truncated,
+                "adoption_receipts": receipts, "export_performed_external_io": False,
+                "evidence_boundary": "per_record_provenance", "completion_claim": False}
 
     def _task_research(self, task_id: str) -> dict[str, JsonValue]:
         task = self._task(task_id)
@@ -879,26 +1026,12 @@ class ResearchService:
         return task.signal.payload.get("project_id") == project_id
 
     def _research_branches(self, project_id: str) -> tuple[Branch, ...]:
-        """Project branches projected onto the advisory `Branch` contract.
-
-        ``supported_by``/``refuted_by`` are the accepted contribution result ids
-        bound to each branch via the admitted task's proposal payload; a result
-        with no confirmed branch linkage contributes nothing here.
-        """
-        by_branch: dict[str, list[ThreeAxisResult]] = {}
-        for contribution in self.feedback_store.effective_contributions():
-            branch_id = self._contribution_branch(contribution.task_id, project_id)
-            if branch_id is not None and contribution.contribution == "accepted":
-                by_branch.setdefault(branch_id, []).append(contribution)
+        """Append lifecycle transitions; the feedback store alone derives references."""
         branches: list[Branch] = []
         for branch in self.knowledge.branches(project_id):
-            contributions = by_branch.get(branch.branch_id, [])
-            supported = tuple(c.result_id for c in contributions if c.hypothesis == "supported")
-            refuted = tuple(c.result_id for c in contributions if c.hypothesis == "refuted")
             projected = Branch.model_validate({
                 "branch_id": branch.branch_id, "status": branch.status,
-                "parent_id": branch.parent_branch_id, "authorized": True,
-                "supported_by": supported, "refuted_by": refuted})
+                "parent_id": branch.parent_branch_id, "authorized": True})
             for event in self.feedback_store.corrections(branch.branch_id):
                 projected = self.feedback_store.policy.apply_correction(projected, event)
             branches.append(projected)
@@ -933,8 +1066,6 @@ class ResearchService:
         bound = self._project_id(project_id)
         self._authorize_project(bound)
         result = self.feedback_store.advisory(self._research_branches(bound))
-        result["contributions"] = [c.model_dump(mode="json") for c in self.feedback_store.effective_contributions()
-                                   if self._project_result(c, bound)]
         result["project_id"] = bound
         return _OBJECT.validate_python(result)
 
@@ -942,17 +1073,19 @@ class ResearchService:
         """Three-axis/context/project snapshot (research-v1), separate from legacy v0.1."""
         bound = self._project_id(project_id)
         self._authorize_project(bound)
-        branches = self._research_branches(bound)
-        results = [c for c in self.feedback_store.effective_contributions() if self._project_result(c, bound)]
+        advice = self.research_advisory(bound)
+        raw = advice["contributions"]
+        results = [ThreeAxisResult.model_validate(c) for c in raw] if isinstance(raw, list) else []
+        raw_branches = advice["branches"]
+        branches = tuple(Branch.model_validate(b) for b in raw_branches) if isinstance(raw_branches, list) else ()
         feedback = self.feedback_store.policy.snapshot(results, branches)
-        plan = self.feedback_store.policy.opportunities(branches)
         snapshot: dict[str, JsonValue] = dict(feedback)
         snapshot["project_id"] = bound
         snapshot["contributions"] = [c.model_dump(mode="json") for c in self.feedback_store.contributions()
                                      if self._project_result(c, bound)]
         snapshot["effective_contributions"] = [c.model_dump(mode="json") for c in results]
         branch_ids = {b.branch_id for b in branches}
-        result_ids = {c.result_id for c in results}
+        result_ids = {c.result_id for c in self.feedback_store.contributions() if self._project_result(c, bound)}
         snapshot["corrections"] = [c.model_dump(mode="json") for c in self.feedback_store.corrections()
                                    if c.branch_id in branch_ids]
         snapshot["supersessions"] = [c.model_dump(mode="json") for c in self.feedback_store.supersessions()
@@ -960,7 +1093,7 @@ class ResearchService:
         snapshot["trusted_results"] = [c.model_dump(mode="json") for c in self.feedback_store.trusted()
                                        if self._project_result(c, bound)]
         snapshot["branches"] = [b.model_dump(mode="json") for b in branches]
-        snapshot["opportunities"] = _OBJECT.validate_python(plan.model_dump(mode="json"))
+        snapshot["opportunities"] = advice["opportunities"]
         return _OBJECT.validate_python(snapshot)
 
     def record_correction(self, branch_id: str, kind: CorrectionKind, reason: str,
@@ -1100,3 +1233,27 @@ class ResearchService:
             "claim_authority": "TaskLedger"}
         self.ledger.record_event("research_selection", selection, task_id=task.signal.task_id)
         return selection
+
+    def _generated_tools(self) -> GeneratedResearch:
+        if self.generated is None:
+            raise AssetSafetyError("generated_experiment_backend_not_configured")
+        return self.generated
+
+    def prepare_candidate_experiment(self, task_id: str, token: int, plan: dict[str, JsonValue],
+                                     files: dict[str, str] | None = None, *, asset_id: str | None = None,
+                                     purpose: Purpose = "original") -> dict[str, JsonValue]:
+        from orchestration.experiments.generated import GeneratedExperimentPlan
+        return self._generated_tools().prepare(task_id, token, GeneratedExperimentPlan.model_validate(plan),
+                                               files, asset_id=asset_id, purpose=purpose)
+
+    def admit_candidate_experiment(self, task_id: str, token: int) -> dict[str, JsonValue]:
+        return self._generated_tools().admit(task_id, token)
+
+
+def build_service(config: HostConfig) -> ResearchService:
+    """Shared production factory used by stdio and the product's official adapter."""
+    backend: ExperimentBackend | None = None
+    if config.experiment_backend:
+        from swarm.research.experiments import OfficialExperiments
+        backend = OfficialExperiments(config)
+    return ResearchService(config, backend=backend)

@@ -27,6 +27,19 @@ def create_server(service: ResearchService) -> FastMCP:
         return service.choose(task_id, reason=reason, limit=limit)
 
     @mcp.tool()
+    async def prepare_candidate_experiment(task_id: str, token: int, plan: dict[str, JsonValue],
+                                            files: dict[str, str] | None = None, asset_id: str | None = None,
+                                            purpose: Purpose = "original") -> dict[str, JsonValue]:
+        """Check generated Python and freeze an approved plan; candidate text is never host-executed."""
+        return await asyncio.to_thread(service.prepare_candidate_experiment, task_id, token, plan, files,
+                                       asset_id=asset_id, purpose=purpose)
+
+    @mcp.tool()
+    def admit_candidate_experiment(task_id: str, token: int) -> dict[str, JsonValue]:
+        """Recheck frozen plan, verified isolation and project budget; execution is a separate action."""
+        return service.admit_candidate_experiment(task_id, token)
+
+    @mcp.tool()
     def project_context(task_id: str) -> dict[str, JsonValue]:
         """Read task acceptance, paper/evidence references and project context."""
         return service.context(task_id)
@@ -60,7 +73,7 @@ def create_server(service: ResearchService) -> FastMCP:
     @mcp.tool()
     async def research_experiment(action: Literal["request", "run", "result"], task_id: str,
                                   token: int | None = None, run_id: str | None = None) -> dict[str, JsonValue]:
-        """Inspect registered environment, run once in a fresh sandbox, or read durable result; never replay unknown."""
+        """Inspect a frozen plan, execute via the selected host backend, or reread its archive; never replay unknown."""
         if action == "result":
             if run_id is None or token is not None:
                 raise ValueError("result_requires_run_id_only")
@@ -113,7 +126,7 @@ def create_server(service: ResearchService) -> FastMCP:
         return service.apply(task_id, token, asset_id, report_id, execution_id)
 
     @mcp.tool()
-    def research_project(action: Literal["create", "read"], project_id: str,
+    def research_project(action: Literal["create", "read", "export"], project_id: str,
                          goal: str | None = None, allowed_domains: list[str] | None = None,
                          data_bounds: dict[str, str] | None = None,
                          milestones: list[str] | None = None) -> dict[str, JsonValue]:
@@ -123,6 +136,8 @@ def create_server(service: ResearchService) -> FastMCP:
                 raise ValueError("create_requires_goal")
             return service.create_project(project_id, goal, allowed_domains=tuple(allowed_domains or ()),
                                           data_bounds=data_bounds or {}, milestones=tuple(milestones or ()))
+        if action == "export":
+            return service.research_package(project_id)
         return service.research_context(project_id)
 
     @mcp.tool()
