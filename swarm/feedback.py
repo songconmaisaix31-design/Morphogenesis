@@ -13,9 +13,9 @@ from typing import Literal, cast
 from pydantic import Field, JsonValue, TypeAdapter
 
 from contracts.base import Contract
-from local_assets.models import AdoptionReceipt, Candidate, ConsumptionExecution, ValidationReport
+from local_assets.models import AdoptionReceipt, Candidate, ConsumptionExecution, PromotionReceipt, ValidationReport
 from local_assets.paths import no_links
-from local_assets.research import known_effect
+from local_assets.research import known_effect, scientific_plan
 from local_assets.research_models import ResearchObservation
 from swarm.models import Locality, RunLimits, TaskRecord
 from swarm.task_ledger import TaskLedger, connection
@@ -43,8 +43,8 @@ def readonly(path: Path) -> Iterator[sqlite3.Connection]:
     # Immutable mode is safe only for a checkpointed file, not an active WAL
     # (it ignores uncheckpointed pages). Never checkpoint or create sidecars
     # in somebody else's archive. An active archive explicitly needs review.
-    wal = path.with_name(path.name + "-wal")
-    if wal.exists() and wal.stat().st_size:
+    sidecars = [path.with_name(path.name + suffix) for suffix in ("-wal", "-journal")]
+    if any(p.exists() and p.stat().st_size for p in sidecars):
         raise ValueError("readonly_policy_source_requires_checkpointed_archive")
     before = path.stat()
     db = sqlite3.connect(path.resolve().as_uri() + "?mode=ro&immutable=1",
@@ -55,7 +55,7 @@ def readonly(path: Path) -> Iterator[sqlite3.Connection]:
         db.execute("BEGIN")
         yield db
         after = path.stat()
-        if (wal.exists() and wal.stat().st_size or
+        if (any(p.exists() and p.stat().st_size for p in sidecars) or
                 (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns)):
             raise ValueError("policy_source_changed_during_read")
     finally:
@@ -125,15 +125,9 @@ def trusted_facts(ledger: TaskLedger, assets_root: Path) -> list[FeedbackFact]:
         for row in rows:
             task = ledger._record(db, row)
             result = task.result or {}
-            completed = db.execute("SELECT at,body FROM task_audit WHERE swarm_id=? AND task_id=? "
-                                   "AND event='completed' ORDER BY sequence", (ledger.swarm_id, task.signal.task_id)).fetchall()
-            anchors = [r[0] for r in completed if _OBJECT.validate_json(r[1]).get("result_id") == task.result_id
-                       and _OBJECT.validate_json(r[1]).get("token") == task.token]
-            attempt = db.execute("SELECT worker_id,outcome FROM task_attempts WHERE swarm_id=? AND task_id=? AND token=?",
-                                 (ledger.swarm_id, task.signal.task_id, task.token)).fetchone()
-            if len(anchors) != 1 or attempt is None or attempt[0] != task.owner or attempt[1] != "completed" or not task.owner:
+            at = _completed_at(db, task)
+            if at is None or not task.owner:
                 continue
-            at = float(anchors[0])
             report: ValidationReport | ResearchObservation | None = None
             kind: Literal["validated_completion", "scientific_result", "scientific_adoption"] = "validated_completion"
             provenance: Literal["live", "replay", "mock", "contract_local"] = "contract_local"
@@ -158,10 +152,9 @@ def trusted_facts(ledger: TaskLedger, assets_root: Path) -> list[FeedbackFact]:
             else:
                 if not task.effect_applied or result.get("applied") is not True:
                     continue
-                report_row = assets.execute("SELECT body FROM reports WHERE report_id=?", (result.get("report_id"),)).fetchone()
-                if report_row is None:
+                validation = _validation(assets, result)
+                if validation is None:
                     continue
-                validation = ValidationReport.model_validate_json(report_row[0])
                 candidate = Candidate.model_validate_json(validation.candidate_json)
                 # Ordinary Worker persists its pre-claim, zero-based AttemptId;
                 # research hosts use the post-claim count. Neither is the lease token.
@@ -171,10 +164,8 @@ def trusted_facts(ledger: TaskLedger, assets_root: Path) -> list[FeedbackFact]:
                 # applicator's expiry guard. Do not compare different domains or
                 # revalidate a historical accepted result against today's clock.
                 if (not validation.passed or validation.expires_at <= validation.created_at
-                        or validation.report_id != result.get("report_id")
                         or validation.asset_id != result.get("candidate_asset_id")
-                        or validation.attempt != candidate.attempt or candidate.attempt.task_id != task.signal.task_id
-                        or candidate.attempt.attempt != expected_attempt or candidate.scope != task.signal.scope
+                        or validation.attempt != candidate.attempt or candidate.scope != task.signal.scope
                         or _OBJECT.validate_json(validation.policy_json) != task.acceptance.get("validation_policy", task.acceptance.get("file_policy"))):
                     continue
                 if (result.get("worker_id", task.owner) != task.owner or result.get("fencing_token", task.token) != task.token
@@ -190,12 +181,18 @@ def trusted_facts(ledger: TaskLedger, assets_root: Path) -> list[FeedbackFact]:
                                 and r.fencing_token == task.token and _trusted_science(db, task, r, {
                                     "scientific_verdict": r.scientific_verdict, "execution_state": r.execution_state,
                                     "provenance": r.provenance}, at)
-                                and _candidate_matches(assets, r.asset_id, Candidate.model_validate_json(r.candidate_json))]
+                                and _candidate_matches(assets, r.asset_id, Candidate.model_validate_json(r.candidate_json))
+                                and _application_source(db, assets, ledger, task, candidate, r, adoption_id)]
                     if not verified:
                         continue
                     scientific = max(verified, key=lambda r: (r.created_at, r.report_id))
                     scientific_report_id, provenance = scientific.report_id, scientific.provenance
                     kind = "scientific_adoption" if adoption_id is not None else "scientific_result"
+                elif (candidate.attempt.task_id != task.signal.task_id or candidate.attempt.attempt != expected_attempt
+                      or "report_id" not in result):
+                    # Historical report lookup is only for the scientific host's
+                    # approved apply chain, never an ordinary Worker shortcut.
+                    continue
                 # The completed authority supplies worker/token; the report is bound to
                 # the identical candidate/result and validated policy, never a caller flag.
                 report = validation
@@ -208,6 +205,89 @@ def trusted_facts(ledger: TaskLedger, assets_root: Path) -> list[FeedbackFact]:
                                           at=at, report_id=report.report_id, scientific_report_id=scientific_report_id,
                                           adoption_id=adoption_id, provenance=provenance))
     return sorted(facts, key=lambda fact: (fact.at, fact.source_id, fact.kind))
+
+
+def _completed_at(db: sqlite3.Connection, task: TaskRecord) -> float | None:
+    if task.status != "completed" or task.result_id is None or not task.owner:
+        return None
+    confirmed = db.execute("SELECT unconfirmed_request_id FROM tasks WHERE swarm_id=? AND task_id=?",
+                           (task.swarm_id, task.signal.task_id)).fetchone()
+    if confirmed is None or confirmed[0] is not None:
+        return None
+    completed = db.execute("SELECT at,body FROM task_audit WHERE swarm_id=? AND task_id=? AND event='completed'",
+                           (task.swarm_id, task.signal.task_id)).fetchall()
+    anchors = [r[0] for r in completed if _OBJECT.validate_json(r[1]).get("result_id") == task.result_id
+               and _OBJECT.validate_json(r[1]).get("token") == task.token]
+    attempt = db.execute("SELECT worker_id,outcome FROM task_attempts WHERE swarm_id=? AND task_id=? AND token=?",
+                         (task.swarm_id, task.signal.task_id, task.token)).fetchone()
+    return float(anchors[0]) if len(anchors) == 1 and attempt is not None and tuple(attempt) == (task.owner, "completed") else None
+
+
+def _validation(assets: sqlite3.Connection, result: dict[str, JsonValue]) -> ValidationReport | None:
+    report_id = result.get("report_id")
+    approval: PromotionReceipt | None = None
+    if "report_id" not in result:
+        # Original ResearchService.apply omitted report_id. The existing unique
+        # approval supplies its precise report; do not choose a passing report.
+        row = assets.execute("SELECT report_id,body FROM approvals WHERE asset_id=?",
+                             (result.get("candidate_asset_id"),)).fetchone()
+        if row is None:
+            return None
+        approval = PromotionReceipt.model_validate_json(row[1])
+        report_id = row[0]
+        if approval.report_id != report_id or approval.asset_id != result.get("candidate_asset_id"):
+            return None
+    row = assets.execute("SELECT body FROM reports WHERE report_id=?", (report_id,)).fetchone()
+    if row is None:
+        return None
+    report = ValidationReport.model_validate_json(row[0])
+    if (report.report_id != report_id or approval is not None and (
+            approval.policy_version != report.policy_version
+            or not report.created_at <= approval.promoted_at < report.expires_at)):
+        return None
+    return report
+
+
+def _application_source(db: sqlite3.Connection, assets: sqlite3.Connection, ledger: TaskLedger,
+                        task: TaskRecord, candidate: Candidate, report: ResearchObservation,
+                        adoption_id: str | None) -> bool:
+    source_candidate = Candidate.model_validate_json(report.candidate_json)
+    if adoption_id is not None:
+        execution_row = assets.execute("SELECT body FROM consumptions WHERE execution_id=?", (adoption_id,)).fetchone()
+        if execution_row is None:
+            return False
+        execution = ConsumptionExecution.model_validate_json(execution_row[0])
+        if (report.purpose != "inheritance" or report.asset_id != execution.asset_id
+                or execution.candidate != candidate or source_candidate.research != candidate.research
+                or candidate.attempt.task_id != task.signal.task_id or candidate.attempt.attempt != task.attempts):
+            return False
+    elif source_candidate != candidate or report.asset_id != (task.result or {}).get("candidate_asset_id"):
+        return False
+    elif report.purpose == "original":
+        return candidate.attempt.task_id == task.signal.task_id
+    elif report.purpose != "reproduction":
+        return False
+    # Reproduction observes the author's Candidate; inheritance observes that
+    # same source while applying the recorded child. Bind it to the completed
+    # author and its original run, not the consumer's Candidate AttemptId.
+    source_id = source_candidate.attempt.task_id
+    if source_id not in task.dependencies:
+        return False
+    row = db.execute("SELECT * FROM tasks WHERE swarm_id=? AND task_id=?", (task.swarm_id, source_id)).fetchone()
+    if row is None:
+        return False
+    source = ledger._record(db, row)
+    source_at = _completed_at(db, source)
+    result = source.result or {}
+    if source_at is None or result.get("stage") != "evidence_submitted" or result.get("asset_id") != report.asset_id:
+        return False
+    originals = [ResearchObservation.model_validate_json(r[0]) for r in assets.execute(
+        "SELECT body FROM research_reports WHERE asset_id=?", (report.asset_id,))]
+    return any(r.purpose == "original" and (r.task_id, r.worker_id, r.fencing_token, r.run_id) ==
+               (source_id, source.owner, source.token, result.get("run_id"))
+               and Candidate.model_validate_json(r.candidate_json) == source_candidate
+               and scientific_plan(r.plan_json) == scientific_plan(report.plan_json)
+               and r.provenance == report.provenance and _trusted_science(db, source, r, result, source_at) for r in originals)
 
 
 def _trusted_science(db: sqlite3.Connection, task: TaskRecord, report: ResearchObservation,
@@ -281,6 +361,8 @@ def _adoption(db: sqlite3.Connection, task: TaskRecord, result: dict[str, JsonVa
             or receipt.candidate_asset_id != result.get("candidate_asset_id")
             or receipt.asset_id not in TypeAdapter(list[str]).validate_python(result.get("consumed_asset_ids", []))
             or context.input_context != result.get("input_context")
+            or context.execution_id != execution_id
+            or not _candidate_matches(db, execution.candidate_asset_id, execution.candidate)
             or (context.swarm_id, context.task_id, context.worker_id, context.fencing_token, context.scope) !=
             (task.swarm_id, task.signal.task_id, task.owner, task.token, task.signal.scope)):
         return None
