@@ -1,6 +1,6 @@
 # 策略 v0.1 独立累计集成与验收（I，1002）
 
-当前状态：**R2 验收 BLOCKED，策略 v0.1 NOT_FROZEN**。固定累计核心 SOURCE `54bb8d0897eb22c5e8a52ea158606388fe64064a` 与最终产品 SOURCE `e806f667ad9f52409364618472b5f8a6b1c922b0` 已正常推送并 exact 核对，独立新安装/原完整产品53/正式CLI-MCP/历史只读复核及核心本地1211均通过；最终54bb原完整 CI `36957851632` Linux全门PASS，Windows原墙钟续租测试失败、后续工程门SKIPPED，五项停止条件未齐，不冻结。R1 核心 `9ceb3aa` / 产品 `35934f1` 保持失败候选，其真实反馈 RED 和本地首全量 1192 PASS / 2 FAIL / 5 SKIP 不被后续通过覆盖。新增科研、收费模型与 main 发布 NOT_RUN。
+当前状态：**R3 新组合独立验收进行中，策略 v0.1 尚未冻结**。原Owner续租节奏最小修复已精确累计为 SOURCE `7062a632b8c625c05b35bdec4c36fce63a31c2a4` 并正常推送、remote exact；新原完整Windows/Linux workflow及新私有环境完整核心pytest正在运行，A3最终产品重pin待交。R2核心54bb/产品e806保持Windows原墙钟续租工程RED、NOT_FROZEN，R1核心9ceb/产品359保持真实反馈RED及本地首全量1192 PASS / 2 FAIL / 5 SKIP，不被新结果重标。新增科研、收费模型与main发布NOT_RUN。
 
 ## 范围与不可变输入
 
@@ -115,3 +115,13 @@ Windows唯一失败为原 `tests/swarm/test_worker_runtime.py::test_real_wall_cl
 | 版本、安装与工程一致 | 来源/产品pin/字节/原audit/checker及Linux全门PASS；Windows pytest RED / 后续五门SKIPPED，**整体BLOCKED** |
 
 因此不签策略v0.1冻结，保留新SOURCE作为待原Owner诊断的失败验收候选；完整修复若需要新源码，须继续原Owner交付、I累计SOURCE与A产品pin及独立全门，不由I修改领域。100候选窗口按原created_at/task_id，窗口外不评分/探索，不宣称全局公平/最优。未启动新科研、native自主选择/新模型、外部Hub/EvoMap、额外Agent/案例/调度，未修改全局auth/HOME或main/tag；原科学usage/cost unknown/null不变。D最终版本与领域验收文档由D同Owner后续Task写，I只维护本报告。
+
+## R3 原Owner修复与新累计SOURCE
+
+主控保留原I Task active，C同Owner在同worktree/branch窄范围诊断。新受控真实SQLite/虚拟IO边界首次1 FAIL / 1 PASS：TTL2s，renew事务完成前耗时1.5s后返回仍有效，但旧续租线程又等待完整TTL/3使下次调用过期；>TTL的2.5s分支正确拒绝。C SOURCE `5e24715c7002d254dd908aea53ce82e86c12ebf3` 仅 `worker_loop._Renewal._run` 使用同次调用monotonic耗时扣除后续固定等待，另加三个新有意义边界用例。原真实墙钟测试、TTL2、过期guard、TaskLedger、lease.py、Router、fsync/锁及两原checker/workflow/poetry.lock无改；2.5s过期与IOerror仍fail closed、不自动retry。此证实受限节奏缺陷，不证明原Windows2.332s全部原因或所有OS停顿均已解决；原R2首RED保留。
+
+精确普通合入5e及主控治理 `ffb39ca3dfe002288b491371d37245350f738b65`，新累计核心 SOURCE **`7062a632b8c625c05b35bdec4c36fce63a31c2a4`** 已normalpush（无skip）、ls-remote exact/clean/源码冻结，并立即交root供A3 pin。C随后docs-only REPORT `992670b37b1bb8c8a04f024b4af8e5ba8dfe668c` 单独普通合入，仅本轨C文档差异，不替换CORE pin。原54bb与e806不再作为最终候选，但原成功与失败证据均不改。
+
+I两次仅文档阶段push意外自动触发 `36959528356`（6709报告）和 `36959685712`（b2dee阻塞报告）；root只取消这两次冗余运行，官方runlist实测均CANCELLED，不算业务修复或首RED替代。原54bb失败run未更改。后续报告commit用 `[skip ci]`，保持原workflow内容不变；新的业务7062正常push触发原完整run **`36960486155`**，精确head7062，Windows job110692862238 / Linux job110692862438进行中。
+
+R3私有根 `C:/Users/DW/AppData/Local/Temp/morph-policy-I-r3-1002-29cba60db480`：全新LF Git archive、全新CPython3.13.13私有venv、原poetry.lock重新export/hash-sync COPY、全新原npm锁依赖、完整sdist/wheel build与实际noneditable COPY wheel安装；不复用R1/R2/Owner环境或产物。`logs/01-core-export.txt` / 02依赖 / 03npm / 04build / 05typecheck（121源码strict）/ 06SDK / 07真实wheel安装 / 08安装Node依赖 / 09隔离distribution（13包/verifier/Node）均exit0。按原source workflow在新archive cwd的完整pytest为 `11-core-workflow-full-pytest.txt`，正在运行，不预写PASS；不再重复已知非wheel部署运维模块的额外neutral -I全core收集。
