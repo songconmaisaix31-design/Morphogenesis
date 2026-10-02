@@ -23,6 +23,12 @@ def test_official_stdio_generated_member_loop_and_independent_acceptance(tmp_pat
         result = await session.call_tool(name, args)
         assert not result.isError, result
         assert isinstance(result.structuredContent, dict)
+        if name == "lease_task":
+            # The official SDK wraps this tool's dict | bool | None return type.
+            assert set(result.structuredContent) == {"result"}
+            held = result.structuredContent["result"]
+            assert isinstance(held, dict), result
+            return held
         return result.structuredContent
 
     async def run() -> None:
