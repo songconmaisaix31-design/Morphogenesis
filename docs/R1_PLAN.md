@@ -6,10 +6,10 @@
 
 | 长期轨 | 单 Worker / Orca worktree / 分支后缀 | 独占 write_paths | FR / AT |
 |---|---|---|---|
-| A 共同研究与正式 MCP | Codex / morph-r1-research-1003 / 同名 | `swarm/research/**`（除 case.py、feedback*.py、policy*.py）；`tests/research/**`（除 test_generated*.py、test_research_policy*.py）；`docs/tracks/r1-research.md` | FR01-11,25-28；AT01-04,09,14-15 |
-| B 动态候选、隔离、评价与继承 | Codex / morph-r1-experiments-1003 / 同名 | `orchestration/experiments/**`, `local_assets/**`, `swarm/research/case.py`, `tests/experiments/**`, `tests/local_assets/**`, `tests/research/test_generated*.py`, `docs/tracks/r1-experiments.md`, 核心 `pyproject.toml`/`poetry.lock`/`THIRD_PARTY_NOTICES.md`（依赖必要时） | FR15-20,26；AT05-07,12-15,17-18 |
-| C 贡献与研究路线政策 | Codex / morph-r1-policy-1003 / 同名 | `swarm/router.py`, `swarm/pheromone.py`, `swarm/feedback.py`, `swarm/worker_loop.py`, `swarm/research/feedback*.py`, `swarm/research/policy*.py`, `tests/swarm/**`, `tests/research/test_research_policy*.py`, `docs/tracks/r1-policy.md` | FR12-14,24；AT08-11,14-15 |
-| P 产品入口与三页 | Codex / research-r1-product-1003 / 同名，私库 | 私库全部产品源码/前端/测试/依赖锁/README/第三方说明和 `docs/tracks/r1-product.md`；排除治理文件与 Spec | FR01-05,09-11,20-28；AT01-02,04,09,14-18 |
+| A 共同研究与正式 MCP | OpenCode / morph-r1-research-1003 / 同名 | `swarm/research/**`（除 case.py、feedback*.py、policy*.py）；`tests/research/**`（除 test_generated*.py、test_research_policy*.py）；`docs/tracks/r1-research.md` | FR01-11,25-28；AT01-04,09,14-15 |
+| B 动态候选、隔离、评价与继承 | OpenCode / morph-r1-experiments-1003 / 同名 | `orchestration/experiments/**`, `local_assets/**`, `swarm/research/case.py`, `tests/experiments/**`, `tests/local_assets/**`, `tests/research/test_generated*.py`, `docs/tracks/r1-experiments.md`, 核心 `pyproject.toml`/`poetry.lock`/`THIRD_PARTY_NOTICES.md`（依赖必要时） | FR15-20,26；AT05-07,12-15,17-18 |
+| C 贡献与研究路线政策 | OpenCode / morph-r1-policy-1003 / 同名 | `swarm/router.py`, `swarm/pheromone.py`, `swarm/feedback.py`, `swarm/worker_loop.py`, `swarm/research/feedback*.py`, `swarm/research/policy*.py`, `tests/swarm/**`, `tests/research/test_research_policy*.py`, `docs/tracks/r1-policy.md` | FR12-14,24；AT08-11,14-15 |
+| P 产品入口与三页 | OpenCode / research-r1-product-1003 / 同名，私库 | 私库全部产品源码/前端/测试/依赖锁/README/第三方说明和 `docs/tracks/r1-product.md`；排除治理文件与 Spec | FR01-05,09-11,20-28；AT01-02,04,09,14-18 |
 | I 最后独立集成（轨道完成后派） | Codex / 核心 morph-r1-integration-1003；产品由独立安装验收使用 P 最终源码 | exact merge、`tests/integration/**`, `docs/tracks/r1-integration.md`，少量导入/配置/类型/路由胶水；领域问题退原 Worker | 全部 AT 的适用 L0/L1；L2 单列 |
 
 主控只写治理：AGENTS、docs/PLAN、docs/R1_PLAN、docs/STATUS、docs/DECISIONS、docs/ACCEPTANCE、docs/source 指针及用户 Spec 存档；不写业务代码。每轨固定同一 Agent/worktree/branch，开发、测试、返修和文档持续由原所有者负责。跨轨发 Handoff，禁止修改他轨文件。采用普通精确 SHA merge，无 cherry-pick/force push。
