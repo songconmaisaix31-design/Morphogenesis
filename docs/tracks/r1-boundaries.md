@@ -412,3 +412,54 @@ trusted three-axis projection and original consumption/adoption remain under
 review. Coordinator `msg_d7c25aad3900` permits explicit isolated mock L1 adoption
 only through the existing chain, requiring provenance retention and default-live,
 mixed-mode and reopen refusal checks. No real science or probe was authorized.
+
+## Exact host, SDK and generated-feedback stage verification
+
+Coordinator `msg_6e9cb55ceec4` allows sequential Q pure-fixture sets of at most
+100 tests in the existing private environment. Process-only BLAS limits remain
+one; the autouse process/socket guards remain active. The following independent
+checks use exact archives, not Owner working files. SOURCE
+`71c46424d569f2967901684fa2c1c3c58dc71e33` preserves all raw outcomes and tests.
+
+| Exact source | Q pytest files | Result |
+| --- | --- | --- |
+| A `8fc90a9a34d3b47ced952510ea53ce2412dc38ca` | `test_a_host_boundaries.py test_a_research_policy_boundaries.py test_a_project_budget_boundaries.py` | First **35 passed / 2 failed**, 10.95s; bound legitimate fixtures **37 passed**, 13.49s |
+| B `e8e16a5b9e755a94f8587b76ba9fc288f218b8af` | `test_b_generated_boundaries.py test_b_successor_authority.py test_b_sdk_configuration.py test_b_probe_configuration.py test_b_input_binding.py test_b_configured_sdk_boundary.py` | **52 passed**, 2.41s |
+| C `d7e561f9b4d6155316f12471de050c09b12471b4` | `test_c_feedback_boundaries.py test_c_advisory_binding.py test_c_generated_trust.py` | First **40 passed / 1 failed**, 10.91s; generated12 after explicit immutable-write assertion **12 passed**, 5.61s |
+
+Commands use `.venv-q/Scripts/python.exe -m pytest` with the paths above under
+`tests/integration/r1_security/`, followed by `-q --tb=short`, and the matching
+`R1_SECURITY_SOURCE` archive. No failed output was replaced.
+
+A's two first failures identify Q legitimate-fixture gaps under its stronger
+contract: the authorized MCP task lacked a project payload and the sleep/reopen
+positive cited nonexistent notes. Q adds the actual project identity and first
+persists the two notes through `submit_note`; every prior business assertion is
+unchanged. Six project-budget cases independently pass, including a real
+BudgetLedger hold after reserve/begin interruption, unknown effects and worker,
+branch, task or database replacement. These are inert boundary calls, not paid
+or scientific executions.
+
+B now passes all historical29, data/candidate-binding8 and configured-SDK15.
+The SDK positive captures one actual supported `SandboxSync.create` request
+with its effective image, resource and network policy, stopping at the injected
+boundary; twelve configuration substitutions and two post-prepare mutations
+refuse before SDK creation. This closes the bounded d175 first RED cases, not
+live OpenSandbox acceptance.
+
+C's generated positives bind actual original TaskLedger tasks, claims, fenced
+execution audit, original report rows, frozen host criteria and deterministic
+raw archives. Both supported and refuted results require a separate review
+task/actor/run/sandbox, contribute once, change advice and survive reopen.
+Crashes, unknown execution/effect, same reviewer/sandbox, absent review and late
+criteria are refused. Raw-output/evaluation tampering cannot obtain credit.
+The last initial failure was SQLite rejecting Q's attempted reviewer substitution
+with `immutable_local_evidence`; Q now asserts that rejection and unchanged
+original row/trust, instead of assuming the protected write succeeds. Original
+Handoff `msg_4e0faa41eb69` and coordinator result `msg_da85c55e6dc5` preserve
+the distinction between fixture repair and domain failure.
+
+This stage is contract_local. B's newly delivered mock inheritance/adoption
+SOURCE `d0c834fd381fc292443bf85c5ce1e91043143516`, A's complete generated
+formal service chain, P's configured factory and final combined exact candidate
+remain to be independently checked. L2/L3 and external materials remain NOT_RUN.
