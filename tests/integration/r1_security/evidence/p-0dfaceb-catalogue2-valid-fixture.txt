@@ -1,0 +1,20 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_ test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[False] _
+tests\integration\r1_security\test_p_registered_boundaries.py:113: in test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface
+    server = registered_mcp.create_registered_server(selected)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\p-0dfaceb-lf\src\morph_research\registered_mcp.py:18: in create_registered_server
+    raise PermissionError("registered_case_mcp_requires_legacy_host")
+E   PermissionError: registered_case_mcp_requires_legacy_host
+_ test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[True] _
+tests\integration\r1_security\test_p_registered_boundaries.py:113: in test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface
+    server = registered_mcp.create_registered_server(selected)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\p-0dfaceb-lf\src\morph_research\registered_mcp.py:18: in create_registered_server
+    raise PermissionError("registered_case_mcp_requires_legacy_host")
+E   PermissionError: registered_case_mcp_requires_legacy_host
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[False]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[True]
+2 failed, 19 deselected in 2.17s

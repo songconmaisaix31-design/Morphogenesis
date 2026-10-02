@@ -1,0 +1,88 @@
+FFFF..F.F...FFFF..FF.                                                    [100%]
+================================== FAILURES ===================================
+_ test_original_host_binding_survives_product_mcp_module_selection[registered-codex] _
+tests\integration\r1_security\test_p_registered_boundaries.py:68: in test_original_host_binding_survives_product_mcp_module_selection
+    assert plan.host_binding == original.host_binding, "product module lost the original core HostBinding"
+E   AssertionError: product module lost the original core HostBinding
+E   assert None == HostBinding(agent=AgentId(role='builder', instance=0), worker_id='q-legacy-member', swarm_id='q-legacy', config_path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur0/host.json'))
+E    +  where None = LaunchPlan(runtime='codex', mode='headless', argv=('q-native-never-executed', '-c', 'mcp_servers={}', '-c', 'default_p...t_binding_sur0/workspace'), stdin_text='Q inert planning fixture', mcp_config=None, session_id=None, host_binding=None).host_binding
+E    +  and   HostBinding(agent=AgentId(role='builder', instance=0), worker_id='q-legacy-member', swarm_id='q-legacy', config_path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur0/host.json')) = LaunchPlan(runtime='codex', mode='headless', argv=('q-native-never-executed', '-c', 'sandbox_mode="read-only"', '-c', ..._path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur0/host.json'))).host_binding
+_ test_original_host_binding_survives_product_mcp_module_selection[registered-claude] _
+tests\integration\r1_security\test_p_registered_boundaries.py:68: in test_original_host_binding_survives_product_mcp_module_selection
+    assert plan.host_binding == original.host_binding, "product module lost the original core HostBinding"
+E   AssertionError: product module lost the original core HostBinding
+E   assert None == HostBinding(agent=AgentId(role='builder', instance=0), worker_id='q-legacy-member', swarm_id='q-legacy', config_path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur1/host.json'))
+E    +  where None = LaunchPlan(runtime='claude', mode='headless', argv=('q-native-never-executed', '--mcp-config', 'C:\\Users\\DW\\AppData...HONSAFEPATH': '1', 'PYTHONNOUSERSITE': '1', 'PYTHONPATH': '', 'PYTHONHOME': ''}}}}, session_id=None, host_binding=None).host_binding
+E    +  and   HostBinding(agent=AgentId(role='builder', instance=0), worker_id='q-legacy-member', swarm_id='q-legacy', config_path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur1/host.json')) = LaunchPlan(runtime='claude', mode='headless', argv=('q-native-never-executed', '--mcp-config', 'C:\\Users\\DW\\AppData..._path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur1/host.json'))).host_binding
+_ test_original_host_binding_survives_product_mcp_module_selection[choice-codex] _
+tests\integration\r1_security\test_p_registered_boundaries.py:68: in test_original_host_binding_survives_product_mcp_module_selection
+    assert plan.host_binding == original.host_binding, "product module lost the original core HostBinding"
+E   AssertionError: product module lost the original core HostBinding
+E   assert None == HostBinding(agent=AgentId(role='builder', instance=0), worker_id='q-legacy-member', swarm_id='q-legacy', config_path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur2/host.json'))
+E    +  where None = LaunchPlan(runtime='codex', mode='headless', argv=('q-native-never-executed', '-c', 'mcp_servers={}', '-c', 'default_p...t_binding_sur2/workspace'), stdin_text='Q inert planning fixture', mcp_config=None, session_id=None, host_binding=None).host_binding
+E    +  and   HostBinding(agent=AgentId(role='builder', instance=0), worker_id='q-legacy-member', swarm_id='q-legacy', config_path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur2/host.json')) = LaunchPlan(runtime='codex', mode='headless', argv=('q-native-never-executed', '-c', 'sandbox_mode="read-only"', '-c', ..._path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur2/host.json'))).host_binding
+_ test_original_host_binding_survives_product_mcp_module_selection[choice-claude] _
+tests\integration\r1_security\test_p_registered_boundaries.py:68: in test_original_host_binding_survives_product_mcp_module_selection
+    assert plan.host_binding == original.host_binding, "product module lost the original core HostBinding"
+E   AssertionError: product module lost the original core HostBinding
+E   assert None == HostBinding(agent=AgentId(role='builder', instance=0), worker_id='q-legacy-member', swarm_id='q-legacy', config_path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur3/host.json'))
+E    +  where None = LaunchPlan(runtime='claude', mode='headless', argv=('q-native-never-executed', '--mcp-config', 'C:\\Users\\DW\\AppData...HONSAFEPATH': '1', 'PYTHONNOUSERSITE': '1', 'PYTHONPATH': '', 'PYTHONHOME': ''}}}}, session_id=None, host_binding=None).host_binding
+E    +  and   HostBinding(agent=AgentId(role='builder', instance=0), worker_id='q-legacy-member', swarm_id='q-legacy', config_path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur3/host.json')) = LaunchPlan(runtime='claude', mode='headless', argv=('q-native-never-executed', '--mcp-config', 'C:\\Users\\DW\\AppData..._path=WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-548/test_original_host_binding_sur3/host.json'))).host_binding
+_ test_product_module_cannot_bypass_original_config_workspace_refusal[relative_config-registered-codex] _
+tests\integration\r1_security\test_p_registered_boundaries.py:91: in test_product_module_cannot_bypass_original_config_workspace_refusal
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_product_module_cannot_bypass_original_config_workspace_refusal[relative_config-choice-codex] _
+tests\integration\r1_security\test_p_registered_boundaries.py:91: in test_product_module_cannot_bypass_original_config_workspace_refusal
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_product_module_cannot_bypass_original_config_workspace_refusal[foreign_workspace-registered-codex] _
+tests\integration\r1_security\test_p_registered_boundaries.py:91: in test_product_module_cannot_bypass_original_config_workspace_refusal
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_product_module_cannot_bypass_original_config_workspace_refusal[foreign_workspace-registered-claude] _
+tests\integration\r1_security\test_p_registered_boundaries.py:91: in test_product_module_cannot_bypass_original_config_workspace_refusal
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_product_module_cannot_bypass_original_config_workspace_refusal[foreign_workspace-choice-codex] _
+tests\integration\r1_security\test_p_registered_boundaries.py:91: in test_product_module_cannot_bypass_original_config_workspace_refusal
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_product_module_cannot_bypass_original_config_workspace_refusal[foreign_workspace-choice-claude] _
+tests\integration\r1_security\test_p_registered_boundaries.py:91: in test_product_module_cannot_bypass_original_config_workspace_refusal
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[False] _
+tests\integration\r1_security\test_p_registered_boundaries.py:111: in test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface
+    server = registered_mcp.create_registered_server(selected)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\p-66744c4-lf\src\morph_research\registered_mcp.py:18: in create_registered_server
+    raise PermissionError("registered_case_mcp_requires_legacy_host")
+E   PermissionError: registered_case_mcp_requires_legacy_host
+_ test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[True] _
+tests\integration\r1_security\test_p_registered_boundaries.py:111: in test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface
+    server = registered_mcp.create_registered_server(selected)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\p-66744c4-lf\src\morph_research\registered_mcp.py:18: in create_registered_server
+    raise PermissionError("registered_case_mcp_requires_legacy_host")
+E   PermissionError: registered_case_mcp_requires_legacy_host
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_original_host_binding_survives_product_mcp_module_selection[registered-codex]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_original_host_binding_survives_product_mcp_module_selection[registered-claude]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_original_host_binding_survives_product_mcp_module_selection[choice-codex]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_original_host_binding_survives_product_mcp_module_selection[choice-claude]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_product_module_cannot_bypass_original_config_workspace_refusal[relative_config-registered-codex]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_product_module_cannot_bypass_original_config_workspace_refusal[relative_config-choice-codex]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_product_module_cannot_bypass_original_config_workspace_refusal[foreign_workspace-registered-codex]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_product_module_cannot_bypass_original_config_workspace_refusal[foreign_workspace-registered-claude]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_product_module_cannot_bypass_original_config_workspace_refusal[foreign_workspace-choice-codex]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_product_module_cannot_bypass_original_config_workspace_refusal[foreign_workspace-choice-claude]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[False]
+FAILED tests/integration/r1_security/test_p_registered_boundaries.py::test_valid_legacy_eleven_tools_keep_handlers_without_mutating_r1_surface[True]
+12 failed, 9 passed in 3.08s
