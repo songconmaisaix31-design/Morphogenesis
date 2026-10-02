@@ -1,5 +1,27 @@
 # R1 派发状态（2026-10-03）
 
+## 02:06 更新：继续原 Task，恢复 Codex YOLO 会话
+
+用户再次要求继续多 Agent 开发。原 OpenCode 的余额错误与 Codex 初次输入仅接受未确认执行的记录保留；不把迁移当功能交付。Orca 在 01:53 重启，当前 runtime `59ad1e4a-cf8f-4053-bc65-bf6865f8d5a9`。Run 仍为 `run_d5306f2e4993`；主控重新绑定 `term_4e00aa4e-4831-4e2b-899f-da01121e6258`（consumer generation 2）。
+
+F/P 原 Dispatch 有 agent exit `1073807364` 回执；A/B/C/Q 的旧 Orca 状态为 missing_status，未伪造完成回执。执行主机进程清单只剩重启后创建的其他会话，原六个 no-daemon Worker 均已退出；旧终端身份不存在。主控显式 fence 旧 A/B/C/Q Dispatch（worker-abandon，无进程操作），原 Task 继续，未建立重复业务 Task，未覆盖任何 WIP。新会话沿用各自原 worktree/branch/write_paths，未改全局账户、模型或 provider；当前终端显示 Codex 0.160.0 / YOLO，模型采用用户现有配置。
+
+| 轨 | 同一 Task | 新 Dispatch | 终端 |
+|---|---|---|---|
+| A | task_e0494397f5d1 | ctx_9419f1571ba4 | term_c7c4798f-d305-4e9f-b325-be1f8c70c4ae |
+| B | task_d4353c178376 | ctx_376d446c6768 | term_c32ebe74-4735-4494-9935-d7d3fe90abaf |
+| C | task_41f47bb34862 | ctx_059a071b0189 | term_0c968976-b193-41c5-ae4d-425b89353ca9 |
+| P | task_39c0f7d98ea4 | ctx_0480de706294 | term_334a2270-e98e-4eee-9a11-2d17141a8f60 |
+| F | task_00ed68ee0b04 | ctx_5b9f52c4518e | term_06f42687-451d-4d56-94aa-c964c26aa555 |
+| Q | task_4a3623634511 | ctx_e8614b81faa5 | term_cf9d9e63-2ad1-409f-afc0-c248b5ce5f88 |
+
+六条 prompt 均以原 request ID 观察到 `turn_started`，未盲目重发。A/B/C/P 已回 ACK 并确认实际读取工作树；F/Q 等待其恢复检查回执。custom argv 仍使用低层 Orca dispatch/terminal send，资源管理属于 unsupervised，不声称标准 worker-start 的自动资源回收。
+
+当前阶段基线：A HEAD `d1c603323d7701b69caa9e5fe7f01e40197f861b`（含 C316）及 service/server/tests WIP 保留；B `d175f7e2f8c3ff41a1ac8a2a4958c68acf57e275` 独立 Q 精确 29 项为 21 passed / 8 failed；C `99cd2997dd024a41c28461228f47a575fef3f9ab` 尚缺实际 generated 可信投影，系统 Python editable 事件仍由 C 收敛；P `550e1d43b43a9b668d5255fd8f01d0a67c763c49` 及 backend.py WIP 保留，材料 5 项 Q 复验通过；F SOURCE `36b8c0c9dfa400b3574af37a47508796dd5461d6` / REPORT `a1aee14f0b87e4cf1b0cce854f2d77ad23e72539`，阶段两视窗 24 项及视觉修正后 2 项通过；Q HEAD `dc8a81c507d1f99674f1341c56f284f57f8c4608`。
+
+工作继续：A/B/C 先对齐原 ledger/asset/archive 的实验结果消费，A 交早期可安装组合给 P，P/F 完成正式入口与 DTO。Q 当前短测试窗口先复验 A7fc 26 项与 P550 剩余项目/来源 4 项，结束后释放；代码和小单进程检查可并行，重型安装/全回归/浏览器错峰。全 R1、最终安装组合和 AT07/L2/L3 均未通过；I 尚未派发。根工作树 `docs/SWARM_SOL_PLAN.md` 原 WIP 保持。
+
+
 ## 01:28 更新：返修、产品接线与资源窗口
 
 01:42 当前 continuation 地址追加（此前地址保持历史，不再投递已完成 Dispatch）：A `task_e0494397f5d1 / ctx_d5449dbccfe8`；B `task_d4353c178376 / ctx_1f61a986ac8a`；C `task_41f47bb34862 / ctx_41e1a87fafb9`；P `task_39c0f7d98ea4 / ctx_c7f25d836553`；F/Q 仍为下表原 Dispatch。同一 Owner、worktree、branch、write_paths；手动 return-preamble 输入后观察并追加 Enter，不能仅按 input_accepted 算实际工作。

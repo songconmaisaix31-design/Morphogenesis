@@ -2,6 +2,8 @@
 
 事实源：`docs/source/Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md`。用户已授权开发、Orca 派发、测试、commit/push；旧包冲突条款以本 Spec 及本计划为准。旧冻结源码/报告和首失败原样保留。
 
+02:06 接续决策：用户再次要求继续多 Agent。原 A/B/C/P provider 会话故障及 Orca 重启后，六条轨均恢复为 Codex YOLO 会话，保持原 Task、worktree、branch、独占路径与原 WIP；下表 OpenCode 是初始派发记录，当前地址与恢复依据以 `R1_STATUS.md` 为准。主控仍不写业务代码，Q 独立验收，最后单一 I 集成。
+
 基线：核心报告 `326fd8f633c7db72d4fab216a10a77b63aafe59d`（源码 `7062a632b8c625c05b35bdec4c36fce63a31c2a4`）；产品 `78370ad68dcc78d26b880854aedabac2e5ab797e`（完整受测源码 `a25aa40bb0f5259799641fee378d09ccc5887054`）。主线有 WIP，保持不动。
 
 | 长期轨 | 单 Worker / Orca worktree / 分支后缀 | 独占 write_paths | FR / AT |
