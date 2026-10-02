@@ -47,7 +47,7 @@ policy.new_condition_branch(refuted, new_id, conds)   # -> Branch (不擦旧反�
 policy.snapshot(results, branches)                    # -> dict 三轴视图
 
 # 从可信事实投影三轴（research-v1 反馈）＋ 可信接受入口
-from swarm.research.feedback import research_feedback, ResearchFeedbackStore
+from swarm.research.feedback import research_feedback, ResearchFeedbackStore, from_generated_assessment
 results = research_feedback(ledger, assets_root)      # -> list[ThreeAxisResult]（正例+可信反证）
 store = ResearchFeedbackStore(path, ledger, assets_root, reviewer=host_worker_id)
 store.accept(result_id)                               # 唯一持久化接受入口（绑定 host 身份+真实独立审核）
@@ -55,7 +55,14 @@ store.record_correction(event)                        # 追加更正事件
 store.record_supersession(event)                      # 追加 supersession（不删原记录）
 store.contributions() / store.effective_contributions() / store.corrections() / store.snapshot()
 store.advisory(branches)                              # A/P 接线：已接受贡献 + 引用贡献的 branch 机会建议
+
+# B 三轴薄转换（不建平行真值/判据）
+from swarm.research.feedback import from_generated_assessment
+result = from_generated_assessment(assessment, result_id=..., report_id=..., task_id=...,
+                                   actor=..., source_ref=..., provenance=..., asset_id=..., at=...)
 ```
+
+**三轴轴类型复用 B**：`ThreeAxisResult` 的 `execution/hypothesis/contribution` 直接复用 `orchestration.experiments.generated` 的 `ExecutionAxis/HypothesisAxis/ContributionAxis`（spec 5.2 单一三轴结果模型），不建平行判据。`from_generated_assessment` 把 B 的 `GeneratedAssessment` 薄转成 C 的 `ThreeAxisResult`：**忽略 `trusted`/`mode` boolean，`contribution` 恒为 `proposed`**——C 的贡献接受仍来自原 TaskLedger 执行 + 独立审查，不从 backend JSON `trusted` 或 `final` 标签授权，不从 legacy `failed` 推断反证。
 
 **`advisory(branches)`** 是给 A/P 的正式 advisory projection：返回已接受贡献 + `RouteOpportunityPlan`，每个 `RouteOpportunity` 带 `supported_by`/`refuted_by`（真实贡献 `result_id`），所以下一推荐**真引用贡献而非单纯快照**；`advisory_only=True`、`claim_requires_recheck=True`，宿主权限/地方/scope/dependencies/预算过滤与真实 claim 仍走原 `TaskLedger`。默认不改旧 v0/v0.1（`Router` 仍是 v0/v0.1，research-v1 是独立建议层）。
 

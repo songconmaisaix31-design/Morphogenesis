@@ -24,12 +24,20 @@ from typing import Literal
 from pydantic import Field, JsonValue, TypeAdapter
 
 from contracts.base import Contract
+from orchestration.experiments.generated import (
+    ContributionAxis,
+    ExecutionAxis,
+    HypothesisAxis,
+)
 
 _JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 
-ExecutionState = Literal["not_run", "running", "succeeded", "failed", "cancelled", "unknown"]
-HypothesisState = Literal["not_evaluated", "supported", "refuted", "inconclusive", "disputed"]
-ContributionState = Literal["proposed", "accepted", "rejected", "superseded"]
+# The three result axes are the single, shared three-axis result model (spec 5.2)
+# owned by B's generated-experiment contracts; C reuses them verbatim so the
+# policy projection never builds a parallel truth.
+ExecutionState = ExecutionAxis
+HypothesisState = HypothesisAxis
+ContributionState = ContributionAxis
 BranchStatus = Literal["proposed", "exploring", "testing", "supported", "disputed",
                        "dormant", "refuted", "archived"]
 CorrectionKind = Literal["sleep", "downgrade", "reopen"]
@@ -48,7 +56,14 @@ class ThreeAxisResult(Contract):
     contribution: ContributionState = "proposed"
     asset_id: str | None = None
     branch_id: str | None = None
+    project_id: str | None = None
+    experiment_schema: Literal["generated-experiment/v1"] | None = None
+    run_id: str | None = None
+    sandbox_id: str | None = None
+    conditions: dict[str, str] = Field(default_factory=dict)
+    purpose: Literal["original", "reproduction", "inheritance", "counterexample"] | None = None
     reviewer: str | None = None
+    review_report_id: str | None = None
     at: float = Field(ge=0)
     reasons: tuple[str, ...] = ()
 
