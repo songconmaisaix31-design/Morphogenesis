@@ -56,7 +56,14 @@ class ThreeAxisResult(Contract):
     contribution: ContributionState = "proposed"
     asset_id: str | None = None
     branch_id: str | None = None
+    project_id: str | None = None
+    experiment_schema: Literal["generated-experiment/v1"] | None = None
+    run_id: str | None = None
+    sandbox_id: str | None = None
+    conditions: dict[str, str] = Field(default_factory=dict)
+    purpose: Literal["original", "reproduction", "inheritance", "counterexample"] | None = None
     reviewer: str | None = None
+    review_report_id: str | None = None
     at: float = Field(ge=0)
     reasons: tuple[str, ...] = ()
 

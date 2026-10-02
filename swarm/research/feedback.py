@@ -27,6 +27,7 @@ from local_assets.paths import no_links
 from local_assets.research import known_effect
 from local_assets.research_models import ResearchObservation
 from orchestration.experiments.generated import GeneratedAssessment
+from orchestration.experiments.trusted import TrustedCriteriaRegistry
 from swarm.feedback import (
     FeedbackFact,
     ReadonlyLedger,
@@ -45,6 +46,7 @@ from swarm.research.policy import (
     SupersessionEvent,
     ThreeAxisResult,
 )
+from swarm.research.feedback_generated import trusted_generated_feedback
 from swarm.task_ledger import TaskLedger, connection, enable_wal
 
 _OBJECT = TypeAdapter(dict[str, JsonValue])
@@ -136,6 +138,8 @@ def trusted_refutations(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxis
         for row in rows:
             task = ledger._record(db, row)
             result = task.result or {}
+            if "generated_plan" in task.acceptance:
+                continue
             at = _completed_at(db, task)
             asset_id = result.get("asset_id")
             if at is None or not task.owner or result.get("stage") != "evidence_submitted" \
@@ -158,11 +162,14 @@ def trusted_refutations(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxis
                     result_id=task.result_id, report_id=scientific.report_id, task_id=task.signal.task_id,
                     actor=task.owner, source_ref=_claim_sources(scientific), provenance=scientific.provenance,
                     execution="succeeded", hypothesis="refuted", contribution="proposed", at=at,
-                    asset_id=scientific.asset_id))
+                    asset_id=scientific.asset_id, conditions=scientific.conditions,
+                    run_id=scientific.run_id, sandbox_id=scientific.sandbox_id, purpose=scientific.purpose))
     return results
 
 
-def research_feedback(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxisResult]:
+def research_feedback(ledger: TaskLedger, assets_root: Path, *,
+                      generated_criteria: TrustedCriteriaRegistry | None = None,
+                      project_id: str | None = None, archive_root: Path | None = None) -> list[ThreeAxisResult]:
     """Projection of the three axes from approved facts; deterministic and idempotent."""
     database = assets_root / "assets.sqlite3"
     if not database.exists():
@@ -181,8 +188,23 @@ def research_feedback(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxisRe
                 result_id=fact.source_id, report_id=fact.report_id, task_id=fact.task_id, actor=fact.worker_id,
                 source_ref=_source_ref(assets, fact), provenance=fact.provenance, execution="succeeded",
                 hypothesis=hypothesis, contribution="proposed", at=fact.at,
-                asset_id=observation.asset_id if observation is not None else None))
+                asset_id=observation.asset_id if observation is not None else None,
+                conditions=observation.conditions if observation is not None else {},
+                run_id=observation.run_id if observation is not None else None,
+                sandbox_id=observation.sandbox_id if observation is not None else None,
+                purpose=observation.purpose if observation is not None else None))
     results.extend(trusted_refutations(ledger, assets_root))
+    bound: list[ThreeAxisResult] = []
+    for result in results:
+        payload = ledger.get(result.task_id).signal.payload
+        project, branch = payload.get("project_id"), payload.get("branch_id")
+        if project_id is not None and project != project_id:
+            continue
+        bound.append(result.model_copy(update={"project_id": project if isinstance(project, str) else None,
+                                               "branch_id": branch if isinstance(branch, str) else None}))
+    results = bound
+    results.extend(trusted_generated_feedback(ledger, assets_root, criteria_registry=generated_criteria,
+                                              project_id=project_id, archive_root=archive_root))
     return sorted(results, key=lambda result: (result.at, result.result_id, result.hypothesis))
 
 
@@ -218,12 +240,17 @@ class ResearchFeedbackStore:
     """
 
     def __init__(self, path: str | Path, ledger: TaskLedger, assets_root: Path, *,
-                 reviewer: str, clock: Callable[[], float] = time.time) -> None:
+                 reviewer: str, clock: Callable[[], float] = time.time,
+                 generated_criteria: TrustedCriteriaRegistry | None = None,
+                 project_id: str | None = None, archive_root: Path | None = None) -> None:
         self.path = Path(path).resolve()
         self.ledger = ledger
         self.assets_root = Path(assets_root).resolve()
         self.reviewer = reviewer
         self.clock = clock
+        self.generated_criteria = generated_criteria
+        self.project_id = project_id
+        self.archive_root = archive_root
         self.policy = ResearchPolicy()
         enable_wal(self.path)
         with connection(self.path, write=True) as db:
@@ -236,7 +263,8 @@ class ResearchFeedbackStore:
 
     def trusted(self) -> list[ThreeAxisResult]:
         """Derived three-axis facts; never caller-supplied assertions."""
-        return research_feedback(self.ledger, self.assets_root)
+        return research_feedback(self.ledger, self.assets_root, generated_criteria=self.generated_criteria,
+                                 project_id=self.project_id, archive_root=self.archive_root)
 
     def _seen_keys(self, db: sqlite3.Connection) -> set[str]:
         keys: set[str] = set()
@@ -244,7 +272,8 @@ class ResearchFeedbackStore:
             keys.update(ResearchPolicy.dedup_keys(ThreeAxisResult.model_validate_json(row[0])))
         return keys
 
-    def _reviewed(self, fact: ThreeAxisResult, facts: list[ThreeAxisResult]) -> bool:
+    def _review(self, fact: ThreeAxisResult, facts: list[ThreeAxisResult], *,
+                reviewer: str | None = None) -> ThreeAxisResult | None:
         """The host's own bound reviewer must have an independently derived,
         trusted result on the same candidate (a distinct completed task that is
         a reproduction or counterexample of this fact). A forged observation
@@ -252,10 +281,23 @@ class ResearchFeedbackStore:
         execution never appears in the trusted projection, so it cannot
         authorize an acceptance."""
         if fact.asset_id is None:
-            return False
-        return any(other.actor == self.reviewer and other.asset_id == fact.asset_id
-                   and other.task_id != fact.task_id and other.hypothesis in ("supported", "refuted")
-                   for other in facts)
+            return None
+        for other in facts:
+            if (other.actor != (reviewer or self.reviewer) or other.actor == fact.actor
+                    or other.asset_id != fact.asset_id or other.task_id == fact.task_id
+                    or other.provenance == "replay" or other.provenance != fact.provenance
+                    or other.execution != "succeeded" or other.hypothesis != fact.hypothesis
+                    or other.hypothesis not in ("supported", "refuted")
+                    or other.purpose not in ("reproduction", "counterexample")
+                    or other.conditions != fact.conditions or other.project_id != fact.project_id
+                    or other.experiment_schema != fact.experiment_schema):
+                continue
+            if fact.experiment_schema is not None and (
+                    not fact.run_id or not other.run_id or fact.run_id == other.run_id
+                    or not fact.sandbox_id or not other.sandbox_id or fact.sandbox_id == other.sandbox_id):
+                continue
+            return other
+        return None
 
     def accept(self, result_id: str) -> ContributionDecision:
         """Independently accept one trusted result under the host's bound reviewer.
@@ -274,14 +316,16 @@ class ResearchFeedbackStore:
         fact = matches[0]
         if fact.provenance == "replay":
             return ContributionDecision(accepted=False, state="rejected", reasons=("replay_not_acceptable",))
-        if not self._reviewed(fact, facts):
+        review = self._review(fact, facts)
+        if review is None:
             return ContributionDecision(accepted=False, state="rejected", reasons=("reviewer_not_admitted",))
         with connection(self.path, write=True) as db:
             decision = self.policy.accept(fact, reviewer=self.reviewer, seen=self._seen_keys(db))
             if decision.accepted:
                 db.execute("INSERT OR IGNORE INTO contributions VALUES (?,?,?)",
                            (self.ledger.swarm_id, fact.result_id,
-                            fact.model_copy(update={"contribution": "accepted", "reviewer": self.reviewer})
+                            fact.model_copy(update={"contribution": "accepted", "reviewer": self.reviewer,
+                                                    "review_report_id": review.report_id})
                             .model_dump_json()))
         return decision
 
@@ -289,7 +333,8 @@ class ResearchFeedbackStore:
         with connection(self.path) as db:
             rows = db.execute("SELECT body FROM contributions WHERE swarm_id=? ORDER BY rowid",
                               (self.ledger.swarm_id,)).fetchall()
-        return [ThreeAxisResult.model_validate_json(row[0]) for row in rows]
+        results = [ThreeAxisResult.model_validate_json(row[0]) for row in rows]
+        return [result for result in results if self.project_id is None or result.project_id == self.project_id]
 
     def record_correction(self, event: CorrectionEvent) -> None:
         with connection(self.path, write=True) as db:
@@ -337,12 +382,38 @@ class ResearchFeedbackStore:
         claimed through the existing TaskLedger, which re-checks scope,
         capabilities, dependencies, lease/fencing and budget."""
         effective = self.effective_contributions()
-        plan = self.policy.opportunities(branches)
+        facts = self.trusted()
+        trusted = {fact.result_id: fact for fact in facts}
+        accepted: dict[str, ThreeAxisResult] = {}
+        for contribution in effective:
+            fact = trusted.get(contribution.result_id)
+            if (contribution.contribution != "accepted" or fact is None or not contribution.reviewer
+                    or fact.provenance == "replay"
+                    or contribution.model_copy(update={"contribution": "proposed", "reviewer": None,
+                                                       "review_report_id": None}) != fact):
+                continue
+            review = self._review(fact, facts, reviewer=contribution.reviewer)
+            if review is not None and review.report_id == contribution.review_report_id:
+                accepted[fact.result_id] = contribution
+        resolved: list[Branch] = []
+        for branch in branches:
+            def references(hypothesis: str) -> tuple[str, ...]:
+                return tuple(fact.result_id for fact in accepted.values()
+                    if fact.hypothesis == hypothesis and fact.branch_id == branch.branch_id
+                    and (not branch.conditions or fact.conditions == branch.conditions)
+                    and (self.project_id is None or fact.project_id == self.project_id))
+
+            # Derive references from accepted source facts even when the caller
+            # passes none. Caller refs cannot create, duplicate, relocate or
+            # resurrect evidence, or omit a valid refutation from the next advice.
+            resolved.append(branch.model_copy(update={
+                "supported_by": references("supported"), "refuted_by": references("refuted")}))
+        plan = self.policy.opportunities(resolved)
         return {
             "policy_version": self.policy.version,
             "advisory_only": True,
             "claim_requires_recheck": True,
-            "contributions": [_JSON.validate_python(c.model_dump(mode="json")) for c in effective],
+            "contributions": [_JSON.validate_python(c.model_dump(mode="json")) for c in accepted.values()],
             "opportunities": _JSON.validate_python(plan.model_dump(mode="json")),
         }
 
@@ -363,6 +434,7 @@ class ResearchFeedbackStore:
             "policy_version": self.policy.version,
             "advisory_only": True,
             "claim_requires_recheck": True,
+            "results": [_JSON.validate_python(result.model_dump(mode="json")) for result in self.trusted()],
             "three_axis": {
                 "execution": _JSON.validate_python(axis_counts("execution")),
                 "hypothesis": _JSON.validate_python(axis_counts("hypothesis")),

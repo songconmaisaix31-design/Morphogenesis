@@ -254,7 +254,8 @@ def submit_observation(service, task_id, worker, *, asset_id, candidate, claim, 
     from contracts.identity import AttemptId
     from local_assets.research_models import ResearchObservation
     signal = Signal(task_id=task_id, workspace=service.config.workspace, scope="science",
-                    kind="opportunity", required_capability="research.author")
+                    kind="opportunity", required_capability="research.author",
+                    payload={"project_id": "policy-project", "branch_id": "b"})
     service.ledger.enqueue(signal, acceptance={"research_claim": claim.model_dump(mode="json"),
                                                "experiment_plan": plan})
     lease = service.ledger.claim(task_id, worker, locality=service.locality)
