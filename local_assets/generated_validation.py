@@ -82,7 +82,6 @@ def generated_validation(store: LocalAssetStore, asset_id: str, plan: GeneratedE
     """Admission gate: static security plus host-verified isolation; never byte-equality."""
     plan = GeneratedExperimentPlan.model_validate(plan.model_dump(mode="json"))
     _verify_manifest(plan, files)
-    _bound_candidate(store, asset_id, plan, files)
     data = data or {}
     entries = {entry.name: entry for entry in plan.data}
     if set(data) != set(entries) or any(digest(body) != entries[name].sha256
@@ -90,6 +89,14 @@ def generated_validation(store: LocalAssetStore, asset_id: str, plan: GeneratedE
         raise AssetSafetyError("data_manifest_digest_mismatch")
     static = static_checks(plan, files, data)
     reasons = list(static.reasons)
+    try:
+        _bound_candidate(store, asset_id, plan, files)
+    except AssetSafetyError as error:
+        if static.passed:
+            raise
+        # Preserve the structured refusal for statically unsafe code while
+        # retaining any candidate-binding failure as an additional reason.
+        reasons.append(str(error))
     if not static.passed:
         reasons.append("static_security_failed")
     try:
