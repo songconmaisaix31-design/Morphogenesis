@@ -766,3 +766,39 @@ not an observed data transfer. Raw `installed-cc2e722-24f02a1-provider2-first.tx
 is preserved. Handoffs `msg_09f3fb3344df` and `msg_05549e7614da` send the result to
 P and the controller; P confirms the gap in `msg_eae6e4975a15` and owns repair.
 The final safety gate remains open for that repair and the B concurrency merge.
+
+## Actual provider binding repair, with nonempty native positives
+
+P delivers SOURCE `5b1f076cb18d181037f4c5f052b6006705121c84`. Legitimate fixtures
+add the existing frozen `data_bounds.native_provider_bindings` grant with exactly
+`runtime/provider/base_url`, and the original request record's matching
+`provider_binding`. Original refusal assertions remain intact. No current
+configuration, credential, native executable or actual provider is accessed.
+
+Independent exact P5b1/corecc2 archive run of native22, resume13, Codex provider10
+and Claude gateway5: **50 passed**, 15.31s. Codex custom-provider and Claude
+gateway positives traverse the actual service factory/planner and settle original
+budget tokens5 while actual cost stays unknown. The same authorized non-secret
+provider/destination is frozen in the invocation arguments. Native/probe/binary
+boundaries remain inert, and source-mode package admission is explicitly a fixture.
+
+Negative controls cover selected provider changes, same-provider endpoint drift,
+missing/foreign/extra grant fields, active profile, managed/conflicting metadata,
+Claude cloud route, and altered or absent original resume destination binding.
+All reject before the relevant probe/reservation/native effect. Earlier unknown,
+pending hold, exact usage, closed egress, member and resume checks retain their
+assertions. Handoffs `msg_a1fa7aa9ba02` and `msg_0437d2f456e9` report this result.
+
+FR-09 scope is bounded preparation/admission via original adapters, not universal
+readiness of already selected accounts. Exact code requires an unambiguous
+explicit custom Codex provider and rejects every nonempty `profile`/`profiles`,
+managed route and listed built-in provider ID, including one with an explicit URL.
+Q covers Claude gateway; the actual OAuth status path is not exercised here.
+Unknown managed/cloud/socket routes remain refused. These limits are compatible
+with fail-closed AT15 admission, but cannot be represented as live authentication,
+native isolation, or support for all existing native configurations.
+
+Old installed cc2/24f bytes and their first failures are untouched. Final merged
+core/provider-fixed product installation remains pending. The B owner additionally
+reports a separate original-worker deadline failure with unresolved cause; Q's
+SQLite72 result neither explains nor overrides that owner evidence.
