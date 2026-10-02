@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import httpx
 from opensandbox.models.execd import Execution
@@ -65,6 +65,34 @@ def _execution_state(execution: Execution, *, codeinterpreter: bool = False) -> 
     if codeinterpreter and execution.complete is not None:
         return "succeeded"
     return "unknown"
+
+
+def finalize_session(result: Any, root: Path, artifacts: list[ExperimentArtifact],
+                     session: ExperimentSession | None) -> Any:
+    """Shared persist/error/cleanup authority for both experiment modes.
+
+    This is the single cleanup and durable-persist path: owned sandboxes are
+    destroyed, cleanup ambiguity and close failures are recorded without
+    overriding unknown effects, and the archive is written atomically. Generated
+    and registered executors both delegate here rather than maintaining their own
+    fact layer.
+    """
+    if session:
+        try:
+            if session.owned:
+                session.destroy()
+                result = result.model_copy(update={"cleanup_state": "destroyed"})
+        except Exception as error:
+            result = result.model_copy(update={"cleanup_state": "unknown", "remote_effect": "unknown",
+                "reasons": (*result.reasons, "cleanup_" + type(error).__name__)})
+        finally:
+            try:
+                session.close()
+            except Exception as error:
+                result = result.model_copy(update={"reasons": (*result.reasons, "close_" + type(error).__name__)})
+    result = result.model_copy(update={"artifacts": tuple(artifacts)})
+    _write_json(root / "result.json", result.model_dump(mode="json"))
+    return result
 
 
 class ExperimentExecutor:
@@ -189,22 +217,7 @@ class ExperimentExecutor:
     @staticmethod
     def _finish(result: ExperimentResult, root: Path, artifacts: list[ExperimentArtifact],
                 session: ExperimentSession | None) -> ExperimentResult:
-        if session:
-            try:
-                if session.owned:
-                    session.destroy()
-                    result = result.model_copy(update={"cleanup_state": "destroyed"})
-            except Exception as error:
-                result = result.model_copy(update={"cleanup_state": "unknown", "remote_effect": "unknown",
-                    "reasons": (*result.reasons, "cleanup_" + type(error).__name__)})
-            finally:
-                try:
-                    session.close()
-                except Exception as error:
-                    result = result.model_copy(update={"reasons": (*result.reasons, "close_" + type(error).__name__)})
-        result = result.model_copy(update={"artifacts": tuple(artifacts)})
-        _write_json(root / "result.json", result.model_dump(mode="json"))
-        return result
+        return cast(ExperimentResult, finalize_session(result, root, artifacts, session))
 
 
 def read_result(archive_root: Path | str, run_id: str, *, expected_plan: ExperimentPlan | None = None,

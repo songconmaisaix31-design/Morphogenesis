@@ -15,6 +15,7 @@ from local_assets.research_models import ResearchClaim
 from local_assets.validate import static_syntax
 from orchestration.experiments.case import get_case
 from orchestration.experiments.executor import digest
+from orchestration.experiments.generated import GeneratedExperimentPlan
 from orchestration.experiments.models import ExperimentPlan
 from swarm.models import Signal
 from swarm.research.models import HostConfig
@@ -158,6 +159,66 @@ def main() -> None:
     paths = seed_case(args.project, args.state, python=args.python, plan=plan.model_dump(mode="json"), code=code,
                       swarm_id=args.swarm_id or uuid4().hex, domain=args.domain, api_key_env=args.api_key_env)
     print(json.dumps(paths, ensure_ascii=False, indent=2))
+
+
+def seed_generated_case(project: Path, state: Path, *, python: Path, plan: GeneratedExperimentPlan,
+                        swarm_id: str, domain: str = "127.0.0.1:8097", api_key_env: str | None = None) -> dict[str, str]:
+    """Trusted operator entry that seeds a generated-candidate research task.
+
+    Unlike ``seed_case`` there is no pre-registered program: the generated plan
+    carries the problem, hypothesis, sources, environment, evaluation criteria
+    and resources, but the candidate code is produced by the research member and
+    admitted through ``generated_validation`` before any isolated execution.
+    This function never generates code, allocates resources or executes.
+    """
+    for path in (project, state, python):
+        if not path.is_absolute():
+            raise ValueError("case_paths_must_be_absolute")
+    for path in (project, state):
+        no_links(path)
+    no_links(python.resolve(strict=True))
+    project, state = project.resolve(), state.resolve()
+    if (project == state or project.is_relative_to(state) or state.is_relative_to(project)
+            or any(project.is_relative_to(p.resolve()) or state.is_relative_to(p.resolve())
+                   for p in (SWARM_SOURCE, FROZEN_MAINLINE))):
+        raise ValueError("case_project_and_protected_state_must_be_separate")
+    if project.exists() or state.exists():
+        raise ValueError("case_paths_must_not_exist_no_overwrite")
+    if not python.is_file():
+        raise ValueError("python_executable_required")
+    plan = GeneratedExperimentPlan.model_validate(plan.model_dump(mode="json"))
+    state.mkdir(parents=True)
+    (project / "science").mkdir(parents=True)
+    git(project, "init", "-b", "research-case")
+    (project / "science/experiment.py").write_bytes(PENDING.encode())
+    git(project, "add", "science")
+    git(project, "-c", "user.name=Morphogenesis Research", "-c", "user.email=research@example.invalid",
+        "commit", "-m", "Seed generated research task without results")
+    revision = git(project, "rev-parse", "HEAD").decode().strip()
+    ledger = TaskLedger(state / "tasks.sqlite3", swarm_id)
+    instructions = (
+        "Generate candidate Python code for the stated hypothesis, submit it with "
+        "generated_validation, and after admission execute it in an isolated sandbox. "
+        "The host recomputes the scientific assessment; do not self-report a score or "
+        "approve your own result.")
+    payload: dict[str, JsonValue] = {"question": plan.claim, "hypothesis": plan.hypothesis,
+        "instructions": instructions,
+        "sources": [source.ref for source in plan.sources], "base_revision": revision,
+        "entrypoint": plan.entrypoint, "scope": "science"}
+    ledger.enqueue(Signal(task_id=plan.task_id, workspace=str(project), scope="science", kind="opportunity",
+                          required_capability="research.author", module="research", payload=payload),
+                   acceptance={"generated_experiment_plan": plan.model_dump(mode="json")})
+    backend: dict[str, str] = {"domain": domain}
+    if api_key_env is not None:
+        backend["api_key_env"] = api_key_env
+    config = HostConfig(ledger_path=str(ledger.path), swarm_id=swarm_id, workspace=str(project), worker_id="author",
+        agent=AgentId(role="builder", instance=0), authorized_scopes=("science",), capabilities=("research.author",),
+        assets_root=str(state / "assets"), evidence_root=str(state / "experiments"),
+        project_context=instructions, experiment_backend=backend)
+    path = state / "author-host.json"
+    path.write_text(config.model_dump_json(indent=2), encoding="utf-8")
+    return {"project": str(project), "state": str(state), "swarm_id": swarm_id,
+            "python": str(python), "base_revision": revision, "author_config": str(path)}
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from pathlib import Path
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
 from pydantic import JsonValue, TypeAdapter
 
@@ -19,6 +19,7 @@ from hub_client.models import CapsuleEvidence, GenePolicy
 from local_assets.models import (AdoptionReceipt, AssetSafetyError, Candidate, ConsumptionExecution,
                                  PromotionReceipt, ValidationReport)
 from local_assets.paths import FROZEN_MAINLINE, no_links
+from local_assets.generated_models import GeneratedApproval, GeneratedValidationReport
 from local_assets.research_models import ResearchObservation
 
 _OBJECT = TypeAdapter(dict[str, JsonValue])
@@ -56,8 +57,15 @@ class LocalAssetStore:
                 CREATE TABLE IF NOT EXISTS research_reports (
                     report_id TEXT PRIMARY KEY, asset_id TEXT NOT NULL, body TEXT NOT NULL,
                     FOREIGN KEY(asset_id) REFERENCES assets(asset_id));
+                CREATE TABLE IF NOT EXISTS generated_reports (
+                    report_id TEXT PRIMARY KEY, asset_id TEXT NOT NULL,
+                    body TEXT NOT NULL, FOREIGN KEY(asset_id) REFERENCES assets(asset_id));
+                CREATE TABLE IF NOT EXISTS generated_approvals (
+                    asset_id TEXT PRIMARY KEY, report_id TEXT NOT NULL UNIQUE,
+                    body TEXT NOT NULL, FOREIGN KEY(report_id) REFERENCES generated_reports(report_id));
             """)
-            for table in ("assets", "reports", "promotions", "approvals", "consumptions", "adoptions", "research_reports"):
+            for table in ("assets", "reports", "promotions", "approvals", "consumptions", "adoptions",
+                          "research_reports", "generated_reports", "generated_approvals"):
                 for operation in ("UPDATE", "DELETE"):
                     db.execute(f"CREATE TRIGGER IF NOT EXISTS {table}_{operation} "
                                f"BEFORE {operation} ON {table} BEGIN "
@@ -152,6 +160,9 @@ class LocalAssetStore:
         self.fetch(asset_id)
         with self.connection() as db:
             row = db.execute("SELECT 1 FROM approvals WHERE asset_id=?", (asset_id,)).fetchone()
+            if row:
+                return "approved"
+            row = db.execute("SELECT 1 FROM generated_approvals WHERE asset_id=?", (asset_id,)).fetchone()
         return "approved" if row else "quarantined"
 
     def fetch_approved(self, asset_id: str) -> Candidate:
@@ -174,6 +185,49 @@ class LocalAssetStore:
         with self.connection() as db:
             db.execute("INSERT INTO research_reports VALUES (?,?,?)",
                        (report.report_id, report.asset_id, report.model_dump_json()))
+
+    def generated_report(self, report_id: str) -> GeneratedValidationReport:
+        with self.connection() as db:
+            row = db.execute("SELECT body FROM generated_reports WHERE report_id=?", (report_id,)).fetchone()
+        if row is None:
+            raise AssetSafetyError("unknown_generated_report")
+        report = GeneratedValidationReport.model_validate_json(row[0])
+        if report.report_id != report_id:
+            raise AssetSafetyError("report_id_mismatch")
+        return report
+
+    def _record_generated_report(self, report: GeneratedValidationReport) -> None:
+        self.fetch(report.asset_id)
+        with self.connection() as db:
+            db.execute("INSERT INTO generated_reports VALUES (?,?,?)",
+                       (report.report_id, report.asset_id, report.model_dump_json()))
+
+    def approve_generated(self, report: GeneratedValidationReport,
+                          assert_owned: Callable[[], None] = lambda: None, *,
+                          proof_ref: str | None = None) -> None:
+        """Approve a generated candidate under the original fencing authority.
+
+        The report must already be recorded by ``generated_validation``; the FK
+        on ``generated_approvals`` enforces that. Approval never re-writes the
+        immutable report and is guarded by the caller's ownership fence, matching
+        ``AssetPromoter._commit`` rather than an arbitrary new authority.
+        """
+        if not report.passed or report.reasons:
+            raise AssetSafetyError("generated_report_not_passed")
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            assert_owned()
+            row = db.execute("SELECT body FROM generated_approvals WHERE asset_id=?", (report.asset_id,)).fetchone()
+            if row:
+                old = GeneratedApproval.model_validate_json(row[0])
+                if old.report_id != report.report_id:
+                    raise AssetSafetyError("generated_asset_already_approved")
+                return
+            db.execute("INSERT INTO generated_approvals VALUES (?,?,?)",
+                       (report.asset_id, report.report_id, GeneratedApproval(
+                           asset_id=report.asset_id, report_id=report.report_id,
+                           policy_version=report.policy_version, proof_ref=proof_ref).model_dump_json()))
+            assert_owned()
 
     def consumption(self, execution_id: str) -> ConsumptionExecution:
         with self.connection() as db:
