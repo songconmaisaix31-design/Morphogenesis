@@ -54,3 +54,20 @@ F 源码 `124a71af513cfadf096c6e7f55b7be1be2f913ac` / 报告 `bc2a8ec4c505a680a8
 P 撤回八阶段新调度/伪造 mock accepted 的 WIP 只证明错误方案已移除；不能据此标 native 自主闭环完成。A 修复诊断和 P 局部输入通过均须对应最终交付重新验收。全 R1、最终安装组合、实际隔离探针及 L2/L3 科研仍未通过/NOT_RUN。
 
 01:29 Q 交付 C `3161048c463b3aa4f434054755afc9787bbda989` 精确 git archive：`.venv-q/Scripts/python.exe -m pytest tests/integration/r1_security/test_c_feedback_boundaries.py -q --tb=short`，exit 0，22 passed / 5.11s。原伪造结果/复核、unknown、历史与 TaskLedger 负例，以及有效独立复核正例均保留并通过；原始输出 `tests/integration/r1_security/evidence/c-3161048-exact-boundary.txt`。仅接纳该阶段被测贡献边界，B 动态结果投影、实际下一行动与最终组合仍待验收。此前 C 首次 RED 不覆盖。
+
+## 精确边界复验与接续（02:12 追加）
+
+Q SOURCE `967c75a75196b3e4b8ec972ee504e658ff290b49` / REPORT `7ab8c4cf0bb3e24a4196b9847b850f6b5a330293` 已推送且远端核实。使用 Q 自有环境和 owner 精确 archive；原 conftest 禁止宿主启动候选及外网请求，保留有效输入正例。
+
+| 源码与边界 | 实际结果 | 接纳范围 |
+|---|---|---|
+| A `7fc1e80845128080dfbcd5899aa9a09e37128753`；`test_a_host_boundaries.py -q --tb=short` | 26 passed，exit 0；重启前日志及恢复后复验均保留 | 项目/权限/来源/提议幂等与中断恢复的该阶段边界；不涵盖尚在开发的 generated/budget/advisory 接线 |
+| B `d175f7e2f8c3ff41a1ac8a2a4958c68acf57e275`；原四个 `test_b_*.py -q --tb=short` | 21 passed / 8 failed，exit 1，20.45s | NOT_ACCEPTED；有效配置绑定、冲突 probe 和 direct create 仍失败；合法 SDK 配置正例待证实 |
+| P `550e1d43b43a9b668d5255fd8f01d0a67c763c49`；`test_p_host_boundaries.py` 材料子集 | 5 passed / 4 deselected，exit 0 | 宿主允许目录、空拒绝、父目录和调用者 envelope 无法放大范围 |
+| 同 P550；项目/来源服务子集 | 2 failed / 2 passed / 5 deselected，exit 1 | NOT_ACCEPTED；外项目仍可触达两个可信 callback，已退原 P，恢复后同断言仍 RED |
+
+F SOURCE `36b8c0c9dfa400b3574af37a47508796dd5461d6` / REPORT `a1aee14f0b87e4cf1b0cce854f2d77ad23e72539` Owner 交付两视窗 24/24，加视觉修正后适用 2/2；该版动态候选、完整冻评价/复核/采用和实际安装 HTTP L1 仍待。旧 SOURCE124a 的 installed 2 PASS 不转移到新 SOURCE36b。
+
+新增接线门槛：A/P 必须实际复用原 BudgetLedger 在稳定项目命名空间准入，跨 branch/run/resume 不重置，未知效果保留预留；C 只能从原账本/资产/归档与独立复核产生贡献及机会，不信任直接填入的 branch refs；FR02 本地代码快照须有界读取内容并提供行定位，metadata-only 不算完成。Owner 正在实现，不能以 schema/docstring/局部通过代替最终固定组合。
+
+C 系统 Python editable 清理被自动审批在进程启动前拒绝（仅返回 `blocked by policy`），没有发生清理；主控明确禁止换工具绕过。C 用私有环境继续，原安装日志与只读 RECORD 清单、人工恢复步骤由 C 报告；未知旧依赖保留，不声称全局环境恢复。该操作限制与科研 L2 NOT_RUN 分开。
