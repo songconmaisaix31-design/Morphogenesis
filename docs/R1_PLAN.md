@@ -9,12 +9,12 @@
 | A 共同研究与正式 MCP | OpenCode / morph-r1-research-1003 / 同名 | `swarm/research/**`（除 case.py、feedback*.py、policy*.py）；`tests/research/**`（除 test_generated*.py、test_research_policy*.py）；`docs/tracks/r1-research.md` | FR01-11；AT01-04,09,14-15 |
 | B 动态候选、隔离、评价与继承 | OpenCode / morph-r1-experiments-1003 / 同名 | `orchestration/experiments/**`, `local_assets/**`, `swarm/research/case.py`, `tests/experiments/**`, `tests/local_assets/**`, `tests/research/test_generated*.py`, `docs/tracks/r1-experiments.md`, 核心 `pyproject.toml`/`poetry.lock`/`THIRD_PARTY_NOTICES.md`（依赖必要时） | FR15-20；AT05-07,12-15,17-18 |
 | C 贡献与研究路线政策 | OpenCode / morph-r1-policy-1003 / 同名 | `swarm/router.py`, `swarm/pheromone.py`, `swarm/feedback.py`, `swarm/worker_loop.py`, `swarm/research/feedback*.py`, `swarm/research/policy*.py`, `tests/swarm/**`, `tests/research/test_research_policy*.py`, `docs/tracks/r1-policy.md` | FR12-14,24；AT08-11,14-15 |
-| P 产品入口与三页 | OpenCode / research-r1-product-1003 / 同名，私库 | 私库全部产品源码/前端/测试/依赖锁/README/第三方说明和 `docs/tracks/r1-product.md`；排除治理文件与 Spec | FR01-05,09-11,20-24；AT01-02,04,09,14-18 |
-| I 最后独立集成（轨道完成后派） | Codex / 核心 morph-r1-integration-1003；产品由独立安装验收使用 P 最终源码 | exact merge、`tests/integration/**`, `docs/tracks/r1-integration.md`，少量导入/配置/类型/路由胶水；领域问题退原 Worker | 全部 AT 的适用 L0/L1；L2 单列 |
+| P 产品后端与正式入口 | OpenCode / research-r1-product-1003 / 同名，私库 | 后端源码/CLI/后端测试/pyproject/uv.lock/README/第三方说明和 `docs/tracks/r1-product.md`；排除 F 的 UI 路径、治理文件与 Spec | FR01-05,09-11,20-24；AT01-02,04,09,14-18 |
+| I 最后独立集成（轨道完成后派） | Codex / 核心 morph-r1-integration-1003；产品由独立安装验收使用 P/F 最终源码 | exact merge、`tests/integration/**` 排除 Q 的 `r1_security/**`、`docs/tracks/r1-integration.md`，少量导入/配置/类型/路由胶水；领域问题退原 Worker | 全部 AT 的适用 L0/L1；L2 单列 |
 
 主控只写治理：AGENTS、docs/PLAN、docs/R1_PLAN、docs/STATUS、docs/R1_STATUS、docs/DECISIONS、docs/ACCEPTANCE、docs/source 指针及用户 Spec 存档；不写业务代码。每轨固定同一 Agent/worktree/branch，开发、测试、返修和文档持续由原所有者负责。跨轨发 Handoff，禁止修改他轨文件。采用普通精确 SHA merge，无 cherry-pick/force push。
 
-顺序：并行 A(M1)、B(M2)、C(M3 契约/离线)、P(M4 输入与 UI) → A 接 B/C 新契约，原 Worker 测试 → 独立 I 合并核心并验证/安装/构建 → P 固定最终核心 SHA/锁并完成 HTTP/MCP/三页 → I 复核产品固定组合/历史保护/导出。M3 只接受可信评价事件；不把 LLM 意见或崩溃当反证。旧 v0/v0.1、两类固定案例、literal-files-v1 不改语义。
+顺序：并行 A(M1)、B(M2)、C(M3)、P(M4 后端)、F(M4 UI)，Q 独立验收 → A 普通 exact merge B/C 最终接口并在自身 service/MCP 接线 → P/F 在真实可用候选核心上完成产品与安装/HTTP/UI，Q 验证组合及独立负例 → I 精确合并与适用回归 → P 同原 Owner 必要时最终 repin/lock，F 同原 Owner 处理 UI 返修 → I 复核固定组合/历史保护/导出。候选验证不能冒充最终组合通过；集成 Agent 不补领域功能。M3 只接受可信评价事件；不把 LLM 意见或崩溃当反证。旧 v0/v0.1、两类固定案例、literal-files-v1 不改语义。
 
 复用唯一 TaskLedger/lease/fencing/BudgetLedger/native/Executor/资产消费采用链；不新增调度器或完成证明。研究表仅描述语义，未知效果不重放，费用未知为 null。候选不在宿主执行；隔离能力未验证则拒绝执行。资源/数据/模型/费用 envelope 不随新 branch/run 重置。
 
@@ -24,6 +24,8 @@
 ## 用户追加并行指令（2026-10-03）
 
 用户要求“多开几条codex并行去耦合开发路线，直接开yolo模式”。本条覆盖初始四轨规模及P前端所有权；既有A/B/C/P保持原Owner，不接管其领域源码。
+
+当前为五条互斥开发轨 A/B/C/P/F；Q 是独立验收，不是第六条业务实现轨。P 的既有 UI WIP 已保留为 `44353e35bc745b7542625b85376791b5ac68aa4f` 交 F；F 负责普通 merge 的 UI 冲突，不覆盖自己的工作。
 
 - F / Codex YOLO / 私库 `research-r1-ui-1003` / 同名分支：独占 `frontend/**`, `src/morph_research/web/static/**`, `tests/ui/**`, `docs/tracks/r1-ui.md`（含前端package-lock）。P从现在排除以上路径，只负责产品后端/CLI/正式入口/uv.lock/pyproject及后端测试。F先只读，收到P无WIP交接后写入；HTTP契约通过Handoff，核心机制仍由原Owner负责。
 - Q / Codex YOLO / 核心 `morph-r1-boundaries-1003` / 同名分支：独占新增 `tests/integration/r1_security/**`, `docs/tracks/r1-boundaries.md`；黑盒独立验证A/B/C正式边界、跨项目/注入/伪造批准/未知/中断/额度不重置/宿主不执行。Q不能修改领域实现或原测试阈值，缺陷发原Owner修复。本轮不做真实沙箱探针或模型科研。
