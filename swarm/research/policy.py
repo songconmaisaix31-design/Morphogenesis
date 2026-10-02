@@ -75,6 +75,10 @@ class RouteOpportunity(Contract):
     share: float = Field(ge=0, le=1)
     factors: dict[str, float] = Field(default_factory=dict)
     known_cost: float | None = Field(default=None, ge=0)
+    # The accepted contribution result ids that actually drive this opportunity,
+    # so a recommendation references real contributions rather than a bare score.
+    supported_by: tuple[str, ...] = ()
+    refuted_by: tuple[str, ...] = ()
     reasons: tuple[str, ...] = ()
 
 
@@ -190,19 +194,23 @@ class ResearchPolicy:
             if not branch.authorized:
                 opportunities.append(RouteOpportunity(
                     branch_id=branch.branch_id, eligible=False, share=0.0,
+                    supported_by=branch.supported_by, refuted_by=branch.refuted_by,
                     reasons=("out_of_scope",)))
             elif branch.status == "refuted":
                 opportunities.append(RouteOpportunity(
                     branch_id=branch.branch_id, eligible=False, share=0.0,
-                    known_cost=branch.known_cost, reasons=("refuted_under_conditions",)))
+                    known_cost=branch.known_cost, supported_by=branch.supported_by,
+                    refuted_by=branch.refuted_by, reasons=("refuted_under_conditions",)))
             elif branch.status == "archived":
                 opportunities.append(RouteOpportunity(
                     branch_id=branch.branch_id, eligible=False, share=0.0,
-                    known_cost=branch.known_cost, reasons=("archived",)))
+                    known_cost=branch.known_cost, supported_by=branch.supported_by,
+                    refuted_by=branch.refuted_by, reasons=("archived",)))
             elif branch.status == "dormant":
                 opportunities.append(RouteOpportunity(
                     branch_id=branch.branch_id, eligible=False, share=0.0,
-                    known_cost=branch.known_cost, reasons=("dormant",)))
+                    known_cost=branch.known_cost, supported_by=branch.supported_by,
+                    refuted_by=branch.refuted_by, reasons=("dormant",)))
             else:
                 eligible.append(branch)
         count = len(eligible)
@@ -236,7 +244,8 @@ class ResearchPolicy:
                          "applicability": branch.applicability, "goal_relevance": branch.goal_relevance,
                          "risk": branch.risk, "support_count": float(support), "refute_count": float(refute),
                          "exploration_floor": exploration_floor},
-                known_cost=branch.known_cost, reasons=tuple(branch_reasons)))
+                known_cost=branch.known_cost, supported_by=branch.supported_by,
+                refuted_by=branch.refuted_by, reasons=tuple(branch_reasons)))
             eligible_index += 1
         by_id = {op.branch_id: op for op in opportunities}
         ordered = [by_id[branch.branch_id] for branch in branches]

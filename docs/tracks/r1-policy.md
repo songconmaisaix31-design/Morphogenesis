@@ -28,7 +28,7 @@
 
 - 结果从 `research_feedback(ledger, assets_root)`（可信事实投影）按 `result_id` 解析，不存在的 `result_id` → `untrusted_result`（伪造）。
 - `provenance == "replay"` → `replay_not_acceptable`（回放不能建立新接受）。
-- reviewer 是**构造时绑定的 host 自身 Agent 身份**（来自 `HostConfig.worker_id`，由 A 的 identity-bound service 提供），不是调用者字符串。只有 host 自己该身份**实际产生过本候选的独立审核 observation**（`ResearchObservation.worker_id == reviewer` 且 `purpose in {reproduction, counterexample}` 且 `provenance != replay`）才通过 `_reviewed`；仅 claim 过其它 task、未审核本 result 的 known actor 亦被拒（`reviewer_not_admitted`）。结果 id 不能提升 authority。
+- reviewer 是**构造时绑定的 host 自身 Agent 身份**（来自 `HostConfig.worker_id`，由 A 的 identity-bound service 提供），不是调用者字符串。`_reviewed` 要求该 host 身份在**可信投影**里有对本候选的独立派生结果（不同 task 的同 asset 的 `supported`/`refuted` 事实，即真实已确认 TaskLedger 运行的 reproduction/counterexample），仅 JSON 宣称 `purpose=reproduction`/`worker_id` 而无 ledger 执行的伪造 observation 不会出现在可信投影，故被拒（`reviewer_not_admitted`）。结果 id 不能提升 authority。
 - 跨作者（`reviewer == actor` 由纯策略 `self_approval_rejected` 拒绝）、跨 scope/project（事实绑定本 swarm 账本，跨项目结果根本不在本 store 可信事实内 → `untrusted_result`）。
 - 去重按 `result_id` + `source_ref`；纯 `ResearchPolicy.accept` 仅作计算建议，不是持久化权限入口。
 
@@ -50,11 +50,14 @@ policy.snapshot(results, branches)                    # -> dict 三轴视图
 from swarm.research.feedback import research_feedback, ResearchFeedbackStore
 results = research_feedback(ledger, assets_root)      # -> list[ThreeAxisResult]（正例+可信反证）
 store = ResearchFeedbackStore(path, ledger, assets_root, reviewer=host_worker_id)
-store.accept(result_id)                               # 唯一持久化接受入口（绑定 host 身份+真实审核）
+store.accept(result_id)                               # 唯一持久化接受入口（绑定 host 身份+真实独立审核）
 store.record_correction(event)                        # 追加更正事件
 store.record_supersession(event)                      # 追加 supersession（不删原记录）
 store.contributions() / store.effective_contributions() / store.corrections() / store.snapshot()
+store.advisory(branches)                              # A/P 接线：已接受贡献 + 引用贡献的 branch 机会建议
 ```
+
+**`advisory(branches)`** 是给 A/P 的正式 advisory projection：返回已接受贡献 + `RouteOpportunityPlan`，每个 `RouteOpportunity` 带 `supported_by`/`refuted_by`（真实贡献 `result_id`），所以下一推荐**真引用贡献而非单纯快照**；`advisory_only=True`、`claim_requires_recheck=True`，宿主权限/地方/scope/dependencies/预算过滤与真实 claim 仍走原 `TaskLedger`。默认不改旧 v0/v0.1（`Router` 仍是 v0/v0.1，research-v1 是独立建议层）。
 
 **审核身份权威来源**：host 自身 `HostConfig.worker_id`（A 的 identity-bound service 已绑定）；`_reviewed` 要求该 host 身份在资产库对本候选有真实 `reproduction/counterexample` observation。C 需要 A：接线时把 host 绑定身份传给 `reviewer=`，并把 branch/task/source 关联（`ThreeAxisResult.asset_id/task_id/actor` → branch）暴露给机会/快照；需要 B：可信评价方式（当前 `trusted_facts` 正例 + `ResearchObservation(purpose="counterexample", execution_state="succeeded", scientific_verdict="failed", known_effect)` 作可信反证）。接口未定前，本实现不依赖 A/B 新代码，负例（forge/replay/自批/同源/未审核 actor）先独立成立，后由同一 Owner 持续接线返修。
 

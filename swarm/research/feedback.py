@@ -36,6 +36,7 @@ from swarm.feedback import (
 )
 from swarm.models import TaskRecord
 from swarm.research.policy import (
+    Branch,
     ContributionDecision,
     CorrectionEvent,
     ResearchPolicy,
@@ -221,26 +222,18 @@ class ResearchFeedbackStore:
             keys.update(ResearchPolicy.dedup_keys(ThreeAxisResult.model_validate_json(row[0])))
         return keys
 
-    def _reviewed(self, fact: ThreeAxisResult) -> bool:
-        """The host's own bound reviewer identity must have actually recorded an
-        independent review (reproduction/counterexample) of this candidate. An
-        actor that merely claimed some other task never satisfies this."""
+    def _reviewed(self, fact: ThreeAxisResult, facts: list[ThreeAxisResult]) -> bool:
+        """The host's own bound reviewer must have an independently derived,
+        trusted result on the same candidate (a distinct completed task that is
+        a reproduction or counterexample of this fact). A forged observation
+        that merely claims ``purpose=reproduction`` with no confirmed ledger
+        execution never appears in the trusted projection, so it cannot
+        authorize an acceptance."""
         if fact.asset_id is None:
             return False
-        database = self.assets_root / "assets.sqlite3"
-        if not database.exists():
-            return False
-        read = readonly if isinstance(self.ledger, ReadonlyLedger) else connection
-        no_links(database)
-        with read(database) as assets:
-            rows = assets.execute("SELECT body FROM research_reports WHERE asset_id=?", (fact.asset_id,)).fetchall()
-        for row in rows:
-            observation = ResearchObservation.model_validate_json(row[0])
-            if (observation.worker_id == self.reviewer
-                    and observation.purpose in ("reproduction", "counterexample")
-                    and observation.provenance != "replay"):
-                return True
-        return False
+        return any(other.actor == self.reviewer and other.asset_id == fact.asset_id
+                   and other.task_id != fact.task_id and other.hypothesis in ("supported", "refuted")
+                   for other in facts)
 
     def accept(self, result_id: str) -> ContributionDecision:
         """Independently accept one trusted result under the host's bound reviewer.
@@ -248,8 +241,9 @@ class ResearchFeedbackStore:
         The result is re-derived from this store's trusted ledger/asset facts and
         the reviewer is the host's own identity (fixed at construction, never a
         caller string). A caller-supplied result id, replay provenance, a reviewer
-        that is the author, a reviewer with no actual review of this candidate, or
-        a result from another project/scope is rejected without persistence.
+        that is the author, a reviewer with no trusted independent review of this
+        candidate, or a result from another project/scope is rejected without
+        persistence.
         """
         facts = self.trusted()
         matches = [fact for fact in facts if fact.result_id == result_id]
@@ -258,7 +252,7 @@ class ResearchFeedbackStore:
         fact = matches[0]
         if fact.provenance == "replay":
             return ContributionDecision(accepted=False, state="rejected", reasons=("replay_not_acceptable",))
-        if not self._reviewed(fact):
+        if not self._reviewed(fact, facts):
             return ContributionDecision(accepted=False, state="rejected", reasons=("reviewer_not_admitted",))
         with connection(self.path, write=True) as db:
             decision = self.policy.accept(fact, reviewer=self.reviewer, seen=self._seen_keys(db))
@@ -314,6 +308,21 @@ class ResearchFeedbackStore:
         return [contribution.model_copy(update={"contribution": "superseded"})
                 if contribution.result_id in superseded else contribution
                 for contribution in self.contributions()]
+
+    def advisory(self, branches: list[Branch] | tuple[Branch, ...]) -> dict[str, JsonValue]:
+        """Thin advisory projection for A/P: the accepted contributions plus the
+        branch opportunities that reference them. Advisory only — a task is still
+        claimed through the existing TaskLedger, which re-checks scope,
+        capabilities, dependencies, lease/fencing and budget."""
+        effective = self.effective_contributions()
+        plan = self.policy.opportunities(branches)
+        return {
+            "policy_version": self.policy.version,
+            "advisory_only": True,
+            "claim_requires_recheck": True,
+            "contributions": [_JSON.validate_python(c.model_dump(mode="json")) for c in effective],
+            "opportunities": _JSON.validate_python(plan.model_dump(mode="json")),
+        }
 
     def snapshot(self) -> dict[str, JsonValue]:
         contributions = self.contributions()
