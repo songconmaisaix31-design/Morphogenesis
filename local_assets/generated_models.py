@@ -40,3 +40,4 @@ class GeneratedApproval(Contract):
     report_id: str = Field(min_length=1, max_length=120)
     policy_version: str = "generated-isolation-v1"
     proof_ref: str | None = Field(default=None, min_length=1, max_length=240)
+    provenance: Literal["live", "mock"] | None = None

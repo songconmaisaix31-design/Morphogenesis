@@ -78,6 +78,7 @@ class AssetConsumer:
         execution = ConsumptionExecution(
             asset_id=injected.asset_id, context=injected.context, candidate=candidate,
             candidate_asset_id=candidate_asset_id, created_at=time.time(),
+            provenance=self.store.research_provenance if candidate.research is not None else None,
         )
         with self.store.connection() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -95,6 +96,8 @@ class AssetConsumer:
     def record_adoption(self, execution_id: str, result_id: str,
                         ledger: CompletedLedger) -> AdoptionReceipt:
         execution = self.store.consumption(execution_id)
+        if execution.provenance is not None and execution.provenance != self.store.research_provenance:
+            raise AssetSafetyError("consumption_provenance_mismatch")
         context = execution.context
         self.store.fetch_approved(execution.asset_id)
         self.store.fetch_approved(execution.candidate_asset_id)
@@ -114,7 +117,8 @@ class AssetConsumer:
         if self.store.fetch(execution.candidate_asset_id) != execution.candidate:
             raise AssetSafetyError("consumed_candidate_mismatch")
         receipt = AdoptionReceipt(asset_id=execution.asset_id, candidate_asset_id=execution.candidate_asset_id,
-                                  context=context, result_id=result_id, adopted_at=time.time())
+                                  context=context, result_id=result_id, adopted_at=time.time(),
+                                  provenance=execution.provenance)
         # An existing immutable adoption is a historical fact. Later legitimate
         # tasks may change target bytes; replay must not erase that prior effect.
         with self.store.connection() as db:
@@ -125,6 +129,7 @@ class AssetConsumer:
                 raise AssetSafetyError("adoption_identity_conflict")
             return old
         target = check_target(Path(task.signal.workspace))
+        self.store.check_fixture_target(target)
         for change in execution.candidate.changes:
             path = safe_join(target, change.path)
             expected = change.after.encode("utf-8") if change.after is not None else None
