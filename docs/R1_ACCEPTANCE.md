@@ -52,3 +52,5 @@ Q 精确 C `40011761c3cce6513bbeef776543740f60d1d03e` 首批 13 passed / 1 faile
 F 源码 `124a71af513cfadf096c6e7f55b7be1be2f913ac` / 报告 `bc2a8ec4c505a680a847221b3950b22609e19cb5` Owner 已推送：当前三页旧+R1 回归 88 passed / 2 installed skipped，另以 fresh 非 editable 私有安装运行同源真实本机 HTTP 页面 2 passed；现有输入 HTTP 6 passed。未截获接口伪装真实 HTTP，执行后端仍明确为 mock。首次 hardlinked_path 拒绝、错误 selector、mock 时序失败、Node OOM 均保留，修复使用 COPY 私有安装及正确 selector，不弱化安装/业务不变量。该证据仅覆盖现有产品输入及安全状态显示；动态任务分支、候选冻结评价、复核和贡献关系尚待核心 DTO，AT16 总体仍未通过。
 
 P 撤回八阶段新调度/伪造 mock accepted 的 WIP 只证明错误方案已移除；不能据此标 native 自主闭环完成。A 修复诊断和 P 局部输入通过均须对应最终交付重新验收。全 R1、最终安装组合、实际隔离探针及 L2/L3 科研仍未通过/NOT_RUN。
+
+01:29 Q 交付 C `3161048c463b3aa4f434054755afc9787bbda989` 精确 git archive：`.venv-q/Scripts/python.exe -m pytest tests/integration/r1_security/test_c_feedback_boundaries.py -q --tb=short`，exit 0，22 passed / 5.11s。原伪造结果/复核、unknown、历史与 TaskLedger 负例，以及有效独立复核正例均保留并通过；原始输出 `tests/integration/r1_security/evidence/c-3161048-exact-boundary.txt`。仅接纳该阶段被测贡献边界，B 动态结果投影、实际下一行动与最终组合仍待验收。此前 C 首次 RED 不覆盖。
