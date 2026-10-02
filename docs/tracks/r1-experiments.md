@@ -1,3 +1,97 @@
+# R1 B · 2026-10-03 后继：SQLite 配置并发初始化
+
+本轮为新 Task `task_eff1006355f8` / Dispatch `ctx_37f15746c078`，仍由原 B Owner 在原
+worktree/分支处理。此前 SOURCE `5faafe41b1732c83d165251600b688444186c702`、REPORT
+`6ec8c7441e07824bb2b7940c1c93e590200f84ab` 及全部首次失败保留。
+本轮 SOURCE **`230d283848c0879ff9c349096548d3810c4b1954`** 已普通 commit/push，远端核对一致。
+本节是单独的后继报告，不把后来通过用于撤销原 CI 失败。
+
+## 原失败与根因
+
+[C Windows CI run 37051183488 / job 110984695266](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37051183488/job/110984695266)
+的 API 确认 `run_attempt=1`、HEAD `8bc4c282ed4db8e2be0798509b28d984240b3a06`、
+`conclusion=failure`。下载原日志到本地
+`.runtime/ci-37051183488-job-110984695266-first.txt`，首次为
+**1 failed / 1348 passed / 5 skipped / 75 warnings，1456.91s**。
+
+原 `tests/swarm/test_worker_evomap.py:97` 的三个 SpawnProcess 退出码不为全零：
+SpawnProcess-17 在 `LocalAssetStore.__init__` 原 `store.py:100` 插入 `asset_store_settings`
+时发生 `UNIQUE constraint failed: asset_store_settings.name`；其他进程随后在屏障处
+`BrokenBarrierError`。本地原测试 blob `8470c3069c614e7258795f6eacb37e3e228f9aea`
+与该 CI 提交完全一致，未改 C 测试、断言或等待时间。
+
+原代码在 `executescript` 完成后先查询设置，首次 INSERT 才隐式开始写事务；因此两个初始化者
+可能同时看到缺失配置。相同设置也会撞唯一键，冲突设置的失败方则收到数据库异常，而非既有的
+明确拒绝。A/B 之前偶然通过不覆盖这条真实竞争证据。
+
+## 最小修复与回归
+
+生产变更仅 `local_assets/store.py` 三行：在原连接、原事务上下文中，读配置前执行
+`BEGIN IMMEDIATE`。两个配置行、旧库迁移检查与不可变触发器创建在同一事务内提交或回滚；
+竞争方取得锁后读取已提交的一整组绑定。保留原 10 秒 SQLite 等待时间、WAL、immutable
+UPDATE/DELETE triggers、live/mock 隔离以及 populated legacy store 不能转换 mock 的拒绝。
+没有忽略完整性异常、覆盖旧值、增加自动重试或引入调度设施。
+
+新增 `tests/local_assets/test_store_initialization.py` 使用同一 Python 进程的两条线程、真实独立
+SQLite 连接和外部写锁，以事务开始屏障固定交错；同时覆盖隐式和显式 BEGIN，不替换查询结果。
+测试禁止启动进程和网络，也不执行候选。相同的四个并发断言在旧源码上首次 **4 FAIL / 1 PASS，
+2.36s**（`.runtime/sqlite-initialization-first-red.txt`），修复后 **5 PASS，2.00s**
+（`.runtime/sqlite-initialization-fixed-first.txt`）：
+
+- 相同 live、相同 mock 配置的两个初始化者都成功。
+- 模式冲突或 fixture 路径冲突时，仅一个完整绑定成功，另一方收到 `asset_store_provenance_conflict`；
+  重开仍拒绝失败方，持久配置没有混合，UPDATE/DELETE 仍被不可变触发器拒绝。
+- 有资产的旧库拒绝转换 mock，失败不留下配置行或改变原资产；之后默认 live 仍可初始化。
+
+命令：`.venv/Scripts/python.exe -m pytest tests/local_assets/test_store_initialization.py -q --tb=short`。
+使用原 B 私有 `.venv`，只设置进程局部 BLAS 线程数为 1；没有修改借用/全局环境。
+Q 在旧 installed `cc2e722` 上独立首次复现 **4 FAIL，1.85s**，保存
+`installed-cc2e722-store-race4-first.txt`；随后对精确 SOURCE `230d283` 的 `git archive`
+执行同一 4 项断言加原 B 68 项，报告 **72 PASS，10.05s**。这是 Q 独立所有者证据，
+没有替换其原 installed 包，也没有冒充本轮多进程回归已通过。
+主控于 20:17:55 UTC 在 P/F 释放后授予 B 串行窗口，完成一次适用回归后归还给主控/P：
+
+| 原命令 / 范围 | 本轮首次结果 |
+|---|---|
+| `python -m pytest tests/swarm/test_worker_evomap.py -q --tb=short` | **1 FAIL / 21 PASS，279.33s** |
+| `python -m pytest tests/local_assets` 加下列三项原资产断言，`-q --tb=short` | **69 PASS，214.46s** |
+| `python tools/typecheck.py` | **PASS，130 source files** |
+
+三个原断言位于 `tests/swarm/test_assets.py`：
+`test_report_expiry_and_immutable_evidence`、
+`test_same_report_concurrent_promotion_is_consumed_once`、
+`test_approved_fetch_applicability_injection_actual_execution_and_adoption`。
+所有命令均用本轨 `.venv/Scripts/python.exe`；没有修改任何 `tests/swarm/**`。
+原输出分别保留 `.runtime/sqlite-worker-evomap-first.txt`、
+`.runtime/sqlite-assets-boundaries-first.txt`、`.runtime/sqlite-strict-first.txt`。
+
+### 后继本地首次超时仍是 RED
+
+`test_worker_evomap.py:97` 的新失败是原 180 秒截止时退出码 **`[0, None, None]`**，
+没有原 UNIQUE 或 BrokenBarrier traceback。保留原 180/60 秒和 `[0,0,0]` 断言，没有盲重跑。
+这次未完成的两个进程由原测试 finally 终止，不等于测试通过或全部任务完成。
+
+仅复制原 fixture 的 `data` 至 `.runtime/sqlite-worker-first-artifacts`（不复制外层 credential
+文件），在副本以 SQLite `mode=ro` + `query_only` 诊断，原文件不改。四个 promoted 审计对应
+data-0/2/3/4 completed，data-1 claimed 且预算 reservation pending、tokens unknown，data-5
+available；原资产库 4 assets/4 reports/4 approvals、0 consumptions/0 adoptions。builder-0
+回执为 mock、calls=1、state=idle；其余没有完成回执。
+
+时间记录：data-3/4 约 20:19:50 UTC 提交完成，data-0/2 约 20:21:13–16 完成，data-1
+约 20:21:34 仍在 claimed；四次 MockTransport HTTP `elapsed_seconds` 均不足 0.001 秒。
+reservation→settlement 约 23–27 秒，settlement→task completion 约 45–57 秒。可确定构造
+已通过且有大量耗时位于 mock HTTP 之外；缺少各子命令计时，**不能确定 Node/Git/锁或其他
+阶段的根因**。B 与 C 精确提交的 worker_loop 及原测试一致，未因猜测修改 C 领域。
+诊断摘要保留 `.runtime/sqlite-worker-first-diagnostic.json`。
+
+主控正在核对精确 SOURCE `230d283` 的独立 Windows CI；本地原 worker 门仍未通过，
+尚未发送成功完成回执。Linux/后来的独立成功也不会解释或撤销此首失败。
+
+真实模型、科研候选执行、真实沙箱、探针、AT-07/L2 仍 **NOT_RUN**。本修复只处理既有本地
+资产存储的原子初始化，不把 mock 或 SQLite 并发检查转换成科学/隔离验收。
+
+---
+
 # R1 B · 2026-10-03 恢复后的配置、结果与继承返修
 
 当前依据 `docs/source/Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md` 的 FR-15 至 FR-20；
