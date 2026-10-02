@@ -233,3 +233,33 @@ and sandbox resource enforcement across product runs remain NOT_RUN. Official
 MCP tool tests are in-process, without a live transport. AT07 real isolation
 probe, L2/L3, interface_live and task_live remain NOT_RUN. No candidate, model
 research, new sandbox, probe, paid backend or external data operation was run.
+
+## Expanded host/configuration scope
+
+Coordinator `msg_b8c6b6c41499` adds P material-root and service read/provenance
+boundaries and B's actual probe configuration, without expanding Q write paths.
+Orca ask `msg_032ac8a3f5c1`, answer `msg_809961677e5c`, requires this dispatch
+to wait for final receipts. A stage candidate
+`7fc1e80845128080dfbcd5899aa9a09e37128753` is archived but Q26 run awaits the
+main-controlled resource window. Formal dynamic integration remains separate.
+
+B current WIP, eight prepare/admit-only tests in
+`test_b_probe_configuration.py`: **7 failed / 1 passed**, exit 1, 6.29 seconds;
+`b-wip-probe-configuration-first-diagnostic.txt`. Conflicting duplicate probe ID
+silently replaces evidence; effective image, CPU, memory, process limit, endpoint
+and network changes consume unchanged probe identity/capability claims. Exact
+duplicate record construction is retained as a positive control. This is a WIP
+diagnostic, not immutable acceptance or a valid isolation-probe claim. The
+current API cannot bind the full configuration; an incomplete host record must
+refuse. Full correctly configured admission needs the owner's actual new schema
+and a separate positive control before acceptance. No create/execute/SDK call.
+Original B Handoffs `msg_871e5db6f626`, `msg_4a37a68adc04`.
+
+P exact `76b02298355241e1366cdd4ce1ffbadc6ce69d9f` is archived. New nine tests
+in `test_p_host_boundaries.py` are **NOT_RUN pending resource window**: deny empty
+host roots, retain explicit allowed-root import, deny parent traversal, prevent
+caller envelope (including approved boolean) from widening handler roots, deny
+foreign project callbacks, retain valid project read, and do not invent live
+provenance from local service connection. Fixtures use Q-created inert text
+only; there is no user/private file, server socket or scientific result callback.
+Review Handoff `msg_91f820239256`. Owner WIP is not final evidence.
