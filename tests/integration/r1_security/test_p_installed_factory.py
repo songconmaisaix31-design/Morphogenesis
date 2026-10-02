@@ -160,3 +160,72 @@ def test_configured_restart_keeps_original_run_and_rebinding_refuses(configured)
     with pytest.raises((PermissionError, ValueError)):
         ConfiguredResearch(f.config, f.spaces)
     assert started() == first and service.ledger.snapshot() == []
+
+
+@pytest.mark.parametrize(("disconnect_at", "error_type"), [
+    pytest.param(None, None, id="delivered-positive"),
+    pytest.param(1, BrokenPipeError, id="headers-broken-pipe"),
+    pytest.param(2, BrokenPipeError, id="body-broken-pipe"),
+    pytest.param(1, ConnectionResetError, id="headers-reset"),
+    pytest.param(2, ConnectionResetError, id="body-reset"),
+    pytest.param(1, ConnectionAbortedError, id="headers-aborted"),
+    pytest.param(2, ConnectionAbortedError, id="body-aborted"),
+])
+def test_response_disconnect_preserves_admission_and_same_proposal_recovery(configured, monkeypatch,
+        deny_candidate_execution_and_network, disconnect_at, error_type):
+    f, loop = configured, deny_candidate_execution_and_network
+    arguments = {"project_id": "q-project", "kind": "question", "goal": "Q response loss recovery",
+                 "justification": "fixture", "expected_contribution": "question"}
+    request, _ = handler(f, {"arguments": arguments}, loop, monkeypatch,
+                         "Bearer " + f.tokens["member-two"])
+    del request.reply  # Use the real serializer, headers, body write and outer error mapping.
+    request.path = f"/api/research-spaces/{SPACE}/members/member-two/tools/propose_research_work"
+    request.server.origin = "http://127.0.0.1:65534"
+    request.headers.add_header("Host", "127.0.0.1:65534")
+    request.headers.add_header("Origin", request.server.origin)
+    request.request_version = "HTTP/1.1"
+    request.command = "POST"
+    request._form_consumed = True
+    statuses, escaped = [], []
+    request.log_request = lambda status, *args: statuses.append(status)
+
+    class ResponseWriter:
+        def __init__(self):
+            self.calls = 0
+            self.chunks = []
+
+        def write(self, value):
+            self.calls += 1
+            if disconnect_at is not None and self.calls >= disconnect_at:
+                raise error_type("Q deterministic disconnected response")
+            self.chunks.append(bytes(value))
+            return len(value)
+
+    request.wfile = ResponseWriter()
+    try:
+        request.route(write=True)
+    except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError) as error:
+        escaped.append(type(error).__name__)
+
+    # Reply failure cannot roll back a durable admission or fabricate science.
+    service = f.connected.backend(SPACE, "member-two").service
+    admitted = service.ledger.snapshot()
+    assert len(admitted) == 1
+    task_id = admitted[0].signal.task_id
+    original = service.knowledge.proposal(task_id)
+    assert original.status == "accepted" and original.task_id == task_id
+    f.connected = ConfiguredResearch(f.config, f.spaces)
+    replayed = tool(f, loop, monkeypatch, "member-two", "propose_research_work", **arguments)
+    reopened = f.connected.backend(SPACE, "member-two").service
+    assert replayed["task_id"] == task_id
+    assert len(reopened.ledger.snapshot()) == 1 and reopened.knowledge.proposal(task_id) == original
+    assert reopened.store.adoptions() == [] and reopened.feedback_store.contributions() == []
+    assert statuses == [200], "response loss was converted into a second, misleading source-failure status"
+    assert escaped == []
+    assert request.close_connection is True
+    if disconnect_at is None:
+        body = json.loads(request.wfile.chunks[-1])
+        assert body["acceptance"] == "core_tool_response"
+        assert len(request.wfile.chunks) == 2
+    else:
+        assert len(request.wfile.chunks) == disconnect_at - 1
