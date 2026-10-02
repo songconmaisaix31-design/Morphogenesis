@@ -83,3 +83,13 @@ exact A8fc 新37项首结果35 passed / 2 failed：旧合法MCP任务缺 project
 F8e93738 的 build 3906 modules / 15.66s，聚焦两视窗8 passed / 9.2s；Owner实际查看1366x900和390x844截图。只接纳被后端返回的来源定位/多版本/缺失状态展示，不推定 P 真实导入已支持多版本；P import_source按kind+identifier吞并新版本和意见不同适用条件问题已退原 P 并交 Q。新 F8e 的 installed HTTP L1尚未运行。
 
 剩余验收重点是同一组合的正式 configured product/身份MCP/native发现认领、生成候选到可信评价与独立复核、接受证据改变下一实际选择、原消费与采用、完整成果包与三页真实HTTP。所有Owner/独立Q/最终I各自证据须标来源和范围；AT07真实隔离探针、L2研究及L3效果研究仍NOT_RUN。
+
+## 完整候选与归档继承返修（02:46 追加）
+
+Q SOURCE71c4642 / REPORTac4b150精确阶段结果：A8fc的37项在仅修合法项目/note fixture后37 passed /13.49s；首35/2保留。B e8 52通过；C d7e原29及新generated12通过，首40 passed /1 failed为fixture试图写不可变SQLite而提前拒绝，修为断言拒绝后12通过，原失败保留。
+
+Q SOURCE5fc892c6af5a749f8d7356fda613f98c2005846a / REPORT211c50422ec381a057773f15e1dc84d8986d3c86保存真实缺陷：B56的原mock消费/apply/adoption正例通过，但原output/evaluation/environment篡改后仍可继承的3个负例失败；Pced资料版本/内容/解析与意见适用条件9项为7 failed /2 passed。各Owner返修，旧日志不覆盖。
+
+Q 最新SOURCEfff315b / REPORTbf5be87精确验收：B2d 68 passed /10.28s（含原始证据复查、host判据重开、应用前后回滚）；C4f 45 passed /11.80s（含原始来源与review locality、真实有效独立复核）；Pf006 + A8fc 21 passed /4.33s（原12访问边界+9资料/意见身份）。均为受控fixture边界，不执行候选、真实SDK沙箱或模型。当前B5faa后继与A0bcb完整正式入口须进一步验收。
+
+P f006+A8fc 的私有非editable安装37通过只涵盖配置/HTTP/MCP/资料阶段。B静态危险输入compat首244 passed /1 failed、A缺Node依赖首51 passed /24 failed及P安装源码比较器的旧root布局误判都作为原始结果保留；后续新结果分别记录。未完成的安装/stdio/完整研究DTO/三页与最终I检查仍不赋予PASS。

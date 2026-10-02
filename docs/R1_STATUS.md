@@ -1,5 +1,19 @@
 # R1 派发状态（2026-10-03）
 
+## 02:46 更新：首个完整核心组合进入正式接线验收
+
+A SOURCE `0bcb320e843839f5f043fccd9f705d9dd9b7299e` 已推送且远端核实，普通合并 B2d/C4f；23 个正式 MCP 工具及 shared build_service、generated prepare/admit/run/observe/complete、独立接受后实际 discover/choose/claim、原消费/apply/mock adoption、research_package 已接线。动态7通过；混合集51 passed / 24 failed（旧 policy_entry 的 NodeAssetBridge 缺本轨 node_modules），不算完整回归，首日志保留。A 的私有非 editable/stdio/旧案例检查排在 C 后。
+
+B SOURCE `5faafe41b1732c83d165251600b688444186c702` 是当前候选，修正静态危险代码提前抛异常造成的旧 refused-report 兼容差异；原断言未改。此前 SOURCE2d 的归档复查/应用前后回滚已由 Q 独立68通过；B 全领域首244 passed / 1 failed保留，strict130文件通过，完整后继复验与私有安装正占用重型窗口。
+
+C SOURCE `4f83296af908352660ebf71e633e70a111eb2877` 含原始作者/current review/project/locality核验，普通合并B2d；Owner59通过、Q独立45通过，changed-module strict4通过。C 私有安装/旧FC stdout首失败复验在 B 后；不能以旧阶段通过代替此待办。
+
+P SOURCE `f00631e6a11eee776574f8d1ff4319b318fd879a` / REPORT `8aaeca3800dca09bb7e7df4ef2dcefc30ddaf22e`：exact A8fc + product git-archive 私有COPY非editable安装，37 passed /13.24s，31个产品源码文件逐字节相符、核心VCS origin相符。来源内容/版本/解析身份、意见条件追加与受控HTTPS取得已实现；Q新21通过。P已释放重窗口；正在接 A0bcb 的完整实验成果DTO及复用原 native/MCP/项目BudgetLedger的可变成员入口。下一短安装排在 B/C/A 后。F 按真实字段接线，最终两视窗 installed L1 待。
+
+Q SOURCE `fff315b23676666cdd6908bf0bfe4b8d45f91841` / REPORT `bf5be87ebb88fe95b83073fd617948f51256ed90` 已推送并远端核实。B68/C45/P21适用阶段独立通过；正式FastMCP完整组合与native guard继续验收。I仍待领域交付完成后派发。
+
+限制澄清：原本已授权的本地GEP Node桥与官方CLI能力/服务名只读检查属于工程验证；不是收费科研或真实沙箱调用。仅保留非秘密元数据，不读取密钥文件、不复制/输出凭据、不写全局配置。禁止以操作者inventory-complete布尔值代替已验证的native隔离。没有扩大科研运行、资料外发、发布授权。
+
 ## 02:29 更新：动态核心接线与私有安装
 
 六条恢复后的 Codex YOLO Worker 均已回 ACK 并持续在原 Task/worktree/branch/write_paths 开发。主控只维护治理；I 尚未派发。当前阶段来源及待办如下，不替代最终组合验收。
