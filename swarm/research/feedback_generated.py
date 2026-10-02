@@ -65,7 +65,7 @@ def _execution_anchor(db: sqlite3.Connection, task: TaskRecord, report: Research
 def _bound_result(db: sqlite3.Connection, assets: sqlite3.Connection, ledger: TaskLedger,
                   task: TaskRecord, report: ResearchObservation, plan: GeneratedExperimentPlan,
                   registry: TrustedCriteriaRegistry, at: float,
-                  archive_root: Path | None) -> GeneratedResult | None:
+                  archive_root: Path | None, task_ids: set[str] | None) -> GeneratedResult | None:
     submitted = task.result or {}
     if (report.report_id != submitted.get("report_id")
             or report.asset_id != plan.candidate_asset_id
@@ -97,6 +97,8 @@ def _bound_result(db: sqlite3.Connection, assets: sqlite3.Connection, ledger: Ta
     candidate = Candidate.model_validate_json(report.candidate_json)
     if candidate.scope != task.signal.scope or not _candidate_matches(assets, report.asset_id, candidate):
         return None
+    if task_ids is not None and candidate.attempt.task_id not in task_ids:
+        return None
     author_row = db.execute("SELECT * FROM tasks WHERE swarm_id=? AND task_id=?",
                             (ledger.swarm_id, candidate.attempt.task_id)).fetchone()
     if author_row is None:
@@ -105,6 +107,7 @@ def _bound_result(db: sqlite3.Connection, assets: sqlite3.Connection, ledger: Ta
     author_at = _completed_at(db, author_task)
     if (author_at is None or author_at > at or not author_task.owner
             or author_task.signal.scope != task.signal.scope
+            or author_task.signal.workspace != task.signal.workspace
             or author_task.signal.payload.get("project_id") != plan.project_id
             or (author_task.result or {}).get("asset_id") != report.asset_id
             or candidate.attempt.attempt != author_task.attempts
@@ -159,7 +162,7 @@ def trusted_generated_feedback(ledger: TaskLedger, assets_root: Path, *,
             if len(records) != 1:
                 continue
             report = ResearchObservation.model_validate_json(records[0][0])
-            result = _bound_result(db, assets, ledger, task, report, plan, criteria_registry, at, archive_root)
+            result = _bound_result(db, assets, ledger, task, report, plan, criteria_registry, at, archive_root, task_ids)
             if result is None:
                 continue
             outputs = [artifact for artifact in result.artifacts
