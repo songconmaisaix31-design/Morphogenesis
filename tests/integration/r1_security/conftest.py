@@ -9,14 +9,20 @@ from pathlib import Path
 import socket
 import subprocess
 import sys
+import sysconfig
 
 import pytest
 
-target = Path(os.environ.get("R1_SECURITY_SOURCE", Path(__file__).resolve().parents[3])).resolve()
-sys.path.insert(0, str(target))
-if os.environ.get("R1_PRODUCT_SOURCE"):
-    product = Path(os.environ["R1_PRODUCT_SOURCE"]).resolve()
-    sys.path.insert(0, str(product / "src"))
+if os.environ.get("R1_SECURITY_INSTALLED") == "1":
+    # Exact VCS distributions take precedence over the checkout holding Q's
+    # tests. The product still performs its original installed_core pin check.
+    sys.path.insert(0, sysconfig.get_paths()["purelib"])
+else:
+    target = Path(os.environ.get("R1_SECURITY_SOURCE", Path(__file__).resolve().parents[3])).resolve()
+    sys.path.insert(0, str(target))
+    if os.environ.get("R1_PRODUCT_SOURCE"):
+        product = Path(os.environ["R1_PRODUCT_SOURCE"]).resolve()
+        sys.path.insert(0, str(product / "src"))
 
 
 @pytest.fixture(autouse=True)

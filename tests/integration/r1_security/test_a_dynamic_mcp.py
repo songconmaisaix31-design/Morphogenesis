@@ -265,3 +265,34 @@ def test_same_frozen_task_different_plan_is_refused_without_second_execution(tmp
              plan=changed, files={"candidate.py": CODE.decode()})
     assert f.author.ledger.get(task).acceptance["generated_plan"] == admitted["plan"]
     assert not [e for e in f.author.ledger.audit() if e["event"] == "execution_unconfirmed"]
+
+
+@pytest.mark.parametrize("attack", [None, "input_file", "path_escape", "small_bound", "tampered_output"])
+def test_official_artifact_read_is_bounded_and_rechecks_original_bytes(tmp_path, monkeypatch,
+        deny_candidate_execution_and_network, attack):
+    loop = deny_candidate_execution_and_network
+    f = fixture(tmp_path, monkeypatch)
+    task, token, admission = prepared(loop, f.author, f.plan)
+    run, report = observed(loop, f.author, task, token, admission["asset_id"], "original")
+    args = dict(action="artifact", task_id=task, run_id=run, artifact_path="outputs/output.json")
+    positive = call(loop, f.author, "research_experiment", **args)
+    assert json.loads(positive["content"]) == json.loads(raw_output())
+    assert positive["archive_status"] == "verified" and positive["provenance"] == "mock"
+    assert positive["truncated"] is False
+    if attack is None:
+        package = call(loop, f.author, "research_project", action="export", project_id="p1")
+        assert package["completion_claim"] is False
+        assert len(package["executions"]) == 1 and package["executions"][0]["archive_status"] == "verified"
+        assert package["generated_validation_reports"] and not package["adoption_receipts"]
+        return
+    if attack == "input_file":
+        args["artifact_path"] = "inputs/candidate.py"
+    elif attack == "path_escape":
+        args["artifact_path"] = "../../state/ledger.db"
+    elif attack == "small_bound":
+        args["max_bytes"] = 1
+    else:
+        (tmp_path / "evidence" / run / "outputs/output.json").write_bytes(b'{"approved":true}')
+    with pytest.raises(ToolError):
+        call(loop, f.author, "research_experiment", **args)
+    assert f.author.store.adoptions() == []

@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-if not os.environ.get("R1_PRODUCT_SOURCE"):
+if not os.environ.get("R1_PRODUCT_SOURCE") and os.environ.get("R1_SECURITY_INSTALLED") != "1":
     pytest.skip("P source not selected; host import boundary NOT_RUN", allow_module_level=True)
 
 from morph_research import materials
