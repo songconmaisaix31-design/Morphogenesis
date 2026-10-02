@@ -5,19 +5,44 @@ from pydantic import JsonValue
 from typing import Literal
 
 from local_assets.models import Candidate
+from swarm.research.policy import CorrectionKind
+from swarm.research.records import NoteKind, ProposalKind, SourceRef
 from swarm.research.service import Purpose, ResearchService
 
 
 def create_server(service: ResearchService) -> FastMCP:
     mcp = FastMCP("Morphogenesis Research", instructions=(
-        "Discover eligible research tasks and voluntarily claim one. Identity and permissions are host-bound. "
+        f"Host-bound research project: {service.config.project_id!r}. "
+        "Read shared project context and sources, propose justified work within the approved goal, "
+        "discover current legal opportunities, choose or override with a reason, then voluntarily claim one. "
+        "Identity, project approval, data scope, backend, evaluation and budgets are host-bound. "
         "Renew the lease during work. Execution, scientific criteria, independent reproduction and actual adoption "
-        "are separate facts. Unknown external effects must not be replayed."))
+        "are separate facts. Prepare new candidate Python through the structured tools; never execute candidate "
+        "code using host shell, imports or native agent tools. Mock results remain mock. "
+        "Unknown external effects must not be replayed."))
 
     @mcp.tool()
     def discover_tasks(limit: int = 100) -> list[dict[str, JsonValue]]:
         """Discover eligible tasks in this host's scope; never auto-assign."""
         return service.discover(limit)
+
+    @mcp.tool()
+    def choose_research_work(task_id: str | None = None, reason: str = "", limit: int = 100) -> dict[str, JsonValue]:
+        """Choose a current legal research opportunity; lease_task still rechecks and claims it."""
+        return service.choose(task_id, reason=reason, limit=limit)
+
+    @mcp.tool()
+    async def prepare_candidate_experiment(task_id: str, token: int, plan: dict[str, JsonValue],
+                                            files: dict[str, str] | None = None, asset_id: str | None = None,
+                                            purpose: Purpose = "original") -> dict[str, JsonValue]:
+        """Check generated Python and freeze an approved plan; candidate text is never host-executed."""
+        return await asyncio.to_thread(service.prepare_candidate_experiment, task_id, token, plan, files,
+                                       asset_id=asset_id, purpose=purpose)
+
+    @mcp.tool()
+    def admit_candidate_experiment(task_id: str, token: int) -> dict[str, JsonValue]:
+        """Recheck frozen plan, verified isolation and project budget; execution is a separate action."""
+        return service.admit_candidate_experiment(task_id, token)
 
     @mcp.tool()
     def project_context(task_id: str) -> dict[str, JsonValue]:
@@ -51,9 +76,16 @@ def create_server(service: ResearchService) -> FastMCP:
         return service.search(query, limit)
 
     @mcp.tool()
-    async def research_experiment(action: Literal["request", "run", "result"], task_id: str,
-                                  token: int | None = None, run_id: str | None = None) -> dict[str, JsonValue]:
-        """Inspect registered environment, run once in a fresh sandbox, or read durable result; never replay unknown."""
+    async def research_experiment(action: Literal["request", "run", "result", "artifact"], task_id: str,
+                                  token: int | None = None, run_id: str | None = None,
+                                  artifact_path: str | None = None, max_bytes: int = 65536) -> dict[str, JsonValue]:
+        """Inspect a frozen plan, execute via the selected host backend, or reread its archive; never replay unknown."""
+        if action == "artifact":
+            if token is not None or run_id is None or artifact_path is None:
+                raise ValueError("artifact_requires_bound_run_and_artifact_path")
+            return service.artifact(task_id, run_id, artifact_path, max_bytes=max_bytes)
+        if artifact_path is not None or max_bytes != 65536:
+            raise ValueError("artifact_arguments_require_artifact_action")
         if action == "result":
             if run_id is None or token is not None:
                 raise ValueError("result_requires_run_id_only")
@@ -104,5 +136,79 @@ def create_server(service: ResearchService) -> FastMCP:
                         execution_id: str | None = None) -> dict[str, JsonValue]:
         """Apply approved bytes through the existing ledger fence and record actual adoption."""
         return service.apply(task_id, token, asset_id, report_id, execution_id)
+
+    @mcp.tool()
+    def research_project(action: Literal["create", "read", "export"], project_id: str,
+                         goal: str | None = None, allowed_domains: list[str] | None = None,
+                         data_bounds: dict[str, str] | None = None,
+                         milestones: list[str] | None = None) -> dict[str, JsonValue]:
+        """Create a research space or read its full shared memory. Resource authorization is host-bound."""
+        if action == "create":
+            if goal is None:
+                raise ValueError("create_requires_goal")
+            return service.create_project(project_id, goal, allowed_domains=tuple(allowed_domains or ()),
+                                          data_bounds=data_bounds or {}, milestones=tuple(milestones or ()))
+        if action == "export":
+            return service.research_package(project_id)
+        return service.research_context(project_id)
+
+    @mcp.tool()
+    def research_branch(project_id: str, branch_id: str, title: str, goal: str,
+                        parent_branch_id: str | None = None) -> dict[str, JsonValue]:
+        """Open a non-pre-registered research branch; task state stays in the existing ledger."""
+        return service.create_branch(project_id, branch_id, title, goal, parent_branch_id=parent_branch_id)
+
+    @mcp.tool()
+    def submit_research_note(project_id: str, kind: NoteKind, text: str,
+                             source_refs: list[dict[str, JsonValue]] | None = None,
+                             branch_id: str | None = None, hypothesis_id: str | None = None,
+                             task_id: str | None = None, signer: str | None = None,
+                             applicability: dict[str, str] | None = None,
+                             references: list[str] | None = None) -> dict[str, JsonValue]:
+        """Share a sourced observation/opinion. Always unverified: a member can never promote it to fact."""
+        refs = tuple(SourceRef.model_validate(r) for r in (source_refs or []))
+        return service.submit_note(project_id, kind, text, source_refs=refs, branch_id=branch_id,
+                                   hypothesis_id=hypothesis_id, task_id=task_id, signer=signer,
+                                   applicability=applicability, references=tuple(references or ()))
+
+    @mcp.tool()
+    def propose_research_work(project_id: str, kind: ProposalKind, goal: str, justification: str,
+                              expected_contribution: str, scope: str | None = None,
+                              required_capability: str | None = None, dependencies: list[str] | None = None,
+                              source_refs: list[dict[str, JsonValue]] | None = None,
+                              branch_id: str | None = None, derived_from: str | None = None) -> dict[str, JsonValue]:
+        """Propose work; the host admits it into the single ledger only within host authorization."""
+        refs = tuple(SourceRef.model_validate(r) for r in (source_refs or []))
+        return service.propose_work(project_id, kind, goal, justification, expected_contribution,
+                                    scope=scope, required_capability=required_capability,
+                                    dependencies=tuple(dependencies or ()), source_refs=refs,
+                                    branch_id=branch_id, derived_from=derived_from)
+
+    @mcp.tool()
+    def accept_result(result_id: str) -> dict[str, JsonValue]:
+        """Independently accept one trusted result under the host-bound reviewer (never caller-supplied)."""
+        return service.accept_result(result_id)
+
+    @mcp.tool()
+    def research_advisory(project_id: str | None = None) -> dict[str, JsonValue]:
+        """research-v1 advisory: accepted contributions and branch opportunities (advisory only)."""
+        return service.research_advisory(project_id)
+
+    @mcp.tool()
+    def research_snapshot(project_id: str | None = None) -> dict[str, JsonValue]:
+        """Three-axis/context/project snapshot; separate from legacy v0.1 routing."""
+        return service.research_snapshot(project_id)
+
+    @mcp.tool()
+    def record_research_correction(branch_id: str, kind: CorrectionKind, reason: str,
+                                   source_ref: str) -> dict[str, JsonValue]:
+        """Append a branch lifecycle correction (sleep/downgrade/reopen); history is preserved."""
+        return service.record_correction(branch_id, kind, reason, source_ref)
+
+    @mcp.tool()
+    def record_research_supersession(result_id: str, reason: str, source_ref: str,
+                                     superseded_by: str | None = None) -> dict[str, JsonValue]:
+        """Append a contribution supersession; the original contribution is retained."""
+        return service.record_supersession(result_id, reason, source_ref, superseded_by=superseded_by)
 
     return mcp

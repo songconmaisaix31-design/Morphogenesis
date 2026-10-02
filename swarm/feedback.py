@@ -125,6 +125,10 @@ def trusted_facts(ledger: TaskLedger, assets_root: Path) -> list[FeedbackFact]:
         for row in rows:
             task = ledger._record(db, row)
             result = task.result or {}
+            # Dynamic science has its own versioned, raw-archive-verified
+            # projection. Never reinterpret it as legacy passed/failed reward.
+            if "generated_plan" in task.acceptance:
+                continue
             at = _completed_at(db, task)
             if at is None or not task.owner:
                 continue
