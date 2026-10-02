@@ -2,6 +2,8 @@
 
 当前状态（R3）：续租等待的窄修 SOURCE `5e24715c7002d254dd908aea53ce82e86c12ebf3` 已普通 commit/push，远端 exact、SOURCE 工作树 clean。本轨 13 项安装候选定点及 Windows/Linux 平台选项 strict 通过；这是 `contract_local` 领域证据。原 CORE `54bb8d0897eb22c5e8a52ea158606388fe64064a` 的完整 Windows CI RED，结论仍为 **NOT_FROZEN**。新累计版本的完整双平台、正式产品新安装和五项总门由独立 I 接续；本轨不签冻结或新 `task_live`。
 
+主控最新交接通知：I 已普通推送含本 SOURCE 的累计候选 CORE `7062a632b8c625c05b35bdec4c36fce63a31c2a4`，原产品 Owner 的新 pin Task 等待 C 结算；该版本完整 CI 与后续正式新安装仍由 I 验收，本轨不等待或代签。首 docs-only REPORT `08ad3818a695a023d74e9acbfba5b98d2d8e2673` 保留；`[skip ci]` follow-up 在该次提交调用中才返回，未应用于已推提交，未重写历史。此次最终 docs-only 补记使用 `[skip ci]`，SOURCE 不变。
+
 ## R3：阻塞续租的额外等待边界
 
 Task `task_b6e5ed06f580` / Dispatch `ctx_7f1fa34c2cd0`，原 C Owner、原 agents worktree 与分支 `songconmaisaix31-design/morph-policy-feedback-v01-1002`。基线为原 SOURCE `fa0216aa468ea1bd71f009e4089c1872190843e1` / docs-only REPORT `a98219a22bdaa9c7dc069b0ee0c6a90035aa87f6`。主控确认现有路径是 `swarm/lease.py`，并明确授权本次只修已证明的 `_Renewal._run` 等待问题；实际领域改动只有 `swarm/worker_loop.py` 与新 `tests/swarm/test_worker_renewal_v01.py`。本报告分开 docs-only 提交，REPORT 完整 SHA 以交接及远端 head 为准。
