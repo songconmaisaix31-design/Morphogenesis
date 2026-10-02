@@ -1,7 +1,17 @@
 # D 策略 v0.1 有限收尾
 
-**当前状态：D 投影 contract_local 通过；本轮全系统验收 NOT_RUN。**
-A/B/C 冻结与独立 I 完整工程/安装输入未齐，本文不签署累计核心或新科研运行。D 代码 SOURCE `69f586e79adb23cae5d6bb21f3c46e22b0cc850e`；本文后续提交只记录文档，不是累计核心 SOURCE。
+**当前状态：策略 v0.1 在 contract_local / prepared_local / manual-MCP 支持范围内五门通过，冻结并停止扩展。**
+本次只补录最终记录，不运行科研、模型或重复已通过实验/工程门。root 当轮 Handoff `msg_edc529b0acef` / `msg_8e8db9590fa2` 及 PLAN `2384776969ce1a156b75423d73159cde54d9c1d6` 替换早期 9ceb/359 候选；独立 I REPORT `f5e3d33a4ca119d7d173e61fe801d3a4d36cdb09` 的 `docs/tracks/policy-integration-1002.md` 为最终验收输入。
+
+核心 SOURCE `7062a632b8c625c05b35bdec4c36fce63a31c2a4`；产品 SOURCE `c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc` 精确 pin 该核心，A docs-only REPORT `3b17cc0a7120f1d2381871b336293ee301b857de`。D 代码 SOURCE 仍为 `69f586e79adb23cae5d6bb21f3c46e22b0cc850e`，旧 REPORT `d5b3db8cf68f4cb1416b2cf8ed60eb298f797ea4` 与本次 docs-only REPORT 均不替代业务 SOURCE；本次完整 REPORT SHA 随完成 Handoff 提供，不自引用提交身份。
+
+最终原完整 CI `36960486155` attempt1 / head7062 全部工程步骤通过：Windows 1214 PASS / 5 SKIP / 75 warnings / 1541.58s，Linux 1213 PASS / 6 SKIP / 75 warnings / 387.33s；各平台 121 文件 strict、完整构建、SDK、13 包 wheel 分发通过。I 新独立本机全量 1214 PASS / 5 SKIP / 944.11s、实装产品原 53 项 PASS（pytest 72.02s；JUnit 72.016s）；A 独立原 53 项 PASS / 62.882s。未测的 skipped 路径保留。
+
+五门事实、旧 CI `36955261297` 精确结算、新安装 origin、原完整科学 checker 和现有 audit 路径/身份见 [策略验收](../STRATEGY_V01_ACCEPTANCE.md)。正式 MCP 的推荐、认领与主动覆盖仅为手动离线客户端 contract_local；历史真实科学 subject bf67/dfbc 与当前审查生成器7062/c2分列。两原完整 checker 仅经已有只读构造入口复核全部断言，原115文件 bytes/mtime 不变；不是新 task_live。
+
+默认前100候选按 created_at/task_id，窗外不探索；评分仅建议，原账本/执行安全守卫继续裁决。投影 available 只表示有限记录可读，不是完整决策或科学/采用证明。旧 first RED、C CI1190 PASS/1 FAIL/6 SKIP 与 Windows cancelled、D40 PASS/2 FAIL及首typing、A SDK/setup RED和中断 NOT_COMPLETED、R1/R2失败、unknown/null费用均保留。初始D readiness FAIL与retry agent_unconfigured也是原生命周期失败，本正式恢复 Dispatch 不替代其结果。
+
+新版本 native 自主选择、科研 task_live、模型/auth、main/tag/Hub/EvoMap 发布均 NOT_RUN；最终 I2 仅精确收取 D REPORT 与 root PLAN 作文档收口。以下保留 D 原领域开发与首轮验证历史，阶段性“待验”不表示当前重新阻塞。
 
 ## 范围与缺口
 
@@ -18,7 +28,7 @@ A/B/C 冻结与独立 I 完整工程/安装输入未齐，本文不签署累计�
 
 Worker `_status` / `_audit` 最少可见性接线已 Handoff 唯一 C `ctx_72737f3d2607`；D 不改 Worker 或 observer。状态字段仅观察，不能作为执行、认领、奖励、重放或采用权威。
 
-## 验证与证据
+## 原 D 领域验证与证据（历史）
 
 本轮独占开发环境与原始日志：工作树 sibling `morph-policy-closeout-1002-state-ctxa1febd889687`。CPython 3.13.13；从原 poetry.lock 导出依赖，在 fresh venv 安装；本地开发使用本 WT editable 以验证原源码/子进程测试，独立 I 的最终非 editable 安装另验。只在测试进程设置 BLAS/OMP/MKL=1。
 
