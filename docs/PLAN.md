@@ -1,3 +1,7 @@
+# 当前执行：Research Swarm Alpha R1
+
+2026-10-03：以 [R1 一页计划](R1_PLAN.md) 和用户最新 [Spec](source/Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md) 为准。以下为历史阶段记录，冲突限制不适用于 R1 新候选。
+
 # 策略 v0.1：三条算法线＋一条收尾线（2026-10-02）
 
 当前结论（2026-10-02 12:04）：五项停止条件在已验证的 `contract_local / prepared_local / manual-MCP` 支持范围全部具备，底层策略 **v0.1 冻结并停止扩展**。核心 SOURCE `7062a632b8c625c05b35bdec4c36fce63a31c2a4`；产品 SOURCE `c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc` 固定该核心，产品 docs-only REPORT `3b17cc0a7120f1d2381871b336293ee301b857de`；独立 I docs-only REPORT `f5e3d33a4ca119d7d173e61fe801d3a4d36cdb09`，上述实际远端精确一致、工作树干净。原完整 CI `36960486155` 精确 head7062，Windows 1214 PASS / 5 SKIP / 75 warnings / 1541.58s，Linux 1213 PASS / 6 SKIP / 75 warnings / 387.33s，两边原类型121文件、sdist/wheel构建、SDK、13包安装分发全部 PASS；I独立本机原全量1214 PASS / 5 SKIP / 944.11s及同工程门通过。A和I各用独立全新LF/COPY/noneditable实际GitVCS安装验证最终产品原53项，分别62.882s、72.016s，17产品/181核心字节与真实direct_url绑定核对。
@@ -312,3 +316,4 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 # 2026-09-30 当前任务：异构 Agent 与科研环境集成
 
 当前一页计划、固定 Owner/write_paths、基线及三态验收见 [RESEARCH_INTEGRATION_PLAN_0930.md](RESEARCH_INTEGRATION_PLAN_0930.md)。以上历史计划保留；本轮用户指令优先。A/B/C 领域开发及必要返修已提交推送。独立 I 的冻结代码 bde3412d2257fd1581ce1d7f88b254fb0c13a269 已通过双平台完整 CI、本机完整1104项测试、strict/build/SDK/实际wheel分发及原兼容性门禁；工程集成已验证。官方 SDK interface_live 与作者唯一真实实验/中断恢复/fencing 通过；Claude 实际401认证阻塞，第三角色实际采用 NOT_RUN，原3600秒案例已到期，完整 task_live 未达成。认证身份选择未答复，不切换提供方或重置原案例。当前证据及全部原失败见 [RESEARCH_INTEGRATION_ACCEPTANCE_0930.md](RESEARCH_INTEGRATION_ACCEPTANCE_0930.md)。
+

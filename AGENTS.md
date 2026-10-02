@@ -1,3 +1,7 @@
+# R1 当前指令（2026-10-03）
+
+用户授权按 docs/source/Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md 开发；与旧开发包矛盾时以它为准。当前 write_paths 和长期所有者见 docs/R1_PLAN.md，覆盖旧 docs/PLAN.md 的历史派工。历史冻结不改，使用新后继候选；动态 Python 研究为首版必需。主控仅治理，Orca Worker 负责业务与返修，独立 I 最后集成。无运行级付费/外发/新沙箱授权，不进行 L2。
+
 # Morphogenesis 执行约定
 
 用户当前指令优先于开发包。业务事实源为 `docs/source/README_包内说明.md` 列出的现行文档；v1 仅存档。
@@ -10,3 +14,4 @@
 - contract_local、interface_live、task_live 分开；模拟、回放、生成代码、单测通过均不可冒充真实运行验收。未知远端效果不自动重试。
 - Hub 沙箱信息未提供：只联调本地隔离 stub，显示待发布。ORCA 运行时供给接口未提供：使用固定规模蜂群。T4 可选进化不进入当前核心闭环。
 - 最终仅报告完成内容、分支和 SHA、验证命令与结果、真实限制、未执行或人工操作。
+

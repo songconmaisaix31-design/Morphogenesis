@@ -1,3 +1,7 @@
+# 最新事实源（2026-10-03）
+
+用户指定 [Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md](Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md) 为最新开发规格；它优先于下列历史包的冲突要求。当前执行见 ../R1_PLAN.md。
+
 # Morphogenesis 多 Agent 开发包 · 统一版（README）
 
 > 生成时点：2026/09/22（Day 2）。本包为**收敛后的唯一权威版本集合**，已做过全文档一致性对齐与矛盾消解。
@@ -37,3 +41,4 @@
 ## 仍待确认（不阻塞开工）
 1. EvoMap Hub 沙箱地址/凭据 → 未确认前只用本地隔离 stub；
 2. ORCA 批发接口地址/凭据/配额 → 未确认前降级为固定规模蜂群。
+
