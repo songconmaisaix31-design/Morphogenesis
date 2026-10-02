@@ -313,3 +313,36 @@ def test_generated_approval_cannot_be_granted_retroactively_or_block_other_facts
     assert not f.feedback.accept("unapproved-result").accepted
     assert {fact.task_id for fact in f.feedback.trusted()} == {"source", "review"}
     assert f.feedback.accept("source-result").accepted
+
+
+@pytest.mark.parametrize("limit", ["scope", "workspace", "reviewer_module"])
+def test_generated_host_locality_filters_results_and_independent_review(tmp_path, limit):
+    f = GeneratedFixture(tmp_path)
+    f.run("source"); f.run("review", source="source")
+    assert f.feedback.accept("source-result").accepted
+    permitted = ResearchFeedbackStore(f.feedback.path, f.ledger, f.assets.root,
+        reviewer="independent-reviewer", generated_criteria=f.criteria,
+        project_id=f.plan.project_id, locality=f.locality)
+    assert permitted.advisory([Branch(branch_id="source-branch", status="exploring")])[
+        "branches"][0]["supported_by"] == ["source-result"]
+    if limit == "scope":
+        locality = f.locality.model_copy(update={"authorized_scopes": ("foreign",)})
+    elif limit == "workspace":
+        locality = f.locality.model_copy(update={"workspace": str(tmp_path / "foreign")})
+    else:
+        with connection(f.ledger.path, write=True) as db:
+            db.execute("UPDATE tasks SET module='foreign' WHERE task_id='review'")
+        locality = f.locality.model_copy(update={"modules": ("",)})
+    limited = ResearchFeedbackStore(tmp_path / "limited.sqlite3", f.ledger, f.assets.root,
+        reviewer="independent-reviewer", generated_criteria=f.criteria,
+        project_id=f.plan.project_id, locality=locality)
+    assert not limited.accept("source-result").accepted
+    # Reopen the historical accepted store under this host's authority. Keeping
+    # history cannot let a foreign fact or excluded reviewer influence advice.
+    existing = ResearchFeedbackStore(f.feedback.path, f.ledger, f.assets.root,
+        reviewer="independent-reviewer", generated_criteria=f.criteria,
+        project_id=f.plan.project_id, locality=locality)
+    advice = existing.advisory([Branch(branch_id="source-branch", status="exploring")])
+    assert not advice["contributions"]
+    assert advice["opportunities"]["opportunities"][0]["supported_by"] == []
+    assert advice["branches"][0]["supported_by"] == []
