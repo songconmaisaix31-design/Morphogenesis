@@ -24,7 +24,7 @@ from local_assets.models import AssetSafetyError, Candidate, FileChange
 from local_assets.paths import no_links
 from local_assets.research_models import ResearchClaim, ResearchObservation
 from local_assets.store import LocalAssetStore
-from local_assets.validate import blast_radius
+from local_assets.validate import blast_radius, inspect_candidate
 from orchestration.experiments.executor import digest
 from orchestration.experiments.generated import GeneratedContext, GeneratedExperimentPlan, GeneratedResult, IsolationReport
 from orchestration.experiments.generated_executor import read_generated_result
@@ -43,6 +43,7 @@ def generated_conditions(plan: GeneratedExperimentPlan) -> dict[str, str]:
 
 def _check_candidate(candidate: Candidate, asset_id: str, plan: GeneratedExperimentPlan,
                      files: dict[str, bytes]) -> None:
+    inspect_candidate(candidate)
     if asset_id != plan.candidate_asset_id or candidate.base_revision != plan.candidate_revision:
         raise AssetSafetyError("generated_candidate_identity_mismatch")
     expected = {(name if candidate.scope == "." else candidate.scope + "/" + name): body
