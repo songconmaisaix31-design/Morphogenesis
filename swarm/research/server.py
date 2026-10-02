@@ -5,6 +5,7 @@ from pydantic import JsonValue
 from typing import Literal
 
 from local_assets.models import Candidate
+from swarm.research.policy import CorrectionKind
 from swarm.research.records import NoteKind, ProposalKind, SourceRef
 from swarm.research.service import Purpose, ResearchService
 
@@ -19,6 +20,11 @@ def create_server(service: ResearchService) -> FastMCP:
     def discover_tasks(limit: int = 100) -> list[dict[str, JsonValue]]:
         """Discover eligible tasks in this host's scope; never auto-assign."""
         return service.discover(limit)
+
+    @mcp.tool()
+    def choose_research_work(task_id: str | None = None, reason: str = "", limit: int = 100) -> dict[str, JsonValue]:
+        """Choose a current legal research opportunity; lease_task still rechecks and claims it."""
+        return service.choose(task_id, reason=reason, limit=limit)
 
     @mcp.tool()
     def project_context(task_id: str) -> dict[str, JsonValue]:
@@ -150,5 +156,32 @@ def create_server(service: ResearchService) -> FastMCP:
                                     scope=scope, required_capability=required_capability,
                                     dependencies=tuple(dependencies or ()), source_refs=refs,
                                     branch_id=branch_id, derived_from=derived_from)
+
+    @mcp.tool()
+    def accept_result(result_id: str) -> dict[str, JsonValue]:
+        """Independently accept one trusted result under the host-bound reviewer (never caller-supplied)."""
+        return service.accept_result(result_id)
+
+    @mcp.tool()
+    def research_advisory(project_id: str | None = None) -> dict[str, JsonValue]:
+        """research-v1 advisory: accepted contributions and branch opportunities (advisory only)."""
+        return service.research_advisory(project_id)
+
+    @mcp.tool()
+    def research_snapshot(project_id: str | None = None) -> dict[str, JsonValue]:
+        """Three-axis/context/project snapshot; separate from legacy v0.1 routing."""
+        return service.research_snapshot(project_id)
+
+    @mcp.tool()
+    def record_research_correction(branch_id: str, kind: CorrectionKind, reason: str,
+                                   source_ref: str) -> dict[str, JsonValue]:
+        """Append a branch lifecycle correction (sleep/downgrade/reopen); history is preserved."""
+        return service.record_correction(branch_id, kind, reason, source_ref)
+
+    @mcp.tool()
+    def record_research_supersession(result_id: str, reason: str, source_ref: str,
+                                     superseded_by: str | None = None) -> dict[str, JsonValue]:
+        """Append a contribution supersession; the original contribution is retained."""
+        return service.record_supersession(result_id, reason, source_ref, superseded_by=superseded_by)
 
     return mcp

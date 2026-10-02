@@ -48,6 +48,8 @@ class ResearchKnowledge:
                        "project_id TEXT PRIMARY KEY, goal TEXT NOT NULL, "
                        "allowed_domains TEXT NOT NULL, data_bounds TEXT NOT NULL, authorization_ref TEXT, "
                        "milestones TEXT NOT NULL, created_at REAL NOT NULL)")
+            if "host_binding" not in {r[1] for r in db.execute("PRAGMA table_info(research_projects)")}:
+                db.execute("ALTER TABLE research_projects ADD COLUMN host_binding TEXT NOT NULL DEFAULT '{}'")
             db.execute("CREATE TABLE IF NOT EXISTS research_branches ("
                        "branch_id TEXT PRIMARY KEY, project_id TEXT NOT NULL, "
                        "parent_branch_id TEXT, title TEXT NOT NULL, goal TEXT NOT NULL, status TEXT NOT NULL, "
@@ -101,10 +103,10 @@ class ResearchKnowledge:
                 if existing != project:
                     raise ValueError("project_identity_cannot_change")
                 return existing
-            db.execute("INSERT INTO research_projects VALUES (?,?,?,?,?,?,?)",
+            db.execute("INSERT INTO research_projects VALUES (?,?,?,?,?,?,?,?)",
                        (project.project_id, project.goal, _dumps(list(project.allowed_domains)),
                         _dumps(project.data_bounds), project.authorization_ref,
-                        _dumps(list(project.milestones)), project.created_at))
+                        _dumps(list(project.milestones)), project.created_at, _dumps(project.host_binding)))
             return project
 
     @staticmethod
@@ -114,7 +116,8 @@ class ResearchKnowledge:
             "allowed_domains": json.loads(row["allowed_domains"]),
             "data_bounds": json.loads(row["data_bounds"]),
             "authorization_ref": row["authorization_ref"],
-            "milestones": json.loads(row["milestones"]), "created_at": row["created_at"]})
+            "milestones": json.loads(row["milestones"]), "created_at": row["created_at"],
+            "host_binding": json.loads(row["host_binding"])})
 
     def project(self, project_id: str) -> ResearchProject:
         with connection(self.path) as db:

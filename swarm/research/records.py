@@ -122,6 +122,7 @@ class ResearchProject(Contract):
     authorization_ref: str | None = None
     milestones: tuple[str, ...] = Field(default=(), max_length=64)
     created_at: float = Field(ge=0, allow_inf_nan=False)
+    host_binding: dict[str, JsonValue] = Field(default_factory=dict)
 
 
 class WorkProposal(Contract):

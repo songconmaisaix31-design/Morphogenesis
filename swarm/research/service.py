@@ -18,11 +18,14 @@ from local_assets.research_models import ResearchObservation
 from local_assets.snapshot import snapshot_revision
 from local_assets.validate import inspect_candidate
 from swarm.models import Lease, Signal, TaskRecord
+from swarm.budget import BudgetBlocked, BudgetLedger
 from swarm.feedback import trusted_facts
 from swarm.pheromone import PheromoneField
 from swarm.router import Router
+from swarm.research.feedback import ResearchFeedbackStore
 from swarm.research.knowledge import ResearchKnowledge
 from swarm.research.models import HostConfig
+from swarm.research.policy import Branch, CorrectionEvent, CorrectionKind, SupersessionEvent, ThreeAxisResult
 from swarm.research.records import (
     Hypothesis,
     NoteKind,
@@ -55,10 +58,15 @@ class ResearchService:
                 raise ValueError("host_paths_must_be_absolute")
             no_links(Path(value))
         self.locality = config.locality()
-        self.ledger = ledger or TaskLedger(config.ledger_path, config.swarm_id)
+        limits = config.research_envelope.limits if config.research_envelope else None
+        self.ledger = ledger or TaskLedger(config.ledger_path, config.swarm_id, limits=limits)
         if self.ledger.swarm_id != config.swarm_id or self.ledger.path != Path(config.ledger_path).resolve():
             raise ValueError("host_ledger_identity_mismatch")
+        if limits is not None and self.ledger.limits != limits:
+            raise ValueError("host_ledger_limits_mismatch")
         self.store = store or LocalAssetStore(config.assets_root)
+        if self.store.root != Path(config.assets_root).resolve():
+            raise ValueError("host_asset_store_identity_mismatch")
         self.backend = backend
         self.field = PheromoneField(self.ledger.path.with_name("policy-field.sqlite3"), ledger=self.ledger,
                                     clock=self.ledger.clock)
@@ -68,18 +76,51 @@ class ResearchService:
             raise ValueError("research_knowledge_path_must_be_absolute")
         no_links(knowledge_path)
         self.knowledge = ResearchKnowledge(knowledge_path, clock=self.ledger.clock)
+        self.budget: BudgetLedger | None = None
+        if config.research_budget_path is not None and config.research_budget_policy is not None:
+            no_links(Path(config.research_budget_path))
+            self.budget = BudgetLedger(config.research_budget_path, config.project_id,
+                                       config.research_budget_policy, clock=self.ledger.clock)
+        feedback_path = self.ledger.path.with_name("research-feedback.sqlite3")
+        no_links(feedback_path)
+        self.feedback_store = ResearchFeedbackStore(feedback_path, ledger=self.ledger,
+                                                   assets_root=Path(config.assets_root),
+                                                   reviewer=config.worker_id,
+                                                   clock=self.ledger.clock)
 
     def discover(self, limit: int = 100) -> list[dict[str, JsonValue]]:
+        if self.config.project_id:
+            self._research_action("read")
+            self._authorize_project(self.config.project_id)
         self.field.synchronize(trusted_facts(self.ledger, self.store.root))
-        recommendation = self.router.recommend(self.config.worker_id, self.locality,
-                                                {key: 1.0 for key in self.config.capabilities}, limit=limit)
+        records = self.ledger.candidates(self.locality, limit=limit, capabilities=self.config.capabilities)
+        visible = [task for task in records if self._task_visible(task.signal.task_id)]
+        # Preserve the legacy policy unchanged. A mixed-project window cannot
+        # be passed through that legacy schema as if it were project scoped.
+        recommendation: dict[str, JsonValue]
+        if len(visible) == len(records):
+            recommendation = self.router.recommend(self.config.worker_id, self.locality,
+                                                    {key: 1.0 for key in self.config.capabilities}, limit=limit)
+        else:
+            recommendation = {"routing_sequence": None, "policy_version": "v0.1", "selected": None,
+                              "reason": "legacy_window_not_project_scoped", "advisory_only": True}
+        research_v1 = self._discover_research_v1()
+        if research_v1 is not None:
+            opportunities = self._opportunities(research_v1)
+            visible = [task for task in visible if self._opportunity_allows(task, opportunities)]
+            visible.sort(key=lambda task: -self._opportunity_share(task, opportunities))
         responses: list[dict[str, JsonValue]] = []
-        for task in self.ledger.candidates(self.locality, limit=limit, capabilities=self.config.capabilities):
+        for task in visible:
             response = _OBJECT.validate_json(task.model_dump_json())
             response["policy_recommendation"] = (recommendation if not responses else {
                 "routing_sequence": recommendation["routing_sequence"], "policy_version": recommendation["policy_version"],
                 "selected": recommendation["selected"], "reference_only": True})
             response["research"] = self._task_research(task.signal.task_id)
+            if research_v1 is not None:
+                response["research_v1"] = research_v1
+                response["research_opportunity"] = self._task_opportunity(task, self._opportunities(research_v1))
+            response["candidate_window"] = {"limit": limit, "truncated": len(records) == limit,
+                                            "order": "research_opportunity_then_ledger" if research_v1 else "ledger"}
             responses.append(response)
         return responses
 
@@ -94,7 +135,16 @@ class ResearchService:
             task = self.ledger._record(db, row)
         if require_capability and (task.signal.required_capability or task.signal.task_kind) not in self.config.capabilities:
             raise PermissionError("task_capability_required")
+        if self.config.project_id and task.signal.payload.get("project_id") != self.config.project_id:
+            raise PermissionError("task_outside_host_project")
         return task
+
+    def _task_visible(self, task_id: str) -> bool:
+        try:
+            self._task(task_id)
+        except (PermissionError, KeyError):
+            return False
+        return True
 
     def context(self, task_id: str) -> dict[str, JsonValue]:
         task = self._task(task_id)
@@ -106,7 +156,13 @@ class ResearchService:
                 "research": self._task_research(task_id)}
 
     def claim(self, task_id: str, ttl_seconds: float = 60) -> dict[str, JsonValue] | None:
-        self._task(task_id, require_capability=True)
+        task = self._task(task_id, require_capability=True)
+        if self.config.project_id:
+            self._research_action("claim")
+            self._budget_ready()
+            advisory = self.research_advisory()
+            if not self._opportunity_allows(task, self._opportunities(advisory)):
+                raise PermissionError("research_branch_not_active")
         lease = self.ledger.claim(task_id, self.config.worker_id, locality=self.locality, ttl_seconds=ttl_seconds)
         if lease is None:
             return None
@@ -133,6 +189,8 @@ class ResearchService:
                                            "feedback_source": "existing_authoritative_facts"}
         self.ledger.record_event("policy_selection", selection, task_id=task_id)
         response["policy_selection"] = selection
+        if self.config.project_id:
+            response["research_selection"] = self._record_research_selection(task, lease)
         return response
 
     def _recommendation_context(self, decision: dict[str, JsonValue]) -> bool:
@@ -207,11 +265,28 @@ class ResearchService:
         plan = self._plan(task_id)
         if self.backend is None:
             raise AssetSafetyError("experiment_backend_not_configured")
+        if self.config.research_envelope is not None:
+            self._research_action("experiment")
+            self._authorize_project(self.config.project_id)
+            self._budget_ready(required=True)
         run_id = uuid4().hex
-        self.ledger.begin_execution(lease, run_id, max_executions=self.config.max_experiments_per_task)
+        reservation = (self.budget.reserve(self.config.worker_id, task_id, self.config.research_execution_bound,
+                                           request_id=run_id)
+                       if self.budget is not None and self.config.research_execution_bound is not None else None)
         # No SQLite transaction survives this boundary. Exceptions/crashes retain
         # unconfirmed_request_id and prohibit automatic replay after expiry.
-        result = await self.backend.execute(plan, run_id, lease)
+        try:
+            self.ledger.begin_execution(lease, run_id, max_executions=self.config.max_experiments_per_task)
+            result = await self.backend.execute(plan, run_id, lease)
+        except BaseException:
+            if reservation is not None and self.budget is not None:
+                self.budget.mark_uncertain(reservation)
+            raise
+        if reservation is not None and self.budget is not None:
+            if result.get("effect_state") in {"known", "confirmed"}:
+                self.budget.settle(reservation, result.get("usage"))
+            else:
+                self.budget.mark_uncertain(reservation)
         self._lease(task_id, token)
         self.ledger.record_event("research_execution", {"run_id": run_id, "worker_id": lease.worker_id,
                                                        "token": token, "result": result}, task_id=task_id)
@@ -504,7 +579,50 @@ class ResearchService:
         """Enforce the host's project binding and existence (FR-05/10.2)."""
         if self.config.project_id and project_id != self.config.project_id:
             raise PermissionError("project_outside_host_authorization")
-        return self.knowledge.project(project_id)
+        project = self.knowledge.project(project_id)
+        if self.config.research_envelope is not None and project.host_binding != self._host_binding():
+            raise PermissionError("project_host_envelope_changed")
+        if project.host_binding and project.host_binding != self._host_binding():
+            raise PermissionError("project_host_envelope_changed")
+        return project
+
+    def _host_binding(self) -> dict[str, JsonValue]:
+        envelope = self.config.research_envelope
+        if envelope is None:
+            return {}
+        return {"envelope": _OBJECT.validate_json(envelope.model_dump_json()),
+                "authorization_ref": self.config.authorization_ref, "swarm_id": self.config.swarm_id,
+                "ledger_path": canonical_scope(self.ledger.path), "workspace": canonical_scope(self.config.workspace),
+                "assets_root": canonical_scope(self.store.root),
+                "budget_path": canonical_scope(self.config.research_budget_path) if self.config.research_budget_path else None,
+                "budget_policy": self.config.research_budget_policy.model_dump(mode="json") if self.config.research_budget_policy else None,
+                "execution_bound": self.config.research_execution_bound.model_dump(mode="json") if self.config.research_execution_bound else None}
+
+    def _research_action(self, action: str) -> None:
+        envelope = self.config.research_envelope
+        if envelope is not None and action not in envelope.actions:
+            raise PermissionError("action_outside_research_envelope")
+
+    def _budget_ready(self, *, required: bool = False) -> None:
+        if self.budget is None:
+            if required:
+                raise BudgetBlocked("host_project_budget_required")
+            return
+        snapshot = self.budget.snapshot(self.config.worker_id)
+        if snapshot.sleeping:
+            raise BudgetBlocked(snapshot.reason or "project_budget_blocked")
+        if snapshot.pending_reservations:
+            # A process may have stopped between the two original database
+            # writes. A hold without an execution anchor is not permission to
+            # open another branch or replay a request.
+            raise BudgetBlocked("project_pending_request_requires_reconciliation")
+        with connection(self.ledger.path) as db:
+            unknown = db.execute("SELECT 1 FROM tasks WHERE swarm_id=? AND unconfirmed_request_id IS NOT NULL LIMIT 1",
+                                 (self.config.swarm_id,)).fetchone()
+        if unknown is not None:
+            raise BudgetBlocked("project_unknown_effect_requires_reconciliation")
+        if snapshot.admission_charged_usd + snapshot.reserved_estimate_usd >= self.budget.policy.max_cost_usd:
+            raise BudgetBlocked("project_admission_capacity_exhausted")
 
     def _require_branch(self, project_id: str, branch_id: str | None) -> None:
         if branch_id is None:
@@ -533,7 +651,7 @@ class ResearchService:
         event = ResearchEvent(event_id=uuid4().hex, project_id=project_id, branch_id=branch_id,
                               task_id=task_id, source_ref=source_ref, actor=self.config.agent,
                               at=self.ledger.now(), schema_version="research-v1",
-                              provenance="live", event_kind=kind,
+                              provenance=self.config.research_provenance, event_kind=kind,
                               payload=payload or {}, correlation_ref=None)
         self.knowledge.record(event)
         self.ledger.record_event("research." + kind, event.model_dump(mode="json"), task_id=task_id)
@@ -548,11 +666,23 @@ class ResearchService:
             raise PermissionError("project_outside_host_authorization")
         if authorization_ref is not None and authorization_ref != self.config.authorization_ref:
             raise PermissionError("authorization_ref_is_host_bound")
+        envelope = self.config.research_envelope
+        if envelope is not None:
+            if (goal != envelope.goal or (allowed_domains and allowed_domains != envelope.allowed_domains)
+                    or (data_bounds and data_bounds != envelope.data_bounds)):
+                raise PermissionError("project_outside_host_envelope")
+            allowed_domains, data_bounds = envelope.allowed_domains, envelope.data_bounds
+        try:
+            existing = self.knowledge.project(project_id)
+        except KeyError:
+            existing = None
         project = ResearchProject(project_id=project_id, goal=goal, allowed_domains=allowed_domains,
                                   data_bounds=data_bounds or {}, authorization_ref=self.config.authorization_ref,
-                                  milestones=milestones, created_at=self.ledger.now())
+                                  milestones=milestones, created_at=existing.created_at if existing else self.ledger.now(),
+                                  host_binding=self._host_binding())
         saved = self.knowledge.put_project(project)
-        self._record_event("project_created", project_id)
+        if existing is None:
+            self._record_event("project_created", project_id)
         return _OBJECT.validate_json(saved.model_dump_json())
 
     def project(self, project_id: str | None = None) -> dict[str, JsonValue]:
@@ -560,12 +690,19 @@ class ResearchService:
 
     def create_branch(self, project_id: str, branch_id: str, title: str, goal: str, *,
                       parent_branch_id: str | None = None) -> dict[str, JsonValue]:
+        self._research_action("branch")
         self._authorize_project(project_id)
         self._require_branch(project_id, parent_branch_id)
+        try:
+            existing = self.knowledge.branch(branch_id)
+        except KeyError:
+            existing = None
         branch = ResearchBranch(branch_id=branch_id, project_id=project_id, parent_branch_id=parent_branch_id,
-                                title=title, goal=goal, status="proposed", created_at=self.ledger.now())
+                                title=title, goal=goal, status="proposed",
+                                created_at=existing.created_at if existing else self.ledger.now())
         saved = self.knowledge.put_branch(branch)
-        self._record_event("branch_created", project_id, branch_id=branch_id)
+        if existing is None:
+            self._record_event("branch_created", project_id, branch_id=branch_id)
         return _OBJECT.validate_json(saved.model_dump_json())
 
     def submit_note(self, project_id: str, kind: NoteKind, text: str, *,
@@ -581,11 +718,14 @@ class ResearchService:
         expert opinion can never become a verified scientific fact. Repeated
         requests for the same note return the original, never a duplicate.
         """
+        self._research_action("note")
         self._authorize_project(project_id)
         self._require_branch(project_id, branch_id)
         self._require_hypothesis(project_id, hypothesis_id)
         if task_id is not None:
-            self._task(task_id)
+            task = self._task(task_id)
+            if task.signal.payload.get("project_id", project_id) != project_id:
+                raise PermissionError("note_task_outside_project")
         note = ResearchNote(note_id=uuid4().hex, project_id=project_id, branch_id=branch_id,
                             hypothesis_id=hypothesis_id, task_id=task_id, kind=kind,
                             actor=self.config.agent, signer=signer, source_refs=source_refs,
@@ -619,6 +759,7 @@ class ResearchService:
         locality). A duplicate proposal returns its existing admission without
         enqueuing a second task.
         """
+        self._research_action("propose")
         self._authorize_project(project_id)
         self._require_branch(project_id, branch_id)
         if len(dependencies) > 64 or project_id in dependencies:
@@ -630,9 +771,11 @@ class ResearchService:
         if capability not in self.config.capabilities:
             raise PermissionError("proposal_capability_outside_host")
         for dependency in dependencies:
-            self._task(dependency)
+            if self._task(dependency).signal.payload.get("project_id", project_id) != project_id:
+                raise PermissionError("dependency_outside_project")
         if derived_from is not None:
-            self._task(derived_from)
+            if self._task(derived_from).signal.payload.get("project_id", project_id) != project_id:
+                raise PermissionError("parent_task_outside_project")
         proposal = WorkProposal(proposal_id=uuid4().hex, project_id=project_id, branch_id=branch_id,
                                 kind=kind, goal=goal, justification=justification,
                                 expected_contribution=expected_contribution, scope=scope,
@@ -689,8 +832,10 @@ class ResearchService:
         verified = [n for n in notes if n.review_state == "verified"]
         branches = self.knowledge.branches(bound)
         hypotheses = self.knowledge.hypotheses(bound)
-        proposals = self.knowledge.proposals(bound)
-        events = self.knowledge.events(bound, limit=min(limit + 1, 1000))
+        proposals = [p for p in self.knowledge.proposals(bound)
+                     if p.task_id is None or self._task_visible(p.task_id)]
+        events = [e for e in self.knowledge.events(bound, limit=min(limit + 1, 1000))
+                  if e.task_id is None or self._task_visible(e.task_id)]
         return {"project": _OBJECT.validate_json(project.model_dump_json()), "limit": limit,
                 "branches": [b.model_dump(mode="json") for b in branches[:limit]],
                 "branches_truncated": len(branches) > limit,
@@ -703,8 +848,255 @@ class ResearchService:
                 "proposals": [p.model_dump(mode="json") for p in proposals[:limit]],
                 "proposals_truncated": len(proposals) > limit,
                 "events": [e.model_dump(mode="json") for e in events[:limit]],
-                "events_truncated": len(events) > limit}
+                "events_truncated": len(events) > limit,
+                "research_v1": self.research_snapshot(bound)}
 
     def _task_research(self, task_id: str) -> dict[str, JsonValue]:
-        notes = self.knowledge.notes(task_id=task_id)
+        task = self._task(task_id)
+        project_id = task.signal.payload.get("project_id")
+        notes = [n for n in self.knowledge.notes(task_id=task_id)
+                 if not isinstance(project_id, str) or n.project_id == project_id]
         return {"notes": [n.model_dump(mode="json") for n in notes]}
+
+    # -- research-v1: three-axis, advisory, acceptance, lifecycle ----------
+
+    def _contribution_branch(self, task_id: str, project_id: str) -> str | None:
+        try:
+            task = self._task(task_id)
+        except (KeyError, PermissionError):
+            return None
+        payload = task.signal.payload
+        if payload.get("project_id") != project_id:
+            return None
+        branch_id = payload.get("branch_id")
+        return branch_id if isinstance(branch_id, str) else None
+
+    def _project_result(self, result: ThreeAxisResult, project_id: str) -> bool:
+        try:
+            task = self._task(result.task_id)
+        except (KeyError, PermissionError):
+            return False
+        return task.signal.payload.get("project_id") == project_id
+
+    def _research_branches(self, project_id: str) -> tuple[Branch, ...]:
+        """Project branches projected onto the advisory `Branch` contract.
+
+        ``supported_by``/``refuted_by`` are the accepted contribution result ids
+        bound to each branch via the admitted task's proposal payload; a result
+        with no confirmed branch linkage contributes nothing here.
+        """
+        by_branch: dict[str, list[ThreeAxisResult]] = {}
+        for contribution in self.feedback_store.effective_contributions():
+            branch_id = self._contribution_branch(contribution.task_id, project_id)
+            if branch_id is not None and contribution.contribution == "accepted":
+                by_branch.setdefault(branch_id, []).append(contribution)
+        branches: list[Branch] = []
+        for branch in self.knowledge.branches(project_id):
+            contributions = by_branch.get(branch.branch_id, [])
+            supported = tuple(c.result_id for c in contributions if c.hypothesis == "supported")
+            refuted = tuple(c.result_id for c in contributions if c.hypothesis == "refuted")
+            projected = Branch.model_validate({
+                "branch_id": branch.branch_id, "status": branch.status,
+                "parent_id": branch.parent_branch_id, "authorized": True,
+                "supported_by": supported, "refuted_by": refuted})
+            for event in self.feedback_store.corrections(branch.branch_id):
+                projected = self.feedback_store.policy.apply_correction(projected, event)
+            branches.append(projected)
+        return tuple(branches)
+
+    def accept_result(self, result_id: str) -> dict[str, JsonValue]:
+        """Independently accept one trusted result under the host's bound reviewer.
+
+        The reviewer is the host identity (``HostConfig.worker_id``), never a
+        caller string; the store re-derives the result from trusted ledger/asset
+        facts and rejects replays, self-approval, forged ids and foreign scopes.
+        """
+        self._research_action("review")
+        bound = self._project_id()
+        self._authorize_project(bound)
+        fact = next((r for r in self.feedback_store.trusted() if r.result_id == result_id), None)
+        if fact is not None and not self._project_result(fact, bound):
+            raise PermissionError("result_outside_host_project_or_scope")
+        decision = self.feedback_store.accept(result_id)
+        if decision.accepted and fact is not None:
+            self._record_event("contribution_accepted", bound, task_id=fact.task_id,
+                               branch_id=self._contribution_branch(fact.task_id, bound), source_ref=result_id,
+                               payload={"result_id": result_id, "provenance": fact.provenance})
+        return _OBJECT.validate_json(decision.model_dump_json())
+
+    def research_advisory(self, project_id: str | None = None) -> dict[str, JsonValue]:
+        """research-v1 advisory: accepted contributions + branch opportunities.
+
+        Advisory only — claiming still goes through the existing TaskLedger which
+        re-checks scope, capabilities, dependencies, lease/fencing and budget.
+        """
+        bound = self._project_id(project_id)
+        self._authorize_project(bound)
+        result = self.feedback_store.advisory(self._research_branches(bound))
+        result["contributions"] = [c.model_dump(mode="json") for c in self.feedback_store.effective_contributions()
+                                   if self._project_result(c, bound)]
+        result["project_id"] = bound
+        return _OBJECT.validate_python(result)
+
+    def research_snapshot(self, project_id: str | None = None) -> dict[str, JsonValue]:
+        """Three-axis/context/project snapshot (research-v1), separate from legacy v0.1."""
+        bound = self._project_id(project_id)
+        self._authorize_project(bound)
+        branches = self._research_branches(bound)
+        results = [c for c in self.feedback_store.effective_contributions() if self._project_result(c, bound)]
+        feedback = self.feedback_store.policy.snapshot(results, branches)
+        plan = self.feedback_store.policy.opportunities(branches)
+        snapshot: dict[str, JsonValue] = dict(feedback)
+        snapshot["project_id"] = bound
+        snapshot["contributions"] = [c.model_dump(mode="json") for c in self.feedback_store.contributions()
+                                     if self._project_result(c, bound)]
+        snapshot["effective_contributions"] = [c.model_dump(mode="json") for c in results]
+        branch_ids = {b.branch_id for b in branches}
+        result_ids = {c.result_id for c in results}
+        snapshot["corrections"] = [c.model_dump(mode="json") for c in self.feedback_store.corrections()
+                                   if c.branch_id in branch_ids]
+        snapshot["supersessions"] = [c.model_dump(mode="json") for c in self.feedback_store.supersessions()
+                                     if c.result_id in result_ids]
+        snapshot["trusted_results"] = [c.model_dump(mode="json") for c in self.feedback_store.trusted()
+                                       if self._project_result(c, bound)]
+        snapshot["branches"] = [b.model_dump(mode="json") for b in branches]
+        snapshot["opportunities"] = _OBJECT.validate_python(plan.model_dump(mode="json"))
+        return _OBJECT.validate_python(snapshot)
+
+    def record_correction(self, branch_id: str, kind: CorrectionKind, reason: str,
+                          source_ref: str) -> dict[str, JsonValue]:
+        """Append a branch lifecycle correction (sleep/downgrade/reopen); never deletes history."""
+        self._research_action("review")
+        bound = self._project_id()
+        self._authorize_project(bound)
+        self._require_branch(bound, branch_id)
+        self._require_research_source(bound, source_ref)
+        for previous in self.feedback_store.corrections(branch_id):
+            if (previous.kind, previous.reason, previous.source_ref, previous.actor) == (
+                    kind, reason, source_ref, self.config.worker_id):
+                return _OBJECT.validate_json(previous.model_dump_json())
+        event = CorrectionEvent(event_id=uuid4().hex, branch_id=branch_id, kind=kind, reason=reason,
+                                source_ref=source_ref, actor=self.config.worker_id, at=self.ledger.now())
+        branch = next(b for b in self._research_branches(bound) if b.branch_id == branch_id)
+        self.feedback_store.policy.apply_correction(branch, event)
+        self.feedback_store.record_correction(event)
+        self._record_event("branch_" + kind, bound, branch_id=branch_id, source_ref=source_ref,
+                           payload={"correction_id": event.event_id, "reason": reason})
+        return _OBJECT.validate_json(event.model_dump_json())
+
+    def record_supersession(self, result_id: str, reason: str, source_ref: str, *,
+                            superseded_by: str | None = None) -> dict[str, JsonValue]:
+        """Append a contribution supersession; the original contribution is retained."""
+        self._research_action("review")
+        bound = self._project_id()
+        self._authorize_project(bound)
+        self._require_research_source(bound, source_ref)
+        contributions = {c.result_id: c for c in self.feedback_store.contributions()
+                         if self._project_result(c, bound)}
+        if result_id not in contributions or (superseded_by is not None and superseded_by not in contributions):
+            raise PermissionError("contribution_outside_host_project_or_scope")
+        if contributions[result_id].actor == self.config.worker_id:
+            raise PermissionError("independent_reviewer_required")
+        for previous in self.feedback_store.supersessions():
+            if (previous.result_id, previous.superseded_by, previous.reason, previous.source_ref) == (
+                    result_id, superseded_by, reason, source_ref):
+                return _OBJECT.validate_json(previous.model_dump_json())
+        event = SupersessionEvent(event_id=uuid4().hex, result_id=result_id, superseded_by=superseded_by,
+                                  reason=reason, source_ref=source_ref, actor=self.config.worker_id,
+                                  at=self.ledger.now())
+        self.feedback_store.record_supersession(event)
+        self._record_event("contribution_superseded", bound, source_ref=source_ref,
+                           task_id=contributions[result_id].task_id, payload={"result_id": result_id, "reason": reason})
+        return _OBJECT.validate_json(event.model_dump_json())
+
+    def _discover_research_v1(self) -> dict[str, JsonValue] | None:
+        if not self.config.project_id:
+            return None
+        return self.research_advisory(self.config.project_id)
+
+    def _require_research_source(self, project_id: str, source_ref: str) -> None:
+        notes = [n for n in self.knowledge.notes(project_id) if self._note_in_scope(n)]
+        if any(source_ref == n.note_id or source_ref in {s.source_id for s in n.source_refs} for n in notes):
+            return
+        if any(c.result_id == source_ref and self._project_result(c, project_id)
+               for c in self.feedback_store.contributions()):
+            return
+        raise PermissionError("research_source_not_in_project_context")
+
+    @staticmethod
+    def _opportunities(advisory: dict[str, JsonValue]) -> dict[str, dict[str, JsonValue]]:
+        plan = advisory.get("opportunities")
+        values = plan.get("opportunities") if isinstance(plan, dict) else None
+        if not isinstance(values, list):
+            raise ValueError("invalid_research_opportunities")
+        return {str(v["branch_id"]): _OBJECT.validate_python(v) for v in values if isinstance(v, dict)}
+
+    @staticmethod
+    def _task_opportunity(task: TaskRecord, opportunities: dict[str, dict[str, JsonValue]]) -> dict[str, JsonValue]:
+        branch_id = task.signal.payload.get("branch_id")
+        if branch_id is None:
+            return {"branch_id": None, "eligible": True, "share": 1.0, "supported_by": [], "refuted_by": [],
+                    "reasons": ["project_work_without_branch"]}
+        return opportunities.get(str(branch_id), {"branch_id": branch_id, "eligible": False, "share": 0.0})
+
+    def _opportunity_allows(self, task: TaskRecord, opportunities: dict[str, dict[str, JsonValue]]) -> bool:
+        return self._task_opportunity(task, opportunities).get("eligible") is True
+
+    def _opportunity_share(self, task: TaskRecord, opportunities: dict[str, dict[str, JsonValue]]) -> float:
+        value = self._task_opportunity(task, opportunities).get("share")
+        return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else 0.0
+
+    def choose(self, task_id: str | None = None, *, reason: str = "", limit: int = 100) -> dict[str, JsonValue]:
+        """A member selects an opportunity; the later claim remains authoritative."""
+        self._research_action("choose")
+        bound = self._project_id()
+        self._authorize_project(bound)
+        candidates = self.discover(limit)
+        tasks: list[TaskRecord] = []
+        for candidate in candidates:
+            signal = candidate.get("signal")
+            if isinstance(signal, dict) and isinstance(signal.get("task_id"), str):
+                tasks.append(self._task(str(signal["task_id"])))
+        opportunities = self._opportunities(self.research_advisory(bound))
+        counts: dict[str, int] = {}
+        for task in tasks:
+            branch = str(task.signal.payload.get("branch_id"))
+            counts[branch] = counts.get(branch, 0) + 1
+        weights = [self._opportunity_share(task, opportunities) / counts[str(task.signal.payload.get("branch_id"))]
+                   for task in tasks]
+        recommended = self.router.rng.choices(tasks, weights=weights, k=1)[0].signal.task_id if tasks and sum(weights) > 0 else None
+        selected = task_id if task_id is not None else recommended
+        if selected is not None and selected not in {t.signal.task_id for t in tasks}:
+            raise PermissionError("choice_not_current_legal_opportunity")
+        selected_task = next((t for t in tasks if t.signal.task_id == selected), None)
+        opportunity = self._task_opportunity(selected_task, opportunities) if selected_task is not None else None
+        decision: dict[str, JsonValue] = {
+            "policy_version": "research-v1", "project_id": bound, "worker_id": self.config.worker_id,
+            "selected": selected, "recommended_task_id": recommended, "overridden": selected != recommended,
+            "reason": reason or "member_accepted_research_opportunity", "advisory_only": True,
+            "claim_requires_recheck": True, "opportunity": opportunity,
+            "candidate_task_ids": [t.signal.task_id for t in tasks], "query_limit": limit,
+            "candidate_window_truncated": len(candidates) == limit}
+        self.ledger.record_event("research_choice", decision, task_id=selected)
+        return decision
+
+    def _record_research_selection(self, task: TaskRecord, lease: Lease) -> dict[str, JsonValue]:
+        with connection(self.ledger.path) as db:
+            rows = db.execute("SELECT body FROM task_audit WHERE swarm_id=? AND task_id=? AND event='research_choice' "
+                              "ORDER BY sequence DESC", (self.config.swarm_id, task.signal.task_id)).fetchall()
+        choice = next((_OBJECT.validate_json(row[0]) for row in rows
+                       if _OBJECT.validate_json(row[0]).get("worker_id") == self.config.worker_id), None)
+        current = self._task_opportunity(task, self._opportunities(self.research_advisory()))
+        references: list[JsonValue] = []
+        for name in ("supported_by", "refuted_by"):
+            values = current.get(name)
+            if isinstance(values, list):
+                references.extend(values)
+        selection: dict[str, JsonValue] = {
+            "policy_version": "research-v1", "project_id": self.config.project_id,
+            "worker_id": self.config.worker_id, "actual_task_id": task.signal.task_id, "token": lease.token,
+            "choice": choice, "opportunity": current, "reason": choice.get("reason") if choice else "direct_member_choice",
+            "result_references": references,
+            "claim_authority": "TaskLedger"}
+        self.ledger.record_event("research_selection", selection, task_id=task.signal.task_id)
+        return selection

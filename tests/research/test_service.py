@@ -125,7 +125,7 @@ def test_mcp_tools_have_no_identity_database_or_metric_write_parameters(tmp_path
     tools = asyncio.run(server.list_tools())
     for tool in tools:
         assert not {"worker_id", "agent", "ledger_path", "passed", "approved", "metric"} & tool.inputSchema.get("properties", {}).keys()
-    assert len(tools) == 15
+    assert len(tools) == 21
     assert {t.name for t in tools} >= {"discover_tasks", "lease_task", "research_experiment", "verify_research", "inherit_experience"}
 
 
