@@ -1,5 +1,264 @@
 # R1 C 贡献与研究路线政策（research-v1）
 
+## 2026-10-03 恢复后状态（本节覆盖后文旧阶段结论）
+
+**C 领域功能与适用验证已完成，最终 SOURCE 为
+`56de8e3f5d2abd1e1ba02218b422f0aba9847ae2`；本报告单独作为 docs-only 后继提交。**
+边界为 contract_local / 私有非 editable 安装的 mock；历史首 RED 保留，
+全局 editable 清理被自动审批拒绝且未执行，原全局状态 UNKNOWN；不宣称整体 R1 或 L2 完成。
+
+`99cd2997dd024a41c28461228f47a575fef3f9ab` 仅是三轴转换阶段候选；当时
+`from_generated_assessment` 未被可信存储消费，不能证明动态研究反馈闭环。
+旧 `3161048` / Q22 PASS 只覆盖旧路径，历史结果保留。新的阶段 SOURCE
+`d7e561f9b4d6155316f12471de050c09b12471b4` 已 push、远端 SHA 一致，包含普通精确
+merge B `d175f7e2f8c3ff41a1ac8a2a4958c68acf57e275` 和
+`e8e16a5b9e755a94f8587b76ba9fc288f218b8af`；随后普通合入 B
+`d0c834fd381fc292443bf85c5ce1e91043143516` 及
+`56b8db589ee04bcc41652bb5e38793a1216f9a1a`。C 后继 SOURCE 为
+`38eae47e2961e10e9cf492fe99ea02f418d57dc9`（缺少冻结批准不阻塞其他事实）和
+`3cc650b06049d1a714a56a0169de106129ecac10`（host locality），均已 push，远端 SHA 确认。
+`535c05ebc8be5e869c828399e6c66e9331364479` 补充原作者同样必须属于 host locality、
+原作者与执行任务 workspace 一致；普通后继提交，未改写前三次 SOURCE。
+阶段组合 SOURCE `4f83296af908352660ebf71e633e70a111eb2877` 普通精确合入 B 归档重验修复
+`2d50d08811aa2337b9c0166dc114513e292bce1f`；push 与远端 SHA 一致。
+B 新 `LocalAssetStore(generated_criteria=host_registry)` 用于继承/采用重验；C 生产投影
+只读原数据库，显式将同一个 host registry 传给 B 原 reader，未新增存储权威。
+最终安装与回归结果见下文；阶段提交和原失败不被最终通过覆盖。
+
+### 精确私有安装准备
+
+普通合入 B 最后兼容修复 `5faafe41b1732c83d165251600b688444186c702` 后，
+最终 SOURCE 为 `56de8e3f5d2abd1e1ba02218b422f0aba9847ae2`。
+主控 `msg_762cbf9284e0` 授权有界安装准备，完整回归仍等 B 释放窗口。
+从 `git archive` 导出的此 exact SHA 构建非 editable wheel，未从活动工作树安装：
+
+```powershell
+& '<private>/Scripts/python.exe' -I -m build --wheel --no-isolation --outdir wheels-56de8e3 source-56de8e3
+uv pip install --python '<private>/Scripts/python.exe' --link-mode copy --cache-dir uv-cache --no-deps wheels-56de8e3/morphogenesis-0.1.0-py3-none-any.whl
+uv pip check --python '<private>/Scripts/python.exe'
+```
+
+wheel 大小929336，SHA256
+`c96149dba4ee94b9f9d39a872a9dad3b356a4c66b5d7c09f58c025da580a5bdd`；
+`wheel-build-56de8e3.txt` / `wheel-install-56de8e3.txt` 均 exit0。
+`uv pip check` 为 **104 packages compatible**。隔离 `-I` 导入检查保存在
+`installed-import-56de8e3.json`：三个反馈模块均来自本私有
+`venv/Lib/site-packages`，`sys.path` 没有活动工作树或全局 site-packages，
+`direct_url.json` 为 wheel 的 `archive_info`，无 editable 注册。
+锁定 SDK 的工作树依赖文件复制到此私有 site-packages；未改全局 Node 环境。
+准备完成时完整 installed pytest / FC / SDK 尚未执行；之后在主控
+`msg_d32e1261de70` 授权的串行窗口中得到以下实际结果。
+
+### 最终精确安装验证（SOURCE 56de8e3）
+
+| 日志 / 命令范围 | 结果 |
+|---|---|
+| `c-installed-final.txt`：`test_research_policy_generated.py` + `test_research_policy_v1.py` | **59 passed，21.35s** |
+| `q-installed-final.txt`：Q 原 `test_c_feedback_boundaries.py` / `test_c_advisory_binding.py` / `test_c_generated_trust.py` | **45 passed，10.33s**；含原22控制与实际 generated 正负例 |
+| `fc-stdout-installed.txt`：原 `test_process_writers_share_real_sqlite_append_lock` | **1 passed，7.77s**；READY / 120s / 30s 断言均未改 |
+| `legacy-installed-final.txt`：FC logging/projection、policy feedback/score、router、field、ledger、lease、budget、旧 policy_entry | **151 passed / 1 deselected / 2 warnings，112.37s** |
+| `installed-sdk.txt`：原 `tools/check_sdk.cjs`，官方 SDK1.14.0 | schema / asset ID / tamper rejection PASS，`published=false`、`contract_local` |
+| `strict-final.txt`：本轨4个改动模块 | `Success: no issues found in 4 source files` |
+| 私有 `uv pip check` | 104 installed packages compatible |
+| `git diff --check` | PASS |
+
+legacy 唯一 deselected 是已独立运行通过的 FC stdout 同一测试，避免重复测试；不是取消
+失败断言。两项 Pydantic warning 来自旧 budget 的 nan / 字符串输入负例，原样保留。
+本次总计四组 **59 + 45 + 1 + 151 = 256 passed**，不代表全仓或最终产品集成验收。
+
+各命令均以私有解释器 `-I` 从不含核心源码的中立 cwd 运行，测试代码为原文件副本。
+C/Q 测试的 bootstrap 只把各自测试目录加入 `sys.path`，Q 的 `R1_SECURITY_SOURCE`
+显式指向私有 `venv/Lib/site-packages`。旧 FC 的保护目录断言依赖测试相对包的位置，
+所以旧套件原测试复制到私有 site-packages/tests 后用 `-I -m pytest --import-mode=importlib`
+运行，仍保持测试和断言不变。没有活动 worktree / editable 源码回退。
+
+最终 Q 测试副本的 Git blob（按上述文件顺序）：
+`aa793d6c6edab69a007fd2eb11fbd42cc3e7bcf7`、
+`fc76df766bde02a12ec3bfdb64502e83d64711b0`、
+`5fb378cbfeadde874dcec8b959a83ad59fabf7df`。
+
+实际入口命令形状如下；测试目录分别为证据目录中的 `installed-56de8e3`、
+`q-installed`，legacy 目标为私有 site-packages/tests 下的原测试文件：
+
+```powershell
+& $python -I -c 'import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))' tests/research/test_research_policy_generated.py tests/research/test_research_policy_v1.py -q
+& $python -I -c 'import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))' tests/integration/r1_security/test_c_feedback_boundaries.py tests/integration/r1_security/test_c_advisory_binding.py tests/integration/r1_security/test_c_generated_trust.py -q
+& $python -I -c 'import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))' tests/swarm/test_fc_logging.py::test_process_writers_share_real_sqlite_append_lock -q
+# legacy 从 site-packages/tests 选上述10个文件，--import-mode=importlib -q
+# -k 'not test_process_writers_share_real_sqlite_append_lock'；其单项结果已经单独保存。
+```
+
+全部 pytest/Node/build/install 进程结束后已用 `msg_0d25dc91be85` 释放重型窗口给 A。
+
+### 实际持久化消费与独立 Review
+
+- `research_feedback` / `ResearchFeedbackStore.trusted` 读取原 `TaskLedger`、原
+  `assets` / `research_reports` 和 B 原始归档；没有新结果表、执行器或证明权威。
+  新 `feedback_generated.py` 仅负责只读绑定；B 的 `read_generated_observation`
+  重读代码、原始输出、判据、条件、环境和冻结批准，并重新计算科学结论。
+- 接受之前核对原 completion audit、已完成 attempt、owner、当前 execution token、
+  begin/confirm/research_execution 顺序与确切结果、候选原作者、任务冻结的
+  `generated_plan`、project/branch、asset、run、sandbox、已确认效果和清理状态。
+  `source_attempt` 是当前执行任务，`Candidate.attempt` 是候选原作者，语义不混用。
+- host 注入 `generated_criteria`；批准人独立于候选作者，批准时间先于执行；
+  `trusted` / `mode` / `proof_ref` 或传入 `result_id` 本身不授予科学权限。
+  crashed、timeout、unknown、replay、无批准、错来源均不获接受。
+- 独立复核必须是另一个已完成任务与 actor、另一个 run / sandbox、同一资产、
+  条件、项目、provenance 和科学结论；`review_report_id` 与接受事实一同追加保存。
+  有效 supported 与 refuted 分别能被接受；inconclusive 保持 proposed。
+- `advisory(branches)` 每次重验原始事实和 Review，自动从已接受且未 supersede 的
+  事实导出同 branch / conditions 的 `supported_by` / `refuted_by`；调用方空引用
+  也会得到真实引用，伪造、复制、换轴、换分支或删除反证引用均不能改变证据。
+  有效反证贡献被认可，同时降低对应路线的下一次机会份额。
+- A 接线要求的 `locality=host_config.locality()` 复用原 `ledger._local_filter`，
+  过滤原结果和复核任务；同项目但外部 scope/workspace/module 的事实不能授权接受或
+  影响建议。`advisory["branches"]` 返回相同的已校验引用，供正式 snapshot/discover 使用。
+- source 去重复用 B 原输出 artifact 的既有 SHA256 值；未实现新的哈希或证明系统。
+  相同原始输出换 task/agent 身份不重复奖励，原论文来源仍在 B 原报告。
+  `trusted_facts` 跳过 `generated_plan` 任务，防止动态结果误获旧 v0.1 奖励。
+
+接线使用现有构造器：
+
+```python
+store = ResearchFeedbackStore(
+    path, ledger, assets_root, reviewer=host_worker_id,
+    generated_criteria=host_criteria_registry,
+    project_id=project_id, archive_root=archive_root, locality=host_config.locality(),
+)
+store.trusted()               # actual original records, including inconclusive
+store.accept(result_id)      # independent persisted Review required
+store.advisory(branches)      # accepted facts resolve the next opportunity refs
+```
+
+A 负责正式 `ResearchService.discover` / MCP 组合接线，P 负责产品只读投影；
+C 的 store 级通过不代签正式服务、模拟采用或整体 R1 验收。所有新夹具保留 `mock`，
+测试禁止候选宿主子进程与网络。夹具仅使用 B 的固定 mock 输出和 FakeBridge；
+TaskLedger、发布 API、归档、报告 API、贡献存储和 advisory 实际运行。
+
+A 后续交付 `0bcb320e843839f5f043fccd9f705d9dd9b7299e`（消息
+`msg_a554e80b3868`），本 C `4f83296` 是其祖先，已实际读取该 exact 提交测试：
+`test_dynamic_service_accepts_only_independent_original_chain_and_changes_opportunities`
+参数化 supported/refuted，完成独立 Review 后接受，后续 `discover` 返回同一机会，
+`choose/claim` 审计引用原接受结果且费用保持 None。A 报告动态7项 PASS；这属于
+**A Owner 报告、C 只读核对代码/祖先关系**，不冒充 C 独立重跑或 installed/live 证据。
+A 同时保留旧 SDK 环境24项 RED；其整体 R1/安装/stdio/回归验收当时仍未完成。
+
+### 已保存的检查与失败
+
+本次恢复证据目录（不入库）：
+`C:/Users/DW/AppData/Local/Temp/morph-r1-c-recovery-ctx059a/`。
+
+| 检查 | 原始结果 | 后续说明 |
+|---|---|---|
+| C `generated-first.txt` | 25 failed / 27 passed，27.29s | 新夹具误用不存在的 `TaskLedger.assert_owned`；改用已有 `fenced` context |
+| C `generated-second.txt` | 25 failed，14.76s | 原 GEP 桥启动 Node 被测试的子进程禁令拦截；改用 B 惰性 FakeBridge + 原 publish |
+| C `generated-third.txt` | 新动态路径 25 passed，9.27s | 原账本、B 归档与报告、独立接受、接受前后同样分支输入实际改变引用 |
+| C `generated-fourth.txt` | 27 passed，11.89s | 增加一致伪造 trusted/final/accepted 对原始输出重算拒绝、相同输出换身份去重 |
+| C `generated-fifth.txt` | 28 passed，10.37s | 无运行前批准不能事后批准，且不隐藏其他有效结果 |
+| C `generated-locality.txt` | 31 passed，11.10s | 外部 scope/workspace/reviewer module 不影响本 host 反馈 |
+| C `generated-locality-control.txt` | 3 passed / 28 deselected，2.60s | 补充同授权 scope 的有效接受引用控制 |
+| C `generated-locality-origin.txt` | 4 passed / 28 deselected，3.53s | 原始任务 module 也必须属于 host 权限，范围内 Review 不能洗白范围外原始事实 |
+| C `c-source-final.txt` on `4f83296` | 59 passed，15.38s | 新动态32 + 旧 research-policy27，实际 B2d 原 writer/reader API |
+| C `owner-q81.txt` | collection ERROR，1.63s | C/Q 两个 tests 包同进程冲突，未产生81项测试证据；分开从各测试根运行 |
+| Q `q29-source.txt` | 原22 + 新7 = 29 passed，6.34s | 使用 Q 原文件与当前 C SOURCE，无改断言 |
+| Q 对旧 `99cd299` 机会绑定 | 6 failed / 1 passed，3.99s | Q `c-99cd299-advisory-first.txt` 原 RED 保留 |
+| Q 对 exact `d7e561f` | 首轮40 passed / 1 failed，10.91s | Q 新 fixture 改写报告被原 SQLite immutable trigger 拒绝；Q 修 fixture 前原结果保留，非 C 领域绕过 |
+| 私有 `uv pip check` | 103 packages compatible | COPY 安装；不含项目 wheel，后续安装证据另记 |
+| 私有 `strict-first.txt` / `strict-origin.txt` | 4 source files no issues | `mypy --strict --follow-imports=silent`，限定 C 改动模块，不代表全仓 strict |
+
+源码验证实际命令（均仅设置进程级 BLAS1）：
+
+```powershell
+$python = 'C:/Users/DW/AppData/Local/Temp/morph-r1-c-recovery-ctx059a/venv/Scripts/python.exe'
+& $python -m pytest tests/research/test_research_policy_generated.py tests/research/test_research_policy_v1.py -q
+& $python -m mypy --strict --follow-imports=silent swarm/research/policy.py swarm/research/feedback.py swarm/research/feedback_generated.py swarm/feedback.py
+# Q29 从 Q 工作树运行，R1_SECURITY_SOURCE 为本 C 工作树；不与 C tests 包同进程收集。
+& $python -m pytest tests/integration/r1_security/test_c_feedback_boundaries.py tests/integration/r1_security/test_c_advisory_binding.py -q
+```
+
+FC stdout 历史首 RED **仍是历史 RED，根因未确认**，不得称作“无关”或凭后续绿认定修复。
+最早保存的含 FC 综合命令尾部是 `prt_0fd8bd02a001j76uUI6HoX1XSb-test.json`：
+`6 failed / 130 passed / 2 warnings，48.24s`；原命令同时运行 router、policy_score、field、
+ledger、lease、budget、fc_logging 与 research_policy，原日志只保留最后8行。
+旧 C session 的保留输出包括 `prt_0fd90e70f0012uVJ5G4SnppJB6-test.json`
+（1 failed / 33 passed，58.93s），断言为
+`future.result(timeout=120).strip() == "READY"`，实际 stdout 为空。
+`prt_0fd98a043001XN3x7C02jl77c9-test.json` 为 1 failed / 41 passed，98.90s；
+editable 安装后 `prt_0fd9c043b001hMdq6eSufIUuAh-test.json` 仍为
+1 failed / 41 passed，84.37s。原输出没有足够 child stderr 定位证据。
+原测试、READY 断言、120s / 30s 超时保持原样；最终私有安装单项为1 PASS / 7.77s。
+这仅证明当前隔离环境通过，未定位旧环境空 stdout 的根因，也不把历史失败改为通过。
+
+### C 全局 Python 安装事件：事实、残留与人工清理边界
+
+从原 C OpenCode 只读 SQLite session `ses_f0296e348ffent0AfF9jfk7Sdm`
+恢复到以下命令和已保留的输出尾部。数据库以 `mode=ro` / `query_only` 读取。
+这不是安装前后完整包清单；**安装前全局状态 UNKNOWN，不能宣称已恢复**。
+
+| 原 part | 原命令 | 原输出 |
+|---|---|---|
+| `prt_0fd9b33f6001WGiRh6Izy8eHOw` | `python -m pip install -e . --no-deps --no-build-isolation 2>&1 \| Select-Object -Last 20` | `Cannot import 'poetry.core.masonry.api'` |
+| `prt_0fd9b5da4001dkSpTBsMHO2EQr` | `python -m pip install "poetry-core>=2.0,<3.0" "opensandbox==1.1.0" "opensandbox-code-interpreter==1.1.0" 2>&1 \| Select-Object -Last 15` | 原默认镜像 HTTP 403 |
+| `prt_0fd9b7f3e0012NsW454rxZSeQx` | `python -m pip install -i https://pypi.org/simple "poetry-core>=2.0,<3.0" "opensandbox==1.1.0" "opensandbox-code-interpreter==1.1.0" 2>&1 \| Select-Object -Last 15` | `Successfully installed opensandbox-1.1.0 opensandbox-code-interpreter-1.1.0 poetry-core-2.5.0` |
+| `prt_0fd9bd0d9001L1dhmlrQW2OMIh` | `python -m pip install -e . --no-deps --no-build-isolation 2>&1 \| Select-Object -Last 10` | `Successfully installed morphogenesis-0.1.0` |
+
+已确认的安装目标是 `C:/Python313`，不是 C 私有环境；成功 editable wheel 大小8912，
+SHA256 `dae2592c3b95645f5a4b1c4eb01c30150faa16fc154bc5312021c6f7823bda5d`。
+后一次安装约在本地 2026-10-03 01:14:06（UTC 2026-10-02 17:14:06）写入。
+`direct_url.json` 原值：
+
+```json
+{"dir_info":{"editable":true},"url":"file:///C:/Users/DW/orca/workspaces/Morphogenesis/morph-r1-policy-1003"}
+```
+
+`global-registration-readonly.json` 保存11个 RECORD 文件的大小、mtime_ns、SHA256，
+全部与当前 RECORD 匹配。精确残留清单：
+
+- `C:/Python313/Scripts/morphogenesis.exe`（108319 bytes）与
+  `morphogenesis-swarm.exe`（108315 bytes）。
+- `C:/Python313/Lib/site-packages/morphogenesis.pth`（64 bytes），SHA256
+  `7d83c607c265723b7a732a6af0a759ed8816b25d15f1e1e51869e607d7ee4615`。
+- `C:/Python313/Lib/site-packages/morphogenesis-0.1.0.dist-info/` 下8个文件：
+  `INSTALLER`、`METADATA`、`RECORD`、`REQUESTED`、`WHEEL`、`direct_url.json`、
+  `entry_points.txt`、`licenses/LICENSE`。RECORD SHA256
+  `7a3218626c7c09c07b3eb7eee5e92d3a7a04cd78cd630c31981d28f375efc5fe`。
+- 成功安装输出明确列出的 `opensandbox==1.1.0`、
+  `opensandbox-code-interpreter==1.1.0`、`poetry-core==2.5.0` 仍留在全局；
+  不知道旧环境依赖关系，不卸载这些包，也不声称恢复它们之前的状态。
+
+本轮曾提出只移动本轨 RECORD 精确匹配文件到隔离目录的操作；**自动审批在进程启动前
+拒绝，返回 `blocked by policy`**，没有执行清理。已向主控 escalation
+`msg_86307680587a`；主控 `msg_1a53956876b8` / `msg_bdefb513f5a2` 明确要求
+不绕过、不重试，把残留和人工步骤报告，继续私有环境工作。
+
+最终于 UTC `2026-10-02T18:57:49.886512+00:00` 再次只读复核：11项注册文件的
+大小、SHA256 和 mtime_ns 全部与恢复时快照一致，保存在
+`global-registration-final-readonly.json`。因此清理仍为 **BLOCKED / 未执行**；
+私有环境的通过不能解释为全局恢复，未知旧依赖未被卸载。
+
+人工后续操作（未执行）：先确认没有使用该全局注册的进程，再重新核对上述 direct_url、
+RECORD 及11个文件摘要均未变化；只将这些确证文件移到有备份的隔离目录，
+仅清理变空的该 dist-info 目录。若任一归属或内容变化即停止，不能批量卸载依赖、
+递归删除整个 site-packages 或认定全局回到未知旧状态。
+
+新的私有目录为上述证据目录的 `venv/`，`include-system-site-packages=false`。
+使用 `uv pip --python <private>/Scripts/python.exe --link-mode copy --cache-dir <private-cache>`，
+本恢复轮未修改锁文件、全局 pip、auth/provider/HOME 或全局环境变量。
+仅子进程设置 `OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=1`。
+依赖根据既有 `poetry.lock` 构造，另私有安装构建后端 poetry-core2.5.0；完整日志为
+`private-install.txt` / `locked-requirements.txt`，不以全局 editable 提供测试导入。
+
+### 真实剩余限制与未执行操作
+
+本轨 exact-source 私有非 editable 安装、4模块 strict、FC 原断言与上述适用旧路径
+已通过。A 已报告正式 discover/choose/claim mock 组合正例；P/UI、正式安装传输与独立 I
+整体验收仍由相应 Owner 完成，不由 C 的存储测试替代。全局11项 editable 残留仍待人工
+按上述精确核对步骤处理；旧全局状态与历史 FC 空 stdout 根因均 UNKNOWN。
+真实模型科研、外部材料、真实沙箱与探针、云、Hub、部署和 L2 仍全部 **NOT_RUN**；
+mock 不提升为 interface_live / task_live，未知费用/用量不填零。
+
+## 历史阶段报告（原文保留，不能作为当前完整验收）
+
 **状态：三轴贡献与研究路线政策（research-v1）领域返修完成，新接口 strict + pytest 通过。** 这是独立于既有策略 v0/v0.1 的**新增**层；`swarm/router.py`、`swarm/feedback.py`、`swarm/pheromone.py`、`swarm/worker_loop.py`、`swarm/research/service.py`、`server.py`、`models.py` 的既有语义未被修改。L2 真实科研行动未获运行级授权，全部 **NOT_RUN**。
 
 本轮返修（相对首版 71bfedb）修复验收阻断：贡献持久化接受入口改为从可信持久事实解析并绑定 host 自身审核身份，不再接受调用者 `ThreeAxisResult`/`reviewer` 字符串即奖励；`replace=True` 删除历史已移除，改为追加 supersession；`trusted_refutations` 只把 `purpose=counterexample` 的可信反例当反证；机会建议补齐 spec 七要素。
