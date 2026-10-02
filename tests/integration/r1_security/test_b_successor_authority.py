@@ -17,8 +17,8 @@ from local_assets.generated_validation import generated_candidate, generated_val
 from local_assets.store import LocalAssetStore
 
 
-def candidate_store(root):
-    candidate = generated_candidate(plan(), {"candidate.py": CODE},
+def candidate_store(root, *, p=None):
+    candidate = generated_candidate(p if p is not None else plan(), {"candidate.py": CODE},
         attempt=AttemptId(task_id="t1", agent=AgentId(role="builder", instance=0), attempt=1),
         scope="science", summary="inert fixture")
     body = {"type": "Gene", "schema_version": "1.14.0", "id": "local_candidate", "category": "repair",

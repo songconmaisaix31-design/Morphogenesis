@@ -50,20 +50,32 @@ def test_disjoint_bound_inert_data_retains_static_admission():
     assert backend.create_calls == 0
 
 
-def host_fixture_probe():
+def host_fixture_probe(p):
     # Deterministic host authority for a fixture backend, never a live probe.
     capability = IsolationCapability(**{key: True for key in IsolationCapability.model_fields})
+    # Successor requires exact effective host configuration; retain old source
+    # compatibility solely to reproduce the already-preserved first RED.
+    binding = {}
+    if "configuration" in IsolationProbeRecord.model_fields:
+        from orchestration.experiments.generated import IsolationConfiguration
+
+        binding["configuration"] = IsolationConfiguration(endpoint="http://127.0.0.1:65534",
+            instance_id="q-inert-instance", runtime_profile="q-fixed-policy", environment=p.environment,
+            resources=p.backend, network_deny=True, server_process_limit=p.backend.process_limit)
     record = IsolationProbeRecord(probe_id="asset-binding-fixture", backend="fixture", declared=capability,
-        verified=True, passed=True, evidence_ref="q-contract-local-only", probed_at=100)
-    report = IsolationReport(backend="fixture", declared=capability, proof_ref=record.probe_id)
+        image_digest=p.environment.image_digest, verified=True, passed=True,
+        evidence_ref="q-contract-local-only", probed_at=100, **binding)
+    report = IsolationReport(backend="fixture", declared=capability, proof_ref=record.probe_id, **binding)
     return report, TrustedProbeRegistry(records=(record,))
 
 
 @pytest.mark.parametrize("changed", ["asset_id", "revision", "persisted_bytes"])
 def test_generated_validation_binds_the_actual_persisted_candidate(tmp_path, changed):
-    store = candidate_store(tmp_path)
-    isolation, registry = host_fixture_probe()
     p = plan()
+    p = p.model_copy(update={"environment": p.environment.model_copy(update={
+        "image": "fixture@sha256:" + "c" * 64, "image_digest": "sha256:" + "c" * 64})})
+    store = candidate_store(tmp_path, p=p)
+    isolation, registry = host_fixture_probe(p)
     files = {"candidate.py": CODE}
     positive = generated_validation(store, "candidate", p, files, isolation, probe_registry=registry)
     assert positive.passed, "valid persisted candidate control must reach the same validation boundary"

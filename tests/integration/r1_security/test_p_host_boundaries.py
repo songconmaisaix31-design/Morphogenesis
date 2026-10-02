@@ -121,3 +121,38 @@ def test_connected_local_service_does_not_invent_live_provenance(tmp_path):
     backend = ServiceBackend(core)
     assert backend.connected()
     assert backend.provenance() != "live", "connecting local storage invented live execution provenance"
+
+
+def note_fixture(core, *, project, scope):
+    from swarm.models import Signal
+    from swarm.research.records import ResearchNote
+
+    core.ledger.enqueue(Signal(task_id="note-task", workspace=core.config.workspace, scope=scope,
+        kind="opportunity", required_capability="research", payload={"project_id": project}))
+    note = ResearchNote(note_id="fixture-note", project_id=project, task_id="note-task",
+        kind="hypothesis", actor=core.config.agent, text="Q inert scoped note", created_at=100)
+    core.knowledge.put_note(note)
+    return note
+
+
+@pytest.mark.parametrize("project,scope", [("p1", "private"), ("p2", "science")])
+def test_task_note_read_respects_host_scope_and_project(tmp_path, project, scope):
+    from tests.integration.r1_security.test_a_host_boundaries import seeded
+
+    core = seeded(tmp_path)
+    note_fixture(core, project=project, scope=scope)
+    try:
+        response = ServiceBackend(core).task_research("note-task")
+    except (ValueError, PermissionError, KeyError):
+        return
+    assert response["notes"] == [], "public product task lookup leaked a foreign task/project note"
+
+
+def test_task_note_read_preserves_legal_host_project_result(tmp_path):
+    from tests.integration.r1_security.test_a_host_boundaries import seeded
+
+    core = seeded(tmp_path)
+    note = note_fixture(core, project="p1", scope="science")
+    response = ServiceBackend(core).task_research("note-task")
+    assert response["notes"] == [note.model_dump(mode="json")]
+    assert core.ledger.get("note-task").owner is None
