@@ -660,3 +660,84 @@ launch planner only; this does not validate installation. Installed mode keeps
 the original package-origin check. Neither mode reads auth configuration or
 launches a native process, model or candidate. No new session proof mechanism
 or business code is introduced by Q.
+
+## Product repairs and public export contract
+
+Corrected legitimate fixture inputs use original `forbidden=false`, the exact
+closed host egress grant, and typed `ProbeResult`/`LaunchPlan`. No refusal or
+budget assertion changed. Exact f942 native22/resume9 still gives **22 passed /
+9 failed**, 9.05s, independently retaining all one-metering/eight-resume REDs.
+
+Exact P `08afdb8ddb10721ce008fd91d88be1d38a15d3fc` with A4afe passes all 57
+native/resume/member/host/material checks. Adding the older product-authority
+file yields first **58 passed / 5 failed / 3 skipped**, 14.93s: five older tests
+expect scientific fields on the input-only `R1Store.export_package`. Coordinator
+`msg_a5ae6b6b6e6a` and owner `msg_f721f29e5636` confirm that public
+`web.r1.export_view` now projects original core scientific rows.
+
+The same five no-fabrication/no-authority assertions now exercise that actual
+public export over original `R1Spaces`/`R1Store`; they are neither deleted nor
+skipped. Empty scientific rows, unknown core identity, no authorization/route,
+unchanged original TaskLedger, and retained untrusted event inputs are required.
+A new fixture expectation that approval would echo true first fails; actual
+store approval correctly remains false. That failure is retained, and the test
+now asserts false authority plus the original declared input in its event.
+Repeat: **6 passed / 3 historical skips**, 2.58s. The three skips concern the
+withdrawn unsafe parallel loop and do not count as present functionality.
+
+## Exact installed pair and independent SQLite race
+
+Q SOURCE `7aa8d0632a86a162764031b14a62af352f582d4e` records this stage.
+Coordinator `msg_30e76c42ea75` grants private dependency/install work. Initial
+`uv pip check --python .venv-q/Scripts/python.exe` finds two checkpoint version
+incompatibilities. Only this private environment's `langgraph-checkpoint` is
+updated from3.0.1 to4.2.0; repeat83-package check passes. Initial and repair logs
+remain separate.
+
+Exact installed SOURCE pair:
+
+- core `cc2e7227e1b423924c99113c9676ef8cc310e92b`;
+- product `24f02a169a696afd1f4eb769a8c0dbb8ca052f95`.
+
+`uv pip install --python .venv-q/Scripts/python.exe --link-mode copy` uses each
+canonical HTTPS Git URL with its full revision; product installation adds
+`--no-deps` after core dependencies and `pypdf==6.19.0` are resolved. The initial
+Windows local-file Git URL parser error is retained, not recast as a product
+failure. `python -I` checks real distribution `direct_url.json`, noneditable
+origins and site-packages modules for both packages; unmodified `installed_core`
+accepts the exact core pin. Final `uv pip check` passes all95 packages. No
+installed source byte or package metadata is patched.
+
+With `R1_SECURITY_INSTALLED=1`, process-local BLAS1 and all existing process/
+socket denies, `python -m pytest <owned slice> -q --tb=short` gives:
+
+| Installed slice | Result |
+| --- | --- |
+| Protected ConfiguredResearch and actual handler/MCP factory4 | **4 passed**, 4.51s |
+| A host/policy/project budget/dynamic MCP57 | **57 passed**, 36.80s |
+| B generated/configuration/adoption68 | **68 passed**, 9.48s |
+| C original/advisory/generated45 | **45 passed**, 11.29s |
+| P native/resume/member/host/material/public authority66 | **63 passed / 3 historical skips**, 15.33s |
+
+Thus this exact pair has **237 passed and 3 historical skips** for the existing
+owned gate. Factory checks use real protected config, member credentials,
+shared authorities, actual HTTP handler-to-official MCP, claim/fenced release,
+material version links, stable restart and refused rebind. The HTTP transport
+stays in process; no socket server or native model process is started.
+
+Coordinator `msg_9ac5dd5cb6c3` reports a separate Windows CI store initialization
+race and returns it to B. Q independently reproduces it on installed cc2:
+**4 failed**, 1.85s, all exposing `asset_store_settings.name` UNIQUE collisions.
+Two real SQLite connections synchronize their original unprotected read; no
+SQL results or data are mocked. Same live/mock configuration must admit both
+workers; conflicting provenance/fixture roots must yield one domain refusal,
+one intact two-field binding and unchanged immutable triggers.
+
+Exact B successor `230d283848c0879ff9c349096548d3810c4b1954` adds only original
+`BEGIN IMMEDIATE` and comments before settings reads. Independent archive run
+of the unchanged four new checks plus previous68: **72 passed**, 10.05s.
+Handoff `msg_9457a6b8eaf6` sends the no-interface-change result to the controller.
+The old installed cc2/24f bytes remain unchanged; final repaired merge/pin and
+installation still need verification. Additional coordinator-requested native
+provider-destination binding review is ongoing. This is bounded local/mock
+evidence, not real science/model/probe/sandbox/Hub/deployment or L2/L3 acceptance.
