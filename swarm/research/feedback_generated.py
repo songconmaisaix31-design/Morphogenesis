@@ -129,7 +129,8 @@ def _bound_result(db: sqlite3.Connection, assets: sqlite3.Connection, ledger: Ta
 def trusted_generated_feedback(ledger: TaskLedger, assets_root: Path, *,
                                criteria_registry: TrustedCriteriaRegistry | None,
                                project_id: str | None = None,
-                               archive_root: Path | None = None) -> list[ThreeAxisResult]:
+                               archive_root: Path | None = None,
+                               task_ids: set[str] | None = None) -> list[ThreeAxisResult]:
     if criteria_registry is None or not (assets_root / "assets.sqlite3").exists():
         return []
     read = readonly if isinstance(ledger, ReadonlyLedger) else connection
@@ -141,6 +142,8 @@ def trusted_generated_feedback(ledger: TaskLedger, assets_root: Path, *,
                           "AND result_id IS NOT NULL AND unconfirmed_request_id IS NULL", (ledger.swarm_id,))
         for row in rows:
             task = ledger._record(db, row)
+            if task_ids is not None and task.signal.task_id not in task_ids:
+                continue
             submitted = task.result or {}
             frozen = task.acceptance.get("generated_plan")
             if not isinstance(frozen, dict) or submitted.get("stage") != "evidence_submitted":

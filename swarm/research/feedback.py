@@ -36,7 +36,7 @@ from swarm.feedback import (
     readonly,
     trusted_facts,
 )
-from swarm.models import TaskRecord
+from swarm.models import Locality, TaskRecord
 from swarm.research.policy import (
     Branch,
     ContributionDecision,
@@ -51,6 +51,15 @@ from swarm.task_ledger import TaskLedger, connection, enable_wal
 
 _OBJECT = TypeAdapter(dict[str, JsonValue])
 _JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
+
+
+def _local_tasks(ledger: TaskLedger, locality: Locality | None) -> set[str] | None:
+    if locality is None:
+        return None
+    query, args = ledger._local_filter(locality)
+    read = readonly if isinstance(ledger, ReadonlyLedger) else connection
+    with read(ledger.path) as db:
+        return {row[0] for row in db.execute("SELECT t.task_id FROM tasks t WHERE " + query, args)}
 
 
 def _claim_sources(report: ResearchObservation) -> str:
@@ -169,7 +178,8 @@ def trusted_refutations(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxis
 
 def research_feedback(ledger: TaskLedger, assets_root: Path, *,
                       generated_criteria: TrustedCriteriaRegistry | None = None,
-                      project_id: str | None = None, archive_root: Path | None = None) -> list[ThreeAxisResult]:
+                      project_id: str | None = None, archive_root: Path | None = None,
+                      locality: Locality | None = None) -> list[ThreeAxisResult]:
     """Projection of the three axes from approved facts; deterministic and idempotent."""
     database = assets_root / "assets.sqlite3"
     if not database.exists():
@@ -194,8 +204,11 @@ def research_feedback(ledger: TaskLedger, assets_root: Path, *,
                 sandbox_id=observation.sandbox_id if observation is not None else None,
                 purpose=observation.purpose if observation is not None else None))
     results.extend(trusted_refutations(ledger, assets_root))
+    local_tasks = _local_tasks(ledger, locality)
     bound: list[ThreeAxisResult] = []
     for result in results:
+        if local_tasks is not None and result.task_id not in local_tasks:
+            continue
         payload = ledger.get(result.task_id).signal.payload
         project, branch = payload.get("project_id"), payload.get("branch_id")
         if project_id is not None and project != project_id:
@@ -204,7 +217,8 @@ def research_feedback(ledger: TaskLedger, assets_root: Path, *,
                                                "branch_id": branch if isinstance(branch, str) else None}))
     results = bound
     results.extend(trusted_generated_feedback(ledger, assets_root, criteria_registry=generated_criteria,
-                                              project_id=project_id, archive_root=archive_root))
+                                              project_id=project_id, archive_root=archive_root,
+                                              task_ids=local_tasks))
     return sorted(results, key=lambda result: (result.at, result.result_id, result.hypothesis))
 
 
@@ -242,7 +256,8 @@ class ResearchFeedbackStore:
     def __init__(self, path: str | Path, ledger: TaskLedger, assets_root: Path, *,
                  reviewer: str, clock: Callable[[], float] = time.time,
                  generated_criteria: TrustedCriteriaRegistry | None = None,
-                 project_id: str | None = None, archive_root: Path | None = None) -> None:
+                 project_id: str | None = None, archive_root: Path | None = None,
+                 locality: Locality | None = None) -> None:
         self.path = Path(path).resolve()
         self.ledger = ledger
         self.assets_root = Path(assets_root).resolve()
@@ -251,6 +266,7 @@ class ResearchFeedbackStore:
         self.generated_criteria = generated_criteria
         self.project_id = project_id
         self.archive_root = archive_root
+        self.locality = Locality.model_validate(locality.model_dump()) if locality is not None else None
         self.policy = ResearchPolicy()
         enable_wal(self.path)
         with connection(self.path, write=True) as db:
@@ -264,7 +280,8 @@ class ResearchFeedbackStore:
     def trusted(self) -> list[ThreeAxisResult]:
         """Derived three-axis facts; never caller-supplied assertions."""
         return research_feedback(self.ledger, self.assets_root, generated_criteria=self.generated_criteria,
-                                 project_id=self.project_id, archive_root=self.archive_root)
+                                 project_id=self.project_id, archive_root=self.archive_root,
+                                 locality=self.locality)
 
     def _seen_keys(self, db: sqlite3.Connection) -> set[str]:
         keys: set[str] = set()
@@ -334,7 +351,9 @@ class ResearchFeedbackStore:
             rows = db.execute("SELECT body FROM contributions WHERE swarm_id=? ORDER BY rowid",
                               (self.ledger.swarm_id,)).fetchall()
         results = [ThreeAxisResult.model_validate_json(row[0]) for row in rows]
-        return [result for result in results if self.project_id is None or result.project_id == self.project_id]
+        local_tasks = _local_tasks(self.ledger, self.locality)
+        return [result for result in results if (self.project_id is None or result.project_id == self.project_id)
+                and (local_tasks is None or result.task_id in local_tasks)]
 
     def record_correction(self, event: CorrectionEvent) -> None:
         with connection(self.path, write=True) as db:
@@ -414,6 +433,7 @@ class ResearchFeedbackStore:
             "advisory_only": True,
             "claim_requires_recheck": True,
             "contributions": [_JSON.validate_python(c.model_dump(mode="json")) for c in accepted.values()],
+            "branches": [_JSON.validate_python(branch.model_dump(mode="json")) for branch in resolved],
             "opportunities": _JSON.validate_python(plan.model_dump(mode="json")),
         }
 
