@@ -106,3 +106,27 @@ model, data-export, or sandbox runtime enforcement.
 
 WIP counts are repair diagnostics only. No immutable owner candidate is accepted
 by these checkpoints, and later green results cannot rewrite first RED.
+
+## Exact repair candidate checks
+
+- C `40011761c3cce6513bbeef776543740f60d1d03e`, coordinator-delivered pushed SHA:
+  exact git archive, Q suite **13 passed / 1 failed**, exit 1. **NOT_ACCEPTED**.
+  A forged reproduction observation has no matching ledger task/run but still
+  authorizes contribution acceptance; the raw reviewer/purpose strings remain
+  an authority bypass. Full output `c-4001176-first-red.txt`. The constructor
+  and result-ID call adaptation preserves the same invariant and does not
+  count a TypeError as PASS. B WIP 13 pass is diagnostic only.
+
+## Additional P scope
+
+Coordinator `msg_b08511c45c19` added read-only P loop review. P source baseline
+is `9eada755eddb71d53d461577f6054dc34fce96cf`; loop/backend files were uncommitted
+WIP and no P exact candidate has been accepted. Q writes only its own tests.
+
+`test_p_loop_boundaries.py` requires explicit `R1_PRODUCT_SOURCE` and uses real
+R1Store plus actual HostConfig-bound ResearchService/TaskLedger read-only context.
+First P WIP result **2 failed / 1 passed**, exit 1, `p-wip-first-loop-red.txt`:
+mock-labeled unknown/refused effect permits another phase/retry; known core
+context is blocked solely because its provenance is non-mock. Unapproved
+envelope blocks backend calls. Handoff `msg_8393a49aef40` to original P.
+There is no fake eight-stage mock completion and no model/candidate execution.

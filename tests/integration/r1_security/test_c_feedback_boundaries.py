@@ -28,6 +28,8 @@ def store(root):
 
 def accept(s, value, reviewer="invented-reviewer"):
     # Successor moves identity to host construction and removes caller reviewer.
+    if "result_id" in inspect.signature(s.accept).parameters and isinstance(value, ThreeAxisResult):
+        value = value.result_id
     if "reviewer" in inspect.signature(s.accept).parameters:
         return s.accept(value, reviewer=reviewer)
     return s.accept(value)

@@ -14,6 +14,9 @@ import pytest
 
 target = Path(os.environ.get("R1_SECURITY_SOURCE", Path(__file__).resolve().parents[3])).resolve()
 sys.path.insert(0, str(target))
+if os.environ.get("R1_PRODUCT_SOURCE"):
+    product = Path(os.environ["R1_PRODUCT_SOURCE"]).resolve()
+    sys.path.insert(0, str(product / "src"))
 
 
 @pytest.fixture(autouse=True)
