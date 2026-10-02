@@ -316,4 +316,3 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 # 2026-09-30 当前任务：异构 Agent 与科研环境集成
 
 当前一页计划、固定 Owner/write_paths、基线及三态验收见 [RESEARCH_INTEGRATION_PLAN_0930.md](RESEARCH_INTEGRATION_PLAN_0930.md)。以上历史计划保留；本轮用户指令优先。A/B/C 领域开发及必要返修已提交推送。独立 I 的冻结代码 bde3412d2257fd1581ce1d7f88b254fb0c13a269 已通过双平台完整 CI、本机完整1104项测试、strict/build/SDK/实际wheel分发及原兼容性门禁；工程集成已验证。官方 SDK interface_live 与作者唯一真实实验/中断恢复/fencing 通过；Claude 实际401认证阻塞，第三角色实际采用 NOT_RUN，原3600秒案例已到期，完整 task_live 未达成。认证身份选择未答复，不切换提供方或重置原案例。当前证据及全部原失败见 [RESEARCH_INTEGRATION_ACCEPTANCE_0930.md](RESEARCH_INTEGRATION_ACCEPTANCE_0930.md)。
-
