@@ -641,3 +641,22 @@ lines. Final C SOURCE `56de8e3f5d2abd1e1ba02218b422f0aba9847ae2` has no domain
 diff against that A final in C feedback/policy, local assets or experiments.
 This source comparison is not a substitute for the still-pending exact final
 installed product/core combination gate.
+
+## Native resume identity first RED
+
+Coordinator review `msg_92372fc12bec` requested original-record resume scope
+checks. Exact P f942/A4afe runs `test_p_resume_boundaries.py`: **8 failed /
+1 passed**, 4.79s. Same-project/member completed records prepare a resume without
+launching anything. Changed observation project/member/runtime, request
+runtime/model/workspace, reservation member and missing request all reach
+native planning instead of refusing. Raw `p-f942de2-resume9-first.txt` preserves
+the first result; Handoff `msg_16407ecd2556` sends all eight failures to P.
+
+The fixture uses actual protected HostConfig, core service factory, official
+MCP catalogue and original BudgetLedger reservation/settlement. The saved
+request and observation use original `LaunchRequest` and `NativeOutcome`
+structures. Source mode substitutes the package-origin admission and native
+launch planner only; this does not validate installation. Installed mode keeps
+the original package-origin check. Neither mode reads auth configuration or
+launches a native process, model or candidate. No new session proof mechanism
+or business code is introduced by Q.
