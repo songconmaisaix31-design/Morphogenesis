@@ -535,3 +535,34 @@ Handoffs: B `msg_c012fd30895e`, P `msg_677d9ae14b7c`, A
 `msg_3b158e841bcf`. A's complete generated service/official MCP chain and the
 final installed product combination remain pending exact delivery. These
 bounded results do not substitute for final integration or real execution.
+
+## Actual combined generated service through official FastMCP
+
+Exact A SOURCE `0bcb320e843839f5f043fccd9f705d9dd9b7299e` includes B2d and
+C4f by ordinary merges. Q `test_a_dynamic_mcp.py` invokes the actual official
+FastMCP tool manager and original `ResearchService`, with the installed fixed
+output fixture backend selected from HostConfig. No Owner helper is imported.
+
+First `python -m pytest tests/integration/r1_security/test_a_dynamic_mcp.py -q
+--tb=short`: **14 passed / 1 failed**, 19.17s. The adoption positive reached the
+original service snapshot query, which Q's process guard refused. No process
+was launched. Q supplies the same bounded Git/snapshot fixture at that second
+native-plumbing import; all original business assertions and process/network
+denies remain. Repeat: **15 passed**, 20.01s. Both raw outputs are preserved.
+
+Nonempty positives cover proposed/chosen/claimed work, frozen candidate plan,
+actual fixed-output execution, source-bound observation, completed original and
+independent review, accepted support/refutation, future opportunity references,
+reopen and a three-member inheritance sequence through original validation,
+approval, fenced apply and `AdoptionReceipt(provenance=mock)`. The inert candidate
+file is actually written only in the apply positive. Usage and actual cost stay
+unknown, never zero; mere contribution does not create an adoption receipt.
+
+Negatives refuse cross-project/branch/authorization, changed environment or
+resources, self-approved changed evaluation, unapproved data and stale token
+before execution. Failed/timeout/unknown outcomes cannot become refutation or
+credit; the unknown run cannot resend after reopen. A different plan under the
+same frozen task is rejected while the original acceptance remains intact.
+Handoffs `msg_47efa881acbc` and `msg_af9c2ec5391e` preserve the first fixture
+failure and exact subsequent result. Native Git/GEP adapter verification and
+the final installed A/P combination remain outside this fixture result.
