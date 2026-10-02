@@ -213,3 +213,98 @@ def test_new_mcp_tools_round_trip_without_identity_grant(tmp_path: Path) -> None
         assert s.ledger.get(proposal["task_id"]).owner is None
 
     asyncio.run(run())
+
+def test_project_knowledge_persists_across_runs_not_scoped_by_swarm(tmp_path: Path) -> None:
+    knowledge_path = str(tmp_path / "knowledge.sqlite3")
+    a = ResearchService(HostConfig(
+        ledger_path=str(tmp_path / "ledger-a.sqlite3"), swarm_id="run-a",
+        workspace=str(tmp_path / "project-a"), worker_id="w-a",
+        agent=AgentId(role="builder", instance=0), authorized_scopes=("science",),
+        capabilities=("research",), assets_root=str(tmp_path / "assets-a"),
+        evidence_root=str(tmp_path / "evidence-a"), research_knowledge_path=knowledge_path),
+        ledger=TaskLedger(tmp_path / "ledger-a.sqlite3", "run-a"))
+    a.create_project("p1", "goal")
+    a.submit_note("p1", "observation", "shared finding", source_refs=(source(),))
+    b = ResearchService(HostConfig(
+        ledger_path=str(tmp_path / "ledger-b.sqlite3"), swarm_id="run-b",
+        workspace=str(tmp_path / "project-b"), worker_id="w-b",
+        agent=AgentId(role="reviewer", instance=1), authorized_scopes=("science",),
+        capabilities=("research",), assets_root=str(tmp_path / "assets-b"),
+        evidence_root=str(tmp_path / "evidence-b"), research_knowledge_path=knowledge_path),
+        ledger=TaskLedger(tmp_path / "ledger-b.sqlite3", "run-b"))
+    ctx = b.research_context("p1")
+    assert ctx["project"]["project_id"] == "p1"
+    assert any(n["text"] == "shared finding" for n in ctx["notes_unverified"])
+
+
+def test_cross_project_branch_hypothesis_relationships_rejected(tmp_path: Path) -> None:
+    s = make_service(tmp_path)
+    seed_project(s, "p1")
+    s.create_project("p2", "other goal")
+    s.create_branch("p2", "b2", "t", "g")
+    with pytest.raises(ValueError, match="branch_does_not_belong_to_project"):
+        s.submit_note("p1", "observation", "x", branch_id="b2", source_refs=(source(),))
+    with pytest.raises(ValueError, match="branch_does_not_belong_to_project"):
+        s.create_branch("p1", "b3", "t", "g", parent_branch_id="b2")
+
+
+def test_host_project_binding_rejects_cross_project(tmp_path: Path) -> None:
+    config = HostConfig(ledger_path=str(tmp_path / "ledger.sqlite3"), swarm_id="s",
+                        workspace=str(tmp_path / "project"), worker_id="w",
+                        agent=AgentId(role="builder", instance=0), authorized_scopes=("science",),
+                        capabilities=("research",), assets_root=str(tmp_path / "assets"),
+                        evidence_root=str(tmp_path / "evidence"), project_id="p1")
+    s = ResearchService(config, ledger=TaskLedger(config.ledger_path, "s"))
+    s.create_project("p1", "goal")
+    with pytest.raises(PermissionError, match="project_outside_host_authorization"):
+        s.create_project("p2", "other")
+    with pytest.raises(PermissionError, match="project_outside_host_authorization"):
+        s.submit_note("p2", "observation", "x", source_refs=(source(),))
+
+
+def test_derived_from_and_dependencies_must_be_in_host_locality(tmp_path: Path) -> None:
+    s = make_service(tmp_path)
+    seed_project(s)
+    s.ledger.enqueue(Signal(task_id="other", workspace=s.config.workspace, scope="private",
+                            kind="opportunity", required_capability="research", module="research"))
+    with pytest.raises(PermissionError, match="task_outside_host_scope"):
+        s.propose_work("p1", "alternative_route", "g", "j", "e", derived_from="other")
+    with pytest.raises(PermissionError, match="task_outside_host_scope"):
+        s.propose_work("p1", "subtask", "g", "j", "e", dependencies=("other",))
+
+
+def test_same_identity_with_different_content_is_rejected(tmp_path: Path) -> None:
+    from swarm.research.records import ResearchBranch
+    s = make_service(tmp_path)
+    seed_project(s)
+    s.knowledge.put_branch(ResearchBranch(branch_id="b1", project_id="p1", title="t", goal="g",
+                                          status="proposed", created_at=0))
+    with pytest.raises(ValueError, match="branch_identity_cannot_change"):
+        s.knowledge.put_branch(ResearchBranch(branch_id="b1", project_id="p1", title="different",
+                                              goal="g", status="proposed", created_at=0))
+
+
+def test_caller_cannot_replace_host_authorization_ref(tmp_path: Path) -> None:
+    config = HostConfig(ledger_path=str(tmp_path / "ledger.sqlite3"), swarm_id="s",
+                        workspace=str(tmp_path / "project"), worker_id="w",
+                        agent=AgentId(role="builder", instance=0), authorized_scopes=("science",),
+                        capabilities=("research",), assets_root=str(tmp_path / "assets"),
+                        evidence_root=str(tmp_path / "evidence"), authorization_ref="host-authority")
+    s = ResearchService(config, ledger=TaskLedger(config.ledger_path, "s"))
+    with pytest.raises(PermissionError, match="authorization_ref_is_host_bound"):
+        s.create_project("p1", "g", authorization_ref="caller-granted-admin")
+    created = s.create_project("p1", "g")
+    assert created["authorization_ref"] == "host-authority"
+
+
+def test_research_context_is_bounded_and_flags_truncation(tmp_path: Path) -> None:
+    s = make_service(tmp_path)
+    seed_project(s)
+    for i in range(5):
+        s.submit_note("p1", "observation", f"note {i}", source_refs=(source(identifier=f"src-{i}"),))
+    ctx = s.research_context("p1", limit=3)
+    assert len(ctx["notes_unverified"]) == 3
+    assert ctx["notes_unverified_truncated"] is True
+    assert ctx["limit"] == 3
+
+

@@ -41,8 +41,9 @@ FR25-28（Spec 无字面条目，按语义对应）：
 
 ## 4. 验证结果（实际命令）
 
-- `python -m pytest tests/research/test_research_semantics.py tests/research/test_service.py tests/research/test_stdio.py -q` → **25 passed**（新轨 13 + 既有 service 11 + stdio 1）。
-- `python -m pytest tests/research/test_policy_entry_v01.py -k "test_original_mcp_discovery... or test_no_recommendation... or test_uncheckpointed_wal..."` → **3 passed**（`len==11` 断言已更新为 `15`）。
+- `python -m pytest tests/research/test_research_semantics.py tests/research/test_service.py tests/research/test_stdio.py -q` → **32 passed**（新轨 20 + 既有 service 11 + stdio 1）。
+- 合计定向回归（含 policy_entry 3 项 passing 断言）→ **35 passed**（`len==11` 断言已更新为 `15`）。
+- Q 独立负例 `tests/integration/r1_security/test_a_host_boundaries.py`（以 `R1_SECURITY_SOURCE` 指向本 worktree）→ **26 passed**。
 - `python -m mypy --strict swarm/research/records.py knowledge.py models.py service.py server.py` → **Success**。
 - 新增 MCP 工具总数 **15**（11 旧工具语义不变 + `research_project` + `research_branch` + `submit_research_note` + `propose_research_work`）；`test_mcp_tools_have_no_identity_database_or_metric_write_parameters` 校验新工具同样不暴露 worker_id/agent/ledger_path/passed/approved/metric 参数。
 
@@ -58,3 +59,16 @@ FR25-28（Spec 无字面条目，按语义对应）：
 ## 6. 提交
 
 - commit + push 后以 `git ls-remote` 核 SHA（见交付消息）。
+
+## 7. 返修（第二轮，主控退回后）
+
+- **项目稳定域，去 swarm_id 隔离**：`ResearchKnowledge` 全表改为按 `project_id` + UUID 主键（不再按 `swarm_id` 建键/过滤）；同一 `research_knowledge_path` 下，新 run（新 swarm_id/新 ledger）可读同一 project 的 branch/hypothesis/note/proposal/event（`test_project_knowledge_persists_across_runs_not_scoped_by_swarm`）。执行面 `ledger.record_event("research.*")` 仍按 swarm 记录，二者分离。
+- **跨项目关系与宿主授权校验**：`_authorize_project`（HostConfig.project_id 绑定，越项目抛 `PermissionError`）+ `_require_branch`/`_require_hypothesis`（branch/hypothesis 必须归属同一 project）；`create_branch` 校验 parent_branch 归属；`submit_note`/`propose_work` 校验 task_id/branch_id/hypothesis_id 归属与宿主 scope。`HostConfig.project_id` 增加非空标识符校验。
+- **同 id 不同内容拒绝**：`put_branch`/`put_hypothesis`/`record` 由静默返回/`INSERT OR IGNORE` 改为同 id 不同内容抛 `*_identity_cannot_change`，同内容返回原记录；`put_project` 已有此约束。
+- **proposal 中断恢复**：`propose_work` 复用持久化 `proposal_id` 作 `task_id`，`put_proposal`/`enqueue`/`bind_proposal` 任意一步中断后重试都取回原 proposal/task 且不重复（`test_interrupted_admission_recovers_without_duplicate_task`）。
+- **derived_from 与父 task locality**：`derived_from` 与每个 `dependency` 均经 `_task` 校验存在且落在宿主 authorized_scopes（越界抛 `task_outside_host_scope`）；`derived_from` 传 None 时不引入派生关系、派生限额由 ledger 在显式 derived_from 时执行。
+- **上下文裁剪与 truncated**：`research_context(project_id, limit)` 按宿主 locality 过滤 task 关联 note（越界隐藏），每集合限 `limit` 并返回 `*_truncated` 标记。
+- **FR-02 诚实边界**：本轮不联网、未装 Docling，`SourceRef.retrieval` 为成员声明而非宿主抓取/解析完成；`fetched_at` 保持 None（宿主从未抓取）。论文/PDF 全文提取未实现，作为真实限制登记，不假装解析。
+- **未越轨**：未接 C 三轴（可信原 ledger/store 验证归 C，主控已退回，note 层不置 verified）；未接 B 动态执行入口（待 B 安全 Handoff 后由 A 接 formal service/MCP，唯一 ledger/lease/fencing/budget/unknown 保护）；未运行宿主候选、未科研真实调用。
+- **caller authorization_ref 拒绝**（Q 诊断后）：`create_project` 仅在 caller 传入与 `HostConfig.authorization_ref` 不同的 `authorization_ref` 时抛 `PermissionError`，否则始终持久化宿主绑定值（caller 不能写入攻击者 ref；Q `test_caller_cannot_replace_host_authorization` 通过）。
+- **proposal 恢复 payload/acceptance 身份一致**：`propose_work` 在 `put_proposal` 之后一律使用持久化 `existing`（而非一次性 `proposal`）构建 payload/acceptance/dedup，避免 `enqueue` 成功但 `bind` 前崩溃后重试因 `acceptance.research_proposal.proposal_id` 漂移而返回 `blocked`（Q `after_enqueue` 用例通过）。

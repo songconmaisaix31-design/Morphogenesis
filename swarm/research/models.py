@@ -1,7 +1,7 @@
 """Trusted host configuration, never populated from MCP tool arguments."""
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from contracts.base import Contract
 from contracts.identity import AgentId
 from swarm.models import Locality
@@ -26,6 +26,12 @@ class HostConfig(Contract):
     project_id: str = ""
     authorization_ref: str | None = None
     research_knowledge_path: str | None = None
+
+    @model_validator(mode="after")
+    def _project_binding(self) -> "HostConfig":
+        if self.project_id and not self.project_id.strip():
+            raise ValueError("project_id_must_be_a_non_empty_identifier")
+        return self
 
     def knowledge_path(self) -> Path:
         if self.research_knowledge_path is not None:
