@@ -23,6 +23,7 @@ from morph_research import r1_native as native
 from morph_research.config import exclusive_json
 from morph_research.r1_config import ResearchConnection, ResearchMember
 from tests.integration.r1_security.test_a_project_budget_boundaries import host
+from tests.integration.r1_security.test_p_provider_binding import PROVIDER_BINDING, safe_codex_metadata
 
 SPACE = "a" * 32
 
@@ -35,7 +36,9 @@ def recorded(tmp_path, monkeypatch, deny_candidate_execution_and_network):
         "scopes": list(core.authorized_scopes), "data_categories": ["goal", "sources", "expert_opinions",
                                                                   "research_notes", "candidate_code", "raw_outputs"]}
     core = core.model_copy(update={"research_envelope": core.research_envelope.model_copy(update={
-        "data_bounds": {"native_egress": json.dumps([grant])}})})
+        "data_bounds": {"native_egress": json.dumps([grant]),
+                        "native_provider_bindings": json.dumps([PROVIDER_BINDING])}})})
+    safe_codex_metadata(tmp_path, monkeypatch)
     Path(core.workspace).mkdir()
     path = tmp_path / "member-host.json"
     path.write_text(core.model_dump_json(), encoding="utf-8")
@@ -52,7 +55,8 @@ def recorded(tmp_path, monkeypatch, deny_candidate_execution_and_network):
         request = LaunchRequest(runtime=kwargs["member_runtime"], workspace=Path(selected.workspace),
             model=kwargs["member_model"], prompt=prompt, session_id=resume, sandbox="read-only",
             mcp=McpStdio(command=sys.executable, args=("-m", "swarm.research", "--config", str(config_path))))
-        plan = LaunchPlan(runtime=request.runtime, mode=request.mode, argv=("q-inert-never-executed",),
+        plan = LaunchPlan(runtime=request.runtime, mode=request.mode,
+            argv=("q-inert-never-executed", "-c", 'sandbox_mode="read-only"', "exec"),
             workspace=request.workspace, stdin_text=request.prompt, session_id=resume,
             host_binding=HostBinding(agent=selected.agent, worker_id=selected.worker_id,
                 swarm_id=selected.swarm_id, config_path=config_path))
@@ -73,6 +77,7 @@ def recorded(tmp_path, monkeypatch, deny_candidate_execution_and_network):
         acceptance=Acceptance(provenance="mock"), usage=Usage(tokens=5))
     directory.mkdir(parents=True)
     exclusive_json(directory / "request.json", {"request": request.model_dump(mode="json"),
+                                                "provider_binding": dict(PROVIDER_BINDING),
                                                 "reservation": reservation.model_dump(mode="json")})
     exclusive_json(directory / "observation.json", {"member_id": member.id, "project_id": core.project_id,
         "outcome": outcome.model_dump(mode="json"), "forbidden": False, "budget": budget.model_dump(mode="json"),
@@ -95,7 +100,8 @@ def test_same_project_member_native_record_can_prepare_resume_without_launch(rec
 
 
 @pytest.mark.parametrize("field", ["project", "member", "outcome_runtime", "request_runtime", "model",
-                                   "workspace", "reservation_member", "missing_request"])
+                                   "workspace", "reservation_member", "missing_request",
+                                   "binding_provider", "binding_endpoint", "binding_runtime", "missing_binding"])
 def test_resume_rejects_foreign_or_missing_original_record_before_planning(recorded, field):
     f = recorded
     path = f.directory / ("observation.json" if field in {"project", "member", "outcome_runtime"}
@@ -120,6 +126,14 @@ def test_resume_rejects_foreign_or_missing_original_record_before_planning(recor
             body["request"]["workspace"] = str(other)
         elif field == "reservation_member":
             body["reservation"]["worker_id"] = "foreign-member"
+        elif field == "binding_provider":
+            body["provider_binding"]["provider"] = "foreign"
+        elif field == "binding_endpoint":
+            body["provider_binding"]["base_url"] = "https://foreign.invalid/v1"
+        elif field == "binding_runtime":
+            body["provider_binding"]["runtime"] = "claude"
+        elif field == "missing_binding":
+            del body["provider_binding"]
         path.write_text(json.dumps(body), encoding="utf-8")
     with pytest.raises((PermissionError, ValueError, FileNotFoundError)):
         native.prepare_member(f.config, SPACE, f.member.id, str(uuid4()), f.session)

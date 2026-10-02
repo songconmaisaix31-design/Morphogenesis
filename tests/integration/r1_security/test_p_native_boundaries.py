@@ -19,6 +19,7 @@ from orchestration.native_agents.registry import ProbeResult
 from morph_research import r1_native as native
 from morph_research.r1_config import ResearchConnection, ResearchMember
 from tests.integration.r1_security.test_a_project_budget_boundaries import host, opened, InertExecutionBoundary
+from tests.integration.r1_security.test_p_provider_binding import PROVIDER_BINDING, safe_codex_metadata
 
 SPACE = "a" * 32
 
@@ -38,7 +39,8 @@ def configured(root, monkeypatch, *, authorized=True, bound=True, selected=True,
         grants[0]["scopes"] = ["private"]
     elif grant_attack == "category":
         grants[0]["data_categories"] = ["goal"]
-    bounds = {"native_egress": json.dumps(grants)}
+    bounds = {"native_egress": json.dumps(grants), "native_provider_bindings": json.dumps([PROVIDER_BINDING])}
+    safe_codex_metadata(root, monkeypatch)
     if grant_attack == "malformed":
         bounds["native_egress"] = "true"
     core = core.model_copy(update={"research_envelope": core.research_envelope.model_copy(update={"data_bounds": bounds})})
@@ -55,7 +57,7 @@ def configured(root, monkeypatch, *, authorized=True, bound=True, selected=True,
                              claude_auth="pending")
     calls = {"probe": [], "native": []}
 
-    def prepare(config, space_id, member_id, invocation, resume=None):
+    def prepare(config, space_id, member_id, invocation, resume=None, *, provider_binding=None):
         member = next(value for value in members if value.id == member_id)
         s = opened(core.model_copy(update={"worker_id": member_id,
             "agent": AgentId(role="builder", instance=0 if member_id == "member-one" else 1)}), InertExecutionBoundary())
