@@ -145,3 +145,21 @@ invented-probe. `verify_isolation` does not bind the claimed reference to the
 registered record. First diagnostic **2 failed / 14 passed**, exit 1; Handoff
 `msg_de80b96316bc`. This is deterministic host-authority input, not a live probe
 or scientific result; the final host construction path still needs Owner Handoff.
+
+## Latest immutable checkpoints
+
+| Candidate | Q result | Disposition |
+| --- | --- | --- |
+| B `a322cfd53f5c330654e19a6add8438a3f8c5fab4` | exact archive, 14 pass / 2 fail, exit 1 (`b-a322-first-red.txt`) | NOT_ACCEPTED: probe_ref missing/different still authorizes |
+| P `f4799298e530f47fbdac99afc795e6b40969e4eb` + A48ee source for core read fixtures | exact archives, 6 pass / 3 skip, exit 0 (`p-f479-corrected-boundary.txt`) | narrow boundary check only; deleted incorrect loop, core wiring NOT_RUN |
+
+P removed loop/backend and record_loop/loop_position, so the three legacy loop
+tests now explicitly skip with the unmet native integration reason. Six new
+tests prove removal of parallel authority, envelope approval cannot certify
+science, and mock/replay/contract_local product event labels cannot change a real
+core task's owner/status. These do not establish P end-to-end or R1 capability.
+The first P archive command exited 1 with no captured stdout (empty
+`p-f479-exact-boundary.txt`). A verbose retry found a Q test-placement mistake:
+3 failed / 3 passed / 3 skipped (legacy block appended to a new test). Q corrected
+the placement, preserving this history and the original WIP RED. No domain
+threshold changed. B exact RED coordinator Handoff `msg_04a4509540cd`.
