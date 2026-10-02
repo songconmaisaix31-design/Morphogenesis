@@ -741,3 +741,28 @@ The old installed cc2/24f bytes remain unchanged; final repaired merge/pin and
 installation still need verification. Additional coordinator-requested native
 provider-destination binding review is ongoing. This is bounded local/mock
 evidence, not real science/model/probe/sandbox/Hub/deployment or L2/L3 acceptance.
+
+## Selected native provider authorization first RED
+
+Coordinator `msg_a423817c5f54` requests checking actual selected provider binding.
+Read-only review finds only grant/provider versus declared bound/provider
+comparison. The original planner forwards the model and inherits native
+selection; its configuration reads retain only MCP names. The original probe
+reports version/authentication, with no provider-destination fact.
+
+On the unchanged installed cc2/24f pair, `test_p_provider_binding.py` gives
+**1 passed / 1 failed**, 2.34s. The fixture uses the actual protected HostConfig,
+installed-core admission, service factory, original planner and BudgetLedger.
+Its only native config is a credential-free temporary TOML file: approved
+provider `q-mock` maps to `https://authorized.invalid/v1`; `foreign` maps to
+`https://foreign.invalid/v1`. Matching selection passes. Changing the selected
+provider to `foreign` while retaining the old host grant still reaches the
+inert native boundary and returns success, failing the refusal assertion.
+
+Only config-path discovery, executable resolution, version/auth probe and
+headless execution are fixtures; no actual user configuration, auth material,
+native process, model or network is accessed. This proves an admission gap,
+not an observed data transfer. Raw `installed-cc2e722-24f02a1-provider2-first.txt`
+is preserved. Handoffs `msg_09f3fb3344df` and `msg_05549e7614da` send the result to
+P and the controller; P confirms the gap in `msg_eae6e4975a15` and owns repair.
+The final safety gate remains open for that repair and the B concurrency merge.
