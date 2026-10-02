@@ -27,7 +27,7 @@ from tests.integration.r1_security.test_c_advisory_binding import opportunity
 
 def persisted_chain(root, monkeypatch, *, hypothesis="supported", review_state="succeeded",
                     review_effect="known", review_actor="reviewer", reuse_sandbox=False,
-                    include_review=True, approval_at=90):
+                    include_review=True, approval_at=90, review_workspace=None):
     monkeypatch.setattr(reporting.time, "time", lambda: 100.0)
     p = plan()
     assets = candidate_store(root, p=p)
@@ -40,11 +40,13 @@ def persisted_chain(root, monkeypatch, *, hypothesis="supported", review_state="
 
     def append(task_id, actor, *, state="succeeded", effect="known", purpose="original"):
         frozen = p.model_copy(update={"task_id": task_id})
-        ledger.enqueue(Signal(task_id=task_id, workspace=locality.workspace, scope="science",
+        execution_locality = locality if purpose == "original" or review_workspace is None else Locality(
+            workspace=str(review_workspace), authorized_scopes=("science",))
+        ledger.enqueue(Signal(task_id=task_id, workspace=execution_locality.workspace, scope="science",
             kind="opportunity", required_capability="research",
             payload={"project_id": p.project_id, "branch_id": p.branch_id}),
             acceptance={"generated_plan": frozen.model_dump(mode="json")})
-        lease = ledger.claim(task_id, actor, locality=locality)
+        lease = ledger.claim(task_id, actor, locality=execution_locality)
         assert lease is not None
         run_id = "run-" + task_id
         ledger.begin_execution(lease, run_id)
@@ -145,6 +147,31 @@ def test_generated_review_requires_real_independent_known_execution_lineage(tmp_
     else:
         assert not decision.accepted, "invalid independent generated review granted a contribution"
     assert s.contributions() == []
+
+
+@pytest.mark.parametrize("boundary", ["same_host", "foreign_scope", "foreign_workspace", "foreign_review"])
+def test_generated_trust_and_historical_credit_remain_within_original_host_locality(tmp_path, monkeypatch, boundary):
+    s, reports, assets, registry = persisted_chain(tmp_path, monkeypatch,
+        review_workspace=tmp_path / "other-workspace" if boundary == "foreign_review" else None)
+    if boundary != "foreign_review":
+        assert s.accept("result-t1").accepted, "nonempty trusted contribution control required"
+    host = Locality(workspace=str(tmp_path / ("other-workspace" if boundary == "foreign_workspace" else "workspace")),
+        authorized_scopes=("private",) if boundary == "foreign_scope" else ("science",))
+    scoped = ResearchFeedbackStore(s.path, s.ledger, assets.root, reviewer="reviewer", clock=lambda: 100.0,
+        generated_criteria=registry, project_id="p1", archive_root=tmp_path / "evidence", locality=host)
+    if boundary == "same_host":
+        assert len(scoped.trusted()) == 2 and len(scoped.contributions()) == 1
+    else:
+        assert scoped.contributions() == [], "host-excluded historical credit leaked into current projection"
+        if boundary == "foreign_review":
+            try:
+                decision = scoped.accept("result-t1")
+            except (ValueError, PermissionError):
+                pass
+            else:
+                assert not decision.accepted, "a review in another workspace granted contribution"
+        else:
+            assert scoped.trusted() == []
 
 
 @pytest.mark.parametrize("changed", ["raw_output", "frozen_evaluation", "report_reviewer"])

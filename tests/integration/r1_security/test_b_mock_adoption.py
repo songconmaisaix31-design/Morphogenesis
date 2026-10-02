@@ -61,18 +61,18 @@ def setup(root, monkeypatch, *, mode="mock", review=True, review_outcome="succee
     (metadata / "HEAD").write_text("ref: refs/heads/fixture\n")
     (metadata / "refs/heads/fixture").write_text("a" * 40 + "\n")
     bridge = InertAssetBridge()
-    assets = LocalAssetStore(root / "assets", bridge=bridge, research_provenance=mode,
-                             fixture_workspace=root if mode == "mock" else None)
     p = plan()
     p = p.model_copy(update={"environment": p.environment.model_copy(update={
         "image": "fixture@sha256:" + "c" * 64, "image_digest": "sha256:" + "c" * 64})})
+    criterion = TrustedCriteriaRecord(spec=p.evaluation, approved_by="criteria-reviewer", approved_at=90)
+    registry = TrustedCriteriaRegistry(records=(criterion,))
+    assets = LocalAssetStore(root / "assets", bridge=bridge, research_provenance=mode,
+                             fixture_workspace=root if mode == "mock" else None, generated_criteria=registry)
     original = AttemptId(task_id="t1", agent=AgentId(role="builder", instance=0), attempt=1)
     assert assets.publish(generated_candidate(p, {"candidate.py": CODE}, attempt=original,
         scope="science", summary="Q inert fixture")) == "candidate"
     ledger = TaskLedger(root / "ledger.db", "q-mock-adoption", clock=lambda: 100.0)
     locality = Locality(workspace=str(target), authorized_scopes=("science",))
-    criterion = TrustedCriteriaRecord(spec=p.evaluation, approved_by="criteria-reviewer", approved_at=90)
-    registry = TrustedCriteriaRegistry(records=(criterion,))
     backend = GeneratedFixtureBackend(environment=p.environment, resources=p.backend,
                                      output=raw_output(), instance_id="q-fixed-output")
     current_lease = [None]
@@ -133,7 +133,7 @@ def setup(root, monkeypatch, *, mode="mock", review=True, review_outcome="succee
     if review:
         observe("review", "reviewer", "reproduction", outcome=review_outcome)
     return SimpleNamespace(root=root, target=target, assets=assets, bridge=bridge, p=p, backend=backend,
-        ledger=ledger, locality=locality, observe=observe, claim=claim, owned=owned, report=report)
+        ledger=ledger, locality=locality, observe=observe, claim=claim, owned=owned, report=report, registry=registry)
 
 
 def git_plumbing_fixture(monkeypatch, fixture):
@@ -180,10 +180,7 @@ def consumption(fixture):
     return lease, context, consumer, execution
 
 
-def test_installed_fixture_actual_original_consumption_fenced_apply_and_mock_receipt(tmp_path, monkeypatch):
-    f = setup(tmp_path, monkeypatch)
-    assert not f.backend.isolation().verified and f.backend.isolation().probe == "not_run"
-    require_reproduced(f.assets, "candidate")
+def prepared_consumption(f, monkeypatch):
     lease, context, consumer, execution = consumption(f)
     assert execution.provenance == "mock" and not f.assets.adoptions()
     assert not (f.target / "science/candidate.py").exists()
@@ -202,12 +199,21 @@ def test_installed_fixture_actual_original_consumption_fenced_apply_and_mock_rec
         consumer.record_adoption(context.execution_id, "result-reuse", f.ledger)
     result = {"candidate_asset_id": execution.candidate_asset_id, "consumed_asset_ids": ["candidate"],
         "input_context": context.input_context, "execution_id": context.execution_id, "applied": True}
+    return lease, context, consumer, execution, prepared, result
+
+
+def test_installed_fixture_actual_original_consumption_fenced_apply_and_mock_receipt(tmp_path, monkeypatch):
+    f = setup(tmp_path, monkeypatch)
+    assert not f.backend.isolation().verified and f.backend.isolation().probe == "not_run"
+    require_reproduced(f.assets, "candidate")
+    lease, context, consumer, execution, prepared, result = prepared_consumption(f, monkeypatch)
     f.ledger.submit(lease, "result-reuse", result, apply=prepared.apply)
     assert (f.target / "science/candidate.py").read_bytes() == CODE
     receipt = consumer.record_adoption(context.execution_id, "result-reuse", f.ledger)
     assert receipt.provenance == "mock" and receipt.asset_id == "candidate"
     assert consumer.record_adoption(context.execution_id, "result-reuse", f.ledger) == receipt
-    reopened = LocalAssetStore(f.assets.root, bridge=f.bridge, research_provenance="mock", fixture_workspace=tmp_path)
+    reopened = LocalAssetStore(f.assets.root, bridge=f.bridge, research_provenance="mock", fixture_workspace=tmp_path,
+                               generated_criteria=f.registry)
     assert reopened.adoptions() == [receipt]
 
 
@@ -283,3 +289,41 @@ def test_mock_isolation_identity_cannot_admit_real_sdk_adapter(tmp_path, monkeyp
         runtime_profile="fixed-output-fixture-v1", server_process_limit=f.p.backend.process_limit)
     with pytest.raises(ValueError):
         real.create(f.p, context())
+
+
+@pytest.mark.parametrize("authority", ["missing", "different_reviewer"])
+def test_reopen_cannot_reuse_generated_science_without_original_host_criteria(tmp_path, monkeypatch, authority):
+    f = setup(tmp_path, monkeypatch)
+    assert f.assets.fetch_approved("candidate").research is not None
+    registry = None if authority == "missing" else TrustedCriteriaRegistry(records=(
+        TrustedCriteriaRecord(spec=f.p.evaluation, approved_by="replacement-reviewer", approved_at=90),))
+    reopened = LocalAssetStore(f.assets.root, bridge=f.bridge, research_provenance="mock", fixture_workspace=tmp_path,
+                               generated_criteria=registry)
+    with pytest.raises(ValueError):
+        reopened.fetch_approved("candidate")
+    assert reopened.adoptions() == []
+
+
+@pytest.mark.parametrize("when", ["before_apply", "after_write"])
+def test_original_evidence_change_cannot_commit_or_adopt_prepared_child(tmp_path, monkeypatch, when):
+    f = setup(tmp_path, monkeypatch)
+    lease, context, consumer, execution, prepared, result = prepared_consumption(f, monkeypatch)
+    evidence = tmp_path / "evidence/run-t1/outputs/output.json"
+    if when == "before_apply":
+        evidence.write_bytes(b'{"untrusted":"changed"}')
+    else:
+        original_replace = applying.PreparedApplication._replace
+        changed = []
+
+        def replace_then_change(path, body):
+            original_replace(path, body)
+            if body == CODE and not changed:
+                changed.append(True)
+                evidence.write_bytes(b'{"untrusted":"changed-after-write"}')
+
+        monkeypatch.setattr(applying.PreparedApplication, "_replace", staticmethod(replace_then_change))
+    with pytest.raises(ValueError):
+        f.ledger.submit(lease, "result-reuse", result, apply=prepared.apply)
+    assert not (f.target / "science/candidate.py").exists(), "failed evidence recheck left an applied candidate"
+    assert f.ledger.get("reuse").status != "completed"
+    assert f.assets.adoptions() == []
