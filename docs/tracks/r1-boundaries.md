@@ -611,3 +611,33 @@ source version links and restart/rebind boundaries, without creating a socket
 server. `R1_SECURITY_INSTALLED=1` only prioritizes that environment's installed
 packages over Q's checkout; it does not alter package metadata or the pin check.
 Exact repaired P delivery and the serialized install window are still required.
+
+## Product credential repair and native metering first RED
+
+Exact P SOURCE `f942de2ed2a22fa8bd8c418c6b4bf2b7d59e83bf` with the same
+A4afe core runs native22, member5, host12 and material9 sequentially in one
+guarded pytest process: **47 passed / 1 failed**, 10.59s. Q SOURCE
+`fc18b24e22e4671285d7e0afcfff56e99d169733` preserves the unchanged first output
+in `p-f942de2-boundaries48-first.txt`.
+
+All five actual member-handler controls now pass. Missing, wrong, other-member
+and duplicate credentials stop before backend selection; the valid credential
+still writes an unverified note through the original official MCP tool. Nine
+host egress grant negatives and original pending/unknown budget holds also
+pass. Native launch, CLI/auth probes and model execution remain inert fixtures.
+
+Pre-test Handoff `msg_683bb63a3763` identified an original API mismatch: the
+native observer returns bare token fields, whereas original `BudgetLedger`
+parses a `usage` envelope. The new nonempty matching-event control confirms
+this: observed input3/output2 is returned by the inert native adapter, but
+original persisted budget tokens remain `None`, failing expected5. Missing or
+mismatched event counts correctly remain unknown. Actual cost is still unknown
+and no science contribution/adoption is inferred. Post-test Handoff
+`msg_78e63bbf7105` sends this first RED to P for its own repair.
+
+A final SOURCE `cc2e7227e1b423924c99113c9676ef8cc310e92b` was delivered.
+Independent Git diff against tested A4afe contains only six owner stdio test
+lines. Final C SOURCE `56de8e3f5d2abd1e1ba02218b422f0aba9847ae2` has no domain
+diff against that A final in C feedback/policy, local assets or experiments.
+This source comparison is not a substitute for the still-pending exact final
+installed product/core combination gate.
