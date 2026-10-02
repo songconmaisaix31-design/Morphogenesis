@@ -1,5 +1,27 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## 最终固定组合的适用工程验收
+
+核心 SOURCE `2c63bc7c9e49edff28e26f5930a22d0415fadd65`；产品 SOURCE `9e2718789cb67f8b829207e17dac4d95a88e59c9`，最终产品REPORT `ad104f7c3555d04af4753c0601729f6dfef3c855`。以下仅登记本次实际受测层级，完整命令、原日志、first RED和来源见I报告及R1_STATUS。Windows精确核心CI1566 passed/15 skipped/1974.60s，Linux1565 passed/16 skipped/563.89s；同一CI37073582354两平台strict136/build/SDK/wheel均通过。
+
+| AT | 本轮确定性 / 本机安装证据 | 真实运行范围 |
+|---|---|---|
+| 01 / 02 | 实际PDF/文本/已提交代码快照及来源定位、版本和解析不足；权限共享背景与成员接续契约；正式HTTP/MCP安装路径 | 公开论文HTTPS获取用受控fixture验证，实际获取未执行；AT02的L2实例未执行 |
+| 03 / 04 | 原TaskLedger的非预置提议、合法候选推荐/覆盖/认领、lease/fencing与替换边界；正式stdio与原SDK接口 | 模型自行产生分支与研究选择的L2实例未执行 |
+| 05 / 06 | 独立候选版本、评价前冻结、原始输出重算与篡改/自批拒绝；支持/反证/unknown三条正式HTTP链 | 候选执行为inert mock，未在宿主执行；模型生成和实际沙箱运行未执行 |
+| 07 | SDK配置与无效隔离声明负例已测 | **真实无害隔离探针NOT_RUN，不标AT07通过** |
+| 08 / 09 / 10 / 11 | 三轴分离、有效反证贡献、意见不直接批准、同源去重、接受证据影响原discover/choose/claim、休眠/重开与额度边界 | 反馈改变真实研究行动的L2实例未执行 |
+| 12 / 13 | 独立复核来源/成员/当前执行身份、原消费/本地再验证/apply/AdoptionReceipt工程链已测且标mock | 真实独立沙箱复现及后续实际科学使用NOT_RUN |
+| 14 / 15 | 独立Q最终293 passed/3历史skip；unknown、重复POST、过期token、跨项目/成员、预算不重置、provider与数据授权边界；原保护未mock | 未作额外科学调用、费用授权或外发 |
+| 16 | 独立完整fixture UI108 passed/6安装场景skip；另正式installed支持/反证×两视窗共4 passed；主控/I已看真实截图，0POST | 历史mock科学事实；未参与实现的人类观察、L2页面实例NOT_RUN |
+| 17 | 原始Git blob、COPY非editable安装、锁/核心pin、SDK、构建、类型身份与原案例兼容；LinuxCI1565/16、WindowsCI1566/15通过，双端strict136/build/SDK/wheel通过；产品首222/6、原6后继6/6分别保留 | 整包原10类型债仍RED；未称单轮产品228全绿；仅Windows完整产品路径受测 |
+| 18 | 正式完整HTTP成果包包含源代码/环境/原输出/复核/贡献/采用与局限，支持与反证原值逐项对应 | 输出包含明确mock事实；真实L2科研成果包未产生 |
+
+I新增类型首RED14/9已由原P最小修为仅原10/6；I独立适用29源通过，旧a25同环境诊断身份对照保留。产品首5个parser失败为I私有npm布局准备问题；第6个preflight原异常仍UNKNOWN，后继成功不追认原因。原helper超时、CI竞争、长返回空档和首RED均保留。
+
+真实沙箱AT07、L2、L3、独立人工观察、全局系统Python人工恢复、旧Orca release_unknown分别登记，不相互抵消。新实现的本地工程证据不能替代Spec14.4的授权真实研究切片，全R1退出条件仍未达成；性能仅记录实际样本。主控仅维护治理与验收，最终分支普通历史保留并推送，main/tag/部署未执行。
+
+
 ## 06:43 最终组合进入独立验收
 
 本轮受测组合固定为核心 SOURCE `2c63bc7c9e49edff28e26f5930a22d0415fadd65` 与产品 SOURCE `c9fcc6e24500ff26cd6600dfa6719278f04b8cb5`。唯一I已普通合并全部核心领域和独立Q历史，原P负责最终pin/lock；主控核实两者远端精确。最终SOURCE CI37073582354、I全新COPY非editable安装、产品完整Python、Q原安装保护、正式HTTP/MCP及四个实际浏览器观察仍PENDING，旧组合结果不能代替。
