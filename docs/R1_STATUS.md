@@ -1,5 +1,33 @@
 # R1 派发状态（2026-10-03）
 
+## 04:44 更新：核心组合已交付，独立安装页面首失败退回产品
+
+B 最终 SOURCE `230d283848c0879ff9c349096548d3810c4b1954` / REPORT `387338f49045f7be7a184b868f48f325cebd9cbd` 已推送且 worker_done succeeded。主控核实精确 SOURCE [CI37059454013 attempt1](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37059454013)：Windows 1295 passed/5 skipped，Linux 1294 passed/6 skipped；两端 strict130、build、官方SDK、wheel检查通过。原本地180秒期限1 failed/21 passed和C初始化竞争首失败仍保留，不能用新CI解释旧延迟原因。B资源回执为retained/no_owned_resource/processAction none。
+
+A 原Owner按新 Task `task_012ff330b0ea` / Dispatch `ctx_08b0b3d7fddb` 接续，普通精确合并B/C最终报告形成 SOURCE `d85aa95e8da406d598f3658492e3d615bba8a28f`，已push；相对cc2生产差异仅原store读取前BEGIN IMMEDIATE及注释。新私有COPY非editable安装103依赖兼容，direct_url精确d85，14运行模块与git show原blob相等。首archive字节门因本机archive CRLF转换失败保留；未改installed字节，使用仅子进程core.autocrlf=false生成新archive确认。正式stdio1/并发5/strict等待短窗口。
+
+P SOURCE `7a155c59672cc030b3d7916de04e47c71ec6c124` / 核心cc2实际安装CLI inspect→正式stdio MCP→原choose/claim/release/export及字节门2 passed/6.68s；此前非法kind=analysis的fixture首失败保留，后继用原schema允许的question。该SOURCE也包含native cloud/case等路由拒绝修复，不能描述为仅测试变更。Q exact7a native/provider/resume 55 passed/14.97s；previous5b新cloud5首失败保留。Q SOURCE `522af51f04d1107c466ce7742dbf0b990a3276b4` / REPORT `5a49cc8f85abad8ff38a93696882fc3571a4846a` 已push，最终真正安装d85+P repin门仍待。
+
+F 普通合并P7a的 SOURCE `0e6279d1cc19904882d97a31f27b600bc20a7ee6` 独立COPY wheel安装、corecc2 origin、52文件原字节/nlink检查通过；但P p9支持seed经正式serve返回503 source_unavailable，两个视窗在原HTTP200断言前均RED，反证页面NOT_RUN。原日志/trace保留，已退原P排查；F结束自有serve/browser释放窗口后，A短测→P安装完整baseline→F真实页面返验→Q最终安装验收。P legacy baseline用私有官方Codex0.159仅子进程PATH，R1实际0.160 parser兼容另验，不改全局版本。
+
+五条开发轨保持原Owner；最终I尚未派发。真实沙箱/AT07/L2/L3/人工观察仍NOT_RUN，全R1未通过；mock采用与慢操作不升格为科学及性能验收。旧4项release_unknown与C全局editable清理被自动审批拒绝的人工残留继续保留。
+
+
+## 04:37 更新：产品完整 mock HTTP 链通过，剩余安装组合与兼容门
+
+P SOURCE `5b1f076cb18d181037f4c5f052b6006705121c84` 普通合并 F built SOURCE `42ab8759b8b55b3a4ec2a1d8fb9552f3b2c8d2d2`，核心仍pincc2。精确COPY非editable安装后，真实factory/HTTP/原GEP SDK/原账本的生成实验三例（支持、反证、unknown）**3 passed/41.23s**；execution backend为固定mock，原采用回执明确mock。成果种子保留在P私有p9，F只读双视窗installed observer正在准备。F标签修复后原双视窗断言**2 passed/20.9s**、build通过，F阶段REPORT `bd620d239e26358f75d8d7f69ef51aa9f523bd03` 已推送，不能代替尚待的installed页面证据。
+
+P24f首轮安装5项**3 failed/2 passed**保留：支持链apply和unknown链prepare触发旧输入页面通用helper的15秒transport等待；另有Windows autocrlf造成Git原字节不符。后者以独立cache、仅安装子进程core.autocrlf=false重新构建，原字节断言未改，定向1 passed。只读原账本确认支持链已有原mock adoption1，unknown用例仅计划冻结而未执行；原请求均未重发。主控核对Spec13与helper后允许仅新增generated夹具显式60秒采集完整结果，旧测试默认15秒不变，所有科学/预算/租约/拒绝断言不变；后继使用新隔离fixture并逐操作计时，不重分类首失败、不声明性能目标通过。新实测apply8.79s（67次SDK调用7.66s）、inherit3.38s（17次SDK调用2.83s），控制p95/传播目标未验收。
+
+新的真实AT15缺陷也保留：P24f的grant.provider与ExecutionBound相同但实际native配置selected provider不同仍可准入，Q actual planner首1 failed/1 passed。P5b新增原冻结data_bounds.native_provider_bindings，将实际非秘密provider/base_url与授权匹配并固定同一会话argv；切换/缺失/冲突在probe/reserve/launch前拒绝，resume重查原binding。Q新native/provider/resume **50 passed/15.31s**。支持范围明确：Codex只支持单一显式custom provider/base_url，任何非空profiles、managed和列出builtin routes均拒绝；Claude gateway有独立Q正例，OAuth未由Q验收，不能宣称所有既有账户可用或live隔离。
+
+Q最新 SOURCE `bc69ef3db2fbab9ad6cc57b83525d783a55e340e` / REPORT `5366fdd8749c980bfa4c78c7d9a49c0808416bc5` 已推送。此前真实installed cc2/24f同组合factory4+A57+B68+C45+P63共**237 passed**，撤回旧parallel-loop3历史skip单列；同旧组合新SQLite并发4 RED与provider首RED都保留。B230精确archive原并发4+原B68 **72 passed/10.05s**，不能把archive成功写成旧installed字节已修复。
+
+B SOURCE `230d283848c0879ff9c349096548d3810c4b1954` / 阶段REPORT `bb259112d240a5e13b2aa6ea437617406d978dc3`：原SQLite settings读取前新增BEGIN IMMEDIATE，原10秒连接等待和trigger/迁移规则未改；Owner确定性首4 failed/1 passed→同断言5 passed。相关资产69 passed/214.46s、strict130通过。但原worker_evomap后继本地**1 failed/21 passed/279.33s**，原180秒时exitcodes为[0,None,None]；此时四任务已完成、data1已认领/data5待办，没有初始化UNIQUE失败。只读阶段时间把延迟定位在模拟HTTP之外，确切原因UNKNOWN；不增加期限、不盲重跑。精确SOURCE CI37059454013 Linux已通过，Windows仍在运行，原多进程兼容门尚待其独立结果。
+
+当前重窗口P（短stdio修复后F实际页面，随后P完整baseline）；B/Q无重进程等待精确后继，A将按B最终来源普通合并形成可安装组合后交P/Q最终repin检查。最终I仍未派发，全R1及AT07/L2/L3/人工观察未通过或NOT_RUN。
+
+
 ## 04:13 更新：远端 CI 新并发缺陷退回 B，产品修复进入安装
 
 主控实时核实 A SOURCEcc2e722 的 CI [37051852669](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37051852669)：Windows 1387 passed/5 skipped，Linux 1386 passed/6 skipped；两端 strict136、build、SDK与wheel安装检查均通过。B SOURCE5faafe4 的 [37049419672](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37049419672) 两端也通过。
