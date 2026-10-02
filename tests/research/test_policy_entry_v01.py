@@ -51,7 +51,7 @@ def test_original_mcp_discovery_and_voluntary_override_are_authoritative(tmp_pat
         assert service.ledger.get(actual).owner == "worker"
         event = next(e for e in service.ledger.audit() if e["event"] == "policy_selection")
         assert event["body"] == selection
-        assert len(await server.list_tools()) == 11
+        assert len(await server.list_tools()) == 15
     asyncio.run(interact())
 
 

@@ -5,6 +5,7 @@ from pydantic import JsonValue
 from typing import Literal
 
 from local_assets.models import Candidate
+from swarm.research.records import NoteKind, ProposalKind, SourceRef
 from swarm.research.service import Purpose, ResearchService
 
 
@@ -104,5 +105,50 @@ def create_server(service: ResearchService) -> FastMCP:
                         execution_id: str | None = None) -> dict[str, JsonValue]:
         """Apply approved bytes through the existing ledger fence and record actual adoption."""
         return service.apply(task_id, token, asset_id, report_id, execution_id)
+
+    @mcp.tool()
+    def research_project(action: Literal["create", "read"], project_id: str,
+                         goal: str | None = None, allowed_domains: list[str] | None = None,
+                         data_bounds: dict[str, str] | None = None,
+                         milestones: list[str] | None = None) -> dict[str, JsonValue]:
+        """Create a research space or read its full shared memory. Resource authorization is host-bound."""
+        if action == "create":
+            if goal is None:
+                raise ValueError("create_requires_goal")
+            return service.create_project(project_id, goal, allowed_domains=tuple(allowed_domains or ()),
+                                          data_bounds=data_bounds or {}, milestones=tuple(milestones or ()))
+        return service.research_context(project_id)
+
+    @mcp.tool()
+    def research_branch(project_id: str, branch_id: str, title: str, goal: str,
+                        parent_branch_id: str | None = None) -> dict[str, JsonValue]:
+        """Open a non-pre-registered research branch; task state stays in the existing ledger."""
+        return service.create_branch(project_id, branch_id, title, goal, parent_branch_id=parent_branch_id)
+
+    @mcp.tool()
+    def submit_research_note(project_id: str, kind: NoteKind, text: str,
+                             source_refs: list[dict[str, JsonValue]] | None = None,
+                             branch_id: str | None = None, hypothesis_id: str | None = None,
+                             task_id: str | None = None, signer: str | None = None,
+                             applicability: dict[str, str] | None = None,
+                             references: list[str] | None = None) -> dict[str, JsonValue]:
+        """Share a sourced observation/opinion. Always unverified: a member can never promote it to fact."""
+        refs = tuple(SourceRef.model_validate(r) for r in (source_refs or []))
+        return service.submit_note(project_id, kind, text, source_refs=refs, branch_id=branch_id,
+                                   hypothesis_id=hypothesis_id, task_id=task_id, signer=signer,
+                                   applicability=applicability, references=tuple(references or ()))
+
+    @mcp.tool()
+    def propose_research_work(project_id: str, kind: ProposalKind, goal: str, justification: str,
+                              expected_contribution: str, scope: str | None = None,
+                              required_capability: str | None = None, dependencies: list[str] | None = None,
+                              source_refs: list[dict[str, JsonValue]] | None = None,
+                              branch_id: str | None = None, derived_from: str | None = None) -> dict[str, JsonValue]:
+        """Propose work; the host admits it into the single ledger only within host authorization."""
+        refs = tuple(SourceRef.model_validate(r) for r in (source_refs or []))
+        return service.propose_work(project_id, kind, goal, justification, expected_contribution,
+                                    scope=scope, required_capability=required_capability,
+                                    dependencies=tuple(dependencies or ()), source_refs=refs,
+                                    branch_id=branch_id, derived_from=derived_from)
 
     return mcp
