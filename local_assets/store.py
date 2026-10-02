@@ -85,6 +85,9 @@ class LocalAssetStore:
                     asset_id TEXT PRIMARY KEY, report_id TEXT NOT NULL UNIQUE,
                     body TEXT NOT NULL, FOREIGN KEY(report_id) REFERENCES generated_reports(report_id));
             """)
+            # Lock before reading so concurrent initializers observe one whole
+            # provenance/workspace binding, including migration and triggers.
+            db.execute("BEGIN IMMEDIATE")
             settings = {"generated_research_provenance": research_provenance,
                         "fixture_workspace": str(self.fixture_workspace) if self.fixture_workspace else ""}
             for name, value in settings.items():
