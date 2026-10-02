@@ -158,3 +158,141 @@ def test_uncheckpointed_wal_is_refused_without_source_writes_or_missing_fact_cla
         assert before == {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
     writer.close()
     assert policy_diagnostics(service.config)["execution_invoked"] is False
+
+
+def archived_research_chain(root, corruption=None):
+    """Persist the original host result shapes; fixture facts remain mock evidence."""
+    from contracts.identity import AttemptId
+    from local_assets.models import (AdoptionReceipt, Candidate, ConsumptionContext, ConsumptionExecution,
+                                    EnvironmentFingerprint, FileChange, PromotionReceipt, ValidationReport)
+    from local_assets.research_models import ResearchClaim, ResearchObservation
+    service = service_at(root)
+    claim = ResearchClaim(plan_id="archived-plan", criterion_version="archived-v1",
+                          conditions={"seed": "0"}, sources=("https://example.invalid/fixture",))
+    candidates, assets = {}, {}
+    for index, role in enumerate(("author", "replication", "inheritance")):
+        plan = {"plan_id": claim.plan_id, "criteria": {"version": claim.criterion_version},
+                "role": role, "seed": 0, "code": {"local_path": "archive/" + role, "sha256": "fixed"}}
+        path = "science/reused.txt" if role == "inheritance" else "science/source.txt"
+        policy = {"version": role + "-files-v1", "executor": "literal-files-v1",
+                  "expectations": [{"path": path, "content": "fixture"}]}
+        service.ledger.enqueue(Signal(task_id=role, workspace=service.config.workspace, scope="science",
+                                      kind="opportunity", required_capability="research." + role),
+                               dependencies=() if role == "author" else ("author",),
+                               acceptance={"research_claim": claim.model_dump(mode="json"),
+                                           "experiment_plan": plan, "file_policy": policy})
+        lease = service.ledger.claim(role, role, locality=service.locality)
+        assert lease is not None
+        source_attempt = AttemptId(task_id=role, agent=AgentId(role="reviewer" if role == "replication" else "builder",
+                                                            instance=index), attempt=1)
+        if role == "replication":
+            candidate, asset = candidates["author"], assets["author"]
+        else:
+            candidate = Candidate(attempt=source_attempt, base_revision="a" * 40, scope="science",
+                                  changes=(FileChange(path=path, before=None, after="fixture"),),
+                                  declared_files=1, declared_lines=1, research=claim)
+            asset = service.store.publish(candidate)
+        candidates[role], assets[role] = candidate, asset
+        evaluated = {"execution_state": "succeeded", "scientific_verdict": "passed",
+                     "effect_state": "known", "provenance": "mock"}
+        run_id = role + "-run"
+        service.ledger.begin_execution(lease, run_id, max_executions=1)
+        service.ledger.record_event("research_execution", {"run_id": run_id, "worker_id": role,
+                                    "token": lease.token, "result": evaluated}, task_id=role)
+        service.ledger.confirm_execution(lease, run_id)
+        observation = ResearchObservation(report_id=role + "-science", asset_id=assets["author"],
+            task_id=role, worker_id=role, fencing_token=lease.token, run_id=run_id, sandbox_id=None,
+            plan_id=claim.plan_id, criterion_version=claim.criterion_version, conditions=claim.conditions,
+            plan_json=json.dumps(plan), result_json=json.dumps(evaluated),
+            candidate_json=candidates["author"].model_dump_json(), provenance="mock",
+            purpose={"author": "original", "replication": "reproduction", "inheritance": "inheritance"}[role],
+            execution_state="succeeded", scientific_verdict="passed", created_at=service.ledger.now(),
+            source_swarm_id=service.config.swarm_id, source_fencing_token=lease.token, source_attempt=source_attempt)
+        if role == "replication":
+            updates = {"worker": {"worker_id": "wrong"}, "token": {"fencing_token": 2},
+                       "task": {"task_id": "wrong"}, "source_attempt": {"source_attempt": candidates["author"].attempt},
+                       "purpose": {"purpose": "original"},
+                       "unknown": {"result_json": json.dumps({**evaluated, "effect_state": "unknown"})},
+                       "passed": {"result_json": json.dumps({**evaluated, "scientific_verdict": "failed"})},
+                       "plan": {"plan_json": json.dumps({**plan, "seed": 1})},
+                       "claim": {"conditions": {"seed": "1"}},
+                       "scope": {"candidate_json": candidate.model_copy(update={"scope": "other"}).model_dump_json()}}
+            observation = observation.model_copy(update=updates.get(corruption, {}))
+        with service.store.connection() as db:
+            db.execute("INSERT INTO research_reports VALUES (?,?,?)",
+                       (observation.report_id, observation.asset_id, observation.model_dump_json()))
+        if role == "author":
+            service.ledger.submit(lease, role + "-result", {"asset_id": asset, "run_id": run_id,
+                "stage": "evidence_submitted", "scientific_verdict": "passed", "execution_state": "succeeded", "provenance": "mock"})
+            continue
+        validation = ValidationReport(report_id=role + "-static", asset_id=asset, attempt=candidate.attempt,
+            base_revision=candidate.base_revision, candidate_json=candidate.model_dump_json(), passed=True,
+            reasons=(), actual_files=1, actual_lines=1,
+            env_fingerprint=EnvironmentFingerprint(node_version="fixture", arch="fixture", platform="fixture", python_version="fixture"),
+            created_at=service.ledger.now(), expires_at=service.ledger.now() + 60,
+            policy_version=policy["version"], policy_json=json.dumps(policy), isolation="non_arbitrary_literal_files")
+        promotion = PromotionReceipt(asset_id=asset, report_id=validation.report_id,
+                                     promoted_at=validation.created_at, policy_version=validation.policy_version)
+        with service.store.connection() as db:
+            db.execute("INSERT INTO reports VALUES (?,?,?)", (validation.report_id, asset, validation.model_dump_json()))
+            if corruption != "approval" or role != "replication":
+                db.execute("INSERT INTO approvals VALUES (?,?,?)", (asset, validation.report_id, promotion.model_dump_json()))
+        result = {"applied": True, "candidate_asset_id": asset}  # Archived host omitted report_id.
+        if role == "replication" and corruption == "explicit_report":
+            result["report_id"] = "wrong"  # Explicit wrong identity must never fall back.
+        if role == "inheritance":
+            context = ConsumptionContext(swarm_id=service.config.swarm_id, task_id=role, worker_id=role,
+                fencing_token=lease.token, execution_id="actual-consumption", scope="science", input_context="fixture input")
+            execution = ConsumptionExecution(asset_id=assets["author"], context=context, candidate=candidate,
+                                             candidate_asset_id=asset, created_at=service.ledger.now())
+            receipt = AdoptionReceipt(asset_id=assets["author"], candidate_asset_id=asset, context=context,
+                                      result_id=role + "-result", adopted_at=service.ledger.now())
+            if corruption == "adoption_context":
+                receipt = receipt.model_copy(update={"context": context.model_copy(update={"worker_id": "wrong"})})
+            elif corruption == "adoption_source":
+                receipt = receipt.model_copy(update={"asset_id": asset})
+            elif corruption == "consumption_child":
+                execution = execution.model_copy(update={"candidate": candidates["author"]})
+            with service.store.connection() as db:
+                db.execute("INSERT INTO consumptions VALUES (?,?)", (context.execution_id, execution.model_dump_json()))
+                db.execute("INSERT INTO adoptions VALUES (?,?)", (context.execution_id, receipt.model_dump_json()))
+            result.update({"consumed_asset_ids": [assets["author"]], "execution_id": context.execution_id,
+                           "input_context": context.input_context})
+        # A fixture callback records only the ledger's applied shape; no model,
+        # experiment or actual scientific adoption is claimed by these rows.
+        service.ledger.submit(lease, role + "-result", result, apply=lambda owned: owned())
+    return service
+
+
+@pytest.mark.parametrize("corruption", [None, "worker", "token", "task", "source_attempt", "purpose", "unknown",
+    "passed", "plan", "claim", "scope", "approval", "explicit_report", "adoption_context", "adoption_source", "consumption_child"])
+def test_archived_replication_and_adoption_use_existing_immutable_chains(tmp_path, corruption):
+    service = archived_research_chain(tmp_path, corruption)
+    facts = trusted_facts(service.ledger, service.store.root)
+    expected = {"author-result", "replication-result", "inheritance-result"}
+    if corruption in {"adoption_context", "adoption_source", "consumption_child"}:
+        expected.remove("inheritance-result")
+    elif corruption is not None:
+        expected.remove("replication-result")
+    assert {fact.source_id for fact in facts} == expected
+    assert all(fact.provenance == "mock" for fact in facts)
+    if corruption is None:
+        assert [(f.task_id, f.kind) for f in facts] == [("author", "scientific_result"),
+            ("replication", "scientific_result"), ("inheritance", "scientific_adoption")]
+        snapshot = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in tmp_path.rglob("*") if p.is_file()}
+        assert policy_diagnostics(service.config)["feedback"] == policy_diagnostics(service.config)["feedback"]
+        assert snapshot == {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in tmp_path.rglob("*") if p.is_file()}
+        service.field.synchronize(facts + facts)
+        service.field.synchronize(trusted_facts(service.ledger, service.store.root))
+        assert all(service.field.pipe_history(role, "research." + role, prior=0.25).samples == 1
+                   for role in ("author", "replication", "inheritance"))
+
+
+def test_nonempty_rollback_journal_is_refused_without_touching_archive(tmp_path):
+    service = service_at(tmp_path)
+    journal = Path(str(service.ledger.path) + "-journal")
+    journal.write_bytes(b"uncommitted fixture archive")
+    before = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in tmp_path.rglob("*") if p.is_file()}
+    with pytest.raises(ValueError, match="checkpointed_archive"):
+        policy_diagnostics(service.config)
+    assert before == {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in tmp_path.rglob("*") if p.is_file()}
