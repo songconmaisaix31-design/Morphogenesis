@@ -1,0 +1,7 @@
+...................sss.................................................. [ 80%]
+..................                                                       [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integration\r1_security\test_p_loop_boundaries.py:69: unsafe product loop removed; native core loop integration remains NOT_RUN
+SKIPPED [1] tests\integration\r1_security\test_p_loop_boundaries.py:78: unsafe product loop removed; native core loop integration remains NOT_RUN
+SKIPPED [1] tests\integration\r1_security\test_p_loop_boundaries.py:93: unsafe product loop removed; native core loop integration remains NOT_RUN
+87 passed, 3 skipped in 21.74s
