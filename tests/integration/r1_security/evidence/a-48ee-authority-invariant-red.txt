@@ -1,0 +1,12 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+________________ test_caller_cannot_replace_host_authorization ________________
+tests\integration\r1_security\test_a_host_boundaries.py:60: in test_caller_cannot_replace_host_authorization
+    assert s.knowledge.project("p1").authorization_ref == s.config.authorization_ref
+E   AssertionError: assert 'caller-granted-admin' == 'host-authority'
+E     
+E     - host-authority
+E     + caller-granted-admin
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_caller_cannot_replace_host_authorization
+1 failed, 25 deselected in 1.89s

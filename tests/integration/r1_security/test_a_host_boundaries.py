@@ -8,6 +8,7 @@ from swarm.models import RunLimits, Signal
 from swarm.research.models import HostConfig
 from swarm.research.records import ResearchBranch, ResearchEvent, ResearchProject
 from swarm.research.service import ResearchService
+from swarm.research.server import create_server
 from swarm.task_ledger import RunLimitReached, TaskLedger
 
 
@@ -50,8 +51,14 @@ def test_host_project_cannot_be_overridden(tmp_path, operation):
 
 def test_caller_cannot_replace_host_authorization(tmp_path):
     s = service(tmp_path)
-    with pytest.raises((PermissionError, ValueError)):
+    try:
         s.create_project("p1", "g", authorization_ref="caller-granted-admin")
+    except (PermissionError, ValueError):
+        return
+    # Refusal and ignored extra input are both safe. Prove the durable authority
+    # rather than requiring a particular error style from the owner.
+    assert s.knowledge.project("p1").authorization_ref == s.config.authorization_ref
+    assert service(tmp_path).project("p1")["authorization_ref"] == "host-authority"
 
 
 @pytest.mark.parametrize("operation", ["parent", "note", "proposal"])
@@ -177,3 +184,39 @@ def test_note_link_to_private_task_rejected(tmp_path):
                             scope="private", kind="opportunity", required_capability="research"))
     with pytest.raises((PermissionError, ValueError)):
         s.submit_note("p1", "hypothesis", "leak", task_id="private")
+
+
+def test_official_mcp_tool_arguments_cannot_impersonate_host(tmp_path, deny_candidate_execution_and_network):
+    from mcp.server.fastmcp.exceptions import ToolError
+
+    s = seeded(tmp_path)
+    s.ledger.enqueue(Signal(task_id="authorized", workspace=s.config.workspace, scope="science",
+                            kind="opportunity", required_capability="research"))
+    server = create_server(s)
+
+    async def call():
+        tools = await server.list_tools()
+        lease_tool = next(t for t in tools if t.name == "lease_task")
+        assert "worker_id" not in lease_tool.inputSchema.get("properties", {})
+        try:
+            await server.call_tool("lease_task", {"action": "claim", "task_id": "authorized",
+                "worker_id": "impersonated", "scope": "private", "capabilities": ["admin"],
+                "authorization_ref": "caller-granted"})
+        except ToolError:
+            await server.call_tool("lease_task", {"action": "claim", "task_id": "authorized"})
+
+    deny_candidate_execution_and_network.run_until_complete(call())
+    assert s.ledger.get("authorized").owner == s.config.worker_id
+    assert s.config.authorized_scopes == ("science",)
+    assert s.config.capabilities == ("research",)
+    assert s.config.authorization_ref == "host-authority"
+
+
+def test_official_mcp_cross_project_access_refused(tmp_path, deny_candidate_execution_and_network):
+    from mcp.server.fastmcp.exceptions import ToolError
+
+    s = seeded(tmp_path)
+    server = create_server(s)
+    with pytest.raises(ToolError):
+        deny_candidate_execution_and_network.run_until_complete(
+            server.call_tool("research_project", {"action": "read", "project_id": "p2"}))

@@ -84,3 +84,25 @@ containment, and real isolation capability probes need separate evidence.
 All additional raw results are in the same evidence directory. Task-count
 envelope checks establish only persistent TaskLedger limits, not financial,
 model, data-export, or sandbox runtime enforcement.
+
+## Review checkpoints (not final acceptance)
+
+- Official in-process FastMCP tests initially hit Q's network guard while
+  Windows asyncio created a stdlib self-pipe: 2 failures, no tool invocation.
+  Saved in `a-48ee-mcp-negative.txt`. The fixture now creates the trusted stdlib
+  loop before guarding all test/tool calls; network/process denial remains active.
+  The actual A48ee tool run produced 1 pass (host impersonation denied/ignored)
+  and 1 RED (cross-project read), in `a-48ee-mcp-domain.txt`.
+- A WIP diagnostic: 25 pass / 1 RED (authorization_ref), not tied to a final SHA.
+  Q's original exception-only assertion is preserved in `6ceb2e2`. Coordinator
+  `msg_1b36908dd46e` required the actual invariant: reject OR retain host authority.
+  The successor test reopens storage and checks persisted HostConfig authority;
+  old source still fails because it persists the caller's reference.
+- C WIP first interface check failed 12 / passed 1 because the new constructor
+  requires a host-bound reviewer. Q adapted that API without changing safety
+  assertions. A subsequent diagnostic passed 13 / failed 1: an invented review
+  observation with no ledger task/lease/run granted acceptance. Handoff
+  `msg_4c450a93c76a` requests validation of the review's authoritative lineage.
+
+WIP counts are repair diagnostics only. No immutable owner candidate is accepted
+by these checkpoints, and later green results cannot rewrite first RED.

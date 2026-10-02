@@ -21,7 +21,16 @@ def store(root):
     kwargs = {"clock": lambda: 100.0}
     if "assets_root" in inspect.signature(ResearchFeedbackStore).parameters:
         kwargs["assets_root"] = root / "assets"
+    if "reviewer" in inspect.signature(ResearchFeedbackStore).parameters:
+        kwargs["reviewer"] = "nominated-reviewer"  # trusted host fixture identity
     return ResearchFeedbackStore(root / "feedback.db", ledger, **kwargs)
+
+
+def accept(s, value, reviewer="invented-reviewer"):
+    # Successor moves identity to host construction and removes caller reviewer.
+    if "reviewer" in inspect.signature(s.accept).parameters:
+        return s.accept(value, reviewer=reviewer)
+    return s.accept(value)
 
 
 def forged(**updates):
@@ -36,7 +45,7 @@ def forged(**updates):
 def test_forged_result_and_reviewer_never_persist(tmp_path, hypothesis):
     s = store(tmp_path)
     try:
-        decision = s.accept(forged(hypothesis=hypothesis), reviewer="invented-reviewer")
+        decision = accept(s, forged(hypothesis=hypothesis))
     except (ValueError, PermissionError, KeyError):
         pass
     else:
@@ -59,7 +68,7 @@ def test_synchronize_does_not_import_caller_accepted_label(tmp_path):
 def test_unknown_and_crash_do_not_reward(tmp_path, execution):
     s = store(tmp_path)
     try:
-        decision = s.accept(forged(execution=execution), reviewer="reviewer")
+        decision = accept(s, forged(execution=execution))
     except (ValueError, PermissionError, KeyError):
         pass
     else:
@@ -153,9 +162,26 @@ def test_nomination_of_unknown_or_unrelated_known_reviewer_cannot_accept(tmp_pat
     # Knowing/claiming another task does not establish review of this result.
     value = fact.result_id if "result_id" in inspect.signature(s.accept).parameters else fact
     try:
-        decision = s.accept(value, reviewer="nominated-reviewer")
+        decision = accept(s, value, reviewer="nominated-reviewer")
     except (ValueError, PermissionError, KeyError):
         pass
     else:
         assert not decision.accepted, "nominated identity has no result-bound independent review"
+    assert s.contributions() == []
+
+
+def test_review_observation_without_ledger_execution_cannot_authorize(tmp_path):
+    s, fact, locality = trusted_refutation(tmp_path)
+    assets = LocalAssetStore(tmp_path / "assets")
+    with assets.connection() as db:
+        row = db.execute("SELECT body FROM research_reports WHERE report_id=?", ("fixture-report",)).fetchone()
+        original = ResearchObservation.model_validate_json(row[0])
+        # Caller-invented reviewer observation has no task, lease, run, or result.
+        fake = original.model_copy(update={"report_id": "fake-review", "task_id": "missing-review-task",
+            "worker_id": "nominated-reviewer", "run_id": "missing-review-run", "purpose": "reproduction"})
+        db.execute("INSERT INTO research_reports VALUES (?,?,?)",
+                   (fake.report_id, fake.asset_id, fake.model_dump_json()))
+    value = fact.result_id if "result_id" in inspect.signature(s.accept).parameters else fact
+    decision = accept(s, value, reviewer="nominated-reviewer")
+    assert not decision.accepted, "unbound review report granted independent acceptance"
     assert s.contributions() == []
