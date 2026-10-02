@@ -1,6 +1,46 @@
 # 可信反馈与恢复 v0.1（C，1002）
 
-当前状态（R2）：原 C Owner 最小返修 SOURCE `fa0216aa468ea1bd71f009e4089c1872190843e1` 已普通推送，远端 exact，领域定点验证通过。原 `9796d23c1f978b96baec5b8625ced55aa98816ea` / REPORT `8770ac46f7b1d23e9f53ec82dfd1214cb34a77c5` 保留；旧 CORE `9ceb3aaef16a7f65a8a457d525e01202150ac1ab` / PRODUCT `35934f1e3afcbb6a2028a14fe998611c4cbd509b` 候选由此次修复候选替代，旧正式 reader 的实际 RED 不改绿。主控交接确认 I 已推送累积冻结 CORE `54bb8d0897eb22c5e8a52ea158606388fe64064a`；产品 pin 待 A 同 Owner 新 Task 更新、独立完整门待 I，本轨不签五项总门或新 task_live。下文“初代交付记录”保持原结果。
+当前状态（R3）：续租等待的窄修 SOURCE `5e24715c7002d254dd908aea53ce82e86c12ebf3` 已普通 commit/push，远端 exact、SOURCE 工作树 clean。本轨 13 项安装候选定点及 Windows/Linux 平台选项 strict 通过；这是 `contract_local` 领域证据。原 CORE `54bb8d0897eb22c5e8a52ea158606388fe64064a` 的完整 Windows CI RED，结论仍为 **NOT_FROZEN**。新累计版本的完整双平台、正式产品新安装和五项总门由独立 I 接续；本轨不签冻结或新 `task_live`。
+
+主控最新交接通知：I 已普通推送含本 SOURCE 的累计候选 CORE `7062a632b8c625c05b35bdec4c36fce63a31c2a4`，原产品 Owner 的新 pin Task 等待 C 结算；该版本完整 CI 与后续正式新安装仍由 I 验收，本轨不等待或代签。首 docs-only REPORT `08ad3818a695a023d74e9acbfba5b98d2d8e2673` 保留；`[skip ci]` follow-up 在该次提交调用中才返回，未应用于已推提交，未重写历史。此次最终 docs-only 补记使用 `[skip ci]`，SOURCE 不变。
+
+## R3：阻塞续租的额外等待边界
+
+Task `task_b6e5ed06f580` / Dispatch `ctx_7f1fa34c2cd0`，原 C Owner、原 agents worktree 与分支 `songconmaisaix31-design/morph-policy-feedback-v01-1002`。基线为原 SOURCE `fa0216aa468ea1bd71f009e4089c1872190843e1` / docs-only REPORT `a98219a22bdaa9c7dc069b0ee0c6a90035aa87f6`。主控确认现有路径是 `swarm/lease.py`，并明确授权本次只修已证明的 `_Renewal._run` 等待问题；实际领域改动只有 `swarm/worker_loop.py` 与新 `tests/swarm/test_worker_renewal_v01.py`。本报告分开 docs-only 提交，REPORT 完整 SHA 以交接及远端 head 为准。
+
+原 CI `36957851632` 事实保持：Windows 1210 PASS / 1 FAIL / 5 SKIP / 75 warnings / 1248.44s，失败为原 `test_real_wall_clock_renewal_outlives_initial_ttl`，`lease_handoff` 的 `AssetSafetyError/stale_lease`。原 TTL=2 秒、8 次成功续租、`renewal_failed=true`、`renewal_rejected`、`max_renew_seconds=2.3321284s`、最大 schedule gap=0.6804508s；owner/token/expiry 一致，`effect_applied=false`、反馈未 started，FC projection failure_count=0。Linux 原 whole 1210 PASS / 6 SKIP / 403.03s，strict 121 files、build/SDK/wheel PASS；Windows 后续门是 SKIPPED。产品 e806f667 的原独立安装 53 PASS 与本机 1211 PASS / 5 SKIP 不能抵消 Windows first RED。
+
+只读原证据路径为 `C:/Users/DW/AppData/Local/Temp/morph-policy-I-r2-1002-f37be5feadfb/logs/22-ci-windows-run-log.txt` 与同目录 `23-r2-ci-result.json`，未修改。`max_renew_seconds` 在取得 `_Renewal.lock` **之后**开始，覆盖 `LeaseManager.renew → TaskLedger.renew → transaction → connection` 的连接设置、`BEGIN IMMEDIATE`、原 `_owned`、expiry UPDATE、audit、commit、close。原值不能证明等待 Python Lock，亦不能区分事务获取、提交/关闭 IO 或该调用中的 OS 停顿。原最后失败发生在 handoff 等待续租线程停止期间；该失败的精确阻塞组件仍未知，不定性为 flake、SQLite 故障或已修复。
+
+可重复查证的独立缺陷：账本在事务内部设定 `expires_at=now+TTL`，提交与关闭完成后才把 Lease 返回调用者。原循环此时再等完整 TTL/3，未扣除已消耗的续租时间。新定点使用真实 SQLite 事务、固定 100.0 起点及原 owner/token/expiry 权威，仅在事务完成返回前推进受控时间：TTL=2、完成耗时 1.5 时，Lease 返回时仍有效，原额外 2/3 秒等待使下一轮原 `_owned` 拒绝。基线安装候选的该正例实际 FAIL；耗时 2.5 的负例 PASS，拒绝 expired handoff/submit 且无 effect。此 fixture 隔离验证该边界，**不能证明它重现了原 CI 唯一原因**，也不代表真实 OS IO 性能测量。
+
+窄修保持原首次等待与上下界：每次 Event.wait 后、获取 lock 前记录 monotonic 起点，完成同一次 renewal 后用 `max(0.001, interval-elapsed)` 计算下一次等待。只有这段可避免的额外睡眠被消除；续租阻塞超过 TTL、已失效或被 fencing 的 holder 仍按原账本拒绝，不增加 retry、延长 TTL、复活租约、吞 IO 错误或丢弃 fsync。停止、handoff 单次续租与短 submit 流程不变。新增 IO-error 行为验证失败保持可见、handoff 不再调用 renew，任意异常文本不进入证据。
+
+`tests/swarm/test_worker_runtime.py` 所有行，包括 TTL2、sleep2.5、完成/续租/expiry 断言均原样；`swarm/task_ledger.py`、`swarm/lease.py`、原 expiry/capability/token/scope/budget 守卫、lockwait/SDK timeout、workflow/CI/poetry.lock 均未改。Router、评分、科学判断、反馈事实 reader、Product 只读。本次没有科研模型、实验执行或重放；旧 canonical 档案、auth/HOME/provider/model/key 未写，未知费用保持 null。
+
+## R3 私有环境与验证
+
+新独占证据根 `C:/Users/DW/AppData/Local/Temp/pfc-7f1fa34c`（下称 R），fresh CPython 3.13 copy venv、当前 Poetry lock 导出依赖、非 editable wheel 安装，Node 用原 package-lock 在私有 site-packages 重新 npm ci。未复用旧 venv、node_modules 或 test artifacts。BLAS/OMP/MKL 只在测试进程设置 1，所有状态、basetemp、mypy cache、XML 位于 R。先从基线 git archive 构建安装，再叠加唯一源码变更构建候选；13 PASS 使用该私有 wheel 的源码，未从工作树导入包。
+
+| R/logs 原始证据 | 实际结果 |
+| --- | --- |
+| 01-bootstrap / 02-export / 03-deps | 新 private venv 工具安装、冻结锁 export 与依赖安装 exit0 |
+| 04-baseline-build / 05-baseline-install | 基线非 editable wheel build/install exit0 |
+| 06-boundary-first-red.log/xml/exit | 原代码新故障正例 1 FAIL、过 TTL 负例 1 PASS / 21.68s / exit1，首 RED 保留 |
+| 07-candidate-build / 08-candidate-install / 09-npm | 新候选 wheel build/install、私有 npm ci exit0 |
+| 10-focused.log/xml/exit | 13 PASS / 46.92s / exit0；新增 3 个行为、原 10 项安全/恢复回归 |
+| 11-win-strict / 12-linux-strict | 串行 `--strict --platform win32` / `linux`，worker_loop.py 与 lease.py 各 2 files PASS / exit0；Linux 是平台选项类型检查，不是本轨实际 Linux 测试 |
+| 13-exact-vcs-install / 14-exact-origin.json | 推送后 exact GitHub SOURCE 的非 editable VCS COPY 安装 exit0；direct_url.commit_id 精确、origin 位于新 private venv，tested wheel 的 worker_loop 源码与 exact commit/安装源码一致；这是来源核验，不另称完整工程通过 |
+
+13 项原断言保持：原真实墙钟续租、受控账本续租、慢 submitting status、handoff 后过期 submit 拒绝、过期/继任 holder 的 handoff 拒绝、submit 后 crash 从 authority 恢复 final expiry、feedback_incomplete 禁止再次强化、completed-before-approval restart 不重新执行、expired scope 禁止 promotion、expired owner/successor 的 stale submit/release 拒绝，以及新 1.5/2.5 秒边界与 IO-error 不重试。
+
+验证命令从 R/neutral 使用 `R/venv/Scripts/python.exe -I -m pytest -q -p no:cacheprovider --basetemp R/t1 --junitxml R/logs/10-focused.xml`，绝对路径选新 `test_worker_renewal_v01.py`、上述原 Worker 的 9 个具名用例，以及 `test_lease.py::test_expired_owner_successor_commit_then_stale_submit_release_rejected`。strict 用同一私有 Python `-I -m mypy --strict --platform win32|linux --config-file <原 pyproject.toml> --cache-dir <R 的独占目录> <原 worker_loop.py> <原 lease.py>`，串行执行。`git diff --check` 与 SOURCE cached diffcheck exit0；对基线核验原 runtime 测试、task_ledger、lease facade、poetry.lock 与 workflows 的 `git diff --exit-code` 为 exit0。
+
+SOURCE 已早发主控转 I，原 full CI 和本轮 06 first RED 保留。本轨通过只证明有界等待及安全边界，无法保证 OS/存储/锁阻塞越过 TTL 时任务能完成；那种情况必须拒绝过期 holder。独立新累计完整 Windows/Linux、产品 exact pin 与新安装由 I/原产品 Owner 处理；未运行整套 CI 碰运气、未改 main/tag/生产 pin、未发布，也未新增科学运行或费用事实。
+
+## 历史 R2 交接记录
+
+历史状态（R2，以顶部 R3 为准）：原 C Owner 最小返修 SOURCE `fa0216aa468ea1bd71f009e4089c1872190843e1` 已普通推送，远端 exact，领域定点验证通过。原 `9796d23c1f978b96baec5b8625ced55aa98816ea` / REPORT `8770ac46f7b1d23e9f53ec82dfd1214cb34a77c5` 保留；旧 CORE `9ceb3aaef16a7f65a8a457d525e01202150ac1ab` / PRODUCT `35934f1e3afcbb6a2028a14fe998611c4cbd509b` 候选由此次修复候选替代，旧正式 reader 的实际 RED 不改绿。主控交接确认 I 已推送累计候选 CORE `54bb8d0897eb22c5e8a52ea158606388fe64064a`（后续完整 Windows CI RED，未冻结）；产品 pin 待 A 同 Owner 新 Task 更新、独立完整门待 I，本轨不签五项总门或新 task_live。下文“初代交付记录”保持原结果。
 
 ## R2：原 immutable 报告链最小恢复
 
