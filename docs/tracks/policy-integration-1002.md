@@ -1,6 +1,6 @@
 # 策略 v0.1 独立累计集成与验收（I，1002）
 
-当前状态：**R3 新组合独立验收进行中，策略 v0.1 尚未冻结**。原Owner续租节奏最小修复已精确累计为 SOURCE `7062a632b8c625c05b35bdec4c36fce63a31c2a4` 并正常推送、remote exact；新原完整Windows/Linux workflow及新私有环境完整核心pytest正在运行，A3最终产品重pin待交。R2核心54bb/产品e806保持Windows原墙钟续租工程RED、NOT_FROZEN，R1核心9ceb/产品359保持真实反馈RED及本地首全量1192 PASS / 2 FAIL / 5 SKIP，不被新结果重标。新增科研、收费模型与main发布NOT_RUN。
+当前状态：**R3 新组合独立验收进行中，策略 v0.1 尚未冻结**。累计核心 SOURCE `7062a632b8c625c05b35bdec4c36fce63a31c2a4` / 产品 SOURCE `c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc` 正常推送、remote exact；I独立新安装/53产品测试/正式MCP-CLI/两历史完整只读checker及audit/三原live反馈和两派生库重建均PASS，新完整核心本地pytest与Windows原workflow仍待结算。R2核心54bb/产品e806保持原Windows续租工程RED、NOT_FROZEN，R1核心9ceb/产品359保持真实反馈RED及本地首全量1192 PASS / 2 FAIL / 5 SKIP，不被新结果重标。新增科研、收费模型与main发布NOT_RUN。
 
 ## 范围与不可变输入
 
@@ -125,3 +125,17 @@ Windows唯一失败为原 `tests/swarm/test_worker_runtime.py::test_real_wall_cl
 I两次仅文档阶段push意外自动触发 `36959528356`（6709报告）和 `36959685712`（b2dee阻塞报告）；root只取消这两次冗余运行，官方runlist实测均CANCELLED，不算业务修复或首RED替代。原54bb失败run未更改。后续报告commit用 `[skip ci]`，保持原workflow内容不变；新的业务7062正常push触发原完整run **`36960486155`**，精确head7062，Windows job110692862238 / Linux job110692862438进行中。
 
 R3私有根 `C:/Users/DW/AppData/Local/Temp/morph-policy-I-r3-1002-29cba60db480`：全新LF Git archive、全新CPython3.13.13私有venv、原poetry.lock重新export/hash-sync COPY、全新原npm锁依赖、完整sdist/wheel build与实际noneditable COPY wheel安装；不复用R1/R2/Owner环境或产物。`logs/01-core-export.txt` / 02依赖 / 03npm / 04build / 05typecheck（121源码strict）/ 06SDK / 07真实wheel安装 / 08安装Node依赖 / 09隔离distribution（13包/verifier/Node）均exit0。按原source workflow在新archive cwd的完整pytest为 `11-core-workflow-full-pytest.txt`，正在运行，不预写PASS；不再重复已知非wheel部署运维模块的额外neutral -I全core收集。
+
+## R3 最终产品与原档案独立验收
+
+A3最终产品 SOURCE **`c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc`** 精确pin核心7062；init/pyproject/三处uv.lock引用/README一致。独立 docs-only REPORT **`3b17cc0a7120f1d2381871b336293ee301b857de`** 已normalpush、I ls-remote exact / c2..3b仅自身policy-entry报告diff-check PASS；root已接受新A3完成（不是用旧A1/A2完成满足依赖）。I只从c2固定Git对象新LF archive/uv export --frozen、原哈希依赖COPY及core7062真实GitVCS --no-cache/LF/COPY安装、自建产品wheel/noneditable COPY安装，不用A的环境/输出。`product-installation/logs/08-verification-command.txt`：17产品+181核心文件Git/archive/自建wheel/实装site全字节一致、nlink1、core direct_url真实Git7062，原08/10清单及case_checkers绑定7062/原两个blob，exit0。
+
+正式 version、两个案例setup-assets/doctor均exit0 / models_experiments_hub_called=false。neutral cwd、实装Python `-I -B` 的原完整产品53项：**53 passed / 72.02s / exit0**，`product-installation/logs/15-installed-full-product.txt` / 原JUnit XML / `16-policy-junit-traces.json`。原实装11 MCP工具/manual client的两合法候选、推荐author而实际claim policy-other、routing_sequence7、overridden=true、当前token续租/旧token及非法scope/依赖/能力拒绝均PASS；策略仍advisory_only/claim_requires_recheck/budget not evaluated by router，预算准入由原执行边界负责。不是native Agent新自主选择，亦不主张未测量性能改善。
+
+原formal policy CLI mock已验证科学lineage：policy-higher概率 `0.5197814644677805` → `0.5207710255956669`；unknown后只保留offline-result-mock-known这一事实/样本，`0.5207745158298932`为正常墙钟衰减变化，不声称精确零变化；新派生库 `0.5207726399637972` 在原绝对容差内一致。原53测试全部原断言/fixture不改，source bytes/mtime不变。
+
+新安装Python通过同一I自有最小只读recipe重做两份原完整checker全部断言，`logs/30-readonly-full-checker-{nist,synthetic}.json` exit0：旧subject corebf67、新generator7062、historical_readonly_reverification/new_task_live=not_run；仅获准绑定既有ArchivedLedger/ReadOnlyAssets构造入口，无mock返回/剪断言/科研调用，各canonical state+workspace115文件bytes/mtime前后一致。
+
+独立 `review_historical_r3.py` / `logs/45-historical-review-command.txt` exit0；两案例正式CLI默认/重复feedback均含原author/replication/inheritance三result_id、live provenance、两个scientific_result/一个scientific_adoption、唯一真实采用=1；旧completed档案无候选，不用它宣称新两候选排序。各两次formal `--rebuild-to` 写I新私有绝对路径，三个learning_facts/三个learned_history样本各1、两新库投影逐值相同；重复facts同步与未完成trusted_pair拒绝后派生表逐值不变。原authority/state/workspace115文件bytes/mtime无变，不学习原库，不重放模型/实验。细节在 `44-historical-review-{nist,synthetic}.json` 和40/41/42原CLI命令输出。
+
+原audit两案例 `43-audit-{nist,synthetic}` exit0：subject corebf67/productdfbc/REPORTe9，generated_by core7062/productc2c2，两个binding均verified；原effective renewals、三原实验与唯一AdoptionReceipt/ConsumptionExecution/ledger result绑定保留，原usage/cost unknown/null不改。仍使用原旧integration-0930的core-repository argv绑定，不将新生成器换成旧科学subject。所有这些是新版本contract_local行为与historical readonly复核，新科研task_live仍NOT_RUN。
