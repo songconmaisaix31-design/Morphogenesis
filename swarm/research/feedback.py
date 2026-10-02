@@ -2,10 +2,15 @@
 
 The projection derives execution/hypothesis/contribution axes from the same
 immutable ledger and asset facts that ``trusted_facts`` validates. A valid
-refutation (succeeded execution + refuted hypothesis + known effect) is a
-positive contribution; a crash, timeout, auth error or unknown effect produces
-no scientific entry. Read failures are never swallowed, and a rebuild re-reads
-the same source facts without re-running any science.
+refutation (a trusted ``counterexample``: succeeded execution + failed verdict +
+known effect, bound to the original claim/conditions) is a positive
+contribution; a crash, timeout, auth error or unknown effect produces no
+scientific entry. Read failures are never swallowed.
+
+The durable acceptance entry (``ResearchFeedbackStore.accept``) re-derives every
+result from trusted persistent facts and never trusts a caller-supplied result.
+Contributions and corrections are append-only; supersession is recorded as an
+appended event and never deletes the original record.
 """
 from __future__ import annotations
 
@@ -34,6 +39,7 @@ from swarm.research.policy import (
     ContributionDecision,
     CorrectionEvent,
     ResearchPolicy,
+    SupersessionEvent,
     ThreeAxisResult,
 )
 from swarm.task_ledger import TaskLedger, connection, enable_wal
@@ -49,14 +55,21 @@ def _claim_sources(report: ResearchObservation) -> str:
     return ";".join(claim.sources)
 
 
+def _observation(assets: sqlite3.Connection, fact: FeedbackFact) -> ResearchObservation | None:
+    if fact.kind == "validated_completion":
+        return None
+    report_id = fact.scientific_report_id or fact.report_id
+    row = assets.execute("SELECT body FROM research_reports WHERE report_id=?", (report_id,)).fetchone()
+    return ResearchObservation.model_validate_json(row[0]) if row is not None else None
+
+
 def _source_ref(assets: sqlite3.Connection, fact: FeedbackFact) -> str:
     if fact.kind == "validated_completion":
         return "receipt:" + fact.report_id
-    report_id = fact.scientific_report_id or fact.report_id
-    row = assets.execute("SELECT body FROM research_reports WHERE report_id=?", (report_id,)).fetchone()
-    if row is None:
-        return "report:" + report_id
-    return _claim_sources(ResearchObservation.model_validate_json(row[0]))
+    observation = _observation(assets, fact)
+    if observation is None:
+        return "report:" + (fact.scientific_report_id or fact.report_id)
+    return _claim_sources(observation)
 
 
 def _trusted_refutation(db: sqlite3.Connection, task: TaskRecord, report: ResearchObservation,
@@ -65,6 +78,7 @@ def _trusted_refutation(db: sqlite3.Connection, task: TaskRecord, report: Resear
     claim = candidate.research
     evaluated = _OBJECT.validate_json(report.result_json)
     if (claim is None or candidate.scope != task.signal.scope or report.created_at > at
+            or report.purpose != "counterexample"
             or report.scientific_verdict != "failed" or report.execution_state != "succeeded"
             or not known_effect(report)
             or result.get("scientific_verdict") != report.scientific_verdict
@@ -89,11 +103,6 @@ def _trusted_refutation(db: sqlite3.Connection, task: TaskRecord, report: Resear
     if report.source_attempt is not None and (report.source_attempt.task_id != task.signal.task_id
                                               or report.source_attempt.attempt != count):
         return False
-    if report.purpose == "original" and (candidate.attempt.task_id != task.signal.task_id
-                                         or candidate.attempt.attempt != count
-                                         or report.source_attempt is not None
-                                         and candidate.attempt != report.source_attempt):
-        return False
     events = [_OBJECT.validate_json(r[0]) for r in db.execute(
         "SELECT body FROM task_audit WHERE swarm_id=? AND task_id=? AND event='research_execution'",
         (task.swarm_id, task.signal.task_id))]
@@ -110,7 +119,7 @@ def _trusted_refutation(db: sqlite3.Connection, task: TaskRecord, report: Resear
 
 
 def trusted_refutations(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxisResult]:
-    """Approved-fact refutations only; a crash or unknown effect is never one."""
+    """Approved-fact counterexamples only; a legacy failure or unknown effect is never one."""
     database = assets_root / "assets.sqlite3"
     if not database.exists():
         return []
@@ -132,7 +141,8 @@ def trusted_refutations(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxis
             observations = [ResearchObservation.model_validate_json(r[0]) for r in assets.execute(
                 "SELECT body FROM research_reports WHERE asset_id=?", (asset_id,))]
             for scientific in observations:
-                if (scientific.scientific_verdict != "failed" or scientific.execution_state != "succeeded"
+                if (scientific.purpose != "counterexample" or scientific.scientific_verdict != "failed"
+                        or scientific.execution_state != "succeeded"
                         or (scientific.task_id, scientific.worker_id, scientific.fencing_token, scientific.run_id) !=
                         (task.signal.task_id, task.owner, task.token, result.get("run_id"))):
                     continue
@@ -144,7 +154,8 @@ def trusted_refutations(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxis
                 results.append(ThreeAxisResult(
                     result_id=task.result_id, report_id=scientific.report_id, task_id=task.signal.task_id,
                     actor=task.owner, source_ref=_claim_sources(scientific), provenance=scientific.provenance,
-                    execution="succeeded", hypothesis="refuted", contribution="proposed", at=at))
+                    execution="succeeded", hypothesis="refuted", contribution="proposed", at=at,
+                    asset_id=scientific.asset_id))
     return results
 
 
@@ -162,10 +173,12 @@ def research_feedback(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxisRe
         for fact in facts:
             hypothesis: Literal["supported", "not_evaluated"] = (
                 "supported" if fact.kind in ("scientific_result", "scientific_adoption") else "not_evaluated")
+            observation = _observation(assets, fact)
             results.append(ThreeAxisResult(
                 result_id=fact.source_id, report_id=fact.report_id, task_id=fact.task_id, actor=fact.worker_id,
                 source_ref=_source_ref(assets, fact), provenance=fact.provenance, execution="succeeded",
-                hypothesis=hypothesis, contribution="proposed", at=fact.at))
+                hypothesis=hypothesis, contribution="proposed", at=fact.at,
+                asset_id=observation.asset_id if observation is not None else None))
     results.extend(trusted_refutations(ledger, assets_root))
     return sorted(results, key=lambda result: (result.at, result.result_id, result.hypothesis))
 
@@ -173,14 +186,20 @@ def research_feedback(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxisRe
 class ResearchFeedbackStore:
     """Append-only, idempotent persistence of accepted contributions and corrections.
 
-    Contributions are deduplicated by completed result and source reference;
-    correction events are appended and never rewritten. The store only persists
-    facts already decided by the policy; it never re-runs science or an executor.
+    ``accept`` is the only durable acceptance entry and re-derives the target
+    result from the trusted ledger/asset facts bound to this store's swarm; a
+    forged result id, a replay provenance, a self-approval or a result from
+    another project/scope is rejected without persistence. Supersession is an
+    appended event; it never deletes the original contribution record. A fresh
+    rebuild writes to a new destination store and never mutates the source.
     """
 
-    def __init__(self, path: str | Path, ledger: TaskLedger, *, clock: Callable[[], float] = time.time) -> None:
+    def __init__(self, path: str | Path, ledger: TaskLedger, assets_root: Path, *,
+                 reviewer: str, clock: Callable[[], float] = time.time) -> None:
         self.path = Path(path).resolve()
         self.ledger = ledger
+        self.assets_root = Path(assets_root).resolve()
+        self.reviewer = reviewer
         self.clock = clock
         self.policy = ResearchPolicy()
         enable_wal(self.path)
@@ -189,6 +208,12 @@ class ResearchFeedbackStore:
                        "PRIMARY KEY(swarm_id, result_id))")
             db.execute("CREATE TABLE IF NOT EXISTS corrections (event_id TEXT PRIMARY KEY, swarm_id TEXT, "
                        "branch_id TEXT, kind TEXT, body TEXT)")
+            db.execute("CREATE TABLE IF NOT EXISTS supersessions (event_id TEXT PRIMARY KEY, swarm_id TEXT, "
+                       "result_id TEXT, body TEXT)")
+
+    def trusted(self) -> list[ThreeAxisResult]:
+        """Derived three-axis facts; never caller-supplied assertions."""
+        return research_feedback(self.ledger, self.assets_root)
 
     def _seen_keys(self, db: sqlite3.Connection) -> set[str]:
         keys: set[str] = set()
@@ -196,25 +221,53 @@ class ResearchFeedbackStore:
             keys.update(ResearchPolicy.dedup_keys(ThreeAxisResult.model_validate_json(row[0])))
         return keys
 
-    def accept(self, result: ThreeAxisResult, *, reviewer: str) -> ContributionDecision:
+    def _reviewed(self, fact: ThreeAxisResult) -> bool:
+        """The host's own bound reviewer identity must have actually recorded an
+        independent review (reproduction/counterexample) of this candidate. An
+        actor that merely claimed some other task never satisfies this."""
+        if fact.asset_id is None:
+            return False
+        database = self.assets_root / "assets.sqlite3"
+        if not database.exists():
+            return False
+        read = readonly if isinstance(self.ledger, ReadonlyLedger) else connection
+        no_links(database)
+        with read(database) as assets:
+            rows = assets.execute("SELECT body FROM research_reports WHERE asset_id=?", (fact.asset_id,)).fetchall()
+        for row in rows:
+            observation = ResearchObservation.model_validate_json(row[0])
+            if (observation.worker_id == self.reviewer
+                    and observation.purpose in ("reproduction", "counterexample")
+                    and observation.provenance != "replay"):
+                return True
+        return False
+
+    def accept(self, result_id: str) -> ContributionDecision:
+        """Independently accept one trusted result under the host's bound reviewer.
+
+        The result is re-derived from this store's trusted ledger/asset facts and
+        the reviewer is the host's own identity (fixed at construction, never a
+        caller string). A caller-supplied result id, replay provenance, a reviewer
+        that is the author, a reviewer with no actual review of this candidate, or
+        a result from another project/scope is rejected without persistence.
+        """
+        facts = self.trusted()
+        matches = [fact for fact in facts if fact.result_id == result_id]
+        if not matches:
+            return ContributionDecision(accepted=False, state="rejected", reasons=("untrusted_result",))
+        fact = matches[0]
+        if fact.provenance == "replay":
+            return ContributionDecision(accepted=False, state="rejected", reasons=("replay_not_acceptable",))
+        if not self._reviewed(fact):
+            return ContributionDecision(accepted=False, state="rejected", reasons=("reviewer_not_admitted",))
         with connection(self.path, write=True) as db:
-            decision = self.policy.accept(result, reviewer=reviewer, seen=self._seen_keys(db))
+            decision = self.policy.accept(fact, reviewer=self.reviewer, seen=self._seen_keys(db))
             if decision.accepted:
                 db.execute("INSERT OR IGNORE INTO contributions VALUES (?,?,?)",
-                           (self.ledger.swarm_id, result.result_id,
-                            result.model_copy(update={"contribution": "accepted"}).model_dump_json()))
+                           (self.ledger.swarm_id, fact.result_id,
+                            fact.model_copy(update={"contribution": "accepted", "reviewer": self.reviewer})
+                            .model_dump_json()))
         return decision
-
-    def synchronize(self, results: list[ThreeAxisResult], *, replace: bool = False) -> None:
-        """Idempotent import of already-accepted contributions; never double-counts."""
-        with connection(self.path, write=True) as db:
-            if replace:
-                db.execute("DELETE FROM contributions WHERE swarm_id=?", (self.ledger.swarm_id,))
-            for result in results:
-                if result.contribution != "accepted":
-                    continue
-                db.execute("INSERT OR IGNORE INTO contributions VALUES (?,?,?)",
-                           (self.ledger.swarm_id, result.result_id, result.model_dump_json()))
 
     def contributions(self) -> list[ThreeAxisResult]:
         with connection(self.path) as db:
@@ -241,13 +294,36 @@ class ResearchFeedbackStore:
                                   (self.ledger.swarm_id, branch_id)).fetchall()
         return [CorrectionEvent.model_validate_json(row[0]) for row in rows]
 
+    def record_supersession(self, event: SupersessionEvent) -> None:
+        with connection(self.path, write=True) as db:
+            existing = db.execute("SELECT 1 FROM supersessions WHERE event_id=?", (event.event_id,)).fetchone()
+            if existing is not None:
+                raise ValueError("supersession_event_already_recorded")
+            db.execute("INSERT INTO supersessions VALUES (?,?,?,?)",
+                       (event.event_id, self.ledger.swarm_id, event.result_id, event.model_dump_json()))
+
+    def supersessions(self) -> list[SupersessionEvent]:
+        with connection(self.path) as db:
+            rows = db.execute("SELECT body FROM supersessions WHERE swarm_id=? ORDER BY rowid",
+                              (self.ledger.swarm_id,)).fetchall()
+        return [SupersessionEvent.model_validate_json(row[0]) for row in rows]
+
+    def effective_contributions(self) -> list[ThreeAxisResult]:
+        """Derived view: superseded contributions are marked, never deleted."""
+        superseded = {event.result_id for event in self.supersessions()}
+        return [contribution.model_copy(update={"contribution": "superseded"})
+                if contribution.result_id in superseded else contribution
+                for contribution in self.contributions()]
+
     def snapshot(self) -> dict[str, JsonValue]:
         contributions = self.contributions()
+        effective = self.effective_contributions()
         corrections = self.corrections()
+        supersessions = self.supersessions()
 
         def axis_counts(axis: str) -> dict[str, int]:
             counts: dict[str, int] = {}
-            for result in contributions:
+            for result in effective:
                 value = getattr(result, axis)
                 counts[value] = counts.get(value, 0) + 1
             return counts
@@ -262,5 +338,7 @@ class ResearchFeedbackStore:
                 "contribution": _JSON.validate_python(axis_counts("contribution")),
             },
             "contributions": [_JSON.validate_python(c.model_dump(mode="json")) for c in contributions],
+            "effective_contributions": [_JSON.validate_python(c.model_dump(mode="json")) for c in effective],
             "corrections": [_JSON.validate_python(c.model_dump(mode="json")) for c in corrections],
+            "supersessions": [_JSON.validate_python(c.model_dump(mode="json")) for c in supersessions],
         }

@@ -4,6 +4,8 @@ These tests exercise the pure policy engine and the approved-fact projection
 without invoking the Node GEP bridge or any executor. The projection is built
 exclusively from immutable ledger/asset facts, so a valid refutation earns a
 contribution while a crash, timeout, auth error or unknown effect earns none.
+The durable store acceptance re-derives results from trusted facts and rejects
+forged, replayed, self-approved or cross-project results.
 """
 import json
 import sqlite3
@@ -17,10 +19,10 @@ from swarm.research.models import HostConfig
 from swarm.research.service import ResearchService
 from swarm.research.policy import (
     Branch,
-    ContributionDecision,
     CorrectionEvent,
     ResearchPolicy,
     RouteOpportunityPlan,
+    SupersessionEvent,
     ThreeAxisResult,
 )
 from swarm.research.feedback import ResearchFeedbackStore, research_feedback
@@ -29,19 +31,22 @@ from swarm.router import Router
 
 def make_result(result_id="r1", source_ref="https://example.invalid/paper", *,
                 actor="author-0", execution="succeeded", hypothesis="refuted",
-                contribution="proposed", at=1.0, report_id=None, task_id="t1") -> ThreeAxisResult:
+                contribution="proposed", at=1.0, report_id=None, task_id="t1",
+                provenance="mock") -> ThreeAxisResult:
     return ThreeAxisResult(
         result_id=result_id, report_id=report_id or (result_id + "-report"), task_id=task_id,
-        actor=actor, source_ref=source_ref, provenance="mock", execution=execution,
+        actor=actor, source_ref=source_ref, provenance=provenance, execution=execution,
         hypothesis=hypothesis, contribution=contribution, at=at,
     )
 
 
 def make_branch(branch_id="b1", status="proposed", *, authorized=True, supported=(),
-                refuted=(), conditions=None) -> Branch:
+                refuted=(), conditions=None, applicability=1.0, goal_relevance=1.0,
+                risk=0.0, known_cost=None) -> Branch:
     return Branch(branch_id=branch_id, status=status, authorized=authorized,
                   supported_by=supported, refuted_by=refuted,
-                  conditions=conditions or {"seed": "0"})
+                  conditions=conditions or {"seed": "0"}, applicability=applicability,
+                  goal_relevance=goal_relevance, risk=risk, known_cost=known_cost)
 
 
 # ---------------------------------------------------------------------------
@@ -78,13 +83,10 @@ def test_duplicate_result_and_duplicate_source_are_not_counted_again():
     seen: set[str] = set()
     first = make_result(result_id="r1", source_ref="https://example.invalid/paper")
     assert policy.accept(first, reviewer="reviewer-1", seen=seen).accepted is True
-    # Same completed result, a different reviewer: not a second contribution.
     duplicate_result = make_result(result_id="r1", source_ref="https://example.invalid/paper")
     assert policy.accept(duplicate_result, reviewer="reviewer-2", seen=seen).reasons == ("duplicate_contribution",)
-    # Different result, same source paper/origin: not an independent source.
     same_paper = make_result(result_id="r2", source_ref="https://example.invalid/paper")
     assert policy.accept(same_paper, reviewer="reviewer-3", seen=seen).reasons == ("duplicate_contribution",)
-    # A genuinely distinct source is accepted regardless of agent brand.
     other_paper = make_result(result_id="r3", source_ref="https://example.invalid/other-paper", actor="other-brand-0")
     assert policy.accept(other_paper, reviewer="reviewer-1", seen=seen).accepted is True
 
@@ -121,6 +123,23 @@ def test_exploration_floor_is_bounded_and_configurable():
         assert sum(shares) == pytest.approx(1.0, abs=1e-9)
         floor = fraction / 2
         assert all(share >= floor - 1e-9 for share in shares)
+
+
+def test_opportunity_carries_spec_factors_and_unknown_cost_reason():
+    policy = ResearchPolicy(exploration_fraction=0.20)
+    plan = policy.opportunities([make_branch("a", "proposed", applicability=0.8,
+                                             goal_relevance=0.9, risk=0.1, known_cost=None)])
+    op = plan.opportunities[0]
+    assert op.eligible is True
+    assert op.factors["applicability"] == 0.8
+    assert op.factors["goal_relevance"] == 0.9
+    assert op.factors["risk"] == 0.1
+    assert "insufficient_evidence" in op.reasons
+    assert "unknown_cost" in op.reasons and op.known_cost is None
+    # A known cost is reported and no longer flags unknown_cost.
+    plan2 = policy.opportunities([make_branch("a", "proposed", known_cost=1.5)])
+    assert plan2.opportunities[0].known_cost == 1.5
+    assert "unknown_cost" not in plan2.opportunities[0].reasons
 
 
 def test_trusted_refutation_lowers_future_opportunity_for_the_same_conditions():
@@ -194,8 +213,8 @@ def test_snapshot_reports_three_axes_and_advisory_only():
 # Approved-fact projection (no Node bridge, no executor)
 # ---------------------------------------------------------------------------
 
-def service_at(root, capability="research.author"):
-    config = HostConfig(ledger_path=str(root / "ledger.sqlite3"), swarm_id="research-v1-fixture",
+def service_at(root, capability="research.author", swarm_id="research-v1-fixture"):
+    config = HostConfig(ledger_path=str(root / "ledger.sqlite3"), swarm_id=swarm_id,
                         workspace=str(root / "project"), worker_id="worker",
                         agent=AgentId(role="builder", instance=0), authorized_scopes=("science",),
                         capabilities=(capability,), assets_root=str(root / "assets"),
@@ -214,7 +233,7 @@ def insert_asset(store, asset_id, candidate):
 
 
 def submit_scientific(service, task_id, *, verdict="passed", execution="succeeded",
-                      effect="known", purpose="original"):
+                      effect="known", purpose="original", provenance="mock"):
     from contracts.identity import AttemptId
     from local_assets.models import Candidate, FileChange
     from local_assets.research_models import ResearchClaim, ResearchObservation
@@ -234,7 +253,8 @@ def submit_scientific(service, task_id, *, verdict="passed", execution="succeede
     lease = service.ledger.claim(task_id, "worker", locality=service.locality)
     assert lease is not None
     run_id = task_id + "-run"
-    result = {"execution_state": execution, "scientific_verdict": verdict, "effect_state": effect, "provenance": "mock"}
+    result = {"execution_state": execution, "scientific_verdict": verdict, "effect_state": effect,
+              "provenance": provenance}
     service.ledger.begin_execution(lease, run_id, max_executions=1)
     service.ledger.record_event("research_execution", {"run_id": run_id, "worker_id": "worker",
                                                        "token": 1, "result": result}, task_id=task_id)
@@ -244,7 +264,7 @@ def submit_scientific(service, task_id, *, verdict="passed", execution="succeede
                                       plan_id=claim.plan_id, criterion_version=claim.criterion_version,
                                       conditions=claim.conditions, plan_json=json.dumps(plan),
                                       candidate_json=candidate.model_dump_json(), result_json=json.dumps(result),
-                                      provenance="mock", purpose=purpose, execution_state=execution,
+                                      provenance=provenance, purpose=purpose, execution_state=execution,
                                       scientific_verdict=verdict, created_at=service.ledger.now(),
                                       source_swarm_id=service.config.swarm_id, source_fencing_token=1,
                                       source_attempt=candidate.attempt)
@@ -254,8 +274,34 @@ def submit_scientific(service, task_id, *, verdict="passed", execution="succeede
     service.ledger.submit(lease, task_id + "-result", {"asset_id": asset_id, "run_id": run_id,
                                                        "stage": "evidence_submitted",
                                                        "scientific_verdict": verdict, "execution_state": execution,
-                                                       "provenance": "mock"})
+                                                       "provenance": provenance})
     return service
+
+
+def record_review(service, reviewer, task_id, *, purpose="reproduction"):
+    """Bind the reviewer to an actual independent review observation of the
+    candidate, so it is a genuine reviewer rather than an arbitrary string."""
+    from local_assets.research_models import ResearchObservation
+    asset_id = "asset-" + task_id
+    plan = {"plan_id": "plan-" + task_id, "criteria": {"version": "cv1"}}
+    observation = ResearchObservation(
+        report_id=task_id + "-review-" + reviewer, asset_id=asset_id, task_id=task_id,
+        worker_id=reviewer, fencing_token=1, run_id=task_id + "-review-run", sandbox_id=None,
+        plan_id="plan-" + task_id, criterion_version="cv1", conditions={"input": "fixture"},
+        plan_json=json.dumps(plan), candidate_json="{}",
+        result_json=json.dumps({"execution_state": "succeeded", "scientific_verdict": "passed",
+                                "effect_state": "known", "provenance": "mock"}),
+        provenance="mock", purpose=purpose, execution_state="succeeded",
+        scientific_verdict="passed", created_at=service.ledger.now(),
+        source_swarm_id=service.config.swarm_id, source_fencing_token=1, source_attempt=None)
+    with service.store.connection() as db:
+        db.execute("INSERT INTO research_reports VALUES (?,?,?)",
+                   (observation.report_id, asset_id, observation.model_dump_json()))
+
+
+def store_for(root, service, reviewer):
+    return ResearchFeedbackStore(root / "policy.sqlite3", service.ledger, service.store.root,
+                                 reviewer=reviewer)
 
 
 def test_projection_separates_supported_refuted_and_non_scientific(tmp_path):
@@ -271,38 +317,107 @@ def test_projection_separates_supported_refuted_and_non_scientific(tmp_path):
     assert by_task["refuted"].hypothesis == "refuted"
     assert by_task["refuted"].execution == "succeeded"
     assert all(r.contribution == "proposed" for r in results)
-    # crash/unknown produce no scientific three-axis entry.
     assert "crash" not in by_task and "unknown" not in by_task
 
 
-def test_store_is_idempotent_and_deduplicates_by_result_and_source(tmp_path):
+def test_legacy_failed_original_is_not_a_refutation(tmp_path):
+    service = service_at(tmp_path)
+    submit_scientific(service, "failed-original", verdict="failed", purpose="original")
+    results = research_feedback(service.ledger, service.store.root)
+    assert results == []
+
+
+def test_store_accept_binds_to_trusted_fact_and_records_reviewer(tmp_path):
     service = service_at(tmp_path)
     submit_scientific(service, "refuted", verdict="failed", purpose="counterexample")
-    results = research_feedback(service.ledger, service.store.root)
-    assert len(results) == 1
-    store = ResearchFeedbackStore(tmp_path / "policy.sqlite3", service.ledger)
-    refuted = results[0]
-    decision = store.accept(refuted, reviewer="reviewer-1")
+    record_review(service, "reviewer-1", "refuted")
+    store = store_for(tmp_path, service, "reviewer-1")
+    decision = store.accept("refuted-result")
     assert decision.accepted is True
-    # Repeated rebuild from the same accepted facts must not double-count.
-    accepted = refuted.model_copy(update={"contribution": "accepted"})
-    store.synchronize([accepted, accepted])
-    assert len(store.contributions()) == 1
-    # Same result re-submitted by another reviewer is a duplicate.
-    again = store.accept(refuted, reviewer="reviewer-2")
-    assert again.accepted is False and again.reasons == ("duplicate_contribution",)
-    # Self-approval is rejected and never persisted.
-    self_approved = store.accept(refuted, reviewer=refuted.actor)
-    assert self_approved.accepted is False and self_approved.reasons == ("self_approval_rejected",)
+    contributions = store.contributions()
+    assert len(contributions) == 1
+    persisted = contributions[0]
+    # Identity is re-derived from the trusted fact, never from caller input.
+    assert persisted.actor == "worker" and persisted.task_id == "refuted"
+    assert persisted.reviewer == "reviewer-1" and persisted.contribution == "accepted"
+    assert persisted.source_ref == "https://example.invalid/paper"
+    assert persisted.asset_id == "asset-refuted"
+
+
+def test_store_accept_rejects_forged_replay_self_cross_project_and_unreviewed(tmp_path):
+    service = service_at(tmp_path)
+    submit_scientific(service, "refuted", verdict="failed", purpose="counterexample")
+    record_review(service, "reviewer-1", "refuted")
+    store = store_for(tmp_path, service, "reviewer-1")
+    # Forged result id: no such trusted result.
+    assert store.accept("does-not-exist").reasons == ("untrusted_result",)
+    # A replayed provenance cannot establish a new acceptance.
+    submit_scientific(service, "replayed", verdict="passed", provenance="replay")
+    assert store.accept("replayed-result").reasons == ("replay_not_acceptable",)
+    # Cross-project: a result from a different swarm is not in this store's trusted facts.
+    other = service_at(tmp_path / "other", swarm_id="other-swarm")
+    submit_scientific(other, "foreign", verdict="failed", purpose="counterexample")
+    assert store.accept("foreign-result").reasons == ("untrusted_result",)
+    # A reviewer with no actual review of this candidate is not admitted.
+    store2 = store_for(tmp_path, service, "unreviewed-actor")
+    assert store2.accept("refuted-result").reasons == ("reviewer_not_admitted",)
+    assert store2.contributions() == []
+
+
+def test_known_actor_that_claimed_but_did_not_review_is_rejected(tmp_path):
+    service = service_at(tmp_path)
+    submit_scientific(service, "refuted", verdict="failed", purpose="counterexample")
+    # Make "known-actor" a real task-claimer, but it never reviewed this result.
+    service.ledger.enqueue(Signal(task_id="claim-known", workspace=service.config.workspace,
+                                  scope="science/claim-known", kind="opportunity",
+                                  required_capability="research.author"))
+    assert service.ledger.claim("claim-known", "known-actor", locality=service.locality) is not None
+    store = store_for(tmp_path, service, "known-actor")
+    assert store.accept("refuted-result").reasons == ("reviewer_not_admitted",)
+    assert store.contributions() == []
+
+
+def test_store_accept_is_idempotent_and_deduplicates(tmp_path):
+    service = service_at(tmp_path)
+    submit_scientific(service, "refuted", verdict="failed", purpose="counterexample")
+    record_review(service, "reviewer-1", "refuted")
+    record_review(service, "reviewer-2", "refuted")
+    store = store_for(tmp_path, service, "reviewer-1")
+    assert store.accept("refuted-result").accepted is True
+    # A second reviewer is not the host's bound identity, but even the host's own
+    # repeat is a duplicate: it cannot double-count.
+    store2 = store_for(tmp_path, service, "reviewer-2")
+    again = store2.accept("refuted-result")
+    assert again.accepted is False
     assert len(store.contributions()) == 1
     snapshot = store.snapshot()
     assert snapshot["policy_version"] == "research-v1" and snapshot["advisory_only"] is True
     assert snapshot["three_axis"]["contribution"]["accepted"] == 1
 
 
+def test_supersession_is_append_only_and_never_deletes_the_original(tmp_path):
+    service = service_at(tmp_path)
+    submit_scientific(service, "refuted", verdict="failed", purpose="counterexample")
+    record_review(service, "reviewer-1", "refuted")
+    store = store_for(tmp_path, service, "reviewer-1")
+    assert store.accept("refuted-result").accepted is True
+    store.record_supersession(SupersessionEvent(
+        event_id="s1", result_id="refuted-result", reason="superseded_by_reanalysis",
+        source_ref="https://example.invalid/new", actor="reviewer-2", at=2.0))
+    # Original record is preserved; the effective view marks it superseded.
+    assert [c.contribution for c in store.contributions()] == ["accepted"]
+    assert [c.contribution for c in store.effective_contributions()] == ["superseded"]
+    assert store.snapshot()["three_axis"]["contribution"]["superseded"] == 1
+    assert store.snapshot()["three_axis"]["contribution"].get("accepted", 0) == 0
+    with pytest.raises(ValueError, match="already_recorded"):
+        store.record_supersession(SupersessionEvent(
+            event_id="s1", result_id="refuted-result", reason="dup",
+            source_ref="https://example.invalid/dup", actor="reviewer-3", at=3.0))
+
+
 def test_correction_events_are_append_only_and_replayed(tmp_path):
     service = service_at(tmp_path)
-    store = ResearchFeedbackStore(tmp_path / "policy.sqlite3", service.ledger)
+    store = store_for(tmp_path, service, "reviewer-1")
     events = [
         CorrectionEvent(event_id="e1", branch_id="b", kind="sleep", reason="budget",
                         source_ref="https://example.invalid/d1", actor="operator", at=1.0),
@@ -318,10 +433,24 @@ def test_correction_events_are_append_only_and_replayed(tmp_path):
         store.record_correction(events[0])
 
 
+def test_fresh_rebuild_writes_to_a_new_destination_and_never_mutates_source(tmp_path):
+    service = service_at(tmp_path)
+    submit_scientific(service, "refuted", verdict="failed", purpose="counterexample")
+    record_review(service, "reviewer-1", "refuted")
+    source = store_for(tmp_path, service, "reviewer-1")
+    assert source.accept("refuted-result").accepted is True
+    before = source.snapshot()
+    # A fresh rebuild is a new store at a new path; the source store is untouched.
+    rebuilt = ResearchFeedbackStore(tmp_path / "rebuilt.sqlite3", service.ledger, service.store.root,
+                                    reviewer="reviewer-1")
+    assert rebuilt.accept("refuted-result").accepted is True
+    assert source.snapshot() == before
+    assert len(source.contributions()) == 1 and len(rebuilt.contributions()) == 1
+
+
 def test_projection_read_failure_is_not_swallowed(tmp_path):
     service = service_at(tmp_path)
     submit_scientific(service, "supported", verdict="passed")
-    # A corrupt source archive must fail loudly, never return an empty projection.
     broken = tmp_path / "broken-assets"
     broken.mkdir()
     (broken / "assets.sqlite3").write_bytes(b"not a sqlite database")
@@ -331,7 +460,6 @@ def test_projection_read_failure_is_not_swallowed(tmp_path):
 
 def test_router_v0_and_v01_remain_unchanged_by_the_research_v1_policy(tmp_path):
     service = service_at(tmp_path)
-    # research-v1 is a separate advisory layer, not a Router strategy version.
     with pytest.raises(ValueError, match="strategy_version"):
         Router(service.field, strategy_version="research-v1")  # type: ignore[arg-type]
     assert ResearchPolicy.version == "research-v1"

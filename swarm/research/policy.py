@@ -9,6 +9,12 @@ This module is a pure advisory layer. Route opportunities are suggestions only:
 a task is still claimed through the existing TaskLedger, which re-checks scope,
 capabilities, dependencies, lease/fencing and budget. No scheduler, forced
 central allocation or completion proof is introduced here.
+
+``ResearchPolicy.accept`` is a pure computation used to *suggest* whether an
+independently supplied result should be accepted. It is **not** a persistence
+authorization: the durable acceptance entry in ``swarm.research.feedback``
+re-derives every result from trusted persistent facts and never trusts a
+caller-supplied ``ThreeAxisResult``.
 """
 from __future__ import annotations
 
@@ -40,7 +46,9 @@ class ThreeAxisResult(Contract):
     execution: ExecutionState
     hypothesis: HypothesisState
     contribution: ContributionState = "proposed"
+    asset_id: str | None = None
     branch_id: str | None = None
+    reviewer: str | None = None
     at: float = Field(ge=0)
     reasons: tuple[str, ...] = ()
 
@@ -53,6 +61,12 @@ class Branch(Contract):
     authorized: bool = True
     supported_by: tuple[str, ...] = ()
     refuted_by: tuple[str, ...] = ()
+    # Bounded, explainable inputs (spec 7.2): applicability, goal relevance,
+    # proven risk and estimated cost are explicit factors, never a hidden score.
+    applicability: float = Field(default=1.0, ge=0, le=1)
+    goal_relevance: float = Field(default=1.0, ge=0, le=1)
+    risk: float = Field(default=0.0, ge=0, le=1)
+    known_cost: float | None = Field(default=None, ge=0)
 
 
 class RouteOpportunity(Contract):
@@ -60,6 +74,7 @@ class RouteOpportunity(Contract):
     eligible: bool
     share: float = Field(ge=0, le=1)
     factors: dict[str, float] = Field(default_factory=dict)
+    known_cost: float | None = Field(default=None, ge=0)
     reasons: tuple[str, ...] = ()
 
 
@@ -75,6 +90,16 @@ class CorrectionEvent(Contract):
     event_id: str = Field(min_length=1)
     branch_id: str = Field(min_length=1)
     kind: CorrectionKind
+    reason: str = Field(min_length=1)
+    source_ref: str = Field(min_length=1)
+    actor: str = Field(min_length=1)
+    at: float = Field(ge=0)
+
+
+class SupersessionEvent(Contract):
+    event_id: str = Field(min_length=1)
+    result_id: str = Field(min_length=1)
+    superseded_by: str | None = None
     reason: str = Field(min_length=1)
     source_ref: str = Field(min_length=1)
     actor: str = Field(min_length=1)
@@ -115,7 +140,7 @@ class ResearchPolicy:
 
     def accept(self, result: ThreeAxisResult, *, reviewer: str,
                seen: set[str]) -> ContributionDecision:
-        """Independently accept a contribution; no double reward, no self-approval."""
+        """Pure suggestion of whether a result may be accepted; no persistence."""
         if not reviewer.strip():
             raise ValueError("reviewer is required")
         if reviewer == result.actor:
@@ -136,13 +161,24 @@ class ResearchPolicy:
         refute = len(branch.refuted_by)
         return (1.0 + support) / (1.0 + support + refute)
 
+    @staticmethod
+    def _value(branch: Branch) -> float:
+        """Bounded, explainable composite: evidence * applicability *
+        goal relevance * (1 - proven risk)."""
+        support = len(branch.supported_by)
+        refute = len(branch.refuted_by)
+        evidence = (1.0 + support) / (1.0 + support + refute)
+        return evidence * branch.applicability * branch.goal_relevance * (1.0 - branch.risk)
+
     def opportunities(self, branches: list[Branch] | tuple[Branch, ...]) -> RouteOpportunityPlan:
         """Allocate a fixed opportunity pool across eligible branches.
 
-        80% follows evidence; the configurable exploration fraction is a floor
-        shared by every legal branch so low-evidence branches are not starved.
-        Dormant, refuted, archived and out-of-scope branches have no exploration
-        quota and therefore no execution right from this suggestion.
+        80% follows evidence (times applicability, goal relevance and inverse
+        risk); the configurable exploration fraction is a floor shared by every
+        legal branch so low-evidence branches are not starved. Dormant, refuted,
+        archived and out-of-scope branches have no exploration quota and
+        therefore no execution right from this suggestion. Unknown cost is never
+        treated as zero; it is reported as an explicit ``unknown_cost`` reason.
         """
         if not branches:
             return RouteOpportunityPlan(exploration_fraction=self.exploration_fraction,
@@ -158,15 +194,15 @@ class ResearchPolicy:
             elif branch.status == "refuted":
                 opportunities.append(RouteOpportunity(
                     branch_id=branch.branch_id, eligible=False, share=0.0,
-                    reasons=("refuted_under_conditions",)))
+                    known_cost=branch.known_cost, reasons=("refuted_under_conditions",)))
             elif branch.status == "archived":
                 opportunities.append(RouteOpportunity(
                     branch_id=branch.branch_id, eligible=False, share=0.0,
-                    reasons=("archived",)))
+                    known_cost=branch.known_cost, reasons=("archived",)))
             elif branch.status == "dormant":
                 opportunities.append(RouteOpportunity(
                     branch_id=branch.branch_id, eligible=False, share=0.0,
-                    reasons=("dormant",)))
+                    known_cost=branch.known_cost, reasons=("dormant",)))
             else:
                 eligible.append(branch)
         count = len(eligible)
@@ -175,25 +211,33 @@ class ResearchPolicy:
             return RouteOpportunityPlan(exploration_fraction=self.exploration_fraction,
                                         opportunities=tuple(opportunities),
                                         reasons=tuple(reasons))
-        evidence = [self._evidence(branch) for branch in eligible]
-        evidence_sum = sum(evidence)
+        values = [self._value(branch) for branch in eligible]
+        value_sum = sum(values)
         exploration_floor = 1.0 / count
         exploration = self.exploration_fraction
         eligible_index = 0
         for branch in branches:
             if not branch.authorized or branch.status in ("refuted", "archived", "dormant"):
                 continue
-            value = evidence[eligible_index]
-            evidence_share = value / evidence_sum if evidence_sum > 0 else 0.0
-            share = min(1.0, max(0.0, (1.0 - exploration) * evidence_share + exploration * exploration_floor))
+            value = values[eligible_index]
+            value_share = value / value_sum if value_sum > 0 else 0.0
+            share = min(1.0, max(0.0, (1.0 - exploration) * value_share + exploration * exploration_floor))
+            support = len(branch.supported_by)
+            refute = len(branch.refuted_by)
+            evidence = self._evidence(branch)
+            branch_reasons = ["eligible"]
+            if support == 0 and refute == 0:
+                branch_reasons.append("insufficient_evidence")
+            if branch.known_cost is None:
+                branch_reasons.append("unknown_cost")
             opportunities.append(RouteOpportunity(
                 branch_id=branch.branch_id, eligible=True, share=share,
-                factors={"evidence": value, "exploration_floor": exploration_floor,
-                         "support_count": float(len(branch.supported_by)),
-                         "refute_count": float(len(branch.refuted_by))},
-                reasons=("eligible",)))
+                factors={"evidence": evidence, "insufficient_evidence": 1.0 - evidence,
+                         "applicability": branch.applicability, "goal_relevance": branch.goal_relevance,
+                         "risk": branch.risk, "support_count": float(support), "refute_count": float(refute),
+                         "exploration_floor": exploration_floor},
+                known_cost=branch.known_cost, reasons=tuple(branch_reasons)))
             eligible_index += 1
-        # Preserve the original input order across eligible and ineligible branches.
         by_id = {op.branch_id: op for op in opportunities}
         ordered = [by_id[branch.branch_id] for branch in branches]
         return RouteOpportunityPlan(exploration_fraction=self.exploration_fraction,
