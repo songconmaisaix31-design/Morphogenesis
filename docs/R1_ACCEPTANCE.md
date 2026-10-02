@@ -1,5 +1,14 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## 06:24 验收收尾更新
+
+核心组合d85精确CI37062098247 Windows1392/Linux1391通过，strict136/build/SDK/wheel均通过；F447精确安装的支持与反证两视窗各2通过，主控实际查看默认折叠条件后的截图。Q真正installed fbe/d85独立272 passed/3历史skip；对应身份与原始失败见最新R1_STATUS及各Owner报告。以上不替代最终I组合安装与回归。
+
+P全适用installed fbe/d85首221 passed/3 failed，失败限于旧MCP代理config与exact11目录。后继0dfaceb复用原factory缩小旧工具目录，并保留原launch绝对配置/workspace/HostBinding；其相关兼容与独立负例正在验收。新generated/stdio/断连/字节门在fbe已通过，但不得把它们写成新0d包已完整通过。
+
+原UI六项首失败、Q断连首六失败、两次工具长返回空档及所有历史RED继续保留。Q B72此次实际耗时4314.57s，原因UNKNOWN，不改成旧样本10秒。AT07真实沙箱档、L2真实研究、L3和独立人工观察NOT_RUN；性能只报告实际样本，不作全R1退出PASS声明。
+
+
 ## 04:50 组合与验收边界更新
 
 本节是新的阶段记录，下文所有首失败与历史受测身份保留。A 组合 SOURCE `d85aa95e8da406d598f3658492e3d615bba8a28f` / REPORT `524a81ed7ba0b3550f6ae029e316a56293901d12` 已精确普通合并B/C最终历史。私有COPY非editable VCS、14运行文件与原Git blob一致、103依赖兼容；正式stdio1+SQLite并发5首次6 passed/11.11s，变动store strict通过。B最终230d源码CI37059454013双平台全适用回归、strict/build/SDK/wheel通过；新组合d85的CI37062098247尚运行，不将旧CI直接转移为新组合PASS。

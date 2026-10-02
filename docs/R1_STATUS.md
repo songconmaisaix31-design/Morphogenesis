@@ -1,5 +1,18 @@
 # R1 派发状态（2026-10-03）
 
+## 06:24 更新：核心组合双平台通过，页面完成，产品兼容收尾
+
+A 最终 SOURCE `d85aa95e8da406d598f3658492e3d615bba8a28f` / REPORT `524a81ed7ba0b3550f6ae029e316a56293901d12` 已接纳本轨交付；worker_done succeeded，release retained/no_owned_resource/processAction none。主控核实该精确源码 [CI37062098247](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37062098247)：Windows 1392 passed/5 skipped/1545.58s，Linux 1391 passed/6 skipped/351.47s；两端strict136、build、官方SDK、wheel检查全部通过。B旧本地180秒超时原因仍UNKNOWN，不被新CI解释或覆盖。
+
+F 最终 SOURCE `447d9e0aaa34cf0eaabc114c12f22496127e326a` / REPORT `fa6bfbda3849117ade2325b2d1cb378041344cb4` 已push且clean。实际视觉发现默认三轴卡片铺开完整实验配置后，由原F将原内容移入可键盘展开的native details；三轴、成员、mock标识保持可见。build10.30s通过；精确COPY wheel52文件原字节/nlink与doctor通过；实际installed447/corecc2支持两视窗2 passed/29.9s、反证两视窗2 passed/8.5s，原30秒阈值、DTO等值、0POST保持。主控已查看新窄屏三轴和桌面反证截图。F自有serve/browser已退出；先前503两失败、导航未就绪两失败、反证selector两失败均保留，不把旧0e或新447结果冒充最终I组合。
+
+P 精确 SOURCE `fbe72c519a3809ffbd439ecba9b65b0441726585` / core d85实际安装全套首次 **221 passed/3 failed/270.94s**；新generated3、正式stdio、安装字节及断连6全部通过。三失败是旧ChoiceService代理config属性和旧MCP exact11目录兼容，不改原断言。P只在原产品路径做旧11工具薄适配，复用原factory/public工具移除；新R1保留完整surface。主控发现新module可能绕过原build_launch的HostBinding，要求继续经过原canonical请求的绝对路径/workspace验证并携带原绑定。后继SOURCE `0dfaceb8af5cc220e555cd3ad4033f02f4ec44cc` 已普通合并F447与治理，正在私有安装及原3失败/相关入口回归，尚未接纳最终产品。
+
+Q 真正installed fbe/d85的factory11+A57+B72+C45+P87共 **272 passed/3 historical skipped**。原process/socket与installed_core检查未mock。三skip是已撤回parallel-loop历史用例，不计通过。B72原进程经历工具返回空档，实际4314.57s原样保留；原因UNKNOWN，不声明性能达标。旧fd7断连独立7项首次1 passed/6 failed，任务各只准入一次，但响应曾写[200,503]；fbe新factory11通过包含修复，原失败保留。Q继续只对P新legacy HostBinding/目录变化做相关独立验证，不能用fbe结果给未测0d版本全套PASS。
+
+UTC21:07:21至22:19:35观察到约72分钟工具返回空档；各Owner接回原命令/进程，未盲重发、未重写原耗时，原因UNKNOWN。当前P短兼容窗口、Q纯fixture相关复核、F仅最终文档与生命周期；最终I仍待这些前置结果后唯一派发。原Spec与仓库存档校验一致。AT07真实探针、L2/L3/独立人工观察未执行，全R1退出条件仍未达到；C自动审批拒绝的系统editable人工残留与四旧release_unknown保持原记录。
+
+
 ## 04:44 更新：核心组合已交付，独立安装页面首失败退回产品
 
 B 最终 SOURCE `230d283848c0879ff9c349096548d3810c4b1954` / REPORT `387338f49045f7be7a184b868f48f325cebd9cbd` 已推送且 worker_done succeeded。主控核实精确 SOURCE [CI37059454013 attempt1](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37059454013)：Windows 1295 passed/5 skipped，Linux 1294 passed/6 skipped；两端 strict130、build、官方SDK、wheel检查通过。原本地180秒期限1 failed/21 passed和C初始化竞争首失败仍保留，不能用新CI解释旧延迟原因。B资源回执为retained/no_owned_resource/processAction none。
