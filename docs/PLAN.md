@@ -1,4 +1,27 @@
-# 策略 v0.1：三条算法线＋一条收尾线（2026-10-02）
+# 产品集成：一条用户路径、三个核心界面（2026-10-02）
+
+当前阶段：开发中。用户路径限定为“创建研究空间 → 接入成员 → 发起任务 → 看懂推荐与实际选择 → 查看实验和复现证据 → 检查成果继承”。正式产品基线 SOURCE c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc / docs REPORT 3b17cc0a7120f1d2381871b336293ee301b857de；固定核心 7062a632b8c625c05b35bdec4c36fce63a31c2a4 / 策略 v0.1。本轮结束底层开发，不改变核心源码、pin、检查器、策略或科学阈值，不扩 Agent 协议或科研案例。
+
+| 轨 | 固定 Agent / Worktree / Branch | 独占 write_paths |
+|---|---|---|
+| A 产品操作与事实服务 | Orca Codex / research-product-path-api-1002 / 创建后记录实际分支 | 产品 src/morph_research 下 Python 文件、新 web/ Python 包及 web/static/.gitkeep、tests/test_web*.py、tests/test_spaces*.py、tests/test_native_choice*.py、pyproject.toml、uv.lock、docs/tracks/product-path-api-1002.md；禁止 frontend 与静态构建产物 |
+| U 三界面 | Orca Codex / research-product-path-ui-1002 / 创建后记录实际分支 | 产品 frontend/**、src/morph_research/web/static/**（除 .gitkeep）、tests/ui/**、THIRD_PARTY_NOTICES.md、docs/tracks/product-path-ui-1002.md；禁止 Python 与根依赖锁 |
+| I 独立集成与验收 | Orca Codex / research-product-path-integration-1002 / 创建后记录实际分支 | 普通精确合并、tests/integration/**、docs/tracks/product-path-integration-1002.md、README.md、少量已交接导入/配置/打包胶水；领域问题退 A/U |
+| 主控 | 当前 Orca governance worktree / morph-product-three-pages-plan-1002 | 仅本计划、状态、决策与验收；不写业务代码 |
+
+接口优先：A 先提交可复用既有事实与操作接口的 Handoff；U 并行做页面布局，随后接 A 精确契约。复用现有 Python/Pydantic、正式 init/run/permissions、原 MCP/Router/TaskLedger/assets，以及既有 React18/TDesign/Vite UI 表述及许可证；不复制执行器、不建设第二账本/完成状态/调度器/证明系统。页面完成状态必须来自服务端既有事实，只翻译展示，技术 SHA/token 等放追溯展开项，不作主操作前置。
+
+界面验收：研究空间首页直接显示任务、成员、阻塞原因、进度并可完成必要创建/接入/发起操作；任务详情按时间串联推荐、实际选择、覆盖、实验、独立复现，缺失事实明确未知/未发生；成果与继承页分开源成果、验证条件、子成果、实际 adoption，检索、上下文注入、验证、真实采用不可统一标成功。历史展示固定标历史回放；未有本轮原生证据不能标实时自主运行。
+
+读取硬边界：历史只读档案复用 ArchivedLedger/ReadOnlyAssets，运行中状态使用可感知 WAL/变化的 mode=ro/query_only 活动读取，绝不能将 immutable=1 用在正在写入的数据库。HTTP GET 不初始化/迁移/认领/学习/执行；活动并发读取须能看见新提交，历史 bytes/mtime 不变。缺日志投影显示不完整，不另算完成。控制接口仅绑定本地配置的空间及既有权限；不向页面暴露 secret、主机私有路径或任意文件/命令接口。
+
+集成末端：全新非 editable 安装冻结核心+本轮产品，原完整产品测试、适用类型/构建/静态打包与真实浏览器三页单路径通过。保持核心7062不变，唯一新有界 Codex 原生调用经产品正式入口看到至少两个合法候选、自主选择并由原 discover/claim 留下推荐关联或覆盖；最多一次调用、不强制符合推荐、不执行科学实验、不重试未知效果、不改全局 auth/HOME/provider。保留原始事件与账本事实；缺原生证据只交标记清晰的历史回放，NOT_RUN/失败与未知费用/null不得改写。旧科学档案不升级为本轮 task_live；无需重跑冻结核心全量或收费科学实验来验证 UI。
+
+收口：同 Worker 持续开发/测试/返修/文档/commit+push；I 精确合并后独立验收，最终产品候选 push，不默认推进 main/tag/部署。所有权之外仅 Handoff。实际轨道身份、SOURCE/REPORT、证据与限制在收到 Orca 回执后更新。
+
+---
+
+# 已冻结底层策略 v0.1：历史开发记录（2026-10-02）
 
 当前结论（2026-10-02 12:04）：五项停止条件在已验证的 `contract_local / prepared_local / manual-MCP` 支持范围全部具备，底层策略 **v0.1 冻结并停止扩展**。核心 SOURCE `7062a632b8c625c05b35bdec4c36fce63a31c2a4`；产品 SOURCE `c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc` 固定该核心，产品 docs-only REPORT `3b17cc0a7120f1d2381871b336293ee301b857de`；独立 I docs-only REPORT `f5e3d33a4ca119d7d173e61fe801d3a4d36cdb09`，上述实际远端精确一致、工作树干净。原完整 CI `36960486155` 精确 head7062，Windows 1214 PASS / 5 SKIP / 75 warnings / 1541.58s，Linux 1213 PASS / 6 SKIP / 75 warnings / 387.33s，两边原类型121文件、sdist/wheel构建、SDK、13包安装分发全部 PASS；I独立本机原全量1214 PASS / 5 SKIP / 944.11s及同工程门通过。A和I各用独立全新LF/COPY/noneditable实际GitVCS安装验证最终产品原53项，分别62.882s、72.016s，17产品/181核心字节与真实direct_url绑定核对。
 
