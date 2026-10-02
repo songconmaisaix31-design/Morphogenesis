@@ -463,3 +463,45 @@ This stage is contract_local. B's newly delivered mock inheritance/adoption
 SOURCE `d0c834fd381fc292443bf85c5ce1e91043143516`, A's complete generated
 formal service chain, P's configured factory and final combined exact candidate
 remain to be independently checked. L2/L3 and external materials remain NOT_RUN.
+
+## Original mock adoption and product material first RED
+
+Q SOURCE `5fc892c` adds `test_b_mock_adoption.py` and
+`test_p_material_identity.py` with preserved raw evidence. All runs are sequential
+private-environment `python -m pytest <file> -q --tb=short` under the same
+process/network-deny fixtures and BLAS1 settings.
+
+* B exact `56b8db589ee04bcc41652bb5e38793a1216f9a1a`, mock12 first:
+  **8 failed / 4 passed**, 6.27s. The Q fixture left the approval lease active;
+  the original TaskLedger correctly refused later same-scope claims. Q now
+  performs the real approval and releases that lease before original/review
+  tasks. Failed/unknown review eligibility is checked directly at fetch, leaving
+  its unknown ledger hold intact. No domain assertion or guard was weakened.
+* The same B exact candidate with corrected fixture: **9 passed / 3 failed**,
+  6.44s. The true failures are original archived output, evaluation and
+  environment changes still allowing `AssetConsumer.inject/execute` to produce
+  an inherited candidate. Prior original/review and approved-asset positive
+  controls pass before each change. Handoff `msg_c386db7350f8`; Owner confirmed
+  the cached eligibility gap and is adding original-reader rechecks with the
+  host criteria registry.
+* P exact `cedbf3bc52eaabd4814e43068428e89a49ab5cf9`, material9:
+  **7 failed / 2 passed**, 2.65s. Same-locator changed source version, digest or
+  extraction outcome is discarded. Same-source/text expert opinions with a
+  different applicability, domain, time or dispute status are also discarded.
+  Both unchanged retry controls deduplicate. Handoff `msg_c44d4c988955` asks for
+  append-only history and the new receipt-selected identity at the HTTP route.
+
+The B positive uses the installed `GeneratedFixtureBackend` and original
+observation writer, actual original/review tasks, `AssetConsumer`, child local
+revalidation, `AssetApplicator.prepare`, `TaskLedger.submit(apply)`, real inert
+file writes and the original `AdoptionReceipt`. Receipt provenance is `mock`,
+replay is idempotent and reopen preserves it. Default-live refusal, both mode
+switch directions, root binding, mixed provenance, failed/timeout/unknown
+review and using the fixture identity with the real SDK adapter all pass.
+GEP and read-only Git plumbing are deterministic Q boundaries; Node/Git
+subprocess adapter coverage is not claimed. The fixture backend visibly retains
+`isolation.verified=false`, `probe=not_run`, and never executes candidate bytes.
+
+The new failing cases are unresolved at this evidence checkpoint. The corrected
+exact Owner successor, combined formal service chain and configured product
+factory remain pending; none of these local results claims L2/L3.
