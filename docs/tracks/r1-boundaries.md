@@ -802,3 +802,31 @@ Old installed cc2/24f bytes and their first failures are untouched. Final merged
 core/provider-fixed product installation remains pending. The B owner additionally
 reports a separate original-worker deadline failure with unresolved cause; Q's
 SQLite72 result neither explains nor overrides that owner evidence.
+
+## Cloud route and case-equivalent metadata independent controls
+
+Read-only review of P SOURCE `7a155c59672cc030b3d7916de04e47c71ec6c124`
+adds five black-box admission controls to the same protected service/planner
+fixtures. Codex selected custom-provider metadata must refuse cloud names
+`Amazon Bedrock` / `Amazon Bedrock Runtime` and an `aws` route even when its
+ordinary provider ID and URL match the prior grant. Claude must refuse a
+lower-case cloud flag and conflicting case-equivalent destination keys.
+Review Handoff `msg_a29a0146c076` precedes the test additions.
+
+On exact previous P5b1/corecc2 archives these five refusal assertions give
+**5 failed**, 3.48s. The same assertions plus the previous native/resume/provider
+controls on exact P7a/corecc2 give **55 passed**, 14.97s. Raw
+`p-5b1f076-cloud-route5-first.txt` and
+`p-7a155c5-native-provider55-first.txt` preserve both outcomes. Legitimate Codex
+and Claude gateway positives remain nonempty; probe/native/process/network
+boundaries remain inert or denied. No real metadata or credential is read.
+Handoffs `msg_94d1a18473f6` and `msg_4db908e3f9e4` deliver this bounded result.
+
+A delivers merged core SOURCE `d85aa95e8da406d598f3658492e3d615bba8a28f`.
+Q read-only diff against cc2 confirms the sole production change is B's original
+SQLite `BEGIN IMMEDIATE` and comments; B/C exact source/report ancestry remains.
+B separately reports SOURCE230 CI37059454013 attempt1 success, Windows1295
+passed/5 skipped and Linux1294 passed/6 skipped, plus its final REPORT
+`387338f49045f7be7a184b868f48f325cebd9cbd`. These are owner-reported CI results,
+not Q's independently run checks; the earlier local worker timeout remains
+unexplained. Final P repin and the exact merged installed Q gate are pending.
