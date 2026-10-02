@@ -26,6 +26,7 @@ from local_assets.models import Candidate
 from local_assets.paths import no_links
 from local_assets.research import known_effect
 from local_assets.research_models import ResearchObservation
+from orchestration.experiments.generated import GeneratedAssessment
 from swarm.feedback import (
     FeedbackFact,
     ReadonlyLedger,
@@ -39,6 +40,7 @@ from swarm.research.policy import (
     Branch,
     ContributionDecision,
     CorrectionEvent,
+    Provenance,
     ResearchPolicy,
     SupersessionEvent,
     ThreeAxisResult,
@@ -182,6 +184,26 @@ def research_feedback(ledger: TaskLedger, assets_root: Path) -> list[ThreeAxisRe
                 asset_id=observation.asset_id if observation is not None else None))
     results.extend(trusted_refutations(ledger, assets_root))
     return sorted(results, key=lambda result: (result.at, result.result_id, result.hypothesis))
+
+
+def from_generated_assessment(assessment: GeneratedAssessment, *, result_id: str, report_id: str,
+                              task_id: str, actor: str, source_ref: str, provenance: Provenance,
+                              asset_id: str | None = None, at: float = 0.0) -> ThreeAxisResult:
+    """Thin conversion of B's three-axis ``GeneratedAssessment`` into C's policy
+    ``ThreeAxisResult``.
+
+    ``assessment.trusted`` and ``assessment.mode`` are deliberately ignored: C
+    derives authority from the original TaskLedger execution, source/result and
+    independent review, never from a backend-recomputed boolean or a "final"
+    label. ``contribution`` stays ``proposed`` — accepting a contribution is a
+    separate, independently reviewed step.
+    """
+    return ThreeAxisResult(
+        result_id=result_id, report_id=report_id, task_id=task_id, actor=actor,
+        source_ref=source_ref, provenance=provenance,
+        execution=assessment.execution, hypothesis=assessment.hypothesis,
+        contribution="proposed", asset_id=asset_id, at=at, reasons=assessment.reasons,
+    )
 
 
 class ResearchFeedbackStore:

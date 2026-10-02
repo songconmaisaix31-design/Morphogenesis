@@ -26,7 +26,7 @@ from swarm.research.policy import (
     SupersessionEvent,
     ThreeAxisResult,
 )
-from swarm.research.feedback import ResearchFeedbackStore, research_feedback
+from swarm.research.feedback import ResearchFeedbackStore, from_generated_assessment, research_feedback
 from swarm.router import Router
 
 
@@ -501,6 +501,21 @@ def test_projection_read_failure_is_not_swallowed(tmp_path):
     (broken / "assets.sqlite3").write_bytes(b"not a sqlite database")
     with pytest.raises(sqlite3.Error):
         research_feedback(service.ledger, broken)
+
+
+def test_generated_assessment_conversion_is_thin_and_never_trusts_booleans():
+    from orchestration.experiments.generated import GeneratedAssessment
+    assessment = GeneratedAssessment(
+        execution="succeeded", hypothesis="refuted", contribution="proposed",
+        mode="final", trusted=True, reasons=("max_abs_error_exceeds_tolerance",),
+    )
+    result = from_generated_assessment(assessment, result_id="r", report_id="rp", task_id="t",
+                                       actor="author", source_ref="https://example.invalid/paper",
+                                       provenance="mock", at=1.0)
+    # The three axes carry over; the 'final'/'trusted' booleans never grant acceptance.
+    assert result.execution == "succeeded" and result.hypothesis == "refuted"
+    assert result.contribution == "proposed"
+    assert result.reasons == ("max_abs_error_exceeds_tolerance",)
 
 
 def test_router_v0_and_v01_remain_unchanged_by_the_research_v1_policy(tmp_path):
