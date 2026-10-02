@@ -221,6 +221,8 @@ class LocalAssetStore:
             raise AssetSafetyError("generated_report_not_passed")
         if time.time() >= persisted.expires_at:
             raise AssetSafetyError("stale_report")
+        from local_assets.generated_validation import checked_generated_report
+        checked_generated_report(self, persisted.asset_id, persisted, persisted.policy_version)
         if assert_owned is None:
             raise PermissionError("approval_requires_ownership_fence")
         with self.connection() as db:

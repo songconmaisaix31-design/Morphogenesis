@@ -17,7 +17,8 @@ from opensandbox.models.execd import Execution, ExecutionError
 
 from orchestration.experiments.generated import (
     ApprovedEnvironment, BackendProfile, EvaluationSpec, GeneratedContext, GeneratedExperimentPlan,
-    GeneratedFile, GeneratedSource, IsolationCapability, IsolationReport,
+    GeneratedFile, GeneratedSource, IsolationCapability, IsolationConfiguration, IsolationReport,
+    effective_environment,
 )
 from orchestration.experiments.executor import DIRECTORY, RUNTIME_PROBE
 from orchestration.experiments.trusted import (
@@ -114,19 +115,28 @@ def make_context(*, run_id: str = "gen-run-01", author: str = "author-1", review
                             fencing_token=1, author=author, reviewer=reviewer)
 
 
-def probe_record(*, backend: str = "mock") -> IsolationProbeRecord:
+def mock_configuration(plan: GeneratedExperimentPlan | None = None) -> IsolationConfiguration:
+    plan = plan or make_poisson_plan()
+    return IsolationConfiguration(endpoint="mock://fixture", instance_id="fixture-1",
+        runtime_profile="fixture-runtime-1", environment=effective_environment(plan.environment),
+        resources=plan.backend, network_deny=True, server_process_limit=plan.backend.process_limit)
+
+
+def probe_record(*, backend: str = "mock", plan: GeneratedExperimentPlan | None = None) -> IsolationProbeRecord:
     return IsolationProbeRecord(probe_id="probe-1", backend=backend,
                                 declared=full_capability(), image_digest=IMAGE_DIGEST,
+                                configuration=mock_configuration(plan),
                                 verified=True, passed=True, evidence_ref="probe-run-1", probed_at=1_000_000.0)
 
 
-def verified_probe_registry(*, backend: str = "mock") -> TrustedProbeRegistry:
-    return TrustedProbeRegistry(records=(probe_record(backend=backend),))
+def verified_probe_registry(*, backend: str = "mock", plan: GeneratedExperimentPlan | None = None) -> TrustedProbeRegistry:
+    return TrustedProbeRegistry(records=(probe_record(backend=backend, plan=plan),))
 
 
-def mock_isolation(backend: str = "mock") -> IsolationReport:
+def mock_isolation(backend: str = "mock", plan: GeneratedExperimentPlan | None = None) -> IsolationReport:
     return IsolationReport(backend=backend, declared=full_capability(),
                            verified=False, probe="not_run", proof_ref="probe-1",
+                           configuration=mock_configuration(plan),
                            reasons=("isolation_probe_not_run",))
 
 
@@ -211,6 +221,9 @@ class MockGeneratedBackend:
 
     def isolation(self) -> IsolationReport:
         return self._isolation
+
+    def configuration(self, plan: GeneratedExperimentPlan) -> IsolationConfiguration:
+        return mock_configuration(plan)
 
     def create(self, plan, context) -> MockGeneratedSession:
         self.create_calls += 1
