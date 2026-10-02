@@ -283,3 +283,21 @@ callback reads on foreign project and one read on valid project. Forwarding an
 ID alone does not authorize it; the stage still lacks host project validation
 before projection. Read-only Handoff `msg_a8f584b0b3e7`; no TypeError is counted
 as a safety PASS. Full configured product/PDF/native integration stays pending.
+
+P material subset runs use lazy core imports so they do not construct the actual
+research service or an HTTP server. Both commands select the explicit exact P
+archive plus A7fc1 source, run `test_p_host_boundaries.py -q --tb=short -k
+'host_roots or host_root or parent_traversal or caller_envelope'`:
+
+- P76b0229: **3 failed / 2 passed / 4 deselected**, exit 1, 2.37 seconds;
+  `p-76b0229-material-first.txt`. Empty roots authorize an arbitrary local file;
+  both False/True caller envelope booleans widen the handler's host roots.
+- P550e1d4: **5 passed / 4 deselected**, exit 0, 2.58 seconds;
+  `p-550e1d4-material-exact.txt`. Trusted positive import retained; all root
+  negatives refuse before any read of the own inert outside fixture.
+
+Original P Handoff `msg_24b038c0f466`. First RED is unchanged. Only Q-created
+text is read; UI view formatting is a deterministic fixture while actual
+handler routing/parser/persistent store authorize the operation. Four service
+project/provenance cases still await the resource window. This subset is no
+claim of configured product, PDF, installed/native science or R1 acceptance.

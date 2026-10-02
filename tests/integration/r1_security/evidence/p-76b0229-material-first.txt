@@ -1,0 +1,28 @@
+F..FF                                                                    [100%]
+================================== FAILURES ===================================
+__________________ test_empty_host_roots_deny_local_material __________________
+tests\integration\r1_security\test_p_host_boundaries.py:22: in test_empty_host_roots_deny_local_material
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+_____ test_caller_envelope_cannot_widen_handler_host_import_roots[False] ______
+tests\integration\r1_security\test_p_host_boundaries.py:77: in test_caller_envelope_cannot_widen_handler_host_import_roots
+    assert reads == [], "untrusted envelope directories authorized a host read"
+E   AssertionError: untrusted envelope directories authorized a host read
+E   assert [WindowsPath(...q-inert.txt')] == []
+E     
+E     Left contains one more item: WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-453/test_caller_envelope_cannot_wi0/caller-requested/q-inert.txt')
+E     Use -v to get more diff
+______ test_caller_envelope_cannot_widen_handler_host_import_roots[True] ______
+tests\integration\r1_security\test_p_host_boundaries.py:77: in test_caller_envelope_cannot_widen_handler_host_import_roots
+    assert reads == [], "untrusted envelope directories authorized a host read"
+E   AssertionError: untrusted envelope directories authorized a host read
+E   assert [WindowsPath(...q-inert.txt')] == []
+E     
+E     Left contains one more item: WindowsPath('C:/Users/DW/AppData/Local/Temp/pytest-of-DW/pytest-453/test_caller_envelope_cannot_wi1/caller-requested/q-inert.txt')
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_host_boundaries.py::test_empty_host_roots_deny_local_material
+FAILED tests/integration/r1_security/test_p_host_boundaries.py::test_caller_envelope_cannot_widen_handler_host_import_roots[False]
+FAILED tests/integration/r1_security/test_p_host_boundaries.py::test_caller_envelope_cannot_widen_handler_host_import_roots[True]
+3 failed, 2 passed, 4 deselected in 2.37s

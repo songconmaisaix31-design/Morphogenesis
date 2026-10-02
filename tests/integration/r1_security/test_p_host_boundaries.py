@@ -12,7 +12,6 @@ from morph_research.backend import ServiceBackend, UnconnectedBackend
 from morph_research.r1 import DataBoundary, R1Envelope, ResearchGoal
 from morph_research.r1_store import R1Store
 from morph_research.web import server
-from tests.integration.r1_security.test_a_host_boundaries import seeded
 
 SPACE = "a" * 32
 
@@ -81,6 +80,8 @@ def test_caller_envelope_cannot_widen_handler_host_import_roots(tmp_path, monkey
 
 @pytest.mark.parametrize("operation", ["three_axis", "route_opportunities"])
 def test_foreign_project_is_refused_before_trusted_projection_callback(tmp_path, operation):
+    from tests.integration.r1_security.test_a_host_boundaries import seeded
+
     core = seeded(tmp_path)
     reads = []
 
@@ -97,6 +98,8 @@ def test_foreign_project_is_refused_before_trusted_projection_callback(tmp_path,
 
 
 def test_authorized_project_retains_read_only_projection(tmp_path):
+    from tests.integration.r1_security.test_a_host_boundaries import seeded
+
     core = seeded(tmp_path)
     reads = []
 
@@ -111,6 +114,8 @@ def test_authorized_project_retains_read_only_projection(tmp_path):
 
 
 def test_connected_local_service_does_not_invent_live_provenance(tmp_path):
+    from tests.integration.r1_security.test_a_host_boundaries import seeded
+
     core = seeded(tmp_path)
     assert core.ledger.snapshot() == []
     backend = ServiceBackend(core)
