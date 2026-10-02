@@ -5,7 +5,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from pathlib import Path
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
 from pydantic import JsonValue, TypeAdapter
 
@@ -202,16 +202,21 @@ class LocalAssetStore:
             db.execute("INSERT INTO generated_reports VALUES (?,?,?)",
                        (report.report_id, report.asset_id, report.model_dump_json()))
 
-    def approve_generated(self, report: GeneratedValidationReport) -> None:
-        """Approve a generated candidate whose static + isolation admission passed.
+    def approve_generated(self, report: GeneratedValidationReport,
+                          assert_owned: Callable[[], None] = lambda: None, *,
+                          proof_ref: str | None = None) -> None:
+        """Approve a generated candidate under the original fencing authority.
 
         The report must already be recorded by ``generated_validation``; the FK
         on ``generated_approvals`` enforces that. Approval never re-writes the
-        immutable report.
+        immutable report and is guarded by the caller's ownership fence, matching
+        ``AssetPromoter._commit`` rather than an arbitrary new authority.
         """
         if not report.passed or report.reasons:
             raise AssetSafetyError("generated_report_not_passed")
         with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            assert_owned()
             row = db.execute("SELECT body FROM generated_approvals WHERE asset_id=?", (report.asset_id,)).fetchone()
             if row:
                 old = GeneratedApproval.model_validate_json(row[0])
@@ -221,7 +226,8 @@ class LocalAssetStore:
             db.execute("INSERT INTO generated_approvals VALUES (?,?,?)",
                        (report.asset_id, report.report_id, GeneratedApproval(
                            asset_id=report.asset_id, report_id=report.report_id,
-                           policy_version=report.policy_version).model_dump_json()))
+                           policy_version=report.policy_version, proof_ref=proof_ref).model_dump_json()))
+            assert_owned()
 
     def consumption(self, execution_id: str) -> ConsumptionExecution:
         with self.connection() as db:

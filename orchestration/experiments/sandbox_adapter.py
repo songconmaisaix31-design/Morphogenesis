@@ -3,9 +3,14 @@
 This is the R1 "local CPU usable isolation path": a thin configuration and
 check in front of the existing OpenSandbox backend. It does not build a second
 scheduler. The adapter *declares* the isolation properties the local Linux
-OpenSandbox service is expected to enforce, but until a real harmless probe has
-verified them (AT-07, this round NOT_RUN), ``IsolationReport.admitted`` is False
-and generated candidates fail closed instead of running on the host.
+OpenSandbox service is configured to enforce, and claims a ``proof_ref`` when a
+real harmless probe has been recorded.
+
+Authorization is host-owned: ``IsolationReport.verified``/``probe`` are advisory
+and the executor ignores them. Admission requires a ``TrustedProbeRegistry``
+entry whose ``declared`` capability set matches this adapter's declaration and
+whose probe ``passed``. This round no real probe is authorized, so generated
+candidates fail closed rather than running on the host.
 """
 
 from __future__ import annotations
@@ -13,13 +18,13 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Literal, Protocol
 
-from opensandbox.models.sandboxes import PVC, Volume
 from opensandbox.sync.sandbox import SandboxSync
 
 from orchestration.experiments.backend import OpenSandboxBackend, OpenSandboxSession, UnsupportedCapability
 from orchestration.experiments.generated import (
     BackendProfile, GeneratedContext, GeneratedExperimentPlan, IsolationCapability, IsolationReport,
 )
+from orchestration.experiments.trusted import IsolationProbeRecord, TrustedProbeRegistry
 
 _DENY_ENV = {"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"}
 
@@ -41,28 +46,39 @@ def declared_capability(*, network_deny: bool) -> IsolationCapability:
     )
 
 
+def registry_with_probe(record: IsolationProbeRecord) -> TrustedProbeRegistry:
+    """Host-only helper: register a real (harmless) probe record after it ran."""
+    return TrustedProbeRegistry(records=(record,))
+
+
 class LocalCpuSandboxBackend:
     """Reuses the OpenSandbox SDK lifecycle; isolation stays unverified until a real probe."""
 
     def __init__(self, *, domain: str = "127.0.0.1:8097", api_key: str | None = None,
-                 protocol: Literal["http", "https"] = "http", network_deny: bool = True) -> None:
+                 protocol: Literal["http", "https"] = "http", network_deny: bool = True,
+                 probe: IsolationProbeRecord | None = None) -> None:
         self._opensandbox = OpenSandboxBackend(domain=domain, api_key=api_key, protocol=protocol)
         self._network_deny = network_deny
+        self._probe = probe
         self.provenance: Literal["live"] = "live"
         self.capabilities = self._opensandbox.capabilities
 
     def isolation(self) -> IsolationReport:
+        declared = declared_capability(network_deny=self._network_deny)
+        verified = self._probe is not None and self._probe.verified and self._probe.passed
         return IsolationReport(
-            backend="opensandbox", declared=declared_capability(network_deny=self._network_deny),
-            verified=False, probe="not_run", reasons=("isolation_probe_not_run",),
-        )
+            backend="opensandbox", declared=declared,
+            verified=verified, probe="passed" if verified else "not_run",
+            proof_ref=self._probe.probe_id if self._probe is not None else None,
+            reasons=() if verified else ("isolation_probe_not_run",))
 
     def create(self, plan: GeneratedExperimentPlan, context: GeneratedContext) -> OpenSandboxSession:
         required = {"script", "cpu", "memory", "duration"}
         if missing := required - self.capabilities:
             raise UnsupportedCapability(",".join(sorted(missing)))
         profile: BackendProfile = plan.backend
-        sandbox = SandboxSync.create(plan.environment.image,
+        image = plan.environment.image_digest or plan.environment.image
+        sandbox = SandboxSync.create(image,
             connection_config=self._opensandbox.connection(profile.command_seconds + 15),
             resource={"cpu": str(profile.cpu), "memory": f"{profile.memory_mib}Mi"},
             timeout=timedelta(seconds=profile.lifetime_seconds), ready_timeout=timedelta(seconds=45),

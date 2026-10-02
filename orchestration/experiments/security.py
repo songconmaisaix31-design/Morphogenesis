@@ -21,6 +21,7 @@ import re
 from typing import Literal
 
 from orchestration.experiments.generated import GeneratedExperimentPlan, IsolationReport, StaticSecurityReport
+from orchestration.experiments.trusted import TrustedProbeRegistry
 
 RESERVED_RUNNER_NAMES = frozenset({
     "output.json", "parameters.json", "runtime.json", "sandbox.json",
@@ -122,7 +123,14 @@ def static_checks(plan: GeneratedExperimentPlan, files: dict[str, bytes]) -> Sta
                                 danger=danger, resource=resource, reasons=tuple(reasons))
 
 
-def verify_isolation(report: IsolationReport) -> None:
-    """Raise when the isolation backend is not actually verified; never host-execute."""
-    if not report.admitted:
+def verify_isolation(isolation: IsolationReport, registry: TrustedProbeRegistry | None) -> None:
+    """Raise unless a host-owned registry proves the declared capability set.
+
+    The report's own ``verified``/``probe`` booleans are advisory and ignored:
+    only a matching ``TrustedProbeRegistry`` record (a real harmless probe) can
+    admit execution. Absent proof, fail closed and never host-execute.
+    """
+    if not isolation.declared.complete:
+        raise SecurityRejection("isolation_capability_incomplete")
+    if registry is None or not registry.is_verified(isolation):
         raise SecurityRejection("isolation_capability_unverified")

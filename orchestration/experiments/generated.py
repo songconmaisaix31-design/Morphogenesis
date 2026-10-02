@@ -5,8 +5,13 @@ Alpha R1. They coexist with the frozen ``registered_case`` contracts in
 ``models.py`` and never change the byte-equality semantics of the original two
 cases. A generated candidate is untrusted by definition: its plan, environment,
 evaluation criteria, authorization and resources are all frozen before any
-output is produced, and the candidate author is never granted trusted-criteria
-write authority (the evaluation spec is host-owned and immutable once built).
+output is produced.
+
+Trust boundary: the ``approved``/``approved_by`` fields on ``EvaluationSpec``
+and the ``verified``/``probe`` fields on ``IsolationReport`` are *advisory only*.
+The evaluator and the executor never grant a final scientific verdict or
+admission from those booleans; authoritative approval and isolation verification
+come from host-owned registries in ``trusted.py``.
 """
 
 from __future__ import annotations
@@ -37,7 +42,7 @@ class GeneratedSource(Contract):
 
 
 class GeneratedFile(Contract):
-    """One immutable code-manifest entry with a standard-library digest."""
+    """One immutable manifest entry (code or data) with a standard-library digest."""
 
     name: str = Field(min_length=1, max_length=240)
     sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
@@ -55,9 +60,16 @@ class GeneratedFile(Contract):
 
 
 class ApprovedEnvironment(Contract):
-    """Approved image, runtime and dependency-lock identity; never derived from the candidate."""
+    """Environment request plus its immutable lock identity.
+
+    ``image`` is the requested image reference (tag or digest); ``image_digest``
+    carries the immutable ``@sha256:`` digest when the host has approved one. The
+    dependency lock is always an immutable digest. Neither value is derived from
+    the candidate.
+    """
 
     image: str = Field(min_length=1, max_length=512)
+    image_digest: str | None = Field(default=None, pattern=r"^sha256:[a-f0-9]{64}$")
     python_version: Literal["3.12"] = "3.12"
     sdk_version: Literal["1.1.0"] = "1.1.0"
     backend: Literal["opensandbox"] = "opensandbox"
@@ -98,16 +110,18 @@ class BackendProfile(Contract):
 
 
 class EvaluationSpec(Contract):
-    """Frozen, host-owned evaluation criteria. ``approved=False`` means diagnostic only.
+    """Frozen evaluation criteria the candidate references.
 
-    The candidate may *propose* standards but never holds write authority over a
-    trusted criterion version. Until an independent review approves the version,
-    any trusted recomputation is reported as ``diagnostic`` and cannot set a final
-    hypothesis or contribution state.
+    ``approved`` / ``approved_by`` are advisory and are never trusted by the
+    evaluator: a final scientific verdict requires a matching entry in the
+    host-owned ``TrustedCriteriaRegistry``. The concrete reference function,
+    domain and tolerances are frozen here; a generic template must declare the
+    properties it applies (never an empty default success).
     """
 
     version: str = Field(min_length=1, max_length=120)
     kind: Literal["poisson_reference_v1", "generic_property_v1"]
+    reference: str = Field(default="sin_pi_x", min_length=1, max_length=120)
     max_abs_tolerance: float = Field(default=1e-6, ge=0.0, le=1.0)
     boundary_tolerance: float = Field(default=1e-8, ge=0.0, le=1.0)
     n_intervals: int = Field(default=100, ge=2, le=100000, strict=True)
@@ -121,6 +135,8 @@ class EvaluationSpec(Contract):
     def poisson_domain(self) -> EvaluationSpec:
         if self.kind == "poisson_reference_v1" and not self.x_left < self.x_right:
             raise ValueError("poisson reference requires x_left < x_right")
+        if self.kind == "generic_property_v1" and not self.properties:
+            raise ValueError("generic property template requires explicit properties")
         return self
 
 
@@ -137,6 +153,7 @@ class GeneratedExperimentPlan(Contract):
     authorization_ref: str = Field(min_length=1, max_length=120)
     files: tuple[GeneratedFile, ...] = Field(min_length=1, max_length=64)
     entrypoint: str = Field(min_length=1, max_length=240)
+    data: tuple[GeneratedFile, ...] = Field(default_factory=tuple, max_length=64)
     data_refs: tuple[str, ...] = Field(default_factory=tuple, max_length=64)
     environment: ApprovedEnvironment
     parameters: dict[str, JsonValue] = Field(default_factory=dict)
@@ -165,7 +182,12 @@ class GeneratedExperimentPlan(Contract):
 
 
 class GeneratedContext(Contract):
-    """Run identity plus author/reviewer. The reviewer must be independent of the author."""
+    """Run identity plus author/reviewer labels.
+
+    The strings are informational labels; independence and approval authority
+    are host-owned (ledger identities + ``trusted.py`` registries), never granted
+    by these caller-supplied fields.
+    """
 
     run_id: str = Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,119}$")
     task_id: str = Field(min_length=1, max_length=120)
@@ -221,21 +243,27 @@ class IsolationCapability(Contract):
 
 
 class IsolationReport(Contract):
-    """Isolation evidence. Declared capability is never treated as a real proof."""
+    """Declared isolation + a claim of which host probe proves it.
+
+    ``verified`` / ``probe`` are advisory and are never trusted by the executor:
+    authoritative verification comes from the host-owned ``TrustedProbeRegistry``
+    keyed by ``backend`` and ``proof_ref``.
+    """
 
     backend: str = Field(min_length=1, max_length=120)
     declared: IsolationCapability
     verified: bool = False
     probe: Literal["not_run", "passed", "failed"] = "not_run"
+    proof_ref: str | None = Field(default=None, min_length=1, max_length=120)
     reasons: tuple[str, ...] = ()
-
-    @property
-    def admitted(self) -> bool:
-        return self.verified and self.probe == "passed" and self.declared.complete
 
 
 class GeneratedAssessment(Contract):
-    """Three-axis result. ``trusted`` means the host recomputed it from raw output."""
+    """Three-axis result. ``trusted`` means the host recomputed it from raw output.
+
+    ``proof_ref`` binds a final/contribution decision back to an original ledger
+    run, consumption or adoption fact; it is only set by host-owned acceptance.
+    """
 
     execution: ExecutionAxis = "not_run"
     hypothesis: HypothesisAxis = "not_evaluated"
@@ -246,6 +274,7 @@ class GeneratedAssessment(Contract):
     reasons: tuple[str, ...] = ()
     metrics: dict[str, float] = Field(default_factory=dict)
     candidate_self_score: float | None = None
+    proof_ref: str | None = Field(default=None, min_length=1, max_length=240)
 
 
 class GeneratedResult(Contract):

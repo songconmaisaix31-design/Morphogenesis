@@ -13,6 +13,10 @@ from orchestration.experiments.generated import (
 )
 from orchestration.experiments.generated_executor import GeneratedExperimentExecutor, read_generated_result
 from orchestration.experiments.sandbox_adapter import LocalCpuSandboxBackend
+from orchestration.experiments.trusted import (
+    IsolationProbeRecord, TrustedCriteriaRecord, TrustedCriteriaRegistry, TrustedProbeRegistry,
+    finalize_assessment,
+)
 
 __all__ = ["ExperimentContext", "ExperimentCriteria", "ExperimentEnvironment", "ExperimentInput",
            "ExperimentPlan", "ExperimentResources", "ExperimentResult", "ScientificAssessment",
@@ -20,4 +24,6 @@ __all__ = ["ExperimentContext", "ExperimentCriteria", "ExperimentEnvironment", "
            "ApprovedEnvironment", "BackendProfile", "EvaluationSpec", "GeneratedAssessment",
            "GeneratedContext", "GeneratedExperimentPlan", "GeneratedFile", "GeneratedResult",
            "GeneratedSource", "IsolationCapability", "IsolationReport", "StaticSecurityReport",
-           "GeneratedExperimentExecutor", "LocalCpuSandboxBackend", "read_generated_result"]
+           "GeneratedExperimentExecutor", "LocalCpuSandboxBackend", "read_generated_result",
+           "IsolationProbeRecord", "TrustedCriteriaRecord", "TrustedCriteriaRegistry",
+           "TrustedProbeRegistry", "finalize_assessment"]

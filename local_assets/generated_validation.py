@@ -1,38 +1,44 @@
 """Admission, apply and consume entrypoints for generated candidates.
 
 The generated candidate is admitted by ``generated_validation`` (static security
-gates plus a *verified* isolation report), then reused through the existing
+gates plus a *host-owned* isolation proof), then reused through the existing
 asset chain: ``AssetApplicator`` (prepare/apply) and ``AssetConsumer``
-(execute/record_adoption -> ``AdoptionReceipt``). No second ledger, scheduler or
-completion-proof system is introduced.
+(execute/record_adoption -> ``AdoptionReceipt``). Approval is fence-guarded and
+bound to the original chain, never an arbitrary caller authority. No second
+ledger, scheduler or completion-proof system is introduced.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable
 import time
 from uuid import uuid4
 
+from contracts.identity import AttemptId
 from local_assets.consume import AssetConsumer
-from local_assets.generated_models import GeneratedValidationReport
+from local_assets.generated_models import GeneratedApproval, GeneratedValidationReport
 from local_assets.models import Candidate, FileChange
 from local_assets.store import LocalAssetStore
 from local_assets.validate import blast_radius
 from orchestration.experiments.generated import GeneratedExperimentPlan, IsolationReport
-from orchestration.experiments.security import static_checks
-from contracts.identity import AttemptId
+from orchestration.experiments.security import SecurityRejection, static_checks, verify_isolation
+from orchestration.experiments.trusted import TrustedProbeRegistry
 
 
 def generated_validation(store: LocalAssetStore, asset_id: str, plan: GeneratedExperimentPlan,
                          files: dict[str, bytes], isolation: IsolationReport, *,
+                         probe_registry: TrustedProbeRegistry | None = None,
                          report_ttl_seconds: float = 300) -> GeneratedValidationReport:
-    """Admission gate: static security plus verified isolation; never byte-equality."""
+    """Admission gate: static security plus host-verified isolation; never byte-equality."""
     plan = GeneratedExperimentPlan.model_validate(plan.model_dump(mode="json"))
     static = static_checks(plan, files)
     reasons = list(static.reasons)
     if not static.passed:
         reasons.append("static_security_failed")
-    if not isolation.admitted:
-        reasons.append("isolation_capability_unverified")
+    try:
+        verify_isolation(isolation, probe_registry)
+    except SecurityRejection as error:
+        reasons.append(str(error))
     now = time.time()
     report = GeneratedValidationReport(
         report_id=uuid4().hex, asset_id=asset_id, plan_json=plan.model_dump_json(),
@@ -42,9 +48,11 @@ def generated_validation(store: LocalAssetStore, asset_id: str, plan: GeneratedE
     return report
 
 
-def approve_generated(store: LocalAssetStore, report: GeneratedValidationReport) -> None:
-    """Mark a passing generated admission durable; downstream reuse requires this."""
-    store.approve_generated(report)
+def approve_generated(store: LocalAssetStore, report: GeneratedValidationReport,
+                      assert_owned: Callable[[], None] = lambda: None,
+                      *, proof_ref: str | None = None) -> None:
+    """Fence-guarded approval; downstream reuse requires the original approval authority."""
+    store.approve_generated(report, assert_owned, proof_ref=proof_ref)
 
 
 def generated_candidate(plan: GeneratedExperimentPlan, files: dict[str, bytes], *, attempt: AttemptId,
@@ -67,5 +75,5 @@ def generated_candidate(plan: GeneratedExperimentPlan, files: dict[str, bytes], 
     return candidate.model_copy(update={"declared_files": count, "declared_lines": lines})
 
 
-__all__ = ["GeneratedValidationReport", "AssetConsumer", "approve_generated", "generated_candidate",
-           "generated_validation"]
+__all__ = ["GeneratedValidationReport", "GeneratedApproval", "AssetConsumer", "approve_generated",
+           "generated_candidate", "generated_validation"]

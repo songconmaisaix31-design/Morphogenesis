@@ -1,10 +1,15 @@
 """Bounded generated-candidate execution reusing the OpenSandbox SDK lifecycle.
 
 The pipeline is prepare -> admit -> run -> evaluate -> report. Admission is
-fail-closed: static security gates and a *verified* isolation report must pass
+fail-closed: static security gates and a *host-owned* isolation proof must pass
 before any sandbox is created. A candidate is never executed on the host. The
-trusted assessment is recomputed from the candidate's raw output, never from a
-self-reported score.
+trusted assessment is recomputed from the candidate's raw output and is always
+``diagnostic`` here; finalization is a separate host-owned step.
+
+Persist/error/cleanup authority is shared with the registered executor via
+``orchestration.experiments.executor`` (``finalize_session``, ``_write_json``,
+``_artifact``, ``_execution_state``, ``digest``): this module is a thin branch,
+not a second executor fact layer.
 """
 
 from __future__ import annotations
@@ -12,13 +17,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Any
+from typing import cast
 
 import httpx
 
 from orchestration.experiments.backend import ExperimentSession, UnsupportedCapability
 from orchestration.experiments.evaluation import evaluate
-from orchestration.experiments.executor import DIRECTORY, RUNTIME_PROBE, _execution_state, digest
+from orchestration.experiments.executor import (
+    DIRECTORY, RUNTIME_PROBE, _artifact, _execution_state, _write_json, digest, finalize_session,
+)
 from orchestration.experiments.generated import (
     ExecutionAxis, GeneratedAssessment, GeneratedContext, GeneratedExperimentPlan, GeneratedResult,
     IsolationReport, StaticSecurityReport,
@@ -26,22 +33,10 @@ from orchestration.experiments.generated import (
 from orchestration.experiments.models import ExperimentArtifact
 from orchestration.experiments.sandbox_adapter import GeneratedBackend
 from orchestration.experiments.security import SecurityRejection, static_checks, verify_isolation
+from orchestration.experiments.trusted import TrustedCriteriaRegistry, TrustedProbeRegistry
 
 GENERATED_OUTPUT = "output.json"
 GENERATED_PARAMETERS = "parameters.json"
-
-
-def _write_json(path: Path, data: Any) -> None:
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(data, ensure_ascii=False, allow_nan=False, indent=2), encoding="utf-8")
-    temporary.replace(path)
-
-
-def _artifact(root: Path, name: str, data: bytes) -> ExperimentArtifact:
-    path = root / name
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(data)
-    return ExperimentArtifact(name=name, archive_path=name, sha256=digest(data), size_bytes=len(data))
 
 
 def execution_axis(state: str) -> ExecutionAxis:
@@ -54,41 +49,56 @@ def execution_axis(state: str) -> ExecutionAxis:
     return "not_run"
 
 
+def _require_immutable_image(plan: GeneratedExperimentPlan) -> None:
+    if not plan.environment.image_digest and "@sha256:" not in plan.environment.image:
+        raise SecurityRejection("immutable_image_digest_required")
+
+
 @dataclass(frozen=True)
 class GeneratedPreparation:
     plan: GeneratedExperimentPlan
     files: dict[str, bytes]
+    data: dict[str, bytes]
     static: StaticSecurityReport
     isolation: IsolationReport
 
 
 class GeneratedExperimentExecutor:
-    def __init__(self, backend: GeneratedBackend) -> None:
+    def __init__(self, backend: GeneratedBackend, *,
+                 probe_registry: TrustedProbeRegistry | None = None,
+                 criteria_registry: TrustedCriteriaRegistry | None = None) -> None:
         self.backend = backend
+        self.probe_registry = probe_registry
+        self.criteria_registry = criteria_registry
 
-    def prepare(self, plan: GeneratedExperimentPlan, files: dict[str, bytes]) -> GeneratedPreparation:
+    def prepare(self, plan: GeneratedExperimentPlan, files: dict[str, bytes],
+                data: dict[str, bytes] | None = None) -> GeneratedPreparation:
         plan = GeneratedExperimentPlan.model_validate(plan.model_dump(mode="json"))
-        manifest = {file.name: file for file in plan.files}
-        for name, body in files.items():
-            entry = manifest.get(name)
-            if entry is None or digest(body) != entry.sha256 or len(body) != entry.size_bytes:
-                raise ValueError("manifest_digest_mismatch")
-        if set(files) != set(manifest):
-            raise ValueError("manifest_count_mismatch")
-        return GeneratedPreparation(plan=plan, files=dict(files),
+        data = data or {}
+        for manifest, bodies, label in ((plan.files, files, "code"), (plan.data, data, "data")):
+            entries = {file.name: file for file in manifest}
+            for name, body in bodies.items():
+                entry = entries.get(name)
+                if entry is None or digest(body) != entry.sha256 or len(body) != entry.size_bytes:
+                    raise ValueError(label + "_manifest_digest_mismatch")
+            if set(bodies) != set(entries):
+                raise ValueError(label + "_manifest_count_mismatch")
+        return GeneratedPreparation(plan=plan, files=dict(files), data=dict(data),
                                     static=static_checks(plan, files), isolation=self.backend.isolation())
 
     def admit(self, preparation: GeneratedPreparation) -> None:
         if not preparation.static.passed:
             raise SecurityRejection("static_security_failed")
-        verify_isolation(preparation.isolation)
+        verify_isolation(preparation.isolation, self.probe_registry)
+        _require_immutable_image(preparation.plan)
         required = {"script", "cpu", "memory", "duration"}
         if missing := required - self.backend.capabilities:
             raise UnsupportedCapability(",".join(sorted(missing)))
 
     def execute(self, plan: GeneratedExperimentPlan, context: GeneratedContext,
-                files: dict[str, bytes], archive_root: Path | str) -> GeneratedResult:
-        preparation = self.prepare(plan, files)
+                files: dict[str, bytes], archive_root: Path | str,
+                data: dict[str, bytes] | None = None) -> GeneratedResult:
+        preparation = self.prepare(plan, files, data)
         root = Path(archive_root).resolve() / context.run_id
         result = GeneratedResult(
             plan=preparation.plan, context=context, archive_path=str(root), provenance=self.backend.provenance,
@@ -114,13 +124,15 @@ class GeneratedExperimentExecutor:
             self.admit(preparation)
             for name, body in preparation.files.items():
                 capture(f"inputs/{name}", body)
+            for name, body in preparation.data.items():
+                capture(f"inputs/{name}", body)
             result = result.model_copy(update={"cleanup_state": "unknown"})
             persist()
             session = self.backend.create(preparation.plan, context)
             result = result.model_copy(update={"sandbox_id": session.id})
             persist()
             capture("sandbox.json", json.dumps(session.info()).encode())
-            for name, body in preparation.files.items():
+            for name, body in {**preparation.files, **preparation.data}.items():
                 session.upload(f"{DIRECTORY}/{name}", body)
             parameters = {"parameters": preparation.plan.parameters, "seeds": list(preparation.plan.seeds)}
             session.upload(f"{DIRECTORY}/{GENERATED_PARAMETERS}", json.dumps(parameters).encode())
@@ -131,7 +143,7 @@ class GeneratedExperimentExecutor:
                 result = result.model_copy(update={"execution_state": state, "exit_code": probe.exit_code,
                     "reasons": ("runtime_probe_failed",),
                     "assessment": result.assessment.model_copy(update={"execution": execution_axis(state)})})
-                return self._finish(result, root, artifacts, session)
+                return cast(GeneratedResult, finalize_session(result, root, artifacts, session))
             runtime = session.download(f"{DIRECTORY}/runtime.json", preparation.plan.backend.artifact_bytes)
             capture("runtime.json", runtime)
             version = json.loads(runtime).get("python")
@@ -153,8 +165,6 @@ class GeneratedExperimentExecutor:
                     result = result.model_copy(update={"execution_state": "missing_artifact",
                         "reasons": (*result.reasons, "required_artifact_unreadable")})
             result = result.model_copy(update={"assessment": self.evaluate(result, context)})
-            if result.execution_state == "succeeded" and not result.assessment.trusted:
-                raise ValueError("trusted_assessment_unavailable")
         except UnsupportedCapability as error:
             result = result.model_copy(update={"execution_state": "unsupported", "reasons": (str(error),),
                 "assessment": result.assessment.model_copy(update={"execution": "not_run"})})
@@ -166,45 +176,30 @@ class GeneratedExperimentExecutor:
                 "reasons": ("transport_timeout_execution_unknown",)})
         except Exception as error:
             result = result.model_copy(update={"execution_state": "unknown", "reasons": (type(error).__name__,)})
-        return self._finish(result, root, artifacts, session)
+        return cast(GeneratedResult, finalize_session(result, root, artifacts, session))
 
     def evaluate(self, result: GeneratedResult, context: GeneratedContext) -> GeneratedAssessment:
         plan = result.plan
         state = result.execution_state
-        reviewer_independent = context.reviewer != context.author
         if state != "succeeded":
             return GeneratedAssessment(execution=execution_axis(state), hypothesis="not_evaluated",
                                        contribution="proposed", mode="diagnostic", trusted=False,
                                        evaluator_version=plan.evaluation.version,
                                        reasons=tuple(result.reasons))
         raw = (Path(result.archive_path) / f"outputs/{GENERATED_OUTPUT}").read_bytes()
-        assessment = evaluate(plan, raw, reviewer_independent=reviewer_independent)
-        return assessment.model_copy(update={"execution": "succeeded"})
-
-    @staticmethod
-    def _finish(result: GeneratedResult, root: Path, artifacts: list[ExperimentArtifact],
-                session: ExperimentSession | None) -> GeneratedResult:
-        if session:
-            try:
-                session.destroy()
-                result = result.model_copy(update={"cleanup_state": "destroyed"})
-            except Exception as error:
-                result = result.model_copy(update={"cleanup_state": "unknown", "remote_effect": "unknown",
-                    "reasons": (*result.reasons, "cleanup_" + type(error).__name__)})
-            finally:
-                try:
-                    session.close()
-                except Exception as error:
-                    result = result.model_copy(update={"reasons": (*result.reasons, "close_" + type(error).__name__)})
-        result = result.model_copy(update={"artifacts": tuple(artifacts)})
-        _write_json(root / "result.json", result.model_dump(mode="json"))
-        return result
+        return evaluate(plan, raw, reviewer_independent=False).model_copy(update={"execution": "succeeded"})
 
 
 def read_generated_result(archive_root: Path | str, run_id: str, *,
                           expected_plan: GeneratedExperimentPlan | None = None,
                           expected_context: GeneratedContext | None = None) -> GeneratedResult:
-    """Verify durable binding, input digests, and recompute the trusted assessment."""
+    """Verify durable binding, input/output digests, and recompute the assessment.
+
+    The stored ``assessment`` is never trusted: it is recomputed from the raw
+    output and is always diagnostic (host-owned finalization is separate). A
+    forged ``accepted``/``final``/``trusted`` assessment in the archive is
+    therefore discarded, and a mutable plan field change is rejected.
+    """
     if not run_id or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-" for char in run_id):
         raise ValueError("invalid_run_id")
     root = Path(archive_root).resolve() / run_id
@@ -228,10 +223,21 @@ def read_generated_result(archive_root: Path | str, run_id: str, *,
     for file in result.plan.files:
         if digest((root / "inputs" / file.name).read_bytes()) != file.sha256:
             raise ValueError("input_digest_mismatch")
+    for file in result.plan.data:
+        if digest((root / "inputs" / file.name).read_bytes()) != file.sha256:
+            raise ValueError("data_digest_mismatch")
     if result.execution_state == "succeeded":
+        names = {artifact.archive_path for artifact in result.artifacts}
+        required = {f"inputs/{file.name}" for file in result.plan.files}
+        required |= {f"inputs/{file.name}" for file in result.plan.data}
+        required.add(f"outputs/{GENERATED_OUTPUT}")
+        if not required <= names:
+            raise ValueError("missing_durable_evidence")
         raw = (root / f"outputs/{GENERATED_OUTPUT}").read_bytes()
-        assessment = evaluate(result.plan, raw, reviewer_independent=result.context.reviewer != result.context.author)
+        assessment = evaluate(result.plan, raw, reviewer_independent=False)
         assessment = assessment.model_copy(update={"execution": "succeeded"})
     else:
-        assessment = result.assessment
+        assessment = GeneratedAssessment(execution=execution_axis(result.execution_state),
+                                         hypothesis="not_evaluated", contribution="proposed",
+                                         mode="diagnostic", trusted=False)
     return result.model_copy(update={"assessment": assessment})
