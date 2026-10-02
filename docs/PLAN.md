@@ -2,6 +2,8 @@
 
 事实源：本轮用户今日规划与五项停止条件，优先于历史开发包。采用 Swarm Harness：算法仅提供局部候选偏好，Agent 原 MCP 接口自主认领，原 TaskLedger 裁决合法性；没有全局派发者或第二份任务状态。主控仅计划、分发、决策及独立验收，不写业务代码。四位固定 Owner 在互斥路径开发，统一由独立 I 最后精确集成；未知效果不重试，首失败保留。
 
+当前验收退回（2026-10-02 10:42）：累计CORE9ceb3aaef16a7f65a8a457d525e01202150ac1ab、PRODUCT35934f1e3afcbb6a2028a14fe998611c4cbd509b已形成候选，A精确安装完整53项通过，I独立17产品/181核心文件Git/archive/wheel/site字节与COPY/VCS来源通过，原Linux完整工程1193PASS6SKIP及121文件strict/build/SDK/wheel通过；Windows与本机首轮仍待结果。I用既有只读构造入口执行两个原完整科学checker全部断言通过，115旧state/workspace文件bytes/mtime不变，明确为instrumented档案复核、旧subject不升级新task_live。但真实旧档案正式policy读取只接作者事实，漏掉合法复现/继承：原applied结果没有report_id，且复现合法应用author源候选。离线mock回归绿不能覆盖该缺口；现9ceb/359不得冻结策略或发布。退C同Owner/原分支新Task task_3c396b201980做最小可信来源兼容修复，旧报告/账本/采用/判定全部只读；I精确合新SOURCE再冻结，A同Owner更新产品pin，最终版本上再完整工程与独立安装，D最后仅补录已验证版本。原firstRED与旧9候选证据保留；不重跑科学、模型或扩大兼容范围。
+
 核验基线：科研 CORE/REPORT branch 7b66f0dd0a285c1b6cf789aa3c5a41d22d655993（业务冻结 bf67c1a4134a25d009cff2acccbfab027999bea6）；私库产品 branch e9a68668ac1e15038faaa3b04a34e2a5aa0c9f4a（固定核心 bf67）。公开 main 31d7fc9eb1fd372ea2786131f539fe2de8506b53、私库 main 6c1451f5269ce8d7e2f92c8a794a691b41d8145c 均未包含上述正式科研代码，不能从只有初始化文档的 main 重写产品。各 Owner 在原 clean Orca Worktree 新建本轮 branch，保留全部旧分支与根2957/WIP。默认先推送候选，不修改默认 main；已异步询问正式入口验收是否新增有界科研运行及发布目标，等待用户约束，无答案不执行收费/科学新实验。
 
 | 轨 | 固定 Owner / Worktree / Branch | 互斥 write_paths 与交付 |
