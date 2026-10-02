@@ -383,3 +383,32 @@ candidate author's source_attempt while C requires the current review execution
 attempt; Handoffs `msg_ebc5bf6469cc` and `msg_393526310efc` request one consistent
 original execution lineage and a nonempty independently reviewed positive.
 These repair checkpoints are neither final Owner acceptance nor R1 PASS.
+
+## P host repair and successor configuration controls
+
+P delivered SOURCE `cedbf3bc52eaabd4814e43068428e89a49ab5cf9`; coordinator
+`msg_704adcdf4f64` granted the exact Q12 window. A fresh P archive with unchanged
+A7fc and private BLAS1 environment ran `test_p_host_boundaries.py -q --tb=short`:
+**12 passed**, exit 0, 3.17s. `p-cedbf3b-host-first.txt` preserves this first
+candidate outcome. Original material-root and callback negatives pass; three
+additional tests reject a private-scope task and a same-scope foreign-project
+task while preserving a real permitted note read. This uses the actual public
+ServiceBackend and original stores, without constructing a socket server.
+Window release `msg_d9eb7509a234`, original P receipt `msg_1a5306edc854`.
+
+Q SOURCE `63fe5ead51e05fc2f718ebcfe942942d82d90abf` also adds currently NOT_RUN
+tests for fully configured SDK request capture (one nonempty positive, twelve
+effective-setting substitutions, two prepare/admit mutations) and actual service
+BudgetLedger admission (six cases covering known allowance, unknown/crash,
+reserve/begin interruption and replacement run/database). B's new full
+IsolationConfiguration fixture uses the same canonical image, resource profile,
+endpoint, deployment and process limit on the host record and report; candidate
+seeding takes that same frozen plan. No assertion or threshold changed; the
+historical unbound-fixture first RED remains in `e7e1805` and its raw log.
+
+B has delivered stage `e8e16a5b9e755a94f8587b76ba9fc288f218b8af`, now archived.
+Owner test reports are not Q acceptance. The real generated observation reader,
+trusted three-axis projection and original consumption/adoption remain under
+review. Coordinator `msg_d7c25aad3900` permits explicit isolated mock L1 adoption
+only through the existing chain, requiring provenance retention and default-live,
+mixed-mode and reopen refusal checks. No real science or probe was authorized.
