@@ -505,3 +505,33 @@ subprocess adapter coverage is not claimed. The fixture backend visibly retains
 The new failing cases are unresolved at this evidence checkpoint. The corrected
 exact Owner successor, combined formal service chain and configured product
 factory remain pending; none of these local results claims L2/L3.
+
+## Exact archive repair and scoped-feedback rechecks
+
+Q SOURCE `fff315b` preserves the repaired-fixture checks and new raw logs:
+
+| Exact source combination | Own Q suite | Result |
+| --- | --- | --- |
+| B `2d50d08811aa2337b9c0166dc114513e292bce1f` | Historical52 plus `test_b_mock_adoption.py`16 | **68 passed**, 10.28s |
+| C `4f83296af908352660ebf71e633e70a111eb2877` (contains B2d) | Original22, advisory7, generated16 | **45 passed**, 11.80s |
+| P `f00631e6a11eee776574f8d1ff4319b318fd879a` plus A8fc | Host12 plus material9 | **21 passed**, 4.33s |
+
+All use the same `python -m pytest <owned files> -q --tb=short` command and
+exact archive environment selection as above. B fixture now passes the same
+original host `TrustedCriteriaRegistry` to the store, executor and reopen.
+Original assertions remain; the three B archive first REDs and seven P identity
+first REDs remain in their earlier logs and commits. B additionally refuses
+missing or substituted host criteria on reopen and rechecks original evidence
+before apply and after actual file writes. Post-write corruption rolls back the
+inert file, leaves the ledger task uncompleted and records no adoption.
+
+C's four new locality controls first establish a real accepted contribution.
+The matching host can still read it; a foreign scope or workspace sees neither
+trusted results nor historical credit. A separate review workspace cannot
+launder the original result into a contribution. Existing support/refutation,
+correction, deduplication and archive checks still pass on the combined C/B SHA.
+
+Handoffs: B `msg_c012fd30895e`, P `msg_677d9ae14b7c`, A
+`msg_3b158e841bcf`. A's complete generated service/official MCP chain and the
+final installed product combination remain pending exact delivery. These
+bounded results do not substitute for final integration or real execution.
