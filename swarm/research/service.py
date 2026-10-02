@@ -358,6 +358,11 @@ class ResearchService:
             raise AssetSafetyError("experiment_backend_not_configured")
         return self.backend.read(run_id)
 
+    def artifact(self, task_id: str, run_id: str, artifact_path: str, *, max_bytes: int = 65536) -> dict[str, JsonValue]:
+        """Read only a verified, size-bounded original generated output or log."""
+        self._run(task_id, run_id)
+        return self._generated_tools().artifact(task_id, run_id, artifact_path, max_bytes)
+
     def publish(self, task_id: str, token: int, candidate: Candidate) -> str:
         lease = self._lease(task_id, token)
         task = self._task(task_id)
@@ -950,6 +955,7 @@ class ResearchService:
         task_ids = {t.signal.task_id for t in tasks}
         assets: dict[str, JsonValue] = {}
         observations: list[JsonValue] = []
+        validation_reports: dict[str, JsonValue] = {}
         executions: list[JsonValue] = []
         audit: list[JsonValue] = []
         audit_truncated = False
@@ -977,6 +983,12 @@ class ResearchService:
             plan = task.acceptance.get("generated_plan")
             if isinstance(plan, dict) and isinstance(plan.get("candidate_asset_id"), str):
                 asset_ids.add(str(plan["candidate_asset_id"]))
+                report_id = task.acceptance.get("generated_report_id")
+                if isinstance(report_id, str):
+                    validation_reports[report_id] = self.store.generated_report(report_id).model_dump(mode="json")
+                applied_report = (task.result or {}).get("report_id")
+                if (task.result or {}).get("applied") is True and isinstance(applied_report, str):
+                    validation_reports[applied_report] = self.store.generated_report(applied_report).model_dump(mode="json")
             for key in ("asset_id", "candidate_asset_id"):
                 value = (task.result or {}).get(key)
                 if isinstance(value, str):
@@ -994,6 +1006,7 @@ class ResearchService:
         return {"schema_version": "research-package/v1", "project_id": bound, "context": context,
                 "tasks": [t.model_dump(mode="json") for t in tasks], "tasks_truncated": len(rows) > limit,
                 "limit": limit, "assets": list(assets.values()), "persisted_observations": observations,
+                "generated_validation_reports": list(validation_reports.values()),
                 "executions": executions, "task_audit": audit, "audit_truncated": audit_truncated,
                 "adoption_receipts": receipts, "export_performed_external_io": False,
                 "evidence_boundary": "per_record_provenance", "completion_claim": False}

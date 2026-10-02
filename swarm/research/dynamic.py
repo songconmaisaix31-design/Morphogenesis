@@ -30,6 +30,7 @@ from orchestration.experiments.generated import (
 )
 from orchestration.experiments.generated_executor import GeneratedExperimentExecutor, read_generated_result
 from orchestration.experiments.fixture import GeneratedFixtureBackend
+from orchestration.experiments.executor import digest
 from orchestration.experiments.sandbox_adapter import LocalCpuSandboxBackend
 from orchestration.experiments.trusted import (
     IsolationProbeRecord, TrustedCriteriaRecord, TrustedCriteriaRegistry, TrustedProbeRegistry,
@@ -376,6 +377,29 @@ class GeneratedResearch:
 
     def read(self, task_id: str, run_id: str) -> dict[str, JsonValue]:
         return _OBJECT.validate_python(generated_result_payload(self._read(task_id, run_id), criteria_registry=self.criteria))
+
+    def artifact(self, task_id: str, run_id: str, artifact_path: str, max_bytes: int) -> dict[str, JsonValue]:
+        """Bounded output/log export with original archive verification on both sides."""
+        self.service._research_action("read")
+        if isinstance(max_bytes, bool) or not 1 <= max_bytes <= 1048576:
+            raise ValueError("artifact_limit_must_be_in_1_1048576")
+        result = self._read(task_id, run_id)
+        allowed = {"outputs/output.json", "execution.json", "runtime.json", "runtime-command.json",
+                   "cleanup.json", "cancel.json", "download-output.json"}
+        artifact = next((a for a in result.artifacts if a.archive_path == artifact_path and artifact_path in allowed), None)
+        if artifact is None:
+            raise AssetSafetyError("output_artifact_not_in_original_archive")
+        if artifact.size_bytes > max_bytes:
+            raise AssetSafetyError("artifact_exceeds_inline_limit")
+        path = Path(result.archive_path) / artifact.archive_path
+        no_links(path)
+        with path.open("rb") as stream:
+            raw = stream.read(max_bytes + 1)
+        if len(raw) != artifact.size_bytes or digest(raw) != artifact.sha256 or self._read(task_id, run_id) != result:
+            raise AssetSafetyError("archive_changed_during_artifact_export")
+        return {"task_id": task_id, "run_id": run_id, "artifact": artifact.model_dump(mode="json"),
+                "content": raw.decode("utf-8"), "encoding": "utf-8", "truncated": False,
+                "archive_status": "verified", "provenance": result.provenance}
 
     def observe(self, task_id: str, token: int, asset_id: str, run_id: str, purpose: Purpose) -> ResearchObservation:
         s = self.service

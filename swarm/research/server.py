@@ -12,9 +12,14 @@ from swarm.research.service import Purpose, ResearchService
 
 def create_server(service: ResearchService) -> FastMCP:
     mcp = FastMCP("Morphogenesis Research", instructions=(
-        "Discover eligible research tasks and voluntarily claim one. Identity and permissions are host-bound. "
+        f"Host-bound research project: {service.config.project_id!r}. "
+        "Read shared project context and sources, propose justified work within the approved goal, "
+        "discover current legal opportunities, choose or override with a reason, then voluntarily claim one. "
+        "Identity, project approval, data scope, backend, evaluation and budgets are host-bound. "
         "Renew the lease during work. Execution, scientific criteria, independent reproduction and actual adoption "
-        "are separate facts. Unknown external effects must not be replayed."))
+        "are separate facts. Prepare new candidate Python through the structured tools; never execute candidate "
+        "code using host shell, imports or native agent tools. Mock results remain mock. "
+        "Unknown external effects must not be replayed."))
 
     @mcp.tool()
     def discover_tasks(limit: int = 100) -> list[dict[str, JsonValue]]:
@@ -71,9 +76,16 @@ def create_server(service: ResearchService) -> FastMCP:
         return service.search(query, limit)
 
     @mcp.tool()
-    async def research_experiment(action: Literal["request", "run", "result"], task_id: str,
-                                  token: int | None = None, run_id: str | None = None) -> dict[str, JsonValue]:
+    async def research_experiment(action: Literal["request", "run", "result", "artifact"], task_id: str,
+                                  token: int | None = None, run_id: str | None = None,
+                                  artifact_path: str | None = None, max_bytes: int = 65536) -> dict[str, JsonValue]:
         """Inspect a frozen plan, execute via the selected host backend, or reread its archive; never replay unknown."""
+        if action == "artifact":
+            if token is not None or run_id is None or artifact_path is None:
+                raise ValueError("artifact_requires_bound_run_and_artifact_path")
+            return service.artifact(task_id, run_id, artifact_path, max_bytes=max_bytes)
+        if artifact_path is not None or max_bytes != 65536:
+            raise ValueError("artifact_arguments_require_artifact_action")
         if action == "result":
             if run_id is None or token is not None:
                 raise ValueError("result_requires_run_id_only")

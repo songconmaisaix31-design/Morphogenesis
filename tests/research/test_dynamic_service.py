@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 from pathlib import Path
 import socket
@@ -122,6 +123,25 @@ def execute_observe(s, task, token, asset, purpose):
     assert report["source_attempt"]["task_id"] == task
     assert report["provenance"] == "mock"
     return run, report
+
+
+def test_original_artifact_reader_is_bounded_task_bound_and_rechecks_mutation(tmp_path):
+    s, plan = setup(tmp_path)
+    task, token, prepared = prepare(s, plan)
+    run, _ = execute_observe(s, task, token, prepared["asset_id"], "original")
+    output = s.artifact(task, run, "outputs/output.json")
+    assert output["archive_status"] == "verified" and output["provenance"] == "mock"
+    assert not output["truncated"] and len(json.loads(output["content"])["x"]) == 101
+    with pytest.raises(AssetSafetyError, match="inline_limit"):
+        s.artifact(task, run, "outputs/output.json", max_bytes=1)
+    with pytest.raises(AssetSafetyError, match="not_in_original_archive"):
+        s.artifact(task, run, "../host.json")
+    with pytest.raises(AssetSafetyError, match="unknown_task_run"):
+        s.artifact(task, "unknown-run", "outputs/output.json")
+    raw = Path(s.config.evidence_root, run, "outputs", "output.json")
+    raw.write_bytes(b'{}')
+    with pytest.raises(ValueError):
+        s.artifact(task, run, "outputs/output.json")
 
 
 @pytest.mark.parametrize("refuted", [False, True])
