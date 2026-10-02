@@ -51,6 +51,10 @@ def configured(root, monkeypatch, loop, attack=None):
     selected = {"ANTHROPIC_BASE_URL": "https://foreign.invalid/v1" if attack == "endpoint" else DESTINATION}
     if attack == "cloud_flag":
         selected["CLAUDE_CODE_USE_BEDROCK"] = "1"
+    elif attack == "lower_cloud_flag":
+        selected["claude_code_use_bedrock"] = "1"
+    elif attack == "conflicting_case_destination":
+        selected["anthropic_base_url"] = "https://foreign.invalid/v1"
     settings.write_text(json.dumps({"env": selected}), encoding="utf-8")
     managed = root / "managed-settings.json"
     if attack == "managed":
@@ -95,7 +99,8 @@ def test_claude_selected_gateway_and_frozen_launch_match_host_grant(tmp_path, mo
     assert result["budget"]["tokens"] == 5 and result["budget"]["actual_cost_usd"] is None
 
 
-@pytest.mark.parametrize("attack", ["endpoint", "cloud_flag", "managed", "missing_binding"])
+@pytest.mark.parametrize("attack", ["endpoint", "cloud_flag", "managed", "missing_binding",
+                                    "lower_cloud_flag", "conflicting_case_destination"])
 def test_claude_unapproved_or_ambiguous_destination_refuses_before_effect(tmp_path, monkeypatch,
         deny_candidate_execution_and_network, attack):
     config, member, calls = configured(tmp_path, monkeypatch, deny_candidate_execution_and_network, attack)

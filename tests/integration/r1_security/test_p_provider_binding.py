@@ -31,14 +31,16 @@ PROVIDER_BINDING = {"runtime": "codex", "provider": "q-mock", "base_url": "https
 
 
 def safe_codex_metadata(root, monkeypatch, *, selected_provider="q-mock", endpoint=None, profile=False,
-                        conflict=False, managed=False):
+                        conflict=False, managed=False, cloud_name=None, aws=False):
     """Route all product metadata discovery to these credential-free files."""
     selected = root / "native-metadata.toml"
     selected.write_text('model_provider = ' + json.dumps(selected_provider) + '\nmodel = "fixture"\n'
         + ('profile = "selected"\n' if profile else '')
-        + '[model_providers.q-mock]\nname = "Q mock"\nbase_url = '
+        + '[model_providers.q-mock]\nname = ' + json.dumps(cloud_name or "Q mock") + '\nbase_url = '
         + json.dumps(endpoint or PROVIDER_BINDING["base_url"])
-        + '\nwire_api = "responses"\n[model_providers.foreign]\nname = "Q unauthorized fixture"\n'
+        + '\nwire_api = "responses"\n'
+        + ('aws = {region = "us-east-1"}\n' if aws else '')
+        + '[model_providers.foreign]\nname = "Q unauthorized fixture"\n'
         + 'base_url = "https://foreign.invalid/v1"\nwire_api = "responses"\n'
         + ('[profiles.selected]\nmodel_provider = "foreign"\n' if profile else ''), encoding="utf-8")
     sources = [selected]
@@ -80,7 +82,9 @@ def configured(root, selected_provider, monkeypatch, loop, *, attack=None):
         codex_auth="inherited-selected", claude_auth="pending", claude_api_base_url=None, claude_model=None)
     safe_codex_metadata(root, monkeypatch, selected_provider=selected_provider,
         endpoint="https://changed.invalid/v1" if attack == "endpoint" else None,
-        profile=attack == "active_profile", conflict=attack == "conflicting_source", managed=attack == "managed")
+        profile=attack == "active_profile", conflict=attack == "conflicting_source", managed=attack == "managed",
+        cloud_name={"cloud_name": "Amazon Bedrock", "cloud_runtime_name": "Amazon Bedrock Runtime"}.get(attack),
+        aws=attack == "cloud_aws")
     calls = {"probe": [], "native": []}
     if os.environ.get("R1_SECURITY_INSTALLED") != "1":
         monkeypatch.setattr(native, "installed_core", lambda: {"acceptance": "fixture_package_gate_not_validated"})
@@ -136,7 +140,8 @@ def test_changed_selected_provider_cannot_reuse_previous_host_data_grant(tmp_pat
 
 
 @pytest.mark.parametrize("attack", ["endpoint", "missing_binding", "binding_provider", "binding_runtime",
-                                    "binding_extra", "active_profile", "conflicting_source", "managed"])
+                                    "binding_extra", "active_profile", "conflicting_source", "managed",
+                                    "cloud_name", "cloud_runtime_name", "cloud_aws"])
 def test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses(tmp_path, monkeypatch,
         deny_candidate_execution_and_network, attack):
     config, member, calls = configured(tmp_path, "q-mock", monkeypatch, deny_candidate_execution_and_network,
