@@ -1,11 +1,13 @@
 # 产品集成：一条用户路径、三个核心界面（2026-10-02）
 
-当前阶段：开发中。用户路径限定为“创建研究空间 → 接入成员 → 发起任务 → 看懂推荐与实际选择 → 查看实验和复现证据 → 检查成果继承”。正式产品基线 SOURCE c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc / docs REPORT 3b17cc0a7120f1d2381871b336293ee301b857de；固定核心 7062a632b8c625c05b35bdec4c36fce63a31c2a4 / 策略 v0.1。本轮结束底层开发，不改变核心源码、pin、检查器、策略或科学阈值，不扩 Agent 协议或科研案例。
+当前阶段：A/U 开发中，I 等待二者完成。Orca Run `run_dd03fdddeb5e`；A Task `task_4c8488a6e9fb` / 当前 Dispatch `ctx_9b019a915d07`，U Task `task_d1dd07b6c128` / 当前 Dispatch `ctx_6af50869fffd`，I Task `task_6e99d0323ba1` pending。A/U 首次 worker-start 就绪超时、未注入业务任务的记录 `ctx_543fe176d607` / `ctx_4744c7371754` 保留；核实两终端实际 Codex idle 后按官方恢复文档在同 Task/Worktree/Terminal dispatch without inject + 精确 preamble send，两者回执均 input_accepted + turn_started，未重复发送、未新增业务任务。旧 creator resource 待相应任务结算后精确释放，不手动关闭其他会话。
+
+用户路径限定为“创建研究空间 → 接入成员 → 发起任务 → 看懂推荐与实际选择 → 查看实验和复现证据 → 检查成果继承”。正式产品基线 SOURCE c2c2d18b3dfcf5831e8e438f92654d4bdca66fbc / docs REPORT 3b17cc0a7120f1d2381871b336293ee301b857de；固定核心 7062a632b8c625c05b35bdec4c36fce63a31c2a4 / 策略 v0.1。本轮结束底层开发，不改变核心源码、pin、检查器、策略或科学阈值，不扩 Agent 协议或科研案例。
 
 | 轨 | 固定 Agent / Worktree / Branch | 独占 write_paths |
 |---|---|---|
-| A 产品操作与事实服务 | Orca Codex / research-product-path-api-1002 / 创建后记录实际分支 | 产品 src/morph_research 下 Python 文件、新 web/ Python 包及 web/static/.gitkeep、tests/test_web*.py、tests/test_spaces*.py、tests/test_native_choice*.py、pyproject.toml、uv.lock、docs/tracks/product-path-api-1002.md；禁止 frontend 与静态构建产物 |
-| U 三界面 | Orca Codex / research-product-path-ui-1002 / 创建后记录实际分支 | 产品 frontend/**、src/morph_research/web/static/**（除 .gitkeep）、tests/ui/**、THIRD_PARTY_NOTICES.md、docs/tracks/product-path-ui-1002.md；禁止 Python 与根依赖锁 |
+| A 产品操作与事实服务 | Orca Codex / Morphogenesis-Research/research-product-path-api-1002 / songconmaisaix31-design/research-product-path-api-1002 | 产品 src/morph_research 下 Python 文件、新 web/ Python 包及 web/static/.gitkeep、tests/test_web*.py、tests/test_spaces*.py、tests/test_native_choice*.py、pyproject.toml、uv.lock、docs/tracks/product-path-api-1002.md；禁止 frontend 与静态构建产物 |
+| U 三界面 | Orca Codex / Morphogenesis-Research/research-product-path-ui-1002 / songconmaisaix31-design/research-product-path-ui-1002 | 产品 frontend/**、src/morph_research/web/static/**（除 .gitkeep）、tests/ui/**、THIRD_PARTY_NOTICES.md、docs/tracks/product-path-ui-1002.md；禁止 Python 与根依赖锁 |
 | I 独立集成与验收 | Orca Codex / research-product-path-integration-1002 / 创建后记录实际分支 | 普通精确合并、tests/integration/**、docs/tracks/product-path-integration-1002.md、README.md、少量已交接导入/配置/打包胶水；领域问题退 A/U |
 | 主控 | 当前 Orca governance worktree / morph-product-three-pages-plan-1002 | 仅本计划、状态、决策与验收；不写业务代码 |
 
