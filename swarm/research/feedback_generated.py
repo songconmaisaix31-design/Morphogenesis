@@ -88,7 +88,10 @@ def _bound_result(db: sqlite3.Connection, assets: sqlite3.Connection, ledger: Ta
     started_at = _execution_anchor(db, task, report, envelope, at)
     if started_at is None:
         return None
-    approval = TrustedCriteriaRecord.model_validate(envelope.get("criteria_approval"))
+    frozen_approval = envelope.get("criteria_approval")
+    if not isinstance(frozen_approval, dict):
+        return None
+    approval = TrustedCriteriaRecord.model_validate(frozen_approval)
     if registry.approval(plan.evaluation) != approval or approval.approved_at > started_at:
         return None
     candidate = Candidate.model_validate_json(report.candidate_json)
