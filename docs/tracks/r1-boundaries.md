@@ -188,6 +188,18 @@ changed source bytes outside the frozen manifest still pass validation.
 Handoff `msg_4e104efa3e61` to current B and `msg_99d8adbdf960` to coordinator.
 All child processes and network remain denied during test calls.
 
+B a322 SDK configuration tests: **3 failed**, exit 1
+(`b-a322-sdk-configuration-first-red.txt`). A replaced SDK create function
+captures arguments and returns only an inert fixture ID; no sandbox or SDK
+network request occurs. Actual adapter configuration omits network_policy,
+sends the bare image digest without its repository, and allows direct create
+without verified process-limit/isolation instance authority. Unsupported
+controls must refuse before create; declaring network/process booleans is not
+enforcement. Source inspection additionally finds registry matching only a
+backend name/capability set, without endpoint/runtime/environment/configuration
+binding. Review Handoff `msg_568c2c09267c`, exact reproduction
+`msg_ad45f34519ca`, coordinator `msg_f4c22f417513`.
+
 ## Integration checklist and limits
 
 Before I accepts the successor, the exact merged source must expose the dynamic
