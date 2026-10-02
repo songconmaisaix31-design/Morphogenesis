@@ -1,5 +1,25 @@
 # R1 派发状态（2026-10-03）
 
+## 03:15 更新：核心 Owner 交付，产品边界返修与页面构建
+
+A/B/C 均已交 worker_done succeeded、干净工作树和已推送精确报告；主控已核实远端。接纳各自被测工程范围，仍需最后 I 合并和最终组合安装。P/F/Q 保持原 Owner 继续；I 尚未派发。
+
+| 轨 | SOURCE | REPORT / 当前 HEAD | 实际结果与剩余 |
+|---|---|---|---|
+| A | `cc2e7227e1b423924c99113c9676ef8cc310e92b` | `5a0caf0055d485d6343eaa561589a3be6d43728f` | 正式 build_service/23 MCP 工具、生成候选、独立接受、实际选择认领、原 mock 采用、成果包和有界原始输出。安装核心4afe462与最终13个运行模块逐字节相同；88 passed / 1 failed首结果保留，最终只修6行MCP测试解包，正式stdio定向1 passed。最终源码重新安装由I完成。 |
+| B | `5faafe41b1732c83d165251600b688444186c702` | `6ec8c7441e07824bb2b7940c1c93e590200f84ab` | 领域245 passed，strict130文件通过，wheel/COPY非editable原fixture持久化读取通过；独立Q68通过。此前244/1保留。真实沙箱隔离与科学运行NOT_RUN。 |
+| C | `56de8e3f5d2abd1e1ba02218b422f0aba9847ae2` | `8bc4c282ed4db8e2be0798509b28d984240b3a06` | 精确源码私有安装：C59、Q45、原FC stdout1、legacy151分别通过，strict4通过。旧FC首失败原因UNKNOWN；全局editable清理被拒绝，人工事项保留。 |
+| P | `f942de2ed2a22fa8bd8c418c6b4bf2b7d59e83bf`（阶段） | 同SOURCE，返修WIP | 成员bearer身份与项目native数据授权已接线，Q成员5/5通过。已知用量原账本格式、resume身份与0.160原生兼容继续修复；最终安装/完整生成链回归待。 |
+| F | `5a1dd00ede561a4e78d53be5d337d3cffe7ddbf3`（阶段） | `ca284cad9306526e2436e17998a64f564075a84c`（普通合并Pf942） | generated DTO页面源已准备；新构建静态产物WIP，双视窗与实际安装HTTP仍待。旧页面PASS不转移到本版。 |
+| Q | `d320205e5adc33881f114e4ef837e40bfa9d9bd0`（当前测试阶段） | `19a9bd5e6ef59a226f2a53f1563ce5109cf91807` | 同A4afe运行组合：A57/B68/C45共170独立fixture通过。产品已知用量和resume首失败已固定报告，等待P后继；真正installed_core/configured handler/MCP验收待。 |
+
+P f942 独立48项首47 passed /1 failed：有效usage没有以原BudgetLedger需要的usage envelope结算；未知用量/额度保留、无外发grant拒绝等负例通过。新resume9首8 failed /1 passed：跨project/member/runtime/model/workspace或缺原request仍进入惯性planner，合法同项目正例保留。均已退回原P；Q不削弱断言，后继通过另记。
+
+03:12 P明确没有重进程，释放约10分钟编码/小fixture窗口；F获得构建及单worker浏览器窗口。Q可用原私有环境做<=100项单进程纯fixture，不能因此执行真实候选、模型、外网沙箱或改installed_core guard。原0.159原生路径仍受版本guard；R1对0.160适配必须有官方源码/本机parser证据。交互CLI --no-daemon不能冒充exec实现的隔离证明，P已核实exec使用InProcessAppServer。
+
+C全局Python误安装的11个editable注册文件仍在，自动审批拒绝清理前没有进程执行；理由仅blocked by policy。C报告记录只读清单和人工恢复步骤，未知旧依赖未动。四个重启前Orca资源release_unknown也未伪造关闭。未获得研究运行授权，AT07真实探针、L2、L3和人工观察仍NOT_RUN。
+
+
 ## 02:46 更新：首个完整核心组合进入正式接线验收
 
 A SOURCE `0bcb320e843839f5f043fccd9f705d9dd9b7299e` 已推送且远端核实，普通合并 B2d/C4f；23 个正式 MCP 工具及 shared build_service、generated prepare/admit/run/observe/complete、独立接受后实际 discover/choose/claim、原消费/apply/mock adoption、research_package 已接线。动态7通过；混合集51 passed / 24 failed（旧 policy_entry 的 NodeAssetBridge 缺本轨 node_modules），不算完整回归，首日志保留。A 的私有非 editable/stdio/旧案例检查排在 C 后。

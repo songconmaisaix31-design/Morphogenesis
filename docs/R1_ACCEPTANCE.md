@@ -1,6 +1,28 @@
 # R1 验收登记（2026-10-03，开发开始）
 
-最新Spec第14节为验收事实源。本登记未赋予任何PASS；依据各最终候选源码与实际证据追加结果。首次失败记录在docs/R1_STATUS.md。
+最新Spec第14节为验收事实源。依据各精确候选源码与实际证据逐阶段登记；后继通过不改写首失败。首次失败记录在docs/R1_STATUS.md。
+
+## 03:15 当前验收范围（后继证据，不覆盖下文首失败）
+
+核心最终Owner：A SOURCE cc2e722 / REPORT5a0caf0，B SOURCE5faafe4 / REPORT6ec8c74，C SOURCE56de8e3 / REPORT8bc4c28；完整SHA在R1_STATUS.md。A最终运行模块与已安装/独立受测4afe462逐字节一致，最终只修MCP测试解包；不是最终SHA已安装。Q在同4afe组合独立A57/B68/C45=170项通过，明确fixture/mock、宿主未执行候选。C最终领域代码与该组合相同，I仍需普通merge保留最终报告/祖先与重新安装。
+
+| 对应AT | 已取得工程证据 | 仍待 |
+|---|---|---|
+| 01/02/09 | P旧f006安装37与Q资料/意见21通过；当前f942成员5/5，核心来源/有界上下文/真实MCP边界通过 | P后继实际安装factory/HTTP/MCP，F新页面实际HTTP |
+| 03/04/08/10/11 | 核心非预置提议、独立接受支持/反证、证据影响actual discover/choose/claim；Q57/C45通过 | 固定最终安装与产品接线；AT03/10的L2研究实例NOT_RUN |
+| 05/06 | B领域245、Q68通过：host冻结判据、输出重算、有效probe/config绑定、静态危险输入拒绝 | 真实运行非fixture候选NOT_RUN；不借fixture赋予AT07 |
+| 12/13 | 正式核心mock新run独立复核、原资产消费/本地再验证/apply/TaskLedger.submit/AdoptionReceipt正例；篡改/未知来源拒绝 | 原采用回执明确mock；实际研究独立复核与继承L2 NOT_RUN |
+| 14/15 | 核心原ledger/fencing/项目预算/unknown保留与归档边界通过；P新member/egress负例通过 | Pf942 validusage 1 RED、resume身份8 RED待原P修复；最终组合中断与安装回归待 |
+| 16 | F已有旧阶段双视窗证据；generated非空DTO前端源码准备，已合并Pf942 | 新静态构建、双视窗及独立安装真实HTTP未完成，不赋予AT16整体PASS |
+| 17 | B精确wheel/private103依赖，C精确安装104依赖；原FC stdout与legacy后继通过，strict通过 | I精确最终组合、原固定两例/旧validator/新安全边界/全适用回归；首失败保留 |
+| 18 | 核心research_package及原始artifact读取、SHA/size/path/tamper拒绝正式MCP检查通过 | 产品完整成果包/安装接线与L2可追溯科研产出 |
+
+新增不可覆盖的首结果：A完整安装组合88 passed /1 failed，6行新测试误读官方MCP union结构，最终定向1 passed且运行源码不变；P f942 native/member/material48为47 passed /1 failed，原BudgetLedger结算格式缺陷；同P resume9为8 failed /1 passed，跨身份/缺request恢复没有拒绝。Q SOURCEd320205 / REPORT19a9bd5已推送记录；后续修复新证据追加。
+
+AT07真实隔离探针、L2真实研究、L3对照和未参与实现的人工观察均NOT_RUN。最终工程组合仍未通过，不宣布R1 PASS。
+
+## 初始矩阵（保留当时状态）
+
 
 | AT | 验收对象 | Owner | 当前状态 / 所需证据 |
 |---|---|---|---|
