@@ -1,0 +1,5 @@
+Using Python 3.13.13 environment at: .venv-q
+Checked 83 packages in 10ms
+Found 2 incompatibilities
+The package `langgraph-checkpoint-sqlite` requires `langgraph-checkpoint>=4.1.0,<5.0.0`, but `3.0.1` is installed
+The package `langgraph` requires `langgraph-checkpoint>=4.1.0,<5.0.0`, but `3.0.1` is installed

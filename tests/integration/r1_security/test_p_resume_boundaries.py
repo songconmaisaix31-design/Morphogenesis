@@ -30,6 +30,12 @@ SPACE = "a" * 32
 @pytest.fixture
 def recorded(tmp_path, monkeypatch, deny_candidate_execution_and_network):
     core = host(tmp_path)
+    grant = {"project_id": core.project_id, "member_id": core.worker_id, "runtime": "codex",
+        "provider": core.research_execution_bound.provider, "model": core.research_execution_bound.model,
+        "scopes": list(core.authorized_scopes), "data_categories": ["goal", "sources", "expert_opinions",
+                                                                  "research_notes", "candidate_code", "raw_outputs"]}
+    core = core.model_copy(update={"research_envelope": core.research_envelope.model_copy(update={
+        "data_bounds": {"native_egress": json.dumps([grant])}})})
     Path(core.workspace).mkdir()
     path = tmp_path / "member-host.json"
     path.write_text(core.model_dump_json(), encoding="utf-8")
@@ -69,7 +75,7 @@ def recorded(tmp_path, monkeypatch, deny_candidate_execution_and_network):
     exclusive_json(directory / "request.json", {"request": request.model_dump(mode="json"),
                                                 "reservation": reservation.model_dump(mode="json")})
     exclusive_json(directory / "observation.json", {"member_id": member.id, "project_id": core.project_id,
-        "outcome": outcome.model_dump(mode="json"), "forbidden": [], "budget": budget.model_dump(mode="json"),
+        "outcome": outcome.model_dump(mode="json"), "forbidden": False, "budget": budget.model_dump(mode="json"),
         "acceptance": "native_observation_only"})
     calls.clear()
     return SimpleNamespace(config=config, member=member, service=service, directory=directory,

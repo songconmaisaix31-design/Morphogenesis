@@ -5,17 +5,18 @@ known context is read from the actual HostConfig-bound core service/ledger.
 """
 import os
 import importlib.util
+from types import SimpleNamespace
 
 import pytest
 
-if not os.environ.get("R1_PRODUCT_SOURCE"):
+if not os.environ.get("R1_PRODUCT_SOURCE") and os.environ.get("R1_SECURITY_INSTALLED") != "1":
     pytest.skip("P source not selected; product acceptance NOT_RUN", allow_module_level=True)
 
 legacy_loop = importlib.util.find_spec("morph_research.loop") is not None
 if legacy_loop:
     from morph_research.loop import allowed_step, run_step
 from morph_research.r1 import R1Envelope, ResearchGoal
-from morph_research.r1_store import R1Store
+from morph_research.web.r1 import R1Spaces, export_view
 from tests.integration.r1_security.test_a_host_boundaries import seeded
 from swarm.models import Signal
 
@@ -27,10 +28,30 @@ legacy_only = pytest.mark.skipif(not legacy_loop,
 
 
 @pytest.fixture
-def product_store(tmp_path):
-    with R1Store(tmp_path / "product.db") as s:
-        s.create_space(SPACE, "Q boundary", ResearchGoal(objective="read existing facts"))
-        yield s
+def product_spaces(tmp_path):
+    spaces = R1Spaces(SimpleNamespace(root=tmp_path / "product"))
+    spaces.create(SPACE, "Q boundary", ResearchGoal(objective="read existing facts"), None)
+    try:
+        yield spaces
+    finally:
+        spaces.close()
+
+
+@pytest.fixture
+def product_store(product_spaces):
+    return product_spaces.store(SPACE)
+
+
+def assert_no_unconnected_science(package):
+    # Scientific rows now come from the public core projection. The product
+    # store holds inputs only; a synthetic "not_run" scientific row is not a fact.
+    assert package["three_axis"] == []
+    assert package["research_package"] is None
+    assert package["authorization"] is None and package["route"] is None
+    assert package["backend"] == {"status": "not_connected", "core_sha": None, "provenance": None}
+    assert package["research"]["project"] is None
+    for name in ("notes_unverified", "notes_verified", "proposals", "events", "hypotheses", "branches"):
+        assert package["research"][name] == []
 
 
 class UncertainBackend:
@@ -97,20 +118,22 @@ def test_product_has_no_parallel_phase_or_execution_authority(product_store):
     assert not legacy_loop, "product loop still carries parallel execution authority"
     assert not callable(getattr(product_store, "record_loop", None))
     assert not callable(getattr(product_store, "loop_position", None))
+    assert set(product_store.export_package(SPACE)).isdisjoint({"three_axis", "research", "research_package"})
 
 
 @pytest.mark.parametrize("approved", [False, True])
-def test_product_envelope_is_input_and_does_not_certify_science(product_store, approved):
+def test_product_envelope_is_input_and_does_not_certify_science(product_store, product_spaces, approved):
     product_store.set_envelope(SPACE, R1Envelope(target="fixture", approved=approved,
         budget_mode="enforceable_cap", cash_budget_cny=1))
-    package = product_store.export_package(SPACE)
-    assert package["three_axis"] == {"execution": "not_run", "hypothesis": "not_evaluated",
-        "contribution": "proposed", "authority": "core_not_connected"}
+    package = export_view(SPACE, product_spaces)
+    assert package["envelope"]["approved"] is False
+    assert any(event["payload"].get("approved") is approved for event in package["events"])
+    assert_no_unconnected_science(package)
     assert package["backend"]["status"] == "not_connected"
 
 
 @pytest.mark.parametrize("provenance", ["mock", "replay", "contract_local"])
-def test_product_event_labels_cannot_claim_or_complete_core_task(tmp_path, product_store, provenance):
+def test_product_event_labels_cannot_claim_or_complete_core_task(tmp_path, product_store, product_spaces, provenance):
     core_root = tmp_path / "core"
     core_root.mkdir()
     core = seeded(core_root)
@@ -121,4 +144,7 @@ def test_product_event_labels_cannot_claim_or_complete_core_task(tmp_path, produ
         "effect_state": "unknown", "execution": "succeeded", "hypothesis": "supported",
         "contribution": "accepted", "reviewer": "invented"})
     assert core.ledger.get("core-task") == before
-    assert product_store.export_package(SPACE)["three_axis"]["execution"] == "not_run"
+    package = export_view(SPACE, product_spaces)
+    assert any(event["kind"] == "execution" and event["payload"]["task_id"] == "core-task"
+               for event in package["events"])
+    assert_no_unconnected_science(package)

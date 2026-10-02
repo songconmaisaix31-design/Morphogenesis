@@ -1,0 +1,4 @@
+error: Failed to parse: `morphogenesis @ git+file:///C:/Users/DW/orca/workspaces/Morphogenesis/morph-r1-research-1003@cc2e7227e1b423924c99113c9676ef8cc310e92b`
+  Caused by: ambiguous user/pass authority in URL (not percent-encoded?): git+file:***@cc2e7227e1b423924c99113c9676ef8cc310e92b
+morphogenesis @ git+file:///C:/Users/DW/orca/workspaces/Morphogenesis/morph-r1-research-1003@cc2e7227e1b423924c99113c9676ef8cc310e92b
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

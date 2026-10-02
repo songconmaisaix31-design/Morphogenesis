@@ -1,0 +1,19 @@
+Using Python 3.13.13 environment at: .venv-q
+   Updating https://github.com/songconmaisaix31-design/Morphogenesis.git (cc2e7227e1b423924c99113c9676ef8cc310e92b)
+    Updated https://github.com/songconmaisaix31-design/Morphogenesis.git (cc2e7227e1b423924c99113c9676ef8cc310e92b)
+Resolved 88 packages in 25.56s
+   Building morphogenesis @ git+https://github.com/songconmaisaix31-design/Morphogenesis.git@cc2e7227e1b423924c99113c9676ef8cc310e92b
+      Built morphogenesis @ git+https://github.com/songconmaisaix31-design/Morphogenesis.git@cc2e7227e1b423924c99113c9676ef8cc310e92b
+Prepared 2 packages in 7.70s
+Installed 11 packages in 549ms
+ + fastjsonschema==2.22.2
+ + jupyter-client==8.10.0
+ + jupyter-core==5.9.1
+ + morphogenesis==0.1.0 (from git+https://github.com/songconmaisaix31-design/Morphogenesis.git@cc2e7227e1b423924c99113c9676ef8cc310e92b)
+ + nbclient==0.10.4
+ + nbformat==5.10.4
+ + platformdirs==4.12.2
+ + pypdf==6.19.0
+ + pyzmq==27.2.0
+ + tornado==6.5.10
+ + traitlets==5.16.1

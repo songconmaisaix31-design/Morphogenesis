@@ -14,7 +14,8 @@ from contracts.identity import AgentId
 from contracts.provenance import Acceptance
 from contracts.results import Usage
 from orchestration.native_agents.events import parse_event
-from orchestration.native_agents.models import NativeOutcome
+from orchestration.native_agents.models import LaunchPlan, NativeOutcome
+from orchestration.native_agents.registry import ProbeResult
 from morph_research import r1_native as native
 from morph_research.r1_config import ResearchConnection, ResearchMember
 from tests.integration.r1_security.test_a_project_budget_boundaries import host, opened, InertExecutionBoundary
@@ -60,11 +61,14 @@ def configured(root, monkeypatch, *, authorized=True, bound=True, selected=True,
             "agent": AgentId(role="builder", instance=0 if member_id == "member-one" else 1)}), InertExecutionBoundary())
         directory = root / "evidence/native" / member_id / invocation
         return member, s, ("research_project", "choose_research_work"), directory, SimpleNamespace(
-            model_dump=lambda **kwargs: {"provenance": "mock", "fixture_only": True}), SimpleNamespace()
+            model_dump=lambda **kwargs: {"provenance": "mock", "fixture_only": True}), LaunchPlan(
+                runtime="codex", mode="headless", argv=("q-native-never-executed", "exec"),
+                workspace=Path(core.workspace), stdin_text=None)
 
     def probe(runtime):
         calls["probe"].append(runtime)
-        return SimpleNamespace(version_matches=True, authenticated=True)
+        return ProbeResult(runtime=runtime, command=("q-native-never-executed",), version="codex-cli 0.159.0",
+                           version_matches=True, authenticated=True, version_exit=0, auth_exit=0)
 
     def run(*args, **kwargs):
         calls["native"].append(True)

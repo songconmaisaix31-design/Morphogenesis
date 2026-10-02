@@ -1,0 +1,9 @@
+sss..F...                                                                [100%]
+================================== FAILURES ===================================
+______ test_product_envelope_is_input_and_does_not_certify_science[True] ______
+tests\integration\r1_security\test_p_loop_boundaries.py:128: in test_product_envelope_is_input_and_does_not_certify_science
+    assert package["envelope"]["approved"] == approved
+E   assert False == True
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_loop_boundaries.py::test_product_envelope_is_input_and_does_not_certify_science[True]
+1 failed, 5 passed, 3 skipped in 2.84s

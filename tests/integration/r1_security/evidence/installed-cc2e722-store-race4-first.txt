@@ -1,0 +1,36 @@
+FFFF                                                                     [100%]
+================================== FAILURES ===================================
+_ test_concurrent_identical_store_settings_both_admit_without_unique_collision[live] _
+tests\integration\r1_security\test_b_store_admission_race.py:68: in test_concurrent_identical_store_settings_both_admit_without_unique_collision
+    assert errors == [], "same immutable settings must support simultaneous workers"
+E   AssertionError: same immutable settings must support simultaneous workers
+E   assert [IntegrityErr...ttings.name')] == []
+E     
+E     Left contains one more item: IntegrityError('UNIQUE constraint failed: asset_store_settings.name')
+E     Use -v to get more diff
+_ test_concurrent_identical_store_settings_both_admit_without_unique_collision[mock] _
+tests\integration\r1_security\test_b_store_admission_race.py:68: in test_concurrent_identical_store_settings_both_admit_without_unique_collision
+    assert errors == [], "same immutable settings must support simultaneous workers"
+E   AssertionError: same immutable settings must support simultaneous workers
+E   assert [IntegrityErr...ttings.name')] == []
+E     
+E     Left contains one more item: IntegrityError('UNIQUE constraint failed: asset_store_settings.name')
+E     Use -v to get more diff
+_ test_concurrent_conflicting_store_settings_refuse_atomically_and_preserve_winner[provenance] _
+tests\integration\r1_security\test_b_store_admission_race.py:91: in test_concurrent_conflicting_store_settings_refuse_atomically_and_preserve_winner
+    assert isinstance(errors[0], AssetSafetyError), "conflicting authority must be a domain refusal, not SQLite corruption"
+E   AssertionError: conflicting authority must be a domain refusal, not SQLite corruption
+E   assert False
+E    +  where False = isinstance(IntegrityError('UNIQUE constraint failed: asset_store_settings.name'), AssetSafetyError)
+_ test_concurrent_conflicting_store_settings_refuse_atomically_and_preserve_winner[fixture_workspace] _
+tests\integration\r1_security\test_b_store_admission_race.py:91: in test_concurrent_conflicting_store_settings_refuse_atomically_and_preserve_winner
+    assert isinstance(errors[0], AssetSafetyError), "conflicting authority must be a domain refusal, not SQLite corruption"
+E   AssertionError: conflicting authority must be a domain refusal, not SQLite corruption
+E   assert False
+E    +  where False = isinstance(IntegrityError('UNIQUE constraint failed: asset_store_settings.name'), AssetSafetyError)
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_store_admission_race.py::test_concurrent_identical_store_settings_both_admit_without_unique_collision[live]
+FAILED tests/integration/r1_security/test_b_store_admission_race.py::test_concurrent_identical_store_settings_both_admit_without_unique_collision[mock]
+FAILED tests/integration/r1_security/test_b_store_admission_race.py::test_concurrent_conflicting_store_settings_refuse_atomically_and_preserve_winner[provenance]
+FAILED tests/integration/r1_security/test_b_store_admission_race.py::test_concurrent_conflicting_store_settings_refuse_atomically_and_preserve_winner[fixture_workspace]
+4 failed in 1.85s
