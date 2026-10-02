@@ -33,7 +33,9 @@ _DENY_ENV = {"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREA
 
 
 class GeneratedBackend(Protocol):
-    provenance: Literal["live", "replay", "mock"]
+    @property
+    def provenance(self) -> Literal["live", "replay", "mock"]: ...
+
     capabilities: frozenset[str]
 
     def isolation(self) -> IsolationReport: ...

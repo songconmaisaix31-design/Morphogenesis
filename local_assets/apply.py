@@ -55,6 +55,7 @@ class PreparedApplication:
     report: ValidationReport | GeneratedValidationReport
     baseline_files: dict[Path, bytes]
     git_metadata: dict[Path, bytes | None]
+    revalidate: Callable[[], None] | None = None
 
     @property
     def scope(self) -> str:
@@ -62,6 +63,8 @@ class PreparedApplication:
 
     def apply(self, assert_owned: Callable[[], None]) -> ApplicationReceipt:
         assert_owned()
+        if self.revalidate is not None:
+            self.revalidate()
         no_links(self.target)
         if any(_read(path) != body for path, body in self.git_metadata.items()):
             raise AssetSafetyError("target_revision_changed")
@@ -81,6 +84,8 @@ class PreparedApplication:
                 self._replace(path, after)
                 written.append((path, before))
             assert_owned()
+            if self.revalidate is not None:
+                self.revalidate()
             if time.time() >= self.report.expires_at:
                 raise AssetSafetyError("stale_report")
         except BaseException:
@@ -162,4 +167,8 @@ class AssetApplicator:
         if (_scope_bytes(target, candidate.scope) != files
                 or any(_read(path) != body for path, body in metadata.items())):
             raise AssetSafetyError("target_changed_during_preparation")
-        return PreparedApplication(target, candidate, report, files, metadata)
+        def revalidate() -> None:
+            self.store.fetch_approved(asset_id)
+            self.store.check_fixture_target(target)
+        return PreparedApplication(target, candidate, report, files, metadata,
+                                   revalidate if self.policy_version == "generated-isolation-v1" else None)

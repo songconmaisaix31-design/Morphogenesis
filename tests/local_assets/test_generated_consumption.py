@@ -1,6 +1,7 @@
 """An explicitly mock fixture uses the original file/ledger/adoption chain."""
 
 import os
+import json
 import socket
 import subprocess
 
@@ -50,13 +51,13 @@ def setup(tmp_path, *, mode="mock"):
     git(target, "add", "science")
     git(target, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-m", "fixture")
     revision = git(target, "rev-parse", "HEAD").decode().strip()
-    store = LocalAssetStore(tmp_path / "state" / "assets", bridge=FakeBridge(), research_provenance=mode,
-                            fixture_workspace=tmp_path if mode == "mock" else None)
     plan = make_poisson_plan().model_copy(update={"candidate_revision": revision})
+    registry = approved_criteria_registry(plan.evaluation, approved_by="reviewer-1")
+    store = LocalAssetStore(tmp_path / "state" / "assets", bridge=FakeBridge(), research_provenance=mode,
+                            fixture_workspace=tmp_path if mode == "mock" else None, generated_criteria=registry)
     files = {"experiment.py": GENERATED_CODE.encode()}
     asset = store.publish(generated_candidate(plan, files, attempt=ATTEMPT, scope="science", summary="fixture"))
     plan = plan.model_copy(update={"candidate_asset_id": asset})
-    registry = approved_criteria_registry(plan.evaluation, approved_by="reviewer-1")
     return target, store, plan, registry, files
 
 
@@ -77,7 +78,7 @@ def original_and_review(tmp_path, store, plan, registry):
     observe(tmp_path, store, plan, registry, task="review", worker="reviewer", purpose="reproduction", attempt=review)
 
 
-def test_mock_generated_byte_consumption_real_fenced_apply_and_adoption(tmp_path):
+def prepare_consumption(tmp_path):
     target, store, plan, registry, files = setup(tmp_path)
     original_and_review(tmp_path, store, plan, registry)
     require_reproduced(store, plan.candidate_asset_id)
@@ -110,6 +111,11 @@ def test_mock_generated_byte_consumption_real_fenced_apply_and_adoption(tmp_path
         execution.candidate_asset_id, child_report)
     result = dict(candidate_asset_id=execution.candidate_asset_id, consumed_asset_ids=[plan.candidate_asset_id],
                   input_context=context.input_context, execution_id=context.execution_id, applied=True)
+    return target, store, plan, consumer, ledger, lease, context, prepared, result
+
+
+def test_mock_generated_byte_consumption_real_fenced_apply_and_adoption(tmp_path):
+    target, store, plan, consumer, ledger, lease, context, prepared, result = prepare_consumption(tmp_path)
     with pytest.raises(ValueError, match="completed_fenced_execution"):
         consumer.record_adoption(context.execution_id, "reuse-result", ledger)
     ledger.submit(lease, "reuse-result", result, apply=prepared.apply)
@@ -121,6 +127,8 @@ def test_mock_generated_byte_consumption_real_fenced_apply_and_adoption(tmp_path
     assert reopened.adoptions() == [receipt]
     with pytest.raises(ValueError, match="provenance_conflict"):
         LocalAssetStore(store.root, bridge=FakeBridge())
+    with pytest.raises(ValueError, match="generated_criteria_registry_required"):
+        reopened.fetch_approved(plan.candidate_asset_id)
 
 
 def test_default_live_mode_refuses_mock_science_and_mode_switch(tmp_path):
@@ -152,3 +160,42 @@ def test_mock_and_live_observations_cannot_form_reproduction_pair(tmp_path):
     store._record_research(forged)
     with pytest.raises(ValueError, match="independent_clean_reproduction_required"):
         require_reproduced(store, plan.candidate_asset_id)
+
+
+@pytest.mark.parametrize("changed", ["output", "evaluation"])
+def test_cached_pass_cannot_survive_original_archive_tampering(tmp_path, changed):
+    _, store, plan, registry, files = setup(tmp_path)
+    original_and_review(tmp_path, store, plan, registry)
+    report = generated_validation(store, plan.candidate_asset_id, plan, files,
+        mock_isolation(), probe_registry=verified_probe_registry())
+    approve_generated(store, report, lambda: None)
+    store.fetch_approved(plan.candidate_asset_id)
+    archive = tmp_path / "archive" / ("run-" + ATTEMPT.task_id)
+    if changed == "output":
+        (archive / "outputs" / "output.json").write_bytes(b"{}")
+    else:
+        result = json.loads((archive / "result.json").read_bytes())
+        result["plan"]["evaluation"]["max_abs_tolerance"] = 1.0
+        (archive / "result.json").write_text(json.dumps(result))
+        (archive / "plan.json").write_text(json.dumps(result["plan"]))
+    with pytest.raises(ValueError):
+        store.fetch_approved(plan.candidate_asset_id)
+
+
+@pytest.mark.parametrize("moment", ["before", "after"])
+def test_prepared_application_rechecks_original_evidence_and_rolls_back(tmp_path, monkeypatch, moment):
+    target, store, _, _, ledger, lease, _, prepared, result = prepare_consumption(tmp_path)
+    output = tmp_path / "archive" / ("run-" + ATTEMPT.task_id) / "outputs" / "output.json"
+    if moment == "before":
+        output.write_bytes(b"{}")
+    else:
+        replace = prepared._replace
+        def replace_then_change_archive(path, content):
+            replace(path, content)
+            if content is not None:
+                output.write_bytes(b"{}")
+        monkeypatch.setattr(type(prepared), "_replace", staticmethod(replace_then_change_archive))
+    with pytest.raises(ValueError):
+        ledger.submit(lease, "reuse-result", result, apply=prepared.apply)
+    assert not (target / "science" / "experiment.py").exists()
+    assert not store.adoptions()

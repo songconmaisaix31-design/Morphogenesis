@@ -23,6 +23,7 @@ from local_assets.models import (AdoptionReceipt, AssetSafetyError, Candidate, C
 from local_assets.paths import FROZEN_MAINLINE, no_links
 from local_assets.generated_models import GeneratedApproval, GeneratedValidationReport
 from local_assets.research_models import ResearchObservation
+from orchestration.experiments.trusted import TrustedCriteriaRegistry
 
 _OBJECT = TypeAdapter(dict[str, JsonValue])
 
@@ -30,7 +31,8 @@ _OBJECT = TypeAdapter(dict[str, JsonValue])
 class LocalAssetStore:
     def __init__(self, root: Path | str, *, bridge: NodeAssetBridge | None = None,
                  research_provenance: Literal["live", "mock"] = "live",
-                 fixture_workspace: Path | str | None = None) -> None:
+                 fixture_workspace: Path | str | None = None,
+                 generated_criteria: TrustedCriteriaRegistry | None = None) -> None:
         self.root = Path(root).absolute()
         no_links(self.root)
         if self.root.resolve().is_relative_to(FROZEN_MAINLINE.resolve()):
@@ -42,6 +44,7 @@ class LocalAssetStore:
         if research_provenance not in {"live", "mock"}:
             raise AssetSafetyError("unsupported_research_provenance")
         self._research_provenance = research_provenance
+        self._generated_criteria = generated_criteria
         self.fixture_workspace = Path(fixture_workspace).resolve() if fixture_workspace is not None else None
         if research_provenance == "mock":
             if (self.fixture_workspace is None or self.root.resolve() == self.fixture_workspace
@@ -105,6 +108,10 @@ class LocalAssetStore:
     @property
     def research_provenance(self) -> Literal["live", "mock"]:
         return self._research_provenance
+
+    @property
+    def generated_criteria(self) -> TrustedCriteriaRegistry | None:
+        return self._generated_criteria
 
     def check_fixture_target(self, target: Path) -> None:
         if self.research_provenance == "mock" and (self.fixture_workspace is None
