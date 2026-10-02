@@ -84,8 +84,33 @@ reservation→settlement 约 23–27 秒，settlement→task completion 约 45�
 阶段的根因**。B 与 C 精确提交的 worker_loop 及原测试一致，未因猜测修改 C 领域。
 诊断摘要保留 `.runtime/sqlite-worker-first-diagnostic.json`。
 
-主控正在核对精确 SOURCE `230d283` 的独立 Windows CI；本地原 worker 门仍未通过，
-尚未发送成功完成回执。Linux/后来的独立成功也不会解释或撤销此首失败。
+本节首次记录为 REPORT `bb259112d240a5e13b2aa6ea437617406d978dc3`，当时独立 Windows CI
+仍在运行，尚未发送成功回执。本地原 worker 门未通过的事实保留；副本预算 breaker 为 null，
+没有记录到熔断，但这不足以排除所有停滞原因。后来的独立成功不会解释或撤销此首失败。
+
+### 精确 SOURCE 的独立 CI 继证
+
+[CI 37059454013](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37059454013)
+API 确认 HEAD 为 `230d283848c0879ff9c349096548d3810c4b1954`、`run_attempt=1`、
+最终 `conclusion=success`，没有为取得通过而重跑此 CI。
+
+| 独立 runner | 原 full pytest 结果 | 后续工程检查 |
+|---|---|---|
+| [Windows job 111012194553](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37059454013/job/111012194553) | **1295 PASS / 5 SKIP，75 warnings，1030.30s** | strict 130、build、官方 GEP SDK、非 editable wheel/资源/Node 验证 PASS |
+| [Linux job 111012194917](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37059454013/job/111012194917) | **1294 PASS / 6 SKIP，75 warnings，533.81s** | strict 130、build、官方 GEP SDK、非 editable wheel/资源/Node 验证 PASS |
+
+Windows 于 20:34:53 UTC 完成。实际原命令为 `uv tool run poetry run python -m pytest -q`，
+包含未修改的原 `test_worker_evomap.py`，没有针对它新增 skip 或弱化 `[0,0,0]`/时间阈值。
+`python -I tools/check_distribution.py --site-dir tools/.wheel-site --check-node` 两边输出
+`scope=contract_local`、`packages_from_wheel=13`、`resources_present=true`、
+`installed_verifier=passed`、`node_dependency_check=true`。
+下载的完整原日志保留 `.runtime/ci-37059454013-windows-complete.txt` 与
+`.runtime/ci-37059454013-linux-complete.txt`。
+
+原 Windows CI 的 UNIQUE 首失败、B 确定性首 4 RED、本地后继 180 秒首超时及此独立通过
+是不同记录；最终仅以精确 SOURCE 的新独立结果确认本修复工程门槛。没有断言本地超时已修复、
+没有将其原因归于未经证实的机器负载，也没有宣称科研或实时隔离验收。原 worktree/私有环境/
+本地证据全部保留；最终组合由主控与 I 继续验收。
 
 真实模型、科研候选执行、真实沙箱、探针、AT-07/L2 仍 **NOT_RUN**。本修复只处理既有本地
 资产存储的原子初始化，不把 mock 或 SQLite 并发检查转换成科学/隔离验收。
