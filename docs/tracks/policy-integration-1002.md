@@ -1,6 +1,6 @@
 # 策略 v0.1 独立累计集成与验收（I，1002）
 
-当前状态：**R1 真实反馈 RED，不能冻结 v0.1**。累计核心 `9ceb3aa` / 产品 `35934f1` 保留为失败候选，等待 C 原 Owner 最小返修及独立新一轮精确累计/安装/完整工程。仅候选分支，新增科研、收费模型与 main 发布 NOT_RUN。Linux 原完整 CI 已 PASS；Windows 尚在运行，本地首全量结果为 1192 PASS / 2 FAIL / 5 SKIP。
+当前状态：**R1 真实反馈 RED，不能冻结 v0.1**。累计核心 `9ceb3aa` / 产品 `35934f1` 保留为失败候选，等待 C 原 Owner 最小返修及独立新一轮精确累计/安装/完整工程。仅候选分支，新增科研、收费模型与 main 发布 NOT_RUN。R1 原完整 CI Windows/Linux 已全部 PASS；本地首全量结果仍为 1192 PASS / 2 FAIL / 5 SKIP，不能洗绿。
 
 ## 范围与不可变输入
 
@@ -21,7 +21,7 @@ C SOURCE 已包含 B/D SOURCE，经 Git ancestry 验证。累计核心 SOURCE `9
 
 ## 独立环境与证据位置
 
-I 私有根：`C:/Users/DW/AppData/Local/Temp/morph-policy-I-1002-2baebea8415f`。新 Git archive、私有 venv、Poetry 原锁导出及 `uv pip sync --require-hashes`；不使用 Owner venv/node_modules/artifacts。原日志保存在该根 `logs/`。完整原 workflow CI：`https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/36955261297`，精确 head 为累计 SOURCE；Windows/Linux 尚在运行。
+I 私有根：`C:/Users/DW/AppData/Local/Temp/morph-policy-I-1002-2baebea8415f`。新 Git archive、私有 venv、Poetry 原锁导出及 `uv pip sync --require-hashes`；不使用 Owner venv/node_modules/artifacts。原日志保存在该根 `logs/`。R1 完整原 workflow CI：`https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/36955261297`，精确 head 为累计 SOURCE；Windows/Linux completed/success。原始 Linux `20-ci-linux.txt` 和 Windows `22-ci-windows-run-log.txt`，完整官方 step 结果 `23-r1-ci-result.json`。Windows首 job rawlog 下载 EOF，不计 CI 失败，也不伪称空的21文件已取得结果；后续同一 completed run/job 的新只读下载成功。
 
 A 最终产品 SOURCE `35934f1e3afcbb6a2028a14fe998611c4cbd509b` / docs-only REPORT `05626f7a278fec7d3e73ee2edd6c4a63d6f76767` 已正式交付；核心 pin 为累计 `9ceb3aaef16a7f65a8a457d525e01202150ac1ab`。I 最终产品安装使用独立 `product-final-installation/`，Git 归档与 Git VCS 构建均仅子进程指定 LF，COPY 非 editable 安装，固定 Git core 实际 `direct_url.json` 绑定 SHA。实测 Git/archive/自建 wheel/site 全字节核对 17 产品及 181 核心文件，nlink=1；复用原 audit 的 `logs/08-install-verification.json` 和 `10-source-provenance.json`，不建立新证明框架。首批不合格安装保留在 `product-installation/`，不得用于最终门禁。
 
@@ -33,7 +33,7 @@ A 最终产品 SOURCE `35934f1e3afcbb6a2028a14fe998611c4cbd509b` / docs-only REP
 - `00-tar-first-red.txt`：Windows tar.exe 对四个中文文档路径失败；部分 `core-source` 保留未用，Python tarfile 在新 `core-archive` 完整解包。
 - `01-export.txt` / `02-core-sync.txt`：原 poetry.lock 导出及哈希约束同步通过。
 - `04-npm-ci.txt`：全新 archive 中 `npm ci --ignore-scripts` 通过。
-- `03-core-build.txt`：完整 build 首次失败，现有 pip 镜像安装 poetry-core 返回 HTTP 403；后续仅子进程设置官方 PyPI 重跑，不修改全局配置，结果待记。
+- `03-core-build.txt`：完整 build 首次失败，现有 pip 镜像安装 poetry-core 返回 HTTP 403；后续仅子进程设置官方 PyPI 重跑，不修改全局配置，05新日志通过。
 - `05-core-build-official-index.txt`：完整 build 重跑 PASS；`07-core-typecheck.txt` 121 源码 strict PASS；`09-sdk.txt` SDK PASS；`11-wheel-distribution.txt` 13 包 installed wheel/resource/verifier/Node PASS。
 - 核心首次 `06-core-pytest.txt` 仍在完整运行，已见两个 F。首轮仅同步依赖、未安装项目，且 archive 受全局 autocrlf 影响；不在运行期间改变环境、不提前归为领域缺陷。另行准备全新 exact LF archive / 非 editable wheel / 私有 core-final-venv，待完整首结果明确后新一轮验收。
 - 产品首 `product-installation/logs/02-dependencies.txt`：hash 模式不接受 Git dependency，无安装；原 frozen export 分离哈希依赖与完整 SHA VCS，分别强制哈希 / 实际 Git 安装。
@@ -71,3 +71,5 @@ R1 中已完成的契约/来源/历史复核不能替代新候选验收。等待
 | 原安全硬约束 | 原产品53测试/领域原测试有支持；原核心完整首轮环境 RED，仍须最终完整双平台门 |
 | 同事实幂等、崩溃/重建不重放 | 原契约与只读复核通过部分；实际旧科学 feedback 漏来源，不能签整体冻结 |
 | 版本、安装与完整工程一致 | exact R1 bytes/origin/历史audit PASS、Linux完整 CI PASS；Windows待结算、本地首全量RED，且该组合已有真实领域缺口 |
+
+R1 Windows 最终原全门：1194 passed / 5 skipped / 75 warnings，1494.08s；121 源码 strict、build、npm/SDK、wheel 安装/isolated distribution 全 PASS。Linux 1193 / 6 SKIP / 75 warnings，448.57s。此为旧失败候选完整工程证据，不能覆盖真实科学反馈 RED，也不能代替修后 R2 的原全门。主控返修治理 `5a9e7ed14b2a355bcba1a174a57adfc1f2386dfd` 已精确普通合入，准备随 C R2 SOURCE 合并后一并正常推送，未改默认 main。
