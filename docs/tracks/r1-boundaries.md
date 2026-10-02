@@ -830,3 +830,16 @@ passed/5 skipped and Linux1294 passed/6 skipped, plus its final REPORT
 `387338f49045f7be7a184b868f48f325cebd9cbd`. These are owner-reported CI results,
 not Q's independently run checks; the earlier local worker timeout remains
 unexplained. Final P repin and the exact merged installed Q gate are pending.
+
+## Merged core cross-module archive check
+
+Before the final product installation window, Q checks the interaction of B's
+new initialization transaction with A/C's existing dynamic and trusted-feedback
+paths on exact core `d85aa95e8da406d598f3658492e3d615bba8a28f`. A new archive
+uses process-local `git -c core.autocrlf=false archive`; no global Git setting
+changes. Dynamic MCP20, project/budget6 and all C45 checks give **71 passed**,
+40.64s, with the unchanged deny fixture and BLAS1. Raw
+`a-d85aa95-ac-integration71-first.txt` is retained. This checks the merged source
+interaction, not final installed product acceptance. P's early fd7 pin is
+explicitly not the final combined product candidate; that delivery and the
+coordinated installation window remain pending.
