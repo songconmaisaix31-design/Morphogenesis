@@ -1,16 +1,16 @@
 # R1 派发状态（2026-10-03）
 
-## 当前接续入口（17:56）
+## 当前接续入口（核心工程门已通过）
 
-后面按日期保留的段落是历史观察；本入口与更晚的实际回执决定当前状态，不能把历史PASS或旧顺序当当前组合验收。先读本入口；详细原日志/失败见 R1_ACCEPTANCE 与各原Owner报告，按需定位，不全量重复读取。
+后部按日期保留历史；先读本入口，详细原始失败与命令按需定位 R1_ACCEPTANCE 和原 Owner 报告，不重复全量上下文。
 
-- 当前唯一I：task_5f75f854b26e / ctx_eceee077723b；核心 SOURCE b480fca1b10a0b6a9c93f0d1801d38f267662461 已push；原完整CI37114395256正在运行，尚非PASS。首失败SOURCE3a6 / CI37113441786（Linux1742PASS/2FAIL/16SKIP，WindowsCANCELLED）及REPORTab39保留。
-- Q修复：SOURCEacb26f4af3535ff6b4136dcb5ef0f7fde526e2a3 / docs-only REPORT49c0b3ad49f9fa1b5ad7b493ec05187e5b148503已验收，Windows相关2PASS/0.45s；Linux待I上述CI。额外Q自动CI37114202636确认cancelled，不计通过；原Q已idle。
-- P：SOURCE67721aaa815e706c51e0f80a1d15ab71e34b6880 / corepinCEA，受保护树冻结；缺 C:/research-private/p-aoci-transition-approval.json。本人终端脚本/审核为 C:/research-private/p-aoci-approve.ps1 与 p-aoci-transition-review.md；Agent不得代填、重置或改保护报告。收到真实receipt后恢复原P官方apply/AOCI→普通merge F REPORTc08566edc492e92adfc4e24a9e8de1c18b859e02→最终核心pin/必要维护→同I唯一完整产品新COPY回归与installed观察。私有短Handoff C:/research-private/p-final-combination-handoff-1738.md，不是授权。
-- AOCI核心正式10Entry已在A本轨通过；I复制索引仍A绝对路径，仅10源Git字节一致，I重新绑定NOT_VERIFIED、实际Token节省UNKNOWN。沿用官方工具/原Owner，不另造索引或调度系统。
-- 角色/write_paths仍为原长期所有权，root只治理，领域缺陷退原Owner。Codex GPT-6.1-Sol；OpenCode在10月3日18:00前禁用，之后如有实际任务才按DeepSeek V4 Pro使用，不为等门增加空Worker。
-- 完整产品最终回归NOT_RUN；其后单独授权AT07无害真实隔离、实际全部通过后一次明确授权L2（Spec原Poisson题审查稿在本文后部）。不加入L3/规模效率/多用户/跨宿主/完整RSI，不启动Docker/WSL或科学候选；main/tag/部署未执行，MVP未收口。
-
+- 唯一最终核心 SOURCE b480fca1b10a0b6a9c93f0d1801d38f267662461；I docs-only REPORT1bce9f9f71c9a1c5e864263076ae879fcd67e31f 已普通push、remote exact、clean。主控独立核实原 CI37114395256 headSha/全部steps：Windows1745PASS/15SKIP/1575.82s、Linux1744PASS/16SKIP/521.84s，两端 strict140/build/SDK/wheel/distribution PASS。只接纳当前核心离线工程门，非全MVP/R1。
+- 首 SOURCE3a6/CI37113441786 的 Linux1742PASS/2FAIL/16SKIP 和 WindowsCANCELLED、REPORTab39完整保留。原Q修复acb/REPORT49已验收并普通合入；额外Q CI37114202636 cancelled不计通过，不重跑已绿专项。
+- B docs-only REPORT7f05cc795d2371f6b4d74656c25e8bc92e67db83已验收并普通合入I；l2-poisson-review准备问题/材料、现有 EvaluationSpec/registry/evaluator/复核/消费链及测试定位，无新模块或完整候选代码。数值一致不证明方法改进；负结论贡献不替代合格代码实际使用。科学状态全部NOT_RUN。
+- 原I task5f75/ctxece与B task9eb/ctx85c已成功结算、idle；release retained/processAction none，未声称关闭外部终端。保留原长期Owner/worktree/branch/write_paths，root只治理。B OpenCode首次真实Insufficient Balance及Codex readiness timeout保留；实际成功接续为GPT-6.1-Sol high，不改账户/计费入口。
+- P SOURCE67721/corepinCEA与AOCI WIP受保护冻结；缺 C:/research-private/p-aoci-transition-approval.json。用户本人终端执行 C:/research-private/p-aoci-approve.ps1并亲自输入官方phrase；审核p-aoci-transition-review.md。Agent不得代填、重置、改保护输入。收到真实receipt核验后恢复原P官方apply/15Entry→普通merge F REPORTc085→pin已接纳核心b480/必要维护→同I一次最终产品新COPY完整离线和相关installed输入/只读会话/HTTP观察。私有短Handoff p-final-combination-handoff-1738.md仅接续说明。
+- AOCI核心10Entry只在A原worktree接纳；I复制配置仍A绝对路径，source Git字节一致不能冒充I重新绑定/认知freshness。I NOT_VERIFIED，实际Token节省/费用UNKNOWN。沿用官方维护，真实语义缺口退原Owner。
+- 最终产品完整回归、单独授权AT07真实无害隔离、一次L2及人工理解均NOT_RUN；必须保持此顺序，不借科研验沙箱。性能仅实际样本、不加最优成绩门。L3/规模效率/多用户/跨宿主/完整RSI不加入；main/tag/部署未执行。C系统Python误安装未恢复，原自动审批blocked by policy及人工清单保留。
 
 ## 16:45 A/Q 收口，P 等真实人类确认
 
@@ -402,3 +402,11 @@ P官方真人终端门仍未完成，已再次提供具体官方规则/审查稿
 ## 18:15 B 正式 Codex 接续
 
 task_9ebbae6e5f3b 首次 worker-start 的 ctx_03a9cd950de1 在 agent_readiness 超时，未送入任务；实际就绪画面和首失败都保留。仅送一次无业务写入的准备确认，取得 Codex turn_started；按官方 failed retry-of 在同一原 B 终端重派 ctx_85c678574200，实际 ready/input_accepted/turnStart observed，模型为 GPT-6.1-Sol high YOLO。没有并发 B 编辑者、没有新领域轨，没有把 OpenCode 余额错误或就绪超时变成完成。B 仍仅两份文档，提交 [skip ci]；I 已收到精确范围，不改变冻结核心 SOURCE b480 或另跑 CI。P receipt 仍缺，所有真实科学/AT07/最终产品回归未执行。
+
+## 核心后继工程门与 B 文档接纳（2026-10-03）
+
+主控独立核对冻结 SOURCE b480fca1b10a0b6a9c93f0d1801d38f267662461 的原 foundation CI37114395256已completed/success；两个job所有原步骤通过。Windows1745PASS/15SKIP/75warnings/1575.82s；Linux1744PASS/16SKIP/75warnings/521.84s；两端strict140sourcefiles、sdist/wheel build、SDK schema1.14.0、wheel13packages/installed_verifier/node_dependency_check通过。原命令为 poetry run python -m pytest -q、poetry run python tools/typecheck.py、poetry run python -m build、npm run check:sdk、uv pip install --no-deps --target tools/.wheel-site及 python -I tools/check_distribution.py --check-node；完整argv/平台原输出见I报告§9与 C:/r1i/i1003-core-1732/logs/successor-ci-original.log。SDK/distribution scope仍contract_local，非真实科研。
+
+I最终 docs-only REPORT1bce9f9f71c9a1c5e864263076ae879fcd67e31f与B docs-only REPORT7f05cc795d2371f6b4d74656c25e8bc92e67db83均独立核实remote exact/clean/diffcheck；I含所有A/B/C/Q来源、firstRED3a6/REPORTab39及B7f普通祖先，b480→REPORT只四份docs、非docs零差异。B先交已有评价与采用调用链、补路径图例，未造模块、运行测试/安装/科学；稿为question_prepared而非运行授权。合法refuted可贡献及降温，但failed代码不能伪作passed adopted，AT13需真实可用代码在原消费链再验证和使用。
+
+原CI37113441786 Linux1742PASS/2FAIL/16SKIP与Windowscancelled、原Q追加CI取消、OpenCode Insufficient Balance及Codex readiness timeout均保留。主控接受上述核心工程+docs阶段并结算I/B release，回执为retained/processActionnone，不声称关闭或全MVP。P真实TTY回执尚缺、 protected preimages未改；最终产品pin/fullCOPY回归/installed观察、AT07及L2未执行。核心AOCI跨checkout重新绑定/认知NOT_VERIFIED，模型用量/费用/Token节省UNKNOWN。未执行main/tag/部署或C被政策拒绝的系统清理。

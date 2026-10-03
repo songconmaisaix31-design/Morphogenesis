@@ -274,3 +274,11 @@ P receipt仍缺，其受保护全路径保持原样，最终产品pin/唯一完�
 同一 I 普通merge该Q SOURCE与root9e1，无冲突、无I业务/测试修改。后继冻结核心 SOURCE **b480fca1b10a0b6a9c93f0d1801d38f267662461**，remote exact/clean；首失败3a6和首REDREPORTab39d122f25527e08d41f41b5353ba576f856ce7均保留为祖先。相对3a6，非docs只变化Q该测试与两小证据文件；swarm/orchestration/local_assets/pyproject/poetry.lock/CI/AOCI原字节均零差异。唯一后继 foundation push CI **37114395256 / attempt1 / headb480** 已启动，两平台实际门仍待结果；不rerun旧失败run。Q49后继报告只可docs-only普通merge并[skip ci]推送，不重定义testedSOURCE或再触发完整CI。
 
 P官方真人终端门仍未完成，已再次提供具体官方规则/审查稿/本人脚本和异步回执问题；不把聊天选项/时间经过视作官方receipt。原P树保护不改，原P AOCI/最终pin、一次完整产品离线与相关installed观察仍待。OpenCode18:00前停止；本轮没有新依赖/WSL/Docker/真实候选/科学调用/AT07/L2/main/tag/部署。MVP未收口。
+
+## 核心后继工程门与 B 文档接纳（2026-10-03）
+
+主控独立核对冻结 SOURCE b480fca1b10a0b6a9c93f0d1801d38f267662461 的原 foundation CI37114395256已completed/success；两个job所有原步骤通过。Windows1745PASS/15SKIP/75warnings/1575.82s；Linux1744PASS/16SKIP/75warnings/521.84s；两端strict140sourcefiles、sdist/wheel build、SDK schema1.14.0、wheel13packages/installed_verifier/node_dependency_check通过。原命令为 poetry run python -m pytest -q、poetry run python tools/typecheck.py、poetry run python -m build、npm run check:sdk、uv pip install --no-deps --target tools/.wheel-site及 python -I tools/check_distribution.py --check-node；完整argv/平台原输出见I报告§9与 C:/r1i/i1003-core-1732/logs/successor-ci-original.log。SDK/distribution scope仍contract_local，非真实科研。
+
+I最终 docs-only REPORT1bce9f9f71c9a1c5e864263076ae879fcd67e31f与B docs-only REPORT7f05cc795d2371f6b4d74656c25e8bc92e67db83均独立核实remote exact/clean/diffcheck；I含所有A/B/C/Q来源、firstRED3a6/REPORTab39及B7f普通祖先，b480→REPORT只四份docs、非docs零差异。B先交已有评价与采用调用链、补路径图例，未造模块、运行测试/安装/科学；稿为question_prepared而非运行授权。合法refuted可贡献及降温，但failed代码不能伪作passed adopted，AT13需真实可用代码在原消费链再验证和使用。
+
+原CI37113441786 Linux1742PASS/2FAIL/16SKIP与Windowscancelled、原Q追加CI取消、OpenCode Insufficient Balance及Codex readiness timeout均保留。主控接受上述核心工程+docs阶段并结算I/B release，回执为retained/processActionnone，不声称关闭或全MVP。P真实TTY回执尚缺、 protected preimages未改；最终产品pin/fullCOPY回归/installed观察、AT07及L2未执行。核心AOCI跨checkout重新绑定/认知NOT_VERIFIED，模型用量/费用/Token节省UNKNOWN。未执行main/tag/部署或C被政策拒绝的系统清理。
