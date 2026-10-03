@@ -1,5 +1,13 @@
 # Research Swarm Alpha R1 一页开发计划（2026-10-03）
 
+## 12:24 导出工程决策（真实运行权限不变）
+
+经 B 原 Owner 的官方源码/API 有界调查，继续在原 B 轨离线实现最小修复：复用 OpenSandbox 官方整容器 pause、受信 Docker Engine stat/archive 和原 session/finalize_session；不新增 executor 或运行权威。当前 fail-closed/Range 修正先独立提交保留失败，后继实现仍由 B 负责原适配器、边界测试、必要官方 Docker SDK 依赖/锁及授权包。Windows npipe 使用成熟官方 transport，不自研协议；真实 Engine/API 版本仍未知，须以后 AT07 核对。
+
+冻结期间验收批准目录路径、所有祖先/leaf 无符号链接、无共享写入挂载、普通文件、字节/时间限额；tar 的链接/特殊类型/额外成员拒绝且不提取到宿主。Engine PathStat 不提供 nlink，不能宣称排除了全部 inode 别名；这一未承诺条件不额外升级为本轮收口门，宿主凭据/控制面及原始数据的隔离要求保持。任何暂停、恢复、流读取或 owned 清理效果未知均走原 unknown 边界，不自动重发。
+
+若后继需要 HostConfig/factory 受信控制面注入，由 A 原 Owner 在原源码路径接线，并在稳定接口后完成核心 AOCI；B 只 Handoff。Q 原 Owner 在 B 后继固定后独立复核受影响边界，保留旧默认能力导致的首失败，不用假能力 fixture 宣称生产可执行。活跃槽位先由 P/F 完成阶段释放，I 仍待最终领域交付。以上仅工程实现决定，不授权启动 Docker/WSL、创建沙箱、执行 AT07 或研究候选。
+
 ## 2026-10-03 MVP 追加：AOCI 开发上下文与节点终端
 
 用户追加继续 Orca/Codex YOLO 并行，接入 https://github.com/aoci-spec/aoci-code/ 以减少重复源码检索，前端参考 Codex GUI，拓扑节点右键打开其会话终端和上下文。本节扩展下节收口范围；原三项行为、一次最终完整离线回归、单独授权 AT-07、通过后一次 L2 的顺序继续生效，不扩大到 L3、多用户、跨宿主或更多运行品牌/语言。
