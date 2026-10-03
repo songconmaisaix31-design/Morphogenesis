@@ -457,3 +457,47 @@ def test_operator_engine_mismatch_stops_before_cli_key_or_create(tmp_path, monke
     transport.close.assert_called_once()
     assert not (root / "create-requested.json").exists()
     assert not (root / ".at07-docker-cli").exists()
+
+
+@pytest.mark.parametrize("bound_api,actual_api", [("1.52", "1.54"), ("1.54", "1.52")])
+def test_supported_but_different_engine_api_stops_before_cli_key_or_sdk(tmp_path, monkeypatch, bound_api, actual_api):
+    config = configuration(frozen=True)
+    config = config.model_copy(update={"docker_export": DockerExportConfiguration(
+        **{**config.docker_export.model_dump(), "api_version": bound_api})})
+    root = at07.prepare(config, CONFIG.read_bytes(), probe_id="api-mismatch",
+        target_ipv4="172.17.0.2", archive_root=tmp_path)
+    control = SimpleNamespace(preflight=Mock(), close=Mock(), _json=Mock(return_value={"ApiVersion": actual_api}))
+    monkeypatch.setattr(at07_live, "FrozenDockerExport", lambda value: control)
+    process, create = Mock(), Mock()
+    monkeypatch.setattr(subprocess, "run", process)
+    monkeypatch.setattr(at07.SandboxSync, "create", create)
+    with pytest.raises(PermissionError, match="^docker_export_api_mismatch$"):
+        at07_live.execute(root=root, authorization_ref="inert-reference", key_file=tmp_path / "must-not-read",
+            canary_directory=tmp_path / "missing", accept_infrastructure_limits=True)
+    process.assert_not_called()
+    create.assert_not_called()
+    control.preflight.assert_called_once()
+    control.close.assert_called_once()
+    assert not (root / "create-requested.json").exists()
+    assert not (root / ".at07-docker-cli").exists()
+
+
+def test_bound_api_154_operator_gate_preserves_configuration(tmp_path, monkeypatch):
+    config = configuration(frozen=True)
+    config = config.model_copy(update={"docker_export": DockerExportConfiguration(
+        **{**config.docker_export.model_dump(), "api_version": "1.54"})})
+    root = at07.prepare(config, CONFIG.read_bytes(), probe_id="api-154",
+        target_ipv4="172.17.0.2", archive_root=tmp_path)
+    control = SimpleNamespace(preflight=Mock(), close=Mock(), _json=Mock(return_value={"ApiVersion": "1.54"}))
+    captured = Mock(return_value=at07.At07Result(probe_id="api-154", configuration=config, provenance="mock"))
+    monkeypatch.setattr(at07_live, "FrozenDockerExport", lambda value: control)
+    monkeypatch.setattr(at07_live, "_execute", captured)
+    result = at07_live.execute(root=root, authorization_ref="inert-reference", key_file=tmp_path / "must-not-read",
+        canary_directory=tmp_path / "missing", accept_infrastructure_limits=True)
+    assert result.configuration == captured.call_args.kwargs["config"] == config
+    captured.assert_called_once()
+    control.preflight.assert_called_once()
+    control._json.assert_called_once_with("/version")
+    control.close.assert_called_once()
+    assert not (root / "create-requested.json").exists()
+    assert not (root / ".at07-docker-cli").exists()

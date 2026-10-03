@@ -138,7 +138,7 @@ class DockerExportConfiguration(Contract):
     endpoint: Literal["unix:///var/run/docker.sock", "npipe:////./pipe/dockerDesktopLinuxEngine"]
     daemon_id: str = Field(min_length=8, max_length=120, pattern=r"^[A-Za-z0-9:_.-]+$")
     engine_version: Literal["29.5.3"]
-    api_version: Literal["1.52"] = "1.52"
+    api_version: Literal["1.52", "1.54"] = "1.52"
     request_timeout_seconds: Literal[10] = 10
 
 

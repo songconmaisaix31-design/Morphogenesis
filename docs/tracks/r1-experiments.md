@@ -734,3 +734,34 @@ Desktop可能恢复他项目、固定镜像缺失STOP不pull、实际Engine29.5.
 没有测试/安装/CLIhelp/prepare/Engine/Desktop/key/SDKcreate/候选/科学，Poisson review/锁/profile/业务/AOCI/他轨不写。
 AT07/L2 NOT_RUN，运行授权ref/daemon/server/targetIP/probe UNKNOWN，模型用量/费用UNKNOWN，OpenCode首阻塞未重试。
 仅离线工程阶段接纳，不称MVP或R1完整通过；交唯一I普通docsmerge，不新SOURCE repin/CI。
+
+## 2026-10-03 21:44 专项批准后的创建前STOP与追加只读诊断
+
+原B后继Task `task_671c317b6196` / Dispatch `ctx_6b1c2488a3d2`，用户真实提交“我现在批准AT-07，继续开发”，
+C `msg_f469ac99f92f` UTC13:23:20/root治理`a3880ffb8e83a5df8f22a3880f47483e9754ac01`已直接确认，未再询同一批准。
+原runtime15de+c84/r2私有noneditable Python -I -B、锁87/profile438/compose52B/installed runner原blob再次只读一致；
+I docsREPORTc5cdf不是SOURCE，本Task业务/测试/锁/profile零改。实际600s窗口UTC13:29:15.949至13:39:15.949不续/不重置。
+首host RAM5781MiB/C42.83GiB/pipefalse；一次既有Desktop Hidden启动PID64796/Creation13:29:50.337后pipe出现。
+首官方CLI/同npipe/owned空config/三system子env/typed shellFalse的Compose version exit125/4.768s，
+创建前STOP已立即`msg_0e9f181cd38d`交root；stderr内容未保存明确MISSING，不伪补根因。
+0key/0prepare/0基础设施create/0SDKcreate，未进入pause→HEADGET→resume/探针/候选/科学；原首record不改。
+私有空config核同身份且空后rmdir；closure13:35:38.478/elapsed382.529s，Desktop对他项目影响NOT_ASSESSED、未停他人Engine。
+
+root随后仅追加必要只读诊断/授权包docs路径（msg_0fc604f1bb10/c0ce00419282/a38c276da9e4），不恢复真实probe。
+官方CLI v29.5.3源码Windows discovery依赖ProgramFiles；实读默认系统Compose目录存在、候选常规非link、
+与resources相同33657776bytes/SHA E295...9915/Valid DockerInc。新增唯一非secret固定ProgramFiles系统locator，
+不继承DOCKER*/HOME/auth/TLS/proxy/context、不改空config/global或SDKreader白名单；首缺项是静态推断，非恢复首error。
+新只读Compose诊断UTC13:42:30.747实际v5.1.4/exit0/5.254s/stderr空，原字节分档；未执行standalone。
+同明确npipe/另owned空config/原三systemenv新增只读version/info/fourimageinspect UTC13:44:06：
+LinuxEngine29.5.3/advertised API1.54/Min1.40/daemon6cc73c96-c021-4a82-ade6-2fc9ae693fff；冻结Literal API1.52不匹配STOP。
+server68ca/execd6cf7/python229a存在，固定egress db7345...a87b3b5镜像No such image/exit1，缺镜像STOP不pull/build。
+`msg_8cee4beae80b`交root真实阻塞，不用DOCKER_API_VERSION或修改schema/profile/daemon伪匹配，原窗口到期不再create。
+三profile及DockerBackend全范围allow/nonloopback block规则只作配置观察，不证明实际有效过滤或动态端口范围；仍UNKNOWN/STOP。
+主控后续报告低RAM235MiB/13:35:17及1894MiB/load94%/13:39:59仅时点观察，不推Desktop/child慢的确定因果。
+
+追加仅授权包最小官方locator模板、[secret-free实际文本](../experiments/at07-evidence/live-20261003.txt)及本轨短报告，
+原first/新diagnostic日志在`C:/research-private/b-at07-live-ctx_6b1c2488a3d2/`；无新执行器、无源码/测试/依赖/部署变动。
+AT07 NOT_RUN/precreateSTOP，L2/候选/science/native模型NOT_RUN，registry未写，无server ID可retained_stopped；
+cache/端口/总峰UNKNOWN、caps UNSUPPORTED与全项实际PASS+Q独立审核条件保持，费用/用量UNKNOWN，OpenCode首阻塞不重试。
+只进行真实批准范围前置/后继只读诊断及Git diffcheck/普通docs checkpoint+push `[skip ci]`/remote exact/clean，
+未重测/安装/CI/付费/修改AOCI或全局状态，不称MVP/R1完整通过；领域协议/镜像/可达性缺口交root，不在冻结SOURCE内自修。

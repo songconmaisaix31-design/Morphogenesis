@@ -35,9 +35,9 @@ def deny_execution(monkeypatch):
     monkeypatch.setattr(socket.socket, "sendto", denied)
 
 
-def export_config():
+def export_config(*, api_version="1.52"):
     return DockerExportConfiguration(endpoint="npipe:////./pipe/dockerDesktopLinuxEngine",
-        daemon_id="inert-daemon-1", engine_version="29.5.3")
+        daemon_id="inert-daemon-1", engine_version="29.5.3", api_version=api_version)
 
 
 def tar_bytes(*, name="result.bin", body=b"safe", kind=tarfile.REGTYPE, link="", extra=False, pax=None):
@@ -69,6 +69,7 @@ class Daemon:
     def __init__(self, config):
         self.config = config
         self.requests, self.responses, self.events = [], [], []
+        self.urls = []
         self.preflight_changes = {}
         self.nodes = {"/tmp": 1 << 31, "/tmp/morph-research": 1 << 31, PATH: 0}
         self.archive = tar_bytes()
@@ -98,7 +99,10 @@ class Daemon:
         assert method in {"GET", "HEAD"} and options["allow_redirects"] is False
         assert options["headers"] == {"Accept-Encoding": "identity"}
         assert 0 < options["timeout"] <= 10
-        route = url.split("/v1.52", 1)[1]
+        prefix = "http+docker://localnpipe/v" + self.config.docker_export.api_version
+        assert url.startswith(prefix + "/")
+        self.urls.append(url)
+        route = url[len(prefix):]
         self.requests.append((method, route, deepcopy(options)))
         if route == "/version":
             value = {"Version": "29.5.3", "Os": "linux", **self.preflight_changes}
@@ -161,8 +165,8 @@ class Sandbox:
         self.daemon.events.append("kill:sid")
 
 
-def fixture(monkeypatch):
-    config = configuration().model_copy(update={"docker_export": export_config()})
+def fixture(monkeypatch, *, api_version="1.52"):
+    config = configuration().model_copy(update={"docker_export": export_config(api_version=api_version)})
     daemon = Daemon(config)
     monkeypatch.setattr(module, "_transport", lambda endpoint: (daemon, "http+docker://localnpipe"))
     control = module.FrozenDockerExport(config)
@@ -177,14 +181,16 @@ def fixture(monkeypatch):
     return OpenSandboxSession(Sandbox(daemon), owned=True, export_control=control), daemon
 
 
-def test_paused_ancestor_and_archive_reads_block_replacement_and_preserve_bytes(monkeypatch):
-    session, daemon = fixture(monkeypatch)
+@pytest.mark.parametrize("api_version", ["1.52", "1.54"])
+def test_paused_ancestor_and_archive_reads_block_replacement_and_preserve_bytes(monkeypatch, api_version):
+    session, daemon = fixture(monkeypatch, api_version=api_version)
     session.export_control.preflight()
     daemon.replace_on_read = True
     assert session.download(PATH, 64) == b"safe"
     assert daemon.blocked_replacements == 1 and daemon.events == ["pause", "resume:sid", "sdk_closed"]
     methods = [m for m, p, _ in daemon.requests if p.endswith("/archive")]
     assert methods == ["HEAD", "HEAD", "HEAD", "GET"]
+    assert daemon.urls and all(url.startswith("http+docker://localnpipe/v" + api_version + "/") for url in daemon.urls)
     assert all(r.closed for r in daemon.responses)
     assert session.export_control.observations[0]["paused_after"] is True
     session.destroy()

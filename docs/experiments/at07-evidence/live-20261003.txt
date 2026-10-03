@@ -1,0 +1,97 @@
+AT-07 authorized preflight STOP and later read-only diagnostic evidence
+Date: 2026-10-03; all timestamps below UTC.
+Task: task_671c317b6196; Dispatch: ctx_6b1c2488a3d2; original B owner.
+Branch: songconmaisaix31-design/morph-r1-experiments-1003.
+Scope: secret-free summary, not a verified probe or scientific result.
+
+AUTHORIZATION / IDENTITY
+User submitted: 我现在批准AT-07，继续开发.
+C relay msg_f469ac99f92f at 13:23:20; root directly checked submitted terminal stream.
+Governance: a3880ffb8e83a5df8f22a3880f47483e9754ac01; approved packet e40f7879f9598405486587dad936e9884ead15bc.
+Core runtime SOURCE: 15de4959646df264530b978dfde9152552b9a76b.
+Product runtime SOURCE: c84e49bd8e926f50d2c057793e8789cf137b310a.
+Test-only SOURCE: 756d5069e7739089f0e5ba1c33eebfb2657b03f0; I docs REPORT c5cdfc89e5a1e43ab49f9afc33a05a53d887e8ab is not SOURCE.
+Python: C:/r1i/successor-2018/r2/venv/Scripts/python.exe; -I -B; no install or I writes.
+Raw inputs: C:/r1i/successor-2018/r2/core/deploy/opensandbox/at07.config.toml and at07.compose.yaml.
+Lock SHA256: 87B335297F95B7BF72514691CB990DB0D6441316BE90C8CB726B016B9AF025EB; 384044 bytes.
+Profile SHA256: 438FE04BE51D07188B6BC4B26FBD85C2E7CE28DC02E31ED3AF2A4CF27F3C0B79; 1013 bytes; not an actually loaded runtime profile.
+Compose SHA256: 52B34CD7EED1C1A01CB85DCDBD79550686D058941B5124AA12134AA75A7CD8AC; 1793 bytes.
+Installed runner raw Git blob b96186e24bc7dd12858e0e661ebda4010fe5ae5e equals core15de; no source change.
+
+ORIGINAL AUTHORIZED WINDOW / FIRST STOP
+Window start: 13:29:15.9497674; deadline: 13:39:15.9497674; never extended or reset.
+Host first: Linux engine pipe absent; freeRAM5781MiB; C free42.83GiB; active firewall mask4.
+COM firewall profiles1/2/4: enabled=true, default_inbound=0, default_outbound=1.
+Rule observations include Docker Desktop Backend TCP/UDP allow on profile4, all ports/remote/local addresses.
+A nonloopback block rule also exists; effective rule matching and actual dynamic port reachability were NOT verified.
+No listeners in queried TCP47400..47410/8098/8099 at that observation; absence is not future exposure proof.
+At 13:29:50.3472324: single existing Docker Desktop.exe Start-Process -WindowStyle Hidden.
+Returned PID64796; CreationUTC13:29:50.3378426; Linux engine pipe later observed present.
+Effects on other projects/restart containers: NOT_ASSESSED; no other objects stopped or modified.
+
+First typed argv, shell=False, timeout10, fresh empty owned private config:
+[C:/Program Files/Docker/Docker/resources/bin/docker.exe, --host, npipe:////./pipe/dockerDesktopLinuxEngine,
+ --config, <private-root>/.at07-outer-docker-cli, compose, version, --format, json]
+Child environment ONLY: PATH=C:/Windows/System32; SYSTEMROOT=C:/Windows; WINDIR=C:/Windows.
+Result: exit125; CLI seconds4.767932700000529; stdout empty; stderr_present=true.
+First stderr content: MISSING (not saved); no reconstruction or claimed exact error cause.
+First per-command UTC was not recorded; operation start/deadline and actual CLI duration above remain original evidence.
+Root escalation msg_0e9f181cd38d; precreate STOP; no rerun of this original attempt.
+Key read=0; prepare=0; composeup/infrastructurecreate=0; SDKcreate=0.
+No create-requested marker or original live result/review exists: original live entrypoint never called.
+Owned empty config removed after no_links and exact st_dev/st_ino check; no recursive deletion.
+Procedure STOP closure13:35:38.4788903: elapsed382.5291229s; remaining217.4708771s; no further mutation.
+Original window then expired; later diagnostics below do not restore it.
+
+SEPARATELY AUTHORIZED READ-ONLY ENGINEERING DIAGNOSTICS
+Authority: root msg_0fc604f1bb10, msg_c0ce00419282, msg_a38c276da9e4; no probe/create/mutation permission added.
+CLI file42748848bytes / SHA C0E4F0379277708EEA93B39FCBBFB9BAD6F4EE97CC3EB7D326BF5D534FBF1762 / Valid Docker Inc.
+System Compose candidate C:/Program Files/Docker/cli-plugins/docker-compose.exe is regular Archive, no link.
+Candidate and approved resources/cli-plugins/docker-compose.exe both33657776bytes / SHA E295CD078CACEBC2081CB266275268B3895EC14452B31A9D7568CE295BD59915 / Valid Docker Inc.
+Docker CLI v29.5.3 Windows official source derives system plugin directory from ProgramFiles.
+Missing locator in first three-item env is a source-based inference, not recovered first stderr.
+New unique Compose version diagnostic used same absolute CLI/npipe, another owned empty config, shell=False/10s,
+the same three system fields plus ONLY fixed ProgramFiles=C:/Program Files.
+13:42:30.747583: exit0; CLI seconds5.254027500002849; stdout {"version":"v5.1.4"}; stderr empty.
+Config remained empty and exact owned identity was removed. New stdout/stderr raw bytes retained separately.
+Standalone was NOT executed; no claim that its --config conversion is proven equivalent.
+
+13:44:06.031687: same explicit npipe/absolute CLI/fresh empty config/three-item env, version --format {{json .}}.
+Exit0; seconds0.3260641000015312; actual Client29.5.3/API1.54; Server Linux29.5.3/API1.54/MinAPI1.40, Desktop4.77.0.
+13:44:06.267929: same-route info selected nonsecret fields only; exit0; seconds0.23539489999893703.
+Actual daemon ID: 6cc73c96-c021-4a82-ade6-2fc9ae693fff; os_type=linux; server_version=29.5.3.
+Frozen configuration literal API1.52 and original runner exact API check do NOT match advertised1.54: STOP.
+No DOCKER_API_VERSION, upgrade/downgrade, profile/schema/config edit, or probe call to bypass this condition.
+
+13:44:06.717192: same-route image inspect of ALL FOUR ORIGINAL FIXED DIGESTS; exit1; seconds0.448502200000803.
+Present server: opensandbox/server@sha256:68ca0212a2749b2c73096ce2ec0264455c64442c45f81007db442f52bf84c9d1.
+Present execd: opensandbox/execd@sha256:6cf7dba2f21f0b536e100563d841ac58a9f31c2b0a081b7ac76796a24d6f47e2.
+Present python: python@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36.
+Original stderr: Error response from daemon: No such image: opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5.
+Missing fixed image: STOP; no pull/build/substitute backend/image. Root escalation msg_8cee4beae80b.
+Engine diagnostic config exact identity/empty verified, removed with rmdir; no global config/auth/context writes.
+
+RESULT / LIMITS
+AT07: NOT_RUN, precreate STOP. L2/candidate/science/native models: NOT_RUN. Registry written: false.
+New owned containers0 / volume0 / network0; no server instance, targetIP, prepared runtime configuration or verified probe.
+No main/egress/volume/cache cleanup PASS inferred; cache and future0.0.0.0:47400..47410 reachability UNKNOWN.
+No retained_stopped server exists; original allPASS+independent-Q condition was never reached.
+Docker Desktop was started once, not stopped globally; other-project running/restoration effects UNKNOWN.
+No tests/install/CI/paid model/AOCI/firewall/DNS/daemon changes; original caps UNSUPPORTED/peak UNKNOWN remain.
+Model usage/fees UNKNOWN; no OpenCode balance retry; no MVP/R1 completion claim.
+
+RAW
+C:/research-private/b-at07-live-ctx_6b1c2488a3d2/
+static-inputs-first.json, host-first.json, operation-start-utc.txt, desktop-launch-first.json,
+outer-config-identity-first.json, compose-version-first.json, owned-config-cleanup-first.json, procedure-stop-first.json,
+plugin-filesystem-diagnostic.json, system-compose-candidate-diagnostic.json, compose-discovery-diagnostic.json,
+compose-diagnostic-stdout.bin, compose-diagnostic-stderr.bin,
+engine-version-diagnostic.json, engine-info-diagnostic.json, fixed-images-diagnostic.json,
+the three corresponding stdout/stderr bin pairs, engine-diagnostic-config-cleanup.json.
+Original first record unchanged; new diagnostic records are not replacement/replay evidence.
+
+OFFICIAL SOURCES (parameter/source review, no copied upstream implementation)
+https://docs.docker.com/reference/cli/docker/
+https://github.com/docker/cli/blob/v29.5.3/cli-plugins/manager/manager_windows.go
+https://github.com/docker/cli/blob/v29.5.3/cli-plugins/manager/manager.go
+https://github.com/docker/compose/blob/main/cmd/compatibility/convert.go (main reference, not installed-version source proof)
