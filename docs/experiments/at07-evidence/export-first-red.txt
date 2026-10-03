@@ -1,0 +1,168 @@
+FFFFFFFFF.F                                                              [100%]
+================================== FAILURES ===================================
+__________ test_export_path_escape_rejected_before_sdk[/tmp/outside] __________
+
+path = '/tmp/outside'
+
+    @pytest.mark.parametrize("path", ["/tmp/outside", "/tmp/morph-research/../outside",
+        "/tmp/morph-research/sub/../../outside", "/etc/passwd", "/tmp/morph-research//result.bin"])
+    def test_export_path_escape_rejected_before_sdk(path):
+        session, files = session_with_files()
+>       with pytest.raises(PermissionError, match="artifact_path_escape"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests\experiments\test_at07_export.py:41: Failed
+_ test_export_path_escape_rejected_before_sdk[/tmp/morph-research/../outside] _
+
+path = '/tmp/morph-research/../outside'
+
+    @pytest.mark.parametrize("path", ["/tmp/outside", "/tmp/morph-research/../outside",
+        "/tmp/morph-research/sub/../../outside", "/etc/passwd", "/tmp/morph-research//result.bin"])
+    def test_export_path_escape_rejected_before_sdk(path):
+        session, files = session_with_files()
+>       with pytest.raises(PermissionError, match="artifact_path_escape"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests\experiments\test_at07_export.py:41: Failed
+_ test_export_path_escape_rejected_before_sdk[/tmp/morph-research/sub/../../outside] _
+
+path = '/tmp/morph-research/sub/../../outside'
+
+    @pytest.mark.parametrize("path", ["/tmp/outside", "/tmp/morph-research/../outside",
+        "/tmp/morph-research/sub/../../outside", "/etc/passwd", "/tmp/morph-research//result.bin"])
+    def test_export_path_escape_rejected_before_sdk(path):
+        session, files = session_with_files()
+>       with pytest.raises(PermissionError, match="artifact_path_escape"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests\experiments\test_at07_export.py:41: Failed
+__________ test_export_path_escape_rejected_before_sdk[/etc/passwd] ___________
+
+path = '/etc/passwd'
+
+    @pytest.mark.parametrize("path", ["/tmp/outside", "/tmp/morph-research/../outside",
+        "/tmp/morph-research/sub/../../outside", "/etc/passwd", "/tmp/morph-research//result.bin"])
+    def test_export_path_escape_rejected_before_sdk(path):
+        session, files = session_with_files()
+>       with pytest.raises(PermissionError, match="artifact_path_escape"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests\experiments\test_at07_export.py:41: Failed
+_ test_export_path_escape_rejected_before_sdk[/tmp/morph-research//result.bin] _
+
+path = '/tmp/morph-research//result.bin'
+
+    @pytest.mark.parametrize("path", ["/tmp/outside", "/tmp/morph-research/../outside",
+        "/tmp/morph-research/sub/../../outside", "/etc/passwd", "/tmp/morph-research//result.bin"])
+    def test_export_path_escape_rejected_before_sdk(path):
+        session, files = session_with_files()
+>       with pytest.raises(PermissionError, match="artifact_path_escape"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests\experiments\test_at07_export.py:41: Failed
+__________ test_export_rejects_symlink_in_every_path_component[/tmp] __________
+
+link = '/tmp'
+
+    @pytest.mark.parametrize("link", ["/tmp", "/tmp/morph-research", "/tmp/morph-research/result.bin"])
+    def test_export_rejects_symlink_in_every_path_component(link):
+        session, files = session_with_files(link=link)
+>       with pytest.raises(PermissionError, match="artifact_path_escape"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests\experiments\test_at07_export.py:49: Failed
+__ test_export_rejects_symlink_in_every_path_component[/tmp/morph-research] ___
+
+link = '/tmp/morph-research'
+
+    @pytest.mark.parametrize("link", ["/tmp", "/tmp/morph-research", "/tmp/morph-research/result.bin"])
+    def test_export_rejects_symlink_in_every_path_component(link):
+        session, files = session_with_files(link=link)
+>       with pytest.raises(PermissionError, match="artifact_path_escape"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests\experiments\test_at07_export.py:49: Failed
+_ test_export_rejects_symlink_in_every_path_component[/tmp/morph-research/result.bin] _
+
+link = '/tmp/morph-research/result.bin'
+
+    @pytest.mark.parametrize("link", ["/tmp", "/tmp/morph-research", "/tmp/morph-research/result.bin"])
+    def test_export_rejects_symlink_in_every_path_component(link):
+        session, files = session_with_files(link=link)
+>       with pytest.raises(PermissionError, match="artifact_path_escape"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests\experiments\test_at07_export.py:49: Failed
+_________________ test_bounded_normal_file_reaches_sdk_stream _________________
+
+    def test_bounded_normal_file_reaches_sdk_stream():
+        session, files = session_with_files()
+        assert session.download("/tmp/morph-research/result.bin", 64) == b"safe"
+>       files.read_bytes_stream.assert_called_once_with("/tmp/morph-research/result.bin", limit=65)
+
+tests\experiments\test_at07_export.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Python313\Lib\unittest\mock.py:991: in assert_called_once_with
+    return self.assert_called_with(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Mock name='mock.read_bytes_stream' id='2207486257408'>
+args = ('/tmp/morph-research/result.bin',), kwargs = {'limit': 65}
+
+    def assert_called_with(self, /, *args, **kwargs):
+        """assert that the last call was made with the specified arguments.
+    
+        Raises an AssertionError if the args and keyword args passed in are
+        different to the last call to the mock."""
+        if self.call_args is None:
+            expected = self._format_mock_call_signature(args, kwargs)
+            actual = 'not called.'
+            error_message = ('expected call not found.\nExpected: %s\n  Actual: %s'
+                    % (expected, actual))
+            raise AssertionError(error_message)
+    
+        def _error_message():
+            msg = self._format_mock_failure_message(args, kwargs)
+            return msg
+        expected = self._call_matcher(_Call((args, kwargs), two=True))
+        actual = self._call_matcher(self.call_args)
+        if actual != expected:
+            cause = expected if isinstance(expected, Exception) else None
+>           raise AssertionError(_error_message()) from cause
+E           AssertionError: expected call not found.
+E           Expected: read_bytes_stream('/tmp/morph-research/result.bin', limit=65)
+E             Actual: read_bytes_stream('/tmp/morph-research/result.bin')
+
+C:\Python313\Lib\unittest\mock.py:979: AssertionError
+____________ test_unknown_file_type_is_unsupported_without_export _____________
+
+    def test_unknown_file_type_is_unsupported_without_export():
+        session, files = session_with_files()
+        files.list_directory.return_value = [SimpleNamespace(path="/tmp", entry_type=None, size=0)]
+        files.list_directory.side_effect = None
+>       with pytest.raises(ValueError, match="bounded_export_metadata_unsupported"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\experiments\test_at07_export.py:71: Failed
+=========================== short test summary info ===========================
+FAILED tests/experiments/test_at07_export.py::test_export_path_escape_rejected_before_sdk[/tmp/outside]
+FAILED tests/experiments/test_at07_export.py::test_export_path_escape_rejected_before_sdk[/tmp/morph-research/../outside]
+FAILED tests/experiments/test_at07_export.py::test_export_path_escape_rejected_before_sdk[/tmp/morph-research/sub/../../outside]
+FAILED tests/experiments/test_at07_export.py::test_export_path_escape_rejected_before_sdk[/etc/passwd]
+FAILED tests/experiments/test_at07_export.py::test_export_path_escape_rejected_before_sdk[/tmp/morph-research//result.bin]
+FAILED tests/experiments/test_at07_export.py::test_export_rejects_symlink_in_every_path_component[/tmp]
+FAILED tests/experiments/test_at07_export.py::test_export_rejects_symlink_in_every_path_component[/tmp/morph-research]
+FAILED tests/experiments/test_at07_export.py::test_export_rejects_symlink_in_every_path_component[/tmp/morph-research/result.bin]
+FAILED tests/experiments/test_at07_export.py::test_bounded_normal_file_reaches_sdk_stream
+FAILED tests/experiments/test_at07_export.py::test_unknown_file_type_is_unsupported_without_export
+10 failed, 1 passed in 2.57s
