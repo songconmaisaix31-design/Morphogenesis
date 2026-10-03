@@ -1,5 +1,17 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## 19:10 清理验收与最终产品组合冻结
+
+用户新清理权限下，主控关闭6个已有明确归属的idle/失败terminal，各close回执ptyKilled=true；未关root/唯一I/P/C和无关用户终端，未删源码/历史。4个旧失联资源release_unknown、processActionnone保持未知，不重复清理或声称已死。
+
+P原Owner普通merge F REPORTc085、pin已验收b480后，交付SOURCE2b9bf73c93e732771ed3582f3bc7745ea8158b68与直接docs-only REPORTc8d4197bac272cdf5f634bc7a56c87db19bfbebb，remote exact。主控核对P API677/F c085祖先、相对F仅pyproject/init/uv.lock三业务文件、core全SHA各处相符、lock98与docker7.2.0；SOURCE→REPORT仅原P报告。P官方撤回auto放宽恢复legacy，未伪造human receipt/改baseline；正式scope acknowledge首RED managed_scope_source_guard_snapshot_changed→官方rollback rolled_back。最后Verify/Check exit1、15语义Entry及认知NOT_VERIFIED。原WIP全部保留，P全树dirty，不能直接editable安装或假装AOCI完成。该提案不再作为业务装配前置。
+
+唯一原I在task_3a6652d6b5d6/ctx_0d8a0826c9f7实际input_accepted/turn_started/live，私有fresh root C:/r1i/final-product-1855，以Git SOURCE2b9+b480准备非editable COPY和一次完整产品离线回归、适用UI/类型/installed相关原输入/会话/支持反证HTTP观察。当前尚无最终通过结论；不重跑已绿核心/Owner专项，领域问题仍退原Owner。
+
+C实际registration-cleanup.ps1 -Move单次exit0，固定11 source absent、quarantine backups保留；主控独立直接重读原snapshot .record和实际每个备份大小/hash/mtime_ns，全11匹配且固定目标范围成立。原REPORT52b8→1e2338a4de6bea019b0efe983c7a69a54b22b73e仅docs/tracks/r1-policy.md新增27行，remote exact/clean。原临时snapshot已丢失，Owner从自己旧session172/1061命令原输出恢复而非当前伪造旧基线。3deps opensandbox1.1.0/opensandbox-code-interpreter1.1.0/poetry-core2.5.0保留，安装前UNKNOWN；不称全局恢复。旧blocked by policy/首只读Split-Path错误保留，本次未遭审批拒绝。私有原证据/备份/未执行rollback C:/research-private/c-registration-cleanup-1855；release retained/external/processActionnone，不重跑141。
+
+本次仅接纳清理、业务SOURCE与离线阶段准备；真实AT07/候选执行/科学L2/人工理解/main/tag/部署NOT_RUN。实际费用/Token节省UNKNOWN，性能只样本，不新增最优成绩门。
+
 ## 有限核心 AOCI 交付接纳（16:45）
 
 A SOURCE `8dd85c1f88698cd8a22d72b5575e45e9431c0ce0` / 直接 docs-only REPORT `d8af82791fecde1f3dadfbf9190d4cbfada80146` 已普通推送。主控独立核对 remote=HEAD、clean、报告直接父子和SOURCE九项写入归属；与已验收配置aec86c9相比 swarm/orchestration/tests/pyproject/lock无变化，9PASS/strict2与Q65PASS不冒充本轮新运行，也未重跑。
