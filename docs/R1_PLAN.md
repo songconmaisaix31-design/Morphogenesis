@@ -12,7 +12,10 @@
 | Q 原独立审查Owner | morph-r1-boundaries-1003 | term_977c62ef，当前guarded准备task_1c2ec01e428a/ctx_8cb7185eb67f（原task90/ctx9d已done）；只docs/tracks/r1-boundaries.md与新Q私有证据 | 只读现有有效FW/NAT与API绑定、最小双栈端口packet；当前UNKNOWN/STOP |
 | I 唯一集成Owner | morph-r1-integration-1003 | 原会话01a10119-cd06-7f40-a9fc-f6e46af64e7f已resume至term_cc6a6c31；task_6d13ed8377e3/ctx34ec首agent_readiness timeout未注入保留，短只读恢复后sameTask retry-of→ctx_2b9faf05e09a actualready/working；只own docs/tracks/r1-integration.md、新C:/r1i/私有验收与必要少量导入/路由/类型/SDK胶水 | 普通合精确B SOURCE/REPORT与root治理，尽早发布唯一累计SOURCE；一次新SOURCE原CI，等精确P最终pin后一次新组合全产品offline与installed |
 | P 原产品Owner | research-r1-product-1003 | 原会话01a10165-8eb4-7370-bb7d-da99cd19c66b已resume至term_eee00a9d；task_9b74028a8491/ctx_e8a927614c4f首unobserved后root两次核同composer只bareEnter1，实际working，不重复Task；仅pyproject.toml、uv.lock、src/morph_research/__init__.py、own docs/tracks/r1-product.md | 只收到root接纳的I完整SOURCE才repin，不从REPORT取pin，不再安装/重复绿测试 |
+| C 原报告轨 OpenCode | morph-r1-policy-1003 | term_3a2bb576，原deepseek/deepseek-v4-pro --auto；仅docs/tracks/r1-policy.md与新C私有current-L2差异证据；原C用户协调会话保持只读，无业务双写 | 在现有B L2草稿基础上只核当前822+d5调用/授权输入缺项，先Handoff，不造模块/候选/新指南，不执行科学 |
 | 主控 | morph-r1-control-1003 / research-r1-control-1003 | 仅计划/状态/决策/验收；不写业务代码。C用户协调会话只读跟进 | 分配原Owner、验收原始结果、保护历史和边界 |
+
+22:42 root已针对C当前会话原role=user第4768/4801行核实新指令：允许OpenCode恢复/不要重复造轮子。原C报告路径本轮明确交上述OpenCode，原C用户协调会话只读。官方CLI模型列表匹配原deepseek/deepseek-v4-pro，Orca受控terminal已创建、tui-idle=true；实际模型请求/余额结果尚未观察。一次请求失败或未知不换provider/自动重试，原Insufficient Balance历史保留。新唯一full-product-first出现F，原run继续保存，具体node/cause/统计未出，工程不得报全绿；随后具体失败只退原Owner。
 
 分支均songconmaisaix31-design/<尾名>；仅上述原树，跨轨只Handoff。Codex GPT-6.1-Sol high YOLO；C转达新用户允许OpenCode恢复，实际提交证据正在核实。只读CLI1.18.34/models有deepseek/deepseek-v4-pro，不代表余额或模型请求通过；原Insufficient Balance保留，不改provider/auth/HOME。仅实际互斥缺项可开一条报告轨，不重复已实现模块与已绿门。普通merge/push，不cherry-pick/force/覆盖贡献；领域退原Owner。避免新增idle Agent、全局pip/auth/HOME/provider或大范围进程/文件清理。
 
