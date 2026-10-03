@@ -365,3 +365,14 @@ L2按Spec§14.2准备Poisson题与原论文版本链接，仅问题/材料审查
 L2公开资料准备增量：已仅在私有 C:/research-private/l2-materials/1907.04502v2.pdf 保存原 arXivv2 PDF，1118278字节、21页、SHA256 d17f9bf6b8f346baaa52b6ec81223c53dd3da6899324114c72c7e8c3432d9368。用既有私有环境pypdf只读核对PDF与标题作者，不安装包。页4–5为边界/方法背景，页10§2.8为RAR方法背景；输入建议只指定这些背景位置，原完整文件供来源回链，不附论文中的完整实例程序/注册候选。正文不复制入仓库。正式产品材料导入/科学调用/候选代码/实跑仍NOT_RUN；科学问题和容差/预算仍待以后明确授权。
 
 P receipt仍缺，其受保护全路径保持原样，最终产品pin/唯一完整产品离线回归尚未执行；AT07、L2及人工理解仍未验收，MVP未收口。OpenCode18:00前保持停止；其他全局环境/main/tag/部署边界不变。
+
+
+## 17:54 原 Q 修复已接纳，后继唯一组合 CI 进行中
+
+原 Q 子Task task_7517d7a2997a / ctx_246835450dd3 已完成，本阶段 accepted msg_1ea30e0bf917。SOURCE **acb26f4af3535ff6b4136dcb5ef0f7fde526e2a3** → docs-only REPORT **76af665511cb4b31662df0f698fcf631bb96419e** → final docs-only REPORT **49c0b3ad49f9fa1b5ad7b493ec05187e5b148503**，均普通推送、直接父子、remote/local49相同、clean，源码至最终REPORT只有原Q报告差异。实际原Windows两参数用例 **2 PASS / 0 SKIP / 0.45s**，非editable Aaec身份和136 raw Python blobs匹配、B576目录无delta。只改测试中的平台导入和精确socket/pipe/base断言，原进程/网络/envpoison/auth/trust_env守卫不变；Linux分支真实断言官方Npipe不可用和原_transport抛AttributeError，既不伪造构造也不skip。Linux实跑仍待后继I CI，不把Windows2PASS当Linux通过。release state retained/external_terminal/processAction none，原终端保留但已idle。
+
+主控首次派发时漏写 SOURCE的[skip ci]要求，补充消息在该源码已push后才被消费，触发额外 Q automatic run **37114202636**。主控只发一次cancel request，并独立核对最终status completed/conclusion cancelled、两端job cancelled；不改源码历史、不算通过，也不宣称没有自动触发。Q两docs-only报告含[skip ci]。该失误/回执及原首失败均保留。
+
+同一 I 普通merge该Q SOURCE与root9e1，无冲突、无I业务/测试修改。后继冻结核心 SOURCE **b480fca1b10a0b6a9c93f0d1801d38f267662461**，remote exact/clean；首失败3a6和首REDREPORTab39d122f25527e08d41f41b5353ba576f856ce7均保留为祖先。相对3a6，非docs只变化Q该测试与两小证据文件；swarm/orchestration/local_assets/pyproject/poetry.lock/CI/AOCI原字节均零差异。唯一后继 foundation push CI **37114395256 / attempt1 / headb480** 已启动，两平台实际门仍待结果；不rerun旧失败run。Q49后继报告只可docs-only普通merge并[skip ci]推送，不重定义testedSOURCE或再触发完整CI。
+
+P官方真人终端门仍未完成，已再次提供具体官方规则/审查稿/本人脚本和异步回执问题；不把聊天选项/时间经过视作官方receipt。原P树保护不改，原P AOCI/最终pin、一次完整产品离线与相关installed观察仍待。OpenCode18:00前停止；本轮没有新依赖/WSL/Docker/真实候选/科学调用/AT07/L2/main/tag/部署。MVP未收口。
