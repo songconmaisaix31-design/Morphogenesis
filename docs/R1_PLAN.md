@@ -1,3 +1,11 @@
+## 22:09 原B最小SOURCE接纳与唯一原I接续
+
+主控直接读取并核对 B SOURCE c3a905eaf79a869dffb5960da9c4afee1dc63c3e（生产仅generated.py一行闭集1.52/1.54、默认1.52；三既有测试新增正负控制）、docs-only REPORT 08f2315dbc6a2396c4b55dd07a6d60f6fd115dfa；旧98断言及reader/export/registry/锁/profile/compose不变。原首6FAIL/29PASS/97deselected、修后131PASS/1FAIL（新增mock漏provenance）与修后仅该项1PASS/strict1source分别保留，不宣称完整132重跑。实际独立installed/新SOURCE门待唯一I。
+
+现阶段继续原I角色/树/分支，原任务task_33b99bbe70e8父接续；先恢复已核对同会话01a10119-cd06-7f40-a9fc-f6e46af64e7f，旧已关terminal不能发送。I write_paths仅 docs/tracks/r1-integration.md、原少量必要导入/路由/类型/SDK生成胶水（任何领域退B）、新C:/r1i/私有acceptance根；普通merge精确B c3/08f与root当前治理，不cherry-pick/force/改断言/锁/profile，不修改任何他轨WIP。及时发布唯一累计core SOURCE（最终来源提交不skip-ci），一次该新SOURCE原双平台CI；旧15de原SUCCESS与所有首失败不重跑/重写。原P后续恢复同会话01a10165-8eb4-7370-bb7d-da99cd19c66b，仅三个既有pin文件和owntrack，收到主控接纳的I SOURCE才repin。I再固定这个新组合做一次完整产品离线回归、新私有noneditable COPY来源/受影响B三测试installed/必要类型与原CIbuildSDKwheel；UI/前端生产零delta沿用原证据，不为pin重跑浏览器/已绿旧源码。全产品保留原255/1与修后单node，不合写旧256green；新组合统计只实际新run。
+
+原Q仅owntrack/私有只读端口与API审阅，现已证明关联SID不一致且声明版本未含publish_host，image revision UNKNOWN不能用主线能力；暂不改FW/镜像/Engine/runtime profile。root拟最小包仅回环127/8与::1，任何补齐范围待具体packet及原实际批准条件判断。B已发布固定egress digest OCI元数据与132032785字节压缩layers+config、解压/增量UNKNOWN、未pull/build；原尝试600秒STOP/SDK0不reset。真实AT07全项及原Q独立审核前候选/L2禁止；无新增品牌/语言/学科/L3/RSI或性能最优条件。
+
 ## 21:57 实际运行前提返修：原B领域与原Q只读审查并行
 
 原B报告 d03e1557de795923894d8d89d7c089401bfdf005 已普通push/clean，仅三docs；原窗口STOP及首exit125/MISSING保留，后继只读证据为Engine29.5.3/API1.54/daemon6cc73c96-c021-4a82-ade6-2fc9ae693fff、Compose5.1.4、四固定镜像仅egress原digest缺失。用户专项AT07批准仍有效；已结束的原600秒尝试不可replay/reset，SDKcreate0，真实AT07及L2未验收。
