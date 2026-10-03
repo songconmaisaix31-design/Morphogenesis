@@ -440,8 +440,10 @@ def test_execute_keeps_every_observation_on_one_endpoint_and_never_replays(tmp_p
     monkeypatch.setattr(live, "check_exports", lambda session, result, directory:
         result.model_copy(update={"observations": {**result.observations, "export": {
             "small": True, "large": "artifact_size_limit", "absolute": "artifact_path_escape",
-            "traversal": "artifact_path_escape", "symlink": "artifact_path_escape"}}}))
+            "traversal": "artifact_path_escape", "symlink": "artifact_path_escape",
+            "frozen_export": True}}}))
     result = execute(root, key)
+    assert "TimeoutError" in result.reasons and "ValueError" not in result.reasons
     assert create.call_count == 1 and len(reads) == 1
     assert endpoints == [endpoint, endpoint] and all(e.closed == 1 for e in engines)
     assert result.remote_effect == "unknown"
