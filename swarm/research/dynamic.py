@@ -26,7 +26,7 @@ from local_assets.research import require_reproduced
 from local_assets.snapshot import snapshot_revision
 from local_assets.validate import blast_radius, inspect_candidate
 from orchestration.experiments.generated import (
-    ApprovedEnvironment, BackendProfile, GeneratedContext, GeneratedExperimentPlan, GeneratedResult,
+    ApprovedEnvironment, BackendProfile, DockerExportConfiguration, GeneratedContext, GeneratedExperimentPlan, GeneratedResult,
 )
 from orchestration.experiments.generated_executor import GeneratedExperimentExecutor, read_generated_result
 from orchestration.experiments.fixture import GeneratedFixtureBackend
@@ -58,6 +58,7 @@ class GeneratedHostSettings(Contract):
     instance_id: str | None = None
     runtime_profile: str | None = None
     server_process_limit: int | None = Field(default=None, gt=0, strict=True)
+    docker_export: DockerExportConfiguration | None = None
     fixture_workspace: str | None = None
     fixture_output: str | None = None
     fixture_outcome: Literal["succeeded", "failed", "timeout", "unknown"] = "succeeded"
@@ -94,7 +95,7 @@ class GeneratedResearch:
                     domain=self.settings.domain, protocol=self.settings.protocol, api_key=secret,
                     probe=self.settings.probes[0] if len(self.settings.probes) == 1 else None,
                     instance_id=self.settings.instance_id, runtime_profile=self.settings.runtime_profile,
-                    server_process_limit=self.settings.server_process_limit)
+                    server_process_limit=self.settings.server_process_limit, docker_export=self.settings.docker_export)
                 executor = GeneratedExperimentExecutor(backend)
         if executor.backend.provenance != self.settings.mode:
             raise AssetSafetyError("generated_backend_provenance_mismatch")

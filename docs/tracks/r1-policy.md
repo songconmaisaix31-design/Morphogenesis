@@ -1,5 +1,147 @@
 # R1 C 贡献与研究路线政策（research-v1）
 
+## 2026-10-03 正证据影响后续选择（本次追加收口）
+
+本轨改动及适用验证完成。本次 SOURCE：`e82cae36038c386aec999642289ac1d78c82a9ed`，
+已 push 并核对远端 SHA。
+分支：`songconmaisaix31-design/morph-r1-policy-1003`。本节是旧阶段之后的追加修复，
+以下旧报告与首 RED 均保留；本报告另作 docs-only 后继提交。
+
+按主控计划 `66e2a26f043453a851f4f31ec20700802b90b5d4` 和当前 Spec 的
+FR-12/13、AT-10 工作；Spec 的规范 LF SHA256 为
+`ab73f60e26af1bc1b44ca5da9b94b2cfdda91a5d4acb25683b9386462dcfb165`。
+本 C Windows checkout 的 CRLF 与主控 LF 文本经换行归一化相等。
+原 C HEAD `8bc4c282ed4db8e2be0798509b28d984240b3a06` 普通精确快进合入
+核心 SOURCE `2c63bc7c9e49edff28e26f5930a22d0415fadd65` 后开发；
+核心 REPORT `08b31b39c075571ffd247e2b591d657ce09b6b34` 未再合入，历史由 I 保留。
+本次领域变更仅 `swarm/research/policy.py` 和
+`tests/research/test_research_policy_opportunities.py`，未改 A/B/P/Q 文件。
+
+### 缺陷、策略语义与实际行为
+
+旧研究候选公式 `(1 + support) / (1 + support + refute)` 在零反证时恒为 1，
+所以独立接受正证据只添加引用，无法增加对应机会份额。
+本次 `research-v1` 修正为 `(1 + support) / (2 + support + refute)`：
+无证据为 0.5，一条支持为 2/3，一条反证为 1/3。它是有界路线偏好，
+不解释为科学结论为真的概率。`_value` 和展示因子复用同一 `_evidence`，避免解释与排序分离。
+公开 `research-v1` 名称和 DTO 保留，主控 `msg_d1bc90680d07` 已明确同意此候选缺陷修复；
+修正语义绑定本次 SOURCE，不回写旧报告或沿用旧 `v0/v0.1` 名称改变其行为。
+
+保持原 80% 价值机会、20% 合法探索和总份额 1；applicability=0 明确不可用，
+返回 `eligible=false / share=0 / inapplicable`，不获得探索份额。
+负证据继续降低对应路线机会，但可靠反例的贡献仍为 accepted。
+原反馈存储负责原始完成记录、独立复核及来源去重，本次未增加反馈表、调度器、预算或证明权威。
+
+新增正式服务对照先完成原执行和独立新任务／运行／sandbox 复核，保持 mock 标记；
+随后给三个同等合法分支分别提出工作。在接受前各份额 1/3，未接受结果和作者自评均不增益。
+独立接受后，支持分支份额约为 **0.386667**，另两条各约
+**0.306667**，总额仍为 1，合法探索下限保持 0.2/3。
+`discover` 排序将支持分支移到首位；相同 `seed=4` 的原随机选择从 `alternative`
+转到支持分支，实际 `claim` 在原 TaskLedger 写下相同机会及 `result_references=[accepted_result_id]`。
+比较的是有证据和无证据的同一批工作，没有 mock 策略、返回值、接受结果或账本。
+此单次确定性对照证明机制生效，不宣称统计最优、科研有效性或群体效率优势。
+
+固定 host envelope、持久 BudgetPolicy 和 BudgetSnapshot 在接受／读取／choose／claim
+前后相等，未知 tokens / actual_cost_usd 保持 None，未产生采用回执。
+重复接受、同原始输出换 task 身份、非匹配条件、越权或无 review 权限、零适用性，
+以及 failed/timeout/unknown 执行均不增加科研奖励；unknown 原请求仍拒绝再次执行。
+
+### 调用证据与测试定位（行号按本次 SOURCE）
+
+| 路径 | 调用与意义 |
+|---|---|
+| `swarm/research/feedback_generated.py:132` | `trusted_generated_feedback` 原 ledger + 资产 + B 原 archive 的可信投影，未另造结果 |
+| `swarm/research/feedback.py:179,280,319,398` | `research_feedback → trusted → accept → advisory`，每次重验原事实与独立 Review，只取已接受的适用引用 |
+| `swarm/research/policy.py:178,188,193` | `_evidence → _value → opportunities`，一处中性先验公式同时驱动份额和可解释因子 |
+| `swarm/research/service.py:1053,1073,124` | 原 `accept_result → research_advisory → discover`，排序实际消费该份额 |
+| `swarm/research/service.py:1195,192,1229` | 原 `choose → claim → _record_research_selection`；原 TaskLedger 审计包含选择、token 和已接受结果引用 |
+| `tests/research/test_research_policy_opportunities.py:40` | 三合法分支前后份额、同 seed 实际选择、claim 与 SQL 审计、预算不变、重复接受 |
+| 同文件 `:108,122` | 反证获得贡献且路线下降；同源复制不再增益 |
+| 同文件 `:143,160,171,184` | 条件／scope／适用性／review 权限与 failed/timeout/unknown 负例 |
+
+复用 A 的 `test_dynamic_service` 函数夹具和 B 原 mock 执行器、原 store/ledger，
+宿主候选执行和网络由夹具禁止，唯一允许的子进程为固定本地 Git。
+A 原测试中正证据 `share == .5` 的旧断言已通过 `msg_d7a0abb9f40a` Handoff 给 A；
+A ACK 将收紧为 `> .5` 并保留原源码 RED。C 不越权修改 A 测试或服务。
+SOURCE 已通过 `msg_d3fb752441f0` 交 A 允许普通精确 merge。
+
+### 首 RED 与当前验证
+
+本机完整日志目录：`C:/Users/DW/AppData/Local/Temp/morph-r1-c-positive-ctx4b4437/`。
+全部新安装指向 C 独有私有解释器
+`C:/Users/DW/AppData/Local/Temp/morph-r1-c-recovery-ctx059a/venv/Scripts/python.exe`；
+已核实 `sys.prefix` 为该 venv，`swarm.__file__` 来自私有 site-packages。
+用 `git archive` 导出基线、`build --wheel --no-isolation`、
+`uv pip install --python <private> --offline --link-mode copy --reinstall --no-deps <wheel>`；
+首次修复 wheel 使用此导出的代码副本加单一 policy.py 覆盖。
+测试 cwd 只有独立测试副本，用 `-I` 加仅测试目录的 bootstrap，不导入活动工作树。
+所有进程仅局部设置 `OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=1`。
+
+| 实际阶段 / 日志 | 结果 |
+|---|---|
+| 基线 `2c63bc7` 非 editable wheel build/install | PASS |
+| `positive-2c63-first-red.txt`，新正式服务正例 | **1 failed，27.09s**；接受后 share 仍为 1/3 |
+| `inapplicable-2c63-first-red.txt`，零适用性资格 | **1 failed，2.91s**；旧值 `eligible=True, share=0.1` |
+| `opportunities-first-fix.txt`，修复 wheel 上新增全11项 | **11 passed，45.20s** |
+| `strict-policy.txt`，`mypy --strict --follow-imports=silent swarm/research/policy.py` | **Success: no issues found in 1 source file** |
+| `exact-build.txt` / `exact-install.txt`，最终 SOURCE `git archive` wheel、私有 COPY 安装 | **PASS** |
+| `exact-origins.json`，7个实际导入模块与 exact archive 逐字节比较 | **PASS**；非 editable，无全局 site-packages / 活动工作树导入 |
+| `exact-dependencies.txt`，私有 `uv pip check` | **104 packages compatible** |
+| `exact-c70.txt`，原59 + 新11项 | **70 passed，50.71s** |
+| `exact-q45.txt`，Q 原 C 反馈／绑定／generated 安全控制 | **45 passed，11.74s**；原文件和断言不变 |
+| `exact-legacy.txt`，旧 `Router` / `policy_score_v01` / `policy_feedback_v01` | **26 passed，42.94s** |
+
+最终 exact-source installed 共 **70 + 45 + 26 = 141 passed**，无 deselect 或断言降级。
+全部重进程退出后已通过 `msg_49fae887e9c6` 立即释放串行窗口，报告不触发重跑。
+首次修复的11项与最终70项中的新11项是同一套测试，不重复计入141项。
+
+精确 SOURCE wheel 大小 954495，SHA256 为
+`3739af7e0447cf932390fcdf32fd3d8b0825469efdd1301cef9b9a56a2b309e5`。
+`exact-origins.json` 核对 policy、feedback、feedback_generated、service、dynamic、
+TaskLedger 和 BudgetLedger；`direct_url.json` 指向此 wheel，包含 `archive_info`，
+不存在 editable `dir_info`，私有 venv 为 `include-system-site-packages=false`。
+
+本次最终 installed 命令（同一中立 tests-only cwd；`$cPython` 为上述私有路径）：
+
+```powershell
+& $cPython -I -c 'import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))' tests/research/test_research_policy_opportunities.py tests/research/test_research_policy_generated.py tests/research/test_research_policy_v1.py -q
+$env:R1_SECURITY_SOURCE='<private>/Lib/site-packages'
+& $cPython -I -c 'import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))' tests/integration/r1_security/test_c_feedback_boundaries.py tests/integration/r1_security/test_c_advisory_binding.py tests/integration/r1_security/test_c_generated_trust.py -q
+& $cPython -I -c 'import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))' tests/swarm/test_router.py tests/swarm/test_policy_score_v01.py tests/swarm/test_policy_feedback_v01.py -q
+```
+
+首 RED 的可定位原 stdout（后续通过不覆盖）：
+
+```text
+_ test_accepted_support_changes_discover_choose_claim_and_preserves_envelope __
+>       assert supported["share"] > before[plan.branch_id]["share"]
+E       assert 0.3333333333333333 > 0.3333333333333333
+tests\research\test_research_policy_opportunities.py:64: AssertionError
+1 failed in 27.09s
+
+________ test_inapplicable_route_has_no_exploration_or_evidence_reward ________
+>           assert not excluded.eligible and excluded.share == 0
+E           AssertionError: assert (not True)
+E            +  where True = RouteOpportunity(branch_id='inapplicable', eligible=True, share=0.1, ...).eligible
+tests\research\test_research_policy_opportunities.py:166: AssertionError
+1 failed in 2.91s
+```
+
+完整原日志 SHA256 分别为
+`ff6ec9f6f563003ae129f01c12513fd810ec592b04409e6f4b5033a980253e96` 和
+`dc36933d9987c45cb397e85e5297c95b7d4d16ab6faed4b498b5cdbdb01ad5b1`。
+
+### 仍有的边界
+
+本轨仅离线／installed mock 的机制证据。基线 A 测试的旧 `share == .5` 正例
+须随 A 后继合入其收紧的断言；本次未将该旧断言计为通过，也不改写其历史结果。
+完整产品离线回归、正式 installed 输入观察
+留给最终 I 组合；本次不代表整体 R1 完成。AT-07 真实隔离探针和 L2 均 **NOT_RUN**，
+须后续单独授权。未执行真实模型科研、真实沙箱、云、外部材料获取、Hub 或部署。
+旧 FC stdout 首 RED 根因仍 UNKNOWN，未放松原断言或时限，本窄修复不重复 FC 运行。
+旧全局 Python 安装残留保持现状；之前清理被自动审批 `blocked by policy` 拒绝，
+本轮未重试、卸载或换工具绕过，未知原依赖状态不称已恢复。
+
 ## 2026-10-03 恢复后状态（本节覆盖后文旧阶段结论）
 
 **C 领域功能与适用验证已完成，最终 SOURCE 为

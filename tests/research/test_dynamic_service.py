@@ -9,6 +9,7 @@ import socket
 import subprocess
 
 import pytest
+from pydantic import ValidationError
 
 from contracts.identity import AgentId
 from local_assets.models import AssetSafetyError
@@ -18,6 +19,7 @@ from orchestration.experiments.trusted import TrustedCriteriaRecord, TrustedCrit
 from swarm.budget import BudgetBlocked
 from swarm.models import BudgetPolicy, ExecutionBound, RunLimits
 from swarm.research.models import HostConfig, ResearchEnvelope
+from swarm.research.dynamic import GeneratedHostSettings
 from swarm.research.server import create_server
 from swarm.research.service import ResearchService
 from tests.experiments.generated_helpers import (
@@ -168,7 +170,7 @@ def test_dynamic_service_accepts_only_independent_original_chain_and_changes_opp
     result_id = completed["result_id"]
     opportunity = next(x for x in advice["opportunities"]["opportunities"] if x["branch_id"] == plan.branch_id)
     assert opportunity["refuted_by" if refuted else "supported_by"] == [result_id]
-    assert opportunity["share"] < .5 if refuted else opportunity["share"] == .5
+    assert opportunity["share"] < .5 if refuted else opportunity["share"] > .5
     follow = reviewer.propose_work(plan.project_id, "question", "follow up", "j", "e", branch_id=plan.branch_id)
     discovered = reviewer.discover()
     assert next(x for x in discovered if x["signal"]["task_id"] == follow["task_id"])["research_opportunity"] == opportunity
@@ -273,4 +275,92 @@ def test_dynamic_mcp_preparation_rejects_self_declared_approval_and_environment(
     with pytest.raises(PermissionError, match="environment_outside"):
         s.prepare_candidate_experiment(task, 1, plan.model_copy(update={"task_id": task,
             "backend": plan.backend.model_copy(update={"cpu": 2})}).model_dump(mode="json"), {"experiment.py": GENERATED_CODE})
+    assert not [e for e in s.ledger.audit() if e["event"] == "execution_unconfirmed"]
+
+
+def docker_export_fixture():
+    # Deterministic configuration only; this is not an observed Engine identity.
+    return {"endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+            "daemon_id": "fixture-only-engine", "engine_version": "29.5.3"}
+
+
+@pytest.mark.parametrize("configured", [False, True])
+def test_host_docker_export_roundtrip_factory_and_no_implicit_admission(tmp_path, monkeypatch, configured):
+    s, plan = setup(tmp_path)
+    settings = {key: value for key, value in s.config.generated_experiments.items()
+                if not key.startswith("fixture_")}
+    settings.update(mode="live", runtime_profile="fixture-only-profile", server_process_limit=16)
+    if configured:
+        settings["docker_export"] = docker_export_fixture()
+    # Neither an unapproved remote endpoint nor a context can supply this field.
+    monkeypatch.setenv("DOCKER_HOST", "tcp://unapproved.invalid:2375")
+    monkeypatch.setenv("DOCKER_CONTEXT", "unapproved-context")
+    config = HostConfig.model_validate_json(s.config.model_copy(update={
+        "generated_experiments": settings, "research_provenance": "live",
+        "assets_root": str(tmp_path / "config-only-live-assets")}).model_dump_json())
+    trusted = GeneratedHostSettings.model_validate(config.generated_experiments)
+    store = LocalAssetStore(config.assets_root, bridge=FakeBridge(), research_provenance="live",
+                            generated_criteria=s.generated.criteria)
+    service = ResearchService(config, store=store)
+    backend = service.generated.executor.backend
+    actual = backend.configuration(plan)
+    assert actual.docker_export == trusted.docker_export
+    assert (actual.docker_export is not None) is configured
+    if configured:
+        assert actual.docker_export.daemon_id == "fixture-only-engine"
+        assert actual.docker_export.api_version == "1.52"
+        assert actual.docker_export.request_timeout_seconds == 10
+    isolation = backend.isolation()
+    assert not isolation.verified and isolation.probe == "not_run"
+    assert not service.generated.probes.is_verified(isolation)
+    assert not [e for e in service.ledger.audit() if e["event"] == "execution_unconfirmed"]
+
+
+@pytest.mark.parametrize("changed", [
+    {"endpoint": "tcp://localhost:2375"}, {"engine_version": "unknown"},
+    {"daemon_id": ""}, {"api_version": "1.51"}, {"request_timeout_seconds": 11},
+])
+def test_host_docker_export_invalid_configuration_rejected(tmp_path, changed):
+    s, _ = setup(tmp_path)
+    export = docker_export_fixture() | changed
+    config = s.config.model_copy(update={"generated_experiments": {
+        **s.config.generated_experiments, "docker_export": export}})
+    with pytest.raises(ValidationError):
+        member(config)
+
+
+def test_host_docker_export_cannot_rebind_existing_project(tmp_path):
+    s, plan = setup(tmp_path)
+    config = s.config.model_copy(update={"generated_experiments": {
+        **s.config.generated_experiments, "docker_export": docker_export_fixture()}})
+    changed = member(config)
+    with pytest.raises(ValueError, match="^project_identity_cannot_change$"):
+        changed.create_project(plan.project_id, "approved fixture goal")
+    with pytest.raises(PermissionError, match="^project_host_envelope_changed$"):
+        changed.research_context(plan.project_id)
+    assert s.generated.settings.docker_export is None
+    assert s.research_context(plan.project_id)["project"]["project_id"] == plan.project_id
+
+
+def test_mcp_candidate_cannot_supply_docker_export(tmp_path):
+    s, plan = setup(tmp_path)
+    task = s.propose_work(plan.project_id, "experiment", "bad control", "j", "e",
+                          branch_id=plan.branch_id)["task_id"]
+    lease = s.claim(task, ttl_seconds=300)
+    supplied = plan.model_copy(update={"task_id": task}).model_dump(mode="json")
+    supplied["docker_export"] = docker_export_fixture()
+    server = create_server(s)
+
+    async def run():
+        tools = await server.list_tools()
+        for tool in tools:
+            assert "docker_export" not in tool.inputSchema.get("properties", {})
+        with pytest.raises(Exception, match="docker_export"):
+            await server.call_tool("prepare_candidate_experiment", {
+                "task_id": task, "token": lease["token"], "plan": supplied,
+                "files": {"experiment.py": GENERATED_CODE}})
+
+    asyncio.run(run())
+    assert s.generated.settings.docker_export is None
+    assert not s.ledger.get(task).acceptance.get("generated_plan")
     assert not [e for e in s.ledger.audit() if e["event"] == "execution_unconfirmed"]

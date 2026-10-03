@@ -176,18 +176,19 @@ class ResearchPolicy:
 
     @staticmethod
     def _evidence(branch: Branch) -> float:
+        """research-v1 neutral prior: no evidence=.5, support raises the
+        factor and refutation lowers it. These are bounded route preferences,
+        not probabilities of scientific truth. The legacy v0/v0.1 is separate.
+        """
         support = len(branch.supported_by)
         refute = len(branch.refuted_by)
-        return (1.0 + support) / (1.0 + support + refute)
+        return (1.0 + support) / (2.0 + support + refute)
 
-    @staticmethod
-    def _value(branch: Branch) -> float:
+    @classmethod
+    def _value(cls, branch: Branch) -> float:
         """Bounded, explainable composite: evidence * applicability *
         goal relevance * (1 - proven risk)."""
-        support = len(branch.supported_by)
-        refute = len(branch.refuted_by)
-        evidence = (1.0 + support) / (1.0 + support + refute)
-        return evidence * branch.applicability * branch.goal_relevance * (1.0 - branch.risk)
+        return cls._evidence(branch) * branch.applicability * branch.goal_relevance * (1.0 - branch.risk)
 
     def opportunities(self, branches: list[Branch] | tuple[Branch, ...]) -> RouteOpportunityPlan:
         """Allocate a fixed opportunity pool across eligible branches.
@@ -195,7 +196,7 @@ class ResearchPolicy:
         80% follows evidence (times applicability, goal relevance and inverse
         risk); the configurable exploration fraction is a floor shared by every
         legal branch so low-evidence branches are not starved. Dormant, refuted,
-        archived and out-of-scope branches have no exploration quota and
+        archived, inapplicable and out-of-scope branches have no exploration quota and
         therefore no execution right from this suggestion. Unknown cost is never
         treated as zero; it is reported as an explicit ``unknown_cost`` reason.
         """
@@ -226,6 +227,11 @@ class ResearchPolicy:
                     branch_id=branch.branch_id, eligible=False, share=0.0,
                     known_cost=branch.known_cost, supported_by=branch.supported_by,
                     refuted_by=branch.refuted_by, reasons=("dormant",)))
+            elif branch.applicability == 0:
+                opportunities.append(RouteOpportunity(
+                    branch_id=branch.branch_id, eligible=False, share=0.0,
+                    known_cost=branch.known_cost, supported_by=branch.supported_by,
+                    refuted_by=branch.refuted_by, reasons=("inapplicable",)))
             else:
                 eligible.append(branch)
         count = len(eligible)
@@ -240,7 +246,8 @@ class ResearchPolicy:
         exploration = self.exploration_fraction
         eligible_index = 0
         for branch in branches:
-            if not branch.authorized or branch.status in ("refuted", "archived", "dormant"):
+            if (not branch.authorized or branch.status in ("refuted", "archived", "dormant")
+                    or branch.applicability == 0):
                 continue
             value = values[eligible_index]
             value_share = value / value_sum if value_sum > 0 else 0.0
