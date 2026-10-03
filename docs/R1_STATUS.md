@@ -1,5 +1,14 @@
 # R1 派发状态（2026-10-03）
 
+## 本轮三项行为已交付，MVP 追加轨开始
+
+A SOURCE cea7923fec48c10e043c1fea40c99749e0b6a114 / REPORT faf23260df7a4f530eb421680f71eb6dc7c72e40，P SOURCE 79ca28d81dd039b24c284494d3aa5911d7b10cfc / REPORT ffe186235318cf6c6ecb79de8e5db92906575cfe 均已由原Owner交付，主控独立核对remote/clean/docs-only后继和原测试日志后接纳；详见R1_ACCEPTANCE新节。A最后COPY43 PASS/52.52s+strict4，P raw-Git COPY44 PASS/44.89s+适用types29，原首RED/原10债保留。两项旧Dispatch已worker_done succeeded；release均为retained/no_owned_resource/processAction none，未声称杀掉终端。
+
+当前 B task_a8533b909675 / ctx_bd976e22265e 获A释放后的离线测试窗口，仅准备真实AT07包。F task_239a283e16e4 / ctx_9e81c23f2e1f 在原UI工作树普通合并a7/ee22033/ffe186后实现布局与节点只读终端；原terminal send只观测input_accepted，按同requestId回放不重投；随后screen和OwnerACK确认实际已执行新任务，原警告保留。P后继 task_3150b8e27bc9 / ctx_460ac3b1abe3 已input_accepted+turn_started，负责纯GET会话投影、私库AOCI及官方固定binary接入，已收到F DTO需求。
+
+当前三个Worker为B/P/F；A在B结算后复用原Owner承担核心AOCI配置/索引，避免重建Agent或重复安装。I尚未重新派发，等新领域/UI/AOCI最终提交。新组合全套离线回归、AT07真实运行和L2均未执行。根工作树WIP及历史证据不动。
+
+
 ## 11:49 用户追加 MVP/AOCI 与拓扑会话界面
 
 已核实 AOCI 官方仓库和 Windows 发布 rc17/许可；现有仓库未检出 AOCI。配置与索引工作按 R1_PLAN 追加给原 A/P，UI 仍由原 F，root 只治理。F 终端身份/原分支/clean 已检查，尚未派新任务；等待当前 A/P 一项完成释放并发槽。用户已明确只读查看对应 Agent 会话实时输出和上下文。当前研究关系图和原生调用记录可复用，成员/session 映射缺口由 P 交明确 Handoff，避免重复模块。
