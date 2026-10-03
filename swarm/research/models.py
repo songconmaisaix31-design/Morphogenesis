@@ -57,6 +57,8 @@ class HostConfig(Contract):
     native_invocation: NativeInvocationBinding | None = None
     # Validated by the closed GeneratedHostSettings contract on service creation.
     # Keeping the import lazy preserves SDK-free non-execution member tools.
+    # Its optional docker_export is host-only, frozen with the other project
+    # settings, and defaults to None; it is never inferred from Docker context.
     generated_experiments: dict[str, JsonValue] = Field(default_factory=dict)
 
     @model_validator(mode="after")
