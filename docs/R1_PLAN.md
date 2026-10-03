@@ -1,5 +1,18 @@
 # Research Swarm Alpha R1 一页开发计划（2026-10-03）
 
+## 当前接续入口（19:10，最终产品离线进行中）
+
+后部保留原失败与决策历史；业务 SOURCE 与文档 REPORT 分开，不从脏工作树安装。
+
+- 最终核心 SOURCE b480fca1b10a0b6a9c93f0d1801d38f267662461 的原 CI37114395256 已通过：Windows1745PASS/15SKIP，Linux1744PASS/16SKIP，两端 strict140/build/SDK/wheel/distribution PASS。原3a6首RED1742PASS/2FAIL/16SKIP、WindowsCANCELLED与REPORTab39保留，不重跑绿门。
+- P 最终业务 SOURCE 2b9bf73c93e732771ed3582f3bc7745ea8158b68 / docs-only REPORT c8d4197bac272cdf5f634bc7a56c87db19bfbebb 已push并由主控核对。含F REPORTc085普通祖先及P API677，核心pin精确b480，lock98packages/docker7.2.0。原P全工作树仍有被保留的AOCI WIP，不称clean、不直接安装该树。
+- P已正式撤回可选auto放宽，官方config恢复legacy兼容；原human receipt仍不存在，旧preview不是当前可执行审批。一次官方ack首RED managed_scope_source_guard_snapshot_changed及官方rollback保留，baseline未改。15源正式Entry/Challenge/retrieval/maintenance NOT_VERIFIED。该开发工具提案不再阻塞已授权业务组合；实际Token节省与费用UNKNOWN。
+- 原唯一I task_3a6652d6b5d6 / ctx_0d8a0826c9f7、原worktree/branch正在 C:/r1i/final-product-1855 做b480+2b9新非editable COPY/raw Git身份校验/一次完整产品离线/适用类型与UI/相关installed输入只读HTTP观察。只准本轨报告与私有证据，领域失败退原P/F；不假定回归已通过。
+- 清理已关闭6个明确idle/失败terminal，均实际ptyKilled=true；root/I/P/C与无关用户终端未误关。4个旧缺失句柄release_unknown/processActionnone保留，不证明旧进程已死，不改调度DB/历史。
+- C固定11误安装注册文件已单次逐项隔离。主控实际重读11备份，原路径不存在，大小/SHA256/mtime_ns逐项原快照匹配11/11；REPORT1e2338a4de6bea019b0efe983c7a69a54b22b73e已push/remote exact/clean、仅原报告27行。三个全局依赖保留，安装前UNKNOWN，不称全环境恢复。旧blocked by policy与首只读错误不改；release retained/external/processActionnone。
+- A核心10Entry只接纳原A树，I跨checkout认知freshness NOT_VERIFIED。B l2-poisson-review为问题/材料/现有评价复核消费调用链审查，无完整候选程序、无科学执行。
+- 下一顺序保持最终产品离线验收→单独授权AT07实际无害隔离→通过后一次L2；真实候选/科研/人工理解均NOT_RUN，性能仅真实记录。L3/规模效率/多用户/跨宿主/完整RSI不加入；main/tag/部署未执行。OpenCode真实Insufficient Balance仍未恢复，研发继续用户指定Codex GPT-6.1-Sol。
+
 ## 16:45 当前收口与下一步
 
 A SOURCE8dd85c1f88698cd8a22d72b5575e45e9431c0ce0 / REPORTd8af82791fecde1f3dadfbf9190d4cbfada80146 和Q SOURCE88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0 / REPORT6ce5a23ea256affdf9fe8a71bbaabb66695f3631 已精确验收/push/clean。A索引仅当前worktree十源，I不能未经官方Guide/重新绑定观察宣称新checkout索引fresh；真实delta仍退原A，禁止手写迁移/证明框架。P API67721aaa815e706c51e0f80a1d15ab71e34b6880 和F UI7bf17d195859a18960ee1ef933a920a286f73e61 保留阶段验收，不能替代新最终组合。
@@ -141,3 +154,45 @@ AT07、真实候选、L2、人工理解仍未执行；OpenCode 至 2026-10-03 18
 完成需有实际非预置后续工作、实际新候选代码且不等于注册例程、授权后真实隔离实验、另一成员的新运行独立复核、接受证据改变并被下一实际行动引用，以及新任务通过原消费链至少一次实际使用与本地再验证。允许采用经复核的有效负结论指导后续工作，但负结论不能替代缺失的代码真实使用。成果包保留原始 stdout/stderr、失败、未知效果/费用、材料页码、代码/环境版本和局限；不因一次结果不理想换题、无限换种子或回放旧请求。
 
 当前仅文档准备：question_prepared；material 原文正式导入 NOT_RUN；native scientific invocation、candidate sandbox execution、independent science review、adoption 均 NOT_RUN。实际科研题目/容差/账号/模型额度/数据范围/批准环境仍须在唯一最终组合离线通过、单独 AT07 实际通过以后落入明确运行授权。公共资料外发仅届时批准项，不访问私密数据。人工页面理解观察另列，性能只记真实样本；L3/大规模效率/多用户/跨宿主/完整 RSI 均不加入本稿。
+
+
+## 18:05 原 B 离线 L2 契约审查（OpenCode 恢复）
+
+当前已过用户暂停边界18:00。只读本机 opencode models 和配置的顶层model已确认 deepseek/deepseek-v4-pro，未读取/输出认证值、未改全局配置；18:00前没有恢复OpenCode。复用原B角色/worktree/branch的后继docs-only子Task，以该用户指定模型/auto执行，跟同I核心CI并行。仍是固定原Owner，不增加品牌或执行后端。
+
+B仅新增 docs/experiments/l2-poisson-review.md 与原 docs/tracks/r1-experiments.md短报告，排除业务源码/测试/锁/部署/AOCI/主控/P/F路径。按现行Spec§14.2/14.4和既有 generated.py/EvaluationCriteria/TrustedCriteriaRegistry/原消费采用调用链，准备问题、原论文v2的页码来源、独立网格与边界/参考检查的既有格式、合法负结论和实际使用路径、待运行授权参数。复用现有poisson_reference_v1/sin_pi_x，既有默认值只作未批准参考；不预置后续分支、不提供完整候选程序、不复制论文例程，不创建新判定/调度/证明系统。若发现真实功能缺口只Handoff，不因审查扩写领域模块。
+
+原材料私有PDF1118278字节/21页/SHAd17f9bf6...，页4–5/10方法背景已核对；正式产品导入与所有科学调用NOT_RUN。只静态阅读与可审查文档，不原生科研/候选执行，不启动Docker/WSL/services，不改变账号/全局环境，不重跑已绿专项/安装测试；提交push用[skip ci]，不影响冻结b480 SOURCE与正在运行37114395256。AT07只在最终产品离线验收后单独授权，实际通过后才讨论一次L2；P保护树和真实TTY门不变。金额/容差/模型额度/科学结果均不得填成已批准或已发生。
+
+
+## 18:09 B 模型阻塞的同轨接续
+
+18:00后实际OpenCode1.18.34终端已确认 Build auto / DeepSeek V4 Pro DeepSeek，使用既有 deepseek/deepseek-v4-pro route，无全局model/provider/auth修改。任务task_202100600acb / ctx_b6a3d7cd9641只得到input_accepted，turn observation unsupported；首次请求实际返回 Insufficient Balance，request9165a37c-a4c8-48b7-94be-dcf826a113fa，未发生B工具/源码/docs写入，原HEAD5aeb/clean再次核对。私有原bounded screen C:/research-private/b-opencode-l2-first-error-1806.json保留；用量/费用UNKNOWN，不能由错误推0。
+
+为继续已授权的同一B离线文档工作，仅关闭本次自建term_390a93e5-ad96-493b-ac44-1877a98f37e0，close回执ptyKilled=true；其ctx随关闭已settled failed，后worker-abandon回执alreadySettled/stale/processActionnone，不伪称它清理进程。当前无opencode.exe；不充值、不重试同余额不足route、不尝试别的计费入口、不改全局账号。原B角色/worktree/branch/write_paths不变，后继Codex GPT-6.1-Sol high YOLO继续18:05的docs-only审查，保留OpenCode首阻塞。这是研发Agent接续，不是L2模型科研或真实运行权限。
+
+核心b480 CI Linux1744PASS/16SKIP/521.84s、strict140和build/SDK/wheel/distribution通过已由I和主控原日志核实；Windows仍在pytest，全组合未通过。P真实人类receipt仍缺，产品最终pin/唯一完整离线、AT07单独授权和L2未执行。当前入口的18:00前暂停条件已结束，但OpenCode实际余额阻塞未解除，不称恢复任务执行成功。
+
+
+## 18:15 B 正式 Codex 接续
+
+task_9ebbae6e5f3b 首次 worker-start 的 ctx_03a9cd950de1 在 agent_readiness 超时，未送入任务；实际就绪画面和首失败都保留。仅送一次无业务写入的准备确认，取得 Codex turn_started；按官方 failed retry-of 在同一原 B 终端重派 ctx_85c678574200，实际 ready/input_accepted/turnStart observed，模型为 GPT-6.1-Sol high YOLO。没有并发 B 编辑者、没有新领域轨，没有把 OpenCode 余额错误或就绪超时变成完成。B 仍仅两份文档，提交 [skip ci]；I 已收到精确范围，不改变冻结核心 SOURCE b480 或另跑 CI。P receipt 仍缺，所有真实科学/AT07/最终产品回归未执行。
+
+## 核心后继工程门与 B 文档接纳（2026-10-03）
+
+主控独立核对冻结 SOURCE b480fca1b10a0b6a9c93f0d1801d38f267662461 的原 foundation CI37114395256已completed/success；两个job所有原步骤通过。Windows1745PASS/15SKIP/75warnings/1575.82s；Linux1744PASS/16SKIP/75warnings/521.84s；两端strict140sourcefiles、sdist/wheel build、SDK schema1.14.0、wheel13packages/installed_verifier/node_dependency_check通过。原命令为 poetry run python -m pytest -q、poetry run python tools/typecheck.py、poetry run python -m build、npm run check:sdk、uv pip install --no-deps --target tools/.wheel-site及 python -I tools/check_distribution.py --check-node；完整argv/平台原输出见I报告§9与 C:/r1i/i1003-core-1732/logs/successor-ci-original.log。SDK/distribution scope仍contract_local，非真实科研。
+
+I最终 docs-only REPORT1bce9f9f71c9a1c5e864263076ae879fcd67e31f与B docs-only REPORT7f05cc795d2371f6b4d74656c25e8bc92e67db83均独立核实remote exact/clean/diffcheck；I含所有A/B/C/Q来源、firstRED3a6/REPORTab39及B7f普通祖先，b480→REPORT只四份docs、非docs零差异。B先交已有评价与采用调用链、补路径图例，未造模块、运行测试/安装/科学；稿为question_prepared而非运行授权。合法refuted可贡献及降温，但failed代码不能伪作passed adopted，AT13需真实可用代码在原消费链再验证和使用。
+
+原CI37113441786 Linux1742PASS/2FAIL/16SKIP与Windowscancelled、原Q追加CI取消、OpenCode Insufficient Balance及Codex readiness timeout均保留。主控接受上述核心工程+docs阶段并结算I/B release，回执为retained/processActionnone，不声称关闭或全MVP。P真实TTY回执尚缺、 protected preimages未改；最终产品pin/fullCOPY回归/installed观察、AT07及L2未执行。核心AOCI跨checkout重新绑定/认知NOT_VERIFIED，模型用量/费用/Token节省UNKNOWN。未执行main/tag/部署或C被政策拒绝的系统清理。
+
+
+## 18:55 用户新增授权：清理拥堵并推进产品收口
+
+用户明确“现在你拥有全部权限，开始清理拥堵，继续开发MVP级别项目”。先处理有归属的已结算会话和误安装注册，保留当前总控/I及其他未知项目工作；不删仓库/历史/原失败。已确认原A/Q/B三条idle、C OpenCode实际DeepSeekV4Pro再次Insufficient Balance，四个精确terminal close均ptyKilled=true。不是按名称或全机杀进程，不声称恢复OpenCode余额。原C用户新Codex已选择原session目录，未启动领域开发。
+
+两条互斥轨保持原Owner/树/分支：P原research-r1-product-1003负责正式产品后端/pyproject/uv.lock/本轨报告和官方AOCI配置；先只读核对官方保守恢复路径，权限收紧/撤回放宽可用正式config命令，不能改baseline/reinit/伪造人类receipt。旧preview/审批失败作为历史保留，只有旧计划需要本人TTY；不再把非业务必须的auto模式当MVP运行前置。若官方当前legacy允许原15Entry维护，按官方完成；若仍有真实TTY门，保留清楚NOT_VERIFIED与WIP，隔离该开发工具提案，完成已授权业务corepin/F普通merge，不借header或旧approval声称门通过。任何保护输入变更先说明旧提案已撤回，真实现行权限不降低；不得将全权限聊天改称human receipt。I唯一最终产品完整离线安排在原P固定业务SOURCE后，不重跑旧绿专项。
+
+C原morph-r1-policy-1003负责本轨误安装的11项精确注册文件，只准匹配原direct_url/RECORD/摘要且无使用中进程后逐文件移动到新私有隔离备份目录，source targets固定C:/Python313/Scripts与该morphogenesis dist-info/pth；不卸载未知依赖、不触碰其他系统包、不递归删除。历史blocked by policy保留；此轮有新增用户清理授权，但如果自动审批再拒绝仍停止该动作，不换工具绕过。C只改own报告与私有操作证据；不改领域源码/测试、AOCI或P/F/I树。两轨提交push [skip ci]，费用UNKNOWN。
+
+原I后续仅最终COPY/installed/UI验收，核心b480无需再CI。AT07仍按用户先前指定产品离线后独立批准/无害实际隔离，再一次L2；不得用科研顺便试隔离，不加入L3/新学科/品牌/语言/评分框架。main/tag/部署未授权。

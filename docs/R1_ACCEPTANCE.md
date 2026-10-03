@@ -1,5 +1,17 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## 19:10 清理验收与最终产品组合冻结
+
+用户新清理权限下，主控关闭6个已有明确归属的idle/失败terminal，各close回执ptyKilled=true；未关root/唯一I/P/C和无关用户终端，未删源码/历史。4个旧失联资源release_unknown、processActionnone保持未知，不重复清理或声称已死。
+
+P原Owner普通merge F REPORTc085、pin已验收b480后，交付SOURCE2b9bf73c93e732771ed3582f3bc7745ea8158b68与直接docs-only REPORTc8d4197bac272cdf5f634bc7a56c87db19bfbebb，remote exact。主控核对P API677/F c085祖先、相对F仅pyproject/init/uv.lock三业务文件、core全SHA各处相符、lock98与docker7.2.0；SOURCE→REPORT仅原P报告。P官方撤回auto放宽恢复legacy，未伪造human receipt/改baseline；正式scope acknowledge首RED managed_scope_source_guard_snapshot_changed→官方rollback rolled_back。最后Verify/Check exit1、15语义Entry及认知NOT_VERIFIED。原WIP全部保留，P全树dirty，不能直接editable安装或假装AOCI完成。该提案不再作为业务装配前置。
+
+唯一原I在task_3a6652d6b5d6/ctx_0d8a0826c9f7实际input_accepted/turn_started/live，私有fresh root C:/r1i/final-product-1855，以Git SOURCE2b9+b480准备非editable COPY和一次完整产品离线回归、适用UI/类型/installed相关原输入/会话/支持反证HTTP观察。当前尚无最终通过结论；不重跑已绿核心/Owner专项，领域问题仍退原Owner。
+
+C实际registration-cleanup.ps1 -Move单次exit0，固定11 source absent、quarantine backups保留；主控独立直接重读原snapshot .record和实际每个备份大小/hash/mtime_ns，全11匹配且固定目标范围成立。原REPORT52b8→1e2338a4de6bea019b0efe983c7a69a54b22b73e仅docs/tracks/r1-policy.md新增27行，remote exact/clean。原临时snapshot已丢失，Owner从自己旧session172/1061命令原输出恢复而非当前伪造旧基线。3deps opensandbox1.1.0/opensandbox-code-interpreter1.1.0/poetry-core2.5.0保留，安装前UNKNOWN；不称全局恢复。旧blocked by policy/首只读Split-Path错误保留，本次未遭审批拒绝。私有原证据/备份/未执行rollback C:/research-private/c-registration-cleanup-1855；release retained/external/processActionnone，不重跑141。
+
+本次仅接纳清理、业务SOURCE与离线阶段准备；真实AT07/候选执行/科学L2/人工理解/main/tag/部署NOT_RUN。实际费用/Token节省UNKNOWN，性能只样本，不新增最优成绩门。
+
 ## 有限核心 AOCI 交付接纳（16:45）
 
 A SOURCE `8dd85c1f88698cd8a22d72b5575e45e9431c0ce0` / 直接 docs-only REPORT `d8af82791fecde1f3dadfbf9190d4cbfada80146` 已普通推送。主控独立核对 remote=HEAD、clean、报告直接父子和SOURCE九项写入归属；与已验收配置aec86c9相比 swarm/orchestration/tests/pyproject/lock无变化，9PASS/strict2与Q65PASS不冒充本轮新运行，也未重跑。
@@ -263,3 +275,22 @@ L2按Spec§14.2准备Poisson题与原论文版本链接，仅问题/材料审查
 L2公开资料准备增量：已仅在私有 C:/research-private/l2-materials/1907.04502v2.pdf 保存原 arXivv2 PDF，1118278字节、21页、SHA256 d17f9bf6b8f346baaa52b6ec81223c53dd3da6899324114c72c7e8c3432d9368。用既有私有环境pypdf只读核对PDF与标题作者，不安装包。页4–5为边界/方法背景，页10§2.8为RAR方法背景；输入建议只指定这些背景位置，原完整文件供来源回链，不附论文中的完整实例程序/注册候选。正文不复制入仓库。正式产品材料导入/科学调用/候选代码/实跑仍NOT_RUN；科学问题和容差/预算仍待以后明确授权。
 
 P receipt仍缺，其受保护全路径保持原样，最终产品pin/唯一完整产品离线回归尚未执行；AT07、L2及人工理解仍未验收，MVP未收口。OpenCode18:00前保持停止；其他全局环境/main/tag/部署边界不变。
+
+
+## 17:54 原 Q 修复已接纳，后继唯一组合 CI 进行中
+
+原 Q 子Task task_7517d7a2997a / ctx_246835450dd3 已完成，本阶段 accepted msg_1ea30e0bf917。SOURCE **acb26f4af3535ff6b4136dcb5ef0f7fde526e2a3** → docs-only REPORT **76af665511cb4b31662df0f698fcf631bb96419e** → final docs-only REPORT **49c0b3ad49f9fa1b5ad7b493ec05187e5b148503**，均普通推送、直接父子、remote/local49相同、clean，源码至最终REPORT只有原Q报告差异。实际原Windows两参数用例 **2 PASS / 0 SKIP / 0.45s**，非editable Aaec身份和136 raw Python blobs匹配、B576目录无delta。只改测试中的平台导入和精确socket/pipe/base断言，原进程/网络/envpoison/auth/trust_env守卫不变；Linux分支真实断言官方Npipe不可用和原_transport抛AttributeError，既不伪造构造也不skip。Linux实跑仍待后继I CI，不把Windows2PASS当Linux通过。release state retained/external_terminal/processAction none，原终端保留但已idle。
+
+主控首次派发时漏写 SOURCE的[skip ci]要求，补充消息在该源码已push后才被消费，触发额外 Q automatic run **37114202636**。主控只发一次cancel request，并独立核对最终status completed/conclusion cancelled、两端job cancelled；不改源码历史、不算通过，也不宣称没有自动触发。Q两docs-only报告含[skip ci]。该失误/回执及原首失败均保留。
+
+同一 I 普通merge该Q SOURCE与root9e1，无冲突、无I业务/测试修改。后继冻结核心 SOURCE **b480fca1b10a0b6a9c93f0d1801d38f267662461**，remote exact/clean；首失败3a6和首REDREPORTab39d122f25527e08d41f41b5353ba576f856ce7均保留为祖先。相对3a6，非docs只变化Q该测试与两小证据文件；swarm/orchestration/local_assets/pyproject/poetry.lock/CI/AOCI原字节均零差异。唯一后继 foundation push CI **37114395256 / attempt1 / headb480** 已启动，两平台实际门仍待结果；不rerun旧失败run。Q49后继报告只可docs-only普通merge并[skip ci]推送，不重定义testedSOURCE或再触发完整CI。
+
+P官方真人终端门仍未完成，已再次提供具体官方规则/审查稿/本人脚本和异步回执问题；不把聊天选项/时间经过视作官方receipt。原P树保护不改，原P AOCI/最终pin、一次完整产品离线与相关installed观察仍待。OpenCode18:00前停止；本轮没有新依赖/WSL/Docker/真实候选/科学调用/AT07/L2/main/tag/部署。MVP未收口。
+
+## 核心后继工程门与 B 文档接纳（2026-10-03）
+
+主控独立核对冻结 SOURCE b480fca1b10a0b6a9c93f0d1801d38f267662461 的原 foundation CI37114395256已completed/success；两个job所有原步骤通过。Windows1745PASS/15SKIP/75warnings/1575.82s；Linux1744PASS/16SKIP/75warnings/521.84s；两端strict140sourcefiles、sdist/wheel build、SDK schema1.14.0、wheel13packages/installed_verifier/node_dependency_check通过。原命令为 poetry run python -m pytest -q、poetry run python tools/typecheck.py、poetry run python -m build、npm run check:sdk、uv pip install --no-deps --target tools/.wheel-site及 python -I tools/check_distribution.py --check-node；完整argv/平台原输出见I报告§9与 C:/r1i/i1003-core-1732/logs/successor-ci-original.log。SDK/distribution scope仍contract_local，非真实科研。
+
+I最终 docs-only REPORT1bce9f9f71c9a1c5e864263076ae879fcd67e31f与B docs-only REPORT7f05cc795d2371f6b4d74656c25e8bc92e67db83均独立核实remote exact/clean/diffcheck；I含所有A/B/C/Q来源、firstRED3a6/REPORTab39及B7f普通祖先，b480→REPORT只四份docs、非docs零差异。B先交已有评价与采用调用链、补路径图例，未造模块、运行测试/安装/科学；稿为question_prepared而非运行授权。合法refuted可贡献及降温，但failed代码不能伪作passed adopted，AT13需真实可用代码在原消费链再验证和使用。
+
+原CI37113441786 Linux1742PASS/2FAIL/16SKIP与Windowscancelled、原Q追加CI取消、OpenCode Insufficient Balance及Codex readiness timeout均保留。主控接受上述核心工程+docs阶段并结算I/B release，回执为retained/processActionnone，不声称关闭或全MVP。P真实TTY回执尚缺、 protected preimages未改；最终产品pin/fullCOPY回归/installed观察、AT07及L2未执行。核心AOCI跨checkout重新绑定/认知NOT_VERIFIED，模型用量/费用/Token节省UNKNOWN。未执行main/tag/部署或C被政策拒绝的系统清理。
