@@ -1,3 +1,11 @@
+## AT07前置首STOP与官方调用路线返修（2026-10-03）
+
+原B Task `task_671c317b6196` / Dispatch `ctx_6b1c2488a3d2` 首worker-start结果turn_start_unobserved保留；主控两次确认已有同任务composer后只bareEnter一次/bytesWritten1，随后实际原B Working并读治理，未重复派发。UTC13:29:15.9497674操作窗口起，13:29:50.3472324一次Hidden启动原Desktop/PID64796；随后受控官方CLI `compose version --format json` exit125/stdout空，首stderr仅presence、内容MISSING，不还原或猜首具体error。UTC13:35:38.4788903在382.5291229秒封存STOP_before_key_prepare_deploy_create：SDKcreate0/基础设施create0/无新容器卷网IDs/registry未写；同一owned空config核identity/空目录后rmdir成功，其他项目Desktop启动影响NOT_ASSESSED，不写全清理或AT07PASS。原600秒窗口已结束，不续/reset/replay；实际AT07/L2仍NOT_RUN。
+
+为持续MVP，仍同B同Task只读工程诊断并追加本轨write_paths `docs/experiments/at07-authorization.md`，原own报告/新live证据可写、业务/profile/锁/其他Owner不变。官方Windows插件发现依赖固定系统ProgramFiles；实际 `C:/Program Files/Docker/cli-plugins/docker-compose.exe` 常规非link、33657776字节/SHA E295CD078CACEBC2081CB266275268B3895EC14452B31A9D7568CE295BD59915/Valid DockerInc，与已批准resources本体相同。主控正式接纳唯一必要非secret `ProgramFiles=C:/Program Files` 系统locator，保持原三system字段、同官方CLI/同npipe/新私有空config/typed argv/shellFalse；不是继承父env或改变auth/HOME/DOCKER*/TLS/proxy/context/全局设置，不扩SDK reader白名单。新只读诊断实际Compose v5.1.4/exit0/5.254s、空stderr/config仍空，UTC13:42:30.747583；原exit125/MISSING/STOP原样保留，后继诊断不是新probe或首失败替换。同route只读确认Engine/API/daemon/四固定镜像与端口实际facts，禁止SDK/部署/key/新Desktop/候选/科学与绿测试/安装/CI重跑，精确修正operator文档后普通push供审查。后续真实运行范围与实际门依据修正后的事实决定，不借只读诊断突破原STOP。
+
+启动后实际UTC13:35:17.4016351宿主可用物理内存235MiB、可用virtual4945MiB，同阶段出现工具卡顿/hook超时。主控逐一核原A/P/I已done、push且idle，精确关闭term_2bf537af/term_f7c4258b/term_e6a62e60三个终端，各回执ptyKilled=true；保留所有Git/原证据/会话文件，不触当前B、Q、root、用户C及其他用户终端/容器。13:39:59.134972 GlobalMemoryStatusEx观察可用物理1894MiB/load94%/availablecommit3594MiB，仅时点实测，不推因果或性能最优/全恢复。既有最终工程REPORT c5cdfc89/业务15de+c84/测试756保持，不为该operator诊断重新完整回归、repin或新增后端。模型用量/费用/节省UNKNOWN，MVP与完整R1尚未宣称完成。
+
 ## 21:25 专项AT07用户批准与原B真实执行轨
 
 C协调会话在UTC13:23:20通过 `msg_f469ac99f92f` 转交用户明确“我现在批准AT-07，继续开发”。主控随后直接读取 `term_57e5296e-b048-4992-9840-3cb81960c8e8` 已提交终端stream，确认用户原话（非draft）；接受为针对已展示e40最终包的当前专项批准，不再询问同一批准、不将批准预写成检查PASS。主控先前async问题已由此实际用户决定满足。最终I docs-only REPORT `c5cdfc89e5a1e43ab49f9afc33a05a53d887e8ab` 已独立核对remote exact/clean，15de→REPORT仅六docs、非docs零delta；root bbd/Q c4de/B e40均普通祖先exit0，原业务15de+c84与测试756不变。
