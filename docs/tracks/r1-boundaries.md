@@ -1196,3 +1196,51 @@ MVP/R1 overall acceptance are outside this Q task. AOCI is A's separate work;
 Q has neither authored nor claimed its receipt. No C policy-blocked cleanup was
 retried. These focused results do not replace prior failures, owner reports or
 unrun live/human acceptance.
+
+### 2026-10-03 16:32 CST publication recovery, docs-only successor
+
+Recovery dispatch `ctx_ff36f31b0819` retains task `task_f1ef0047b01a`, the
+original Q worker/worktree/branch and the completed affected-boundary evidence.
+The earlier publication checkpoint above remains the historical state when
+REPORT `09a62370498e40d54d8e956ce6b2c941e16f7515` was authored; its direct parent
+is SOURCE `88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0`. The first failed push and
+failed remote queries remain in that SOURCE, with their original outcomes.
+Root's 16:29 CST successful HTTP/1.1 remote read supplied evidence of changed
+network conditions and authorized the single ordinary publication recovery.
+
+Q independently completed these commands in order, with process-local
+`GIT_NO_LAZY_FETCH=1` and `GIT_TERMINAL_PROMPT=0`:
+
+```text
+git -c http.version=HTTP/1.1 push origin 88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0:refs/heads/songconmaisaix31-design/morph-r1-boundaries-1003
+git -c http.version=HTTP/1.1 ls-remote origin refs/heads/songconmaisaix31-design/morph-r1-boundaries-1003
+git -c http.version=HTTP/1.1 push origin 09a62370498e40d54d8e956ce6b2c941e16f7515:refs/heads/songconmaisaix31-design/morph-r1-boundaries-1003
+git -c http.version=HTTP/1.1 ls-remote origin refs/heads/songconmaisaix31-design/morph-r1-boundaries-1003
+git status --porcelain=v1
+```
+
+All five commands exited 0. The first push advanced the original remote ref
+`793661391738f5dadb2412af32c7188a60915c7d` to SOURCE88; its immediately following
+remote read returned the full SOURCE88 SHA. Only after that verification did
+the second push advance SOURCE88 to REPORT09; the next remote read returned
+`09a62370498e40d54d8e956ce6b2c941e16f7515`. The worktree was clean at
+`2026-10-03T16:32:47.8439736+08:00`, before this report-only addition.
+Both original SOURCE and REPORT are now independently confirmed published;
+the new success does not change any earlier failure or unknown-effect record.
+
+This successor changes only `docs/tracks/r1-boundaries.md`; SOURCE88's tests,
+raw evidence and domain bytes remain unchanged. No completed test or install
+was rerun, no new boundary module was added, and the previously released
+serialized installation/test window remains released. No AOCI file or receipt
+was changed or claimed. No force push, cherry-pick, API Git-object reconstruction,
+global auth/proxy/SSH change, Docker/WSL action or C cleanup retry occurred.
+The final docs-only successor SHA and its successful ordinary push/remote-read
+receipt will be handed to root through the current live Dispatch.
+
+The retained result is the existing private noneditable Aaec/B576 affected
+slice: 65 PASS in 24.98s, 136 original Python blobs and 96 compatible packages.
+Actual Engine29.5.3/API1.52, daemon identity and isolation remain unmeasured;
+AT07 and L2 remain NOT_RUN. Independent I's final offline combination and
+separate user authorization are still required before real AT07, followed by
+L2 only after actual AT07 acceptance and its approved problem/material/resource
+scope. This publication closeout grants no MVP/R1 overall acceptance.
