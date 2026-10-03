@@ -1,5 +1,12 @@
 # Research Swarm Alpha R1 一页开发计划（2026-10-03）
 
+## 16:45 当前收口与下一步
+
+A SOURCE8dd85c1f88698cd8a22d72b5575e45e9431c0ce0 / REPORTd8af82791fecde1f3dadfbf9190d4cbfada80146 和Q SOURCE88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0 / REPORT6ce5a23ea256affdf9fe8a71bbaabb66695f3631 已精确验收/push/clean。A索引仅当前worktree十源，I不能未经官方Guide/重新绑定观察宣称新checkout索引fresh；真实delta仍退原A，禁止手写迁移/证明框架。P API67721aaa815e706c51e0f80a1d15ab71e34b6880 和F UI7bf17d195859a18960ee1ef933a920a286f73e61 保留阶段验收，不能替代新最终组合。
+
+P官方human TTY receipt目前仍缺，不能改其被preview保护的输入或代人approve；原Task blocked。已提供具体人工专用脚本 `C:/research-private/p-aoci-approve.ps1` 与审核 `p-aoci-transition-review.md`。之后固定顺序仍是原P索引交付 → 唯一I普通核心合并/最终SOURCE → 原P最终pin/必要索引维护 → I唯一完整产品离线回归及相关installed观察 → 另行授权真实AT07 → 隔离实际通过后一次授权L2。不提前再启动完整回归或I领域编辑，也不扩学科/品牌/语言/评分框架。OpenCode18:00前禁用，之后按用户模型DeepSeek V4 Pro；Codex继续GPT-6.1-Sol。
+
+
 ## 16:30 中断恢复与 OpenCode 暂停
 
 用户要求 OpenCode 暂停至 2026-10-03 18:00（北京时间）；已关闭本次 runtime 中唯一 OpenCode 终端，回执 ptyKilled=true，不删除源码或会话历史。18:00 后才可按用户指定 DeepSeek V4 Pro 使用，当前工程恢复仅用 Codex GPT-6.1-Sol。新恢复进程显式采用 high 推理档，以缩减原长上下文请求的恢复成本；旧 max 会话记录保留，不把模型切换算验收。

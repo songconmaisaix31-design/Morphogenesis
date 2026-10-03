@@ -1,5 +1,14 @@
 # R1 派发状态（2026-10-03）
 
+## 16:45 A/Q 收口，P 等真实人类确认
+
+原Run已恢复；A有限AOCI SOURCE8dd85c1f88698cd8a22d72b5575e45e9431c0ce0 / REPORTd8af82791fecde1f3dadfbf9190d4cbfada80146 与Q SOURCE88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0 / REPORT6ce5a23ea256affdf9fe8a71bbaabb66695f3631 均已push/remote相等/clean，主控接纳各自当前工程范围并结算release。A官方13 fingerprint/10语义Entry、Verify/Check/Guide、两次完整10/10 Challenge、重复检索及单对象维护通过；实际Token节省未知，仅当前A worktree。Q65 PASS为原适用安装证据，恢复过程未重跑。
+
+当前唯一实际阻塞为 P `managed_scope_human_approval_required`：legacy→auto需用户自己真实TTY操作，`C:/research-private/p-aoci-transition-approval.json`仍缺；此前已给一次具体审核/脚本，聊天“继续”不替代此receipt。P原Task保持blocked、未恢复空轮询进程；没有改受保护输入或绕过官方门。确认后恢复原P、官方apply精确preview、15源语义索引并交SOURCE/REPORT；随后唯一I普通精确合并核心，原P固定最终core pin及必要维护，I一次完整产品离线回归和相关installed输入/会话观察。未得到确认前不编造该完整结果。AT07仍后置单独授权且先无害隔离检查，L2只在实际通过后；排除项和C人工恢复事项保留。
+
+OpenCode实际进程已退出，按用户要求18:00后方可恢复DeepSeek V4 Pro使用；当前Codex GPT-6.1-Sol。没有main/tag/部署或真实执行。
+
+
 ## 16:35 Q 交付已接纳
 
 Q SOURCE88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0 / REPORT6ce5a23ea256affdf9fe8a71bbaabb66695f3631 现已普通推送且主控独立核对 remote/clean/docs-only 父子历史。65 PASS/24.98s、136blob/96依赖为原Aaec/B576受影响边界，未重跑；所有首RED/网络失败保留。新Dispatch ctx_ff36f31b0819 worker_done succeeded已接纳，release retained/no_owned_resource/processAction none。A ctx_6aadc6cb132c 正在官方MCP/scan/手工业务语义收口；root AGENTS仅字节/行尾恢复及stat刷新，原Git blob身份相同且status空，backup保留。P人工receipt仍未收到；新唯一I/full offline、AT07/L2未运行。OpenCode18:00前保持停止。
