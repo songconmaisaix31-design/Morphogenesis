@@ -461,3 +461,82 @@ c84/756对原2b frontend、UI tests及生产static原Git零delta；新安装资�
 本轮完成原SOURCE累计普通集成、原双平台全部工程门、新COPY/installed来源、一次完整离线首RED与原Owner测试工具修复后独立精准复验；结果按上述层级保留，不将255/1合写成whole256green。I最终docs-only REPORT完整SHA/remoteexact/clean/core/product/TESTSOURCE在push后保存 `C:/r1i/successor-2018/FINAL_REPORT.md` 并交原Dispatch，不在提交内自嵌本提交SHA。
 
 A本轮只有docs/条件与成本覆盖限制，无新A源码修复或全FR13覆盖承诺；P六developer配置字节沿用不等于15语义Entry维护完成，P/A human receipt、I跨checkoutAOCI freshness/cognition仍NOT_VERIFIED。不复制receipt/reinit/reset/手写baseline或假Token节省。本轮仅contract_local/mock与实际本机installed离线工程证据，**task_live/真实AT07/native科学/候选实际执行/L2 NOT_RUN；实际费用/用量/Token节省UNKNOWN**。时长仅原实测样本，不证明性能最优。B包是待单独授权的可审查路线，未启动Engine/Docker/WSL/服务key/SDK真实create、候选/模型/科学调用、外发、main/tag/deploy；实际无害隔离全部通过之后才可能一次另授权L2。人工理解未回不PASS，不由本轮机器门补出新认知或运行权限。
+
+## 12. 原唯一 I 的 API 1.54 后继累计工程与最终离线验收（2026-10-03）
+
+原 Owner、树、分支保持；本次有效 Task `task_6d13ed8377e3` / Dispatch `ctx_2b9faf05e09a` / terminal `term_cc6a6c31-ae52-4fcf-a6f1-185db592c6b4`。旧 `ctx_34ec9acbe03a` 的 agent_readiness 首 timeout/未注入失败保留，旧handle/cap未用于完成。本轮起点是原已接受且clean的 REPORT `c5cdfc89e5a1e43ab49f9afc33a05a53d887e8ab`；先读本树AGENTS、用户Spec及root `ab663f6392c9499becea2f7c61bee6421a27fab3` 顶部22:09决定。没有新集成者、I领域/测试/锁/profile/workflow改动或治理手写。
+
+### 12.1 实际 SOURCE、普通祖先与安装身份
+
+| 身份 | 完整 SHA |
+| --- | --- |
+| 前组合实际核心 | `15de4959646df264530b978dfde9152552b9a76b` |
+| B API实际 SOURCE / 首docs REPORT | `c3a905eaf79a869dffb5960da9c4afee1dc63c3e` / `08f2315dbc6a2396c4b55dd07a6d60f6fd115dfa` |
+| **本轮唯一累计核心 SOURCE** | **`82201af4d3b369da827f6f22ff1d9c6b608c0108`** |
+| **产品实际运行 SOURCE** / 首pin docs REPORT | **`d5d387a6f5c1778dffdd860986843826420edf5e`** / `0e936ceee4ff1e8aca1d2c8d3f0a77ae753e3639` |
+| 原产品客户端测试来源 | `756d5069e7739089f0e5ba1c33eebfb2657b03f0`，已为d5祖先 |
+| **产品最小测试修复 SOURCE** / 最终docs REPORT | **`c0dd0b9a9071f72d67f690bfe084cd60f30b13f4`** / `cbaf3dc8411575ec16f52121bf7e8351d887b54c` |
+
+普通精确合入B c3 SOURCE、08 REPORT与root ab；最终含代码集成commit822无skip-ci，普通push后核远端exact/clean，立即fullSHA Handoff给root供原P repin。原SOURCE祖先、Owner blob与范围检查见 `C:/r1i/successor-2220/logs/source-freeze-first.json` 及 `merge-*-first`、`source-push-first`、`source-remote-first` 原记录。
+
+相对15de/原I c5的非docs差异精确仅四个B原blob：`orchestration/experiments/generated.py` 的一行 `api_version: Literal["1.52", "1.54"] = "1.52"`；三个既有文件 `tests/experiments/{test_at07,test_frozen_export,test_generated_configuration}.py`。reader/export/at07_live/registry、锁、profile、compose与workflow原字节未变。原 `poetry.lock` SHA256仍 **`87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb`**；rawGit正式profile1013字节/SHA256 **`438fe04be51d07188b6bc4b26fbd85c2e7ce28dc02e31ed3af2a4cf27f3c0b79`**，默认/原绑定仍1.52。接受显式1.54并不证明真实Engine API绑定或隔离。
+
+P d5只更新原三pin文件到822。c0dd仅两个原测试文件 initial claim从50ms改为600s，原renew50ms、真实sleep60ms、active600、unknown预算/并发/全部原assert AST不变；相对d5生产、UI、三pin、锁零delta。最终运行仍安装d5 wheel，测试原Git取c0dd；不从P docsREPORT取pin。P cbaf已在**原P仓库**核SOURCE祖先、own report-only、远端exact/clean，跨仓仅读证，不merge到core。
+
+新私有主根 `C:/r1i/successor-2220/`：rawGit/core723文件、product165文件全部原blob/nlink1相等；全新env/cache，GitVCS非editable COPY核心822，独立产品wheel再no-deps COPY安装。原锁98记录、97包兼容，另加mypy1.20.2四工具包后101包兼容。wheel SHA256 **`bac6e0ab9e4d683cd90b560113c8bb7ee9788d8f0e4234a7f2550ffbe744d961`**；product direct_url实际为本轮wheelURL/archive_info{}，没有手补hash。
+
+实际installed核对 **136 core Python、13 packages实际import、新venv prefix、64原core非Python资源**；产品 **53总生产文件=36 Python+17资源**。单core distribution、无editable、nlink1、rawGit字节相等，CORE_SHA/pyproject/uv.lock与core direct_url commit_id/requested_revision全822。原setup-assets与doctor首exit0（32.405s/12.385s），SDK1.14/ready_local/local_only/models_experiments_hub_called=false。证据 `logs/archive-raw-git.json`、`installed-identity-first.json`、`commands.jsonl`。
+
+### 12.2 原自动 CI 与受影响 installed 门
+
+仅本SOURCE原自动 `.github/workflows/check.yml` **Run37129204576 / attempt1 / head822 / push**；两job所有原步骤success，没有cancel/replay/rerun，也没有本机whole核心副本：
+
+| 原job | pytest首次结果 | 原严格/构建门 |
+| --- | --- | --- |
+| Windows111220744248 | **1839 PASS / 15 SKIP / 75warnings / 1445.58s** | strict140、sdist/wheel、SDK1.14、wheel13包/资源/installed verifier/node全部PASS |
+| Linux111220744098 | **1838 PASS / 16 SKIP / 75warnings / 492.89s** | 同上全部PASS |
+
+原run/job JSON、actual收集命令与完整raw见 `logs/ci-final-first.json`、`ci-final-jobs-first.json`、`ci-full-first.log`、`ci-job-111220744{098,248}-first.log`、`ci-summary-first.json`。旧15de Run37123370202及所有历史首RED不重跑、不覆盖。
+
+新installed仅B受影响三既有文件独立一次：**132 PASS / 1warning / 1.17s，exit0，外层8.663s**。原命令以newvenv `python -I -X utf8`、importlib模式、`-c core/pyproject.toml`，执行上述三文件，前后核模块来自installed；profile指向rawGit档案。原正负控制含显式1.54、legacy1.52、跨绑定拒绝与mockSDK/read transport；`installed-api154-observation-from-first-raw.json`只分析同一次raw，没有额外request。属于 **contract_local + 实际installed API配置调用工程观察**，非真实Engine/SDKcreate。B Owner原首6FAIL/29PASS/97deselected、修后131PASS/1FAIL漏mock provenance、修单项1PASS/1.69s、strict1source保留为Owner身份，不把它们写成B完整132重跑。
+
+### 12.3 一次完整产品首RED、Owner修复与独立精准补验
+
+本轮唯一完整产品命令，cwd为主根原product归档：
+
+```text
+C:/r1i/successor-2220/venv/Scripts/python.exe -I -X utf8 -u -c "import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))" -q -rA --tb=short --basetemp C:/r1i/successor-2220/full-product-first-tmp
+```
+
+**首次完整：254 PASS / 2 FAIL / 517.11s，child exit1，外层520.539s**。wrapper允许pytest exit1而返回0，不能当pytest PASS。原日志 `logs/full-product-first.log`、command JSONL和首F独立partial保留；具体原事实与限制见 `FIRST_RED.md` / `logs/product-first-RED-fixture-facts.json`，没有第二次whole。
+
+1. 原并发 `test_simultaneous_real_requests_and_refresh_have_only_one_native_boundary` line168实际三409，原断言期待200/409/409。原fx01473a14唯一child LeaseLost/not_completed/exit2，与ready/interrupt/首次F时点相符，但fixture未编码nodeid，关联如实为证据推断；原HTTP三响应正文未保存，不重构。
+2. 原 `test_unknown_science_hold_and_cumulative_budget_are_original_core` 的 interrupted_fixture renew50ms得到LeaseLost。唯一原无observation/无renewed的50ms claimed author token1、updated1791038553.6987135/expiry1791038553.7487135，精确attempted renew时刻MISSING。原DB+WAL只读字节复制，仅copy用SQLite mode=ro/query_only，原size/mtime/hash前后相等。
+
+root退原P最小测试窗口修复c0dd，不I patch或弱化断言。P先instrumented私有诊断 **7PASS/35.54s** 只diagnostic；随后全新prefix、原Git未instrumented helper的正式 **7PASS/1warning/27.14s，外层33.824s**，原raw `C:/r1p/red-82201-ctx_d683c5c884de/logs/exact-targeted-first.log`。正式与诊断分列，不替I独立门。
+
+I用全新短根 **`C:/r1i/i2220r/`**、新COPY/env/cache与未改c0dd rawGit测试，只两个原失败nodes独立一次：**1 PASS / 1 FAIL / 22.31s，exit1，外层27.799s**。预算node通过；并发仍三409，但新fx5b51d241原child为 **BridgeError/not_completed**，不是旧LeaseLost：PID58884/Creation15:05:04.003361Z/exit2；response preflight_rejected/unknown，author available/token0/无claim-renew、无native-boundary launch。原Node细stderr/error code未由CLI保存，明确 **MISSING**，不得用后续diagnostic伪作首次stderr。原log/command与只读copy `logs/bridge-first-facts.json` / `bridge-first-readonly-snapshot/` 全保留。
+
+这个新prefix准备时遗漏原入口必需的Node SDK安装前提，是I工具准备错误。actual newsite无gep-sdk/ajv/ajv-formats/node_modules/setup receipt；原2220与P正式copy存在。原runner在probe/spawn前先doctor，原asset_bridge ESM必须导入这些包；生产字节相等并不证明运行依赖就绪。root明确授权仅新prefix复用既有 `morph-research setup-assets`，没有手搬Node模块、改桥/生产/断言/锁或增加新SOURCE。
+
+该新prefix首次原setup **exit0/5.428s**，原包内npm manifests逐字节相同，locked npm ci/ignore-scripts仅7包、SDK1.14，原managed bridge/product installed bytes/mtime不变；原既有setup自带一次local canonicalize/validate正负smoke，models_experiments_hub_called=false。actualargv/原receipt见 `logs/new-prefix-sdk-setup-first-command.json`、`sdk-prerequisite-installed-facts.json`。受控child_environment使用新prefix内临时home/cache，没有全局配置变更。
+
+随后只剩并发唯一node环境补齐后一次：**1 PASS / 7.68s，exit0，外层10.461s**，raw `logs/concurrent-after-sdk-prerequisite-first.log` / command JSON。已PASS预算不再跑、无whole/types/UI/CI/132重复。新fx55b6c5a2 ownedchild57620/Creation15:11:03.176733Z/exit0闭合；actual fixture counters native/auth/scientific/sandbox/backend全0、substitute_spawns1，原cancel returns true/false，无cancel error。原BridgeError fixture全部size/mtime/hash在补齐和补验后仍相等；`logs/final-target-and-product-report-facts.json`留精确SOURCE/REPORT/remote与层级。实际HTTP/runner/parser/cancel已执行，spawn明确mock，**不声称whole256green、真实产品科研e2e或task_live**。
+
+### 12.4 类型债、UI沿用与私有工具首错误
+
+原mypy1.20.2参数 `--follow-imports skip --ignore-missing-imports --check-untyped-defs`：**适用30源PASS/exit0/2.983s**；whole36仍 **10原错误/6文件/exit1/5.312s**。逐file/原当前行映射/类别/message/a25与9e原Git表达式核身份相同、新增0；不是仅count相同，不称whole strict green。原stdout/argv见 `logs/product-mypy-*-first.log` / `commands.jsonl`，身份比较 `product-type-identities-first.json`。
+
+d5/c0dd对原2b的frontend/UI测试和static生产字节零delta，六portable dev文件原字节保持，新installed资源实际相等。因此仅按原范围沿用b480+2b/a67的 **build14.91s、UI126PASS/8SKIP、installed input/session/context/support/refute8条两视窗观察**；不是本轮新browser/build/preview/人工理解。新实际入口与API配置证据为本节installed原测试/HTTP补验，不以purepin/docs重绿UI；unknown/complete窗口事实不转EOF/科学成功。
+
+新2220私有parser helper首次替换漏Windows反斜线，ROOT误指旧r2，原旧log exclusive `xb` 在subprocess.run之前抛FileExistsError。原工具输出逐字副本 `logs/parser-helper-first-tool-output-copy.txt`、helper首preimage、path correction/effects analysis保留；只修新helper后全新2220 npm官方Codex0.159/version成功，原测试仅version/mcp-get解析，无模型。控制流证明首失败未启动旧命令/写旧log/env/cache；没有旧树整体before snapshot，**不宣称整个旧树前后字节相等**。原旧mtime/hash与局部观察见 `private-path-failure-effects-analysis.json`。新BridgeError缺前提错误与原领域/测试RED分列，均未改历史。
+
+### 12.5 普通文档收口与真实剩余边界
+
+精确普通合入Q docs `1fb5f3dc6e4d9eb60a2df4be22819c97bd01d91c`、B两docs `6ea5e5dd81bdf53e33f46beed74f7382a804efaf`、C纠正后docs `61101810cb3e2425347bb1d3e38cb34759ddaf09`、root治理 `09c52988390ba4eace08f2eb4e3592682c8b15a2`；四merge分别 `1f1e97229d4893f124000c75eb5a2a5fb9db82e2`、`f493d4c55f33315ea1b4222d21531728bff784c2`、`d560f2e7a989b9d54008b5bb9ace86a803c1bf62`、`fd1f4b9a81bf78ae827ee3ad63ed06cac575f935`，均无冲突/[skip ci]。root三治理/Owner报告原blobs精确，SOURCE822至此全部非docs差异0；original argv/raw/身份见 `logs/merge-final-*-first` 与 `merged-docs-final-identity.json`。P跨仓report单独核验，不合入core，不产生第二SOURCE/pin/CI。
+
+随后仅追加本节，普通commit/push `[skip ci]`。I最终docs-only REPORT完整SHA、remoteexact/clean、指定所有SOURCE祖先与原命令/日志索引在push后写入 **`C:/r1i/successor-2220/FINAL_REPORT.md`** / `logs/git-final-closeout.json` 并Handoff当前有效Dispatch；不在提交内自嵌自己的SHA。第1–11节及各原首失败保留。
+
+本阶段完成唯一实际SOURCE集成、原双平台工程门、新独立安装/输入核对、一次产品完整首RED及最小Owner修复后独立补验。结果保持上述累计层级，不虚构一次whole全绿。真实AT07批准是root已核用户专项，原600s STOP/SDK0、实际egress/端口/UAC准备属原B/Q/root后续，本I不触Docker/WSL/Engine/FW/key/真实SDKcreate；静态packet、镜像准备或原mock不能代真实隔离PASS。无native科学、真实候选/模型、付费调用、外发或L2；真实无害隔离实际全PASS之后才可能另授权一次L2。
+
+P/A正式AOCI语义维护/human receipt、I跨路径索引freshness仍NOT_VERIFIED；不复制receipt/reinit/reset/手写baseline，不假认知或Token节省。**task_live NOT_RUN；真实用量/费用/Token节省UNKNOWN**，时长只是上述样本，不证最优性能。人工理解未完成；未执行main/tag/deploy、L3/多用户/跨宿主/RSI或额外科学学科品牌评分，没有据此完整MVP/R1成功声明。
