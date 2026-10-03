@@ -1,5 +1,13 @@
 # R1 派发状态（2026-10-03）
 
+## 11:37 第一项领域交付接纳，AT-07 仅开始离线准备
+
+C 正证据修正 SOURCE **e82cae36038c386aec999642289ac1d78c82a9ed**、REPORT **52b8d26da04aec41ceb7e008445ef2f1dc088d53** 已 push；主控复核远端、clean、SOURCE 后仅单一报告及实现/测试。独立接受前后三合法分支份额从1/3变为约0.386667/0.306667/0.306667，同seed的正式choose发生变化，claim原账本保留引用；零适用性不获探索份额。首正例RED 1/27.09s与零适用性RED 1/2.91s保留；最终COPY安装原C70+原Q45+旧v0/v0.1 26=141 PASS，strict1 PASS。旧策略语义不变，仍仅离线mock链。C task_45d094d904c7 / ctx_4b4437b4b02c 已 succeeded 接纳并release，返回retained/no_owned_resource/processAction none。
+
+A 新基线测试原样留存19 FAIL/1 stdio deselected/38.78s（运行代码为原2c）；证实上下文依赖/引用/能力筛选缺口，当前修复后聚焦中。P正式CLI接续首轮3 FAIL/2 PASS/25.36s：合法调用被自身pending拒绝，新片段却可在旧TaskLedger unknown存在时启动；原费用/到期拒绝通过。A/P共同修复host-only当前invocation绑定，复用原BudgetLedger reservation，旧unknown/其他pending仍拒绝。P后续先交领域候选，I合并后同Owner做唯一最终repin，避免循环等待。
+
+C结算后B原Codex在原worktree/branch实际启动 **task_a8533b909675 / ctx_bd976e22265e**（input_accepted + turn_started），范围按R1_PLAN：只准备无害隔离检查包与必要最小配置/工具、离线验证。主控只读发现Docker daemon不可达及旧服务缺egress.image；没有启动Docker/服务/真实沙箱。AT-07仍须最终组合离线回归后单独授权；L2仍未执行。
+
 ## 11:17 新收口任务已实际启动
 
 用户追加范围已记录于 R1_PLAN 最新章节（核心治理 66e2a26f043453a851f4f31ec20700802b90b5d4），下方 08:28/07:16 是上轮历史交付，不能代替本轮最终回归。当前在原 Run run_d5306f2e4993 复用三个已确认 idle 的原 Codex YOLO 终端，均获得 input_accepted + turn_started：
