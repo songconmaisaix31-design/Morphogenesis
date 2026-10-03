@@ -397,3 +397,9 @@ P官方真人终端门仍未完成，已再次提供具体官方规则/审查稿
 为继续已授权的同一B离线文档工作，仅关闭本次自建term_390a93e5-ad96-493b-ac44-1877a98f37e0，close回执ptyKilled=true；其ctx随关闭已settled failed，后worker-abandon回执alreadySettled/stale/processActionnone，不伪称它清理进程。当前无opencode.exe；不充值、不重试同余额不足route、不尝试别的计费入口、不改全局账号。原B角色/worktree/branch/write_paths不变，后继Codex GPT-6.1-Sol high YOLO继续18:05的docs-only审查，保留OpenCode首阻塞。这是研发Agent接续，不是L2模型科研或真实运行权限。
 
 核心b480 CI Linux1744PASS/16SKIP/521.84s、strict140和build/SDK/wheel/distribution通过已由I和主控原日志核实；Windows仍在pytest，全组合未通过。P真实人类receipt仍缺，产品最终pin/唯一完整离线、AT07单独授权和L2未执行。当前入口的18:00前暂停条件已结束，但OpenCode实际余额阻塞未解除，不称恢复任务执行成功。
+
+
+## 18:15 B 正式 Codex 接续
+
+task_9ebbae6e5f3b 首次 worker-start 的 ctx_03a9cd950de1 在 agent_readiness 超时，未送入任务；实际就绪画面和首失败都保留。仅送一次无业务写入的准备确认，取得 Codex turn_started；按官方 failed retry-of 在同一原 B 终端重派 ctx_85c678574200，实际 ready/input_accepted/turnStart observed，模型为 GPT-6.1-Sol high YOLO。没有并发 B 编辑者、没有新领域轨，没有把 OpenCode 余额错误或就绪超时变成完成。B 仍仅两份文档，提交 [skip ci]；I 已收到精确范围，不改变冻结核心 SOURCE b480 或另跑 CI。P receipt 仍缺，所有真实科学/AT07/最终产品回归未执行。
+
