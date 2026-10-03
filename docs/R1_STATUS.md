@@ -1,5 +1,15 @@
 # R1 派发状态（2026-10-03）
 
+## 12:22 MVP 会话首版与 AOCI 实际连接，AT-07 导出缺口继续修正
+
+F 阶段 SOURCE `0a588e2659c3aca65e7d2d7fe3d1b926c2d513ba` 已由 Owner push，包含项目/成员侧栏、配置成员节点菜单和纯 GET 会话/上下文面板；此时只做语法检查，静态 bundle 仍为旧版，构建和双视窗测试未完成，不能作为已验收 UI。P 已实现三条只读 GET 第一版与原记录格式的双成员/多片段 fixture，等待其首 RED 和定向门；两者仍在原任务继续开发。
+
+P 复用官方 AOCI v0.1.0-rc17 Windows 二进制完成 SHA256 对照及本机版本检查，并通过独立 MCP stdio 子进程取得工具目录。项目治理已含官方 AGENTS 区块和 LF 配置归属。当前声明 15 个产品相关源文件范围，语义索引尚未完成；旧 Codex 会话未热加载新 MCP，实际 Token 节省未知。不能将安装/连接与可用索引混为一项结果。
+
+B 保留导出竞争首 FAIL：路径元数据检查之后实际读取仍可能获得 fake 范围外字节。官方固定 execd 的 path-open 与 SDK 元数据调用之间没有原子范围保证，command 返回也没有冻结候选全部残留进程。AT07 入口已在真实资源操作前 hard NOT_READY；生产声明能力及旧/手填 probe 绕过路径正在原 Owner 修正。另发现 SDK download 的 limit 是行数而非字节，将修正为实际有界流式字节处理；旧绿测试不覆盖该语义。原适用 235 PASS/strict139 只记当时版本，不倒记后续改动。官方暂停/受信控制面导出方案仍在有界可行性核查，未启动 Docker/WSL/服务/沙箱。
+
+原 Q 文件若受生产 fail-closed 改动影响，保留首失败并交 Q 原 Owner，不由 B 跨轨改断言。当前活跃 B/P/F；A 核心 AOCI 与 Q 必要返修按槽位接续。新最终组合完整离线回归、installed 输入/会话观察、真实 AT07 和 L2 均未完成，主控不提前请求运行一个已知无法过门的隔离档。
+
 ## 本轮三项行为已交付，MVP 追加轨开始
 
 A SOURCE cea7923fec48c10e043c1fea40c99749e0b6a114 / REPORT faf23260df7a4f530eb421680f71eb6dc7c72e40，P SOURCE 79ca28d81dd039b24c284494d3aa5911d7b10cfc / REPORT ffe186235318cf6c6ecb79de8e5db92906575cfe 均已由原Owner交付，主控独立核对remote/clean/docs-only后继和原测试日志后接纳；详见R1_ACCEPTANCE新节。A最后COPY43 PASS/52.52s+strict4，P raw-Git COPY44 PASS/44.89s+适用types29，原首RED/原10债保留。两项旧Dispatch已worker_done succeeded；release均为retained/no_owned_resource/processAction none，未声称杀掉终端。
