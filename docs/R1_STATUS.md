@@ -410,3 +410,14 @@ task_9ebbae6e5f3b 首次 worker-start 的 ctx_03a9cd950de1 在 agent_readiness �
 I最终 docs-only REPORT1bce9f9f71c9a1c5e864263076ae879fcd67e31f与B docs-only REPORT7f05cc795d2371f6b4d74656c25e8bc92e67db83均独立核实remote exact/clean/diffcheck；I含所有A/B/C/Q来源、firstRED3a6/REPORTab39及B7f普通祖先，b480→REPORT只四份docs、非docs零差异。B先交已有评价与采用调用链、补路径图例，未造模块、运行测试/安装/科学；稿为question_prepared而非运行授权。合法refuted可贡献及降温，但failed代码不能伪作passed adopted，AT13需真实可用代码在原消费链再验证和使用。
 
 原CI37113441786 Linux1742PASS/2FAIL/16SKIP与Windowscancelled、原Q追加CI取消、OpenCode Insufficient Balance及Codex readiness timeout均保留。主控接受上述核心工程+docs阶段并结算I/B release，回执为retained/processActionnone，不声称关闭或全MVP。P真实TTY回执尚缺、 protected preimages未改；最终产品pin/fullCOPY回归/installed观察、AT07及L2未执行。核心AOCI跨checkout重新绑定/认知NOT_VERIFIED，模型用量/费用/Token节省UNKNOWN。未执行main/tag/部署或C被政策拒绝的系统清理。
+
+
+## 18:55 用户新增授权：清理拥堵并推进产品收口
+
+用户明确“现在你拥有全部权限，开始清理拥堵，继续开发MVP级别项目”。先处理有归属的已结算会话和误安装注册，保留当前总控/I及其他未知项目工作；不删仓库/历史/原失败。已确认原A/Q/B三条idle、C OpenCode实际DeepSeekV4Pro再次Insufficient Balance，四个精确terminal close均ptyKilled=true。不是按名称或全机杀进程，不声称恢复OpenCode余额。原C用户新Codex已选择原session目录，未启动领域开发。
+
+两条互斥轨保持原Owner/树/分支：P原research-r1-product-1003负责正式产品后端/pyproject/uv.lock/本轨报告和官方AOCI配置；先只读核对官方保守恢复路径，权限收紧/撤回放宽可用正式config命令，不能改baseline/reinit/伪造人类receipt。旧preview/审批失败作为历史保留，只有旧计划需要本人TTY；不再把非业务必须的auto模式当MVP运行前置。若官方当前legacy允许原15Entry维护，按官方完成；若仍有真实TTY门，保留清楚NOT_VERIFIED与WIP，隔离该开发工具提案，完成已授权业务corepin/F普通merge，不借header或旧approval声称门通过。任何保护输入变更先说明旧提案已撤回，真实现行权限不降低；不得将全权限聊天改称human receipt。I唯一最终产品完整离线安排在原P固定业务SOURCE后，不重跑旧绿专项。
+
+C原morph-r1-policy-1003负责本轨误安装的11项精确注册文件，只准匹配原direct_url/RECORD/摘要且无使用中进程后逐文件移动到新私有隔离备份目录，source targets固定C:/Python313/Scripts与该morphogenesis dist-info/pth；不卸载未知依赖、不触碰其他系统包、不递归删除。历史blocked by policy保留；此轮有新增用户清理授权，但如果自动审批再拒绝仍停止该动作，不换工具绕过。C只改own报告与私有操作证据；不改领域源码/测试、AOCI或P/F/I树。两轨提交push [skip ci]，费用UNKNOWN。
+
+原I后续仅最终COPY/installed/UI验收，核心b480无需再CI。AT07仍按用户先前指定产品离线后独立批准/无害实际隔离，再一次L2；不得用科研顺便试隔离，不加入L3/新学科/品牌/语言/评分框架。main/tag/部署未授权。
