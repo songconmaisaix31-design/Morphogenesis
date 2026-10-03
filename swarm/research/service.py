@@ -817,6 +817,7 @@ class ResearchService:
                        authorization_ref: str | None = None,
                        milestones: tuple[str, ...] = ()) -> dict[str, JsonValue]:
         """Idempotent project registration; authorization is host-supplied, never caller-granted."""
+        self._native_reservation()
         if self.config.project_id and project_id != self.config.project_id:
             raise PermissionError("project_outside_host_authorization")
         if authorization_ref is not None and authorization_ref != self.config.authorization_ref:

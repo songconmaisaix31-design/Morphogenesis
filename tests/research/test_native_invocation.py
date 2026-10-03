@@ -64,7 +64,8 @@ def test_closed_or_expired_binding_cannot_replay_read_or_mutations(tmp_path, clo
         s.budget.mark_uncertain(binding.reservation)
     else:
         clock[0] += 60
-    for action in (lambda: attached.research_context(),
+    for action in (lambda: attached.create_project("p1", "goal"),
+                   lambda: attached.research_context(),
                    lambda: attached.submit_note("p1", "expert_opinion", "replay"),
                    lambda: attached.propose_work("p1", "question", "replay", "j", "e"),
                    lambda: attached.choose()):
