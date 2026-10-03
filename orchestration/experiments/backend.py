@@ -11,13 +11,18 @@ from typing import Any, Literal, Protocol
 from code_interpreter.sync import CodeInterpreterSync
 from opensandbox.config import ConnectionConfigSync
 from opensandbox.exceptions import InvalidArgumentException
-from opensandbox.models import WriteEntry
+from opensandbox.models import DirectoryListEntry, WriteEntry
 from opensandbox.models.execd import Execution, RunCommandOpts
 from opensandbox.models.sandboxes import PVC, Volume
 from opensandbox.sync.sandbox import SandboxSync
 from opensandbox.transport import RetryPolicy
 
 from orchestration.experiments.models import ExperimentContext, ExperimentPlan
+
+# SDK 1.1.0 has separate directory metadata and path-based stream calls. Neither
+# that sequence nor command completion proves atomic root/no-follow enforcement.
+# Do not promote the static path checks below into an AT-07 capability proof.
+ATOMIC_EXPORT_SCOPE_SUPPORTED = False
 
 
 class UnsupportedCapability(ValueError):
@@ -82,8 +87,38 @@ class OpenSandboxSession:
         self.sandbox.files.write_file(path, data, mode=600)
 
     def download(self, path: str, limit: int) -> bytes:
-        # SDK binary streaming; never encode binary blobs into MCP text.
-        chunks: Iterator[bytes] = self.sandbox.files.read_bytes_stream(path)
+        # Executor outputs have one fixed sandbox root. The raw SDK filesystem
+        # accepts arbitrary absolute paths; do not expose that as an export API.
+        root = PurePosixPath("/tmp/morph-research")
+        candidate = PurePosixPath(path)
+        if (not path.startswith(str(root) + "/") or "\\" in path or "\0" in path
+                or any(part in {"", ".", ".."} for part in path.split("/")[1:])
+                or not candidate.is_relative_to(root)):
+            raise PermissionError("artifact_path_escape")
+        if type(limit) is not int or not 1 <= limit <= 16777216:
+            raise ValueError("artifact_size_limit")
+        # Official directory listing reports link types without traversing them.
+        # Inspect every ancestor, including the export root. Unsupported/missing
+        # type metadata is not permission to fall back to an unchecked download.
+        parent = PurePosixPath("/")
+        for component in candidate.parts[1:]:
+            child = parent / component
+            entries = self.sandbox.files.list_directory(DirectoryListEntry(path=str(parent), depth=1))
+            matches = [entry for entry in entries if entry.path == str(child)]
+            if len(matches) != 1 or matches[0].entry_type is None:
+                raise UnsupportedCapability("bounded_export_metadata_unsupported")
+            entry = matches[0]
+            if entry.entry_type not in {"file", "directory", "symlink"}:
+                raise UnsupportedCapability("bounded_export_metadata_unsupported")
+            expected = "file" if child == candidate else "directory"
+            if entry.entry_type != expected:
+                raise PermissionError("artifact_path_escape")
+            if child == candidate and entry.size > limit:
+                raise ValueError("artifact_size_limit")
+            parent = child
+        # Execd offset/limit count lines. Range bounds bytes, with one extra byte
+        # to detect overflow independently even if the server ignores Range.
+        chunks: Iterator[bytes] = self.sandbox.files.read_bytes_stream(path, range_header=f"bytes=0-{limit}")
         data = bytearray()
         for chunk in chunks:
             data.extend(chunk)

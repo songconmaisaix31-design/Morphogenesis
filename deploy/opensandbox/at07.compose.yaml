@@ -1,0 +1,51 @@
+# Prepared, NOT deployed. Review docs/experiments/at07-authorization.md first.
+# No implicit pulls/builds, daemon/network changes, or restart of old resources.
+name: morph-r1-at07
+services:
+  server:
+    image: opensandbox/server:release-1.1.0@sha256:68ca0212a2749b2c73096ce2ec0264455c64442c45f81007db442f52bf84c9d1
+    pull_policy: never
+    container_name: morph-r1-at07-server
+    network_mode: bridge
+    cpus: 1
+    mem_limit: 512m
+    memswap_limit: 512m
+    pids_limit: 128
+    ports:
+      - "127.0.0.1:8099:8090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./at07.config.toml:/etc/opensandbox/config.toml:ro
+    environment:
+      SANDBOX_CONFIG_PATH: /etc/opensandbox/config.toml
+      OPENSANDBOX_SERVER_API_KEY: ${OPENSANDBOX_SERVER_API_KEY:?Protected service key required after authorization}
+    labels:
+      morph.owner: r1-at07
+    restart: "no"
+  target:
+    image: python:3.12.13-slim@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36
+    pull_policy: never
+    container_name: morph-r1-at07-target
+    network_mode: bridge
+    cpus: 0.25
+    mem_limit: 64m
+    memswap_limit: 64m
+    pids_limit: 8
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    # UDP is >1024 so no NET_BIND_SERVICE capability is needed by the fixture.
+    ports:
+      - "127.0.0.1:8098:9000"
+      - "127.0.0.1:8053:9053/udp"
+    volumes:
+      - ./at07_target.py:/at07_target.py:ro
+      - ${AT07_CANARY_DIR:?New synthetic canary directory required}:/at07-host-canary:ro
+    environment:
+      AT07_FAKE_CREDENTIAL: AT07-SYNTHETIC-NOT-A-SECRET
+    command: ["python3", "-I", "/at07_target.py"]
+    labels:
+      morph.owner: r1-at07
+    restart: "no"

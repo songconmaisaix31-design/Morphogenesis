@@ -21,7 +21,9 @@ from typing import Literal, Protocol
 from opensandbox.models.sandboxes import NetworkPolicy
 from opensandbox.sync.sandbox import SandboxSync
 
-from orchestration.experiments.backend import ExperimentSession, OpenSandboxBackend, OpenSandboxSession, UnsupportedCapability
+from orchestration.experiments.backend import (
+    ATOMIC_EXPORT_SCOPE_SUPPORTED, ExperimentSession, OpenSandboxBackend, OpenSandboxSession, UnsupportedCapability,
+)
 from orchestration.experiments.generated import (
     BackendProfile, GeneratedContext, GeneratedExperimentPlan, IsolationCapability, IsolationConfiguration,
     IsolationReport, effective_environment,
@@ -49,11 +51,12 @@ def declared_capability(*, network_deny: bool, probed_server_process_limit: bool
     ``NetworkPolicy`` (deny default), plus container filesystem/credential/host
     isolation. It has no pids/process-limit parameter, so ``process_limit`` is
     declared False (unsupported) and admission fails closed until a backend
-    verifies it. Never inflate a claim into a proof.
+    verifies it. File metadata/read requests also lack atomic root/no-follow
+    enforcement; no filled probe record can make that implementation support it.
     """
     return IsolationCapability(
         no_host_write=True, no_credentials=True, no_host_control=True, no_privilege=True,
-        export_bounded=True, network_deny=network_deny, cpu_limit=True, memory_limit=True,
+        export_bounded=ATOMIC_EXPORT_SCOPE_SUPPORTED, network_deny=network_deny, cpu_limit=True, memory_limit=True,
         process_limit=probed_server_process_limit, time_limit=True, self_owned_cleanup=True,
     )
 
@@ -90,12 +93,17 @@ class LocalCpuSandboxBackend:
             and config.endpoint == self._endpoint())
         declared = declared_capability(network_deny=self._network_deny,
                                        probed_server_process_limit=process_supported)
-        verified = self._probe is not None and self._probe.verified and self._probe.passed
+        verified = (declared.complete and self._probe is not None and self._probe.verified and self._probe.passed)
+        reasons = []
+        if not declared.export_bounded:
+            reasons.append("atomic_export_scope_unsupported")
+        if not verified:
+            reasons.append("isolation_probe_not_verified")
         return IsolationReport(
             backend="opensandbox", declared=declared,
             verified=verified, probe="passed" if verified else "not_run",
             proof_ref=self._probe.probe_id if self._probe is not None else None,
-            reasons=() if verified else ("isolation_probe_not_run",))
+            reasons=tuple(reasons))
 
     def _endpoint(self) -> str:
         return self._opensandbox.protocol + "://" + self._opensandbox.domain

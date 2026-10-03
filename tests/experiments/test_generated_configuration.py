@@ -26,6 +26,10 @@ def no_execution_or_network(monkeypatch):
     monkeypatch.setattr(os, "system", denied)
     monkeypatch.setattr(socket.socket, "connect", denied)
     monkeypatch.setattr(socket.socket, "connect_ex", denied)
+    # This file isolates request/probe binding against a hypothetical supported
+    # exporter. Current production support is False and separately tested in
+    # test_at07_export; this fixture never proves live export/AT07 availability.
+    monkeypatch.setattr(adapter, "ATOMIC_EXPORT_SCOPE_SUPPORTED", True)
 
 
 def configured_backend(plan):
