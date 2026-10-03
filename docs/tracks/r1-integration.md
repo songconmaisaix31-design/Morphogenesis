@@ -303,3 +303,80 @@ I 先原始 Git读取 root治理 `9e1e6f78b588ecb858ea9226126773cf0f071254` 的�
 I 核对 B原REPORT5aeb→7f05只改 `docs/experiments/l2-poisson-review.md` 与 `docs/tracks/r1-experiments.md`，128行新增、无非docs差异；5aeb为7f05祖先。普通精确merge带 `[skip ci]`，无冲突，merge为 `0095ce658734c02d5cc249ddb20c3da3f2b4554a`；最终 b480→HEAD全部非docs零差异，原命令保存为 `merge-B-docs-final-first.txt`。随后仅追加本小节，再push最后 I docs-only REPORT，不新增或重跑CI。
 
 B审查稿是 `question_prepared/reviewable_draft`，保留其18:09的CI观察身份；最终双平台通过以本报告第9节及原Run日志为准，不回写B文档的历史观察。Poisson问题、材料locator、正式调用链及待批准输入只作可审查准备，不提供完整候选实现或运行授权；材料身份来自原Owner/主控，不是I重新核验或正式导入。P human receipt/AOCI/finalpin、唯一最终产品回归、AT07、native科研和L2等仍NOT_RUN；当前核心+docs结算后I闲置，后续同Owner由主控另行接续。
+
+## 10. 原唯一 I 的最终产品组合离线验收（2026-10-03）
+
+本节为原 Owner、原树、原分支的后续产品阶段，Task `task_3a6652d6b5d6` / Dispatch `ctx_0d8a0826c9f7`。主控正式接纳原 P 业务组合后才安装和测试；不是第二集成者，也不重复第9节已通过的核心 CI 或 Owner 专项。此前核心 REPORT `1bce9f9f71c9a1c5e864263076ae879fcd67e31f` 的干净 HEAD 与全部历史报告、首失败保留。
+
+### 10.1 受测身份与独立 COPY
+
+| 身份 | 完整 Git SHA |
+| --- | --- |
+| 实际安装核心 SOURCE | **`b480fca1b10a0b6a9c93f0d1801d38f267662461`** |
+| 实际安装最终产品 SOURCE | **`2b9bf73c93e732771ed3582f3bc7745ea8158b68`** |
+| P 最终 docs-only REPORT | `c8d4197bac272cdf5f634bc7a56c87db19bfbebb` |
+| P API SOURCE，产品祖先 | `67721aaa815e706c51e0f80a1d15ab71e34b6880` |
+| F SOURCE，产品祖先 | `7bf17d195859a18960ee1ef933a920a286f73e61` |
+| F REPORT，产品普通 merge 祖先 | `c08566edc492e92adfc4e24a9e8de1c18b859e02` |
+
+I 实际核对上述 P/F 三个祖先、2b→c8 仅 `docs/tracks/r1-product.md`，P 远端分支精确 c8。产品 `CORE_SHA`、pyproject HTTPS VCS pin、uv.lock git source 和安装 `direct_url.vcs_info.commit_id/requested_revision` 均完整 b480；锁98记录，Docker SDK7.2.0。没有从 REPORT 选择运行来源，也没有安装原 P 的脏 AOCI WIP 树。
+
+新短路径 **`C:/r1i/final-product-1855`** 在本轮开始时不存在。以命令局部 `core.autocrlf=false` 对两个精确 SOURCE 做 `git archive --format=tar`，原生 Python tarfile 解包，再经 `git ls-tree -r -z` / `git cat-file --batch` 逐文件比对原 blob：**核心720文件、产品161文件，全部字节相等，nlink1**。日志 `logs/archive-raw-git.json`；不用 Windows archive 的文本转换结果修补业务文件。
+
+新 venv 为该目录下 `venv`，Python **3.13.13**；新 `uv-cache`、`npm-cache`、空私有 npm user/global config 和 COPY 安装，未复用 `C:/r1i/i1003-2239` 或 F 环境。原锁 `uv export --frozen --no-emit-project` 后精确 VCS 安装核心，产品原归档独立 `uv build --wheel`，wheel 再 `uv pip install --no-deps --link-mode copy`。首次 `uv pip check` **97 packages compatible**，添加独立 mypy1.20.2 的4个工具包后 **101 compatible**；后者不冒充原锁包数。
+
+实际安装审计 `logs/installed-identity-first.json` 核对 **136核心Python、36产品Python、53产品资源** 全部原归档字节相等、均在新 site-packages、nlink1、无 editable，并确认只存在一个核心 distribution。产品 direct_url 如实为本轮 wheel URL 与 `archive_info:{}`，不手填 hash；实际 wheel SHA256 为 `1bdd52f08ee4bc55a0426762c5bd9fcda23c914ff3552ca9db57e18c9e41721a`。原 `setup-assets` / `doctor` 均通过，SDK schema1.14.0、本地 canonicalize/无效资产拒绝和注册输入就绪；其声明是 local_only / models_experiments_hub_called=false，不是科学运行。
+
+为满足原测试已冻结的 native 配置解析器断言，仅在新 `native159` 私有目录通过 npm 官方包安装 `@openai/codex@0.159.0`，ignore-scripts；确认真实 vendor codex.exe 版本。只有本次 pytest 子进程 PATH 指向该私有 binary，原 parser subprocess 使用原测试创建的 secret-free CODEX_HOME，只运行版本及 `mcp get`，不请求模型、MCP服务或沙箱。父进程全局 PATH/HOME/auth/provider 未改。
+
+### 10.2 一次完整产品门与类型身份
+
+从本轮原产品归档 cwd 执行以下原完整命令，只有测试根加入 sys.path，生产模块保持安装来源；环境 `MORPH_FROZEN_ARCHIVE=.../product`、`MORPH_CORE_ARCHIVE=.../core`，BLAS/OMP/MKL线程1：
+
+```text
+C:/r1i/final-product-1855/venv/Scripts/python.exe -I -X utf8 -u -c "import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))" -q -rA --tb=short --basetemp C:/r1i/final-product-1855/full-product-first-tmp
+```
+
+**首次完整产品结果：256 PASS / 423.71s，exit0**；外层命令耗时428.762s。原 stdout/stderr合流字节为 `logs/full-product-first.log`，完整 argv/cwd/exit/耗时为 `logs/commands.jsonl`。没有完整门首 FAIL、没有第二遍完整门、没有 P28/F18/Q65 或旧专项复跑；旧222PASS/6FAIL与后续修复证据仍属第1–7节旧组合，不能代替本轮。
+
+原 mypy1.20.2 flags `--follow-imports skip --ignore-missing-imports --check-untyped-defs`：**适用30源 PASS**；whole36源仍 **原10 errors / 6 files / exit1**，不是全包 strict green。对 guard、renewal、cases、checklist、install、auth 的十条逐文件、当前/原行映射、类别、完整消息及 a25/9e 原 Git 表达式比较均相同，新增错误0。基准 `a25aa40bb0f5259799641fee378d09ccc5887054` 与旧受测 `9e2718789cb67f8b829207e17dac4d95a88e59c9` 只读获取源表达式与旧身份文件，不运行旧测试。证据 `product-mypy-whole-first.log`、`product-mypy-applicable-first.log`、`product-type-identities-first.json`。
+
+### 10.3 原前端及实际安装 HTTP/UI
+
+新私有 `ui-build` 仅复制本轮原归档；新 npm cache、ignore-scripts 的原 `npm ci` 与 `npm run build` 首次均 PASS。产出的 **3静态文件与2b SOURCE逐字节相等**，不替换受测安装资源。原 Playwright `tests/ui/playwright.config.mjs`、workers1/retries0、msedge，desktop1366×900/narrow390×844：**126 PASS / 8 SKIP**，原输出1.5m、命令100.003s。8个条件 skip 为原 installed observers 未提供 origin 的明确 NOT_RUN；它们在下表正式安装观察中各执行一次，未回写原 fixture 输出。
+
+以下均为本轮已安装包的正式 `morph-research serve --config <本轮私有JSON> --port <新loopback端口>`，无 route interception，串行新 owned server / 原 `tests/ui/r1-installed.config.mjs`，workers1/retries0、同两视窗。server/browser PID加原 handle CreationFileTime 入日志；cleanup只关闭自己存活的 Popen 树，均 exit0；serve被有意关闭后的exit1如实记录，不称自主正常退出。
+
+| 原观察 | 首次原浏览器结果 | 实际来源与范围 |
+| --- | --- | --- |
+| 输入/资料/意见/envelope 三页 | **2 PASS / 6.1s** | 新断开后端配置；每视窗仅原4个产品登记POST，未抓取example.invalid资料、未批准科研envelope或执行科学 |
+| member sessions / 输出 / 当前context | **2 PASS / 6.8s** | 本轮完整pytest留下的 `test_actual_http_sessions_bind*/serve.json`；项目p1、两成员/不同invocation/session精确闭合，仅GET/HEAD，mock/unknown保持原事实 |
+| 支持/复核/贡献/消费与采用三页 | **2 PASS / 34.3s** | 本轮 `test_configured_generated_revi0/serve.json`，空间b×32，原mock持久记录；GET只读，不重发实验 |
+| 反证/贡献/无采用 | **2 PASS / 10.2s** | 本轮 `test_configured_generated_revi1/serve.json`；succeeded/refuted/accepted独立显示，adoption_receipts为空，不由接受贡献推实际采用 |
+
+四类 **8 PASS** 的原断言未改、没有浏览器重跑。`logs/ui-{input,sessions,support,refutation}-observer-first.log` 和对应 `*-command-first.json` 保存原命令、origin、fixture、进程身份、前后快照与清理。原截图位于 `ui-*-first/`；I查看了实际输入desktop、当前context narrow、反证narrow截图，仅作为机器页面观察，不是独立人类理解或 AOCI receipt。
+
+会话前后完整 DTO 的离线比较差异0；unknown catalog仅新GET读取时间 `observed_at` 从1791026419.1448333变1791026426.8383627，其全部其他字段相同：state/activity_state unknown、provenance null、finished_at null。原fixture文件无变/无新增、SQLite表计数相同。支持/反证的**完整 DTO均前后相同**，持久文件字节/表计数无变，不能仅由backend binding相等推所有研究状态相同。
+
+原会话观察已实际读取两成员context。为另留原HTTP原文，按主控追加指示补 investigator context/output 的独立GET，再仅补此前未保存的 **critic context单次GET**，未重跑浏览器或已采GET。`sessions-extra-get-investigator-context.json` / `critic-context-get-critic-context.json` 均 current_local_view，identity仍p1与对应member，historical_prompt/observed_input unknown。补GET前后**全部持久文件字节、mtime_ns和SQLite计数相同**，证据 `sessions-extra-get-command.json` / `critic-context-get-command.json`。这些是当前获准局部context，不代表历史完整原生prompt。
+
+### 10.4 私有观察工具首错误保持原身份
+
+本轮原产品 pytest、原 build 与原浏览器断言没有首 FAIL；以下额外私有取证工具首错误全部保留，未转换成领域修复或抹除失败：
+
+- 安装审计首次假定本地 wheel 的 `archive_info.hashes` 必有，得到 `KeyError: hashes`；真实原 metadata为空archive_info。原工具输出逐字副本 `audit-helper-first-tool-output.txt` 明示是tool输出副本，后按真实URL、独立wheel字节与实际安装资源核对，不修改 direct_url。
+- 类型身份工具首次仅按文件/消息匹配，auth两处同名config_args导致歧义断言；`type-identity-comparison-first.log`保留。随后加入原当前行身份，只重分析原mypy输出与Git表达式，不重跑mypy；修正分析为原十条身份相同。
+- sessions追加工具首次比较含实时observed_at的完整unknown条目，exit1 `unknown record changed`；`ui-sessions-helper-first.log`、原command/raw均保留。源码r1_sessions.py:193明确time.time()，离线逐字段只该时间不同，完整DTO差异0。`ui-sessions-complete-facts-reanalysis.json`保留全部差异与持久事实；没有第二遍sessions浏览器。
+- 补GET工具额外假定unknown输出必须 `complete=false`，首exit1保留于 `sessions-extra-get-helper.log`。真实raw为complete=true/has_more=false/partial_line=false；原r1_sessions.py:399定义的是当前受限文件窗口读尽，**不是原生进程EOF、活动确认或科学成功**。原ResearchSessions.jsx:100–112不用complete推完成或停止follow，仍定时只读GET；state/activity/provenance未知事实未变。主控 `msg_6b46c3b519a7` 只读确认该原接口语义，接纳为I工具误断言而非P/F缺陷；`unknown-window-complete-reanalysis.json`仅分析已采raw，没有重发GET或改原测试/模块。
+
+私有 observer 的两个源码预像按已记录apply_patch精确转变重建为 `observe_installed.{input,sessions}-first-reconstructed.py`，`helper-version-provenance.txt`明确它们**不是当时预先保存的hash回执**；所有原失败输出、command JSON、HTTP响应仍原样。没有因为私有工具错误重新运行已绿完整门、浏览器或Owner专项。
+
+### 10.5 普通文档闭合与真实限制
+
+结果齐备后普通精确合入 C docs-only REPORT `1e2338a4de6bea019b0efe983c7a69a54b22b73e`（仅本轨报告27行），merge **`a8dcee4dc39fc79442ac25bad46d50ecd31627e4`**；再合入主控治理 **`96fbefd904826b563dc1c78a181fd424b7490701`**，merge **`3392d9ddfe1712c34a0f2f47b22970ba241a42b7`**。两次均无冲突、[skip ci]，C/root各远端精确SHA已核对。根R1_PLAN/R1_STATUS/R1_ACCEPTANCE三个blob与主控96完全一致，I没有独立重写治理。相对受测b480的全部非docs差异0，来源和断言未变，不产生新SOURCE或新核心CI。
+
+随后仅追加本节，普通commit/push `[skip ci]` 到原 `songconmaisaix31-design/morph-r1-integration-1003`。本阶段 I docs-only REPORT 的**最终完整SHA、remote exact、clean与core/productSOURCE**在push后写入私有 **`C:/r1i/final-product-1855/FINAL_REPORT.md`** / `logs/git-final-closeout.json` 并通过原Dispatch交主控；不在提交内自嵌该提交SHA。第1–9节历史内容保留。
+
+本阶段最终组合离线工程验收完成；whole原十项类型债仍RED身份，不称全包strict通过。核心Windows1745/15skip、Linux1744/16skip、strict140/build/SDK/wheel证据仅沿用已接纳的第9节原CI，没有复跑。P15正式AOCI Entry/维护、真实human receipt仍NOT_VERIFIED；撤回可选auto并恢复legacy是原P/主控事实，不把聊天全权限或preview变receipt。本轮不维护跨路径AOCI、不复制receipt/reinit/手改baseline/安装业务源码；A核心十源仍A-path-bound，I跨checkout认知freshness NOT_VERIFIED。C11单次隔离与三个全局依赖保留仅沿用原Owner/主控证据，I不改全局环境或清理其他进程。
+
+本轮运行与观察属 contract_local/mock及真实本机installed接口工程证据；**task_live NOT_RUN，实际用量/费用/Token节省UNKNOWN**。未创建真实native science claim、科研候选沙箱或执行模型/科学请求；没有Docker/WSL、外部服务启动、AT07/L2、main/tag/deploy或外发。本机正式serve只用于用户已授权产品离线观察。AT07仍须本阶段后单独授权的实际无害隔离，真实隔离通过后再谈一次L2；人工理解与性能最优不由本轮自动验收产生。
