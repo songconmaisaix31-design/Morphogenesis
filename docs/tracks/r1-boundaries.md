@@ -1356,3 +1356,158 @@ returned exact SOURCEacb, status `completed`, conclusion `cancelled`.
 This confirms cancellation only, not a passing Linux run. This final docs-only
 successor records that confirmed result, also uses `[skip ci]`, and preserves
 SOURCEacb and REPORT76 without amendment or forced history changes.
+
+## 2026-10-03 Q: exact AT07 observation route boundary acceptance
+
+Completed only the Q19:44 scope from root governance
+`86199ed6f2df1413b8b2b9a81e0a65988cb1a6f0`: the independent new
+`tests/boundary_review/test_at07_route_boundary.py` and this appended report.
+Spec AT-07 still requires a separately authorized real harmless sandbox probe;
+this acceptance is **contract_local mock I/O**, not AT-07, L2 or isolation proof.
+Q resumed branch `songconmaisaix31-design/morph-r1-boundaries-1003` at historical
+REPORT `49c0b3ad49f9fa1b5ad7b493ec05187e5b148503`, initially clean. No B dirty
+tree, other owner's environment, source, tests, lock, AOCI assets or old evidence
+was modified. The original Linux/NPIPE first failure and all prior reports remain.
+
+### Exact sources and private installation
+
+- Actual baseline core: `b480fca1b10a0b6a9c93f0d1801d38f267662461`.
+- Actual new core under test, supplied by root: B SOURCE
+  `fc866465aa52a3f09773bc79a0fab95bceedc3d9`. Q read this immutable Git object;
+  B docs-only REPORT `f008e281e15d25c8950d7ddd05450fbe398653f1` was not used as
+  the tested code pin.
+- Initial Q test SOURCE: `8b1b9d4b1da40eb3c2d544aa875ad65d7e596733`.
+- Final Q test SOURCE: `f2b81cd9c0e0623c224b0501580a19e3fc1d37da`; its small
+  successor completes a synthetic export observation and strengthens the
+  injected TimeoutError assertion. Original route/log/unknown/replay assertions
+  remain. Both SOURCE commits use `[skip ci]` and were ordinarily pushed;
+  `ls-remote` returned their full exact SHAs, with clean worktrees at publication.
+  Root received final SOURCE before this separate docs-only REPORT.
+
+Private root: `C:/research-private/q-at07-ctx345f-20261003`. Baseline and new
+SOURCE used separate fresh noneditable GitHub VCS COPY installs, venvs and caches,
+`uv pip install --link-mode copy`, Python 3.13.13; no global pip or I/P/B environment
+was used. The accepted new environment is `source-lf-venv`, with `source-lf-cache`.
+The URL is `git+https://github.com/songconmaisaix31-design/Morphogenesis.git@`
+followed by the full tested SHA; `direct_url.json` has that same full commit ID
+and requested revision, with no editable flag. Actual imports of `at07_live`,
+`at07`, `frozen_export` and `generated` are inside this venv's site-packages.
+
+Raw identity verification passed **133/133 Python objects, all nlink=1**. This
+set consists of Git-tracked `.py` paths actually present in the noneditable
+distribution, excluding `tests/`, `tools/` and `demo/`; it is not all repository
+files or an assertion about distribution completeness. Each installed object
+was compared byte-for-byte with the exact source Git blob, without normalization
+or installed-file edits. A read-only `git cat-file --batch` preserved that same
+comparison while avoiding per-object subprocess overhead. Raw identity and
+import paths: `source-lf-identity-batch.txt`; baseline: `baseline-identity-first.json`.
+`source-lf-pip-check.txt` records `uv pip check`: **98 packages compatible, exit0**.
+
+### Independent cases and first evidence
+
+The 54 cases intercept original subprocess argv/env and original
+`frozen_export._transport` I/O; they run original `FrozenDockerExport.preflight`,
+the execute/create/finish call chain and original diagnostic review. Real
+process creation, network connect/connect_ex/sendto, os.system, transport and
+SDK create are denied unless the individual test replaces that seam with an
+explicit synthetic capture. No Docker executable or Engine was invoked. Synthetic
+key reads and captured SDK calls are not real key access or real sandbox creation.
+
+Coverage includes both allowed endpoints; uppercase/mixed-case Docker context,
+host/config/certs/TLS/API/auth and proxy/HOME poisoning; explicit host/config,
+minimal canonical process environment, shell=False and 10-second deadline;
+route arguments and secret inspect-format bypasses; mutation and arbitrary exec
+refusal; exact fixed cat/nft forms; incomplete/invalid/conflicting configuration
+before CLI/key/create; original daemon/Engine/OS and actual API mismatch rejection;
+absent/unknown/nonempty/symlink/junction private paths; preexisting directory
+refusal and preservation of unexpected files without recursive deletion;
+bounded secret-free exit/OSError/timeout/oversized failures with no retry; all
+pre/post inspect, inventory, fixedexec and log observations on the same endpoint;
+unknown SDK/observation effects and durable refusal of a second create request.
+Junction metadata and both transports are mocked, not real platform acceptance.
+
+Preserved evidence, in order:
+
+1. Installed baseline `b480`: independent unbound-observation test **1 FAIL,
+   15.41s, exit1**, because `docker_read` without a trusted binding did not reject
+   the intercepted CLI call. The test was WIP on parent Q49 at that time; its
+   refusal assertion remains in both published Q sources. Raw:
+   `baseline-route-first-red.txt`; this is the actual old-code counterexample.
+2. First fc866 install identity **FAIL** on `bootstrap/__init__.py`: installed
+   63B with CRLF versus Git 62B LF. `source-identity-first.json` is unchanged.
+   System Git `core.autocrlf=true` was diagnosed; normalization was used only
+   to identify the cause, never for acceptance. A new venv/cache was installed
+   with process-local `GIT_CONFIG_COUNT=1`, key `core.autocrlf`, value `false`.
+   No global configuration or installed bytes were patched.
+3. A long-running identity import was stopped only after confirming its exact
+   private command, PID68432 and creation time `2026-10-03 19:54:17`.
+   `identity-import-interruption.json` preserves ownership. Pytest had not started;
+   this interrupted verification was not a pass. Its empty original output is
+   retained as `source-lf-identity.json`. Subsequent verification sets BLAS/OMP/MKL
+   thread limits to 1 before import and performs the same raw checks in a batch.
+4. Q SOURCE8b1 on identity-verified installed fc866: **52 PASS / 2 FAIL,
+   2.11s, exit1**, raw `source-boundary-first.txt`. The two postcreate route cases
+   stopped at the original export review: Q's synthetic export observation lacked
+   required `frozen_export=true`, leaving export unknown before the logs stage.
+   Private `source-first-tmp/test_execute_keeps_every_obser2/q-route/result.json`
+   and `review.json` preserve that reason. No B defect was inferred from this
+   incomplete fixture; only Q's synthetic observation was completed, with a
+   stronger TimeoutError reason assertion. No route assertion was weakened.
+5. Final Q SOURCEf2 on the same installed fc866: **54 PASS / 0 SKIP,
+   4.54s, exit0**, raw `source-boundary-final.txt`; root accepted this narrow gate.
+6. Closing input audit additionally found Q's unchanged checked-out TOML fixture
+   had CRLF (1049B) versus fc866 Git LF (1013B), while the Q test source itself
+   matched Git exactly. `final-test-and-profile-identity.json` preserves that
+   first audit assertion failure. The already-passing core's 133-byte checks were
+   unaffected. Via the existing `Q_AT07_SERVER_CONFIG` fixture input, a new private
+   `source-at07.config.toml` was copied from the exact fc866 Git blob, nlink1 and
+   byte equality checked. No code mirror or installed object was changed.
+   `bound-test-and-profile-identity.txt` records original diagnosis and final input
+   identity; final test SHA256 is
+   `36f002b60310ddfd84f2ec160948532d3a9ea918d5a3e7c488e9d29dd428a192` and
+   profile SHA256 is `438fe04be51d07188b6bc4b26fbd85c2e7ce28dc02e31ed3af2a4cf27f3c0b79`.
+   With that exact profile input, the unchanged Q SOURCEf2 and installed fc866
+   passed **54 PASS / 0 SKIP, 1.71s, exit0**, raw `source-bound-input-final.txt`.
+   This new evidence does not overwrite the earlier green or any first failure.
+
+### Commands and remaining limits
+
+From the private root, using process-local `PYTHONDONTWRITEBYTECODE=1` and
+`OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=1`, the baseline selector was
+`test_unbound_observation_cannot_reach_cli` with `baseline-venv/Scripts/python.exe`.
+The final new-file command was:
+
+```text
+source-lf-venv/Scripts/python.exe -I -m pytest C:/Users/DW/orca/workspaces/Morphogenesis/morph-r1-boundaries-1003/tests/boundary_review/test_at07_route_boundary.py --import-mode=importlib -q -rA --tb=short -p no:cacheprovider --basetemp C:/research-private/q-at07-ctx345f-20261003/source-bound-input-tmp
+```
+
+The final invocation additionally set `Q_AT07_SERVER_CONFIG` to the absolute
+private `source-at07.config.toml` path. Identity used
+`source-lf-venv/Scripts/python.exe -I verify_install_batch.py <absolute-Q-repo> fc866465aa52a3f09773bc79a0fab95bceedc3d9`;
+package compatibility used `uv pip check --python source-lf-venv/Scripts/python.exe
+--cache-dir source-lf-cache`. Paths here denote this task's private root only.
+`git diff --check` passed; publication uses ordinary
+`git -c http.version=HTTP/1.1 push origin HEAD:refs/heads/songconmaisaix31-design/morph-r1-boundaries-1003`
+and `git -c http.version=HTTP/1.1 ls-remote origin refs/heads/songconmaisaix31-design/morph-r1-boundaries-1003`.
+Q changed tests only; no production type change required another strict gate.
+
+The earlier I combination `b480` + product
+`2b9bf73c93e732771ed3582f3bc7745ea8158b68` / REPORT
+`a67c0af1e27bea08a8e2ce426337f0608e62f216` remains prior-combination evidence,
+not acceptance of a product repinned to fc866. Q did not repeat old 293/65/platform2,
+core/product/UI gates or create a new integration owner. Root received first
+failures, the final consumable SOURCE and all input distinctions via Orca CLI;
+the settled original B Dispatch refused further mailbox delivery, so any domain
+repair would have gone through root to the same Owner. None was required here.
+After consuming root's docs-only closeout instruction, no further test runs occur.
+
+Real Engine/daemon/API/isolation, official CLI binary identity, real cleanup,
+AT-07, candidate execution, native/model/science, L2 and final integrated product
+acceptance remain **NOT_RUN**. Capture of the `docker` argv is not verification
+of a host executable. No usable AOCI index/service entry was present in this Q
+checkout; no formal cognition or maintenance claim is made, and all AOCI assets
+remain untouched as required. The task's private test/import processes exited;
+private caches, venvs and all first evidence are retained. Main/tag/deploy,
+Engine startup/pulls and human acceptance were not performed. Token usage, cost
+and savings are **UNKNOWN**. Only the original I may subsequently merge these
+exact B/Q sources and perform the applicable cumulative integration gate.
