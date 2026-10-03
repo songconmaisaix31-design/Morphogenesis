@@ -1,5 +1,17 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## 19:35 最终产品离线工程验收接纳
+
+实际受测SOURCE固定为核心 b480fca1b10a0b6a9c93f0d1801d38f267662461 / 产品 2b9bf73c93e732771ed3582f3bc7745ea8158b68，P docsREPORT c8d4197bac272cdf5f634bc7a56c87db19bfbebb不作SOURCE。唯一I docs-only REPORT a67c0af1e27bea08a8e2ce426337f0608e62f216已普通push；主控独立核对remote精确/clean/diffcheck、C1e/root96祖先、最后提交仅own报告77行及全部非docs零差异，接纳本阶段。
+
+主控实际读原命令raw：首次完整产品256PASS/423.71s（subprocess428.762s/exit0），适用原mypy30PASS/whole36原10errors6files exit1，十项按文件/行映射/消息/类别/原表达式匹配新增0；原frontend构建3909modules/14.91s且3static原Git字节一致，原fixture UI126PASS8SKIP，installed input2/session2/support2/refute2均首原浏览器PASS、串行workers1/retries0。private C:/r1i/final-product-1855/FINAL_REPORT.md及logs保留完整命令/首次输出/HTTP/取证。新COPY Git720core/161product、installed136corePy/36productPy/53resources、nlink1/精确core VCS及产品wheel origin、锁97包和含4私有mypy工具101包check兼容，setup-assets/doctor通过。不得称全包strict、科学或性能最优通过。
+
+额外私有审计/类型重复消息/GET observed_at等值/unknown窗口complete断言及finalGit helper远端96→1af变化首错误均保留；未修改原测试或业务/重跑全套与原浏览器。主控独立确认r1_sessions.py:193实时观察时间与:399窗口完整度；F ResearchSessions.jsx:100–112不由complete推原生完成/停止follow。原未知state/activity/provenance未改；原完整DTO差异0、既有文件/SQLite未变。investigator与critic实际context GET明确当前局部视图、历史prompt/当时input UNKNOWN；support/refute既有持久记录全同。所有自有观察服务器cleanup0，强制serve exit1如实保留。无main/tag/deploy。
+
+I当前阶段worker_done成功并release retained/external/processActionnone；根1af是稍后B文档决策，仅PLAN/STATUS各一行，与I已合96身份分开不伪称合入。B只更新最终AT07准备包（原旧锁8558→实际87B，SOURCE b480/product2b/installed路径）；当前DockerLinuxpipe不存在/进程0，实际Engine/daemon及live HostConfig/profile未核实。docker_read默认CLI与受信export endpoint需实际同daemon证据，否则SDKcreate前停止。B docs不冒充真实隔离授权/探针。
+
+本阶段仅contract_local/mock与实际installed接口。task_live/真实AT07/L2/人工理解NOT_RUN、费用/Token节省UNKNOWN；P15 AOCI和I跨树freshness仍NOT_VERIFIED，C11有限注册隔离/3deps保留不称全恢复。下一独立真实隔离仍按用户“再单独授权AT-07”顺序，全部实际通过才一次L2，不借科研试隔离，不加入L3/新学科/品牌/语言/评分框架。
+
 ## 19:10 清理验收与最终产品组合冻结
 
 用户新清理权限下，主控关闭6个已有明确归属的idle/失败terminal，各close回执ptyKilled=true；未关root/唯一I/P/C和无关用户终端，未删源码/历史。4个旧失联资源release_unknown、processActionnone保持未知，不重复清理或声称已死。
