@@ -1,5 +1,17 @@
 # Research Swarm Alpha R1 一页开发计划（2026-10-03）
 
+## 当前接续入口（17:56）
+
+后面按日期保留的段落是历史观察；本入口与更晚的实际回执决定当前状态，不能把历史PASS或旧顺序当当前组合验收。先读本入口；详细原日志/失败见 R1_ACCEPTANCE 与各原Owner报告，按需定位，不全量重复读取。
+
+- 当前唯一I：task_5f75f854b26e / ctx_eceee077723b；核心 SOURCE b480fca1b10a0b6a9c93f0d1801d38f267662461 已push；原完整CI37114395256正在运行，尚非PASS。首失败SOURCE3a6 / CI37113441786（Linux1742PASS/2FAIL/16SKIP，WindowsCANCELLED）及REPORTab39保留。
+- Q修复：SOURCEacb26f4af3535ff6b4136dcb5ef0f7fde526e2a3 / docs-only REPORT49c0b3ad49f9fa1b5ad7b493ec05187e5b148503已验收，Windows相关2PASS/0.45s；Linux待I上述CI。额外Q自动CI37114202636确认cancelled，不计通过；原Q已idle。
+- P：SOURCE67721aaa815e706c51e0f80a1d15ab71e34b6880 / corepinCEA，受保护树冻结；缺 C:/research-private/p-aoci-transition-approval.json。本人终端脚本/审核为 C:/research-private/p-aoci-approve.ps1 与 p-aoci-transition-review.md；Agent不得代填、重置或改保护报告。收到真实receipt后恢复原P官方apply/AOCI→普通merge F REPORTc08566edc492e92adfc4e24a9e8de1c18b859e02→最终核心pin/必要维护→同I唯一完整产品新COPY回归与installed观察。私有短Handoff C:/research-private/p-final-combination-handoff-1738.md，不是授权。
+- AOCI核心正式10Entry已在A本轨通过；I复制索引仍A绝对路径，仅10源Git字节一致，I重新绑定NOT_VERIFIED、实际Token节省UNKNOWN。沿用官方工具/原Owner，不另造索引或调度系统。
+- 角色/write_paths仍为原长期所有权，root只治理，领域缺陷退原Owner。Codex GPT-6.1-Sol；OpenCode在10月3日18:00前禁用，之后如有实际任务才按DeepSeek V4 Pro使用，不为等门增加空Worker。
+- 完整产品最终回归NOT_RUN；其后单独授权AT07无害真实隔离、实际全部通过后一次明确授权L2（Spec原Poisson题审查稿在本文后部）。不加入L3/规模效率/多用户/跨宿主/完整RSI，不启动Docker/WSL或科学候选；main/tag/部署未执行，MVP未收口。
+
+
 ## 16:45 当前收口与下一步
 
 A SOURCE8dd85c1f88698cd8a22d72b5575e45e9431c0ce0 / REPORTd8af82791fecde1f3dadfbf9190d4cbfada80146 和Q SOURCE88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0 / REPORT6ce5a23ea256affdf9fe8a71bbaabb66695f3631 已精确验收/push/clean。A索引仅当前worktree十源，I不能未经官方Guide/重新绑定观察宣称新checkout索引fresh；真实delta仍退原A，禁止手写迁移/证明框架。P API67721aaa815e706c51e0f80a1d15ab71e34b6880 和F UI7bf17d195859a18960ee1ef933a920a286f73e61 保留阶段验收，不能替代新最终组合。
