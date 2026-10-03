@@ -1,6 +1,6 @@
 # R1 当前指令（2026-10-03）
 
-用户授权按 docs/source/Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md 开发；与旧开发包矛盾时以它为准。当前 write_paths 和长期所有者见 docs/R1_PLAN.md，覆盖旧 docs/PLAN.md 的历史派工。历史冻结不改，使用新后继候选；动态 Python 研究为首版必需。主控仅治理，Orca Worker 负责业务与返修，独立 I 最后集成。无运行级付费/外发/新沙箱授权，不进行 L2。
+用户授权按 docs/source/Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md 开发；与旧开发包矛盾时以它为准。当前 write_paths 和长期所有者见 docs/R1_PLAN.md，覆盖旧 docs/PLAN.md 的历史派工。历史冻结不改，使用新后继候选；动态 Python 研究为首版必需。主控仅治理，原 Orca/Codex YOLO Worker 负责业务与返修，独立 I 最后集成。MVP 追加官方 AOCI 开发上下文、Codex GUI 参考布局与节点会话只读终端；核心 AOCI 由 A、产品 AOCI/会话投影由 P、UI 由 F。真实 AT-07 在最终离线回归后单独授权，通过后才按批准的问题/材料/资源范围执行一次 L2；本阶段不启动真实沙箱/科研。L3、多用户、跨宿主、完整 RSI 不加入本轮。
 
 # Morphogenesis 执行约定
 
