@@ -250,3 +250,16 @@ I 只读产品血缘证明 P SOURCE67721aaa815e706c51e0f80a1d15ab71e34b6880是 F
 P 人类 receipt仍缺，root实际核对 preview文件SHA256 EEF89CAF0063AA472E4975213C48054F14509BA9A82DA489FE3FE99157590ED3。其 source_guard还包含已有 docs/tracks/r1-product.md等文件，不能以“仅补报告”改掉保护输入。私有控制交接 C:/research-private/p-final-combination-handoff-1738.md 保存最小上下文；不作为审批或完成证明。原P Task保持blocked，无空轮询进程。人工操作脚本/审核链接及其真实TTY门保持原要求。
 
 L2按Spec§14.2准备Poisson题与原论文版本链接，仅问题/材料审查稿，运行授权/容差/预算未填已批准值；未安装科学依赖、生成/执行研究候选或预置后续分支。唯一最终产品离线回归、AT07真实隔离及其单独授权、L2实际科研、人工理解仍NOT_RUN，不能称MVP收口。OpenCode18:00前仍暂停，main/tag/部署未执行；实际Token节省未知。
+
+
+## 17:45 核心首 CI RED 已交原 Q 返修
+
+精确 SOURCE3a6a7e5fecd5bbead9d234fa22ae0735bed19beb / CI37113441786 attempt1 已实际结束。Linux 原 python -m pytest -q 为 **2 FAIL / 1742 PASS / 16 SKIP / 75 warnings / 540.91s**，exit1；Windows 被原矩阵 fail-fast **CANCELLED**，未完成 pytest，不能称PASS/FAIL。两端 strict/build/SDK/wheel 后续门未执行，原日志 C:/r1i/i1003-core-1732/logs/ci-original-first.log 和 ci-final-first.json 保留。前段“CI进行中”为历史观察，不是最终成绩。
+
+两 RED 均为原 Q 的 test_b_frozen_export_boundary.py:123：official_local_transport_constructs_without_environment_or_engine_connection 的Unix和npipe两参数，都先无条件导入 NpipeHTTPAdapter；Linux docker7.2.0 transport不导出Windows Npipe类，Unix亦在调用原_transport前失败。当前已定位为测试平台假设，不构成已证明的B生产缺陷。主控/I均未改原Q断言、B业务或依赖，也未重跑原CI。
+
+恢复原 Q 终端 term_ddb2851c-759f-491a-bb9f-51f39732d6d0、同 worktree/branch，子Task task_7517d7a2997a / ctx_246835450dd3；worker-start实际 ready/input_accepted/turn_started。只归属Q该测试的平台进口与正确平台断言、原报告/首失败证据。Linux真实Unix/Windows真实npipe构造、trust_env=false/authNone/受信endpoint/无Engine连接的边界必须保留；Linux不得假造npipe成功或blanket skip整个测试。针对性实际平台验证即可，旧65/293等不因该阻塞重复运行。新源码推送/独立验收后同I普通merge、固定后继SOURCE并触发一次新的原CI；原3a6/首RED保留，不原地改成全绿。
+
+L2公开资料准备增量：已仅在私有 C:/research-private/l2-materials/1907.04502v2.pdf 保存原 arXivv2 PDF，1118278字节、21页、SHA256 d17f9bf6b8f346baaa52b6ec81223c53dd3da6899324114c72c7e8c3432d9368。用既有私有环境pypdf只读核对PDF与标题作者，不安装包。页4–5为边界/方法背景，页10§2.8为RAR方法背景；输入建议只指定这些背景位置，原完整文件供来源回链，不附论文中的完整实例程序/注册候选。正文不复制入仓库。正式产品材料导入/科学调用/候选代码/实跑仍NOT_RUN；科学问题和容差/预算仍待以后明确授权。
+
+P receipt仍缺，其受保护全路径保持原样，最终产品pin/唯一完整产品离线回归尚未执行；AT07、L2及人工理解仍未验收，MVP未收口。OpenCode18:00前保持停止；其他全局环境/main/tag/部署边界不变。
