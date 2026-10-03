@@ -1,54 +1,52 @@
-# R1 MVP 当前一页执行计划（2026-10-03 22:40）
+# R1 MVP 当前一页执行计划（2026-10-03 23:15）
 
-业务事实源：用户Spec v1.0_2026-10-02（Downloads原件SHA AB73F60E26AF1BC1B44CA5DA9B94B2CFDDA91A5D4ACB25683B9386462DCFB165）与当前用户收窄指令优先。目标：三项Spec行为证据 → 固定离线组合 → 独立真实AT07 → 一次L2开放切片。当前没有完整MVP/R1/task_live成功声明。只用原Python/LangGraph/Pydantic/SQLModel/SQLite/httpx/MCP/GEP/ECharts技术栈和既有TaskLedger/registry/归档链，不造调度/Attempt/Manifest/proof框架。
+业务事实源：Downloads Spec v1.0_2026-10-02（SHA AB73F60E26AF1BC1B44CA5DA9B94B2CFDDA91A5D4ACB25683B9386462DCFB165）与用户当前收窄指令。顺序：三项Spec行为 → 固定组合完整offline → 专用无害真实AT07 → 一次L2开放切片。没有完整MVP/R1/task_live成功声明。沿用既有Python/LangGraph/Pydantic/SQLModel/SQLite/httpx/MCP/GEP/ECharts、TaskLedger/registry/归档/采用链，不造重复模块或调度、Attempt、Manifest、Hash、证明框架。
 
-当前固定组合已由root实际接纳：core SOURCE `82201af4d3b369da827f6f22ff1d9c6b608c0108` + product SOURCE `d5d387a6f5c1778dffdd860986843826420edf5e`，原CI `37129204576` attempt1该head正在运行，唯一I新 `C:/r1i/successor-2220/` installed/完整产品门正在接续，尚无新绿声明。原工程与首失败保持。镜像已在独立180s准备中只pull一次/50.8656108s/exit0，本地原RepoDigest/linuxamd64已核，B docs REPORT `ee7e6cce730b9a63312f653f3d120882d9b31be2`。Windows实际SID1005/IsAdminfalse；Q guarded script E2C23FF1A0CE3C84F80E02A101A1DDB235595A623F87C1CAE1F3066ACA51911F已root全文审阅，尚未执行/UAC/FW修改，已请用户选择如何完成Windows本人UAC；等待此OS交互不影响离线门。
+## 固定组合与实际验收
 
-## 当前轨道和互斥所有权
+- core生产SOURCE：`82201af4d3b369da827f6f22ff1d9c6b608c0108`；product生产SOURCE：`d5d387a6f5c1778dffdd860986843826420edf5e`。新增test-only SOURCE：`c0dd0b9a9071f72d67f690bfe084cd60f30b13f4`；P REPORT：`cbaf3dc8411575ec16f52121bf7e8351d887b54c`。REPORT不替代SOURCE，不为文档重pin。
+- 原CI37129204576 attempt1/head822全部成功：Windows1839PASS/15SKIP/1445.58s，Linux1838PASS/16SKIP/492.89s；两侧strict140、构建、SDK1.14、wheel/installed资源通过。
+- I独立非editable `C:/r1i/successor-2220/`：受影响原三文件132PASS，适用types30PASS；整包原10errors/6files/新0保留。唯一完整产品首轮254PASS/2FAIL/517.11s，原并发全409与50ms fixture renew LeaseLost首失败原样保留。
+- P仅两个测试fixture initialclaim改600；原renew50ms/真实sleep60ms/active600和73assert AST不变，生产与pin/98锁零delta。首私有instrument 7PASS仅diagnostic；正式原Gitbytes独立Pprefix七个适用目标7PASS/27.14s。
+- I另一个真实独立短prefix `C:/r1i/i2220r/`：原两失败node首次1PASS/1FAIL/22.31s。新失败是实际BridgeError、author available/token0/no claim/renew；旧stderr/code MISSING，不假写成旧LeaseLost。该prefix遗漏原正式setup-assets，SDK/ajv等依赖确实不存在。
+- I复用原正式 `morph-research setup-assets` 一次：exit0/5.428s，原锁7npm依赖/SDK1.14、manifestexact、原bridge/product字节mtime未改，自带仅本地canonicalize/validate smoke、models/experiments/Hubfalse。然后仅尚失败原并发node一次1PASS/7.68s。已绿budget、完整产品、CI/132/types/UI未重跑；不宣称whole256重跑绿。root已直接读raw接纳。
 
-| 轨 | 原树 / 分支尾名 | 当前身份与唯一write_paths | 本轮交付 |
-|---|---|---|---|
-| B 原领域Owner | morph-r1-experiments-1003 | 原term_4ffcdc70；API Task8ecc/ctx370及镜像task_a61e6e755ed8/ctx_8cbbdafbd94a已done。仅generated.py、tests/experiments/{test_at07,test_frozen_export,test_generated_configuration}.py与own两docs已交；下一准备阶段仅docs/experiments/at07-authorization.md、docs/tracks/r1-experiments.md、新B私有证据 | API SOURCE c3a905eaf79a869dffb5960da9c4afee1dc63c3e；docs REPORT08f2315dbc6a2396c4b55dd07a6d60f6fd115dfa。下一仅原固定egress补齐 |
-| Q 原独立审查Owner | morph-r1-boundaries-1003 | term_977c62ef，当前guarded准备task_1c2ec01e428a/ctx_8cb7185eb67f（原task90/ctx9d已done）；只docs/tracks/r1-boundaries.md与新Q私有证据 | 只读现有有效FW/NAT与API绑定、最小双栈端口packet；当前UNKNOWN/STOP |
-| I 唯一集成Owner | morph-r1-integration-1003 | 原会话01a10119-cd06-7f40-a9fc-f6e46af64e7f已resume至term_cc6a6c31；task_6d13ed8377e3/ctx34ec首agent_readiness timeout未注入保留，短只读恢复后sameTask retry-of→ctx_2b9faf05e09a actualready/working；只own docs/tracks/r1-integration.md、新C:/r1i/私有验收与必要少量导入/路由/类型/SDK胶水 | 普通合精确B SOURCE/REPORT与root治理，尽早发布唯一累计SOURCE；一次新SOURCE原CI，等精确P最终pin后一次新组合全产品offline与installed |
-| P 原产品Owner | research-r1-product-1003 | term_eee00a9d，repin task9b/ctxe8已DONE；当前task_c1cd37d395dc/ctx_d683c5c884de actualready/turnobserved；仅tests/test_research_api.py、tests/integration/{test_research_entry,science_fixture}.py、own docs/tracks/r1-product.md、新P私有RED证据；production先只读诊断Handoff | 新full首254PASS/2FAIL原raw保留；原P核并发全409与fixture renew LeaseLost具体首输入/响应/时点，不猜原因；原assert/真实TTL/unknown预算边界不弱化，不whole重复 |
-| C 原报告轨 OpenCode | morph-r1-policy-1003 | term_3a2bb576，原deepseek/deepseek-v4-pro --auto；仅docs/tracks/r1-policy.md与新C私有current-L2差异证据；原C用户协调会话保持只读，无业务双写 | 在现有B L2草稿基础上只核当前822+d5调用/授权输入缺项，先Handoff，不造模块/候选/新指南，不执行科学 |
-| 主控 | morph-r1-control-1003 / research-r1-control-1003 | 仅计划/状态/决策/验收；不写业务代码。C用户协调会话只读跟进 | 分配原Owner、验收原始结果、保护历史和边界 |
+三项Spec行为已有原Owner调用和针对性证据：正证据影响路线选择、正式envelope跨片段接续、相关性选择在ResearchService.research_context，产品仅转发；不重复造模块。前端原只读节点右击/键盘、2s输出轮询/上下文已交，complete仅窗口读完；历史UI126PASS/8SKIP/build与installed观察按生产零delta范围沿用，真实人工理解未验。AOCI官方portable配置已交，15语义entries/维护未验证、实际Token费用节省UNKNOWN；不另立业务收口门。
 
-22:42 root已针对C当前会话原role=user第4768/4801行核实新指令：允许OpenCode恢复/不要重复造轮子。原C报告路径本轮明确交上述OpenCode，原C用户协调会话只读。官方CLI模型列表匹配原deepseek/deepseek-v4-pro，Orca受控terminal已创建、tui-idle=true；实际模型请求/余额结果尚未观察。一次请求失败或未知不换provider/自动重试，原Insufficient Balance历史保留。新唯一full-product-first出现F，原run继续保存，具体node/cause/统计未出，工程不得报全绿；随后具体失败只退原Owner。
+## 轨道与互斥所有权
 
-分支均songconmaisaix31-design/<尾名>；仅上述原树，跨轨只Handoff。Codex GPT-6.1-Sol high YOLO；C转达新用户允许OpenCode恢复，实际提交证据正在核实。只读CLI1.18.34/models有deepseek/deepseek-v4-pro，不代表余额或模型请求通过；原Insufficient Balance保留，不改provider/auth/HOME。仅实际互斥缺项可开一条报告轨，不重复已实现模块与已绿门。普通merge/push，不cherry-pick/force/覆盖贡献；领域退原Owner。避免新增idle Agent、全局pip/auth/HOME/provider或大范围进程/文件清理。
+所有分支前缀 `songconmaisaix31-design/`。主控只改治理文档、状态、决策、验收；Worker读全仓、仅自己write_paths，跨轨只Handoff；I普通exact merge，领域退原Owner。
 
-22:40阶段结算：P SOURCE d5d387a6f5c1778dffdd860986843826420edf5e / docs REPORT 0e936ceee4ff1e8aca1d2c8d3f0a77ae753e3639；Q guarded docs REPORT 1fb5f3dc6e4d9eb60a2df4be22819c97bd01d91c；两Dispatch已settled/release为external retained，无进程关闭。两REPORT仅各自docs差异，root实际核对。I新installed affected三个既有测试文件一次132PASS/1warning；Linux原CI1838PASS/16SKIP/strict140/build/SDK/wheel通过，Windows原job与唯一完整产品回归仍运行，不写全组合绿。原B新Task task_92e62142bbfc / ctx_78a8eebd6960 actualready/turnobserved，仅own两docs+新私有pre-SDK packet，补最多5累计容器内server_proxy控制路径及822+d5/API1.54当前可执行顺序；不SDK/create/改FW/key/科学，不实施猜测NAT放宽，真实缺证据STOP。当前UAC问题仍待本人回答。
+| 原Owner / Worktree | 当前任务与write_paths | 交付和下一动作 |
+|---|---|---|
+| I / morph-r1-integration-1003 | task_6d13ed8377e3 / ctx_2b9faf05e09a / term_cc6a6c31；own docs/tracks/r1-integration.md、新C:/r1i/私有验收，仅必要集成胶水 | 离线结果已出；精确合Q/B/C/root治理后docs-only最终REPORT/skip-ci/push，不改822或重验旧绿 |
+| P / research-r1-product-1003 | 原task_c1/ctx_d683已done/release；同原会话resume term_9199b958，只读warmup、没有新Task和写权限 | c0dd/cbaf已pushclean；为I新RED恢复原Owner，已定位为I安装漏前提，无需新领域返修；确认后精确关闭idle |
+| B / morph-r1-experiments-1003 | 原API/镜像/packet三个Task均done/release；原term_4ff已关闭，同session01a10188可恢复；下一仅own at07-authorization/r1-experiments docs与新B私有 | API c3a→822；镜像ee7、preSDK6ea已push；只在实际必要时恢复原Owner完成具体最小AT07后继，不新增模块 |
+| Q / morph-r1-boundaries-1003 | task_6735e8f955e0 / ctx_7b3806335d93已done/release；仅own r1-boundaries docs及新Q私有 | docs REPORT739efdd10f538099039f2cdf335567802eac7f5a已root读/clean接纳，静态准备完成；实际独立隔离PASS仍NOT_RUN |
+| C OpenCode / morph-r1-policy-1003 | 原DeepSeek V4 Pro/auto短报告与纠正两个Taskdone/release，term_3a2关闭；原用户协调term_57e保持只读 | docs REPORT61101810cb3e2425347bb1d3e38cb34759ddaf09；当前L2已有实现静态核清，无生产缺口；开发模型实际用过、费用UI未核，不写科学已运行 |
+| 主控 / 两control-1003 | 仅docs/R1_PLAN、STATUS、ACCEPTANCE及决策 | 接纳原raw/远端SHA/clean；不写业务、不清无归属进程/文件、不关闭用户会话 |
 
-## 已有工程基线与新差异
+Codex固定GPT-6.1-Sol high YOLO。用户14:31:51实际role=user已明确恢复OpenCode，14:33:03要求不要重复造轮子；DeepSeek原模型deepseek/deepseek-v4-pro，原Insufficient Balance历史保留。仅互斥必要工作开Agent；无全局pip/auth/HOME/provider变动。已settled/idle的自有终端可精确关闭，release不等于杀进程。旧Q exec19099已知owned PID历史stop exit0、当前PID不存在，但exec本身空poll无exit_code，不能写全部后台清理完成。
 
-原离线接受业务core15de4959646df264530b978dfde9152552b9a76b + productc84e49bd8e926f50d2c057793e8789cf137b310a；TESTSOURCE756d5069e7739089f0e5ba1c33eebfb2657b03f0，I REPORTc5cdfc89e5a1e43ab49f9afc33a05a53d887e8ab，P REPORTeca3fd48c33fc602f1ddb3f45d91bd88e17b941b。原CI37123370202 attempt1：Win1825/15skip、Linux1824/16skip、strict140/build/SDK1.14/wheel通过；原全产品255PASS/1FAIL保留，test-only修后P及I各仅单nodePASS，不写whole256green。适用types30PASS、整包10原errors保留。UI126/8skip只按原范围沿用，人工未验。
+## AT07 当前实况与后继边界
 
-B新差异：generated.py仅Literal1.52/1.54且默认1.52；三既有测试正负控制，旧98assert及at07_live/frozen_export/registry/锁/profile/compose原blob未变。B首6FAIL/29PASS/97deselected、修后131PASS/1FAIL（新mock漏provenance）、修该项1PASS、strict1source分别保留；不冒称132全重跑。I新累计SOURCE/pin/installed/全产品/原双平台CI尚待实际结果，旧SOURCE绿门不rerun。新组合生产UI零delta可沿用，但新installed原bytes/import/direct_url/锁与受影响API调用必须核实。新fixture/env/cache独立，第一失败/原报告不可改写。
+用户真实“我现在批准AT-07，继续开发”已核实接纳；不重问同一专项权限。原600s窗口13:29:15–13:39:15Z封存：Desktop一次Hidden启动，首Composeexit125/stderr内容MISSING，创建前STOP；SDKcreate0/infra0/registry0，不reset/replay原窗口。只读定位后原Compose5.1.4可用（child仅额外ProgramFiles locator），LinuxEngine29.5.3/API1.54，explicit1.54已由新SOURCE闭合，默认1.52仍保留。
 
-三项已定位行为已有原Owner调用/测试证据：正证据路线作用、正式envelope跨片段接续、局部相关性在ResearchService.research_context完成；不重复造模块。只读Agent节点会话右击/键盘、输出轮询和当前上下文已实现，complete仅输出窗口读完。AOCI官方portable配置已交；15语义entries/维护与实际Token费用节省NOT_VERIFIED/UNKNOWN，非新增MVP业务门。
+四固定镜像原digest：server68ca、execd6cf7、python229a已存在；原egressdb7345在独立180s准备只pull一次/50.8656108s/exit0、RepoDigest/linuxamd64已核，未创容器卷网/SDK。该pull不是旧窗口复活或隔离PASS。
 
-## 当前运行事实与必要准备
+B REPORT6ea的最小控制只复用原server/target：追加server0.0.0.0:47410:8090/TCP与target0.0.0.0:47410:9053/UDP，原loopback映射保留。实际Q边界有效前不得发布；原固定stdlib健康/DNScontrol经同server fullID、官方typed argv进行。完整/sandboxes/{actualID}/proxy在唯一无害SDKcreate之后验，不建立SDK前先验证不存在sandbox的循环门。
 
-用户直接“我现在批准AT-07，继续开发”由root读C实际提交stream核实，原专项批准已接纳，不再重复问同一权限。原600s尝试UTC13:29:15–13:39:15已封存：Desktop一次Hidden启动；首Composeexit125/stderr内容MISSING；创建前STOP，SDKcreate0/infra0/registry0/其他项目启动影响NOT_ASSESSED。不reset/replay该尝试。
+Q守护operator `C:/research-private/q-at07-admin-ctx8cb7185-20261003/at07-firewall-operator.ps1` SHA E2C23FF1A0CE3C84F80E02A101A1DDB235595A623F87C1CAE1F3066ACA51911F已全文审阅，仅Backend/Inbound/TCP+UDP/47400..47410/双栈非loopback两精确规则及原回执精确cleanup；所有mode NOT_RUN。实际Windows SID1005/nonadmin；用户本人UAC方式问题仍待回答，当前无RunAs、FW/logging/hostlisten修改。全开发权限不会自动改变Windows token；这是OS交互，不是AT07重新审批。
 
-独立只读诊断：Compose5.1.4（仅加固定ProgramFiles locator）；LinuxEngine29.5.3/API1.54/min1.40/daemon6cc73c96-c021-4a82-ade6-2fc9ae693fff。固定server68ca/execd6cf7/python229a存在，egress原db7345缺失；公开OCI index/amd64manifest摘要一致，压缩layers+config132032785bytes，解压磁盘/增量UNKNOWN。
+Q REPORT739独立只读核：两拟规则Persistent/Active均不存在，现有Backend宽ALLOW，三profile日志disabled；健康/DNS阳性不能代外部拒绝。NAT实际source/包经过哪些filter与非loopback拒绝证据UNKNOWN/STOP，不猜私网/gateway放宽，不把static/config称隔离PASS；不加跨宿主门。若需最小观察办法，先由原Owner给具体受控packet，主控审阅后决定，不盲目重试原script/SDK。
 
-**主控现在明确授权单独镜像准备，基于用户授予的全开发权限与已审阅B08f packet：** 只原官方绝对DockerCLI、同npipe、全新核identity空ownedconfig、typed argv/shellFalse、仅三system childenv，一次image pull --platform linux/amd64 原opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5，独立180s cap；先fresh同Engine/CLI/disk资源只读，缺必要条件STOP。完整exit/时点/secret-free原stdout-stderr分档，timeout/断连效果UNKNOWN不第二pull/重试，不prune/shared层清理/切源/tag/build/升级/auth代理修改/Desktop重启。只读核实际RepoDigest/linuxamd64；只同identity且仍空的ownedconfig精确rmdir。该准备不创建容器卷网/SDK、不是恢复旧probe窗口或科学执行。
+后继独立600s、累计最多5容器（含瞬态cache）/1owned卷/0新network/一次无害SDKcreate；同固定limits、SDKpause→Engine只读HEAD/GET→SDKresume。进入SDK须余量>=420s；240s循环不是完整runner硬保证，实际绝对停止与IO/finish/cleanup均计时。删重建不能重置计数。实际same fullIDs、HostConfig/ports/profile/锁、cache归属/消失、所有拒绝与cleanup必须有raw；UNKNOWN无第二POST/重复probe/猜归属清理。全部PASS+Q实际独立复核+已知收尾+完整配置接纳后才注册verified probe并准入科学候选。
 
-Q现状：Backend宽ALLOW的实际用户SID1005与既有Codex BLOCK1007不同；声明旧server源码没有publish_host，固定镜像Labelsnull/revision UNKNOWN。当前动态0.0.0.0:47400..47410有效边界未证。只准备仅backend+InboundTCP/UDP+该range+双栈nonloopback补集BLOCK；拟允许127/8与::1，不猜gateway/privateCIDR/NAT源，不实际改FW/hostlistener/globaldaemon。原Q必须交exactruleIDs/apply有效核对/权限/未知与回收packet，静态方案不得称真实隔离PASS。服务proxy需要未批准源即STOP，不自动放宽。
+## 收口顺序与限制
 
-22:45实况：唯一新组合完整offline自然结束为254PASS/2FAIL/517.11s，childexit1/outer520.539。原日志与先前partial均保留，失败是原P并发single-native期望[200,409,409]实际全409，以及unknown预算测试在原50ms fixture renew时LeaseLost，原因仍须具体原证据证明；原P上述有效Dispatch最小返修，I仅独立验失败节点与最终installed原输入，不重跑254绿门。适用types30PASS、whole原10errors/new0；Linux与installed132实际PASS，Windows原CI仍运行，当前工程不全绿。原C OpenCode task_25c8bcfa74e4/ctx_6027d5a27c18 actual工具调用已观察，deepseek/deepseek-v4-pro/auto；首head不存在/跨仓对象查找错误保留，当前报告静态不等于L2。
+1. 当前离线组合按原完整回归及分列适用补验收口，I ordinary docs-only最终REPORT；无新的完整回归/CI/pin重跑要求。
+2. 继续具体AT07前置：本人OS UAC与真实动态端口有效边界尚未完成，不从准备文档宣称PASS。同ID停止保留仅全部真实PASS与Q核准后按原packet，删重建或host规则变化不继承。
+3. 真实AT07全通过后执行用户已要求的一次L2：给原Poisson问题和原1907.04502v2材料，不给候选答案；经既有host/criteria/budget/native/registry配置形成新分支、代码、实验、独立复核、证据后续行动及至少一次真实使用。当前实际模型科学/native、sandbox候选、L2/adoption均NOT_RUN；L2执行授权为条件性用户目标，不能误称AT07权限未批。
+4. 不加L3、大规模效率、多用户、跨宿主、完整RSI、新学科/品牌/语言/评分。性能照实记录，不将未经承诺最优成绩变收口条件；人工理解可配真实页面。main/tag/deploy未执行。
 
-22:59进展：core822原CI37129204576 attempt1已全部成功：Win1839PASS/15SKIP/1445.58s，Linux1838PASS/16SKIP/492.89s，双侧strict140/build/SDK1.14/wheel13资源/installedverifier/node通过。P TESTSOURCE c0dd0b9a9071f72d67f690bfe084cd60f30b13f4仅tests/test_research_api.py及root精确追加tests/integration/science_boundary.py两initialclaim600，原renew50ms/真实sleep60ms/active600与73assert AST不变，src/822pin/98lock零delta，root已直接diff接纳；原两RED仍保留。P先已启动私有instrument诊断7PASS仅diagnostic，不正式接纳；正式原Gitbytes新Pprefix与I独立新短prefixC:/r1i/i2220r/验收准备中，旧I2220原env/cache/fixtures/raw不得写。原C OpenCode短报告与事实纠正docs REPORT61101810cb3e2425347bb1d3e38cb34759ddaf09仅own doc已接纳；开发模型实际用过，CLI显示不代表真实费用，科学未运行。该两Dispatch已release/externalretained后root精确terminalclose ptyKilledtrue，用户C协调会话未关。B final preSDK docsREPORT6ea5e5dd81bdf53e33f46beed74f7382a804efaf准备完成/release；Q只读独立复核后继启动正在等待实际receipt，不推成已执行。两0.0.0.0:47410/TCP server8090与UDP target9053追加mapping只是待接纳proposal，有效Q规则前不可发布；原5累计容器/1卷/0network/600s保持，完整SDK proxy在专用无害AT07唯一create之后验，无科学候选。用户本人UAC方式仍待答，无FW修改/真实SDK/真实AT07或L2。
-
-## 下一验收顺序
-
-1. 原I普通精确合入 → root接受完整累计SOURCE → 原P仅repin → 原I新私有noneditable固定组合一次完整产品offline、必要类型/affectedinstalled + 一次该新SOURCE原CI/buildSDKwheel；新RED退原Owner，旧绿不为blocker重跑。
-2. 镜像准备与Q具体端口方案可并行；真实AT07仍待新工程与有效前提核验。原egress已本地核身份，Q guarded管理员脚本待用户本人UAC、服务proxy与外部范围仍UNKNOWN，不能从静态或rule存在直接PASS。每项变动/实际授权范围另记录，不默默继承原结束窗口，不以风险接受代PASS。
-3. 一次专用无害真实AT07沿原SDK pause→只读EngineHEAD/GET→SDKresume，原5容器/1卷/0新network/一次SDKcreate/600s和fixed512MiB/128pids/30s/180s/1MiB范围。unknown不replay/第二POST；全部PASS与Q独立raw审阅、归属/cleanup/fullconfig接纳后才可注册probe与准入候选。仅条件已核的同64IDserver停止保留，删/重建/配置变化不继承。
-4. 然后一次L2：问题和原材料给Agent，不给完整候选代码；记录实际新分支/代码版本/实验/独立复核/证据后续行动与至少一次实际使用；负结论可以。现阶段L2/native付费/外发/真实候选未授权执行。L3/大规模对照/多用户/跨宿主/完整RSI/新学科品牌语言评分/main/tag/deploy均不加入。性能实测照实记录，不变最优成绩收口条件；人工可配真实页面。
-
-历史计划与所有首失败保持Git快照和STATUS/ACCEPTANCE/Owner原报告、私有raw，不再把全量历史塞进每次Worker读取：
-[完整计划历史冻结于ab663f6](https://github.com/songconmaisaix31-design/Morphogenesis/blob/ab663f6/docs/R1_PLAN.md)；[当前状态](R1_STATUS.md)；[验收记录](R1_ACCEPTANCE.md)。
+所有第一RED/STOP/UNKNOWN、旧完整255/1与修后single、原报告/私有raw保持；不将新的绿覆盖历史。历史完整计划见Git `09c52988390ba4eace08f2eb4e3592682c8b15a2`（core）/`8925f913f001f3e9118682fdf6648647f33e2ddc`（product），原[状态](R1_STATUS.md)和[验收](R1_ACCEPTANCE.md)保持。
