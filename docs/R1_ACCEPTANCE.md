@@ -1,5 +1,21 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## MVP 只读会话阶段与隔离准备接纳（13:05）
+
+以下是领域阶段验收，不是新最终组合完整回归；原首次失败、旧类型债和下方历史组合分别保留。开发工作会话已按用户选择切为 GPT-6.1 Sol，OpenCode 后续指定 DeepSeek V4 Pro。
+
+| 交付 | SOURCE / docs-only REPORT | 主控核对与实际结果 |
+|---|---|---|
+| P 只读会话 API | 67721aaa815e706c51e0f80a1d15ab71e34b6880；AOCI整体报告待人工确认后续交 | 真实来源记录→原权限/身份→GET会话/输出/current_local_view；无输入/启动/回放。原私库转发FR04选择，不另造上下文引擎。raw归档/COPY安装28 PASS/50.06s、适用30源types PASS、whole原10错误/6文件身份不变、100依赖兼容。 |
+| F 拓扑只读终端和上下文 | 7bf17d195859a18960ee1ef933a920a286f73e61 / c08566edc492e92adfc4e24a9e8de1c18b859e02 | Codex GUI参考，成员节点右键/键盘打开精确会话，GET轮询、晚响应隔离、窄屏首屏可见。运行包07df78b/core cea7923，后继7bf只改observer。build PASS，新18/旧14/布局2 PASS；实际installed会话2 PASS/6.4s、原输入2 PASS/6.7s。主控实际看桌面/窄屏截图；原observer首2 RED保留。 |
+| B 原生命周期上的冻结导出准备 | 5769005b09f1b756c94fdad0649a6b74690c0ca9 / 5aebd2eb7af774b3dc496ad9620548f6e7852e09 | 主控读实现/锁差异/报告并核对远端、clean、原始日志。官方OpenSandbox pause→官方Docker transport HEAD/GET→原SDKresume；无新执行器。定向110 PASS、experiments210 PASS、strict140 PASS、104依赖兼容。原strict首RED与旧Q三FAIL保留，Q后继ctx_a1965382b7ea独立复核中。 |
+
+F 已结算，B 已结算且保留原Owner返修；release均为retained/no_owned_resource/processAction none，不冒充终端已关闭。A受信HostConfig配置定向9 PASS/10.18s、strict2 PASS，仍在本轨完成核心AOCI。所有科研执行事实仍为mock；HTTP页面真实观察不等于真实科研或独立人类理解。
+
+B 的固定上游runtime volume实际RW；仅允许owned main/egress两者独占并冻结，导出树不允许挂载。单文件下载后恢复原sandbox，不宣称跨文件原子快照。Engine实际版本/ID及真实隔离均未观察，配置和离线通过不授予verified/admit。只有最终固定组合离线验收后才单独请求AT07授权。
+
+产品AOCI正式15语义条目仍未应用，等待真实人类TTY确认的精确preview；主控不会代输入、伪造receipt或重置baseline。核心索引在原A继续。Token节省未测量。I新任务尚未派发；一次最终完整产品离线回归、相关最终installed观察、AT07、L2仍待完成。
+
 ## 三项 Spec 行为的本轮定向验收（MVP 追加前置）
 
 本节登记新的领域证据；下方旧 core2c/product9e 的“最终固定组合”是上一阶段记录。本轮加入 AOCI 与只读节点会话 UI 后尚未冻结新最终组合，完整产品离线回归仍 NOT_RUN。
