@@ -388,3 +388,12 @@ P receipt仍缺，其受保护全路径保持原样，最终产品pin/唯一完�
 同一 I 普通merge该Q SOURCE与root9e1，无冲突、无I业务/测试修改。后继冻结核心 SOURCE **b480fca1b10a0b6a9c93f0d1801d38f267662461**，remote exact/clean；首失败3a6和首REDREPORTab39d122f25527e08d41f41b5353ba576f856ce7均保留为祖先。相对3a6，非docs只变化Q该测试与两小证据文件；swarm/orchestration/local_assets/pyproject/poetry.lock/CI/AOCI原字节均零差异。唯一后继 foundation push CI **37114395256 / attempt1 / headb480** 已启动，两平台实际门仍待结果；不rerun旧失败run。Q49后继报告只可docs-only普通merge并[skip ci]推送，不重定义testedSOURCE或再触发完整CI。
 
 P官方真人终端门仍未完成，已再次提供具体官方规则/审查稿/本人脚本和异步回执问题；不把聊天选项/时间经过视作官方receipt。原P树保护不改，原P AOCI/最终pin、一次完整产品离线与相关installed观察仍待。OpenCode18:00前停止；本轮没有新依赖/WSL/Docker/真实候选/科学调用/AT07/L2/main/tag/部署。MVP未收口。
+
+
+## 18:09 B 模型阻塞的同轨接续
+
+18:00后实际OpenCode1.18.34终端已确认 Build auto / DeepSeek V4 Pro DeepSeek，使用既有 deepseek/deepseek-v4-pro route，无全局model/provider/auth修改。任务task_202100600acb / ctx_b6a3d7cd9641只得到input_accepted，turn observation unsupported；首次请求实际返回 Insufficient Balance，request9165a37c-a4c8-48b7-94be-dcf826a113fa，未发生B工具/源码/docs写入，原HEAD5aeb/clean再次核对。私有原bounded screen C:/research-private/b-opencode-l2-first-error-1806.json保留；用量/费用UNKNOWN，不能由错误推0。
+
+为继续已授权的同一B离线文档工作，仅关闭本次自建term_390a93e5-ad96-493b-ac44-1877a98f37e0，close回执ptyKilled=true；其ctx随关闭已settled failed，后worker-abandon回执alreadySettled/stale/processActionnone，不伪称它清理进程。当前无opencode.exe；不充值、不重试同余额不足route、不尝试别的计费入口、不改全局账号。原B角色/worktree/branch/write_paths不变，后继Codex GPT-6.1-Sol high YOLO继续18:05的docs-only审查，保留OpenCode首阻塞。这是研发Agent接续，不是L2模型科研或真实运行权限。
+
+核心b480 CI Linux1744PASS/16SKIP/521.84s、strict140和build/SDK/wheel/distribution通过已由I和主控原日志核实；Windows仍在pytest，全组合未通过。P真实人类receipt仍缺，产品最终pin/唯一完整离线、AT07单独授权和L2未执行。当前入口的18:00前暂停条件已结束，但OpenCode实际余额阻塞未解除，不称恢复任务执行成功。

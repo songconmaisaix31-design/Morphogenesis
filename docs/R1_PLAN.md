@@ -162,3 +162,12 @@ AT07、真实候选、L2、人工理解仍未执行；OpenCode 至 2026-10-03 18
 B仅新增 docs/experiments/l2-poisson-review.md 与原 docs/tracks/r1-experiments.md短报告，排除业务源码/测试/锁/部署/AOCI/主控/P/F路径。按现行Spec§14.2/14.4和既有 generated.py/EvaluationCriteria/TrustedCriteriaRegistry/原消费采用调用链，准备问题、原论文v2的页码来源、独立网格与边界/参考检查的既有格式、合法负结论和实际使用路径、待运行授权参数。复用现有poisson_reference_v1/sin_pi_x，既有默认值只作未批准参考；不预置后续分支、不提供完整候选程序、不复制论文例程，不创建新判定/调度/证明系统。若发现真实功能缺口只Handoff，不因审查扩写领域模块。
 
 原材料私有PDF1118278字节/21页/SHAd17f9bf6...，页4–5/10方法背景已核对；正式产品导入与所有科学调用NOT_RUN。只静态阅读与可审查文档，不原生科研/候选执行，不启动Docker/WSL/services，不改变账号/全局环境，不重跑已绿专项/安装测试；提交push用[skip ci]，不影响冻结b480 SOURCE与正在运行37114395256。AT07只在最终产品离线验收后单独授权，实际通过后才讨论一次L2；P保护树和真实TTY门不变。金额/容差/模型额度/科学结果均不得填成已批准或已发生。
+
+
+## 18:09 B 模型阻塞的同轨接续
+
+18:00后实际OpenCode1.18.34终端已确认 Build auto / DeepSeek V4 Pro DeepSeek，使用既有 deepseek/deepseek-v4-pro route，无全局model/provider/auth修改。任务task_202100600acb / ctx_b6a3d7cd9641只得到input_accepted，turn observation unsupported；首次请求实际返回 Insufficient Balance，request9165a37c-a4c8-48b7-94be-dcf826a113fa，未发生B工具/源码/docs写入，原HEAD5aeb/clean再次核对。私有原bounded screen C:/research-private/b-opencode-l2-first-error-1806.json保留；用量/费用UNKNOWN，不能由错误推0。
+
+为继续已授权的同一B离线文档工作，仅关闭本次自建term_390a93e5-ad96-493b-ac44-1877a98f37e0，close回执ptyKilled=true；其ctx随关闭已settled failed，后worker-abandon回执alreadySettled/stale/processActionnone，不伪称它清理进程。当前无opencode.exe；不充值、不重试同余额不足route、不尝试别的计费入口、不改全局账号。原B角色/worktree/branch/write_paths不变，后继Codex GPT-6.1-Sol high YOLO继续18:05的docs-only审查，保留OpenCode首阻塞。这是研发Agent接续，不是L2模型科研或真实运行权限。
+
+核心b480 CI Linux1744PASS/16SKIP/521.84s、strict140和build/SDK/wheel/distribution通过已由I和主控原日志核实；Windows仍在pytest，全组合未通过。P真实人类receipt仍缺，产品最终pin/唯一完整离线、AT07单独授权和L2未执行。当前入口的18:00前暂停条件已结束，但OpenCode实际余额阻塞未解除，不称恢复任务执行成功。
