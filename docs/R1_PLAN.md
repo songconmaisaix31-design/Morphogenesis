@@ -1,5 +1,12 @@
 # Research Swarm Alpha R1 一页开发计划（2026-10-03）
 
+## 16:45 当前收口与下一步
+
+A SOURCE8dd85c1f88698cd8a22d72b5575e45e9431c0ce0 / REPORTd8af82791fecde1f3dadfbf9190d4cbfada80146 和Q SOURCE88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0 / REPORT6ce5a23ea256affdf9fe8a71bbaabb66695f3631 已精确验收/push/clean。A索引仅当前worktree十源，I不能未经官方Guide/重新绑定观察宣称新checkout索引fresh；真实delta仍退原A，禁止手写迁移/证明框架。P API67721aaa815e706c51e0f80a1d15ab71e34b6880 和F UI7bf17d195859a18960ee1ef933a920a286f73e61 保留阶段验收，不能替代新最终组合。
+
+P官方human TTY receipt目前仍缺，不能改其被preview保护的输入或代人approve；原Task blocked。已提供具体人工专用脚本 `C:/research-private/p-aoci-approve.ps1` 与审核 `p-aoci-transition-review.md`。之后固定顺序仍是原P索引交付 → 唯一I普通核心合并/最终SOURCE → 原P最终pin/必要索引维护 → I唯一完整产品离线回归及相关installed观察 → 另行授权真实AT07 → 隔离实际通过后一次授权L2。不提前再启动完整回归或I领域编辑，也不扩学科/品牌/语言/评分框架。OpenCode18:00前禁用，之后按用户模型DeepSeek V4 Pro；Codex继续GPT-6.1-Sol。
+
+
 ## 16:30 中断恢复与 OpenCode 暂停
 
 用户要求 OpenCode 暂停至 2026-10-03 18:00（北京时间）；已关闭本次 runtime 中唯一 OpenCode 终端，回执 ptyKilled=true，不删除源码或会话历史。18:00 后才可按用户指定 DeepSeek V4 Pro 使用，当前工程恢复仅用 Codex GPT-6.1-Sol。新恢复进程显式采用 high 推理档，以缩减原长上下文请求的恢复成本；旧 max 会话记录保留，不把模型切换算验收。
@@ -108,3 +115,16 @@ F UI 及 Q 边界现有文件归属保留，只有发现需修改其文件的具
 - Q / Codex YOLO / 核心 `morph-r1-boundaries-1003` / 同名分支：独占新增 `tests/integration/r1_security/**`, `docs/tracks/r1-boundaries.md`；黑盒独立验证A/B/C正式边界、跨项目/注入/伪造批准/未知/中断/额度不重置/宿主不执行。Q不能修改领域实现或原测试阈值，缺陷发原Owner修复。本轮不做真实沙箱探针或模型科研。
 
 新Codex进程用本次argv `codex --no-daemon --dangerously-bypass-approvals-and-sandbox`，不改全局配置；NO-DAEMON用于避开Codex0.160新共享daemon与Orca识别问题。若仍无法识别保留真实失败，不能用OpenCode冒充Codex。YOLO是研发进程执行权限，不赋予收费科学运行/资料外发/新云计算或沙箱授权。最终I仍待领域轨完成后派，合并所有者精确提交和独立安装验收。
+
+
+## 17:32 接续：先完成唯一 I 的核心阶段
+
+用户要求继续至 MVP 完成。A/B/C/Q 领域和独立边界已全部交付；P 的真实人类 TTY receipt 尚未出现。为推进独立工作，将同一唯一集成轨分为先核心、后产品两个连续阶段，不增加 Owner/worktree/branch，不重复完整产品回归。该顺序调整覆盖此前“全部 AOCI 完成才启动 I”的等待条件；真实隔离/L2 授权顺序不变。
+
+I 原 Owner 在 morph-r1-integration-1003 / songconmaisaix31-design/morph-r1-integration-1003 新建原已结算 Task 的子 Task，先普通 exact merge A REPORTd8af82791fecde1f3dadfbf9190d4cbfada80146（SOURCE8dd85c1f88698cd8a22d72b5575e45e9431c0ce0）、B REPORT5aebd2eb7af774b3dc496ad9620548f6e7852e09（SOURCE5769005b09f1b756c94fdad0649a6b74690c0ca9）、C REPORT52b8d26da04aec41ceb7e008445ef2f1dc088d53（SOURCEe82cae36038c386aec999642289ac1d78c82a9ed）、Q REPORT6ce5a23ea256affdf9fe8a71bbaabb66695f3631（SOURCE88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0）与主控治理。严格检查全部原 source 祖先，不 cherry-pick、force 或改 Owner 领域逻辑。只允许原 I 的少量导入/配置/类型/路由胶水与本轨报告；领域或 AOCI 语义问题退原 Owner。
+
+固定并 push 一个最终核心 SOURCE 后，使用原核心 CI 完整门（Windows/Linux pytest、strict、build/SDK/wheel）作为该精确源码一次验收；不重新跑已绿的 Owner 专项来刷数字。AOCI 路径目前绑定 A，I 可只读运行官方 Guide 记录当前状态；不得复制本机 receipt、手工改 baseline/路径或借此重置 P 人工门。涉及源变更/迁移交原 A 官方维护。不新建认知或证明系统。
+
+P 的 worktree/source/Header/config/README 输入继续冻结，主控/I 不改其任何文件，不运行人类脚本。收到并核验实际 receipt 后才恢复原 P 完成 AOCI，按最终核心 SOURCE repin，交付产品最终 SOURCE；F 的最终 UI 以原 Owner 精确普通 merge。随后同一个 I 执行一次全新非 editable COPY 完整产品离线回归、installed 输入/只读会话/支持反证 HTTP 页面，原失败不覆盖。产品私库最终合并位置先由 I 只读调查并 Handoff，总控安排原 Owner，不能新增第二个集成 Worker 或越权改 F/P。
+
+AT07、真实候选、L2、人工理解仍未执行；OpenCode 至 2026-10-03 18:00 前禁用。当前恢复 Codex GPT-6.1-Sol high YOLO；费用/Token 节省未知。最终 main/tag/部署不在授权内。

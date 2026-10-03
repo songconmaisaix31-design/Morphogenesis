@@ -1,5 +1,27 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## 有限核心 AOCI 交付接纳（16:45）
+
+A SOURCE `8dd85c1f88698cd8a22d72b5575e45e9431c0ce0` / 直接 docs-only REPORT `d8af82791fecde1f3dadfbf9190d4cbfada80146` 已普通推送。主控独立核对 remote=HEAD、clean、报告直接父子和SOURCE九项写入归属；与已验收配置aec86c9相比 swarm/orchestration/tests/pyproject/lock无变化，9PASS/strict2与Q65PASS不冒充本轮新运行，也未重跑。
+
+主控实际阅读10条手写Tag/F/R/A/S、官方Verify/Check/Guide原结果、两次完整Overview与终态attestation、两轮检索和来源绑定日志：普通scan13 fingerprint=10业务源+3支持资产；原子apply10/10、remaining=0。最终Check exit0/structure_valid=true/governance_aligned=true/findings=[]；Guide aligned/complete=true/next_action=none。两次Challenge10/10、实际delivery confirmed/model attestation pass；四项重复search返回同相关条目。唯一增量为官方单对象knowledge规模标签校准，业务F/R/A/S/source不变，不伪造源码漂移。
+
+先前初始化支持角色缺陷、完整归档/官方恢复、confirmation version首incomplete及Unicode/version读取错误均保留；没有重置P基线或代做人类审批。实际原生MCP已加载，而本机配置与运行receipt/ledger ignored。约2916 estimated tokens是索引大小估计，实际费用/Token节省UNKNOWN。仅覆盖当前A worktree十源；其它checkout/I组合重新绑定及真实source delta维护尚未观测，不能声称全仓或跨宿主fresh。AOCI不作为科研运行依赖或授权。
+
+A Task succeeded已接纳，release retained/no_owned_resource/processAction none。P官方legacy→auto仍缺真实TTY receipt，受保护源码/配置/Header保持冻结；唯一I、最终pin、新完整产品离线回归、AT07真实授权/探针、L2均待。OpenCode按用户要求18:00前保持停止，未合并main、tag或部署。
+
+
+## Q 冻结导出与受信配置边界接纳（16:35）
+
+Q SOURCE `88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0` / 最终 docs-only REPORT `6ce5a23ea256affdf9fe8a71bbaabb66695f3631` 已普通发布；原本地 REPORT `09a62370498e40d54d8e956ce6b2c941e16f7515` 及其未发布历史检查点保留。16:29真实Git连接恢复后，Q顺序发布SOURCE88、REPORT09和新docs-only报告；主控独立 `git -c http.version=HTTP/1.1 ls-remote` 核实远端=本地最终完整SHA、clean、REPORT6ce父09、SOURCE88后仅r1-boundaries.md。首push/read失败没有改写，不因发布恢复重跑已绿测试。
+
+实际受测私有非editable分发为 A `aec86c98ffe8fc3c3a922da5a6e281d553820d05`，包含 B `5769005b09f1b756c94fdad0649a6b74690c0ca9`：原15受影响配置/领域调用 + 45导出/生命周期 + 5 HostConfig/MCP交接，共 **65 PASS / 24.98s**；136原Git Python blob相等、VCS full-SHA direct_url正确、96依赖兼容。原15首3 FAIL/12 PASS（默认None正确fail-closed与旧成功前置冲突）及首次身份脚本失败保留；使用明确可信配置和实际惰性HTTP/SDK fixture，未猴补生产能力或削弱原 installed_core/process/socket 守卫。
+
+独立检查覆盖本机daemon/服务/main-egress精确身份，runtime RW卷仅这对独占且冻结，导出树/祖先/leaf路径与有界tar拒绝，SDK pause/create/resume/stream效果unknown阻断后续、不重发及owned最终清理边界。PathStat无nlink，不声称所有inode别名排除；逐文件resume不承诺跨文件原子快照。测试没有访问真实Engine或执行生成候选，不证明真实隔离。原始命令/输出与SOURCE身份见 `docs/tracks/r1-boundaries.md` 及 Q `tests/integration/r1_security/evidence/a-aec86c9-installed-affected65-first.txt`。
+
+主控接纳该Task succeeded并worker-release：retained/no_owned_resource/processAction none，未宣称关闭自管终端。新最终组合、完整产品离线回归、真实AT07和L2仍待；AOCI正式语义索引尚在原A，P真实人类审批receipt仍缺，实际Token节省unknown。
+
+
 ## MVP 只读会话阶段与隔离准备接纳（13:05）
 
 以下是领域阶段验收，不是新最终组合完整回归；原首次失败、旧类型债和下方历史组合分别保留。开发工作会话已按用户选择切为 GPT-6.1 Sol，OpenCode 后续指定 DeepSeek V4 Pro。
