@@ -1,3 +1,9 @@
+## 21:02 HTTP客户端测试边界修正决定
+
+原P实际fresh隔离同node保留15s全部断言再次1FAIL/53.43s。原事件时序证明本次失败为replication，原8f68 inheritance是此前别案，root/I首次目录推断已更正保留。replication原HTTP响应25.032s、native mock0.01245s；fresh仪器化require_ready0.431s、真实inert driver13.681s、run_from_ui14.191s后还有DTO投影。原runner.py46为900s角色total/5s margin，原launch_cli同步等child；15s只是测试client窗口，不是Spec/用户新性能承诺。无已证业务delta，不以再跑同RED判host噪声。
+
+root明确追加原P互斥write_paths tests/test_web.py，仅现有request helper可选timeout参数(default15)；tests/test_research_api.py唯一四phase POST显式900s既有角色总预算，其所有GET/其余255测试仍15。原409/四phase/三页/authority/secret/mock/task_live等事实断言完整，真实timeout仍FAIL，不吞错误/改生产/加新HTTP模块/改原runner预算，实际耗时照实记录。只原单node修后精准验证、SOURCE/REPORT普通push [skip ci]，产品生产 SOURCEc84未变，新testSOURCE分开；唯一I按raw生产53字节等价只独立精确验证该新testcase，不重已255/完整套/UI/安装/绿coreCI，不称whole256PASS，原whole255/1及fresh1FAIL保留。
+
 ## 20:53 最终产品首RED退原P定向诊断（不重全套）
 
 固定15de4959646df264530b978dfde9152552b9a76b+c84e49bd8e926f50d2c057793e8789cf137b310a唯一fullproduct自然完成255PASS/1FAIL539.16s、childexit1/外层542.527s，raw C:/r1i/successor-2018/r2/logs/full-product-first.log/commands.jsonl 保留。唯一tests/test_research_api.py::test_four_phases_real_runner_boundary_and_three_page_facts在376行POST phase，经test_web.py42 urlopen(timeout15)→socketTimeoutError。三个页面/runner断言未完成，不能写PASS或用旧256补同来源。新LinuxCI1824PASS16SKIP399.47s、strict140/build/SDK1.14/wheel门通过，Windows原run37123370202仍pytest，不改变或retry。
