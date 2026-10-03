@@ -120,17 +120,31 @@ def test_regular_bounded_export_freezes_both_owned_writers_then_resumes_each_fil
 
 @pytest.mark.parametrize("endpoint", ["unix:///var/run/docker.sock", "npipe:////./pipe/dockerDesktopLinuxEngine"])
 def test_official_local_transport_constructs_without_environment_or_engine_connection(monkeypatch, endpoint):
-    from docker.transport import NpipeHTTPAdapter, UnixHTTPAdapter
+    import sys
+    from docker import transport
 
     monkeypatch.setenv("DOCKER_HOST", "tcp://unapproved.invalid:2375")
     monkeypatch.setenv("DOCKER_CONTEXT", "unapproved-context")
     monkeypatch.setenv("HTTP_PROXY", "http://unapproved.invalid:3128")
+    if endpoint.startswith("npipe:") and sys.platform != "win32":
+        # Official Docker 7.2.0 omits this optional Windows adapter on Linux.
+        # Exercise the real rejection; this is not NPIPE construction success.
+        assert not hasattr(transport, "NpipeHTTPAdapter")
+        with pytest.raises(AttributeError, match="NpipeHTTPAdapter"):
+            export._transport(endpoint)
+        return
     api, base = export._transport(endpoint)
     try:
-        expected = NpipeHTTPAdapter if endpoint.startswith("npipe:") else UnixHTTPAdapter
-        assert isinstance(api.adapters["http+docker://"], expected)
+        actual = api.adapters["http+docker://"]
+        if endpoint.startswith("npipe:"):
+            assert isinstance(actual, transport.NpipeHTTPAdapter)
+            assert actual.npipe_path == endpoint.removeprefix("npipe://")
+            assert base == "http+docker://localnpipe"
+        else:
+            assert isinstance(actual, transport.UnixHTTPAdapter)
+            assert actual.socket_path == endpoint.removeprefix("unix://")
+            assert base == "http+docker://localhost"
         assert api.trust_env is False and api.auth is None
-        assert base in {"http+docker://localnpipe", "http+docker://localhost"}
     finally:
         api.close()
 
