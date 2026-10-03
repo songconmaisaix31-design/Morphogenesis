@@ -1813,3 +1813,111 @@ No Q business SOURCE was created. This ordinary docs-only commit/push uses
 the same I owns any necessary later integration. Actual dynamic ingress,
 service-proxy/NAT source and image revision remain UNKNOWN; actual AT07 and
 L2 remain NOT_RUN. Token usage, cost and savings remain UNKNOWN.
+
+## 2026-10-03 Q: guarded administrator preparation, execution NOT_RUN
+
+Same Q owner/tree/branch/terminal, task `task_1c2ec01e428a`, dispatch
+`ctx_8cb7185eb67f`, continues completed task90f7. Root read was
+`7ef9ff73b578ce9e21cca08b297ca0db7e1bed9a` / 22:16 plan; the later explicit
+TASK narrows this work to an administrator preparation packet. This docs-only
+REPORT changes no production/tests/profile/locks/AOCI assets. REPORT04ad,
+all first failures/unknowns and the original expired600s/SDK0 attempt remain.
+
+Prepared standalone operator script:
+`C:/research-private/q-at07-admin-ctx8cb7185-20261003/at07-firewall-operator.ps1`.
+Reviewed SHA256:
+`E2C23FF1A0CE3C84F80E02A101A1DDB235595A623F87C1CAE1F3066ACA51911F`.
+It retains the original two rule IDs, exact official Backend path and original
+TCP/UDP47400..47410 dual-stack nonloopback complement packet. No old rule,
+default policy, profile438, daemon or other port is modified by its design.
+This private file is a local operator aid, not a new repository module,
+scheduler, registry, Manifest or scientific proof system.
+
+Only standalone read-only file identity was observed at14:22:24Z, recorded in
+`preparation-identity.json`: Backend Authenticode status Valid, Docker Inc
+signer thumbprint `CACB4F507942C182C47EF14E7B9050CBDE780EB9`, executable SHA256
+`3CB1FBA716D63EBBDB28CAC038ED98AA50CC07B91CB366F9A191CD9BDFBFC03E`, current
+principal SID ending1005, IsAdministrator=false. These pins are guard inputs;
+changed signed bytes/process owner cause STOP, not silent pin replacement.
+[Official signature interface](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/get-authenticodesignature?view=powershell-7.5).
+
+The script itself was **not invoked in any mode**, including Inspect. Apply,
+Cleanup, UAC, Engine/listener/probe/SDK/key/science actions were NOT_RUN. Its
+proposed runtime behavior is therefore untested, not a successful safety run:
+
+| Mode / guard | Intended behavior, requiring actual future evidence |
+|---|---|
+| Default Inspect | New private output directory; read exact rule names in PersistentStore and ActiveStore, signed Backend identity/process owner, unused47400..47410 TCP/UDP listeners, MpsSvc, three effective profiles/local-rule merge, current interface categories, SID and IsAdmin. Query failure/conflict is recorded, not swallowed as absence |
+| Nonadministrator, any mode | Record needs_admin and exit20 without calling either firewall mutator. A failed read remains in its separate first-error receipt |
+| Apply | Require elevated SID1005, explicit `AuthorizeRuleChanges`, a non-secret rule-scope `AuthorizationRef` and exact `ReviewedScriptSha256`; require all preconditions and exact-name absence. One New-NetFirewallRule call per TCP/UDP, not a Set/update/overwrite |
+| Effective readback | Direct exact-name ActiveStore reads, all seven associated filters, local/remote users/machines, source/type and enforcement. Require full expected fields and local PersistentStore source; Enforced must be present, only additional ProfileInactive is accepted. Missing/NotApplicable/other projection or enforcement is STOP |
+| Override review | Save only named Docker/Codex related filters and bounded authenticated-bypass candidates. Potential applicable override, missing association or over-limit ambiguity stops. Other WFP providers and packet traversal remain UNKNOWN; no global rule dump is a proof |
+| Cleanup | Separate authorization and fresh output, original Apply identity/created receipts required. Validate every intended removal's two-store complete saved snapshot first, recheck immediately before each exact Remove. No original returned/confirmed receipt, changed fields/store, absent/ambiguous rule or prior remove intent means STOP, not ownership by name alone |
+
+Output is secret-free rule/process metadata, non-secret approval references,
+UTC, raw returned CIM/error XML and JSON filters. Native command exit codes
+are not fabricated for PowerShell cmdlets: receipts say ReturnedWithoutError
+and NativeExit=NOT_APPLICABLE; the script result carries its actual intended
+process exit0/20/21/22/23/30. Every result has Admission=STOP and retains
+ServiceProxySource/ExternalIngress=UNKNOWN and AT07=NOT_RUN, even when rule
+creation/readback or owned cleanup succeeds.
+
+Receipts use FileMode.CreateNew plus flush, preserving first bytes. After
+authorization/preconditions, one append-only apply intent in this packet
+directory prevents a different output directory from replaying this Apply.
+Each removal additionally appends one once-intent in the original Apply
+receipt directory, without rewriting its first evidence. Failure/unknown
+enters only exact-name inspection; there is no automatic retry, rollback,
+cleanup, wildcard delete or recursive directory removal. Partial/unknown
+creation without confirmed full readback cannot obtain cleanup authority.
+Manual recovery from such unknowns needs original-owner review, not repeated
+script invocation. The files are ordinary command receipts, not authority for
+host isolation or science.
+
+For operator review, the invocation shape is `powershell.exe -NoProfile -File`
+the exact script path, with `-Mode Apply`, a fresh absolute `-OutputDirectory`
+directly under this packet directory, `-AuthorizeRuleChanges`, the actual
+new rule-scope approval reference and the reviewed SHA above. Cleanup uses
+`-Mode Cleanup`, another fresh output child and `-ApplyReceiptDirectory` for
+the original Apply receipts, plus its separate explicit authorization and
+the same reviewed SHA. These are instructions, not commands Q executed.
+No Start-Process/RunAs, execution-policy bypass/change, auth/HOME/env dump,
+Docker command or listener launch is included. An existing OS/policy refusal
+is another STOP; do not alter policy automatically.
+
+Windows admin rights are a real OS requirement for modifying firewall rules;
+the already accepted general AT07 approval does not make the current process
+elevated. Root/operator may review the fixed path, scope and bytes, then choose
+one accurate separately authorized elevated invocation using the normal
+Windows UAC interaction. Q neither requested another generic AT07 approval
+nor initiated UAC. Future root/original-owner actual execution must preserve
+its own fresh full receipts and exact effective readback; a prepared script
+does not demonstrate that Windows will apply these rules.
+[Official create interface](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule?view=windowsserver2025-ps),
+[effective rule reads](https://learn.microsoft.com/en-us/powershell/module/netsecurity/get-netfirewallrule?view=windowsserver2025-ps).
+
+`Parser::ParseFile` and installed Get-Command parameter metadata were used
+without invoking the guarded script. `static-first.json` preserves the first
+331-line preparation result; final356-line `static-final.json` records zero
+parse errors, zero unknown literal/splatted cmdlet parameters, and exactly
+one New and one Remove syntax site inside separate guarded branches. This
+validates syntax/parameter names only, not parameter-binding side effects,
+permissions, rule semantics or execution safety. No tests, green old gate,
+package install or Engine operation was repeated.
+
+Correction/limit for REPORT04ad's optional inert-container suggestion: **the
+<=5 resource limit is cumulative, not merely simultaneous**. Deleting a
+control then creating another does not reset it. No sixth cumulative
+container/control is proposed as an executable route here. Any harmless
+control path must be submitted by original B within the approved original
+<=5 cumulative resources and at most one SDK create; it is not authorized
+or implemented by this preparation. Actual service-proxy/NAT source and
+external reachability remain UNKNOWN/STOP. Removing rules also invalidates
+this boundary for future same-ID service/L2 reuse; no old probe authority
+may silently survive that host-policy change.
+
+Ready packet was handed to root before closing, for review and operation
+selection. Only this appended own REPORT is ordinarily committed/pushed
+with [skip ci], remote exact/clean checked; there is no new Q business SOURCE.
+Actual apply/cleanup, complete network evidence, AT07 and L2 remain NOT_RUN.
+Token usage, cost and savings remain UNKNOWN.
