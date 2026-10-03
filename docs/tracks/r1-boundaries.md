@@ -1511,3 +1511,102 @@ private caches, venvs and all first evidence are retained. Main/tag/deploy,
 Engine startup/pulls and human acceptance were not performed. Token usage, cost
 and savings are **UNKNOWN**. Only the original I may subsequently merge these
 exact B/Q sources and perform the applicable cumulative integration gate.
+
+## 2026-10-03 Q successor: Linux junction fixture portability repair
+
+Task `task_33fe99de98b4`, Dispatch `ctx_cc395fc66dbc`, parent
+`task_7799a761b32c`, same Q Owner/worktree/branch/terminal. Q read root's current
+20:31 plan and retained the previous SOURCE/REPORT and Windows-only 54-case
+evidence. This successor changes only the junction fixture in
+`tests/boundary_review/test_at07_route_boundary.py` and this appended report.
+
+### Preserved CI and local first RED
+
+Read-only `gh run view 37122569886 --json headSha,attempt,status,conclusion,jobs`
+and `gh run view 37122569886 --log-failed` confirmed attempt1, exact integrated
+SOURCE `e635b8ab3e79529403b527892e75ffb29674af0a`, completed/failure:
+Linux **1823 PASS / 1 FAIL / 16 SKIP, 425.33s**, Windows **CANCELLED**.
+The failing case was
+`test_untrusted_private_config_directory_cannot_reach_cli[junction]`:
+the fixture simulated `asset_paths.sys.platform=win32`, but Linux's stat module
+had no `IO_REPARSE_TAG_MOUNT_POINT`. The real `local_assets/paths.py:61` raised
+AttributeError before the original expected refusal/CLI-zero assertion finished.
+Linux's later type/build/SDK/wheel steps were skipped. The old installed Windows
+54 PASS does not establish this Linux fixture or the integrated gate as passing.
+
+New private evidence root:
+`C:/research-private/q-at07-linux-junction-ctxcc395-20261003`.
+`ci37122569886-attempt1-failed.log` and `ci37122569886-attempt1-status.json`
+preserve the original CI observation without rerunning or cancelling that run.
+The private `run_case.py` child used the original Q-owned
+`C:/research-private/q-at07-ctx345f-20261003/source-lf-venv/Scripts/python.exe`.
+Its actual noneditable `direct_url` remained B SOURCE
+`fc866465aa52a3f09773bc79a0fab95bceedc3d9`; imported `at07_live.py` and
+`local_assets/paths.py` were inside that venv, nlink1, and their bytes equalled
+both fc866 and integrated e635 Git blobs. This was a two-object identity check,
+not a new whole-install acceptance or a claim of installing e635.
+
+Before editing, the isolated child removed the stat symbol and ran the unchanged
+junction selector against Q parent REPORT
+`f261c78a8181a4ce82a74bb41395cb35ee1e7b21`:
+**1 FAIL, 1 warning, 0.26s, exit1** with the same production-line AttributeError.
+Raw `local-junction-first-red.txt` records symbol absence, imports/pin, failure
+and fixture restoration. The symbol deletion affected only that child process;
+the child restored its original value in finally before exiting.
+
+### Minimal SOURCE and scoped verification
+
+SOURCE `3aa95d94828449fd92e6bb4fe6385178f3dac971`, direct child of Q REPORTf261,
+adds only a comment and, inside the existing junction-only fixture branch:
+
+```python
+monkeypatch.setattr(asset_paths.stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003, raising=False)
+```
+
+This supplies the original Windows constant alongside the already-simulated
+Windows platform and reparse metadata. The actual `no_links` function, comparison
+and invocation remain unchanged. Original expected refusal exceptions, symlink/
+junction metadata, `capture_cli` zero-call assertion and file-preservation checks
+remain unchanged. No skip, AttributeError allowance, stub of `no_links`, production
+edit, lock/workflow/profile change or new transport was introduced.
+
+With process-local `PYTHONDONTWRITEBYTECODE=1` and BLAS/OMP/MKL thread limits1,
+from the new private evidence root, the exact child command pattern was:
+
+```text
+C:/research-private/q-at07-ctx345f-20261003/source-lf-venv/Scripts/python.exe -I C:/research-private/q-at07-linux-junction-ctxcc395-20261003/run_case.py MODE SCOPE PHASE
+```
+
+The helper calls pytest only for the original private-config test function, with
+`--import-mode=importlib -q -rA --tb=short -p no:cacheprovider` and a distinct
+private basetemp for each phase. Actual arguments/results:
+
+| MODE / SCOPE / PHASE | Result | Raw file |
+|---|---|---|
+| `missing junction first-red` | 1 FAIL / 0.26s / exit1 | `local-junction-first-red.txt` |
+| `missing junction missing-fixed` | 1 PASS / 0.03s / exit0 | `local-junction-fixed.txt` |
+| `native five native-five-fixed` | 5 PASS / 0.05s / exit0 | `private-config-five-fixed.txt` |
+
+The five states are absent, nonempty, unknown, symlink and junction. All three
+runs record that `Path.lstat`, `asset_paths.sys` and stat-symbol presence/value
+were restored after pytest teardown. In the missing-symbol run, fixture teardown
+restored absence rather than leaving a fabricated constant behind. Each run
+retains one `PytestAssertRewriteWarning` for already-imported anyio; no case was
+skipped. These are Windows-host isolated simulations, not a real Linux CI run.
+
+`git diff --check` passed. SOURCE was ordinarily committed/pushed with `[skip ci]`;
+`git -c http.version=HTTP/1.1 ls-remote origin refs/heads/songconmaisaix31-design/morph-r1-boundaries-1003`
+returned full SOURCE3aa and the worktree was clean. Handoff `msg_5d2ccf50e94e`
+included full SHA/diff/raw/pin. Root `msg_0107cbb70087` independently accepted the
+exact two-line fixture repair and handed it to the same I; this separate
+docs-only REPORT follows that acceptance and also uses `[skip ci]`.
+
+No 54-case, old install/full-core/product/UI/type gate was repeated, no package
+was installed, and Q did not dispatch/retry CI. Original I must ordinarily merge
+the exact Q SOURCE and publish a new cumulative SOURCE before its necessary new
+CI. Original e635 failure, Windows cancellation and all earlier Q/B/history
+remain unchanged. That new integrated Linux/Windows gate is still pending here.
+No global pip/auth/HOME/configuration or AOCI assets changed; child processes
+exited, and private first evidence remains. Real Engine/key/probe/SDK create,
+science, AT-07, L2, main/tag/deployment remain NOT_RUN. Token usage/cost/savings
+remain UNKNOWN. This closes only Q's fixture repair.
