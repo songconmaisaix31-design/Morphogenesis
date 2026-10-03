@@ -799,3 +799,53 @@ OCI index1609bytes、header及原bytes SHA一致；唯一linuxamd64 manifest1361
 两docs独立REPORT普通push `[skip ci]`，保留SOURCE/REPORT分层；无全测/安装/CI/UI/native模型/付费/科学/候选/registry写入。
 模型保持现有Codex GPT-6.1-Sol high YOLO；用量/费用/节省UNKNOWN，OpenCode余额首阻塞不重试。
 真实AT07/L2仍NOT_RUN，待原I/P新来源工程接纳及实际隔离全项通过+Q独立审核，不称MVP或R1完整通过。
+
+## 2026-10-03 22:20 单独固定镜像准备实际交付
+
+原B Task `task_a61e6e755ed8` / Dispatch `ctx_8cbbdafbd94a`，同Owner/树/branch接续08f，
+先读AGENTS及root `7ef9ff73b578ce9e21cca08b297ca0db7e1bed9a`当前压缩计划，单独一次镜像准备已明确批准。
+fresh14:18:21 UTC官方CLI本体SHA C0E4...F1762/42748848bytes/Valid DockerInc与原记录一致，
+LinuxEngine29.5.3/API1.54/daemon6cc73c96-c021-4a82-ade6-2fc9ae693fff同原；RAM3503MiB/C18.47GiB。
+原digest-before仍No such image/exit1，未外部提前出现；随后唯一typed argv/shellFalse/官方绝对CLI/同npipe/新空ownedconfig，
+`image pull --platform linux/amd64 opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5`。
+childenv仅固定PATH/SYSTEMROOT/WINDIR，无DOCKER*/HOME/auth/TLS/context/proxy继承或全局修改；独立180s cap不reset旧probe窗口。
+UTC14:19:23.802240至14:20:14.668384，exit0/50.8656108s；首stdout1328bytes/stderr0完整保存。
+同route精确image-after inspect exit0，原完整RepoDigest/linux/amd64匹配；reported Size132036591bytes，
+不是解压disk/新增占用/下载流量证明，公共压缩layers+config132032785bytes为另一口径，真实增量UNKNOWN。
+ownedconfig无links、原device/inode且仍空后精确rmdir；14:20:44 RAM3711MiB/C18.45GiB仅时点，不推资源变化归因。
+已`msg_df78fe0c7a76`及时handoff root，raw `C:/research-private/b-egress-pull-ctx_8cbbdafbd94a/`，完整首argv/env/start/end/exit/耗时/stdout-stderr不覆盖。
+未重试/pull第二次/build/换tag源后端/upgrade/prune/共享层清理/Desktop重启/key/新容器卷网/SDK/probe/registry/native科学；其他项目效果NOT_ASSESSED。
+原SDK0/600sSTOP/首exit125/MISSING/旧RED保持；只解缺镜像门，Q端口与新I installed/pin/CI工程门未PASS，AT07/L2 NOT_RUN。
+验证仅实际只读前后身份、一次获准镜像准备、Git diffcheck与普通两docs REPORT push `[skip ci]`/remoteexact/clean；不跑安装/测试/CI/UI。
+本任务业务SOURCE仍c3a905eaf79a869dffb5960da9c4afee1dc63c3e，REPORT仅两docs、不自嵌SHA；费用/模型用量UNKNOWN，OpenCode首阻塞不重试。
+
+## 当前822+d5后继pre-SDK控制准备（仅docs，未执行）
+
+原B `task_92e62142bbfc` / `ctx_78a8eebd6960`，先读AGENTS/root精简计划/ee7镜像REPORT/Q1fb5及原guarded脚本。
+唯一当前业务SOURCE core `82201af4d3b369da827f6f22ff1d9c6b608c0108` + product `d5d387a6f5c1778dffdd860986843826420edf5e`；
+API显式1.54，默认1.52不改；I目标`C:/r1i/successor-2220/`，两SOURCE.txt只读相符、Python存在，未调用/安装/写入。
+当前新完整产品首失败待原P返修、WinCI及新组合最终接纳PENDING；旧完整工程门不重跑、不替新来源通过。
+只读核profile1013bytes/438fe04、compose1793bytes/52b34cd、锁87b335原字节；actual加载/HostConfig须真实后继核，不造值。
+
+早交root缺口与更正：原target9000是raw TCP非HTTP/SDK proxy；`FrozenExport.preflight`实际是`any()`匹配8099 loopback，
+首次误读为唯一mapping已`msg_ebc9e50c9a61`更正，未改代码/原断言，首误读保留。
+遵root最终`msg_6288fd2c1714`，两项proposal为同server `0.0.0.0:47410:8090/tcp`、同target `0.0.0.0:47410:9053/udp`，
+保留原三个loopbackpublication；当前未写override/未部署，有效Q规则前不可启动。
+前置从实际server64ID经host.docker.internal/Windows Backend做原health HTTP与固定DNS无害控制，
+完整SDK sandbox proxy只在唯一SDKcreate后原AT07验，不造假SDK labels/循环新门；具体固定exec解释器/payload仍待实际镜像路径核定。
+官方声明b1a29c源码只读分析：allocator在server网络命名空间TCP bind，无法证明避Windows已占47410；
+DENY分支无无policy分支三次main发布重试。碰撞/未知STOP/no-replay，不减range或换CIDR/profile/后端；镜像revision对应UNKNOWN披露，不加自造证明门。
+上述当前收敛已`msg_030f5437a9cf`handoff root。两mapping改变部署HostConfig事实但不改canonical profile文件；必须完整留证与Q独立审核，不能沿用旧probe。
+
+当前授权包顶部新增独立600s后继顺序/前置停止条件：前180s基础设施与控制，SDK前须至少420s余量，
+原runner保守240s后预留180s审核/精确收尾；原180sTTL/30s命令/1MiB冻结导出/512MiB128pids原限制不削弱。
+累计server+target+main+egress+至多1cache=最多5容器/1ownedvolume/0新network，不加helper、不以remove/recreate归零。
+Q Apply/Inspect/Cleanup的ports-unused前置保持；同server先stop释放range后才按原receipt/有效规则身份Cleanup。
+原result/host-after/创建marker不改写，cache归属/销毁未知不能PASS；same64ID retained_stopped须全部真实PASS+Q审核+所有自有main/egress/volume/cache清理明确。
+移除FW规则使原probe边界失效、不可L2继承；无法精确清理留knownremaining交原Q，不删他人对象/不保留未知running。
+key仅保护路径引用，不读取；UAC/FW有效范围/NAT源/控制payload与实际工程接纳缺项逐一PENDING/UNKNOWN。
+
+私有静态packet `C:/research-private/b-at07-pre-sdk-ctx_78a8eebd6960/` 保存官方固定源码/URL/blob身份、原Q脚本只读SHA及首静态抓取参数错误/更正。
+本Task无Engine/SDK/key/FW/script调用/hostlistener/部署/科学/候选/native模型/付费，无测试/CLIhelp/安装/CI/第二SOURCE/pin；
+原600s STOP/SDK0/firstRED/旧8558/unsupported/unknown/Poisson review原样保留。AT07/L2 NOT_RUN，不称MVP/R1完成。
+验证仅静态调用路径/预算与unknown审阅、Git diffcheck/仅两docs普通REPORT commit+push `[skip ci]`/remoteexact/clean；模型用量费用UNKNOWN。
