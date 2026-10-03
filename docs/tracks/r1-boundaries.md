@@ -996,3 +996,203 @@ No candidate or native model process, real scientific execution, sandbox/probe,
 external material acquisition, Hub or deployment ran; L2/L3 remain NOT_RUN.
 Original unknown effects/costs stay unknown, and the earlier unexplained long
 tool-return duration is retained without a latency assurance.
+
+## 2026-10-03 Q successor: explicit Docker freeze/export, offline only
+
+Successor task `task_f1ef0047b01a`, dispatch `ctx_a1965382b7ea`, reuses the original
+Q worker/worktree/branch. The previous task and its completion stay settled.
+This section records only Q's affected-boundary work; it does not accept MVP/R1,
+AT07, L2, or L3. Only Q tests/evidence and this report were authored. Domain,
+governance and owner reports below entered through authorized ordinary exact
+merges; Q authored no domain, AOCI, dependency, deployment or original B-test file.
+
+### Exact subjects and publication checkpoint
+
+| Subject | Full immutable identity |
+| --- | --- |
+| Starting Q report | `793661391738f5dadb2412af32c7188a60915c7d` |
+| Governance | `de242031cb3cb029191ea7754475bf5d23ebba95` |
+| B runtime SOURCE | `5769005b09f1b756c94fdad0649a6b74690c0ca9` |
+| B docs-only REPORT, direct child of SOURCE | `5aebd2eb7af774b3dc496ad9620548f6e7852e09` |
+| A configuration SOURCE, including the exact B subject | `aec86c98ffe8fc3c3a922da5a6e281d553820d05` |
+| Q ordinary merge of A configuration SOURCE | `d0b9e288942a1491ed2515681c96ccb35fab3ef0` |
+| Q tests and initial raw evidence SOURCE | `b8f7a8a5ae5ab62e8c84fdec85557a88d06d273f` |
+| Q source push first-failure receipt commit | `76de0b577913b947b298573628eb0d2dbefe5e65` |
+| Q latest SOURCE with failed read-only reconciliation receipts | `88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0` |
+
+Branch: `songconmaisaix31-design/morph-r1-boundaries-1003`. At this local-report
+checkpoint, SOURCE is committed locally, first push and two read-only Git remote
+queries failed, and both SOURCE/REPORT publication are pending. The first push's ref effect
+was UNKNOWN; root's existing GitHub API lookup and Q's independent lookup at
+05:25 UTC both return the original report `793661391738f5dadb2412af32c7188a60915c7d`.
+No successor publication is established. Q has not sent worker_done or asserted
+remote publication closeout. Root's reply to the durable Orca ask explicitly
+permits saving a local docs-only REPORT with SOURCE88 as its direct parent while
+publication is blocked. This adjusts local saving order only, not acceptance.
+Root reports SSH443 read-only authentication refusal, not a usable channel;
+neither root nor Q changes auth/network configuration. Unconditional push and
+network polling stop until actual network conditions change. SOURCE must publish
+before the docs-only REPORT push; no completed test is rerun for this blocker.
+
+The final actual private noneditable distribution is A configuration SOURCE
+`aec86c98ffe8fc3c3a922da5a6e281d553820d05`, not a floating owner HEAD or AOCI WIP.
+No `orchestration/experiments/**` or `local_assets/**` difference exists between
+B576 and this exact A source. A's other inherited local-context/native changes
+are outside this test slice. No unchanged 293-test or product-wide suite ran.
+
+### Preserved first results and actual installation
+
+All raw files below live in `tests/integration/r1_security/evidence/` and are new
+immutable evidence. Prior owner/Q REDs, the 296ec298/7a6c509 refusal stage and all
+historical installed results remain unchanged.
+
+| Actual subject/check | First outcome | Raw evidence filename |
+| --- | --- | --- |
+| B576, unchanged original configured15 | **3 FAIL / 12 PASS**, 2.29s | `b-5769005-original-configured15-first.txt` |
+| B576, first identity script | **FAIL**, checkout module import asserted | `b-5769005-private-origins-blobs-first.txt` |
+| B576, identity script with private purelib first | **PASS**, 136 original Python blobs | `b-5769005-private-origins-blobs-import-corrected.txt` |
+| B576, explicit fixture + original15 + new frozen39 | **54 PASS**, 0.66s | `b-5769005-explicit-frozen54-first.txt` |
+| Aaec, final affected slice: original15 + frozen45 + A config5 | **65 PASS**, 24.98s | `a-aec86c9-installed-affected65-first.txt` |
+| Aaec, actual origin/private imports/original blobs | **PASS**, 136 original Python blobs | `a-aec86c9-private-origins-blobs-first.txt` |
+| Aaec, `uv pip check` | **PASS**, 96 compatible packages | `a-aec86c9-private-dependencies-first.txt` |
+| Additional fixed Moby archive read | **UNKNOWN / incomplete**, TaskCanceledException | `q-fixed-moby-archive-read-first.txt` |
+| Q initial SOURCE push | **FAIL**, exit128 connection reset; remote effect unknown | `q-docker-source-push-first.txt` |
+| Q first `ls-remote origin` | **FAIL**, exit1 connection reset | `q-docker-remote-ref-first.txt` |
+| Q canonical same-repository `.git` `ls-remote` | **FAIL**, exit1 unable to connect after32103ms | `q-docker-remote-ref-canonical.txt` |
+
+Successful independent read-only reconciliation command:
+`gh api repos/songconmaisaix31-design/Morphogenesis/git/ref/heads/songconmaisaix31-design/morph-r1-boundaries-1003 --jq .object.sha`.
+It returns `793661391738f5dadb2412af32c7188a60915c7d`, matching root's prior
+observation; it does not retroactively turn the first failed push into success.
+
+The original three tests failed before their intended positive/mutation
+boundaries: the old fixture had `docker_export=None`. That refusal is the new
+default fail-closed contract, not evidence that the explicit adapter failed.
+Q changes only the positive fixture's explicit DockerExportConfiguration and
+full server ID, and stubs the HTTP/SDK I/O boundary. Every original security
+assertion is retained; a pre-create read-only route assertion is added.
+Neither `ATOMIC_EXPORT_SCOPE_SUPPORTED` nor `declared_capability`, verification,
+FrozenDockerExport, or the production admission/path/tar/lifecycle checks are
+monkeypatched. Separate tests require old None configuration and old/hand-filled
+passed probes to remain unverified and unable to admit/create.
+
+The first identity-script failure was Q verification plumbing: imports occurred
+before placing private purelib first. The corrected script preserves that first
+failure, places purelib first like the unchanged installed-mode conftest, and
+compares all packaged Python files to original `git cat-file --batch` blobs.
+There is no normalization or installed source/metadata repair. Both installs
+validate canonical Git origin and full `commit_id`/`requested_revision`; imports
+resolve under Q `.venv-q/Lib/site-packages`, with Docker SDK **7.2.0**.
+
+Installation uses the existing private `.venv-q`, COPY link mode and exclusive
+TEMP cache `morph-q-r1-1003/q-uv-b576-20261003`. The only added runtime package is
+official `docker==7.2.0`. Process-local `core.autocrlf=false`,
+`GIT_NO_LAZY_FETCH=1` and UV concurrency1 apply; no global auth/provider/HOME,
+system Python, other Owner environment or cleanup changes occurred. Raw installs
+and dependency checks retain their `b-5769005-*` / `a-aec86c9-*` identities.
+The product's installed_core guard is untouched; no product acceptance is inferred
+from changing Q's private core distribution.
+
+### Independent boundaries and real domain calls
+
+- **Configuration authority:** actual LocalCpuSandboxBackend, prepare/admit and
+  direct create refuse None export, missing/old configuration and a changed
+  daemon/socket with the previous probe. Closed plan/backend/environment schemas
+  reject candidate-supplied docker_export. Actual daemon/version/service-port/
+  full-server-ID mismatches refuse before the captured official SDK create.
+- **Nonvacuous positive:** original15's legitimate host/probe fixture reaches the
+  original SDK request once after actual FrozenDockerExport preflight. Image,
+  resource, deny-network, duration, task/fence and original prepare-mutation
+  assertions remain. Probe records are trusted deterministic fixtures only;
+  they do not claim a real harmless probe or authorize live execution.
+- **Owned writers and range:** the actual OpenSandboxSession/FrozenDockerExport
+  path checks full main/egress identities, exact image/resources, security,
+  runtime volume driver/options and exclusive users. Third writer, export-root
+  mount, host PID or changed resource/image refuse. Positive metadata models
+  the upstream **RW** runtime volume outside the export tree, shared only by the
+  owned pair. Both must be paused throughout every HEAD/GET. Positive requests
+  visit `/tmp`, export root, nested ancestor and leaf, close all HTTP replies,
+  then resume the same session; the second file performs a second pause/resume.
+- **Untrusted file bytes:** representative ancestor/leaf symlink, oversize stat,
+  tar hardlink/FIFO, traversal, extra member, PAX path, compression, truncation
+  and stream overflow refuse. TarFile.extract/extractall are denied during these
+  tests; only bounded bytes from the actual parser can leave the read boundary.
+- **Unknown effects and original cleanup:** pause timeout before/after effect,
+  a partially paused pair, lost/foreign resume connection, stream disconnect,
+  late read and changed GET metadata do not redeliver pause or later work.
+  Read-only reconciliation may permit one same-session resume when both writers
+  are confirmed paused, while the original unknown remains. A foreign resumed
+  connection is closed, never killed. Actual original finalize_session persists
+  unknown cleanup and closes owned handles; borrowed sessions never kill.
+  Actual executor create timeout persists unknown, original archive reread grants
+  no science/contribution, and the same run cannot recreate the SDK request.
+- **A handoff:** actual HostConfig→GeneratedHostSettings→ResearchService factory
+  roundtrips absent/explicit export, with ambient Docker settings unable to fill
+  it. No probe means no admission. Changing/disabling export cannot rebind the
+  existing frozen project, whose context/audit facts remain unchanged. A real
+  official FastMCP call over the original ledger rejects a candidate control
+  field before plan persistence; the tool catalogue exposes no such host field.
+- **Official transport construction:** on this private Python3.13 environment,
+  actual Docker7.2.0 UnixHTTPAdapter and NpipeHTTPAdapter constructors work with
+  the configured local endpoint, `trust_env=False` and no APIClient auth config.
+  No adapter connects to an Engine. Inert HTTP responses are supplied only for
+  the explicit fixture, not through a fake export-capability declaration.
+
+Final test command (PowerShell process-local `R1_SECURITY_INSTALLED=1` and
+OPENBLAS/OMP/MKL_NUM_THREADS=1):
+
+```text
+.venv-q/Scripts/python.exe -m pytest tests/integration/r1_security/test_b_configured_sdk_boundary.py tests/integration/r1_security/test_b_frozen_export_boundary.py tests/integration/r1_security/test_a_docker_export_handoff.py -q --tb=short
+uv pip check --python .venv-q/Scripts/python.exe
+```
+
+The unchanged conftest denies subprocess.Popen, os.system, socket connect and
+connect_ex for every test/tool call after creating its trusted stdlib loop.
+No original B tests/helpers are imported or run. All test/install processes
+exited. Q released the serialized window in Orca message `msg_f36d690920ab`.
+Review Handoffs preceded new tests; the inactive settled B mailbox was explicitly
+rejected by Orca and forwarded through root. No domain defect was found in this
+affected deterministic slice and no Q domain patch was made.
+
+### Primary-source checks and remaining limits
+
+With `GIT_NO_LAZY_FETCH=1`, Q read the already-present OpenSandbox clone's exact
+`b1a29cf93a823a95913f7943010febb3f29de05c` lifecycle/networking code: main and
+egress pause/resume, rollback handling, and the runtime RW/NET_ADMIN sidecar
+configuration. The local private official Docker7.2.0 API/transport code confirms
+archive path/stat header handling, APIClient auth loading, the high-level stream
+timeout removal, and npipe overlapped timeout/cancellation; Q's actual adapter
+constructors were independently tested. The fixed Moby Stat source was read via
+the official raw endpoint. Further web reads were terminated without completed
+results, and a separate bounded archive fetch failed; its incomplete review is
+not presented as a successful whole-file/schema verification.
+
+Primary references: [fixed OpenSandbox lifecycle](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/opensandbox_server/services/docker/docker_service.py),
+[fixed Moby Stat](https://github.com/moby/moby/blob/285b47192d4b2f183aba5dd360a92cd52d723004/daemon/containerfs_linux.go),
+[Docker SDK7.2.0 API client](https://github.com/docker/docker-py/blob/5ad5327fba623897ee9a527d7eee1b01703e0726/docker/api/client.py),
+and the [Engine API1.52 reference](https://docs.docker.com/reference/api/engine/version/v1.52.yaml).
+The last schema link is a reference, not a claim that its full content was
+independently downloaded successfully during this successor.
+
+Actual Engine29.5.3/API1.52 and daemon ID remain **UNKNOWN / unmeasured**.
+No Docker/WSL service, container, candidate, model/science or real isolation
+probe was started. All passed probe records/HTTP replies/SDK effects are inert
+contract-local fixtures. Mock PASS does not prove isolation or a usable live
+backend. Fixed version metadata/source review does not prove actual deployment.
+
+The approved scope excludes shared mounts from the export tree, checks every
+ancestor/leaf and limits ordinary file bytes/time while both writers are frozen.
+PathStat exposes no nlink; rejecting tar link members does **not** rule out all
+inode aliases outside the tree. That unpromised condition is not added as a new
+exit gate. This implementation resumes after each file, with no promise of one
+atomic snapshot across multiple files. A blocked underlying read can consume an
+additional request timeout; SDK pause/resume is separate, not a hard real-time
+guarantee. Unknown SDK create has no owned returned identity to blindly clean up.
+
+Independent I's final exact combination, product pin/interface/build regression,
+real deployment safety checks and separately authorized AT07 remain pending.
+L2 must follow actual AT07 acceptance and specific user authorization; L3 and
+MVP/R1 overall acceptance are outside this Q task. AOCI is A's separate work;
+Q has neither authored nor claimed its receipt. No C policy-blocked cleanup was
+retried. These focused results do not replace prior failures, owner reports or
+unrun live/human acceptance.
