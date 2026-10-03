@@ -1,5 +1,17 @@
 # R1 派发状态（2026-10-03）
 
+## 会话界面完成初轮，AOCI 等待一次真实终端确认
+
+P API SOURCE `67721aaa815e706c51e0f80a1d15ab71e34b6880` 已由主控独立核对远端及日志：新增与相关 HTTP 27 PASS/34.94s、适用 types30 PASS。旧安装包首 2 FAIL/4.49s、WIP 首 11 FAIL/4 PASS 和后继14 PASS/1 fixture FAIL均保留。原 core cea7923 pin 不变；本阶段独立 COPY 与整包原债对照尚在原 Owner 执行，完整产品回归仍留唯一 I。
+
+F 运行包 SOURCE `07df78b111825c789fb21f8853ece3e69941a704` 包含 P API677，首 build15.27s、新会话18 PASS/12.1s、旧适用smoke14 PASS/13.5s。首轮截图暴露窄屏输出落在初屏以外，紧凑化后新增两视窗首屏检查2 PASS/6.4s；主控已实际查看前后desktop/narrow图片。COPY包54文件字节/单链接、setup-assets/doctor、seed-only通过；installed会话首2 RED因新observer把聚合contract_local误当成会话mock，尚未页面导航，原失败保留，F仅修观察层级与响应等待。实际终端及原输入四观察待后继，不把这些记录当task_live或人工理解测试。
+
+B阶段 SOURCE `296ec298a23eea54f76e8c874aed551487a2999a` / docs-only REPORT `7a6c5094c7235b1a992e0eaa8d688b08fa0fd64b` 已主控核对远端与仅docs后继。生产export能力false、旧/手填probe不能绕过及正确字节Range修复已落地：首5 FAIL/13 PASS保留，后继定向66 PASS、strict139 PASS；原适用238项235 PASS/3 Q FAIL，三个旧成功前置与当前不支持导出冲突，Q断言原样保留。同B继续官方冻结导出后继，不提前worker_done；真实AT07和L2未运行。
+
+AOCI官方二进制、MCP连接和Header已具备；正式15个语义Entry仍未应用。P初始化先创建范围规则导致legacy基线，后续legacy→auto及aoci.txt index→observe触发官方 `managed_scope_human_approval_required`。已保留失败并生成精确preview计划 `6c41e86c1e71c4f39c2ac22d83d92c78b3e9334c1bb31a448142d7cd23cf1708`；零Entry新增/修改/删除。本机 `C:/research-private/p-aoci-transition-review.md` 和人工专用 `p-aoci-approve.ps1` 已由主控阅读，用户已收到一次真实PowerShell确认请求。Agent不得运行approve脚本、输入确认短语、伪造human receipt或重置基线；聊天选项不是TTY receipt。P受保护源码/Header/doc/config在等待期间冻结，独立COPY和私有语义草稿仍可推进。当前未收到该实际确认，Token节省仍未知。
+
+A原Owner后继 `task_7943319add9b` 已创建为ready，未dispatch；等P/F释放槽位后负责B受信导出配置接线与核心AOCI，避免增加活跃Worker。Q待B后继固定再做相关独立复核。I未重新派发，最终组合/完整离线回归/AT07单独授权/L2顺序保持。
+
 ## 12:22 MVP 会话首版与 AOCI 实际连接，AT-07 导出缺口继续修正
 
 F 阶段 SOURCE `0a588e2659c3aca65e7d2d7fe3d1b926c2d513ba` 已由 Owner push，包含项目/成员侧栏、配置成员节点菜单和纯 GET 会话/上下文面板；此时只做语法检查，静态 bundle 仍为旧版，构建和双视窗测试未完成，不能作为已验收 UI。P 已实现三条只读 GET 第一版与原记录格式的双成员/多片段 fixture，等待其首 RED 和定向门；两者仍在原任务继续开发。
