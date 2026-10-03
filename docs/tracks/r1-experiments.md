@@ -659,3 +659,36 @@ model_copy无效配置、缺配置/非空私有目录、mutation、原Engine dae
 SOURCE尚未唯一I合入及P重新pin，b480+2b/a67离线通过明确为前组合，不能冒充新SOURCE installed或全R1完成。
 真实Engine/Docker/WSL/services/pull、密钥、native模型、candidate/science、AT07/L2、main/tag/部署均NOT_RUN；
 模型用量/费用UNKNOWN，OpenCode首余额阻塞和原RED保留。适用工程门后仍需用户独立AT07授权，全项实际隔离通过后才可另议L2。
+
+## 2026-10-03 20:29 后继：最终组合AT07审核包（docs-only）
+
+Task `task_36dcf2a5df0b` / Dispatch `ctx_d8fb1226f9a7`，parent `task_8e19fb680605`；原B树/branch/terminal。
+按root核心治理 `954acd0371407ae45685f68a221948790feafc3a` / 产品治理 `1a395a6d9880d57a440cf6a7433c91d637817f27`，
+只更新AT07授权包与本短追加。受测核心 SOURCE `e635b8ab3e79529403b527892e75ffb29674af0a` /
+产品 SOURCE `8c716c450bf4b5b436e915726857260cc79cb17e`；P/I REPORT不是SOURCE，本次commit仅docs REPORT。
+原Git核对B fc866 / Q f2b81的对应blob在e635相同、产品8c原pyproject精确pin e635；原锁384044字节，
+SHA256 `87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb`，未改锁/profile。
+唯一I新私有非editable COPY目标 `C:/r1i/successor-2018/`，I task33b99/ctx154、CI37122569886 attempt1
+实际identity/完整工程结果尚未齐全，明确PENDING，不填通过，不用旧1855环境执行新probe。
+随后root `msg_50383217a323` 已报告CI首RED Linux1823PASS/1FAIL/16SKIP、WindowsCANCELLED；
+Q test-only junction fixture返修待原Owner，B业务零新差异。e635+8c仅已发布、工程未通过，等待后继I精确SOURCE，不覆盖原失败。
+
+新增最少外层操作审核模板：全部deploy/inspect/info/compose以官方CLI绝对路径、同npipe、
+新owned空config、typed subprocess/shell=False、必要系统PATH/SYSTEMROOT/WINDIR；不继承DOCKER_*/HOME/auth/TLS/
+context/APIheaders/proxy大小写变体。仅Compose按需向新子env传原受保护key/canary，不改变父/全局env。
+当前Get-Command路径 `C:/Program Files/Docker/Docker/resources/bin/docker.exe`不证明本体或Compose插件版本/完整性；
+runner原argv仍为docker名字，后续须核实实际解析为同批准本体，fixture不能冒充此事实。无法确认即create前STOP。
+旧裸Docker/父env示例明确降为历史不可执行，read-only docker_read白名单不扩大；外层mutation仅后来批准的
+一次基础设施创建与精确自有完整IDs收尾。新目录不复用/不追链接/不覆盖/不递归清理未知文件。
+
+root20:13 RAM5850MiB/C45.9GiB、20:21pipe=false及三firewall profile原Enabled1/Inbound4/Outbound2只作带时点观察，
+不证明动态0.0.0.0:47400..47410仅批准范围。保留Desktop恢复他项目、缺镜像STOP不pull、Engine29.5.3/API1.52
+不符STOP不upgrade、sidecar/cache caps UNSUPPORTED/总峰UNKNOWN、基础设施DNS边界、一次SDKcreate未知不重试。
+独立授权需明确启动决定/限制接受/600s/最多5containers1volume0network/一个无害sandbox、无candidate/science/L2；
+AT07全项真实PASS及独立审核后才注入原TrustedProbeRegistry，接受限制参数不把失败或UNKNOWN变PASS。
+
+本轮仅raw Git读取、文档diffcheck、普通commit/push `[skip ci]` 与remote exact/clean/仅两docs检查，
+私有raw `C:/research-private/b-at07-final-identity-ctx_d8fb1226f9a7/`；SOURCE/业务/锁/profile/部署/AOCI/他轨零写入。
+未执行测试/安装/CLIhelp/prepare、密钥、Engine/Desktop/SDKcreate/candidate/native科学，旧绿门未重复。
+旧b480+2b/a67、8558锁、firstRED/unsupported/unknown原段与原日志保留，Poisson review未改，费用/用量UNKNOWN。
+唯一I可最后普通docsmerge，不新SOURCE repin/CI；I结果后由原Task依据root实际日志补充，不虚填PASS。

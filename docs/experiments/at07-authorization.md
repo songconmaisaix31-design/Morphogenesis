@@ -3,7 +3,109 @@
 本包针对 Spec §10.1、AT-07、§14.4。**真实 AT-07：NOT_RUN；L2：NOT_RUN。**
 **当前准备状态：PREPARED_UNVERIFIED；真实执行仍未获授权。**
 
-## 19:39 端点绑定工程后继（仅离线验证）
+## 20:29 最终组合审核框架（工程/安装结果 PENDING）
+
+本次仅docs，依据核心治理 `954acd0371407ae45685f68a221948790feafc3a` / 产品治理
+`1a395a6d9880d57a440cf6a7433c91d637817f27` 当前 `docs/R1_PLAN.md`。
+以下是当前审核入口；下方19:39/19:30段落保留当时身份和结论，不能将历史等待或旧绿门代入新组合。
+
+| 当前对象 | 精确身份 / 状态 |
+| --- | --- |
+| 最终受测核心 SOURCE | `e635b8ab3e79529403b527892e75ffb29674af0a`；不是root/I/B REPORT |
+| 最终产品 SOURCE | `8c716c450bf4b5b436e915726857260cc79cb17e`；原Git pyproject pin精确e635，不从P/I REPORT pin |
+| 已普通合入的B/Q | B SOURCE `fc866465aa52a3f09773bc79a0fab95bceedc3d9`、Q测试 SOURCE `f2b81cd9c0e0623c224b0501580a19e3fc1d37da`；本次只读原Git blob均与e635相同，未重测 |
+| 实际锁 | e635原Git `poetry.lock` 384044字节，SHA256 `87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb`；本次核对，不修改锁或profile |
+| 唯一I安装目标 | `C:/r1i/successor-2018/`，新私有非editable COPY；实际python路径/direct_url/原Git字节/包metadata及工程结果 **PENDING**，不由目录名推完成 |
+| 工程门 | I Task `task_33b99bbe70e8` / Dispatch `ctx_154fc9202fc1`；原CI `37122569886` attempt1派发时仍运行；原结果齐全之前 **PENDING**，本次不重复门 |
+| P/I REPORT | 只承载报告、待实际交付；不作为SOURCE或真实AT07授权。后续I结果只读按精确原日志补充，缺项不填PASS |
+| 当前实际隔离 | Engine版本/API/daemon、service完整ID、targetIP、实际runtime profile、probe/授权ref仍UNKNOWN；AT07/L2 NOT_RUN |
+
+后续root Handoff `msg_50383217a323` 报告原CI37122569886 attempt1首RED：Linux
+**1823 PASS / 1 FAIL / 16 SKIP**、Windows **CANCELLED**。原Q win32 junction fixture在Linux缺stat常量，
+由原Q作test-only返修；B生产模块无新差异。e635+8c目前是已发布组合，**工程未通过**，
+不把通过项拆出来称最终green；后继I SOURCE/新实际工程结果仍PENDING，原首失败与取消不覆盖。
+
+旧b480+2b/a67、旧8558锁、B首RED18FAIL、Q独立首失败与各unsupported/unknown、原日志完整保留。
+旧 `C:/r1i/final-product-1855/venv` 不得直接执行新probe；`$taskFinalPython` 须由I实际新installed证据给出。
+本轮新私有只读取证：`C:/research-private/b-at07-final-identity-ctx_d8fb1226f9a7/`，不是新preparation或probe档。
+
+主控带时点宿主观察：20:13 RAM5850MiB / C盘45.9GiB，20:21 DockerLinuxpipe=false；
+三Firewall profile原值为Enabled=1 / InboundAction=4 / Outbound=2。
+这些原值不是 `0.0.0.0:47400..47410` 仅在批准范围可达的证明；本B没有Engine或防火墙实测。
+sidecar/cache资源限额UNSUPPORTED、总峰值UNKNOWN，内存数字不构成整个栈的硬上限或运行准入。
+
+### 随后必须独立审阅的AT07决定（当前未批准）
+
+| 需明确的决定 | 最小范围 / 停止条件 |
+| --- | --- |
+| 工程与installed前置 | e635+8c的适用工程/完整产品离线及安装身份结果齐全并可审阅；历史绿色结果不替代，未齐即STOP |
+| Docker Desktop启动 | 明确是否允许启动既有Desktop及可能恢复他项目restart容器的宿主影响；本工具不启动Engine，不停他人对象；无权限/Engine未运行即STOP |
+| 本体/镜像/daemon | 官方CLI绝对路径及实际本体/Compose插件身份须核验；固定四镜像缺失STOP不pull/build；实际Linux29.5.3/API1.52/daemon不匹配STOP不upgrade |
+| 基础设施与网络 | 明确接受sidecar/cache无资源caps与总峰UNKNOWN、NET_ADMIN、既有DNS健康流量边界；动态0.0.0.0端口范围须实际确认，否则create前STOP；不改现存防火墙/daemon/网络 |
+| 唯一无害检查 | 新唯一probe ID/真实授权ref；整个部署/检查/精确收尾窗口600s；最多5新容器/1自有volume/0新network、一个sandbox/一次SDKcreate/并发1；512MiB/128pids/30s/180s/1MiB及原时限不变 |
+| 未知与收尾 | create/readiness/pause/resume/stream/对象/清理未知不重放、不第二POST、不切宿主执行；只对记录并重新核对归属的本次完整IDs收尾，未知即停止/保留证据 |
+| 明确排除 | 无候选、science/native模型、L2、外发/付费/Hub；不改变Poisson review、账号/权限/AOCI或全局HOME/auth/config；本Task绝非上述运行授权 |
+
+只有随后真实AT07全部PASS、精确归属清理确认、独立审核及完整profile匹配后才可注入原TrustedProbeRegistry。
+`--accept-disclosed-infrastructure-limits` 仅记录运行范围决定，不能把UNSUPPORTED/UNKNOWN/失败改成PASS。
+若授权要求基础设施DNS也绝不外发，固定栈不满足即STOP。科学L2仍须实际隔离通过后另行有界授权。
+
+### 外层CLI同路由审核模板（当前全部未执行）
+
+runner受信endpoint已修，但外层deploy/inspect/info/compose也必须使用同一明确npipe、全新空私有config和受控子环境。
+**下方历史裸docker/父shell环境示例不可执行，不是当前最终路线。**
+root的Get-Command只定位到 `C:/Program Files/Docker/Docker/resources/bin/docker.exe`；
+实际CLI版本、完整性与Compose插件本体尚未真正核验。它们不是argv fixture证明，未核验即STOP。
+runner当前仍以`docker`名字调用；随后受控runner启动环境还须确认该名字实际解析为同一批准本体，
+不能仅用外层绝对路径或一次version相同替它授予本体身份。本任务不改代码来绕过这个实际确认。
+
+下面只是一次官方CLI调用的typed argv格式，不是新增执行器或可运行脚本：变量均待真实批准与原安装证据。
+`task_outer_config` 必须在本次新保护根下以 `.at07-outer-docker-cli` 新建空目录；
+复用原no_links检查、拒绝已有/链接/未知覆盖，记录自有目录身份，结束只rmdir仍同身份的空目录。
+runner自己的 `.at07-docker-cli` 与外层目录分开；未知新增文件保留，不递归删除或改用户Docker配置。
+
+```python
+# REVIEW TEMPLATE ONLY: no values for the pending approval/install variables.
+task_cli = "C:/Program Files/Docker/Docker/resources/bin/docker.exe"
+task_endpoint = "npipe:////./pipe/dockerDesktopLinuxEngine"
+task_prefix = [task_cli, "--host", task_endpoint, "--config", str(task_outer_config)]
+task_process_env = {
+    "SYSTEMROOT": task_approved_system_root,
+    "WINDIR": task_approved_system_root,
+    "PATH": str(Path(task_approved_system_root) / "System32"),
+}
+task_observation = subprocess.run(
+    [*task_prefix, *task_approved_suffix], shell=False, check=False,
+    env=task_process_env, cwd=task_final_source_copy,
+    capture_output=True, text=True, timeout=10,
+)
+```
+
+`Path/subprocess`为stdlib；`task_approved_suffix`只能是下表负责人核准的一项字面参数，不能来自候选/任意MCP请求。
+必要系统路径/大小写须按实际批准宿主核对，不拷贝任意父PATH。所有DOCKER_*、HOME/USERPROFILE、
+auth/TLS/context/API/custom headers、HTTP(S)/ALL/NO_PROXY及其大小写变体均不继承，不修改父进程/全局环境。
+Compose两项仅按需在这个新子env附加原受保护key的内存值 `OPENSANDBOX_SERVER_API_KEY` 和本次
+synthetic目录 `AT07_CANARY_DIR`；其他CLI子env不带key/canary。不打印/复制key、不展开compose配置/env，
+只记录非秘密结果，stderr/异常可能含敏感值时保持secret-free错误和UNKNOWN，不原样发布。
+所有调用受剩余600s总窗口限制；超时/启动返回不确定都不重试，不能把进程退出码当远端效果已知。
+
+| 外层操作 | 加在同一task_prefix之后的typed参数（仅授权后） |
+| --- | --- |
+| version / info只读 | `["version", "--format", "{{.Server.Version}} {{.Server.APIVersion}}"]`；`["info", "--format", "{{.ID}} {{.OSType}}"]`，须与原受信transport实际daemon一致 |
+| 四固定镜像只读 | `["image", "inspect", task_fixed_image_at_digest, "--format", "{{json .RepoDigests}}"]`；只用下方四完整固定镜像，不pull |
+| 既有ID基线只读 | `["ps", "-aq", "--no-trunc"]`；`["volume", "ls", "-q"]`；`["network", "ls", "-q", "--no-trunc"]` |
+| 固定名称不存在检查 | `["ps", "-aq", "--no-trunc", "--filter", "name=^/morph-r1-at07-server$"]`及target同式；已有任一对象STOP不复用 |
+| Compose校验 | `["compose", "-f", task_final_compose, "config", "--quiet"]`，只用e635同字节文件与已核验插件，子env仅额外带受保护key/canary |
+| 一次新基础设施创建 | `["compose", "-f", task_final_compose, "up", "-d", "--no-build", "--pull", "never", "server", "target"]`；仅批准后一次，返回未知STOP不重试 |
+| 新server/target事实 | `["inspect", "--format", task_nonsecret_fixed_format, task_owned_full_id]`；首次从上述固定名称取得完整ID，再确认owner/image/创建时点/loopback/config挂载/实际targetIP；格式不得包含完整Env或token labels |
+| 精确基础设施收尾 | `["stop", "--time", "5", task_target_full_id, task_server_full_id]`后`["rm", task_target_full_id, task_server_full_id]`；仅已确认本次新建完整IDs且前一步效果已知，禁止按名/标签批量删除、compose down/prune |
+
+上表外层操作不进入`docker_read`，不扩展它的read-only/fixedexec白名单；唯一sandbox仍由原SDK创建/暂停/恢复/清理。
+后续prepare/live runner仍使用原正式参数、最终私有python、同完整configuration以及真实授权ref；
+当前serviceID/targetIP/runtime profile/ref均UNKNOWN，不能把这张审核表生成虚构profile或批准记录。
+官方参数来源仍为[Docker CLI文档](https://docs.docker.com/reference/cli/docker/)，没有复制上游实现或新建运行调度系统。
+
+## 历史19:39 端点绑定工程后继（仅离线验证）
 
 依据主控 `df12d36e31d4dd7d7a5a54263eed710f283689c2` 当前计划，原 B 后继业务 SOURCE
 `fc866465aa52a3f09773bc79a0fab95bceedc3d9` 已普通push，仅改 `at07_live.py` 与本文件对应的AT07测试。
@@ -95,7 +197,7 @@ input/session/support/refute 各 **2 PASS** 均为离线产品证据，本次未
 | 实验 / 受控目标 image | `python:3.12.13-slim@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36`；Linux amd64，Python 3.12，stdlib，无科研依赖安装 |
 | egress | `opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5` |
 | egress 平台清单 | Docker Hub Registry manifest 只读核对于 2026-10-03；amd64 子清单 `sha256:1361851fc54f0175da55c6e63978338d6cfc408a6cdaae6534965b9f76eaf605`；arm64 `sha256:bc1dc7791d2857ca08c31d17f8ad6886b127d42bedb372517886171ef7d287e2`；没有拉取 layer |
-| 宿主锁 | 前组合 SOURCE b480 原 `poetry.lock` SHA256 `87B335297F95B7BF72514691CB990DB0D6441316BE90C8CB726B016B9AF025EB`；模型字段用上文同值小写；端点修正后的最终组合/锁待I核对，锁变更必须重新匹配 |
+| 宿主锁 | 当前已发布e635原 `poetry.lock` SHA256 `87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb`，本次raw核对；与前组合b480同锁。CI返修后的后继身份待I交付，锁变更必须重新匹配，不从B旧8558锁复用binding |
 | 新自有服务 | Compose project `morph-r1-at07` / container `morph-r1-at07-server`；loopback `127.0.0.1:8099`；1 CPU / 512 MiB / 无额外 swap / 128 pids / restart=no |
 | 受控目标 | `morph-r1-at07-target`；0.25 CPU / 64 MiB / 无额外 swap / 8 pids / 只读 root / caps ALL dropped；TCP loopback8098→9000、UDP loopback8053→9053；600 秒自行退出 |
 | 无害 sandbox | **最多一次 SDK create、一个 sandbox、并发 1**；1 CPU / 512 MiB / 128 pids / 180 秒 lifetime / 30 秒 command / 1 MiB export；零 host/PVC bind、零 credential proxy、零 extensions |
@@ -229,7 +331,10 @@ preflight 在 SDK create 之前复核 daemon版本/API/ID/Linux、固定server i
 完整 inert fixture 可覆盖实际判据的分支，但不会成为运行事实；`unverified_record()`始终
 `verified=False,passed=False,process_limit=False,export_bounded=False`。
 
-## 仅在随后单独批准后：一次执行顺序
+## 历史一次执行顺序（裸CLI/父env示例不可直接执行）
+
+此段保留原准备顺序和未知效果/收尾限制；外层命令现以20:29审核模板为准，
+这里的裸docker与父shell `$env:` 示例不构成当前可执行路线或授权。原runner参数形式保留，不在本次调用。
 
 以下命令本轮 **全部 NOT_RUN**。执行者先写下授权引用、最终核心/产品SOURCE、私有installed环境、唯一probe-id、
 允许的宿主基础设施边界与600秒停止时间；同一授权不允许重试第二次create。
