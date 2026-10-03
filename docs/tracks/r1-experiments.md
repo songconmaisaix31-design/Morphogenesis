@@ -1,3 +1,32 @@
+# R1 B · 2026-10-03 18:09 后继：Poisson 离线契约审查
+
+Task `task_9ebbae6e5f3b` / Dispatch `ctx_85c678574200`；原 B Owner、worktree、
+`songconmaisaix31-design/morph-r1-experiments-1003` 分支不变。依据主控治理
+`9f42dfea066648b198d78877c8bdd9a9a55c8378` 的当前入口及18:09/18:05和Spec§14.2/14.4，
+新增[可审查 Poisson 草案](../experiments/l2-poisson-review.md)，只改该稿和本短报告。
+
+原 B SOURCE `5769005b09f1b756c94fdad0649a6b74690c0ca9` / REPORT
+`5aebd2eb7af774b3dc496ad9620548f6e7852e09` 保留；当前唯一核心冻结 SOURCE
+`b480fca1b10a0b6a9c93f0d1801d38f267662461` 不变。本段所在后继 commit 为 docs-only REPORT，
+exact SHA 由终端交付，不作为新业务 SOURCE，不复写下方历史 / 首失败。
+
+已静态定位 HostConfig → 原 GeneratedHostSettings / registry → 正式 MCP prepare / admit / run →
+原 executor / raw archive / evaluator → 独立复核 / feedback 与原消费采用链。
+EvaluationCriteria 已由 EvaluationSpec / poisson_reference_v1 提供；n/容差默认值只是未批准参考。
+数值一致不证明求解方法、训练测试独立或改进；有效负结论可贡献 / 降温，但 failed 源代码不得伪造 adoption。
+真实后续使用须原新任务本地再验证、源字节消费、fenced apply 与原 receipt，读文档不能替代。
+两次短契约 Handoff 已发主控；未扩写评价器、业务 / 测试 / 锁 / 部署 / AOCI 或 P/F 文件。
+
+本轮验证仅 raw Git 静态读取、docs diff、普通 commit/push `[skip ci]`、clean-tree / remote exact 核对。
+原110 PASS / 210 PASS / Q65及其日志身份在草案中区分列明，**本轮未重跑测试或安装**。
+治理18:09观察核心CI37114395256 Linux全门success、Windows当时运行；本轮不刷新 / 不宣称组合通过。
+原OpenCode首请求Insufficient Balance、原ctx settled failed、Codex首readiness timeout保留；不重试 / 换计费入口。
+正式材料导入、科学native、候选执行、实际复核 / 贡献 / 采用、AT07和L2均 **NOT_RUN**；
+用量 / 费用 **UNKNOWN**，P受保护树 / human TTY receipt未触碰，不称MVP/R1完成。
+独立I最后仅普通合本docs，合并保留`[skip ci]`，不再触发CI。
+
+---
+
 # R1 B · 2026-10-03 后继：受信 Docker 冻结导出
 
 仍是 Task `task_a8533b909675` / Dispatch `ctx_bd976e22265e`，原 B Owner/worktree/branch。
