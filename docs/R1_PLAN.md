@@ -1,3 +1,9 @@
+## 20:31 原CI首RED退原Q修复，不重跑原run
+
+原CI37122569886 attempt1/head e635已completed：Linux1823PASS/1FAIL/16SKIP/425.33s，WindowsCANCELLED。唯一失败为Q新test_untrusted_private_config_directory_cannot_reach_cli[junction]：fixture只patch asset_paths.sys.platform=win32而Linuxstat无IO_REPARSE_TAG_MOUNT_POINT；原no_links抛AttributeError，预期拒绝种类/CLI零调用断言未完成。不是已确认生产改动缺陷，不能skip/扩大允许AttributeError/改assertion冒充通过。I保留原fullraw及不重试该run，未开始新全产品暂缓，若已开始保留真实结果不盲停重开。
+
+原Q同Owner/树/branch/terminal后继parent task_7799a761b32c仅 tests/boundary_review/test_at07_route_boundary.py 与 docs/tracks/r1-boundaries.md 修复跨平台模拟所需原stat常量，保持真实no_links/CLI拦截/所有负断言。私有隔离子进程用缺该常量重现原junction firstRED，修后同case及五private-config状态必要检查；生产领域/B源码、依赖/profile/锁、其他测试和已绿54范围不重跑。普通SOURCE/REPORT push [skip ci]；唯一原I合精确testSOURCE后新最终core SOURCE才触发一次新的原CI，原e635失败与Windows取消保持。P仅最后SOURCE必要repin，不重测；完整产品保持一次最终组合，UI旧绿继续保留。B当前授权包必须标新工程首RED与修复待验，仍禁止Engine/probe/science。
+
 ## 20:29 固定最终组合与真实隔离授权包更新
 
 主控直接核对原P最终产品 SOURCE 8c716c450bf4b5b436e915726857260cc79cb17e，普通push/remote exact/clean；对94仅pyproject.toml、uv.lock、src/morph_research/__init__.py三pin文件4增4删，只有b480→e635完整SHA，依赖/UI/API/六developer配置零其它delta。旧root误写包路径由msg_a89118cf3d5e正式纠正，原Task task_f4c3bd2e8087/ctx_0e6f2936f26a无新派发。98原锁离线检查通过，P不重安装/全测，docsREPORT后独立交付。
