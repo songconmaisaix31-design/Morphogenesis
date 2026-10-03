@@ -549,3 +549,19 @@ native_authorized / native_execution_bound；⑥ `native_egress` 授权表；⑦
 criteria/probes/execution_bound 并更新冻结身份为 82201af4；B 无代码缺口、待真实批准输入与候选；
 P 无代码缺口、待真实 host grants 与获准材料。完整证据（不入库）：
 `C:/research-private/c-l2-current-review-ctx_6027d5a27c18/review.md`。
+
+### 本节纠错（2026-10-03，docs-only 后继提交；不改原 4072c14 代码路径证据与原失败）
+
+对上段两处事实标签更正：
+
+1. “未运行任何…模型…用量/费用 UNKNOWN”更正为：**科学 native 未运行**；本次开发审阅本身经
+   DeepSeek V4 Pro 模型与工具调用完成，CLI 末显示约 134.7K tokens / $0.21 仅为界面显示，
+   未独立核对真实 provider 计量/费用，故不写“没有模型”、不写 0 费用或费用节省；真实用量/费用仍 UNKNOWN。
+
+2. 上段“⑩ AT07 / L2 授权 NOT_RUN”及最小 Handoff“待真实批准输入”更正：用户已专项批准 AT-07
+   （“我现在批准AT-07，继续开发”）且 root 已实际接纳；原尝试创建前 STOP 封存，实际 AT07 执行未验，
+   PRE-SDK / FW / UAC / 新 offline 门仍待，这是执行未验而非用户权限缺失。L2 用户明确要求真实 AT07
+   全部 PASS 后才执行，当前不运行科学。剩余是 root 审核并固定完整配置/判据与实际 host inputs，
+   不是重复索要同一批准。
+
+provider/model 未改、未重试、未切换配置。
