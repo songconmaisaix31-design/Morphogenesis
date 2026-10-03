@@ -849,3 +849,29 @@ key仅保护路径引用，不读取；UAC/FW有效范围/NAT源/控制payload�
 本Task无Engine/SDK/key/FW/script调用/hostlistener/部署/科学/候选/native模型/付费，无测试/CLIhelp/安装/CI/第二SOURCE/pin；
 原600s STOP/SDK0/firstRED/旧8558/unsupported/unknown/Poisson review原样保留。AT07/L2 NOT_RUN，不称MVP/R1完成。
 验证仅静态调用路径/预算与unknown审阅、Git diffcheck/仅两docs普通REPORT commit+push `[skip ci]`/remoteexact/clean；模型用量费用UNKNOWN。
+
+## 23:18 剩余边界最小观察准备（不执行）
+
+原B `task_996216d89570` / `ctx_3387a64ad618`，同树/branch，读root89df315、6ea/Q739和E2C原guarded operator；其SHA不变，未调用任何mode。
+root已接纳生产core82201af4d3b369da827f6f22ff1d9c6b608c0108 + productd5d387a6f5c1778dffdd860986843826420edf5e及分列适用补验，
+旧6ea工程PENDING是历史，不写whole256重跑绿、不改SOURCE/pin。AT07批准已接受；本人UAC仍pending，L2为AT07全通过后的条件目标。
+当前只有包来源/有效过滤缺证：Q三profile日志off不能推出WFP NETEVENTS off，静态规则或timeout不能证明真实拒绝。
+root `msg_5de93567973d`提供正确NETEVENTS查询首exit1/0.2098s、requires elevation，原值仍UNKNOWN；
+首漏optionsfor语法输出exit0亦保留，不认配置成功。本B没有重复命令/RunAs/UAC/任何WFP操作。
+
+具体最小顺序已`msg_07cbe0a31176`交root并获`msg_9db282f80423`接纳：管理员后先官方System32 netsh
+`wfp show options optionsfor=NETEVENTS`；已有on则仅读，按Backend appid+47410+protocol6/17+timewindow60读netevents，
+再按实际同family local/remote tuple、dir=IN读filters（file=-捕获到新私有根，typed shell=False，10s/262144bytes有界）。
+同server健康/DNS阳性保持；后继同两基础设施容器至实际本机nonloopback NIC/47410的无害负控，只按真实IN包source/isLoopback/Backendappid/时点/协议/filterId归因原Q有效规则。
+同机路径仍可能回环化；无合法source/DROP对应、只有timeout/别的provider拒绝/IPv6无实际路径都UNKNOWN/SDK0 STOP，不猜NAT、不加跨宿主或第6容器。
+若NETEVENTS确实off，仅提案管理员一次on、保留原值、600s内核本次值后恢复原off；该开关宿主全局收集，程序/端口只过滤读取，
+会涉及他项目元数据/循环日志，不在Q“两规则only”scope内，供root另审，不承诺ALLOW事件齐全，不set/capture/auditpol/改profile日志。
+官方依据：[netsh WFP](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-wfp)、
+[DROP字段](https://learn.microsoft.com/en-us/windows/win32/api/fwpmtypes/ns-fwpmtypes-fwpm_net_event_classify_drop2)、[WFP循环日志](https://learn.microsoft.com/en-us/windows/win32/fwp/logging)；无自研观察框架/新执行器。
+
+下一入口沿用I2220正式Python -I -B、822原Git资源/锁、四原digest、API1.54/29.5.3/同daemon/npipe、原受控CLI/空ownedconfig与key仅路径引用；
+actualIDs/IP/加载字节、UAC、有效Q原回执/关联包记录、新probeID/目录/授权出处仍缺，不造科学配置/criteria/verified record。
+600s/入SDK余量>=420s、累计5containers含cache/1volume/0network/一次SDKcreate不扩；210/240循环非总时限，所有IO/finish/cleanup/观察恢复计时，不未知重试。
+私有`C:/research-private/b-at07-boundary-next-2318/observation-proposal.json`保存具体argv/过滤tuple/原值与恢复条件及coordinator首失败出处；原600s/SDK0/RED/UNKNOWN保留。
+本Task仅两docs REPORT：无业务/test/lock/profile/compose变动，无Engine/SDK/FW/hostlistener/流量/key/模型科学/Hub/测试/安装/CI/pull；
+验证为文档参数/现有调用只读核对与git diffcheck、普通skipci push/remoteexact/clean。实际隔离/AT07/L2 NOT_RUN，模型用量费用UNKNOWN。

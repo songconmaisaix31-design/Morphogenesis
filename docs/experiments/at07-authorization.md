@@ -1,7 +1,43 @@
 # AT-07 可审查授权包（准备完成不等于执行授权）
 
 本包针对 Spec §10.1、AT-07、§14.4。**真实 AT-07：NOT_RUN；L2：NOT_RUN。**
-**当前状态：用户已专项批准；本次创建前STOP，SDKcreate=0，PREPARED_UNVERIFIED。科学L2未获授权。**
+**当前状态：用户已专项批准；原尝试创建前STOP，SDKcreate=0，PREPARED_UNVERIFIED。真实AT07未通过，L2条件未满足。**
+
+## 23:18后继：仅补有效包来源/过滤观察准备，当前STOP
+
+原B `task_996216d89570` / `ctx_3387a64ad618`，读root `89df315ce7870fbc31616e2672e689f61ca1c446`、6ea与Q739。
+**当前工程组合822+d5及独立适用补验已由root接纳**，下文6ea的工程PENDING是当时历史；不称whole256重跑绿。
+AT07用户批准已接受；L2为实际AT07全通过后的用户条件目标，本Task仅准备，无执行权限，UAC本人OS交互仍pending。
+原600s STOP/SDK0不reset；当前剩余是有效FW下服务路径与非loopback拒绝的真实关联证据。
+
+最小路线：先由root只读原NETEVENTS设置，Q739三profile LogAllowed/LogBlocked=False**不证明WFP收集关闭**。
+root `msg_5de93567973d`实际回执：正确optionsfor查询exit1/0.2098s、requires elevation，原值仍UNKNOWN；
+首漏optionsfor的语法输出虽exit0亦保留，不当值/成功，本B不重复查询或启动UAC。
+参考[Microsoft netsh WFP](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-wfp)：
+`show options optionsfor=NETEVENTS`；随后`show netevents file=- protocol=6 localport=47410 appid=<实际Backend> timewindow=60`
+及protocol17，同实际tuple `show filters file=- protocol=<6或17> localport=47410 appid=<实际Backend> dir=IN verbose=ON`。
+所有是官方System32绝对netsh typed argv/`shell=False`模板，输出到本次新私有目录，10s/262144bytes有界；
+超限/无admin/缺字段/空记录如实STOP，不能把默认filters.xml写到任意cwd；完整参数/前后输出要求见私有`observation-proposal.json`。
+
+同原server64ID经host.docker.internal做6ea健康/DNS阳性；仅在后继获准后，从**同预算内server/target**至只读识别的
+本机实际nonloopback NIC地址/47410作固定无害TCP与UDP负控，不开hostlistener、不第6容器、不发科学/secret、不猜NAT或spoof源。
+记录请求时点/真实client sourceport、host-visible source/destination/family/protocol、Backend appid及实际PID/CreationDate、IN层/决定/filterId。
+拒绝须有同期真实DROP与原Q规则有效filter关联；成功包来源若无实际可归因记录仍UNKNOWN。
+同机发往NIC地址仍可能被Backend回环化，`isLoopback`/实际源与层不符、仅timeout、其它provider拒绝或无IPv6合法路径均不可冒充对应边界PASS；
+不凭此加跨宿主门，现范围拿不到证据就SDK0/STOP。官方[DROP字段](https://learn.microsoft.com/en-us/windows/win32/api/fwpmtypes/ns-fwpmtypes-fwpm_net_event_classify_drop2)
+及[过滤来源关联](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/filter-origin-documentation)是判读依据，静态filter匹配不是包命中。
+
+若NETEVENTS已on，复用不set；若确实off，**仅提案**管理员一次`set options netevents=on`，前后读原值并在同600s收尾核当前仍为本次值后精确恢复原off；
+未知/第三方变更不重试覆盖，保留knownremaining交root/Q。该开关宿主全局收集，程序/端口参数仅限制**读取**，会涉及他项目元数据/循环日志历史，
+超原Q“两规则only”scope，须root明确审阅；不能伪称按程序收集，不能保证所有ALLOW事件可用，当前无set/capture/auditpol/profile日志操作。
+Microsoft说明[WFP循环日志](https://learn.microsoft.com/en-us/windows/win32/fwp/logging)容量有限，需每次固定控制后立即分档，不重复发包补丢失证据。
+
+入口输入沿用6ea：正式I2220 Python `-I -B`、822原Gitprofile/compose/锁、四固定digest、1.54/29.5.3/同daemon/npipe、
+全新空ownedconfig/受控childenv、原key仅保护路径引用；actual server/target64IDs/IP/加载字节、本人UAC、Q确认规则回执/有效包记录、
+新probe目录/ID及实际authorization ref仍待填写，不造科学criteria/config/verified record。完整SDK proxy只在唯一SDKcreate后原入口验。
+累计5容器（含瞬态cache）/1volume/0network保持；SDK前余量>=420s，210/240循环非总耗时上界，IO/finish/精确收尾/观察恢复均计600s。
+不足即SDK0停止，不通过删重建或第二POST补验；same64ID stop后ports-unused再原Q精确Cleanup，清理FW边界后不得L2继承。
+私有packet `C:/research-private/b-at07-boundary-next-2318/`；本Task无Engine/SDK/FW/流量/key/测试/安装/CI/pull，所有首失败/UNKNOWN保留。
 
 ## 当前后继准备：822+d5 / API1.54 / 同两基础设施容器控制（未执行）
 
