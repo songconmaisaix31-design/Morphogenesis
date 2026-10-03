@@ -1,3 +1,37 @@
+## 22:09 原B最小SOURCE接纳与唯一原I接续
+
+主控直接读取并核对 B SOURCE c3a905eaf79a869dffb5960da9c4afee1dc63c3e（生产仅generated.py一行闭集1.52/1.54、默认1.52；三既有测试新增正负控制）、docs-only REPORT 08f2315dbc6a2396c4b55dd07a6d60f6fd115dfa；旧98断言及reader/export/registry/锁/profile/compose不变。原首6FAIL/29PASS/97deselected、修后131PASS/1FAIL（新增mock漏provenance）与修后仅该项1PASS/strict1source分别保留，不宣称完整132重跑。实际独立installed/新SOURCE门待唯一I。
+
+现阶段继续原I角色/树/分支，原任务task_33b99bbe70e8父接续；先恢复已核对同会话01a10119-cd06-7f40-a9fc-f6e46af64e7f，旧已关terminal不能发送。I write_paths仅 docs/tracks/r1-integration.md、原少量必要导入/路由/类型/SDK生成胶水（任何领域退B）、新C:/r1i/私有acceptance根；普通merge精确B c3/08f与root当前治理，不cherry-pick/force/改断言/锁/profile，不修改任何他轨WIP。及时发布唯一累计core SOURCE（最终来源提交不skip-ci），一次该新SOURCE原双平台CI；旧15de原SUCCESS与所有首失败不重跑/重写。原P后续恢复同会话01a10165-8eb4-7370-bb7d-da99cd19c66b，仅三个既有pin文件和owntrack，收到主控接纳的I SOURCE才repin。I再固定这个新组合做一次完整产品离线回归、新私有noneditable COPY来源/受影响B三测试installed/必要类型与原CIbuildSDKwheel；UI/前端生产零delta沿用原证据，不为pin重跑浏览器/已绿旧源码。全产品保留原255/1与修后单node，不合写旧256green；新组合统计只实际新run。
+
+原Q仅owntrack/私有只读端口与API审阅，现已证明关联SID不一致且声明版本未含publish_host，image revision UNKNOWN不能用主线能力；暂不改FW/镜像/Engine/runtime profile。root拟最小包仅回环127/8与::1，任何补齐范围待具体packet及原实际批准条件判断。B已发布固定egress digest OCI元数据与132032785字节压缩layers+config、解压/增量UNKNOWN、未pull/build；原尝试600秒STOP/SDK0不reset。真实AT07全项及原Q独立审核前候选/L2禁止；无新增品牌/语言/学科/L3/RSI或性能最优条件。
+
+## 21:57 实际运行前提返修：原B领域与原Q只读审查并行
+
+原B报告 d03e1557de795923894d8d89d7c089401bfdf005 已普通push/clean，仅三docs；原窗口STOP及首exit125/MISSING保留，后继只读证据为Engine29.5.3/API1.54/daemon6cc73c96-c021-4a82-ade6-2fc9ae693fff、Compose5.1.4、四固定镜像仅egress原digest缺失。用户专项AT07批准仍有效；已结束的原600秒尝试不可replay/reset，SDKcreate0，真实AT07及L2未验收。
+
+沿用原B Agent/worktree/branch，接续task_671c317b6196，仅 write_paths orchestration/experiments/generated.py、tests/experiments/test_at07.py、tests/experiments/test_frozen_export.py、tests/experiments/test_generated_configuration.py、docs/experiments/at07-authorization.md、docs/tracks/r1-experiments.md及新私有证据。最小闭集支持API1.54并保留1.52默认，复用既有/v{api}、exact preflight与TrustedProbeRegistry；不扩大任意API，不改at07_live/frozen_export/registry领域逻辑、profile/锁，不以DOCKER_API_VERSION或Engine升级绕开。定向正负测试后先发布SOURCE，再独立REPORT；必要新累计SOURCE/产品pin/受影响验收由原I/P接续，不重复旧SOURCE绿门。
+
+沿用原Q Agent/worktree/branch，接续task_33fe99de98b4，仅docs/tracks/r1-boundaries.md及新私有证据可写。只读审查当前Windows ActiveStore的实际DockerBackend/codex规则与完整关联过滤、IPv4/IPv6/NAT有效范围，确定动态47400..47410是否可证明只对已批准地址可达。无Engine写、listener/探针/科学/跨宿主、防火墙或daemon修改；无足够证据必须UNKNOWN/STOP，提出最小具体修复handoff，不用风险接受代PASS。B并行准备原egress完整digest官方出处/大小与一次精确拉取方案，只读公共metadata，当前不pull/build。主控不写业务，暂无新I/P进程，减少并发内存；待B SOURCE后只启动必要原I集成，领域退原B。AOCI可移植配置沿用，不新增品牌/学科/语言/评分系统，费用节省UNKNOWN。
+
+## AT07前置首STOP与官方调用路线返修（2026-10-03）
+
+原B Task `task_671c317b6196` / Dispatch `ctx_6b1c2488a3d2` 首worker-start结果turn_start_unobserved保留；主控两次确认已有同任务composer后只bareEnter一次/bytesWritten1，随后实际原B Working并读治理，未重复派发。UTC13:29:15.9497674操作窗口起，13:29:50.3472324一次Hidden启动原Desktop/PID64796；随后受控官方CLI `compose version --format json` exit125/stdout空，首stderr仅presence、内容MISSING，不还原或猜首具体error。UTC13:35:38.4788903在382.5291229秒封存STOP_before_key_prepare_deploy_create：SDKcreate0/基础设施create0/无新容器卷网IDs/registry未写；同一owned空config核identity/空目录后rmdir成功，其他项目Desktop启动影响NOT_ASSESSED，不写全清理或AT07PASS。原600秒窗口已结束，不续/reset/replay；实际AT07/L2仍NOT_RUN。
+
+为持续MVP，仍同B同Task只读工程诊断并追加本轨write_paths `docs/experiments/at07-authorization.md`，原own报告/新live证据可写、业务/profile/锁/其他Owner不变。官方Windows插件发现依赖固定系统ProgramFiles；实际 `C:/Program Files/Docker/cli-plugins/docker-compose.exe` 常规非link、33657776字节/SHA E295CD078CACEBC2081CB266275268B3895EC14452B31A9D7568CE295BD59915/Valid DockerInc，与已批准resources本体相同。主控正式接纳唯一必要非secret `ProgramFiles=C:/Program Files` 系统locator，保持原三system字段、同官方CLI/同npipe/新私有空config/typed argv/shellFalse；不是继承父env或改变auth/HOME/DOCKER*/TLS/proxy/context/全局设置，不扩SDK reader白名单。新只读诊断实际Compose v5.1.4/exit0/5.254s、空stderr/config仍空，UTC13:42:30.747583；原exit125/MISSING/STOP原样保留，后继诊断不是新probe或首失败替换。同route只读确认Engine/API/daemon/四固定镜像与端口实际facts，禁止SDK/部署/key/新Desktop/候选/科学与绿测试/安装/CI重跑，精确修正operator文档后普通push供审查。后续真实运行范围与实际门依据修正后的事实决定，不借只读诊断突破原STOP。
+
+启动后实际UTC13:35:17.4016351宿主可用物理内存235MiB、可用virtual4945MiB，同阶段出现工具卡顿/hook超时。主控逐一核原A/P/I已done、push且idle，精确关闭term_2bf537af/term_f7c4258b/term_e6a62e60三个终端，各回执ptyKilled=true；保留所有Git/原证据/会话文件，不触当前B、Q、root、用户C及其他用户终端/容器。13:39:59.134972 GlobalMemoryStatusEx观察可用物理1894MiB/load94%/availablecommit3594MiB，仅时点实测，不推因果或性能最优/全恢复。既有最终工程REPORT c5cdfc89/业务15de+c84/测试756保持，不为该operator诊断重新完整回归、repin或新增后端。模型用量/费用/节省UNKNOWN，MVP与完整R1尚未宣称完成。
+
+## 21:25 专项AT07用户批准与原B真实执行轨
+
+C协调会话在UTC13:23:20通过 `msg_f469ac99f92f` 转交用户明确“我现在批准AT-07，继续开发”。主控随后直接读取 `term_57e5296e-b048-4992-9840-3cb81960c8e8` 已提交终端stream，确认用户原话（非draft）；接受为针对已展示e40最终包的当前专项批准，不再询问同一批准、不将批准预写成检查PASS。主控先前async问题已由此实际用户决定满足。最终I docs-only REPORT `c5cdfc89e5a1e43ab49f9afc33a05a53d887e8ab` 已独立核对remote exact/clean，15de→REPORT仅六docs、非docs零delta；root bbd/Q c4de/B e40均普通祖先exit0，原业务15de+c84与测试756不变。
+
+本阶段仍原B Agent/树/分支，接续已done Task `task_36dcf2a5df0b`；只写 `docs/tracks/r1-experiments.md`、本次新增 `docs/experiments/at07-evidence/live-20261003.txt` 与B私有原始运行证据，e40授权包/业务/测试/锁/其他Owner只读。以I r2 noneditable最终环境与原Git profile/compose运行一次已批准无害AT07；可启动现有Desktop（Hidden）、只读核真实Engine/daemon/四镜像/CLI与Compose路由/端口和当前宿主资源，再按e40所有前置决定是否创建。最多一次SDKcreate/5新容器/1自有volume/0新network/600秒总实际操作窗口；接受已披露sidecar/cache无硬caps/总峰UNKNOWN与基础设施DNS，但实际候选deny/负例不得豁免，动态端口范围未能实际确认即create前STOP。缺镜像不pull/build，版本不符不upgrade，不改全局防火墙/daemon/HOME/auth/provider/系统pip；不碰他人容器/进程。
+
+只经原CLI prepare/live/review及原SDK/frozen export链，不造调度/执行/证明系统、不在宿主执行探针或候选。实际key只原受保护文件进受控child内存，不打印/复制密钥或全部Env。create/readiness/pause/resume/stream/对象/清理未知不重试/不第二POST，精确新ID归属清理并保留所有原raw/失败/未知；全项PASS待原Q独立审阅，不能自行写verified probe。按e40条件仅全PASS与独立审核、sandboxpair/volume/cache已确认清理后移除target并600秒内停止但保留同64ID server为retained_stopped；失败/未知走精确已知自有收尾，残留照实，不称全资源清空。B无需在未知时重复等审批或变后端；立即Handoff原事实和阻塞。
+
+原Q只在真实B档齐全后按同Owner新审阅Task读原raw/归属/完整configuration/effective限制与各正负控制；不重复SDKcreate/执行压力/候选/安装测试，不修改B结果或用代码fixture替实测。真实AT07完整通过并独立接纳后才允许候选进入环境并推进原一次L2，当前不授权科学/native模型/付费/材料外发。L3/效率对照/多用户/跨宿主/完整RSI/main/tag/部署不加入。按现有模型Codex GPT-6.1-Sol high YOLO接续，OpenCode余额阻塞不重试；实际费用/Token节省UNKNOWN。
+
 ## 21:15 最终离线工程验收与真实隔离下一步
 
 固定业务 SOURCE：核心 `15de4959646df264530b978dfde9152552b9a76b`，产品 `c84e49bd8e926f50d2c057793e8789cf137b310a`；测试修复 SOURCE `756d5069e7739089f0e5ba1c33eebfb2657b03f0`，P docs-only REPORT `eca3fd48c33fc602f1ddb3f45d91bd88e17b941b`。主控已核对最小两测试文件差异、原断言不变、remote exact/clean；I新165文件 raw Git COPY/nlink1、53产品文件（36 Python+17其他）与原installed逐字节一致，三个pin不变。原900秒角色预算未改，仅该四phase合法POST测试等待900秒；其余GET/重复POST/测试仍默认15秒。
