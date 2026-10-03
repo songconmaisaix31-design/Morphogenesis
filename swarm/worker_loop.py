@@ -263,11 +263,17 @@ class _Renewal:
         self.thread = Thread(target=self._run, name="scope-lease-renewal", daemon=True)
 
     def _run(self) -> None:
-        while not self.stop_event.wait(max(0.001, min(1.0, self.ttl / 3))):
+        interval = max(0.001, min(1.0, self.ttl / 3))
+        delay = interval
+        while not self.stop_event.wait(delay):
+            started = time.monotonic()
             with self.lock:
                 self._renew_locked()
                 if self.failed:
                     return
+            # The durable expiry already ages while renewal IO finishes. Count
+            # that time toward the interval instead of adding a full new wait.
+            delay = max(0.001, interval - (time.monotonic() - started))
 
     def _renew_locked(self) -> None:
         started = time.monotonic()
