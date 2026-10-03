@@ -1610,3 +1610,206 @@ No global pip/auth/HOME/configuration or AOCI assets changed; child processes
 exited, and private first evidence remains. Real Engine/key/probe/SDK create,
 science, AT-07, L2, main/tag/deployment remain NOT_RUN. Token usage/cost/savings
 remain UNKNOWN. This closes only Q's fixture repair.
+
+## 2026-10-03 Q: dynamic-port prerequisite review and unapplied host packet
+
+Owner Q, task `task_90f7d319dd74`, dispatch `ctx_9d2d8cbf6ca9`, continues
+completed task33fe in the same tree/branch/terminal. Governance read was root
+`ac861af727bcf3420b3e150cac72438a6cec3aa6` (21:57 plan). This is a docs-only
+REPORT: Q production, tests, profile, dependency/lock and AOCI assets have no
+delta. Original approved AT07 attempt stopped before key/deploy/create, SDK0,
+and its 600s window ended; that first STOP and all prior RED/green/CI history
+remain. This review does not replay it or declare actual AT07/review PASS.
+
+**Finding: approved-address-only reachability is UNKNOWN; pre-create STOP.**
+Static rules do not establish actual inbound reachability or prove future
+Docker-published ports are isolated. Private raw evidence is at
+`C:/research-private/q-at07-firewall-ctx9d2d-20261003`; observations began
+2026-10-03T14:00:59Z. No listener, firewall mutation, Engine mutation, SDK
+create, probe, key access or science was performed. Desktop was already
+running from B's separately recorded start; Q made bounded read-only queries.
+
+### ActiveStore and effective matching facts
+
+`read_firewall.ps1` uses `Get-NetFirewallRule -PolicyStore ActiveStore
+-DisplayName 'Docker Desktop Backend','codex_sandbox_offline_block*'` and the
+associated application/service/port/address/interface/interface-type/security
+filters. Only six relevant rules and bounded port/WSL queries were emitted.
+`related-rule-filters.json` and `read-firewall-first.log` retain raw values.
+
+| Relevant rule | Direction/action/profile | Matching filters and limitation |
+|---|---|---|
+| Docker Backend TCP / UDP Query User rules | Enabled, inbound ALLOW, Public; direct ActiveStore reads Enforced | Exact `C:\Program Files\Docker\Docker\resources\com.docker.backend.exe`; service Any; respective TCP/UDP; local/remote ports and addresses Any; interface/type Any; local/remote users and machines Any; authentication/encryption NotRequired; OverrideBlockRules false; edge traversal Allow |
+| Codex nonloopback inbound / outbound | Enabled BLOCK, profiles Any | Program/service/protocol/ports/interface Any; local address Any; remote IPv4 excludes 127/8, remote IPv6 excludes only ::1; security LocalUser is SID ending1007, not Any; authentication/encryption NotRequired, OverrideBlockRules false |
+| Codex loopback TCP / UDP outbound | Enabled BLOCK, profiles Any | Same local-user SID1007; remote127/8 and ::/127; TCP remote1-65535 or UDP Any. This outbound match cannot by itself block Backend inbound publication |
+
+Two existing Backend processes, PID69744 and72724, have the exact executable
+path above and owner SID ending1005; creation times are privately retained in
+`backend-identity-first.json` and `backend-owner-sids.json`. This establishes
+that the observed SID1007 restrictions do not match those Backend owners.
+Microsoft documents that LocalUser filters match traffic to/from the listed
+principals, rather than all applications/users.
+[Security-filter contract](https://learn.microsoft.com/en-us/powershell/module/netsecurity/get-netfirewallsecurityfilter?view=windowsserver2025-ps).
+
+WLAN and Mihomo are Public. WLAN has IPv4 and IPv6 Internet connectivity;
+Mihomo has IPv4 Internet and IPv6 local connectivity. No SSID/account name is
+published here. All three ActiveStore profiles have firewall enabled, inbound
+default Block, outbound default Allow, inbound/local firewall rules allowed,
+and no disabled-interface alias. MpsSvc is Running/Automatic. The current Q
+principal is **not administrator** (`firewall-authority-prerequisites.json`),
+so this session has not established permission to apply rules.
+
+An application-filter association lookup returned the same two Backend rule
+IDs but `NotApplicable`, including when ActiveStore was specified. The original
+direct rule query and a final exact-Name ActiveStore query both returned
+`Enforced`; all three outputs remain, including this projection discrepancy.
+Use direct effective-rule reads for the recorded status, not a silently
+normalized association status. Other providers/exception rules were not
+exhaustively dumped and are not declared absent.
+
+Explicit matching Windows Firewall BLOCK takes precedence over conflicting
+ALLOW, while an explicit ALLOW beats the default inbound Block. Consequently,
+a narrow new ALLOW cannot restrict the existing broad ALLOW, and an Any BLOCK
+cannot be repaired with an ordinary ALLOW exception.
+[Rule precedence](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/rules).
+These are matching-rule conclusions. WFP also arbitrates providers, layers
+and action-override rights; this review neither enumerates every WFP provider
+nor substitutes rule text for a packet traversing the relevant layers.
+[WFP arbitration](https://learn.microsoft.com/en-us/windows/win32/fwp/filter-arbitration).
+
+### Docker forwarding, IPv6 and frozen-version limits
+
+Read-only official CLI queries used the absolute Docker executable, explicit
+`--host npipe:////./pipe/dockerDesktopLinuxEngine`, a newly owned empty
+`--config` directory, shellFalse, timeout10s, and only PATH/SYSTEMROOT/WINDIR.
+`read_docker.py` retains argv/env names/raw results and executable SHA256;
+no Docker context/auth/HOME/proxy variables were inherited. No Config.Env,
+container auth labels, key or expanded Compose output was read.
+
+| Read | Actual result |
+|---|---|
+| `version --format` selected server data; `info --format` ID/version/OS | Desktop4.77.0; Engine29.5.3, API1.54, MinAPI1.40, Linux/amd64, WSL2 kernel; daemon `6cc73c96-c021-4a82-ade6-2fc9ae693fff`; exit0 |
+| `network inspect bridge --format` selected networking fields | driver bridge, subnet172.17.0.0/16, gateway172.17.0.1, EnableIPv6=false, Internal=false; exit0 |
+| `ps -a --format` Ports only; `Get-NetTCPConnection` Listen / `Get-NetUDPEndpoint` local47400..47410 | No current publication/listener record for this range. No existing resources were altered |
+| `Get-NetNat` selected fields | Empty. This does not prove absence of Docker Desktop's VM/backend forwarding |
+| WSL creator Hyper-V VM settings and rules in ActiveStore | Enabled, default inbound Block/outbound Allow, LoopbackEnabled and AllowHostPolicyMerge true; selected rules include profile defaults/ICMP/mDNS, no47400..47410 exception. No proven mapping of the future Backend relay through this layer |
+| Exact `container inspect morph-r1-at07-server` selected networking fields | First exit1, `No such container`; no actual service-proxy address can be read before this service exists |
+| Fixed `image inspect ...server:release-1.1.0@sha256:68ca...` | First template exit1 because Labels field absent; corrected safe-index read exit0, exact imageId/RepoDigest68ca, Labels=null. Image revision and packaged source contents remain UNKNOWN |
+
+Docker documents that Windows/WSL2 published ports pass through
+`com.docker.backend.exe`, which listens on host ports and forwards into the
+Linux VM; default publication uses all interfaces. Host firewall rules may
+filter that executable. This is the relevant architecture, rather than an
+inference that Windows Get-NetNat or Linux host iptables shows the whole path.
+[Docker Desktop networking](https://docs.docker.com/desktop/features/networking/).
+The observed Hyper-V settings describe WSL policy; loopback enablement and
+policy merge alone do not prove the specific Desktop publication boundary.
+[Hyper-V firewall](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/hyper-v-firewall).
+Bridge/egress IPv6 disabled does not demonstrate that the Windows host's
+IPv6-facing Backend sockets cannot accept inbound connections.
+
+The original profile's Git bytes remain1013B, SHA256
+`438fe04be51d07188b6bc4b26fbd85c2e7ce28dc02e31ed3af2a4cf27f3c0b79`,
+read from core15de. It declares upstream
+`b1a29cf93a823a95913f7943010febb3f29de05c`. Official GitHub blobs for that exact
+revision were fetched privately and their Git blob bytes checked, without
+installing/importing upstream code: configuration.md/config.py/networking.py/
+docker_service.py have no publish_host; port_allocator.py defines
+DOCKER_PUBLISH_HOST=0.0.0.0, and sidecar execd/http bindings also use0.0.0.0.
+host_ip controls endpoint resolution, not publication binding.
+[Declared-version configuration](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/opensandbox_server/config.py),
+[allocator](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/opensandbox_server/services/docker/port_allocator.py).
+This source evidence does not establish image/source correspondence when the
+image has no revision label. No main-branch field, version upgrade, host_ip
+change or unverified profile switch is proposed as current support.
+
+### Concrete minimal host packet: proposed, NOT applied or authorized
+
+Root message `msg_c185348001a5` selected proposed permitted origins **127.0.0.0/8
+and ::1 only**, excluding guessed private CIDRs/gateways. It did not authorize
+firewall modification. Private `firewall-change-packet.ps1` contains one
+uninvoked review function with exactly two New-NetFirewallRule calls; its
+proposed parameters are:
+
+| Field | Exact proposed value |
+|---|---|
+| Names | `Morph-R1-AT07-Q-ctx9d2d8cbf6ca9-TCP-NonLoopback`, `Morph-R1-AT07-Q-ctx9d2d8cbf6ca9-UDP-NonLoopback` |
+| Store/group | PersistentStore / `Morph-R1-AT07-Q-ctx9d2d8cbf6ca9`; fresh unique owner names, no edit of existing rules |
+| Direction/action/enabled | Inbound / Block / True |
+| Program/service/users | Exact official Backend absolute path above; Service Any; LocalUser/RemoteUser/RemoteMachine Any, covering actual Backend SID1005 |
+| Protocol and ports | One TCP and one UDP rule; LocalPort47400-47410, RemotePortAny |
+| IPv4 nonloopback remote complement | `0.0.0.0-126.255.255.255`, `128.0.0.0-255.255.255.255` |
+| IPv6 remote complement of ::1 | `::`, `::2-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff` |
+| Remaining match/security | ProfileAny, LocalAddressAny, InterfaceAlias/InterfaceTypeAny; Authentication/EncryptionNotRequired; OverrideBlockRulesfalse; EdgeTraversalBlock |
+
+Both exact proposed names were absent in the read-only preapply lookup at
+14:11:19Z; this is not a reservation or proof of later absence. It must be
+rechecked in both PersistentStore and ActiveStore immediately before any
+authorized attempt. Require separately approved scope and an elevated original
+owner, current Backend path/process identity, MpsSvc Running, enabled effective
+profiles/local-policy merge, and stable relevant rules/interfaces. Do not
+change service, default policy, old Docker/Codex rules, profile438, daemon or
+other ports. This packet affects this Backend port range regardless of local
+user and must not be treated as permission to reuse another workload's ports.
+
+If later authorized, record each create response once; if one rule creation
+fails/is unknown, STOP before SDK and inspect only those exact names instead
+of blindly reissuing the mutation. Before admission, retrieve both names by
+direct ActiveStore query plus all associated filters and compare every field
+above, enforcement and policy-store source. Recheck the existing Backend
+ALLOW/security exceptions and current interfaces; any missing/overridden/
+conflicting field, projection ambiguity or unapplied local policy stays STOP.
+An absent listener or default Block is not a replacement for these checks.
+
+Only exact owned-name rules whose full filters/store still equal the recorded
+proposal may be removed by a separately authorized original owner. No wildcard
+removal, foreign-rule deletion, default-policy restoration or automatic retry.
+Unknown cleanup is preserved and handled by exact read-only inspection.
+Removing rules invalidates this boundary for later same-ID L2 service use;
+re-evaluate effective policy and reachability then, without inheriting old
+probe authority across a changed host boundary.
+
+Actual service-to-host.docker.internal forwarding may arrive with a
+nonloopback source. The observed bridge gateway is not that source identity.
+Under this proposed loopback-only approval, failure of the service proxy is a
+pre-create STOP; do not widen the packet to gateway/private CIDR automatically.
+If a future harmless control is separately approved, a bounded pre-SDK option
+is one short-lived owned inert container from the already pinned Python image,
+no volume/network creation or pull, publishing TCP+UDP at a freshly free port
+inside this range. Use only owned local canary clients and the subsequently
+approved service proxy to observe the actual connection/source, then remove
+that exact control container before the original AT07 resource set (at most
+five objects) and at most one SDK create. No control is implemented/run here.
+Local self-connect checks cannot establish cross-host reachability; cross-host
+testing remains outside this authorization. A denied/missing proxy control or
+missing external-ingress evidence remains UNKNOWN/STOP, not a reason to retry
+SDK create, relax the allowlist, or declare AT07 PASS.
+
+### B API SOURCE review and closing limits
+
+Root supplied B SOURCE `c3a905eaf79a869dffb5960da9c4afee1dc63c3e` in
+`msg_5c09cad1eda0`. Q read its exact Git blobs and diff privately, without
+merging, installing or testing it. Production delta is only generated.py's
+Literal[1.52,1.54], retaining default1.52. The existing execute call chain
+validates complete configuration, preflights the same FrozenDockerExport,
+checks actual /version.ApiVersion equality, and passes the same bound config
+to its CLI reader before _execute/key/SDK. Frozen request URLs use that
+configuration's api_version. Direct backend admission still compares full
+probe configuration and preflights before its unique SDK create.
+
+The existing three test files add both-direction supported-API mismatch
+zero-CLI/SDK assertions, explicit closed-schema/legacy-default cases,
+unsupported API refusal, reverse probe conflict and /v1.54 archive assertions;
+old substantive assertions remain. This bounded static review found no new
+binding regression. It is not an independent installed/live PASS; no Q test
+path was requested and no old54/full-core/product/UI/CI/type gate was rerun.
+An initially guessed nonexistent adapter path produced Git exit128 and was
+preserved; corrected sandbox_adapter.py raw identity was subsequently checked.
+
+Handoffs `msg_9ecd716aed27`, `msg_8fed36a5d91d`, `msg_d8bb22339533` delivered
+the first policy/identity gap, frozen-source/image limits and exact API review.
+No Q business SOURCE was created. This ordinary docs-only commit/push uses
+[skip ci]; root/original owners decide host permission and continuation, and
+the same I owns any necessary later integration. Actual dynamic ingress,
+service-proxy/NAT source and image revision remain UNKNOWN; actual AT07 and
+L2 remain NOT_RUN. Token usage, cost and savings remain UNKNOWN.
