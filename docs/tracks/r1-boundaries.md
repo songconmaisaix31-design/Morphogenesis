@@ -1921,3 +1921,98 @@ selection. Only this appended own REPORT is ordinarily committed/pushed
 with [skip ci], remote exact/clean checked; there is no new Q business SOURCE.
 Actual apply/cleanup, complete network evidence, AT07 and L2 remain NOT_RUN.
 Token usage, cost and savings remain UNKNOWN.
+
+## 2026-10-03 Q: independent pre-SDK packet review, no execution
+
+Task `task_6735e8f955e0`, Dispatch `ctx_7b3806335d93`, same Q owner/tree/branch.
+Read B docs-only REPORT `6ea5e5dd81bdf53e33f46beed74f7382a804efaf` and
+`C:/research-private/b-at07-pre-sdk-ctx_78a8eebd6960/control-proposal.json`,
+root plan `09c52988390ba4eace08f2eb4e3592682c8b15a2`, Spec sections 10.1/14.3
+and the original AT07 authorization. Later direct Task/status messages govern
+where that plan snapshot is older. Private evidence is retained at
+`C:/research-private/q-at07-presdk-review-ctx_7b3806335d93/`.
+Reviewed production objects are core `82201af4d3b369da827f6f22ff1d9c6b608c0108`
+and product `d5d387a6f5c1778dffdd860986843826420edf5e`; neither was executed here.
+
+B's minimum proposal reuses the same server and target, adding only server
+`0.0.0.0:47410:8090/tcp` and target `0.0.0.0:47410:9053/udp`, retaining the
+original loopback publications. Fixed stdlib health/DNS positive controls use
+the actual server ID/interpreter, typed official CLI, bound host/owned empty
+config, shell=False, minimal three-variable child environment and outer 10s.
+The declared interpreter path still needs actual confirmation; no new binary
+revision, fake-label or complete pre-SDK sandbox-proxy gate is introduced.
+Complete proxy testing belongs after the sole harmless SDK create. Original
+preflight accepts any loopback8099 entry, not a unique mapping; B's first
+misinterpretation and correction remain preserved. Actual HostConfig/Ports,
+loaded configuration, same full IDs, cache ownership/destruction and effective
+host filters must be recorded, not inferred from this static proposal.
+
+The cumulative cap remains five containers (including transient cache), one
+owned volume, zero new networks, one harmless SDK create and one 600s window.
+Removing/recreating controls does not reset counts. Windows TCP47410 collision
+with the server namespace allocator remains possible; failure is STOP, not a
+second create or range change. Remaining >=420s before SDK is a conditional
+planning threshold: core822 checks the 210s step limit between steps and the
+240s expiry loop before each iteration; bounded CLI work and finish/inventory
+still follow. It is not a hard 240s total runner deadline. Actual elapsed time
+and the absolute 600s stop remain necessary; speed is not a new success gate.
+
+Current read-only NetSecurity evidence (`current-exact-related-filters.json`)
+contains only six previously identified related rules and their application,
+service, port, address, interface/type and security filters. Backend inbound
+TCP/UDP still allow Any port/remote address; Codex blocks have different local
+security identity constraints, so they cannot stand in for Backend protection.
+The two exact owned Q names returned zero matches in PersistentStore/ActiveStore.
+All three ActiveStore profiles are enabled and allow local-rule merging; their
+LogAllowed/LogBlocked are disabled. Interface/profile facts are recorded
+separately from packet behavior. SID1005 is still nonadmin. Q operator SHA
+`E2C23FF1A0CE3C84F80E02A101A1DDB235595A623F87C1CAE1F3066ACA51911F`
+is unchanged, every mode NOT_RUN. No UAC, policy/logging/WFP change or packet
+execution occurred. Windows admin is an OS requirement, not another request
+for the already accepted AT07 authorization.
+
+Spec AT-07 requires real harmless file/network/resource refusal; the original
+authorization requires approved dynamic-port reachability before SDK creation.
+The proposed health/DNS successes establish only their positive route. Static
+rules, an enabled profile or local loopback failure cannot prove external denial.
+Within one host, legitimate future evidence is the original operator's exact
+rule/store/filter readback, actual publications and interface/profile, plus an
+already available bounded WFP/drop record tying the actual nonloopback source,
+destination port/protocol, application and deny decision to that path. A client
+in already-budgeted infrastructure is useful only if host-visible source and
+filter traversal are established; NAT/self-route assumptions are insufficient.
+No extra listener/container, cross-host requirement or logging reconfiguration
+is added here. Such packet/source attribution is absent now: external ingress
+and service-proxy/NAT source remain UNKNOWN/STOP, not risk-accepted PASS.
+This is an existing admission limitation, not a new requirement to test the
+nonexistent sandbox's complete proxy before its sole authorized creation.
+Official context: [Docker Desktop networking](https://docs.docker.com/desktop/features/networking/),
+[Windows rule precedence](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/rules)
+and [firewall logging](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/configure-logging).
+
+Old background identity is now narrowed to exec session19099: Python PID68432,
+parent64640, CreationDate `2026-10-03T19:54:17.771131+08:00`, private
+`source-lf-venv/Scripts/python.exe -I .../verify_install.py ... fc866465aa52a3f09773bc79a0fab95bceedc3d9`.
+Historical call at 11:58:46.963Z matched PID/creation/command before stopping
+only that owned import; its stop-command receipt is exit0, chunk49c7d4.
+This is not the original exec's exit code. Current exact PID/path queries find
+no matching process, but an empty poll still returns session19099 without an
+exit code (chunk1b1d38). Exec retirement/all-background cleanup is therefore
+NOT_ESTABLISHED; no current kill/CtrlC was sent. The earlier report's blanket
+private-process-exited sentence is qualified by this distinction, not erased.
+Original interruption ownership and this unresolved session state are retained.
+The first history-reader sharing failure is also preserved before the successful
+FileShare.ReadWrite read of this exact own session; no empty history was inferred.
+
+Root received the concrete checkpoint and handoff, including the unresolved
+exec, external evidence gap and budget qualification. Current Task reports core
+CI Win1839/15SKIP, Linux1838/16SKIP, strict140 and SDK wheel green; product
+whole254PASS/2FAIL and P test-only c0dd targeted/I follow-up remain pending.
+Those are coordinator facts, not Q reruns or whole-engineering acceptance.
+Verification here is read-only Git/source/NetSecurity/process inspection and
+`git diff --check`, followed by ordinary docs-only `[skip ci]` publication with
+remote exact/clean checks. Production/tests/locks/profile/compose/AOCI and the
+original operator are unchanged. All first REDs, the original 600s STOP/SDK0,
+the B first misread and prior reports remain. Actual controls, apply/cleanup,
+SDK, real AT07, isolation, candidate/L2/science remain NOT_RUN; this review is
+complete but is not runtime reviewPASS. Token usage/cost/savings remain UNKNOWN.
