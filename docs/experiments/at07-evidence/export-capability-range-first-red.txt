@@ -1,0 +1,64 @@
+........F..F...FFF                                                       [100%]
+================================== FAILURES ===================================
+_________________ test_bounded_normal_file_reaches_sdk_stream _________________
+tests\experiments\test_at07_export.py:57: in test_bounded_normal_file_reaches_sdk_stream
+    files.read_bytes_stream.assert_called_once_with("/tmp/morph-research/result.bin", range_header="bytes=0-64")
+C:\Python313\Lib\unittest\mock.py:991: in assert_called_once_with
+    return self.assert_called_with(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python313\Lib\unittest\mock.py:979: in assert_called_with
+    raise AssertionError(_error_message()) from cause
+E   AssertionError: expected call not found.
+E   Expected: read_bytes_stream('/tmp/morph-research/result.bin', range_header='bytes=0-64')
+E     Actual: read_bytes_stream('/tmp/morph-research/result.bin', limit=65)
+______ test_official_sdk_directory_types_and_bounded_download_wire[file] ______
+tests\experiments\test_at07_export.py:106: in test_official_sdk_directory_types_and_bounded_download_wire
+    assert session.download("/tmp/morph-research/result.bin", 64) == b"safe"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+orchestration\experiments\backend.py:120: in download
+    chunks: Iterator[bytes] = self.sandbox.files.read_bytes_stream(path, limit=limit + 1)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\opensandbox\sync\adapters\filesystem_adapter.py:192: in read_bytes_stream
+    response = self._httpx_client.send(request, stream=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_transports\mock.py:24: in handle_request
+    response = self.handler(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+tests\experiments\test_at07_export.py:98: in respond
+    assert "limit" not in request.url.params
+E   AssertionError: assert 'limit' not in QueryParams('path=%2Ftmp%2Fmorph-research%2Fresult.bin&limit=65')
+E    +  where QueryParams('path=%2Ftmp%2Fmorph-research%2Fresult.bin&limit=65') = URL('http://localhost:44772/files/download?path=%2Ftmp%2Fmorph-research%2Fresult.bin&limit=65').params
+E    +    where URL('http://localhost:44772/files/download?path=%2Ftmp%2Fmorph-research%2Fresult.bin&limit=65') = <Request('GET', 'http://localhost:44772/files/download?path=%2Ftmp%2Fmorph-research%2Fresult.bin&limit=65')>.url
+__ test_live_export_unsupported_cannot_be_overridden_by_filled_probe[admit] ___
+tests\experiments\test_at07_export.py:146: in test_live_export_unsupported_cannot_be_overridden_by_filled_probe
+    assert not report.declared.export_bounded
+E   AssertionError: assert not True
+E    +  where True = IsolationCapability(no_host_write=True, no_credentials=True, no_host_control=True, no_privilege=True, export_bounded=True, network_deny=True, cpu_limit=True, memory_limit=True, process_limit=True, time_limit=True, self_owned_cleanup=True).export_bounded
+E    +    where IsolationCapability(no_host_write=True, no_credentials=True, no_host_control=True, no_privilege=True, export_bounded=True, network_deny=True, cpu_limit=True, memory_limit=True, process_limit=True, time_limit=True, self_owned_cleanup=True) = IsolationReport(backend='opensandbox', declared=IsolationCapability(no_host_write=True, no_credentials=True, no_host_c...ue, self_owned_cleanup=True), verified=True, probe='passed', proof_ref='fixture-probe', reasons=(), configuration=None).declared
+__ test_live_export_unsupported_cannot_be_overridden_by_filled_probe[create] __
+tests\experiments\test_at07_export.py:146: in test_live_export_unsupported_cannot_be_overridden_by_filled_probe
+    assert not report.declared.export_bounded
+E   AssertionError: assert not True
+E    +  where True = IsolationCapability(no_host_write=True, no_credentials=True, no_host_control=True, no_privilege=True, export_bounded=True, network_deny=True, cpu_limit=True, memory_limit=True, process_limit=True, time_limit=True, self_owned_cleanup=True).export_bounded
+E    +    where IsolationCapability(no_host_write=True, no_credentials=True, no_host_control=True, no_privilege=True, export_bounded=True, network_deny=True, cpu_limit=True, memory_limit=True, process_limit=True, time_limit=True, self_owned_cleanup=True) = IsolationReport(backend='opensandbox', declared=IsolationCapability(no_host_write=True, no_credentials=True, no_host_c...ue, self_owned_cleanup=True), verified=True, probe='passed', proof_ref='fixture-probe', reasons=(), configuration=None).declared
+______ test_prepared_full_probe_cannot_survive_export_support_downgrade _______
+tests\experiments\test_at07_export.py:170: in test_prepared_full_probe_cannot_survive_export_support_downgrade
+    monkeypatch.setattr(adapter, "ATOMIC_EXPORT_SCOPE_SUPPORTED", True)
+E   AttributeError: <module 'orchestration.experiments.sandbox_adapter' from 'C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-r1-experiments-1003\\orchestration\\experiments\\sandbox_adapter.py'> has no attribute 'ATOMIC_EXPORT_SCOPE_SUPPORTED'
+=========================== short test summary info ===========================
+FAILED tests/experiments/test_at07_export.py::test_bounded_normal_file_reaches_sdk_stream
+FAILED tests/experiments/test_at07_export.py::test_official_sdk_directory_types_and_bounded_download_wire[file]
+FAILED tests/experiments/test_at07_export.py::test_live_export_unsupported_cannot_be_overridden_by_filled_probe[admit]
+FAILED tests/experiments/test_at07_export.py::test_live_export_unsupported_cannot_be_overridden_by_filled_probe[create]
+FAILED tests/experiments/test_at07_export.py::test_prepared_full_probe_cannot_survive_export_support_downgrade
+5 failed, 13 passed in 0.68s

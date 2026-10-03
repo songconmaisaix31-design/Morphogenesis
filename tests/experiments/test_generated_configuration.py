@@ -9,7 +9,7 @@ from types import SimpleNamespace
 import pytest
 
 from orchestration.experiments import sandbox_adapter as adapter
-from orchestration.experiments.generated import effective_environment
+from orchestration.experiments.generated import DockerExportConfiguration, effective_environment
 from orchestration.experiments.generated_executor import GeneratedExperimentExecutor
 from orchestration.experiments.trusted import IsolationProbeRecord, TrustedProbeRegistry
 from tests.experiments.generated_helpers import (
@@ -28,9 +28,12 @@ def no_execution_or_network(monkeypatch):
     monkeypatch.setattr(socket.socket, "connect_ex", denied)
 
 
-def configured_backend(plan):
+def configured_backend(plan, *, frozen_export=True):
     settings = dict(domain="127.0.0.1:65534", instance_id="fixture-deployment-1",
                     runtime_profile="fixture-linux-pids16-v1", server_process_limit=16)
+    if frozen_export:
+        settings["docker_export"] = DockerExportConfiguration(endpoint="npipe:////./pipe/dockerDesktopLinuxEngine",
+            daemon_id="inert-daemon-1", engine_version="29.5.3")
     configuration = adapter.LocalCpuSandboxBackend(**settings).configuration(plan)
     record = IsolationProbeRecord(probe_id="fixture-probe", backend="opensandbox",
         declared=full_capability(), image_digest=IMAGE_DIGEST, configuration=configuration,
@@ -47,11 +50,17 @@ def test_supported_configuration_reaches_sdk_with_real_deny_and_repository_diges
         calls.append((image, kwargs))
         return SimpleNamespace(id="inert-sdk-return")
     monkeypatch.setattr(adapter.SandboxSync, "create", capture)
+    preflight = []
+    def control(config):
+        assert config.docker_export == backend._docker_export
+        return SimpleNamespace(preflight=lambda: preflight.append(config), close=lambda: None)
+    monkeypatch.setattr(adapter, "FrozenDockerExport", control)
     executor = GeneratedExperimentExecutor(backend, probe_registry=TrustedProbeRegistry((record,)))
     executor.admit(executor.prepare(plan, {"experiment.py": GENERATED_CODE.encode()}))
     session = backend.create(plan, make_context())
     assert session.id == "inert-sdk-return"
     assert len(calls) == 1  # Refusal is not a passing SDK-configuration test.
+    assert len(preflight) == 1
     image, options = calls[0]
     assert image == "fixture@" + IMAGE_DIGEST
     assert options["network_policy"].model_dump(mode="json")["default_action"] == "deny"
@@ -62,7 +71,8 @@ def test_supported_configuration_reaches_sdk_with_real_deny_and_repository_diges
 
 
 @pytest.mark.parametrize("change", ["endpoint", "instance", "runtime", "network", "process", "image",
-    "lock", "python", "sdk", "backend", "cpu", "memory", "duration", "lifetime", "export", "digest"])
+    "lock", "python", "sdk", "backend", "cpu", "memory", "duration", "lifetime", "export", "digest",
+    "docker_endpoint", "docker_daemon", "docker_version"])
 def test_exact_probe_binding_rejects_changed_effective_configuration(monkeypatch, change):
     plan = make_poisson_plan()
     backend, record = configured_backend(plan)
@@ -81,6 +91,10 @@ def test_exact_probe_binding_rejects_changed_effective_configuration(monkeypatch
     elif change == "digest":
         record = record.model_copy(update={"image_digest": "sha256:" + "e" * 64})
         backend._probe = record
+    elif change.startswith("docker_"):
+        key, value = {"docker_endpoint": ("endpoint", "unix:///var/run/docker.sock"),
+            "docker_daemon": ("daemon_id", "other-daemon"), "docker_version": ("engine_version", "29.5.4")}[change]
+        backend._docker_export = backend._docker_export.model_copy(update={key: value})
     else:
         fields = {"cpu": ("cpu", 2), "memory": ("memory_mib", 1024), "duration": ("command_seconds", 29),
                   "lifetime": ("lifetime_seconds", 179), "export": ("artifact_bytes", 1024)}

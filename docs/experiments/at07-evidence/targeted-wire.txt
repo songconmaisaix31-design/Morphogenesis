@@ -1,0 +1,91 @@
+....................................F..                                  [100%]
+================================== FAILURES ===================================
+______ test_official_sdk_directory_types_and_bounded_download_wire[file] ______
+
+leaf_type = 'file'
+
+    @pytest.mark.parametrize("leaf_type", ["file", "symlink", None])
+    def test_official_sdk_directory_types_and_bounded_download_wire(leaf_type):
+        import httpx
+        from opensandbox.config import ConnectionConfigSync
+        from opensandbox.models.sandboxes import SandboxEndpoint
+        from opensandbox.sync.adapters.filesystem_adapter import FilesystemAdapterSync
+    
+        requests = []
+        children = {"/": "/tmp", "/tmp": "/tmp/morph-research", "/tmp/morph-research": "/tmp/morph-research/result.bin"}
+        def respond(request):
+            requests.append(request)
+            if request.url.path == "/directories/list":
+                assert request.url.params["depth"] == "1"
+                name = children[request.url.params["path"]]
+                body = {"path": name, "size": 4, "mode": 600, "owner": "root", "group": "root",
+                        "modified_at": "2026-10-03T00:00:00Z", "created_at": "2026-10-03T00:00:00Z"}
+                kind = leaf_type if name.endswith(".bin") else "directory"
+                if kind is not None:
+                    body["type"] = kind
+                return httpx.Response(200, json=[body], request=request)
+            assert request.url.path == "/files/download"
+            assert request.headers["range"] == "bytes=0-64"
+            return httpx.Response(206, content=b"safe", request=request)
+        config = ConnectionConfigSync(transport=httpx.MockTransport(respond), use_server_proxy=True)
+        files = FilesystemAdapterSync(config, SandboxEndpoint(endpoint="localhost:44772"))
+        session = OpenSandboxSession(SimpleNamespace(id="inert-wire", files=files), owned=True)
+        try:
+            if leaf_type == "file":
+>               assert session.download("/tmp/morph-research/result.bin", 64) == b"safe"
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\experiments\test_at07_export.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+orchestration\experiments\backend.py:115: in download
+    chunks: Iterator[bytes] = self.sandbox.files.read_bytes_stream(path, limit=limit + 1)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\opensandbox\sync\adapters\filesystem_adapter.py:192: in read_bytes_stream
+    response = self._httpx_client.send(request, stream=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_transports\mock.py:24: in handle_request
+    response = self.handler(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+tests\experiments\test_at07_export.py:97: in respond
+    assert request.headers["range"] == "bytes=0-64"
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Headers({'host': 'localhost:44772', 'accept': '*/*', 'accept-encoding': 'gzip, deflate, zstd', 'connection': 'keep-alive', 'user-agent': 'OpenSandbox-Python-SDK/1.1.0'})
+key = 'range'
+
+    def __getitem__(self, key: str) -> str:
+        """
+        Return a single header value.
+    
+        If there are multiple headers with the same key, then we concatenate
+        them with commas. See: https://tools.ietf.org/html/rfc7230#section-3.2.2
+        """
+        normalized_key = key.lower().encode(self.encoding)
+    
+        items = [
+            header_value.decode(self.encoding)
+            for _, header_key, header_value in self._list
+            if header_key == normalized_key
+        ]
+    
+        if items:
+            return ", ".join(items)
+    
+>       raise KeyError(key)
+E       KeyError: 'range'
+
+.venv\Lib\site-packages\httpx\_models.py:302: KeyError
+=========================== short test summary info ===========================
+FAILED tests/experiments/test_at07_export.py::test_official_sdk_directory_types_and_bounded_download_wire[file]
+1 failed, 38 passed in 0.67s

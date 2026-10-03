@@ -21,13 +21,16 @@ from typing import Literal, Protocol
 from opensandbox.models.sandboxes import NetworkPolicy
 from opensandbox.sync.sandbox import SandboxSync
 
-from orchestration.experiments.backend import ExperimentSession, OpenSandboxBackend, OpenSandboxSession, UnsupportedCapability
+from orchestration.experiments.backend import (
+    ATOMIC_EXPORT_SCOPE_SUPPORTED, ExperimentSession, OpenSandboxBackend, OpenSandboxSession, UnsupportedCapability,
+)
 from orchestration.experiments.generated import (
-    BackendProfile, GeneratedContext, GeneratedExperimentPlan, IsolationCapability, IsolationConfiguration,
+    BackendProfile, DockerExportConfiguration, GeneratedContext, GeneratedExperimentPlan, IsolationCapability, IsolationConfiguration,
     IsolationReport, effective_environment,
 )
 from orchestration.experiments.security import SecurityRejection, verify_isolation
 from orchestration.experiments.trusted import IsolationProbeRecord, TrustedProbeRegistry
+from orchestration.experiments.frozen_export import FrozenDockerExport
 
 _DENY_ENV = {"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"}
 
@@ -42,18 +45,21 @@ class GeneratedBackend(Protocol):
     def create(self, plan: GeneratedExperimentPlan, context: GeneratedContext) -> ExperimentSession: ...
 
 
-def declared_capability(*, network_deny: bool, probed_server_process_limit: bool = False) -> IsolationCapability:
+def declared_capability(*, network_deny: bool, probed_server_process_limit: bool = False,
+                        configured_frozen_export: bool = False) -> IsolationCapability:
     """What the pinned OpenSandbox SDK 1.1.0 actually enforces.
 
     ``SandboxSync.create`` exposes cpu, memory, timeout and an egress
     ``NetworkPolicy`` (deny default), plus container filesystem/credential/host
     isolation. It has no pids/process-limit parameter, so ``process_limit`` is
     declared False (unsupported) and admission fails closed until a backend
-    verifies it. Never inflate a claim into a proof.
+    verifies it. Atomic path scope additionally requires the configured trusted
+    Docker freeze/archive adapter; ordinary SDK metadata/read is insufficient.
     """
     return IsolationCapability(
         no_host_write=True, no_credentials=True, no_host_control=True, no_privilege=True,
-        export_bounded=True, network_deny=network_deny, cpu_limit=True, memory_limit=True,
+        export_bounded=ATOMIC_EXPORT_SCOPE_SUPPORTED and configured_frozen_export,
+        network_deny=network_deny, cpu_limit=True, memory_limit=True,
         process_limit=probed_server_process_limit, time_limit=True, self_owned_cleanup=True,
     )
 
@@ -69,13 +75,16 @@ class LocalCpuSandboxBackend:
     def __init__(self, *, domain: str = "127.0.0.1:8097", api_key: str | None = None,
                  protocol: Literal["http", "https"] = "http", network_deny: bool = True,
                  probe: IsolationProbeRecord | None = None, instance_id: str | None = None,
-                 runtime_profile: str | None = None, server_process_limit: int | None = None) -> None:
+                 runtime_profile: str | None = None, server_process_limit: int | None = None,
+                 docker_export: DockerExportConfiguration | None = None) -> None:
         self._opensandbox = OpenSandboxBackend(domain=domain, api_key=api_key, protocol=protocol)
         self._network_deny = network_deny
         self._probe = probe
         self._instance_id = instance_id
         self._runtime_profile = runtime_profile
         self._server_process_limit = server_process_limit
+        self._docker_export = (DockerExportConfiguration.model_validate_json(docker_export.model_dump_json())
+                               if docker_export is not None else None)
         self.provenance: Literal["live"] = "live"
         self.capabilities = self._opensandbox.capabilities
 
@@ -87,15 +96,21 @@ class LocalCpuSandboxBackend:
             and config is not None and self._server_process_limit is not None
             and config.server_process_limit == self._server_process_limit
             and config.instance_id == self._instance_id and config.runtime_profile == self._runtime_profile
-            and config.endpoint == self._endpoint())
+            and config.endpoint == self._endpoint() and config.docker_export == self._docker_export)
         declared = declared_capability(network_deny=self._network_deny,
-                                       probed_server_process_limit=process_supported)
-        verified = self._probe is not None and self._probe.verified and self._probe.passed
+                                       probed_server_process_limit=process_supported,
+                                       configured_frozen_export=self._docker_export is not None)
+        verified = (declared.complete and self._probe is not None and self._probe.verified and self._probe.passed)
+        reasons = []
+        if not declared.export_bounded:
+            reasons.append("atomic_export_scope_unsupported")
+        if not verified:
+            reasons.append("isolation_probe_not_verified")
         return IsolationReport(
             backend="opensandbox", declared=declared,
             verified=verified, probe="passed" if verified else "not_run",
             proof_ref=self._probe.probe_id if self._probe is not None else None,
-            reasons=() if verified else ("isolation_probe_not_run",))
+            reasons=tuple(reasons))
 
     def _endpoint(self) -> str:
         return self._opensandbox.protocol + "://" + self._opensandbox.domain
@@ -107,7 +122,7 @@ class LocalCpuSandboxBackend:
             endpoint=self._endpoint(), instance_id=self._instance_id, runtime_profile=self._runtime_profile,
             environment=effective_environment(plan.environment), resources=plan.backend,
             network_deny=self._network_deny, server_process_limit=self._server_process_limit,
-            use_server_proxy=self._opensandbox.use_server_proxy)
+            use_server_proxy=self._opensandbox.use_server_proxy, docker_export=self._docker_export)
 
     def create(self, plan: GeneratedExperimentPlan, context: GeneratedContext) -> OpenSandboxSession:
         plan = GeneratedExperimentPlan.model_validate_json(plan.model_dump_json())
@@ -126,11 +141,18 @@ class LocalCpuSandboxBackend:
         # same digest the host probe ran against and must equal image's digest.
         image = effective_environment(plan.environment).image
         network_policy = NetworkPolicy(defaultAction="deny")
-        sandbox = SandboxSync.create(image,
-            connection_config=self._opensandbox.connection(profile.command_seconds + 15),
-            resource={"cpu": str(profile.cpu), "memory": f"{profile.memory_mib}Mi"},
-            timeout=timedelta(seconds=profile.lifetime_seconds), ready_timeout=timedelta(seconds=45),
-            entrypoint=["tail", "-f", "/dev/null"], env=_DENY_ENV, network_policy=network_policy,
-            metadata={"morph-run": context.run_id, "morph-task": context.task_id,
-                      "morph-worker": context.worker_id, "morph-fence": str(context.fencing_token)})
-        return OpenSandboxSession(sandbox, owned=True)
+        assert isolation.configuration is not None
+        control = FrozenDockerExport(isolation.configuration)
+        try:
+            control.preflight()  # Read-only exact daemon/service check BEFORE SDK create.
+            sandbox = SandboxSync.create(image,
+                connection_config=self._opensandbox.connection(profile.command_seconds + 15),
+                resource={"cpu": str(profile.cpu), "memory": f"{profile.memory_mib}Mi"},
+                timeout=timedelta(seconds=profile.lifetime_seconds), ready_timeout=timedelta(seconds=45),
+                entrypoint=["tail", "-f", "/dev/null"], env=_DENY_ENV, network_policy=network_policy,
+                metadata={"morph-run": context.run_id, "morph-task": context.task_id,
+                          "morph-worker": context.worker_id, "morph-fence": str(context.fencing_token)})
+        except BaseException:
+            control.close()
+            raise
+        return OpenSandboxSession(sandbox, owned=True, export_control=control)
