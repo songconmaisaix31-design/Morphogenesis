@@ -1,3 +1,11 @@
+## 21:57 实际运行前提返修：原B领域与原Q只读审查并行
+
+原B报告 d03e1557de795923894d8d89d7c089401bfdf005 已普通push/clean，仅三docs；原窗口STOP及首exit125/MISSING保留，后继只读证据为Engine29.5.3/API1.54/daemon6cc73c96-c021-4a82-ade6-2fc9ae693fff、Compose5.1.4、四固定镜像仅egress原digest缺失。用户专项AT07批准仍有效；已结束的原600秒尝试不可replay/reset，SDKcreate0，真实AT07及L2未验收。
+
+沿用原B Agent/worktree/branch，接续task_671c317b6196，仅 write_paths orchestration/experiments/generated.py、tests/experiments/test_at07.py、tests/experiments/test_frozen_export.py、tests/experiments/test_generated_configuration.py、docs/experiments/at07-authorization.md、docs/tracks/r1-experiments.md及新私有证据。最小闭集支持API1.54并保留1.52默认，复用既有/v{api}、exact preflight与TrustedProbeRegistry；不扩大任意API，不改at07_live/frozen_export/registry领域逻辑、profile/锁，不以DOCKER_API_VERSION或Engine升级绕开。定向正负测试后先发布SOURCE，再独立REPORT；必要新累计SOURCE/产品pin/受影响验收由原I/P接续，不重复旧SOURCE绿门。
+
+沿用原Q Agent/worktree/branch，接续task_33fe99de98b4，仅docs/tracks/r1-boundaries.md及新私有证据可写。只读审查当前Windows ActiveStore的实际DockerBackend/codex规则与完整关联过滤、IPv4/IPv6/NAT有效范围，确定动态47400..47410是否可证明只对已批准地址可达。无Engine写、listener/探针/科学/跨宿主、防火墙或daemon修改；无足够证据必须UNKNOWN/STOP，提出最小具体修复handoff，不用风险接受代PASS。B并行准备原egress完整digest官方出处/大小与一次精确拉取方案，只读公共metadata，当前不pull/build。主控不写业务，暂无新I/P进程，减少并发内存；待B SOURCE后只启动必要原I集成，领域退原B。AOCI可移植配置沿用，不新增品牌/学科/语言/评分系统，费用节省UNKNOWN。
+
 ## AT07前置首STOP与官方调用路线返修（2026-10-03）
 
 原B Task `task_671c317b6196` / Dispatch `ctx_6b1c2488a3d2` 首worker-start结果turn_start_unobserved保留；主控两次确认已有同任务composer后只bareEnter一次/bytesWritten1，随后实际原B Working并读治理，未重复派发。UTC13:29:15.9497674操作窗口起，13:29:50.3472324一次Hidden启动原Desktop/PID64796；随后受控官方CLI `compose version --format json` exit125/stdout空，首stderr仅presence、内容MISSING，不还原或猜首具体error。UTC13:35:38.4788903在382.5291229秒封存STOP_before_key_prepare_deploy_create：SDKcreate0/基础设施create0/无新容器卷网IDs/registry未写；同一owned空config核identity/空目录后rmdir成功，其他项目Desktop启动影响NOT_ASSESSED，不写全清理或AT07PASS。原600秒窗口已结束，不续/reset/replay；实际AT07/L2仍NOT_RUN。
