@@ -11,7 +11,7 @@
 | P / 原 Codex | research-r1-product-1003 | 沿用 P 产品后端/CLI/后端测试/锁/报告，排除 F UI 与治理；明确正式 envelope 下跨片段接续路径、累计预算和共享知识；已实现则补证，最终精确 pin。 |
 | I / 原 Codex，前三轨交付后 | morph-r1-integration-1003 | 普通精确合并、最终 SOURCE 固定、独立 COPY 安装，一次完整产品离线回归，原 installed 输入观察、适用核心/边界/构建；领域问题退原 Owner。 |
 
-F UI 及 Q 边界现有文件归属保留，只有发现需修改其文件的具体缺陷时才唤醒原 Worker。B 原隔离 Owner 在工程收口后负责 AT-07 可审查检查包；此时仅准备，不创建真实沙箱或运行候选。主控只写计划/状态/决策/验收，保留根工作树 docs/SWARM_SOL_PLAN.md 原 WIP。Orca 继续原 Run run_d5306f2e4993，已结算任务使用新子 Task/Dispatch，不复用旧生命周期身份。
+F UI 及 Q 边界现有文件归属保留，只有发现需修改其文件的具体缺陷时才唤醒原 Worker。C 完成后复用 B 原隔离 Owner（morph-r1-experiments-1003），在最终冻结前准备 AT-07 可审查检查包与必要最小工具/配置：沿用 orchestration/experiments/**、tests/experiments/**、docs/tracks/r1-experiments.md，并独占本轮 deploy/opensandbox/**、docs/experiments/** 中隔离探针相关文件；不改 SDK/后端种类，不接管 A/C/P。此阶段仅准备和离线验证，不启动 Docker/真实服务，不创建真实沙箱或运行候选；具体授权仍在固定组合离线验收后请求，探针通过后才进入 L2。主控只写计划/状态/决策/验收，保留根工作树 docs/SWARM_SOL_PLAN.md 原 WIP。Orca 继续原 Run run_d5306f2e4993，已结算任务使用新子 Task/Dispatch，不复用旧生命周期身份。
 
 验收要求：
 - 正证据必须证明接受前/后的合法路线机会或选择发生可解释变化，证据引用进入实际选择/认领记录；重复证据、未经独立接受、越权/不适用仍不得增益。旧 v0/v0.1 语义保留。
