@@ -1,9 +1,70 @@
 # AT-07 可审查授权包（准备完成不等于执行授权）
 
 本包针对 Spec §10.1、AT-07、§14.4。**真实 AT-07：NOT_RUN；L2：NOT_RUN。**
-**当前准备状态：PREPARED_UNVERIFIED；真实执行仍未获授权。**
+**当前状态：用户已专项批准；本次创建前STOP，SDKcreate=0，PREPARED_UNVERIFIED。科学L2未获授权。**
 
-## 21:14 最终离线工程接纳与实际授权边界
+## 21:44 专项批准后的真实前置STOP与独立只读诊断
+
+用户已提交“我现在批准AT-07，继续开发”，原C转交`msg_f469ac99f92f`（UTC13:23:20），
+root治理`a3880ffb8e83a5df8f22a3880f47483e9754ac01`已直接核原提交终端stream并接纳；不是draft或本B代批。
+本次使用原15de+c84/r2非editable来源，**有授权不等于实际AT07已完成**。
+原600s窗口为UTC13:29:15.9497674至13:39:15.9497674，不延期、不重置。
+Desktop仅一次Hidden启动；首官方受控Compose调用exit125，立即创建前STOP并交root。
+没有prepare、密钥读取、基础设施创建、SDKcreate、pause/HEADGET/resume、探针或科学执行。
+原首stderr仅记存在，内容未保存，明确**MISSING**，不能补写或借后继诊断恢复首错误原因。
+
+root `msg_0fc604f1bb10`、`msg_c0ce00419282`、`msg_a38c276da9e4`随后仅追加必要只读工程诊断
+与本授权包docs修正范围，**不恢复probe/create，不新启动Desktop，不改变冻结业务/测试/锁/profile**。
+原证据见[本次secret-free摘要](at07-evidence/live-20261003.txt)，完整私有first/diagnostic分档根
+`C:/research-private/b-at07-live-ctx_6b1c2488a3d2/`。
+
+| 当前实际观察 | 结果 / 保持的停止条件 |
+| --- | --- |
+| 首`docker --host <固定npipe> --config <新空目录> compose version --format json`，三system子env | exit125/4.768s/stdout空/stderr内容MISSING；首失败原样保留，未推根因 |
+| 新只读Compose诊断，固定非秘密`ProgramFiles`定位项 | UTC13:42:30.747，exit0/5.254s/`v5.1.4`/stderr空；只证明这次插件version路径，不是首失败翻绿或AT07 |
+| 新同endpoint只读version/info | UTC13:44:06，实际LinuxEngine29.5.3、advertised API1.54/MinAPI1.40，daemon `6cc73c96-c021-4a82-ade6-2fc9ae693fff`。冻结配置为Literal1.52且原runner严格比较，**API不匹配STOP**；不得用DOCKER_API_VERSION、配置伪值或upgrade/downgrade绕过 |
+| 新固定四digest同次image inspect | server68ca…/execd6cf7…/python229a…存在；固定egress `opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5`返回No such image，exit1，**缺镜像STOP，不pull/build** |
+| 动态端口与宿主 | 首host RAM5781MiB/C42.83GiB、pipe=false、activeFW mask4，三profile启用且COM inbound0/outbound1；Docker Backend TCP/UDP规则remote/local/ports均*，另有非loopback block规则。未核实际有效匹配/未来0.0.0.0:47400..47410可达范围，仍UNKNOWN/STOP；不改防火墙或开监听器证明 |
+| 收尾 | 三个新私有空config各核同身份后rmdir，不递归删；0自有新容器/volume/network、无server ID可停止保留。Desktop启动对他项目影响NOT_ASSESSED，未停Engine/他人对象；不称全宿主资源清空 |
+
+### 最少后继Compose发现路线（仅工程诊断已观察，不开放部署）
+
+[官方Docker CLI v29.5.3 Windows manager](https://github.com/docker/cli/blob/v29.5.3/cli-plugins/manager/manager_windows.go)
+使用`ProgramFiles`推导系统`Docker/cli-plugins`；
+[同版本manager](https://github.com/docker/cli/blob/v29.5.3/cli-plugins/manager/manager.go)
+也会查私有config下plugin目录及配置扩展目录。本次空config无这些条目，不读取用户HOME/auth或追加配置。
+三system首env未含定位项是静态发现缺口推断；第一stderr缺失，不确定它就是首错误原因。
+
+实读`C:/Program Files/Docker/cli-plugins/docker-compose.exe`为常规Archive、非link、33657776字节，
+SHA256 `E295CD078CACEBC2081CB266275268B3895EC14452B31A9D7568CE295BD59915`、Valid Docker Inc，
+与原resources本体精确相同。root只批准这个固定系统locator，没有批准任意父env或插件路径。
+保留下面原官方绝对CLI/同npipe/新空owned config/typed argv/shell=False/10s格式，Compose子env最少增加：
+
+```python
+# Read-only diagnostic format observed once; not a deploy/probe retry.
+task_compose_env = {**task_process_env, "ProgramFiles": "C:/Program Files"}
+subprocess.run(
+    [*task_prefix, "compose", "version", "--format", "json"],
+    shell=False, env=task_compose_env, cwd=task_owned_new_root,
+    capture_output=True, timeout=10, check=False,
+)
+```
+
+`task_process_env`仍仅固定必要PATH/SYSTEMROOT/WINDIR；非Compose Engine读与原SDKreader不加locator。
+Compose的必要key/canary仍仅在未来条件全部满足的已批准动作child内存传递，本次均未读取/传递。
+DOCKER_*/HOME/USERPROFILE/TLS/auth/context/APIheaders/proxy大小写变体均不继承，父/全局环境、空config不改。
+不扩read-only docker_read白名单，不复制上游代码或新造执行器。官方参数依据仍为
+[Docker CLI文档](https://docs.docker.com/reference/cli/docker/)。
+当前[Compose main/standalone转换](https://github.com/docker/compose/blob/main/cmd/compatibility/convert.go)
+不列`--config`为被提到根层的string flag；未实际验证同边界standalone，不将它写成替代可运行路线。
+源码main是本次观察参考，不冒充已安装v5.1.4精确源码绑定。
+
+此前外层模板三system项对Windows Compose发现不足，后继以上述固定locator/已核本体为准；
+它没有解决Engine API、缺镜像、动态端口或资源未知等门。当前实际runtime配置/server/target/probe/registry仍不存在，
+API字段和SOURCE不得由本docs修改。只交原Owner/主控处理真实阻塞，不恢复已结束window、不重放probe。
+原同64ID retained_stopped选项仍需全项真实PASS与原Q独立审核，当前不适用，L2/候选/科学NOT_RUN。
+
+## 历史21:14 最终离线工程接纳与实际授权边界
 
 依据root `msg_3035355dbf6a` 的实际原日志接纳，以下取代历史20:29的等待身份。
 本B只读Git/metadata/原日志并更新两docs，未运行测试、安装、prepare或任何Docker/Engine/SDK操作。
@@ -122,8 +183,9 @@ sidecar/cache资源限额UNSUPPORTED、总峰值UNKNOWN，内存数字不构成�
 `--accept-disclosed-infrastructure-limits` 仅记录运行范围决定，不能把UNSUPPORTED/UNKNOWN/失败改成PASS。
 若授权要求基础设施DNS也绝不外发，固定栈不满足即STOP。科学L2仍须实际隔离通过后另行有界授权。
 
-## 当前外层CLI同路由审核模板（全部未执行）
+## 原外层CLI审核模板（未部署；本次只读事实见21:44）
 
+这是e40原模板；本次少量只读诊断与必要Compose locator更正以上文21:44为准，不把旧等待结论代入新观察。
 runner受信endpoint已修，但外层deploy/inspect/info/compose也必须使用同一明确npipe、全新空私有config和受控子环境。
 **下方历史裸docker/父shell环境示例不可执行，不是当前最终路线。**
 root原Get-Command定位到 `C:/Program Files/Docker/Docker/resources/bin/docker.exe`。
@@ -133,7 +195,7 @@ root原Get-Command定位到 `C:/Program Files/Docker/Docker/resources/bin/docker
 SHA256 `E295CD078CACEBC2081CB266275268B3895EC14452B31A9D7568CE295BD59915`。
 两文件Authenticode状态Valid、Signer Docker Inc；LastWriteUTC分别
 2026-06-05T19:39:28.2997437Z / 2026-06-05T19:39:31.1540471Z。
-这是时点文件身份/签名观察，未启动CLI/Compose/Engine，**实际CLI/插件版本及解析、Engine版本仍未观察**。
+这是当时文件身份/签名观察，当时未启动CLI/Compose/Engine；后继实际版本诊断以上文21:44为准，不改此原时点记录。
 后续须重核本体身份与受控实际解析；argv fixture/签名都不能替代，无法确认即STOP。
 runner当前仍以`docker`名字调用；随后受控runner启动环境还须确认该名字实际解析为同一批准本体，
 不能仅用外层绝对路径或一次version相同替它授予本体身份。本任务不改代码来绕过这个实际确认。
@@ -271,7 +333,7 @@ input/session/support/refute 各 **2 PASS** 均为离线产品证据，本次未
 | 宿主 | 当前 Windows 单宿主；既有 Docker Desktop Linux engine；不改 daemon/WSL/全局 HOME |
 | SDK | 现有 `opensandbox==1.1.0`；既有官方 SDK，重试 disabled、metrics disabled、server proxy 开启 |
 | 受信导出 transport | 官方 `docker==7.2.0` 的 npipe/Unix requests adapters；不构造读取账户配置的 APIClient，不读取 Docker auth/context，不从环境选择 endpoint |
-| Engine / API | 只支持已审查的 Linux Docker Engine **29.5.3 / API 1.52**；实际 Engine 版本、daemon ID 仍 UNKNOWN，CLI 29.5.3 不能替代它们；版本不符即停止，不自动升级 |
+| Engine / API | 冻结要求 Linux Docker Engine **29.5.3 / API 1.52**；本次实际只读Engine29.5.3/advertised API1.54及daemon ID见21:44，API不匹配STOP。CLI版本相同不解除此门，不用环境覆盖或自动升级 |
 | server | `opensandbox/server:release-1.1.0@sha256:68ca0212a2749b2c73096ce2ec0264455c64442c45f81007db442f52bf84c9d1` |
 | execd | `opensandbox/execd:v1.1.0@sha256:6cf7dba2f21f0b536e100563d841ac58a9f31c2b0a081b7ac76796a24d6f47e2` |
 | 实验 / 受控目标 image | `python:3.12.13-slim@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36`；Linux amd64，Python 3.12，stdlib，无科研依赖安装 |
@@ -384,7 +446,7 @@ b480 原调用链已核对，本次只读确认以下原路径到15de零Git差�
 | `environment` | canonical `image=python@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36`、`image_digest=sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36`，原3.12/SDK1.1.0/opensandbox字段，`dependencies=[]`；最终15de锁为上文完整87b…，只能匹配这个实际受测锁 |
 | `resources: BackendProfile` | 明确1 CPU/512MiB/180s/30s/1048576 bytes/**process_limit=128**/原network.default=deny；默认process_limit=16不能省略后误当128 |
 | `server_process_limit/network_deny/use_server_proxy` | 128 / true / true；pids必须由同次实际server配置和压力观测确认，不由 SDK create 参数宣称 |
-| `docker_export: DockerExportConfiguration` | 原mode=`docker-paused-archive-v1`、固定npipe endpoint、29.5.3/API1.52、`request_timeout_seconds=10`；实际 `daemon_id` UNKNOWN，须来自随后获准的只读info；无实际绑定保持None/拒绝 |
+| `docker_export: DockerExportConfiguration` | 原mode=`docker-paused-archive-v1`、固定npipe endpoint、29.5.3/API1.52、`request_timeout_seconds=10`；本次daemon只读观察见21:44，但完整实际配置尚未生成，实际API不匹配STOP，无绑定保持None/拒绝 |
 | `probes: tuple[IsolationProbeRecord,...]` | 当前无本最终组合的真实通过档；必须随后实际全项通过并独立审核才可注入，不能复制旧档或把JSON自报布尔当事实 |
 
 target IPv4当前 UNKNOWN，只能在授权后读取本次新target实际IP。旧离线示例的
@@ -541,3 +603,4 @@ effective-policy、各`*-command.json`完整官方execution/log/exit、target-af
 动态端口可达范围、是否接受可信sidecar/cache基础设施限额未知和既有DNS健康流量、独立审核员、最终L2环境是否完全同档。
 离线实现已覆盖冻结期间的路径契约，真实运行证据尚缺；不宣称inode级独占、多个文件同快照或严格硬实时收尾。
 在这些值明确、完整离线组合通过且收到单独授权前，真实AT07保持NOT_RUN。
+以上为原退出提醒；当前专项授权已实际接纳，但本次创建前STOP且原窗口已结束，所以AT07仍NOT_RUN，不能重复索同一批准或凭诊断成功恢复执行。
