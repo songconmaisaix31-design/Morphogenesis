@@ -3,7 +3,40 @@
 本包针对 Spec §10.1、AT-07、§14.4。**真实 AT-07：NOT_RUN；L2：NOT_RUN。**
 **当前状态：用户已专项批准；本次创建前STOP，SDKcreate=0，PREPARED_UNVERIFIED。科学L2未获授权。**
 
-## 2026-10-03 API闭集返修SOURCE与固定egress拉取审核包
+## 2026-10-03 22:20 单独镜像准备：一次拉取成功，仅解除缺镜像门
+
+原B Task `task_a61e6e755ed8` / Dispatch `ctx_8cbbdafbd94a`，依据root控制治理
+`7ef9ff73b578ce9e21cca08b297ca0db7e1bed9a`对08f packet的**单独镜像准备明确批准**。
+不是旧600s窗口reset/probe重放，不新增SDKcreate或科学权限；原用户AT07批准不重复询问。
+本任务仅两docs与新B私有raw；业务SOURCE仍`c3a905eaf79a869dffb5960da9c4afee1dc63c3e`，
+新I累计来源/installed/pin/CI尚待实际接纳，不从本REPORT取SOURCE。
+
+| 本次真实镜像准备观察（UTC） | 结果 |
+| --- | --- |
+| 14:18:21 fresh宿主/CLI | pipe=true；freeRAM3503MiB/C18.47GiB；原官方CLI42748848bytes、SHA C0E4F0379277708EEA93B39FCBBFB9BAD6F4EE97CC3EB7D326BF5D534FBF1762、Valid Docker Inc，与原记录一致 |
+| fresh同route version/info | LinuxEngine29.5.3/API1.54、daemon6cc73c96-c021-4a82-ade6-2fc9ae693fff精确一致；原固定digest image-before exit1/No such image，未由外部提前出现 |
+| 唯一pull，180s cap | **14:19:23.802240至14:20:14.668384，exit0，50.8656108s**；首stdout1328bytes/stderr0bytes完整私有分档，未重试 |
+| 同route image-after inspect | exit0；完整`opensandbox/egress@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5`在RepoDigests，os=linux/architecture=amd64；reported Size132036591bytes，仅API报告值，不是实测解压disk/新增占用/下载流量 |
+| owned config收尾 / 14:20:44资源 | 新空config核原device/inode、无links且仍空，精确rmdir成功；freeRAM3711MiB/C18.45GiB，仅时点观察，不把变化归因于pull或推全宿主无影响 |
+
+实际typed argv为原官方绝对CLI `C:/Program Files/Docker/Docker/resources/bin/docker.exe`，
+`--host npipe:////./pipe/dockerDesktopLinuxEngine --config <本Task新空owned目录> image pull --platform linux/amd64 opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5`。
+所有CLI同endpoint/config/owned cwd、`shell=False`；child env仅固定
+`PATH=C:/Windows/System32`、`SYSTEMROOT=C:/Windows`、`WINDIR=C:/Windows`。
+实际pull一次180s，其余version/info/image-before/image-after只读10s；未继承DOCKER_*/HOME/USERPROFILE/TLS/auth/context/APIheaders/proxy，未改parent/global/daemon设置。
+
+首raw根`C:/research-private/b-egress-pull-ctx_8cbbdafbd94a/`：host-cli-first、config-identity-first、
+engine-version-first/engine-info-first/image-before-first各command/result与完整stdout-stderr；
+pull-first-command/result、pull-first-stdout.bin/stderr.bin、image-after-first-command/result/stdout/stderr、
+pull-identity-summary-first、owned-config-cleanup-first、host-after-first。
+pull stdout SHA256 `54381028a258e90c449bd98490876785202824eb1e9ab02a9efe624a9bed5de9`，stderr为空亦保存；
+公开只记安全摘要，不丢首stderr、不覆写原失败/未知。原公共压缩layers+config132032785bytes与实际reported Size为不同口径，解压disk/下载增量仍UNKNOWN。
+
+没有Desktop重启、key读取、container/volume/network创建、SDKcreate/probe/registry/native模型/候选/L2；
+其他项目效果NOT_ASSESSED，不停他人process或删除共享layers。原SDK0/STOP/exit125/MISSING/firstRED原样封存。
+**只解除本地缺固定egress镜像门**；Q端口有效范围、完整实际配置与新来源工程门未获PASS，真实AT07/L2仍NOT_RUN。
+
+## 历史2026-10-03 API闭集返修SOURCE与固定egress拉取审核包
 
 原B Task `task_8eccf7578721` / Dispatch `ctx_370b39a856a3` 接续已封存的d03报告，依据root21:57计划。
 领域SOURCE **`c3a905eaf79a869dffb5960da9c4afee1dc63c3e`** 已普通push `[skip ci]`；

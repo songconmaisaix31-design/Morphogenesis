@@ -799,3 +799,22 @@ OCI index1609bytes、header及原bytes SHA一致；唯一linuxamd64 manifest1361
 两docs独立REPORT普通push `[skip ci]`，保留SOURCE/REPORT分层；无全测/安装/CI/UI/native模型/付费/科学/候选/registry写入。
 模型保持现有Codex GPT-6.1-Sol high YOLO；用量/费用/节省UNKNOWN，OpenCode余额首阻塞不重试。
 真实AT07/L2仍NOT_RUN，待原I/P新来源工程接纳及实际隔离全项通过+Q独立审核，不称MVP或R1完整通过。
+
+## 2026-10-03 22:20 单独固定镜像准备实际交付
+
+原B Task `task_a61e6e755ed8` / Dispatch `ctx_8cbbdafbd94a`，同Owner/树/branch接续08f，
+先读AGENTS及root `7ef9ff73b578ce9e21cca08b297ca0db7e1bed9a`当前压缩计划，单独一次镜像准备已明确批准。
+fresh14:18:21 UTC官方CLI本体SHA C0E4...F1762/42748848bytes/Valid DockerInc与原记录一致，
+LinuxEngine29.5.3/API1.54/daemon6cc73c96-c021-4a82-ade6-2fc9ae693fff同原；RAM3503MiB/C18.47GiB。
+原digest-before仍No such image/exit1，未外部提前出现；随后唯一typed argv/shellFalse/官方绝对CLI/同npipe/新空ownedconfig，
+`image pull --platform linux/amd64 opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5`。
+childenv仅固定PATH/SYSTEMROOT/WINDIR，无DOCKER*/HOME/auth/TLS/context/proxy继承或全局修改；独立180s cap不reset旧probe窗口。
+UTC14:19:23.802240至14:20:14.668384，exit0/50.8656108s；首stdout1328bytes/stderr0完整保存。
+同route精确image-after inspect exit0，原完整RepoDigest/linux/amd64匹配；reported Size132036591bytes，
+不是解压disk/新增占用/下载流量证明，公共压缩layers+config132032785bytes为另一口径，真实增量UNKNOWN。
+ownedconfig无links、原device/inode且仍空后精确rmdir；14:20:44 RAM3711MiB/C18.45GiB仅时点，不推资源变化归因。
+已`msg_df78fe0c7a76`及时handoff root，raw `C:/research-private/b-egress-pull-ctx_8cbbdafbd94a/`，完整首argv/env/start/end/exit/耗时/stdout-stderr不覆盖。
+未重试/pull第二次/build/换tag源后端/upgrade/prune/共享层清理/Desktop重启/key/新容器卷网/SDK/probe/registry/native科学；其他项目效果NOT_ASSESSED。
+原SDK0/600sSTOP/首exit125/MISSING/旧RED保持；只解缺镜像门，Q端口与新I installed/pin/CI工程门未PASS，AT07/L2 NOT_RUN。
+验证仅实际只读前后身份、一次获准镜像准备、Git diffcheck与普通两docs REPORT push `[skip ci]`/remoteexact/clean；不跑安装/测试/CI/UI。
+本任务业务SOURCE仍c3a905eaf79a869dffb5960da9c4afee1dc63c3e，REPORT仅两docs、不自嵌SHA；费用/模型用量UNKNOWN，OpenCode首阻塞不重试。
