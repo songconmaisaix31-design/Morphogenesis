@@ -6,9 +6,9 @@
 
 | 长期 Owner | 原 worktree / branch 后缀 | 追加 write_paths 与交付 |
 |---|---|---|
-| A / 原 Codex | morph-r1-research-1003 | 先交完当前 FR04/native binding SOURCE/REPORT，再接核心开发 AOCI：aoci.txt、aoci.meta.txt、aoci.code.txt、.aoci 中官方可提交配置/索引基线、.gitignore 的 AOCI 区块、docs/development/aoci.md；项目 .codex/config.toml 仅本机忽略。原源码归属不变。 |
+| A / 原 Codex | morph-r1-research-1003 | 先交完当前 FR04/native binding SOURCE/REPORT，再接核心开发 AOCI：aoci.txt、aoci.meta.txt、aoci.code.txt、.aoci 中官方可提交配置/索引基线、.gitignore 的 AOCI 区块、.gitattributes 的官方 AOCI LF 规则、docs/development/aoci.md；项目 .codex/config.toml 仅本机忽略。原源码归属不变。 |
 | B / 原 Codex | morph-r1-experiments-1003 | 保持 AT-07 离线检查包、必要适配器边界修补及原 write_paths，不承担 UI/AOCI。 |
-| P / 原 Codex | research-r1-product-1003 | 先交跨片段正式入口候选；后继复用原产品 native/process/session 记录提供节点会话/上下文 API，完成产品仓库 AOCI 同类文件与安装说明。排除 F 路径和治理。 |
+| P / 原 Codex | research-r1-product-1003 | 先交跨片段正式入口候选；后继复用原产品 native/process/session 记录提供节点会话/上下文 API，完成产品仓库 AOCI 同类文件（含官方 .gitattributes LF 规则）与安装说明。排除 F 路径和治理。 |
 | F / 原 Codex | research-r1-ui-1003 | 原 frontend/**、web/static/**、tests/ui/**、r1-ui 报告：Codex GUI 参考布局、研究/成员拓扑、右键菜单、对应会话终端与上下文；键盘和窄屏可用。HTTP 契约与 P Handoff。 |
 
 C 正证据已交付验收，留原 Worker 返修；不再加新业务轨。I 待 A/B/P/F 领域和配置交付后普通 exact merge，固定最终核心/产品组合，最后一次完整产品离线回归与适用 installed 页面观察。最多同时 3 个 Worker 加主控；测试/构建资源冲突时排队，其余开发/阅读并行，不重复跑已绿且未受改动影响的门。
