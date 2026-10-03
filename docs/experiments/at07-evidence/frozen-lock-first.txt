@@ -1,0 +1,10 @@
+Downloading virtualenv (5.2MiB)
+Downloading rapidfuzz (1.7MiB)
+Downloading dulwich (1.0MiB)
+ Downloaded dulwich
+ Downloaded rapidfuzz
+ Downloaded virtualenv
+Installed 43 packages in 1.22s
+Resolving dependencies...
+
+Writing lock file

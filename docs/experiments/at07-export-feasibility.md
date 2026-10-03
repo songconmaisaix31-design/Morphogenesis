@@ -1,8 +1,11 @@
-# AT-07 原子范围导出的有界可行性调查
+# AT-07 冻结范围导出的来源、实现与边界
 
-2026-10-03；只读源码/API 审查，未启动 Docker/WSL、未创建资源、未执行候选或探针。
-当前结论仍是 **UNSUPPORTED / AT-07 NOT_READY / 真实执行 NOT_RUN**。
-本文件给原 Owner 下一步的工程决策依据，不授予执行权限，也不把设计推断记成已验证能力。
+2026-10-03；官方源码/API 审查及离线实现，未启动 Docker/WSL、未创建资源、未执行候选或探针。
+当前 SOURCE **`5769005b09f1b756c94fdad0649a6b74690c0ca9`** 实现受信配置选择的暂停导出路径，
+状态 **PREPARED_UNVERIFIED / 真实 AT-07 与 L2 NOT_RUN**。未配置的默认路径仍 unsupported。
+此前强制拒绝阶段 SOURCE `296ec298a23eea54f76e8c874aed551487a2999a` / REPORT
+`7a6c5094c7235b1a992e0eaa8d688b08fa0fd64b` 及首 RED 原样保留。
+本文件不授予执行权限；A接线、Q独立复核与固定组合installed验收仍须后续完成。
 
 ## 当前组合的确定事实
 
@@ -50,18 +53,22 @@ Docker Engine 已有两个宿主控制面 API，可在不执行容器程序的�
 
 本机仅执行了 `docker --version`，返回 CLI 29.5.3 / d1c06ef；没有连接/启动引擎。
 **实际 Engine 版本 UNKNOWN**，不能把 CLI 版本或上述 Moby 源码当成本机运行时证据。
-真实批准前还须核对 Engine/API/安全补丁及对应源码，版本不符即重新审查，不自动更新 daemon。
+实现只接受已审查的 **Engine29.5.3/API1.52**，不允许把任意版本字符串填进配置后自称支持。
+真实批准后必须只读核对实际Engine/ID及安全补丁状态，版本不符即重新审查，不自动更新 daemon。
 
-## 最小后继方案与剩余缺口
+## 已实现的暂停期路径契约
 
-可作下一步离线实现的方案是：在原 `OpenSandboxSession` 内增加受信控制面的冻结导出，
-保留原 executor、result/archive、TaskLedger 和 `finalize_session`。以下是**设计推断，尚未实现/验证**：
+原 `OpenSandboxSession` 增加配置化冻结导出，保留原 executor、result/archive、TaskLedger 和
+`finalize_session`。以下机制已做 inert 单进程测试，**尚未经过真实 Engine/探针验证**：
 
 1. 使用同一批准的 Docker daemon、完整 sandbox/sidecar IDs、原 create metadata 与 instance binding；
    不从候选输入或任意 `DOCKER_HOST/context` 选择 daemon，不读写任意宿主路径。
 2. 检查非特权、caps、无 host PID/control。拒绝导出根或任一祖先上的 bind/volume/tmpfs，
    拒绝任何能让其他容器/宿主写入该导出树的共享挂载。
-   execd 的原只读专属 runtime volume 位于导出根以外时，单独精确匹配；不能宽泛豁免所有 volume。
+   早期“execd runtime只读”假设不成立：固定 server 和 sidecar 都挂载 `/opt/opensandbox:rw`。
+   唯一例外是该根外、服务管理、local driver 无 options 的 `opensandbox-runtime-<id>`；
+   Engine 列出的使用者必须恰为同次 main/egress 两个完整ID且两者都暂停。拒绝第三使用者、其他挂载、
+   bind driver 或导出树共享写入；不把 runtime/execd 内容当成不可修改的信任根。
 3. 官方 SDK pause 精确 owned session；通过 Engine inspect 确认 main/egress 都实际 Paused，
    暂停失败/回复未知即停止，不做文件读取、不自动重复 pause/create。
 4. 保持暂停，逐层对 `/tmp`、`/tmp/morph-research`、所有子目录和目标 file 调用 HEAD。
@@ -71,10 +78,24 @@ Docker Engine 已有两个宿主控制面 API，可在不执行容器程序的�
    对 metadata、tar header/padding、payload 和总时间分别限额。只接受一个预期普通成员；
    拒绝 tar symlink/hardlink、absolute/`..`、额外成员、设备/FIFO、超大 header/PAX 和 truncated stream。
    不调用 `extract/extractall`、shell tar、候选 Python 或候选容器里的 helper。
-6. 原归档只消费通过边界检查的 bytes。最终输出导出后不恢复候选，走原 `finalize_session` 的 owned kill/close；
-   前置 runtime fingerprint 的读取如果必须恢复，原 SDK `SandboxSync.resume` 返回新连接对象，
-   需要在原 session 封装内替换连接并确认恢复后才能继续。任何恢复/清理未知保持 unknown，不补第二 POST。
-   暂停期间 TTL/删除/控制面并发、stream 中断都需要离线负例及后来单独真实 AT07 验证。
+6. 原归档只消费通过边界检查的 bytes。每次成功下载是原SDK pause → Docker只读HEAD/GET →
+   原SDK resume；finally只在只读inspect确认owned pair确实都暂停时尝试恢复**同一个**sandbox，
+   `SandboxSync.resume` 返回的新连接对象必须ID一致，再替换原session连接并核对非暂停。
+   前置 fingerprint 和各最终文件均复用原单文件API；因此没有多个文件同一原子快照的承诺。
+   最终仍走 `finalize_session` 的 owned kill/close。恢复对象ID不同只关闭借来的连接，不kill另一对象。
+   pause/resume未知、TTL/删除/控制面并发及stream中断保持unknown，阻止后续执行/导出，不重POST或退回宿主。
+   这些分支有离线负例，后来仍需单独真实AT07核对全部行为。
+   pause异常后可能经只读核对确认已暂停并尝试一次resume，但不会把原unknown改成成功。
+   小文件成功的PathStat/bytes/Paused观测有持久文件；当前没有逐次pause/resume原始响应转录，
+   不将这部分未保存数据写成实测事实，完整记录范围见授权包。
+
+RW来源：固定server的
+[`docker_service.py`](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/opensandbox_server/services/docker/docker_service.py)
+与sidecar的
+[`networking.py`](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/opensandbox_server/services/docker/networking.py)
+都使用`:rw`；管理标签定义在
+[`constants.py`](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/opensandbox_server/services/constants.py)。
+这项纠正已交主控确认；旧报告保留原假设，当前实现不依赖那个错误假设。
 
 **不能忽略的限制：** Engine PathStat 不暴露 inode link count；单文件 tar 也可能把某个
 拥有树外硬链接的 inode 作为普通文件输出。因此“拒绝 tar hardlink header”不证明该 inode 没有
@@ -83,40 +104,54 @@ Docker Engine 已有两个宿主控制面 API，可在不执行容器程序的�
 `fstat/nlink` 或等价的已审定官方原语；现有 API 没有该事实，不允许用容器内自报补齐。
 主控于2026-10-03 04:24:23 UTC明确本轮契约为：冻结期间的批准路径、无symlink祖先/leaf、
 无共享写入挂载、普通文件及字节/时间限额；拒绝tar link成员，不提取。
-任意树外inode别名全面排除不是本轮新增退出条件。因此后继会实现上述路径契约，
+任意树外inode别名全面排除不是本轮新增退出条件。因此当前实现上述路径契约，
 保留nlink限制，不宣称inode级独占或用静态检查冒充真实验证。
 
 ## 精确改动面与工程选择
 
-| 位置 | 后继最小职责 |
+| 位置 | 当前最小职责 |
 | --- | --- |
-| `orchestration/experiments/backend.py`（B） | 原 session 冻结/受信 archive 下载、bounded stream、owned lifecycle；不是新 Executor |
-| `orchestration/experiments/sandbox_adapter.py`（B） | 注入精确控制面，声明已实现能力；原 `IsolationConfiguration.runtime_profile/instance` 绑定 exporter 模式及 daemon，而非只改布尔值 |
-| `orchestration/experiments/generated_executor.py`（B，确有需要才改） | 最终一批导出在同一冻结期完成，前置 fingerprint 与最终导出的生命周期位置；原错误/unknown/cleanup 语义保留 |
+| `orchestration/experiments/backend.py`（B） | 原 session 暂停/恢复、受信 archive 下载、owned lifecycle；不是新 Executor |
+| `orchestration/experiments/frozen_export.py`（B） | 官方transport只读HEAD/GET，实际daemon/server/owned pair/volume检查，逐层PathStat、bounded tar/时间、无宿主提取 |
+| `orchestration/experiments/generated.py`、`sandbox_adapter.py`（B） | 原 `IsolationConfiguration` 增可空冻结模型 `DockerExportConfiguration`；新字段进入既有prepare/admit/create精确比较；无配置/旧probe不声明导出支持 |
+| `orchestration/experiments/generated_executor.py`（B） | 保留原逐文件消费；导出TimeoutError不能降成missing_artifact，原unknown/cleanup语义保留 |
 | `tests/experiments/**`（B） | 原始 ancestor/leaf 替换竞争；frozen 失败/unknown；挂载替换；恶意 tar/overflow；附着 session 拒绝；仅 owned 清理；未探测档不能 admit |
-| `deploy/opensandbox/**`、`docs/experiments/**`（B） | 精确 Engine/daemon/export mode 部署及原子导出探针；不更新全局配置 |
-| `swarm/research/dynamic.py`/HostConfig（A Handoff） | 若必须新增 trusted Docker endpoint 注入，在原 factory 配置接线；B 不跨轨编辑 |
-| 核心依赖/锁/NOTICE（B，只有实际必要） | Windows npipe 的控制面 transport 优先官方 Docker Python SDK；当前 httpx 不原生提供 npipe，不能写自研管道协议。版本、Python3.13兼容和许可证须固定/验证后才加入；本轮未安装/未改锁 |
+| `deploy/opensandbox/**`、`docs/experiments/**`（B） | 精确Engine/daemon/export模式及无害探针；成功读取保存frozen-export原始事实；不更新全局配置 |
+| `swarm/research/dynamic.py`/HostConfig（A Handoff） | 原受信配置接 `DockerExportConfiguration | None`，原factory传 `docker_export=self.settings.docker_export`；不接受候选/产品请求选择endpoint，实际ID未知保持None；B未跨轨修改 |
+| 核心依赖/锁/NOTICE（B） | 新增官方 `docker==7.2.0`，原依赖版本不变；私有COPY环境安装唯一runtime新包，Python3.13构造官方npipe/Unix adapters离线通过，实际npipe连接仍NOT_RUN |
 
 这条方案复用已有官方 freeze/archive 与原生命周期，不需要另一个 runtime、候选可写 helper、
 调度器、Manifest、Hash 或证明系统，但也不是简单替换一行 download：Windows受信 transport、
-暂停期边界和文件类型/挂载语义需要同 Owner 离线实现与独立复核。
-若选择等待上游原子 root/no-follow API，则保持当前硬拒绝；升级 RC 只解决端口设置，不能替代该工作。
-真实科学必需的 CPU 路径仍是待完成项，不能将此调查解释为允许 R1 永久仅 mock。
+暂停期边界和文件类型/挂载语义仍需独立复核与真实证据。
+升级RC只解决端口设置，不能替代这些导出保证；本轮没有升级server/execd/egress。
+真实科学必需的CPU路径实现已准备，实际可用性须同档AT07验证，不能将本文件解释为允许R1永久仅mock。
 
-## 已授权的工程后继（真实运行仍未授权）
+## 官方依赖、transport与离线证据
 
-主控已决定同B继续离线实现上述最小冻结导出；先普通提交当前失败/拒绝阶段，再提交后继。
+主控授权同B继续最小冻结导出，并已先普通提交失败/拒绝阶段、再提交后继；没有改写首RED。
 已只读核对官方 Docker Python SDK **7.2.0**（2026-07-09，Apache-2.0），
 源 **`5ad5327fba623897ee9a527d7eee1b01703e0726`**，支持 Python>=3.8；
 Windows依赖pywin32>=304，原锁已有pywin32 312/Python3.13 wheel。
-这是拟固定依赖，当前阶段尚未安装/更新锁；不能仅凭metadata声称本机npipe验证通过。
+已在主控串行窗口中安装到B私有COPY `.venv` 并更新锁，未使用系统pip或修改其他Owner环境。
+官方wheel SHA256 `a3f45fdeb9165e2d25d9a1d02ddf3bc70fb572cf5ebbf9b58558c22caf29b71f`；
+sdist `cebb93773d334f778e023a7ee352a8d6e13ab1bd3b863a4d4a59dec897df43ac`。
+当前锁SHA256 `8558e9e065da381466d9c188bc87a88fcaf09a3b367455eb8267c0bb4c9fcc98`；
+私有临时Poetry2.3.2工具环境仅用于解析锁，未改变其他锁定版本。
 
 其 `get_archive` 内部 `_stream_raw_result` 会取消 socket read timeout，
-后继必须避免用这条无超时stream包装；使用同一官方 `APIClient` 的 requests transport，
-显式timeout/identity编码/stream关闭及全程总期限调用只读HEAD/GET。
+实现避开这条无超时stream包装；也不构造会读取Docker auth配置的`APIClient`。
+仅把官方`NpipeHTTPAdapter/UnixHTTPAdapter`装到`requests.Session(trust_env=False)`，
+固定本地endpoint，不用registry/account/context，显式timeout/identity编码/stream关闭调用只读HEAD/GET。
+每个archive含逐层检查总期限10秒、每次请求至多10秒；`raw.read1`前后核对时间，
+避免大chunk隐藏慢速trickle。已在等待的一次底层读取仍可能多占一次请求超时，SDK暂停/恢复另计；不声称硬实时。
 npipe的官方 `recv_into` 使用overlapped ReadFile+WaitForSingleObject timeout/CancelIo，
 无需自研Windows管道协议；实际Engine通道仍需后来AT07观察。
 [官方 SDK 7.2.0 client](https://github.com/docker/docker-py/blob/5ad5327fba623897ee9a527d7eee1b01703e0726/docker/api/client.py)，
 [官方 npipe transport](https://github.com/docker/docker-py/blob/5ad5327fba623897ee9a527d7eee1b01703e0726/docker/transport/npipesocket.py)，
 [官方 package metadata](https://pypi.org/pypi/docker/7.2.0/json)。
+
+新增冻结与既有AT07/configuration定向测试 **110 PASS**，所有 `tests/experiments` **210 PASS**，
+严格类型检查 **140 source files PASS**，私有环境 **104 packages compatible**。
+strict首测 `Returning Any` 失败保留，运行时已校验bool后仅补类型cast；原始输出见
+[at07-evidence](at07-evidence/)。Q旧fixture三项失败仍是上一阶段事实，当前需Q按新精确配置独立覆盖正负例。
+测试只执行inert SDK/HTTP fixture与宿主静态解析；没有真实Engine调用、sandbox、探针或候选执行。
