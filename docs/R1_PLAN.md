@@ -2,6 +2,8 @@
 
 ## 当前接续入口（19:39，前组合离线接纳，B端点修正接续）
 
+- 19:44 原Q同长期Owner/worktree/branch独立核对B新AT07端点边界，write_paths仅tests/boundary_review/test_at07_route_boundary.py与docs/tracks/r1-boundaries.md、全新私有COPY取证。先只读设计/负例，收到精确B SOURCE后才安装验证；不使用B脏树、不改B源码/测试、无Engine/native science/全套旧门，不新集成者。定向覆盖context/env/参数绕过、CLI与受信transport同daemon及拒绝在SDKcreate前；首RED和actualSOURCE身份保留，只必要精准pytest/适用类型，完成普通SOURCE+REPORT push [skip ci]。
+
 ## 19:39 原 B 真实隔离工具端点修正（尚无真实执行授权）
 
 B docs-only REPORT64c5fac87d7823beb2c15354a3f395e5a23512dc已push/remote exact/clean，原Git锁87B核对、source/report/实际installed身份清楚，scope仅两docs、不冒充probe。B静态发现与root复核at07_live.docker_read调用默认docker CLI且继承上下文/env，现有观察未硬绑定docker_export.engine_endpoint。官方Docker CLI文档说明DOCKER_CONTEXT可覆盖DOCKER_HOST，默认读取用户.docker，--config/显式选项可定向；不能仅靠一句版本相同即将所有观察视为相同受信daemon。
