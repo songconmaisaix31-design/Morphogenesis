@@ -16,7 +16,8 @@ def test_official_stdio_discovery_claim_and_bound_identity(tmp_path: Path) -> No
     config.write_text(service.config.model_dump_json(), encoding="utf-8")
 
     async def run() -> None:
-        params = StdioServerParameters(command=sys.executable, args=["-m", "swarm.research", "--config", str(config)])
+        params = StdioServerParameters(command=sys.executable, args=["-m", "swarm.research", "--config", str(config)],
+                                      env={"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"})
         async with stdio_client(params) as (reader, writer):
             async with ClientSession(reader, writer) as session:
                 await session.initialize()

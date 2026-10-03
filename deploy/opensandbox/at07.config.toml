@@ -1,0 +1,36 @@
+# AT-07 preparation ONLY. Does not modify the historical c-0930 deployment.
+# Official server release source b1a29cf93a823a95913f7943010febb3f29de05c (Apache-2.0).
+# All runtime claims require the separately authorized effective/negative probes.
+[server]
+host = "0.0.0.0"
+port = 8090
+
+[proxy]
+# Egress owns the network namespace and published ports. The containerized
+# server must reach the Docker host, not its own 127.0.0.1.
+resolve_internal = false
+
+[log]
+level = "INFO"
+
+[runtime]
+type = "docker"
+execd_image = "opensandbox/execd:v1.1.0@sha256:6cf7dba2f21f0b536e100563d841ac58a9f31c2b0a081b7ac76796a24d6f47e2"
+
+[egress]
+image = "opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5"
+mode = "dns+nft"
+disable_ipv6 = true
+readiness_timeout_seconds = 30.0
+
+[docker]
+network_mode = "bridge"
+host_ip = "host.docker.internal"
+port_range_min = 47400
+port_range_max = 47410
+drop_capabilities = ["ALL"]
+no_new_privileges = true
+pids_limit = 128
+
+[ingress]
+mode = "direct"

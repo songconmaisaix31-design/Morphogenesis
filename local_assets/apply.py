@@ -10,6 +10,7 @@ import tempfile
 import time
 
 from local_assets.models import ApplicationReceipt, AssetSafetyError, Candidate, ValidationReport
+from local_assets.generated_models import GeneratedValidationReport
 from local_assets.paths import check_target, git, no_links, safe_join
 from local_assets.promote import checked_report
 from local_assets.snapshot import check_snapshot, scope_tree
@@ -51,9 +52,10 @@ class PreparedApplication:
 
     target: Path
     candidate: Candidate
-    report: ValidationReport
+    report: ValidationReport | GeneratedValidationReport
     baseline_files: dict[Path, bytes]
     git_metadata: dict[Path, bytes | None]
+    revalidate: Callable[[], None] | None = None
 
     @property
     def scope(self) -> str:
@@ -61,6 +63,8 @@ class PreparedApplication:
 
     def apply(self, assert_owned: Callable[[], None]) -> ApplicationReceipt:
         assert_owned()
+        if self.revalidate is not None:
+            self.revalidate()
         no_links(self.target)
         if any(_read(path) != body for path, body in self.git_metadata.items()):
             raise AssetSafetyError("target_revision_changed")
@@ -80,6 +84,8 @@ class PreparedApplication:
                 self._replace(path, after)
                 written.append((path, before))
             assert_owned()
+            if self.revalidate is not None:
+                self.revalidate()
             if time.time() >= self.report.expires_at:
                 raise AssetSafetyError("stale_report")
         except BaseException:
@@ -122,9 +128,21 @@ class AssetApplicator:
         self.policy_version = policy_version
         self.protected_paths = protected_paths
 
-    def prepare(self, asset_id: str, report_id: str | ValidationReport) -> PreparedApplication:
-        candidate, report = checked_report(self.store, asset_id, report_id, self.policy_version)
+    def prepare(self, asset_id: str, report_id: str | ValidationReport | GeneratedValidationReport) -> PreparedApplication:
+        report: ValidationReport | GeneratedValidationReport
+        if self.policy_version == "generated-isolation-v1":
+            from local_assets.generated_validation import checked_generated_report
+            if isinstance(report_id, ValidationReport):
+                raise AssetSafetyError("validation_policy_mismatch")
+            candidate, report = checked_generated_report(self.store, asset_id, report_id, self.policy_version)
+            # Static admission is insufficient for publishing a scientific asset.
+            self.store.fetch_approved(asset_id)
+        else:
+            if isinstance(report_id, GeneratedValidationReport):
+                raise AssetSafetyError("validation_policy_mismatch")
+            candidate, report = checked_report(self.store, asset_id, report_id, self.policy_version)
         target = check_target(self.target, self.protected_paths)
+        self.store.check_fixture_target(target)
         # Resolve metadata once outside B's transaction. Re-read these exact native
         # Git files in the callback so ref/branch/HEAD changes invalidate preparation.
         ref = git(target, "symbolic-ref", "HEAD").decode().strip()
@@ -149,4 +167,8 @@ class AssetApplicator:
         if (_scope_bytes(target, candidate.scope) != files
                 or any(_read(path) != body for path, body in metadata.items())):
             raise AssetSafetyError("target_changed_during_preparation")
-        return PreparedApplication(target, candidate, report, files, metadata)
+        def revalidate() -> None:
+            self.store.fetch_approved(asset_id)
+            self.store.check_fixture_target(target)
+        return PreparedApplication(target, candidate, report, files, metadata,
+                                   revalidate if self.policy_version == "generated-isolation-v1" else None)

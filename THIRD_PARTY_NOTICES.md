@@ -1,5 +1,16 @@
 # Third-party sources and licenses
 
+## 2026-10-03 R1 frozen export control transport
+
+`docker==7.2.0` (official Docker SDK for Python), source
+[`5ad5327fba623897ee9a527d7eee1b01703e0726`](https://github.com/docker/docker-py/tree/5ad5327fba623897ee9a527d7eee1b01703e0726),
+is Apache-2.0. The original session uses its Unix/npipe HTTP adapters with the
+existing requests transport for bounded, read-only Engine stat/archive calls;
+no implementation is copied. Its Windows dependency pywin32>=304 is satisfied
+by the existing locked pywin32 312 (PSF license); installed packages retain
+their license files. This dependency does not start Docker or authorize a
+sandbox/probe. OpenSandbox SDK/server/image versions remain unchanged.
+
 Checked against installed package metadata on 2026-09-22. Exact direct and transitive artifacts are recorded by `poetry.lock` and `package-lock.json`; runtime installation retains their LICENSE / NOTICE files. Project code calls these dependencies and does not copy their implementation. The original project Apache-2.0 LICENSE is unchanged.
 
 | Dependency | Installed version | Declared license | Source / use |
