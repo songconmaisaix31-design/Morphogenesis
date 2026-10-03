@@ -11,6 +11,7 @@
 - 清理已关闭6个明确idle/失败terminal，均实际ptyKilled=true；root/I/P/C与无关用户终端未误关。4个旧缺失句柄release_unknown/processActionnone保留，不证明旧进程已死，不改调度DB/历史。
 - C固定11误安装注册文件已单次逐项隔离。主控实际重读11备份，原路径不存在，大小/SHA256/mtime_ns逐项原快照匹配11/11；REPORT1e2338a4de6bea019b0efe983c7a69a54b22b73e已push/remote exact/clean、仅原报告27行。三个全局依赖保留，安装前UNKNOWN，不称全环境恢复。旧blocked by policy与首只读错误不改；release retained/external/processActionnone。
 - A核心10Entry只接纳原A树，I跨checkout认知freshness NOT_VERIFIED。B l2-poisson-review为问题/材料/现有评价复核消费调用链审查，无完整候选程序、无科学执行。
+- 19:30 原B同角色/树/分支准备最终AT07文档：write_paths仅docs/experiments/at07-authorization.md与docs/tracks/r1-experiments.md及本轨私有原证据。最终核心b480实际poetry.lock SHA256=87B335297F95B7BF72514691CB990DB0D6441316BE90C8CB726B016B9AF025EB，旧包8558为历史输入，须更新当前固定SOURCE/锁/产品2b/installed路径，不能套用旧binding。只静态/docs，不测试/安装/Engine/真实probe/密钥/registry；commit push [skip ci]。此工作与唯一I报告互斥，B后报告可docs-only普通merge，不再全回归。只读现状Dockerpipe不存在、进程0、空闲内存12720MiB/C49.72GiB，不等于授权或实测。
 - 下一顺序保持最终产品离线验收→单独授权AT07实际无害隔离→通过后一次L2；真实候选/科研/人工理解均NOT_RUN，性能仅真实记录。L3/规模效率/多用户/跨宿主/完整RSI不加入；main/tag/部署未执行。OpenCode真实Insufficient Balance仍未恢复，研发继续用户指定Codex GPT-6.1-Sol。
 
 ## 16:45 当前收口与下一步
