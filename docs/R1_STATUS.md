@@ -1,3 +1,13 @@
+## 21:25 专项AT07用户批准与原B真实执行轨
+
+C协调会话在UTC13:23:20通过 `msg_f469ac99f92f` 转交用户明确“我现在批准AT-07，继续开发”。主控随后直接读取 `term_57e5296e-b048-4992-9840-3cb81960c8e8` 已提交终端stream，确认用户原话（非draft）；接受为针对已展示e40最终包的当前专项批准，不再询问同一批准、不将批准预写成检查PASS。主控先前async问题已由此实际用户决定满足。最终I docs-only REPORT `c5cdfc89e5a1e43ab49f9afc33a05a53d887e8ab` 已独立核对remote exact/clean，15de→REPORT仅六docs、非docs零delta；root bbd/Q c4de/B e40均普通祖先exit0，原业务15de+c84与测试756不变。
+
+本阶段仍原B Agent/树/分支，接续已done Task `task_36dcf2a5df0b`；只写 `docs/tracks/r1-experiments.md`、本次新增 `docs/experiments/at07-evidence/live-20261003.txt` 与B私有原始运行证据，e40授权包/业务/测试/锁/其他Owner只读。以I r2 noneditable最终环境与原Git profile/compose运行一次已批准无害AT07；可启动现有Desktop（Hidden）、只读核真实Engine/daemon/四镜像/CLI与Compose路由/端口和当前宿主资源，再按e40所有前置决定是否创建。最多一次SDKcreate/5新容器/1自有volume/0新network/600秒总实际操作窗口；接受已披露sidecar/cache无硬caps/总峰UNKNOWN与基础设施DNS，但实际候选deny/负例不得豁免，动态端口范围未能实际确认即create前STOP。缺镜像不pull/build，版本不符不upgrade，不改全局防火墙/daemon/HOME/auth/provider/系统pip；不碰他人容器/进程。
+
+只经原CLI prepare/live/review及原SDK/frozen export链，不造调度/执行/证明系统、不在宿主执行探针或候选。实际key只原受保护文件进受控child内存，不打印/复制密钥或全部Env。create/readiness/pause/resume/stream/对象/清理未知不重试/不第二POST，精确新ID归属清理并保留所有原raw/失败/未知；全项PASS待原Q独立审阅，不能自行写verified probe。按e40条件仅全PASS与独立审核、sandboxpair/volume/cache已确认清理后移除target并600秒内停止但保留同64ID server为retained_stopped；失败/未知走精确已知自有收尾，残留照实，不称全资源清空。B无需在未知时重复等审批或变后端；立即Handoff原事实和阻塞。
+
+原Q只在真实B档齐全后按同Owner新审阅Task读原raw/归属/完整configuration/effective限制与各正负控制；不重复SDKcreate/执行压力/候选/安装测试，不修改B结果或用代码fixture替实测。真实AT07完整通过并独立接纳后才允许候选进入环境并推进原一次L2，当前不授权科学/native模型/付费/材料外发。L3/效率对照/多用户/跨宿主/完整RSI/main/tag/部署不加入。按现有模型Codex GPT-6.1-Sol high YOLO接续，OpenCode余额阻塞不重试；实际费用/Token节省UNKNOWN。
+
 ## 21:15 最终离线工程验收与真实隔离下一步
 
 固定业务 SOURCE：核心 `15de4959646df264530b978dfde9152552b9a76b`，产品 `c84e49bd8e926f50d2c057793e8789cf137b310a`；测试修复 SOURCE `756d5069e7739089f0e5ba1c33eebfb2657b03f0`，P docs-only REPORT `eca3fd48c33fc602f1ddb3f45d91bd88e17b941b`。主控已核对最小两测试文件差异、原断言不变、remote exact/clean；I新165文件 raw Git COPY/nlink1、53产品文件（36 Python+17其他）与原installed逐字节一致，三个pin不变。原900秒角色预算未改，仅该四phase合法POST测试等待900秒；其余GET/重复POST/测试仍默认15秒。
