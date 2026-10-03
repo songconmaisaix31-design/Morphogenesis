@@ -201,3 +201,65 @@ C 的全局 editable 清理是已发生的 **自动审批 blocked by policy，�
 本文件所在的最后单独文档commit为I REPORT，其完整SHA由最终Orca交付回执列出；提交信息含`[skip ci]`，不重复已完成的精确SOURCE CI。最后执行`git diff --cached --check`、普通`git push`、`git ls-remote`对照本分支HEAD、`git status --porcelain`及`git diff --exit-code <SOURCE> HEAD -- . ':(exclude)docs/**'`核对，交付时remote exact、工作树干净且非文档零差异。原始Git命令结果保存在`C:/r1i/i1003-2239/logs/final-git-delivery.log`。
 
 本次确定性契约与本机安装/HTTP/MCP/UI适用工程验收完成。所有首RED及UNKNOWN、SKIP、原十项类型债和性能限制按原身份保留；第6节的AT07/L2/L3、真实模型/沙箱/外发和独立人工观察等仍NOT_RUN，C人工恢复及旧未知资源仍未处理。没有推送main/tag或部署，不宣称全R1退出PASS。
+
+## 8. 2026-10-03 17:32 同一 I 接续：核心阶段
+
+本节属于原唯一 I 的连续核心阶段，Task `task_5f75f854b26e` / Dispatch `ctx_eceee077723b`；没有第二集成 Owner、worktree 或分支。先以原始 `git show 6cf280dd78db687dee45effdc805e5b46f17a744:docs/R1_PLAN.md` 读取主控 17:32 决策，再执行普通精确合并。用户 Spec 优先，原产品完整回归仍等 P 的实际人类 TTY receipt、AOCI 完成、最终核心 pin 和 F 最终合并。
+
+开始时原分支 `songconmaisaix31-design/morph-r1-integration-1003` 干净，HEAD 为 `08b31b39c075571ffd247e2b591d657ce09b6b34`。原第1–7节、首 RED、UNKNOWN 和 `C:/r1i/i1003-2239/` 证据保持；本轮不读取或复用其环境。新日志目录为 `C:/r1i/i1003-core-1732/logs/`，无新的本机安装或科研运行。
+
+### 8.1 精确来源、合并与 SOURCE
+
+| 输入 | SOURCE | REPORT / 治理 |
+| --- | --- | --- |
+| A 累积核心与 AOCI | `8dd85c1f88698cd8a22d72b5575e45e9431c0ce0` | `d8af82791fecde1f3dadfbf9190d4cbfada80146` |
+| B 官方冻结导出 | `5769005b09f1b756c94fdad0649a6b74690c0ca9` | `5aebd2eb7af774b3dc496ad9620548f6e7852e09` |
+| C 正证据机会与选择 | `e82cae36038c386aec999642289ac1d78c82a9ed` | `52b8d26da04aec41ceb7e008445ef2f1dc088d53` |
+| Q 独立边界 | `88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0` | `6ce5a23ea256affdf9fe8a71bbaabb66695f3631` |
+| 主控治理 | — | `6cf280dd78db687dee45effdc805e5b46f17a744` |
+
+每个 business SOURCE 均为其 REPORT 的祖先；四组 SOURCE/REPORT、主控治理和原 HEAD 共十个提交均经 `git merge-base --is-ancestor <sha> HEAD` 核验 exit0。A/C/Q 的 SOURCE→REPORT 仅本轨文档；B 的差异仅本轨报告、授权包和保留的原始离线日志。
+
+依次执行 `git merge --no-ff --no-edit <REPORT/治理>`：A merge 为 `080acc0639ece16ca58d3236779e199d9721bac8`；B/C 已包含于 A，返回 Already up to date；Q merge 为 `dc2655acc974bfe1862c86a35b3fbadf3a9fc28d`；治理 merge 为 **最终核心 SOURCE `3a6a7e5fecd5bbead9d234fa22ae0735bed19beb`**。全部无冲突，不 cherry-pick、不 force、不接管领域或 Q 文件，没有 I 胶水修改。
+
+最终 AGENTS、R1_PLAN、R1_STATUS、R1_ACCEPTANCE 与 root6cf 原 Git blob 完全一致。相对 A REPORT 的非 docs 差异仅来自 Q 的新增/受影响边界文件；原 I 报告与 `.github/workflows/check.yml` 在 SOURCE 冻结时未变。`final-ancestors.txt`、`A-to-final-nondocs.txt`、`governance-exact.txt` 和 `historical-I-workflow-protection.txt` 保存核对结果。
+
+SOURCE 于 2026-10-03 09:33 UTC 普通 push，`git ls-remote` 证明远端 exact，原推送日志为 `core-source-push-first.txt` / `core-source-remote.txt`。首次本机证据收集命令因 PowerShell foreach 后直接接管道产生 ParserError，整条命令在执行前被拒绝；后继仅修正命令语法，随后 ACK、血缘检查和首次 push 成功，未触发重复 push 或 CI。
+
+### 8.2 精确 SOURCE 的原双平台 CI
+
+原 `foundation` push Run **`37113441786`**：<https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37113441786>。`headSha` 为上述 SOURCE；Linux job `111175600084`，Windows job `111175600216`。只消费这一次实际运行，没有 dispatch、rerun 或重复 Owner 专项测试。
+
+原工作流使用 Python3.13 / Node24，依次执行原 `uv tool run poetry install`、`npm ci --ignore-scripts`、完整 `uv tool run poetry run python -m pytest -q`、`python tools/typecheck.py`、`python -m build`、`npm run check:sdk`、wheel target 安装和隔离 `python -I tools/check_distribution.py --site-dir tools/.wheel-site --check-node`。首次实际 Run 已结束为 **failure**，attempt1 原样保留，没有重跑。
+
+| 原门 | Linux `111175600084` | Windows `111175600216` |
+| --- | --- | --- |
+| 原锁安装、npm ci | PASS | PASS |
+| 完整 pytest | **1742 PASS / 2 FAIL / 16 SKIP / 75 warnings，540.91s，exit1** | **CANCELLED**，没有完整统计，不能算 FAIL 或 PASS |
+| strict / build / SDK / wheel install / distribution | workflow skipped / NOT_RUN | workflow skipped / NOT_RUN |
+
+两项失败均为 Q 所有的 `tests/integration/r1_security/test_b_frozen_export_boundary.py::test_official_local_transport_constructs_without_environment_or_engine_connection`，分别参数 `unix:///var/run/docker.sock` 与 `npipe:////./pipe/dockerDesktopLinuxEngine`。第123行无条件 `from docker.transport import NpipeHTTPAdapter, UnixHTTPAdapter` 在 Linux 的官方 docker.transport 上抛出 `ImportError: cannot import name 'NpipeHTTPAdapter'`；连 unix 用例也在 `_transport` 调用和原断言之前失败。静态核查 B `_transport` 在 npipe 分支取 NpipeHTTPAdapter、unix 分支取 UnixHTTPAdapter，不能据测试 import 失败认定 unix 生产适配失败或真实 Engine 可用。
+
+Windows 在 Linux失败后被原 matrix取消；原日志包含 cancellation期间pytest INTERNALERROR/KeyError和 `The operation was canceled`，保持原结果身份，不把取消堆栈变成完整 Windows失败或通过。原始完整 `gh run view --log` 字节保存为 `ci-original-first.log`，stderr为 `ci-original-first.stderr`；首失败原行摘录为 `ci-first-failure-excerpt.txt`，最终Run/step状态为 `ci-final-first.json`。原 run URL和job ID绑定本 SOURCE，而非某个 Owner旧 green。
+
+已通过 Handoff `msg_23efbcd5dd55` 向主控交 exact SOURCE、原失败节点/行、原断言前失败、原日志及所有者。平台适用的官方 transport测试修正归**原 Q**；若进一步发现不支持endpoint的生产边界需要变更，归原 B。I 不修改 Q测试、平台断言、领域逻辑或 CI来绕过；核心阶段验收目前 **NOT_ACCEPTED**，后继源修正与验收仍待主控路由原 Owner。
+
+### 8.3 AOCI 只读官方观察与原 A Handoff
+
+使用原官方 rc17 二进制，显式 `--repo <I worktree>` 执行官方 `index agent guide --agent codex --json` 和 `check --json`。Guide exit0、`complete=true,next_action=none,stage=aligned`；Check exit0、`ok=true,findings=[]`。Guide 报告 structure/governance aligned、pending_transactions0、recovery_pending=false、third_party_conflict=false、network_accessed=false。原输出为 `aoci-I-guide-first.json` / `aoci-I-check-first.json`。
+
+代码 Volume 目录仍为 `C:/Users/DW/orca/workspaces/Morphogenesis/morph-r1-research-1003/`。十个索引源码在最终 SOURCE 相对 A SOURCE 的原 Git 字节零差异；Guide 有五个 line_ending_only 条目，不能由此覆盖原 installed 字节门。上述返回只证明本次官方检查的机器观察，**I 的路径重新绑定、当前完整 cognition 和 freshness 仍 NOT_VERIFIED**。未执行 Overview/Attestation、init、baseline/路径/receipt 修改或迁移；未复制 A/P 本机 receipt。无索引源码 delta，路径迁移的必要性与官方维护交回原 A，由主控路由，不手工替换绝对路径。
+
+### 8.4 产品最终合并位置：只读建议
+
+仅使用 F checkout 的 Git 数据只读调查，未访问 P 冻结工作树文件、未运行 `C:/research-private/p-aoci-approve.ps1`、未写产品文件。P 当前 SOURCE `67721aaa815e706c51e0f80a1d15ab71e34b6880` 已为 F SOURCE `7bf17d195859a18960ee1ef933a920a286f73e61` / REPORT `c08566edc492e92adfc4e24a9e8de1c18b859e02` 的祖先，merge-base 正是 P677。F SOURCE→REPORT 仅 `docs/tracks/r1-ui.md`；P677→F REPORT 仅 F 所有的 UI、静态产物、UI 测试和报告。
+
+建议主控待 P 实际 human receipt 和 AOCI 收口后，由**原 P** 在原产品分支普通精确合并 F REPORT，再按最终核心 SOURCE repin/lock 并交最终产品 SOURCE；任何 F 领域冲突交原 F。此建议不改变 P 当前受保护 Header/config/README/source，不先合并产品、不运行完整产品回归。原产品路径和血缘见 `product-worktree-location.txt` / `product-lineage-location.txt`。
+
+早期 Handoff `msg_833cd194a39d` 交核心冻结与无冲突事实；`msg_316c74cb369b` 交 Run/job IDs、产品合并建议及 AOCI 路径限制。主控后继 `4b8aec899606626dd4780aee73aefa536ddef844` 仅追加 L2 问题/材料提议，不进入本 SOURCE、不改变授权；主控已明确无需合入冻结 SOURCE。
+
+### 8.5 当前边界
+
+本阶段只覆盖最终核心确定性 CI；产品最终组合完整 COPY 回归及 installed 输入/只读会话/支持反证 HTTP 页面仍 NOT_RUN。P human receipt 尚未出现，原十项产品类型债、原失败与未知事实保留。AT07、Docker/WSL/真实服务启动、真实候选、native 科研、L2/L3、外发、人工理解、main/tag/部署未执行；`task_live=NOT_RUN`。没有全局安装、认证、PATH、HOME/provider/hostconfig 改动；用量/费用与 token 节省 UNKNOWN。
+
+本节交付为保留首 RED 的后继 docs-only REPORT，完整 SHA 由本次 Orca 回执列出。原 CI 实际结果齐备后 commit/push，提交带 `[skip ci]`，避免文档再次触发完整源码门；失败 SOURCE 不因 REPORT 改变，核心适用门未全通过，不能宣称该阶段完成或全 R1 PASS。
