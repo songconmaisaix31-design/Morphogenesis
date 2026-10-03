@@ -268,6 +268,8 @@ def test_untrusted_private_config_directory_cannot_reach_cli(tmp_path, monkeypat
         original = Path.lstat
         if state == "junction":
             monkeypatch.setattr(asset_paths, "sys", SimpleNamespace(platform="win32"))
+            # Linux stat lacks this Windows constant; model the full Windows seam.
+            monkeypatch.setattr(asset_paths.stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003, raising=False)
 
         def lstat(path, *args, **kwargs):
             if path == directory:
