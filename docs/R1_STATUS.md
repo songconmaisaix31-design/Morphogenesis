@@ -1,3 +1,11 @@
+## 20:01 条件适用性定界，保持两条互斥开发轨
+
+C卫星run_72af1ba4a579三路只读审查已全部完成，私有ACCEPTANCE.md已主控阅读。可信生成投影与accept→advisory→choose/claim链未找到新增反例，原141与三项Spec行为不重跑。发现正式_research_branches只投影branch身份/status/parent/authorized，C Branch.conditions为空且feedback空条件可泛配；任务plan允许不同parameters/seeds/claim。该静态路径尚无正式入口的跨条件首RED，不提前称确认漏洞或授予修复范围之外源码。
+
+原A同morph-r1-research-1003/原branch后继恢复，write_paths仅 swarm/research/service.py、records.py、knowledge.py、server.py、新 tests/research/test_route_conditions.py 与 docs/tracks/r1-research.md及本轨私有证据。先读取Spec FR13/FR19及原B/C真实conditions生成/冻结/匹配调用，以实际正式admission与证据构造判明旧证据是否对明确不适用条件获得增益。不得仅手造C Branch/model字段冒充产品首RED，不把参数/seed每次不同天然等同不适用，不能把跨条件建议混同可信PASS继承。无具体缺口只给调用和范围证据；有首RED只在A接线/持久契约做最小修正，反馈/policy域若需变更交原C，不跨写。禁止新成本估计/评分框架/预算/调度/proof模块。
+
+现行并发仅Q端点installed精准验收与A正式条件定界（互斥源码路径）；B端点SOURCEfc866/REPORTf008保持已交付，需计划语义可只读调用或Handoff，不新建无必要的B编辑者。验证仅原A新条件负例与适用类型/必要回归，不重跑旧全门、Engine/key/SDK/science/AT07/L2不授权。SOURCE及docs-onlyREPORT普通push [skip ci]，保留所有首失败，唯一I待这些实际领域结果后普通精确集成；同P再pin，再一个最终固定组合的完整产品离线门。当前known_cost无正式可信投影/单位，先如实UNKNOWN与覆盖限制，不创造数值。
+
 ## 19:51 B端点修正交付，原Q独立安装验收进行中
 
 原B SOURCE fc866465aa52a3f09773bc79a0fab95bceedc3d9 / 直接子docs-only REPORT f008e281e15d25c8950d7ddd05450fbe398653f1均普通push、remote exact、clean。相对64c5fac仅at07_live.py与原AT07测试两业务文件；SOURCE到REPORT仅授权包与原轨报告两docs。原定向首RED18FAIL保留，最终52PASS/2.04s、改动模块strict1PASS。主控已读实际绑定调用链并核对交付路径，未将Owner绿替代独立边界验收。
