@@ -1,5 +1,19 @@
 # R1 派发状态（2026-10-03）
 
+## 11:17 新收口任务已实际启动
+
+用户追加范围已记录于 R1_PLAN 最新章节（核心治理 66e2a26f043453a851f4f31ec20700802b90b5d4），下方 08:28/07:16 是上轮历史交付，不能代替本轮最终回归。当前在原 Run run_d5306f2e4993 复用三个已确认 idle 的原 Codex YOLO 终端，均获得 input_accepted + turn_started：
+
+| Owner | Task | Dispatch | 当前验收目标 |
+|---|---|---|---|
+| A | task_8f61e0bb9e35 | ctx_c60dc35cb810 | 局部上下文相关性选择的调用/测试或最小修正 |
+| C | task_45d094d904c7 | ctx_4b4437b4b02c | 正证据影响路线机会和正式后续选择的针对性测试与修正 |
+| P | task_7cf2cd840b46 | ctx_abe7449e62f9 | 正式 envelope 跨片段接续，复用私库能力，相关 installed 输入条件 |
+
+同原 worktree/branch/write_paths，无新增重复 Owner。继续采用已有低层 Dispatch 与自管终端；未声称转为 supervised resource ownership，结算后按真实 retained/no_owned_resource 处理。I 等三个领域结果及最终 pin 后再派发，独立 COPY 安装并执行完整产品离线套件与 installed 输入观察。新完整结果目前 NOT_RUN。
+
+真实 AT-07 将先准备具体无害探针、后端/镜像/资源/清理范围供用户单独授权；本阶段不执行。AT-07 通过前不将生成候选送入真实环境。L2 后置，L3/大规模对照/多用户/跨宿主/完整 RSI 排除。性能实际记录，不增加收口阈值。旧首失败、十项类型债及 C 全局误装/清理拒绝原样保留。
+
 ## 08:28 文档最终身份与第三次工具空档
 
 最终产品 SOURCE 仍为 `9e2718789cb67f8b829207e17dac4d95a88e59c9`，最新文档 REPORT 为 **`a7f657d18fae33fc2a4df92b5fcb60dcd7839c5d`**；主控已核实远端、clean、治理b20祖先及SOURCE后仅五个docs文件变动。下文07:16的ad104是该时点领域/类型报告，完整保留。原P仅做文档收尾（task_4ceeb28295b5 / ctx_187f60b538c0），未重测或修改业务、README、锁及静态产物。I以最终SOURCE2c63和产品9e的现有证据封存独立报告，不发生再次repin。
