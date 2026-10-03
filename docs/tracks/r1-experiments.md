@@ -593,3 +593,30 @@ author/reviewer 授权（宿主身份，非 caller 字符串）。
 
 - 真实沙箱探针、真实科研切片、云/GPU 后端、Hub 发布：未获授权，NOT_RUN。
 - A 正式 MCP 接线、C 三轴贡献接受（绑定 `proof_ref`）、P 产品 UI 由各自 Owner 消费上述 Handoff；独立 I 最后集成。
+
+## 2026-10-03 19:30 后继：最终 AT07 准备文档（非运行授权）
+
+Task `task_a4ec02a052a7` / Dispatch `ctx_021ad7956531`；原 B Owner/worktree/branch不变，
+依据主控 `1af65788c0223f874c61bc08514c785cc95575be` 当前决策，只更新
+[AT07准备包](../experiments/at07-authorization.md)及本短追加。本次commit是docs-only REPORT，不是新业务SOURCE。
+受测核心 SOURCE `b480fca1b10a0b6a9c93f0d1801d38f267662461` / 产品 SOURCE
+`2b9bf73c93e732771ed3582f3bc7745ea8158b68` / P docs REPORT `c8d4197bac272cdf5f634bc7a56c87db19bfbebb`。
+原Git锁384044字节，SHA256 `87B335297F95B7BF72514691CB990DB0D6441316BE90C8CB726B016B9AF025EB`；
+模型字段用同值小写。旧576 SOURCE、8558锁、preparation、first RED和OpenCode余额首阻塞明确保留，不复用旧binding。
+
+只读I `C:/r1i/final-product-1855/venv` 核心direct_url精确b480及docker7.2.0/opensandbox1.1.0 metadata；
+产品wheel metadata本身不证明2b，沿用I原Git字节/非editable COPY证据。
+I原core136/product36Python/53资源/98锁记录、256PASS423.71s、UI126PASS8SKIP、installed四类各2PASS
+仅离线证据，本轮未重跑；原全产品10类型错误/6文件不抹除。包新增现有HostConfig/generated settings→
+IsolationConfiguration/prepare→原profile/registry调用图例，显式128pids（原默认16），未造模块/profile/approval。
+Handoff `msg_15b77327c6f6` / 主控答复 `msg_b3b3ae645af1`：原at07_live默认Docker CLI尚无host/私有配置参数，
+须同受控子进程/空私有Docker配置/明确endpoint证明全部CLI读观察与冻结导出同daemon，一条version匹配不足；
+无法证明即SDKcreate前STOP交原Owner另定scope。本次不修业务，daemon/serviceID/targetIP/实际profile/probe/授权ref仍UNKNOWN。
+
+保持四镜像、固定endpoint、512MiB/128pids/30s/180s/1MiB、最多5容器1volume0network和
+原SDK pause→只读HEAD/GET→原SDKresume单次导出；sidecar/cache限额UNSUPPORTED、动态端口/现存防火墙、
+Engine可能恢复他项目容器等限制未降低。下一独立授权最小范围、条件停止、一次SDKcreate未知不重试和精确自有收尾已列明。
+本次仅原Git/源码/包metadata读取、docs diff/commit/push `[skip ci]` 与remote exact/clean核对；
+私有raw `C:/research-private/b-at07-final-packet-ctx_021ad7956531/`。业务/测试/lock/部署/AOCI/root/P/F/I写入零。
+安装、测试、Engine/Docker/WSL/service、密钥、prepare/registry写入、SDKcreate、candidate/native科学均未执行；
+AT07与L2仍NOT_RUN，Poisson review不变，费用UNKNOWN，不称MVP/R1完整通过。唯一I可普通合此docs-only REPORT，不新增集成Worker或全回归。
