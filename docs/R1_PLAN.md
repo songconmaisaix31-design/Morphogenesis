@@ -1,3 +1,11 @@
+## 20:53 最终产品首RED退原P定向诊断（不重全套）
+
+固定15de4959646df264530b978dfde9152552b9a76b+c84e49bd8e926f50d2c057793e8789cf137b310a唯一fullproduct自然完成255PASS/1FAIL539.16s、childexit1/外层542.527s，raw C:/r1i/successor-2018/r2/logs/full-product-first.log/commands.jsonl 保留。唯一tests/test_research_api.py::test_four_phases_real_runner_boundary_and_three_page_facts在376行POST phase，经test_web.py42 urlopen(timeout15)→socketTimeoutError。三个页面/runner断言未完成，不能写PASS或用旧256补同来源。新LinuxCI1824PASS16SKIP399.47s、strict140/build/SDK1.14/wheel门通过，Windows原run37123370202仍pytest，不改变或retry。
+
+原P同Owner/树/branch/terminal后继parent task_278fd6b98458，write_paths仅tests/test_research_api.py、docs/tracks/r1-product.md和新P私有诊断材料。先只读完整trace、失败phase原fixture/childargv-env/start-end/audit、源码调用与旧b480+2b差异，区分测试客户端15s工具timeout、真实产品超时契约与宿主子进程首次导入/环境资源；用户明确性能目标只如实记录，不把未承诺最优成绩或工具默认timeout变产品收口条件。保持原状态/phase/mock/task_live/秘密/原事实断言，不擅自拉长共享test_web.py timeout、skip/弱化断言/改生产，只原同case全新私有fixture必要定向复核，不重255绿项/整套/UI/CI/全旧type或全重安装。可只读使用I最终r2非editablevenv运行P新私有子进程，不写I树/env/global包/原首fixture、不重放原unknown请求；源修复必要先Handoff精确域路径/理由由root授权原Owner，不I自修。环境修复或fixture修复分层记录，SOURCE若不变明确无新业务SOURCE；如test-only修复，发布SOURCE/REPORT普通push [skip ci]、保持原来源与首次255/1，唯一I据实际delta安排必要定向安装而非全suite重跑。Domain变化另固定新组合并验收，禁止为绿色表演扩大模块/框架。
+
+B同Task最终授权包继续待真实工程结果补，不Engine/key/prepare/probe/SCI；工程结果可审阅齐全后方按用户要求独立授权AT07，已核生命周期成功后600s内stop并显式retain同serverID为待授权选项，不能从cleanup bool推缓存清理/删除重建探针继承。
+
 ## 20:38 最后固定SOURCE组合（工程仍在验收）
 
 核心 SOURCE 15de4959646df264530b978dfde9152552b9a76b / 产品 SOURCE c84e49bd8e926f50d2c057793e8789cf137b310a 已由主控实际核对remote exact、clean、普通祖先与最小diff。15de对e635仅root两docs与原Qjunctionfixture两行，生产/依赖/锁零delta；c84对P REPORT684仅三个既有pin文件4增4删，98锁记录仅五处完整SOURCE SHA替换、Docker7.2.0未漂移。原Q修复 SOURCE3aa95d94828449fd92e6bb4fe6385178f3dac971 / docsREPORTc4de24734f3f8d85446265d39ed6365a92e0d3ee已接纳/done/release retained，首RED1FAIL与后1PASS+5PASS、模拟恢复true保留；真实Linux门待新CI不冒充已绿。
