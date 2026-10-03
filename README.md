@@ -5,7 +5,8 @@
 > 让研究像形态发生一样生长——没有中央指挥，却能长出最优的拓扑。
 >
 > *Morphogenesis · decentralized Agent swarm*
->![Uploading 6d850dd4b18f3f7d5e13fb2196cf2ed5.png…]()
+><img width="2559" height="1398" alt="6d850dd4b18f3f7d5e13fb2196cf2ed5" src="https://github.com/user-attachments/assets/17a53db5-8279-425d-821c-7f06da0d2226" />
+
 
 
 
