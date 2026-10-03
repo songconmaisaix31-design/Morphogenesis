@@ -22,6 +22,8 @@
 
 业务名 EvaluationCriteria 在现有 Python 契约中对应 **`EvaluationSpec`**，不是缺失的新模块。源码入口可从[冻结核心树](https://github.com/songconmaisaix31-design/Morphogenesis/tree/b480fca1b10a0b6a9c93f0d1801d38f267662461)查看；下表行号固定于该 SOURCE。
 
+缩略路径图例：本稿 `service.py`、`server.py`、`dynamic.py`、`feedback_generated.py` 均属于 `swarm/research/`；`generated.py`、`evaluation.py`、`trusted.py`、`generated_executor.py` 均属于 `orchestration/experiments/`。`local_assets/` 文件与测试均写明相对路径；行号不是本 B checkout 的其他同名文件位置。
+
 | 位置 | 现有契约 / 调用事实 |
 | --- | --- |
 | `orchestration/native_agents/launch.py:10`；`swarm/research/__main__.py:11` | 正式 MCP argv 为 `-m swarm.research --config` 加绝对宿主配置路径；`build_launch` 保留 `HostBinding`，核对 workspace，再由 `HostConfig` → `build_service` → `create_server` 接入。此处仅记契约，不启动进程 |
