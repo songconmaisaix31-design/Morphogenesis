@@ -32,6 +32,7 @@ def denied_execution(monkeypatch):
     monkeypatch.setattr(socket.socket, "sendto", denied)
     monkeypatch.setattr(at07.SandboxSync, "create", denied)
     monkeypatch.setattr(at07, "FrozenDockerExport", denied)
+    monkeypatch.setattr(at07_live, "FrozenDockerExport", denied)
 
 
 def configuration(*, frozen=False):
@@ -49,8 +50,9 @@ def prepared(tmp_path, *, frozen=False):
 
 @pytest.fixture
 def inert_control(monkeypatch):
-    control = SimpleNamespace(preflight=Mock(), close=Mock())
+    control = SimpleNamespace(preflight=Mock(), close=Mock(), _json=Mock(return_value={"ApiVersion": "1.52"}))
     monkeypatch.setattr(at07, "FrozenDockerExport", lambda config: control)
+    monkeypatch.setattr(at07_live, "FrozenDockerExport", lambda config: control)
     return control
 
 
@@ -229,12 +231,20 @@ def test_operator_disconnected_create_is_not_replayed_or_overwritten(tmp_path, m
     (canary / "credentials").write_bytes(b"AT07-SYNTHETIC-NOT-A-SECRET\n")
     key = tmp_path / "fake-service-key"
     key.write_text("fake-fixture-only")
-    def inspecting(name):
-        return {"id": configuration().instance_id, "image": at07.SERVER_IMAGE if name.endswith("server") else PYTHON_IMAGE,
-                "owner": "r1-at07", "state": "running", "ip": "172.17.0.2"}
-    monkeypatch.setattr(at07_live, "inspect", inspecting)
-    monkeypatch.setattr(at07_live, "docker_read", lambda *args: CONFIG.read_text())
-    monkeypatch.setattr(at07_live, "inventory", lambda: {"containers": ["unrelated"], "volumes": ["old-volume"], "networks": ["bridge"]})
+    calls = []
+    def process(argv, **options):
+        calls.append((argv, options))
+        args = argv[5:]
+        if args[0] == "inspect":
+            output = json.dumps({"id": configuration().instance_id,
+                "image": at07.SERVER_IMAGE if args[-1].endswith("server") else PYTHON_IMAGE,
+                "owner": "r1-at07", "state": "running", "ip": "172.17.0.2"})
+        elif args[0] == "exec":
+            output = CONFIG.read_text()
+        else:
+            output = {"ps": "unrelated", "volume": "old-volume", "network": "bridge"}[args[0]]
+        return SimpleNamespace(returncode=0, stdout=output, stderr="")
+    monkeypatch.setattr(subprocess, "run", process)
     monkeypatch.setattr(at07_live, "target_control", lambda: {"dns_positive": True, "canary_exists": True,
         "fake_credential_present": True, "denied_tcp_hits": 0, "dns_queries": 0})
     create = Mock(side_effect=TimeoutError("offline disconnect fixture"))
@@ -249,6 +259,77 @@ def test_operator_disconnected_create_is_not_replayed_or_overwritten(tmp_path, m
                          canary_directory=canary, accept_infrastructure_limits=True)
     assert first == {p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}
     create.assert_called_once()
+    assert len(calls) == 9  # Both inventories, two inspects, fixed server-config exec.
+    for argv, options in calls:
+        assert argv[:5] == ["docker", "--host", configuration(frozen=True).docker_export.endpoint,
+                            "--config", str(root / ".at07-docker-cli")]
+        assert options["shell"] is False
+        assert not any(k.upper().startswith("DOCKER_") or "PROXY" in k.upper() for k in options["env"])
+    assert not (root / ".at07-docker-cli").exists()
+
+
+def test_docker_read_without_binding_and_nonempty_config_never_spawns(tmp_path, monkeypatch):
+    process = Mock(side_effect=AssertionError("must not spawn"))
+    monkeypatch.setattr(subprocess, "run", process)
+    private = tmp_path / ".at07-docker-cli"
+    private.mkdir()
+    secret = private / "config.json"
+    secret.write_text('{"auths":{"foreign":"fake-secret"}}')
+    with pytest.raises(ValueError, match="configuration_required"):
+        at07_live.docker_read("ps", "-aq", "--no-trunc", private_config=private)
+    with pytest.raises(ValueError, match="empty_docker_config_required"):
+        at07_live.docker_read("ps", "-aq", "--no-trunc",
+            configuration=configuration(frozen=True).docker_export, private_config=private)
+    assert secret.read_text() == '{"auths":{"foreign":"fake-secret"}}'
+    process.assert_not_called()
+
+
+def test_private_docker_config_does_not_overwrite_or_remove_unknown_files(tmp_path):
+    private = tmp_path / ".at07-docker-cli"
+    private.mkdir()
+    original = private / "original"
+    original.write_text("retain")
+    with pytest.raises(FileExistsError):
+        with at07_live._private_docker_config(tmp_path):
+            pytest.fail("must not enter an existing directory")
+    assert original.read_text() == "retain"
+    root = tmp_path / "new-root"
+    root.mkdir()
+    with pytest.raises(OSError):
+        with at07_live._private_docker_config(root) as owned:
+            (owned / "unexpected").write_text("retain-new")
+    assert (root / ".at07-docker-cli/unexpected").read_text() == "retain-new"
+
+
+@pytest.mark.parametrize("field,value", [("instance_id", "UNBOUND-NOT-RUN"),
+    ("runtime_profile", "unverified"), ("endpoint", "http://foreign:8099"), ("server_process_limit", 16)])
+def test_invalid_complete_operator_configuration_stops_before_transport(tmp_path, monkeypatch, field, value):
+    root = prepared(tmp_path, frozen=True)
+    altered = configuration(frozen=True).model_copy(update={field: value})
+    (root / "configuration.json").write_text(altered.model_dump_json())
+    transport = Mock(side_effect=AssertionError("must not construct transport"))
+    process = Mock(side_effect=AssertionError("must not spawn"))
+    monkeypatch.setattr(at07_live, "FrozenDockerExport", transport)
+    monkeypatch.setattr(subprocess, "run", process)
+    with pytest.raises(ValueError):
+        at07_live.execute(root=root, authorization_ref="fixture", key_file=tmp_path / "must-not-read",
+            canary_directory=tmp_path / "missing", accept_infrastructure_limits=True)
+    transport.assert_not_called()
+    process.assert_not_called()
+    assert not (root / "create-requested.json").exists()
+    assert not (root / ".at07-docker-cli").exists()
+
+
+@pytest.mark.parametrize("failure", [subprocess.TimeoutExpired("fake-secret-argv", 10),
+                                    OSError("fake-secret-path")])
+def test_docker_process_errors_remain_secret_free(tmp_path, monkeypatch, failure):
+    private = tmp_path / ".at07-docker-cli"
+    private.mkdir()
+    monkeypatch.setattr(subprocess, "run", Mock(side_effect=failure))
+    with pytest.raises(RuntimeError, match="^docker_read_failed$") as caught:
+        at07_live.docker_read("ps", "-aq", "--no-trunc",
+            configuration=configuration(frozen=True).docker_export, private_config=private)
+    assert caught.value.__suppress_context__ is True
 
 
 def test_unconfigured_operator_stops_before_any_docker_or_key_read(tmp_path):
@@ -286,3 +367,93 @@ def test_effective_config_requires_actual_owned_container_and_not_sdk_parameters
                     {**main, "probe": "another-probe"}):
         assert not at07_live.effective(changed, sidecar, result)
     assert not at07_live.effective(main, {**sidecar, "sidecar_for": "unrelated"}, result)
+
+
+@pytest.mark.parametrize("endpoint", ["npipe:////./pipe/dockerDesktopLinuxEngine", "unix:///var/run/docker.sock"])
+def test_docker_reads_bind_explicit_endpoint_and_ignore_poison_environment(tmp_path, monkeypatch, endpoint):
+    private = tmp_path / ".at07-docker-cli"
+    private.mkdir()
+    config = configuration(frozen=True).docker_export.model_copy(update={"endpoint": endpoint})
+    poison = {"PATH": "trusted-tool-path", "SystemRoot": "C:/Windows", "HOME": "secret-home",
+        "USERPROFILE": "secret-profile", "DOCKER_CONTEXT": "foreign", "docker_host": "tcp://foreign:2375",
+        "DoCkEr_CoNfIg": "secret-config", "DOCKER_TLS_VERIFY": "1", "DOCKER_CERT_PATH": "secret-certs",
+        "DOCKER_API_VERSION": "1.20", "DOCKER_CUSTOM_HEADERS": "Authorization=secret",
+        "http_proxy": "secret-proxy", "HTTPS_PROXY": "secret-proxy", "ALL_PROXY": "secret-proxy",
+        "NO_PROXY": "foreign", "OPENSANDBOX_SERVER_API_KEY": "secret-service-key"}
+    monkeypatch.setattr(at07_live.os, "environ", poison)
+    calls = []
+    def capture(argv, **kwargs):
+        calls.append((argv, kwargs))
+        assert private.is_dir() and list(private.iterdir()) == []
+        return SimpleNamespace(returncode=0, stdout="[]", stderr="")
+    monkeypatch.setattr(subprocess, "run", capture)
+    commands = [("inspect", "--format", at07_live.INSPECT, "1" * 64), ("ps", "-aq", "--no-trunc"),
+        ("volume", "ls", "-q"), ("network", "ls", "-q", "--no-trunc"),
+        ("exec", "1" * 64, "cat", "/etc/opensandbox/config.toml"),
+        ("exec", "2" * 64, "nft", "-j", "list", "ruleset"), ("logs", "--tail", "100", "2" * 64)]
+    for args in commands:
+        at07_live.docker_read(*args, configuration=config, private_config=private)
+    assert len(calls) == len(commands)
+    for (argv, options), command in zip(calls, commands, strict=True):
+        assert argv == ["docker", "--host", endpoint, "--config", str(private), *command]
+        assert options["shell"] is False and options["timeout"] == 10
+        assert set(options["env"]) == {"PATH", "SYSTEMROOT"}
+        assert options["env"] == {"PATH": "trusted-tool-path", "SYSTEMROOT": "C:/Windows"}
+        assert options["cwd"] == private
+    assert poison["DOCKER_CONTEXT"] == "foreign" and poison["HOME"] == "secret-home"
+
+
+@pytest.mark.parametrize("args", [
+    ("inspect", "--host", "tcp://foreign", "1" * 64), ("ps", "--context=foreign"),
+    ("ps", "-Htcp://foreign"), ("logs", "--config", "secret-config", "1" * 64),
+    ("ps", "--tlsverify"), ("exec", "1" * 64, "sh", "-c", "true"), ("volume", "rm", "foreign"),
+])
+def test_docker_read_rejects_routing_overrides_and_mutation_before_process(tmp_path, monkeypatch, args):
+    process = Mock(side_effect=AssertionError("must not spawn"))
+    monkeypatch.setattr(subprocess, "run", process)
+    with pytest.raises(PermissionError, match="docker_read_only"):
+        at07_live.docker_read(*args, configuration=configuration(frozen=True).docker_export,
+                              private_config=tmp_path / ".at07-docker-cli")
+    process.assert_not_called()
+
+
+@pytest.mark.parametrize("field,value", [("endpoint", "tcp://foreign:2375"), ("api_version", "1.20"),
+    ("engine_version", "unknown"), ("daemon_id", ""), ("request_timeout_seconds", 45)])
+def test_docker_read_revalidates_even_bypassed_model_before_process(tmp_path, monkeypatch, field, value):
+    process = Mock(side_effect=AssertionError("must not spawn"))
+    monkeypatch.setattr(subprocess, "run", process)
+    config = configuration(frozen=True).docker_export.model_copy(update={field: value})
+    with pytest.raises(ValueError):
+        at07_live.docker_read("ps", "-aq", "--no-trunc", configuration=config,
+                              private_config=tmp_path / ".at07-docker-cli")
+    process.assert_not_called()
+
+
+@pytest.mark.parametrize("change", [{"Version": "other"}, {"ApiVersion": "1.20"},
+                                    {"ID": "foreign-daemon"}, {"Os": "windows"}])
+def test_operator_engine_mismatch_stops_before_cli_key_or_create(tmp_path, monkeypatch, change):
+    from orchestration.experiments import frozen_export
+    root = prepared(tmp_path, frozen=True)
+    transport = Mock()
+    monkeypatch.setattr(frozen_export, "_transport", lambda endpoint: (transport, "http+docker://inert"))
+    def original_json(control, path):
+        if path == "/version":
+            return {"Version": "29.5.3", "Os": "linux", "ApiVersion": "1.52", **change}
+        if path == "/info":
+            return {"ID": "inert-daemon-1", "OSType": "linux", **change}
+        return {"Id": "1" * 64, "State": {"Running": True}, "Config": {"Image": at07.SERVER_IMAGE},
+            "NetworkSettings": {"Ports": {"8090/tcp": [{"HostIp": "127.0.0.1", "HostPort": "8099"}]}}}
+    monkeypatch.setattr(frozen_export.FrozenDockerExport, "_json", original_json)
+    monkeypatch.setattr(at07_live, "FrozenDockerExport", frozen_export.FrozenDockerExport)
+    process = Mock(side_effect=AssertionError("must not spawn"))
+    create = Mock(side_effect=AssertionError("must not create"))
+    monkeypatch.setattr(subprocess, "run", process)
+    monkeypatch.setattr(at07.SandboxSync, "create", create)
+    with pytest.raises(PermissionError, match="daemon_mismatch|api_mismatch"):
+        at07_live.execute(root=root, authorization_ref="fixture-not-permission", key_file=tmp_path / "must-not-read",
+            canary_directory=tmp_path / "missing", accept_infrastructure_limits=True)
+    process.assert_not_called()
+    create.assert_not_called()
+    transport.close.assert_called_once()
+    assert not (root / "create-requested.json").exists()
+    assert not (root / ".at07-docker-cli").exists()

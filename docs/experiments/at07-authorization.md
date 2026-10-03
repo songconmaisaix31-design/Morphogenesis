@@ -1,18 +1,86 @@
 # AT-07 可审查授权包（准备完成不等于执行授权）
 
 本包针对 Spec §10.1、AT-07、§14.4。**真实 AT-07：NOT_RUN；L2：NOT_RUN。**
-**当前准备状态：PREPARED_UNVERIFIED；真实执行仍未获授权。** SOURCE
-`5769005b09f1b756c94fdad0649a6b74690c0ca9` 已实现原 SDK pause/resume 加受信 Docker
-控制面冻结导出；本机实际 Engine/daemon ID 未知，A 的受信配置接线、固定组合完整离线/installed 验证仍待完成。
+**当前准备状态：PREPARED_UNVERIFIED；真实执行仍未获授权。**
+
+## 19:39 端点绑定工程后继（仅离线验证）
+
+依据主控 `df12d36e31d4dd7d7a5a54263eed710f283689c2` 当前计划，原 B 后继业务 SOURCE
+`fc866465aa52a3f09773bc79a0fab95bceedc3d9` 已普通push，仅改 `at07_live.py` 与本文件对应的AT07测试。
+此 SOURCE 尚待唯一 I 精确合入、原 P 重新pin以及适用工程门；**不能用前组合 b480+2b/a67 的installed或离线通过结果验收新组合**。
+本 SOURCE 未改变锁/依赖，B旧分支的8558锁也未升级；最终受测集成SOURCE、产品SOURCE、锁和installed路径
+须由 I/P 后续精确给出，当前不伪造新固定值。下文19:30组合与87B锁仍是前组合记录。
+
+修正复用原 `DockerExportConfiguration` 和官方CLI：所有inspect/inventory、固定cat/nft与筛选域名日志
+都通过同次execute绑定的reader，typed argv含 `docker --host <配置endpoint> --config <本次空私有目录>`，
+`shell=False`、10秒、原262144字符观察上限。仅保留子进程PATH/SYSTEMROOT/WINDIR，按大小写规范读取；
+不继承HOME/USERPROFILE、任何DOCKER_*、TLS/证书/API/context/custom headers、代理或service key。
+闭合原命令形式，拒绝附加全局路由选项、其他inspect格式、任意exec和mutation；没有fallback默认reader。
+`execute` 在CLI/密钥/SDKcreate前重验完整IsolationConfiguration、128pids固定profile及真实service/runtime身份格式；
+继而用原 `FrozenDockerExport.preflight()` 核对Engine版本/daemon/Linux/server绑定，并用同一原transport读取
+`/version` 核对实际 `ApiVersion=1.52`，不以CLI自报或配置字面值代替。
+真实控制面读取本次均未发生，测试只注入原transport的inert数据和捕获subprocess argv/env。
+
+空目录仅在新的probe root下创建 `.at07-docker-cli`，拒绝已有目录、symlink/junction/hardlink路径；
+收尾核对目录身份，仅rmdir空目录。非空/替换目录保留并报错，不递归删未知内容，不改全局配置或HOME。
+原一次SDKcreate、create-requested/no-replay、UNKNOWN与原owned SDK cleanup结构保持；目录清理错误不得当成探针PASS。
+原SDK pause→Docker只读HEAD/GET→原SDKresume及全部实际隔离限制仍适用。
+
+依据 [Docker官方CLI文档](https://docs.docker.com/reference/cli/docker/)（本次只读）：context可覆盖host环境项，
+默认用户配置可能含认证；显式host、空config和不继承这些环境项共同固定此调用的本机路由。
+来源为官方参数说明，未复制上游代码，未增加transport/registry/证明/调度系统或配置schema。
+定向首测18 FAIL、后继44 PASS、最终52 PASS/2.04s及改动文件strict1 PASS原日志保留于
+`C:/research-private/b-at07-endpoint-ctx_0c9ab2aea2f0/`；都是contract_local，非Engine/AT07隔离证据。
+没有重跑原110/210/Q65、核心CI或产品256/UI门；费用/模型用量UNKNOWN。
+
+## 19:30 前组合准备记录（历史受测身份保留）
+
+下列段落为此前docs-only准备，依据主控
+`1af65788c0223f874c61bc08514c785cc95575be` 的 `docs/R1_PLAN.md` 19:30 决策，仅更新准备文档。
+前组合受测核心 SOURCE 为 `b480fca1b10a0b6a9c93f0d1801d38f267662461`，产品 SOURCE 为
+`2b9bf73c93e732771ed3582f3bc7745ea8158b68`；P docs-only REPORT 为
+`c8d4197bac272cdf5f634bc7a56c87db19bfbebb`。REPORT（包括 I 的报告 HEAD 和本次 B 文档 commit）
+均不作为受测 SOURCE。b480 已包含原 SDK pause/resume、受信 Docker 控制面冻结导出及宿主配置透传；
+实际 live HostConfig、Engine/daemon、服务 instance、target IP、runtime_profile、probe 和授权引用仍未确认。
 没有 `docker_export` 精确配置时，`at07_live` 在 Docker/key/SDK create 前拒绝，原 live adapter
 也声明 `export_bounded=False`。旧 probe 不含新配置，不能授权新路径；接受基础设施边界的参数不改变该门禁。
 `prepare` 的 `ready_for_real_at07` 仅表示配置选择了已实现路径，不是 Engine 已核对、探针已通过或真实执行授权。
 官方 API、精确版本、暂停期路径契约和 nlink 限制见
 [冻结导出实现与来源](at07-export-feasibility.md)。离线 fixture 不是隔离实测。
-Spec 原文件 SHA256 为 `AB73F60E26AF1BC1B44CA5DA9B94B2CFDDA91A5D4ACB25683B9386462DCFB165`。
+Spec 在 b480 的原Git blob SHA256 为 `AB73F60E26AF1BC1B44CA5DA9B94B2CFDDA91A5D4ACB25683B9386462DCFB165`；
+本次已核对，Windows checkout行尾产生的文件hash不能代替此原始blob值。
 不得用旧 C/I sandbox、旧成功/失败/unknown 档案、Mock 或本包的离线结果授权动态候选。
 先固定组合完成离线回归和 installed 输入验证，再由负责人单独授权下面的一次无害检查；
 全部实际通过后才讨论一次 L2。本包不授权候选、科学、模型、付费、外部材料或 Hub 操作。
+
+## 前组合与历史边界（2026-10-03 19:30 后继）
+
+本次从 b480 原始 Git `poetry.lock` blob 读取 384044 字节，SHA256 为
+`87B335297F95B7BF72514691CB990DB0D6441316BE90C8CB726B016B9AF025EB`。
+写入 `ApprovedEnvironment.dependency_lock_sha256` 时按原模型使用小写
+`87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb`；这是同一个实际锁值，
+不能改用 B 当前旧 checkout 的锁。未修改锁、生成新 profile 或运行 `prepare`。
+
+I 私有 installed 路径为 `C:/r1i/final-product-1855/venv`，非 editable COPY。
+本次只读其包 metadata：核心 `direct_url.json` 的 commit/requested_revision 均精确为 b480，
+Docker 7.2.0 / OpenSandbox 1.1.0；产品 `direct_url.json` 为私有 wheel 路径，**该 metadata 本身不能证明产品 2b 来源**。
+产品 2b 原 Git `pyproject.toml` 精确 pin b480；2b→P REPORT c8 仅一份报告文档。
+产品原 Git/资源/锁和 installed 对应关系沿用 I 的独立证据，不将 wheel 路径当 SOURCE SHA。
+本次只读核对原 I `FINAL_REPORT.md` / `logs/installed-identity-first.json`：core136 / product36 Python、
+产品53资源、98 lock records；原 I 报告区分97兼容锁包与4个私有类型工具，不混用记录数和包数。
+I 原全产品 **256 PASS / 423.71s**、fixture UI **126 PASS / 8 SKIP**、installed
+input/session/support/refute 各 **2 PASS** 均为离线产品证据，本次未重跑，不能冒充 AT07、人工理解或科研完成。
+原全产品类型门10 errors/6 files仍保留，适用30文件通过不写成整个36文件strict green。
+主控后续 Handoff `msg_b3b3ae645af1` 已接纳 I docs-only REPORT
+`a67c0af1e27bea08a8e2ce426337f0608e62f216` 的push/remote exact/clean及上述离线证据；它仍不是受测SOURCE。
+
+旧 B SOURCE `5769005b09f1b756c94fdad0649a6b74690c0ca9` / REPORT
+`5aebd2eb7af774b3dc496ad9620548f6e7852e09` 与旧锁
+`8558e9e065da381466d9c188bc87a88fcaf09a3b367455eb8267c0bb4c9fcc98` 是明确历史输入，
+旧 preparation、first RED、unsupported、unknown 及原日志全部保留；旧 binding 不能套用最终组合。
+原 OpenCode Insufficient Balance 和 Codex readiness 首阻塞不改，不重试计费 route，费用仍 UNKNOWN。
+本轮新私有 raw：`C:/research-private/b-at07-final-packet-ctx_021ad7956531/`，
+只含原 Git 锁字节和只读来源/包 metadata 记录，不是新 preparation 或 probe evidence。
 
 ## 固定对象与资源
 
@@ -27,7 +95,7 @@ Spec 原文件 SHA256 为 `AB73F60E26AF1BC1B44CA5DA9B94B2CFDDA91A5D4ACB25683B938
 | 实验 / 受控目标 image | `python:3.12.13-slim@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36`；Linux amd64，Python 3.12，stdlib，无科研依赖安装 |
 | egress | `opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5` |
 | egress 平台清单 | Docker Hub Registry manifest 只读核对于 2026-10-03；amd64 子清单 `sha256:1361851fc54f0175da55c6e63978338d6cfc408a6cdaae6534965b9f76eaf605`；arm64 `sha256:bc1dc7791d2857ca08c31d17f8ad6886b127d42bedb372517886171ef7d287e2`；没有拉取 layer |
-| 宿主锁 | 当前 `poetry.lock` SHA256 `8558e9e065da381466d9c188bc87a88fcaf09a3b367455eb8267c0bb4c9fcc98`；最终组合若改锁，使用最终实际值并重新准备，不能套用旧 binding |
+| 宿主锁 | 前组合 SOURCE b480 原 `poetry.lock` SHA256 `87B335297F95B7BF72514691CB990DB0D6441316BE90C8CB726B016B9AF025EB`；模型字段用上文同值小写；端点修正后的最终组合/锁待I核对，锁变更必须重新匹配 |
 | 新自有服务 | Compose project `morph-r1-at07` / container `morph-r1-at07-server`；loopback `127.0.0.1:8099`；1 CPU / 512 MiB / 无额外 swap / 128 pids / restart=no |
 | 受控目标 | `morph-r1-at07-target`；0.25 CPU / 64 MiB / 无额外 swap / 8 pids / 只读 root / caps ALL dropped；TCP loopback8098→9000、UDP loopback8053→9053；600 秒自行退出 |
 | 无害 sandbox | **最多一次 SDK create、一个 sandbox、并发 1**；1 CPU / 512 MiB / 128 pids / 180 秒 lifetime / 30 秒 command / 1 MiB export；零 host/PVC bind、零 credential proxy、零 extensions |
@@ -45,7 +113,9 @@ execd image 的旧 source tag 记录见 [upstream.md](upstream.md)；源 commit 
 
 ## 授权前必须明确的实际限制
 
-1. 当前主控观察 Docker engine npipe 不存在，**本轮没有启动 Docker/WSL/service**。
+1. 主控19:28只读观察 Docker Linux pipe=false、Docker进程0、空闲RAM12720MiB、C盘49.72GiB；
+   这是带时点的宿主观察，不是 B 本轮重测或 Engine/隔离事实。实际29.5.3/API1.52仍 UNKNOWN。
+   **本轮没有启动 Docker/WSL/service**。
    启动既有 Docker Desktop 可能恢复其他项目的 restart 容器；这是授权时必须接受/处理的宿主影响，
    本工具不启动引擎，也不停止他人容器。再次只读确认空闲物理内存、CPU、磁盘及端口。
 2. 固定 server 的 Docker egress sidecar 没有承接 CPU/memory/pids 配额，`[egress].limits` 只适用于 Kubernetes。
@@ -107,48 +177,54 @@ execd image 的旧 source tag 记录见 [upstream.md](upstream.md)；源 commit 
 缺正向控制、缺配置观测、缺原始事实均不通过；失败停止后续压力试验。
 探针源码是固定字符串，由宿主仅 parse/compile（不exec），上传至本次sandbox；没有候选代码/学科判断。
 
-## 现在可执行：离线审查
+## 现有离线 prepare/review 入口（本次未执行）
 
-使用 B 私有 COPY 环境；命令不需要 Docker。测试窗口仍由主控串行分配：
+下列旧 B 私有 COPY 命令仅保留历史离线审查格式：19:30文档任务未执行它们；
+19:39只执行上文定向AT07测试和改动strict，没有重跑下列旧绿全门或调用CLI --help/prepare/review：
 
 ```powershell
 .venv/Scripts/python.exe -m pytest tests/experiments/test_frozen_export.py tests/experiments/test_at07.py tests/experiments/test_at07_export.py tests/experiments/test_generated_configuration.py -q --tb=short
 .venv/Scripts/python.exe -m orchestration.experiments.at07 --help
 ```
 
-`prepare` 输入为**现有 `IsolationConfiguration`** JSON，而非新 Manifest。
-字段包括 endpoint、实际service完整containerID作为instance_id、`git:<固定SOURCE>:deploy/opensandbox/at07.config.toml`
-作为 runtime_profile、canonical `python@sha256:...`、实际 dependency_lock_sha256、固定BackendProfile。
-离线样本可以使用 `instance_id=UNBOUND-NOT-RUN`；真实create独立拒绝该值。
-target IP当前 UNKNOWN，离线样本显式用受控私网示例；真实执行前必须与本次target inspect精确相等。
+`prepare` 输入为**现有 `IsolationConfiguration`** JSON，不是 HostConfig 整体或新 Manifest。
+b480 原调用链已核对：`swarm/research/models.py:HostConfig.generated_experiments` →
+`swarm/research/service.py:ResearchService` → `swarm/research/dynamic.py:GeneratedHostSettings/GeneratedResearch` →
+`LocalCpuSandboxBackend` → 原 `GeneratedExperimentExecutor` 的 prepare/admit/execute，
+使用同一 `TrustedProbeRegistry` / `TrustedCriteriaRegistry`；候选与产品请求不能选择 daemon 或颁发隔离 authority。
+这是已存在的透传代码，不是实际 live 配置已落盘或 probe 已注册的声明。
 
-原 `IsolationConfiguration` 增加的受信字段如下；这是待填示意，**不是可授权运行的实际配置**。
-`engine_version` 只接受字面值29.5.3；`daemon_id` 必须来自随后获准的只读 Engine info，不能照抄示例。
-主机上的 `GeneratedHostSettings/HostConfig` 接同一可空模型，原 factory 透传到
-`LocalCpuSandboxBackend(docker_export=...)`；产品/候选请求不能选择 daemon。
+| 原字段 / profile 路径 | 本固定包的要求 / 当前事实 |
+| --- | --- |
+| `domain/protocol` → `IsolationConfiguration.endpoint` | 目标 `127.0.0.1:8099` / `http` → `http://127.0.0.1:8099`；实际服务尚未创建/确认 |
+| `instance_id` | 随后本次新 server 的完整64位ID；当前 UNKNOWN，不填占位值充当真实配置 |
+| `runtime_profile` | 原约定格式 `git:<最终核心SOURCE>:deploy/opensandbox/at07.config.toml`，须用端点修正后I最终SOURCE；前组合为b480；须实际核对服务加载的同字节配置，当前实际 profile UNKNOWN，不伪造已加载值 |
+| `environment` | canonical `image=python@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36`、`image_digest=sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36`，原3.12/SDK1.1.0/opensandbox字段，`dependencies=[]`；前组合锁为上文87b…，新组合锁必须I实际核对后填入 |
+| `resources: BackendProfile` | 明确1 CPU/512MiB/180s/30s/1048576 bytes/**process_limit=128**/原network.default=deny；默认process_limit=16不能省略后误当128 |
+| `server_process_limit/network_deny/use_server_proxy` | 128 / true / true；pids必须由同次实际server配置和压力观测确认，不由 SDK create 参数宣称 |
+| `docker_export: DockerExportConfiguration` | 原mode=`docker-paused-archive-v1`、固定npipe endpoint、29.5.3/API1.52、`request_timeout_seconds=10`；实际 `daemon_id` UNKNOWN，须来自随后获准的只读info；无实际绑定保持None/拒绝 |
+| `probes: tuple[IsolationProbeRecord,...]` | 当前无本最终组合的真实通过档；必须随后实际全项通过并独立审核才可注入，不能复制旧档或把JSON自报布尔当事实 |
 
-```json
-{
-  "docker_export": {
-    "mode": "docker-paused-archive-v1",
-    "endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
-    "daemon_id": "UNBOUND-NOT-RUN",
-    "engine_version": "29.5.3",
-    "api_version": "1.52",
-    "request_timeout_seconds": 10
-  }
-}
-```
+target IPv4当前 UNKNOWN，只能在授权后读取本次新target实际IP。旧离线示例的
+`UNBOUND-NOT-RUN`、`172.17.0.2` 和review-only ID是历史样本，不进入新真实配置。
 
 另一受支持 transport 为 `unix:///var/run/docker.sock`，仍须同一个已绑定 Linux daemon；
 不接受 TCP、任意 socket 路径或 `DOCKER_HOST` 覆盖。真实服务 instance 为完整64位container ID，
-preflight 在 SDK create 之前复核 daemon版本/ID/Linux、固定server image和loopback8090→8099绑定。
+preflight 在 SDK create 之前复核 daemon版本/API/ID/Linux、固定server image和loopback宿主8099→容器8090绑定。
+历史b480 `at07_live.docker_read` 继承默认CLI路由，不能靠一次version匹配补足此缺口。
+后继B SOURCE已按上文硬绑定reader及前置核对，路由取自原configuration，不增加可由候选覆盖的CLI全局参数。
+实际运行仍须使用随后I整合、P重新pin的精确installed组合，确认server使用同Engine；无法确认就SDKcreate前STOP。
+下列 `$taskFinalPython` 只是随后最终私有noneditable安装的python路径变量，当前未知，
+不能继续用I前组合1855的python执行新代码。
 
 ```powershell
-.venv/Scripts/python.exe -m orchestration.experiments.at07 prepare --configuration C:/morph-r1/at07/configuration.json --server-config deploy/opensandbox/at07.config.toml --probe-id at07-review-only --target-ipv4 172.17.0.2 --archive-root C:/morph-r1/at07/review
-.venv/Scripts/python.exe -m orchestration.experiments.at07 review --result C:/morph-r1/at07/review/at07-review-only/result.json
+& $taskFinalPython -m orchestration.experiments.at07 prepare --configuration $taskConfigurationFile --server-config $taskServerConfig --probe-id $taskProbeId --target-ipv4 $taskTargetIPv4 --archive-root $taskEvidenceRoot
+& $taskFinalPython -m orchestration.experiments.at07 review --result "$taskEvidenceRoot/$taskProbeId/result.json"
 ```
 
+以上只是原CLI的命令格式，各变量尚未赋实际值；本次未生成真实configuration/profile/probe或授权记录，
+测试中的inert preparation始终与真实运行输入分开。
+`$taskServerConfig` 须对应随后最终集成SOURCE原blob；不能把I前组合的配置/路径当成新installed验收。
 输出只有固定probe源码、配置副本和 NOT_RUN 诊断。目录不可重用。Mock/replay/partial/unknown不会产生verified记录，
 完整 inert fixture 可覆盖实际判据的分支，但不会成为运行事实；`unverified_record()`始终
 `verified=False,passed=False,process_limit=False,export_bounded=False`。
@@ -159,12 +235,24 @@ preflight 在 SDK create 之前复核 daemon版本/ID/Linux、固定server image
 允许的宿主基础设施边界与600秒停止时间；同一授权不允许重试第二次create。
 **第0步：固定组合完整离线/installed 输入验收与单独真实授权未齐全时，停止在这里。**
 SOURCE 中的实现和这份文档不构成授权；不能通过CLI风险接受参数解除该停止。
+未来执行命令的相对 `deploy/opensandbox/...` 路径须来自随后最终集成SOURCE同字节私有 COPY，
+不在原 B 旧 SOURCE checkout 中直接运行，也不修改 I 工作树或现有安装。下列代码块是批准后的格式说明，当前全部未执行。
+
+下一次独立授权的最小范围：仅当前Windows宿主、上述最终组合和四个固定镜像、只读preflight、
+在全部条件满足后新建本包server/target及最多一次原SDK无害sandbox create，执行表中固定探针并精确收尾；
+最多5个容器/1个自有volume/0新network，资源、时限和导出限制不变。
+Engine启动可能恢复其他项目容器，须另有明确启动决定；未获准/引擎未运行就停，不提供启动或修复命令。
+镜像缺失、版本不符、动态端口与现存防火墙范围不能确认、默认CLI不指向同daemon、未知已有对象归属或未接受sidecar/cache边界均停止，
+不pull、不改防火墙、不重配置daemon、不更新对象、不放宽权限。
+不包含science/candidate/native模型、材料外发、Hub、付费或L2；AT07全部实际通过且独立审核后，才可另议一次科学L2。
+原[Poisson review](l2-poisson-review.md)本次不改，题目/容差/额度/实际运行仍待独立授权。
 
 1. 人工确认上述限制与既有引擎启动权限；引擎未运行就停止。本工具不提供 engine 启动命令。
    已获准后，仅用明确 endpoint 只读确认实际Engine版本与ID：
-   `docker --host npipe:////./pipe/dockerDesktopLinuxEngine version --format '{{.Server.Version}}'`、
+   `docker --host npipe:////./pipe/dockerDesktopLinuxEngine version --format '{{.Server.Version}} {{.Server.APIVersion}}'`、
    `docker --host npipe:////./pipe/dockerDesktopLinuxEngine info --format '{{.ID}} {{.OSType}}'`。
-   必须29.5.3、linux且ID准确；其他版本停止交原Owner审查，不更新 daemon、不猜值。
+   必须29.5.3/API1.52、linux且ID准确；同时满足上文全部CLI的受控路由条件，不能只以默认CLI的一条version/info相等放行。
+   其他值或完整路由不能证明时停止交原Owner审查，不更新daemon、不猜值。
    固定4个image应已存在，使用 `docker image inspect <完整image@digest> --format '{{json .RepoDigests}}'`
    逐一只读核对。缺镜像即停止；本包不pull、不build，补镜像需独立批准。
    保留所有已有container/volume/network IDs，不停旧C/I或其他项目。
@@ -201,7 +289,7 @@ try {
 5. 若基础设施限额/动态端口/既有DNS边界已明确接受，运行一次：
 
 ```powershell
-.venv/Scripts/python.exe -m orchestration.experiments.at07_live --execute-separately-authorized-probe --authorization-ref '<真实批准记录引用>' --accept-disclosed-infrastructure-limits --prepared-root "C:/morph-r1/at07/evidence/$taskProbeId" --service-key-file $taskServiceKey --canary-directory "C:/morph-r1/at07/$taskProbeId/canary"
+& $taskFinalPython -m orchestration.experiments.at07_live --execute-separately-authorized-probe --authorization-ref $taskAuthorizationRef --accept-disclosed-infrastructure-limits --prepared-root "C:/morph-r1/at07/evidence/$taskProbeId" --service-key-file $taskServiceKey --canary-directory "C:/morph-r1/at07/$taskProbeId/canary"
 ```
 
 它只读Docker状态/archive，只有官方SDK新建/暂停/恢复/操作/清理这个无害sandbox；不操作服务/target生命周期。
@@ -209,6 +297,7 @@ try {
 没有自动创建第二sandbox、renew、放宽caps/network/limits、切换宿主执行的路径。
 原始文件在每步后保留，未知时不复跑；命令失败只可只读调查原ID。
 本CLI保守返回非零，直到所有观测齐全；非零不构成重跑授权。
+`$taskAuthorizationRef` 当前 UNKNOWN；参数必须指向随后真实批准记录，不能以本包或I离线报告代填。
 
 6. 工具在已知owned sidecar上只读运行固定 `nft -j list ruleset`，保存 `effective-nft.json`；
    只保留 `canary.at07.test` 的日志行到 `domain-denial.log`，不保存完整环境/任意label/token。
@@ -256,7 +345,8 @@ effective-policy、各`*-command.json`完整官方execution/log/exit、target-af
 这是宿主对真实记录的审核，不是导入候选/CLI自报JSON作为科学或隔离权威。
 每个环境、锁、endpoint、服务instance、runtime配置、daemon/Engine/export模式、CPU/memory/pids/lifetime/command/export/network不同都会被原精确绑定拒绝。
 特别是本包的512MiB/128pids/stdlib镜像不能授权另一个16pids或新增NumPy/PyTorch image的候选。
-本B没有跨轨修改GeneratedResearch factory、原TaskLedger或产品入口；A接线与Q复核须进入最终固定组合。
+本B没有跨轨修改GeneratedResearch factory、原TaskLedger或产品入口；A受信配置接线已存在于 b480，
+原离线Q复核不替代本最终组合的真实AT07。实际宿主settings/registry及与后续L2同档的确认仍待运行授权和独立审核。
 最终运行档不同则交回原Owner重新匹配，不能复制布尔PASS。
 
 仍需负责人确认：引擎启动/镜像准备权限、固定组合SOURCE与installed路径、新ID与授权引用、实际Engine/daemon/service ID与target IP、
