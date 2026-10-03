@@ -22,8 +22,9 @@ root `msg_5de93567973d`实际回执：正确optionsfor查询exit1/0.2098s、requ
 同原server64ID经host.docker.internal做6ea健康/DNS阳性；仅在后继获准后，从**同预算内server/target**至只读识别的
 本机实际nonloopback NIC地址/47410作固定无害TCP与UDP负控，不开hostlistener、不第6容器、不发科学/secret、不猜NAT或spoof源。
 记录请求时点/真实client sourceport、host-visible source/destination/family/protocol、Backend appid及实际PID/CreationDate、IN层/决定/filterId。
-拒绝须有同期真实DROP与原Q规则有效filter关联；成功包来源若无实际可归因记录仍UNKNOWN。
-同机发往NIC地址仍可能被Backend回环化，`isLoopback`/实际源与层不符、仅timeout、其它provider拒绝或无IPv6合法路径均不可冒充对应边界PASS；
+拒绝须有同期真实DROP与原Q规则有效filter关联；同64ID server健康/DNS阳性+owned映射核对本身建立route观察，缺ALLOW仅使NATsource UNKNOWN，不新增Spec退出门。
+按root `msg_2dbfd1624a26`，地址族仅按实际publication/host endpoint声明；实际无IPv6发布且有对应观测则记不适用，不新增IPv6路径。
+同机发往NIC地址仍可能被Backend回环化，`isLoopback`/实际源与层不符、仅timeout或其它provider拒绝均不可冒充实际所声明非loopback边界PASS；
 不凭此加跨宿主门，现范围拿不到证据就SDK0/STOP。官方[DROP字段](https://learn.microsoft.com/en-us/windows/win32/api/fwpmtypes/ns-fwpmtypes-fwpm_net_event_classify_drop2)
 及[过滤来源关联](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/filter-origin-documentation)是判读依据，静态filter匹配不是包命中。
 

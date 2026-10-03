@@ -863,7 +863,8 @@ root `msg_5de93567973d`提供正确NETEVENTS查询首exit1/0.2098s、requires el
 `wfp show options optionsfor=NETEVENTS`；已有on则仅读，按Backend appid+47410+protocol6/17+timewindow60读netevents，
 再按实际同family local/remote tuple、dir=IN读filters（file=-捕获到新私有根，typed shell=False，10s/262144bytes有界）。
 同server健康/DNS阳性保持；后继同两基础设施容器至实际本机nonloopback NIC/47410的无害负控，只按真实IN包source/isLoopback/Backendappid/时点/协议/filterId归因原Q有效规则。
-同机路径仍可能回环化；无合法source/DROP对应、只有timeout/别的provider拒绝/IPv6无实际路径都UNKNOWN/SDK0 STOP，不猜NAT、不加跨宿主或第6容器。
+同机路径仍可能回环化；所声明非loopback负控无合法source/DROP对应或只有timeout/别的provider拒绝则UNKNOWN/SDK0 STOP，不猜NAT、不加跨宿主或第6容器。
+root `msg_2dbfd1624a26`限定义：同64ID健康/DNS阳性+owned映射是route观察，缺ALLOW仅NATsource UNKNOWN，不新增Spec门；实际未发布IPv6且有对应观察则不适用，不新增该族路径。
 若NETEVENTS确实off，仅提案管理员一次on、保留原值、600s内核本次值后恢复原off；该开关宿主全局收集，程序/端口只过滤读取，
 会涉及他项目元数据/循环日志，不在Q“两规则only”scope内，供root另审，不承诺ALLOW事件齐全，不set/capture/auditpol/改profile日志。
 官方依据：[netsh WFP](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-wfp)、
