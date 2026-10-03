@@ -1,16 +1,65 @@
+## 20:18 唯一原I累计集成接续，A/P阶段交付接纳
+
+主控已直接核对原A docsREPORT1c40129e81362686fcba968e57809582c22dabfc：actualSOURCE b480、远端精确/clean、仅49行ownreport；私有正式链首2PASS4FAIL为读取TaskRecord字段错误，原拒绝先通过，修私有SQL读取仅四失败4PASS、必要旧positive/unknown/stdio3PASS。同路线不同主张保留建议不授PASS；旧asset变hypothesis/parameters/seeds与缺本task再验证均正式拒绝，新branch无旧support。未确认新的产品适用性首RED，A/C不新增条件注册表或评分；逐hypothesis适用与可信known_cost源/单位的覆盖限制完整保留，不说所有FR13场景已验。A已done/release retained，首次start_unknown与一次原composer Enter实际恢复、跨Run首拒绝不改；root已真实转交C。
+
+P portable developer SOURCE c7711f807e50ea4101ec6af231351e5c1037add6 / docsREPORT94c7fc779770e8847f6366bac1a0a3dcaa134332均remote exact，报告仅108行；SOURCE只六developer文件，生产代码/UI/测试/锁对2b零delta。原config CC679AC5B560EA8DB9C660A9F8E8F42DD9CF64B8E1E43D3193A70B2CE3FA5EE5 原字节与官方静态loader通过，baseline D5C485..691实际主控重读相同。机器bound Header/aoci.txt、baseline/runtime/backup/.codex全本地保留并Git排除；Git owned区干净不表示索引clean。15语义Entry覆盖0/NOT_VERIFIED、实际Token节省UNKNOWN、不重复原guard。P已done/release retained，不等待认知重新阻塞业务。
+
+恢复原唯一I同morph-r1-integration-1003/原branch/原terminal、parent task_3a6652d6b5d6，以当前a67干净HEAD普通exactmerge B REPORTf008e281e15d25c8950d7ddd05450fbe398653f1（SOURCEfc866）与Q REPORTf261c78a8181a4ce82a74bb41395cb35ee1e7b21（SOURCEf2b81cd），以及A docsREPORT1c40129和本次已发布root治理。相对原受测b480业务delta只允许B at07_live.py/test_at07.py与Q新增route boundary测试；不替域Owner写业务。累计SOURCE尽早普通push（代码集成提交不加skip-ci），一次原双平台CI跟踪精确SOURCE，原本机全核心门不复制；unknown远端效果只读确认、不自动retry。必要安装身份/精准受影响边界与原CI type/build/SDK/wheel留准确受测身份；docsREPORT后skip-ci不重复门。
+
+精确累计SOURCE交原P同Owner后继仅三pin文件与ownreport；消费已交付c771 developer配置、保持F/API原祖先，不从任何REPORT或单B SOURCE pin。固定新core+product后唯一I新noneditable raw-Git/COPY/私有cache安装，一次完整产品offline、必要类型与依赖身份。UI/生产文件若原Git零delta保留前组合126+8SKIP/build/installed8原范围证据，不再因纯pin/docs发布重跑原浏览器；新安装身份新核对。如实保留原十债与所有firstRED；若用户人工页面需要可用既有只读观察fixture提供精确安装的有界loopback预览，不构造新权限/假科学数据，不能保证read-only就只交已保存观察。
+
+只读20:13宿主观察空闲RAM5850MiB、C45.9GiB，Firewall返回Enabled1/Inbound4/Outbound2三profile，仅原值、不作为动态端口范围或实际隔离证据。真实Engine/key/create/AT07/candidate science/L2仍NOT_RUN，最终工程门后独立AT07授权再真实无害检查，通过才一次L2。无main/tag/部署；不新增评分类框架/学科/品牌/语言/L3。
+
+## 20:08 原P并行交付AOCI配置，正式业务pin等待唯一I
+
+原Q独立54PASS接纳，最终测试SOURCE f2b81cd9c0e0623c224b0501580a19e3fc1d37da / docs-only REPORT f261c78a8181a4ce82a74bb41395cb35ee1e7b21均普通push/remote exact/clean；受测B fc866，最终原Git部署profile输入54PASS/1.71s，先前4.54s不同CRLF profile及首52/2均独立保留。A同原Owner已消费精确b480，正在正式条件窄fixture定界，尚无新业务修复SOURCE。
+
+用户再次要求持续去耦并行研发，当前另恢复原P/原research-r1-product树/branch：write_paths仅原developer AOCI WIP中的 .gitignore、.gitattributes、AGENTS.md、README.md、.aoci/.gitignore、.aoci/config.json、aoci.txt、docs/development/aoci.md、docs/tracks/r1-product.md；现有本机.codex/config.toml仅本轨ignored配置，不入SOURCE。交付稳定已准备的官方配置与明确partial状态，不重新初始化/改变baseline/角色/managed_scope/budget/automation，不代人TTY，不修改official工具，不重试原guard失败。原baseline、私有ledger/receipts/恢复/backup/原WIP保持；仅既有配置原字节与更新准确setup文档可审查提交，配置不得包含秘密/本机绝对身份。正式15Entry仍NOT_VERIFIED、成本节省UNKNOWN，不能将配置交付说成完成索引。
+
+P可先交developer-only SOURCE供审查（不触业务模块/锁，不触UI）；当唯一I以后交精确累计核心SOURCE时，同P后续只改pyproject.toml、uv.lock、src/morphogenesis_research/__init__.py与ownreport精确repin。未获I新SOURCE前不能pinB单轨fc866或任意docsREPORT。原P全树有无法提交的历史备份/工具runtime则如实dirty，不删除来假clean；唯一I始终从发布SOURCE新COPY安装。此可复用配置是用户AOCI需求的已授权交付，不将开发工具guard重新设为MVP业务前置。不执行新模型科研/Engine/key/SDK/AT07/L2/产品全套或已绿浏览器。
+
+## 20:01 条件适用性定界，保持两条互斥开发轨
+
+C卫星run_72af1ba4a579三路只读审查已全部完成，私有ACCEPTANCE.md已主控阅读。可信生成投影与accept→advisory→choose/claim链未找到新增反例，原141与三项Spec行为不重跑。发现正式_research_branches只投影branch身份/status/parent/authorized，C Branch.conditions为空且feedback空条件可泛配；任务plan允许不同parameters/seeds/claim。该静态路径尚无正式入口的跨条件首RED，不提前称确认漏洞或授予修复范围之外源码。
+
+原A同morph-r1-research-1003/原branch后继恢复，write_paths仅 swarm/research/service.py、records.py、knowledge.py、server.py、新 tests/research/test_route_conditions.py 与 docs/tracks/r1-research.md及本轨私有证据。先读取Spec FR13/FR19及原B/C真实conditions生成/冻结/匹配调用，以实际正式admission与证据构造判明旧证据是否对明确不适用条件获得增益。不得仅手造C Branch/model字段冒充产品首RED，不把参数/seed每次不同天然等同不适用，不能把跨条件建议混同可信PASS继承。无具体缺口只给调用和范围证据；有首RED只在A接线/持久契约做最小修正，反馈/policy域若需变更交原C，不跨写。禁止新成本估计/评分框架/预算/调度/proof模块。
+
+现行并发仅Q端点installed精准验收与A正式条件定界（互斥源码路径）；B端点SOURCEfc866/REPORTf008保持已交付，需计划语义可只读调用或Handoff，不新建无必要的B编辑者。验证仅原A新条件负例与适用类型/必要回归，不重跑旧全门、Engine/key/SDK/science/AT07/L2不授权。SOURCE及docs-onlyREPORT普通push [skip ci]，保留所有首失败，唯一I待这些实际领域结果后普通精确集成；同P再pin，再一个最终固定组合的完整产品离线门。当前known_cost无正式可信投影/单位，先如实UNKNOWN与覆盖限制，不创造数值。
+
+## 19:51 B端点修正交付，原Q独立安装验收进行中
+
+原B SOURCE fc866465aa52a3f09773bc79a0fab95bceedc3d9 / 直接子docs-only REPORT f008e281e15d25c8950d7ddd05450fbe398653f1均普通push、remote exact、clean。相对64c5fac仅at07_live.py与原AT07测试两业务文件；SOURCE到REPORT仅授权包与原轨报告两docs。原定向首RED18FAIL保留，最终52PASS/2.04s、改动模块strict1PASS。主控已读实际绑定调用链并核对交付路径，未将Owner绿替代独立边界验收。
+
+所有CLI只读观察以同一完整受信cfg显式--host、owned空--config、受控子进程env；原Engine/version/API核实在密钥与唯一create之前，原unknown/no-replay结构不改。原B task_8e19fb680605 / ctx_0c9ab2aea2f0已succeeded，release retained/external_terminal/processAction none。原Q task_7799a761b32c / ctx_345f48f8d667正在新私有非editable COPY核对精确SOURCE，bootstrap初次字节核对失败必须保留/查明，不能改预期或借用脏树。独立结果前不宣称新SOURCE accepted installed。
+
+下一仅原I普通精确合入B/Q后继SOURCE及报告，按实际代码差异完成适用工程门，再原P精确repin新累计core；前组合b480+2b/a67离线结果完整保留，不重复绿门来解决文档、helper或push阻塞。C新增卫星run_72af1ba4a579只读三个反馈链审查、repo write_paths为空，不产生第二套领域所有权/集成者，无已知C反例则不重复造模块。真实Engine/key/create/AT07/candidate science/L2仍NOT_RUN；真实隔离待可审阅的新最终工程结果后独立授权。
+
 # R1 派发状态（2026-10-03）
 
-## 当前接续入口（19:10，最终产品离线进行中）
+## 当前接续入口（19:39，前组合离线接纳，B端点修正接续）
+
+- 19:44 原Q同长期Owner/worktree/branch独立核对B新AT07端点边界，write_paths仅tests/boundary_review/test_at07_route_boundary.py与docs/tracks/r1-boundaries.md、全新私有COPY取证。先只读设计/负例，收到精确B SOURCE后才安装验证；不使用B脏树、不改B源码/测试、无Engine/native science/全套旧门，不新集成者。定向覆盖context/env/参数绕过、CLI与受信transport同daemon及拒绝在SDKcreate前；首RED和actualSOURCE身份保留，只必要精准pytest/适用类型，完成普通SOURCE+REPORT push [skip ci]。
+
+## 19:39 原 B 真实隔离工具端点修正（尚无真实执行授权）
+
+B docs-only REPORT64c5fac87d7823beb2c15354a3f395e5a23512dc已push/remote exact/clean，原Git锁87B核对、source/report/实际installed身份清楚，scope仅两docs、不冒充probe。B静态发现与root复核at07_live.docker_read调用默认docker CLI且继承上下文/env，现有观察未硬绑定docker_export.engine_endpoint。官方Docker CLI文档说明DOCKER_CONTEXT可覆盖DOCKER_HOST，默认读取用户.docker，--config/显式选项可定向；不能仅靠一句版本相同即将所有观察视为相同受信daemon。
+
+本缺口与真实AT07相关，修正是已授权MVP研发，不需要启动引擎/真实探针。原B唯一Owner/树/分支继续后继Task，write_paths仅 orchestration/experiments/at07_live.py、tests/experiments/test_at07.py、docs/experiments/at07-authorization.md、docs/tracks/r1-experiments.md及本轨新私有证据。复用现有完整DockerExportConfiguration/官方CLI或现有受信transport，所有前后inspect/inventory/fixedexec/log观察使用同一明确endpoint；空私有配置+受控子进程env，保留closed read-only/fixedexec命令约束，禁止ambient context/认证/TLS/代理/API注入。无/无效/冲突配置必须在CLI/密钥/SDKcreate前拒绝；同实际Engine版本/API/daemon必须在唯一SDKcreate前核实，不填自报PASS，不加registry/证明/调度框架，不重写成熟SDK。
+
+同B只跑针对该变更的有意义适用测试与必要严格类型检查，保留首RED，测试实际捕获argv/env和daemon mismatch-before-create负例，不用fixture冒充真实引擎。原通过的256/UI/Owner全门不为文档或网络重跑；B代码SOURCE变化交唯一I正常exactmerge后据实际差异安排必要检查及原P精确repin，原b480+2b/a67通过结果完整保留为前组合，不提升为新组合。后继SOURCE/REPORT普通commit+push [skip ci]，不force/cherry-pick、业务锁/依赖/其他轨/核心调度零改。
+
+Q必要时只独立核对精确新SOURCE的这些负边界，原C反馈链只读未见具体未接线缺口，不因并行数量重复研发。AT07仍待所有适用工程门及之后用户指定独立授权；这不是Engine/Docker启动/镜像拉取/SDKcreate/候选/science/L2权限。下一实现完成后才请求实际检查，不拿已知缺口的工具给用户批准。
 
 后部保留原失败与决策历史；业务 SOURCE 与文档 REPORT 分开，不从脏工作树安装。
 
 - 最终核心 SOURCE b480fca1b10a0b6a9c93f0d1801d38f267662461 的原 CI37114395256 已通过：Windows1745PASS/15SKIP，Linux1744PASS/16SKIP，两端 strict140/build/SDK/wheel/distribution PASS。原3a6首RED1742PASS/2FAIL/16SKIP、WindowsCANCELLED与REPORTab39保留，不重跑绿门。
 - P 最终业务 SOURCE 2b9bf73c93e732771ed3582f3bc7745ea8158b68 / docs-only REPORT c8d4197bac272cdf5f634bc7a56c87db19bfbebb 已push并由主控核对。含F REPORTc085普通祖先及P API677，核心pin精确b480，lock98packages/docker7.2.0。原P全工作树仍有被保留的AOCI WIP，不称clean、不直接安装该树。
 - P已正式撤回可选auto放宽，官方config恢复legacy兼容；原human receipt仍不存在，旧preview不是当前可执行审批。一次官方ack首RED managed_scope_source_guard_snapshot_changed及官方rollback保留，baseline未改。15源正式Entry/Challenge/retrieval/maintenance NOT_VERIFIED。该开发工具提案不再阻塞已授权业务组合；实际Token节省与费用UNKNOWN。
-- 原唯一I task_3a6652d6b5d6 / ctx_0d8a0826c9f7、原worktree/branch正在 C:/r1i/final-product-1855 做b480+2b9新非editable COPY/raw Git身份校验/一次完整产品离线/适用类型与UI/相关installed输入只读HTTP观察。只准本轨报告与私有证据，领域失败退原P/F；不假定回归已通过。
+- 原唯一I最终离线REPORT a67c0af1e27bea08a8e2ce426337f0608e62f216已push并独立接纳，remote exact/clean、相对受测b480非docs零差异。b480+2b新非editable COPY：产品首次全套256PASS/423.71s；适用mypy30PASS、whole36原10债务逐identity不变/exit1；原build14.91s/静态3blob相同，UI126PASS/8SKIP，installed input/session/support/refute各2PASS（共8）。原helper首RED全保留，仅已采响应重分析，未重跑已绿门；已结算release retained/external/processActionnone，原I继续唯一后继集成者。
 - 清理已关闭6个明确idle/失败terminal，均实际ptyKilled=true；root/I/P/C与无关用户终端未误关。4个旧缺失句柄release_unknown/processActionnone保留，不证明旧进程已死，不改调度DB/历史。
 - C固定11误安装注册文件已单次逐项隔离。主控实际重读11备份，原路径不存在，大小/SHA256/mtime_ns逐项原快照匹配11/11；REPORT1e2338a4de6bea019b0efe983c7a69a54b22b73e已push/remote exact/clean、仅原报告27行。三个全局依赖保留，安装前UNKNOWN，不称全环境恢复。旧blocked by policy与首只读错误不改；release retained/external/processActionnone。
 - A核心10Entry只接纳原A树，I跨checkout认知freshness NOT_VERIFIED。B l2-poisson-review为问题/材料/现有评价复核消费调用链审查，无完整候选程序、无科学执行。
+- 19:30 原B同角色/树/分支准备最终AT07文档：write_paths仅docs/experiments/at07-authorization.md与docs/tracks/r1-experiments.md及本轨私有原证据。最终核心b480实际poetry.lock SHA256=87B335297F95B7BF72514691CB990DB0D6441316BE90C8CB726B016B9AF025EB，旧包8558为历史输入，须更新当前固定SOURCE/锁/产品2b/installed路径，不能套用旧binding。只静态/docs，不测试/安装/Engine/真实probe/密钥/registry；commit push [skip ci]。此工作与唯一I报告互斥，B后报告可docs-only普通merge，不再全回归。只读现状Dockerpipe不存在、进程0、空闲内存12720MiB/C49.72GiB，不等于授权或实测。
 - 下一顺序保持最终产品离线验收→单独授权AT07实际无害隔离→通过后一次L2；真实候选/科研/人工理解均NOT_RUN，性能仅真实记录。L3/规模效率/多用户/跨宿主/完整RSI不加入；main/tag/部署未执行。OpenCode真实Insufficient Balance仍未恢复，研发继续用户指定Codex GPT-6.1-Sol。
 
 ## 16:45 A/Q 收口，P 等真实人类确认

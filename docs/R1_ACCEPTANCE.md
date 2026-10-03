@@ -1,4 +1,36 @@
+## 20:18 唯一原I累计集成接续，A/P阶段交付接纳
+
+主控已直接核对原A docsREPORT1c40129e81362686fcba968e57809582c22dabfc：actualSOURCE b480、远端精确/clean、仅49行ownreport；私有正式链首2PASS4FAIL为读取TaskRecord字段错误，原拒绝先通过，修私有SQL读取仅四失败4PASS、必要旧positive/unknown/stdio3PASS。同路线不同主张保留建议不授PASS；旧asset变hypothesis/parameters/seeds与缺本task再验证均正式拒绝，新branch无旧support。未确认新的产品适用性首RED，A/C不新增条件注册表或评分；逐hypothesis适用与可信known_cost源/单位的覆盖限制完整保留，不说所有FR13场景已验。A已done/release retained，首次start_unknown与一次原composer Enter实际恢复、跨Run首拒绝不改；root已真实转交C。
+
+P portable developer SOURCE c7711f807e50ea4101ec6af231351e5c1037add6 / docsREPORT94c7fc779770e8847f6366bac1a0a3dcaa134332均remote exact，报告仅108行；SOURCE只六developer文件，生产代码/UI/测试/锁对2b零delta。原config CC679AC5B560EA8DB9C660A9F8E8F42DD9CF64B8E1E43D3193A70B2CE3FA5EE5 原字节与官方静态loader通过，baseline D5C485..691实际主控重读相同。机器bound Header/aoci.txt、baseline/runtime/backup/.codex全本地保留并Git排除；Git owned区干净不表示索引clean。15语义Entry覆盖0/NOT_VERIFIED、实际Token节省UNKNOWN、不重复原guard。P已done/release retained，不等待认知重新阻塞业务。
+
+恢复原唯一I同morph-r1-integration-1003/原branch/原terminal、parent task_3a6652d6b5d6，以当前a67干净HEAD普通exactmerge B REPORTf008e281e15d25c8950d7ddd05450fbe398653f1（SOURCEfc866）与Q REPORTf261c78a8181a4ce82a74bb41395cb35ee1e7b21（SOURCEf2b81cd），以及A docsREPORT1c40129和本次已发布root治理。相对原受测b480业务delta只允许B at07_live.py/test_at07.py与Q新增route boundary测试；不替域Owner写业务。累计SOURCE尽早普通push（代码集成提交不加skip-ci），一次原双平台CI跟踪精确SOURCE，原本机全核心门不复制；unknown远端效果只读确认、不自动retry。必要安装身份/精准受影响边界与原CI type/build/SDK/wheel留准确受测身份；docsREPORT后skip-ci不重复门。
+
+精确累计SOURCE交原P同Owner后继仅三pin文件与ownreport；消费已交付c771 developer配置、保持F/API原祖先，不从任何REPORT或单B SOURCE pin。固定新core+product后唯一I新noneditable raw-Git/COPY/私有cache安装，一次完整产品offline、必要类型与依赖身份。UI/生产文件若原Git零delta保留前组合126+8SKIP/build/installed8原范围证据，不再因纯pin/docs发布重跑原浏览器；新安装身份新核对。如实保留原十债与所有firstRED；若用户人工页面需要可用既有只读观察fixture提供精确安装的有界loopback预览，不构造新权限/假科学数据，不能保证read-only就只交已保存观察。
+
+只读20:13宿主观察空闲RAM5850MiB、C45.9GiB，Firewall返回Enabled1/Inbound4/Outbound2三profile，仅原值、不作为动态端口范围或实际隔离证据。真实Engine/key/create/AT07/candidate science/L2仍NOT_RUN，最终工程门后独立AT07授权再真实无害检查，通过才一次L2。无main/tag/部署；不新增评分类框架/学科/品牌/语言/L3。
+
+## 19:57 AT07端点工程后继的阶段验收与后续检查
+
+B SOURCE fc866465aa52a3f09773bc79a0fab95bceedc3d9 / docs-only REPORT f008e281e15d25c8950d7ddd05450fbe398653f1已主控独立核对remote exact/clean、两业务文件及两docs的范围。Owner首次18FAIL保留、最终52PASS/2.04s、changed-module strict1PASS只为contract_local。原Q在全新私有noneditable COPY验收：旧b480的实际无绑定观察1FAIL构成反例；fc866第一安装133原Git字节核对在bootstrap/__init__.py失败，诊断63B CRLF对原62B LF及system core.autocrlf=true。该安装未用于新边界测试；新venv/cache使用进程局部Git LF配置，原字节断言不变、旧失败不改。新包98 compatible不等于源码身份已通过，完整独立結果仍待。
+
+Q精确独立交付接纳后，唯一原I普通merge B/Q与当前治理，发布新累计业务SOURCE供原P重新pin。此为真实代码变更，允许一次原双平台CI验证新累计SOURCE与必要installed精准测试/身份核对；不在本机再复制一套全核心门，不为docs/push/helper失败重跑已绿CI。P后继只改原pin三文件/本轨报告，最终冻结新组合做一次完整产品离线回归。前组合b480+2b/a67的UI/build/installed观察保留，UI/产品业务文件若原Git字节未变则沿用该范围证据，新增安装身份须新核对；新发现实质失败退原Owner，不制造假绿或新的集成者。
+
+原三个Spec行为已接纳调用与测试证据，下部完整记录不变；本轮无新的C反馈链反例，C卫星三路严格只读、空repo write_paths，归并实质问题即可。新最终工程门与真实隔离独立授权尚未完成；Docker/Engine/key/SDKcreate/candidate science/AT07/L2实际均NOT_RUN。不将旧完整门或无害fixture升级为真实隔离、人工理解、研究或完整MVP。费用/实际Token节省UNKNOWN。
+
 # R1 验收登记（2026-10-03，开发开始）
+
+## 19:35 最终产品离线工程验收接纳
+
+实际受测SOURCE固定为核心 b480fca1b10a0b6a9c93f0d1801d38f267662461 / 产品 2b9bf73c93e732771ed3582f3bc7745ea8158b68，P docsREPORT c8d4197bac272cdf5f634bc7a56c87db19bfbebb不作SOURCE。唯一I docs-only REPORT a67c0af1e27bea08a8e2ce426337f0608e62f216已普通push；主控独立核对remote精确/clean/diffcheck、C1e/root96祖先、最后提交仅own报告77行及全部非docs零差异，接纳本阶段。
+
+主控实际读原命令raw：首次完整产品256PASS/423.71s（subprocess428.762s/exit0），适用原mypy30PASS/whole36原10errors6files exit1，十项按文件/行映射/消息/类别/原表达式匹配新增0；原frontend构建3909modules/14.91s且3static原Git字节一致，原fixture UI126PASS8SKIP，installed input2/session2/support2/refute2均首原浏览器PASS、串行workers1/retries0。private C:/r1i/final-product-1855/FINAL_REPORT.md及logs保留完整命令/首次输出/HTTP/取证。新COPY Git720core/161product、installed136corePy/36productPy/53resources、nlink1/精确core VCS及产品wheel origin、锁97包和含4私有mypy工具101包check兼容，setup-assets/doctor通过。不得称全包strict、科学或性能最优通过。
+
+额外私有审计/类型重复消息/GET observed_at等值/unknown窗口complete断言及finalGit helper远端96→1af变化首错误均保留；未修改原测试或业务/重跑全套与原浏览器。主控独立确认r1_sessions.py:193实时观察时间与:399窗口完整度；F ResearchSessions.jsx:100–112不由complete推原生完成/停止follow。原未知state/activity/provenance未改；原完整DTO差异0、既有文件/SQLite未变。investigator与critic实际context GET明确当前局部视图、历史prompt/当时input UNKNOWN；support/refute既有持久记录全同。所有自有观察服务器cleanup0，强制serve exit1如实保留。无main/tag/deploy。
+
+I当前阶段worker_done成功并release retained/external/processActionnone；根1af是稍后B文档决策，仅PLAN/STATUS各一行，与I已合96身份分开不伪称合入。B只更新最终AT07准备包（原旧锁8558→实际87B，SOURCE b480/product2b/installed路径）；当前DockerLinuxpipe不存在/进程0，实际Engine/daemon及live HostConfig/profile未核实。docker_read默认CLI与受信export endpoint需实际同daemon证据，否则SDKcreate前停止。B docs不冒充真实隔离授权/探针。
+
+本阶段仅contract_local/mock与实际installed接口。task_live/真实AT07/L2/人工理解NOT_RUN、费用/Token节省UNKNOWN；P15 AOCI和I跨树freshness仍NOT_VERIFIED，C11有限注册隔离/3deps保留不称全恢复。下一独立真实隔离仍按用户“再单独授权AT-07”顺序，全部实际通过才一次L2，不借科研试隔离，不加入L3/新学科/品牌/语言/评分框架。
 
 ## 19:10 清理验收与最终产品组合冻结
 
