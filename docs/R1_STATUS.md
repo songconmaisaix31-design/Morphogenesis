@@ -1,3 +1,11 @@
+## 20:08 原P并行交付AOCI配置，正式业务pin等待唯一I
+
+原Q独立54PASS接纳，最终测试SOURCE f2b81cd9c0e0623c224b0501580a19e3fc1d37da / docs-only REPORT f261c78a8181a4ce82a74bb41395cb35ee1e7b21均普通push/remote exact/clean；受测B fc866，最终原Git部署profile输入54PASS/1.71s，先前4.54s不同CRLF profile及首52/2均独立保留。A同原Owner已消费精确b480，正在正式条件窄fixture定界，尚无新业务修复SOURCE。
+
+用户再次要求持续去耦并行研发，当前另恢复原P/原research-r1-product树/branch：write_paths仅原developer AOCI WIP中的 .gitignore、.gitattributes、AGENTS.md、README.md、.aoci/.gitignore、.aoci/config.json、aoci.txt、docs/development/aoci.md、docs/tracks/r1-product.md；现有本机.codex/config.toml仅本轨ignored配置，不入SOURCE。交付稳定已准备的官方配置与明确partial状态，不重新初始化/改变baseline/角色/managed_scope/budget/automation，不代人TTY，不修改official工具，不重试原guard失败。原baseline、私有ledger/receipts/恢复/backup/原WIP保持；仅既有配置原字节与更新准确setup文档可审查提交，配置不得包含秘密/本机绝对身份。正式15Entry仍NOT_VERIFIED、成本节省UNKNOWN，不能将配置交付说成完成索引。
+
+P可先交developer-only SOURCE供审查（不触业务模块/锁，不触UI）；当唯一I以后交精确累计核心SOURCE时，同P后续只改pyproject.toml、uv.lock、src/morphogenesis_research/__init__.py与ownreport精确repin。未获I新SOURCE前不能pinB单轨fc866或任意docsREPORT。原P全树有无法提交的历史备份/工具runtime则如实dirty，不删除来假clean；唯一I始终从发布SOURCE新COPY安装。此可复用配置是用户AOCI需求的已授权交付，不将开发工具guard重新设为MVP业务前置。不执行新模型科研/Engine/key/SDK/AT07/L2/产品全套或已绿浏览器。
+
 ## 20:01 条件适用性定界，保持两条互斥开发轨
 
 C卫星run_72af1ba4a579三路只读审查已全部完成，私有ACCEPTANCE.md已主控阅读。可信生成投影与accept→advisory→choose/claim链未找到新增反例，原141与三项Spec行为不重跑。发现正式_research_branches只投影branch身份/status/parent/authorized，C Branch.conditions为空且feedback空条件可泛配；任务plan允许不同parameters/seeds/claim。该静态路径尚无正式入口的跨条件首RED，不提前称确认漏洞或授予修复范围之外源码。
