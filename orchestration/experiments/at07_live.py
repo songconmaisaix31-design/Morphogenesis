@@ -8,8 +8,12 @@ inside that owned sandbox, and the original SDK cleanup path.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import datetime
+from functools import partial
 import json
+import os
 from pathlib import Path
 import re
 import socket
@@ -20,6 +24,8 @@ from typing import Any
 
 from opensandbox.exceptions import SandboxApiException
 
+from local_assets.paths import no_links
+
 from orchestration.experiments.at07 import (
     At07Result, CHECKS, EGRESS_IMAGE, SERVER_IMAGE, STEPS, check_exports, create_probe,
     finish, render_payload, review, run_step, validate_configuration,
@@ -27,21 +33,55 @@ from orchestration.experiments.at07 import (
 from orchestration.experiments.backend import ATOMIC_EXPORT_SCOPE_SUPPORTED, OpenSandboxSession, UnsupportedCapability
 from orchestration.experiments.case import PYTHON_IMAGE
 from orchestration.experiments.executor import _write_json
-from orchestration.experiments.generated import IsolationConfiguration
+from orchestration.experiments.generated import DockerExportConfiguration, IsolationConfiguration
+from orchestration.experiments.frozen_export import FrozenDockerExport
 
 # Only these non-secret Docker fields enter the evidence. Never inspect Config.Env,
 # arbitrary labels (the egress auth token is a label), or expanded Compose output.
 INSPECT = r'''{"id":{{json .Id}},"image":{{json .Config.Image}},"state":{{json .State.Status}},"owner":{{json (index .Config.Labels "morph.owner")}},"probe":{{json (index .Config.Labels "morph-at07-probe")}},"sidecar_for":{{json (index .Config.Labels "opensandbox.io/egress-sidecar-for")}},"privileged":{{json .HostConfig.Privileged}},"cpu":{{json .HostConfig.NanoCpus}},"memory":{{json .HostConfig.Memory}},"pids":{{json .HostConfig.PidsLimit}},"caps_drop":{{json .HostConfig.CapDrop}},"caps_add":{{json .HostConfig.CapAdd}},"security":{{json .HostConfig.SecurityOpt}},"network":{{json .HostConfig.NetworkMode}},"mounts":{{json .Mounts}},"ports":{{json .NetworkSettings.Ports}},"ip":{{json .NetworkSettings.IPAddress}}}'''
 
 
-def docker_read(*args: str) -> str:
-    allowed = (("inspect",), ("ps",), ("volume", "ls"), ("network", "ls"), ("logs",))
+def docker_read(*args: str, configuration: DockerExportConfiguration | None = None,
+                private_config: Path | None = None) -> str:
+    # Closed original observation forms: no caller-supplied global routing/TLS
+    # options, plugins, arbitrary exec, or alternate inspect format/secret fields.
+    identifier = r"[a-f0-9]{64}|morph-r1-at07-(?:server|target)|sandbox-[A-Za-z0-9_-]{1,120}"
+    allowed = (args in (("ps", "-aq", "--no-trunc"), ("volume", "ls", "-q"),
+                       ("network", "ls", "-q", "--no-trunc"))
+        or (len(args) == 4 and args[:3] == ("inspect", "--format", INSPECT)
+            and re.fullmatch(identifier, args[3]) is not None)
+        or (len(args) == 5 and args[:4] == ("ps", "-aq", "--no-trunc", "--filter")
+            and re.fullmatch(r"label=opensandbox.io/egress-sidecar-for=[A-Za-z0-9_-]{1,120}", args[4]) is not None)
+        or (len(args) == 4 and args[:3] == ("logs", "--tail", "100")
+            and re.fullmatch(r"[a-f0-9]{64}", args[3]) is not None))
     fixed_exec = (len(args) >= 3 and args[0] == "exec" and re.fullmatch(r"[a-f0-9]{64}", args[1]) is not None
         and args[2:] in (("cat", "/etc/opensandbox/config.toml"), ("nft", "-j", "list", "ruleset")))
-    if not fixed_exec and not any(args[:len(prefix)] == prefix for prefix in allowed):
+    if not fixed_exec and not allowed:
         raise PermissionError("docker_read_only")
-    completed = subprocess.run(["docker", *args], capture_output=True, text=True,
-                               timeout=10, check=False)
+    if configuration is None:
+        raise ValueError("frozen_export_configuration_required")
+    config = DockerExportConfiguration.model_validate_json(configuration.model_dump_json())
+    if private_config is None or not private_config.is_absolute() or private_config.name != ".at07-docker-cli":
+        raise ValueError("owned_empty_docker_config_required")
+    no_links(private_config)
+    if not private_config.is_dir() or any(private_config.iterdir()):
+        raise ValueError("owned_empty_docker_config_required")
+    # Docker docs: DOCKER_CONTEXT overrides HOST, and the default config contains
+    # credentials. Explicit options + an empty config + a fresh allowlisted env
+    # avoid both, including differently-cased Windows environment keys.
+    environment: dict[str, str] = {}
+    for key, value in os.environ.items():
+        upper = key.upper()
+        if upper in {"PATH", "SYSTEMROOT", "WINDIR"}:
+            if upper in environment and environment[upper] != value:
+                raise ValueError("conflicting_docker_process_environment")
+            environment[upper] = value
+    try:
+        completed = subprocess.run(["docker", "--host", config.endpoint, "--config", str(private_config), *args],
+            capture_output=True, text=True, timeout=10, check=False, shell=False,
+            env=environment, cwd=private_config)
+    except (OSError, subprocess.SubprocessError):
+        raise RuntimeError("docker_read_failed") from None
     if completed.returncode != 0:
         raise RuntimeError("docker_read_failed")  # Do not leak stderr/environment.
     # Docker log streams can arrive on stderr even with exit status zero. They
@@ -52,15 +92,33 @@ def docker_read(*args: str) -> str:
     return output.strip()
 
 
-def inspect(identifier: str) -> dict[str, Any]:
-    value: dict[str, Any] = json.loads(docker_read("inspect", "--format", INSPECT, identifier))
+def inspect(identifier: str, *, reader: Callable[..., str]) -> dict[str, Any]:
+    value: dict[str, Any] = json.loads(reader("inspect", "--format", INSPECT, identifier))
     return value
 
 
-def inventory() -> dict[str, list[str]]:
-    return {"containers": sorted(docker_read("ps", "-aq", "--no-trunc").splitlines()),
-            "volumes": sorted(docker_read("volume", "ls", "-q").splitlines()),
-            "networks": sorted(docker_read("network", "ls", "-q", "--no-trunc").splitlines())}
+def inventory(*, reader: Callable[..., str]) -> dict[str, list[str]]:
+    return {"containers": sorted(reader("ps", "-aq", "--no-trunc").splitlines()),
+            "volumes": sorted(reader("volume", "ls", "-q").splitlines()),
+            "networks": sorted(reader("network", "ls", "-q", "--no-trunc").splitlines())}
+
+
+@contextmanager
+def _private_docker_config(root: Path) -> Iterator[Path]:
+    # Never reuse/overwrite a prior directory, follow links, or recursively
+    # remove unexpected files. This path belongs only to the new probe root.
+    directory = root.absolute() / ".at07-docker-cli"
+    no_links(directory)
+    directory.mkdir(mode=0o700, exist_ok=False)
+    owned = directory.stat()
+    try:
+        yield directory
+    finally:
+        no_links(directory)
+        current = directory.stat()
+        if (current.st_dev, current.st_ino) != (owned.st_dev, owned.st_ino):
+            raise PermissionError("docker_private_config_identity_changed")
+        directory.rmdir()  # Nonempty/changed ownership stays visible; no rm tree.
 
 
 def target_control() -> dict[str, Any]:
@@ -115,13 +173,33 @@ def execute(*, root: Path, authorization_ref: str, key_file: Path, canary_direct
         raise UnsupportedCapability("frozen_export_configuration_required_AT07_NOT_READY")
     server_toml = (root / "server.toml").read_bytes()
     validate_configuration(config, server_toml)
-    server, target = inspect("morph-r1-at07-server"), inspect("morph-r1-at07-target")
+    if (re.fullmatch(r"[a-f0-9]{64}", config.instance_id) is None
+            or re.fullmatch(r"git:[a-f0-9]{40}:deploy/opensandbox/at07.config.toml", config.runtime_profile) is None):
+        raise ValueError("actual_service_and_runtime_binding_required")
+    with _private_docker_config(root) as directory:
+        # Original credential-free official Engine transport, same full config
+        # as every CLI observation and the later frozen archive adapter.
+        control = FrozenDockerExport(config)
+        try:
+            control.preflight()
+            if control._json("/version").get("ApiVersion") != config.docker_export.api_version:
+                raise PermissionError("docker_export_api_mismatch")
+        finally:
+            control.close()
+        reader = partial(docker_read, configuration=config.docker_export, private_config=directory)
+        return _execute(config=config, server_toml=server_toml, reader=reader, root=root,
+            authorization_ref=authorization_ref, key_file=key_file, canary_directory=canary_directory)
+
+
+def _execute(*, config: IsolationConfiguration, server_toml: bytes, reader: Callable[..., str],
+             root: Path, authorization_ref: str, key_file: Path, canary_directory: Path) -> At07Result:
+    server, target = inspect("morph-r1-at07-server", reader=reader), inspect("morph-r1-at07-target", reader=reader)
     if (server["id"] != config.instance_id or server["image"] != SERVER_IMAGE
             or server["owner"] != "r1-at07" or target["owner"] != "r1-at07"
             or target["image"] != PYTHON_IMAGE
             or server["state"] != "running" or target["state"] != "running"):
         raise PermissionError("owned_service_instance_required")
-    actual_server = docker_read("exec", server["id"], "cat", "/etc/opensandbox/config.toml").encode()
+    actual_server = reader("exec", server["id"], "cat", "/etc/opensandbox/config.toml").encode()
     validate_configuration(config, actual_server)
     target_ip = (root / "target-ipv4.txt").read_text(encoding="ascii")
     if target["ip"] != target_ip or (root / "at07-probe.py").read_bytes() != render_payload(config, root.name, target_ip):
@@ -129,7 +207,7 @@ def execute(*, root: Path, authorization_ref: str, key_file: Path, canary_direct
     canary = canary_directory / "credentials"
     if canary.is_symlink() or canary.read_bytes() != b"AT07-SYNTHETIC-NOT-A-SECRET\n":
         raise ValueError("new_synthetic_canary_required")
-    before = inventory()
+    before = inventory(reader=reader)
     positive = target_control()
     if not all(positive.get(k) is True for k in ("dns_positive", "canary_exists", "fake_credential_present")):
         raise ValueError("controlled_target_positive_failed")
@@ -148,12 +226,12 @@ def execute(*, root: Path, authorization_ref: str, key_file: Path, canary_direct
         info = session.info()
         _write_json(root / "sdk-info.json", {k: info.get(k) for k in
             ("id", "state", "created_at", "createdAt", "expires_at", "expiresAt")})
-        main = inspect("sandbox-" + session.id)
-        sidecars = docker_read("ps", "-aq", "--no-trunc", "--filter",
+        main = inspect("sandbox-" + session.id, reader=reader)
+        sidecars = reader("ps", "-aq", "--no-trunc", "--filter",
                               "label=opensandbox.io/egress-sidecar-for=" + session.id).splitlines()
         if len(sidecars) != 1:
             raise ValueError("unique_owned_sidecar_missing")
-        sidecar = inspect(sidecars[0])
+        sidecar = inspect(sidecars[0], reader=reader)
         ids = {main["id"], sidecar["id"]}
         volume = "opensandbox-runtime-" + session.id
         _write_json(root / "owned-resources.json", {"main": main, "sidecar": sidecar, "volume": volume})
@@ -165,7 +243,7 @@ def execute(*, root: Path, authorization_ref: str, key_file: Path, canary_direct
         _write_json(root / "effective-policy.json", policy)
         if policy.get("default_action") != "deny" or policy.get("egress") not in (None, []):
             raise ValueError("effective_network_policy_not_default_deny")
-        nft = json.loads(docker_read("exec", sidecar["id"], "nft", "-j", "list", "ruleset"))
+        nft = json.loads(reader("exec", sidecar["id"], "nft", "-j", "list", "ruleset"))
         _write_json(root / "effective-nft.json", nft)
         host["effective_nft_default_deny"] = any(
             rule.get("chain", {}).get("hook") == "output" and rule["chain"].get("type") == "filter"
@@ -193,7 +271,7 @@ def execute(*, root: Path, authorization_ref: str, key_file: Path, canary_direct
                     and after_control["dns_queries"] == positive["dns_queries"] + 1)
                 # Retain only the fixed synthetic domain's log lines, never a
                 # complete infrastructure log, environment or token-bearing labels.
-                logs = docker_read("logs", "--tail", "100", sidecar["id"])
+                logs = reader("logs", "--tail", "100", sidecar["id"])
                 lines = [line[:2048] for line in logs.splitlines() if "canary.at07.test" in line]
                 (root / "domain-denial.log").write_text("\n".join(lines), encoding="utf-8")
                 host["egress_domain_denial_observed"] = True if any(re.search(
@@ -221,9 +299,9 @@ def execute(*, root: Path, authorization_ref: str, key_file: Path, canary_direct
         expiry_text = info.get("expires_at") or info.get("expiresAt")
         expiry = datetime.fromisoformat(str(expiry_text).replace("Z", "+00:00")).timestamp()
         while time.monotonic() - started < 240:
-            present = set(inventory()["containers"])
+            present = set(inventory(reader=reader)["containers"])
             if not ids & present:
-                expired = time.time() >= expiry and volume not in inventory()["volumes"]
+                expired = time.time() >= expiry and volume not in inventory(reader=reader)["volumes"]
                 break
             if time.time() >= expiry + 20:
                 break
@@ -247,7 +325,7 @@ def execute(*, root: Path, authorization_ref: str, key_file: Path, canary_direct
         result = result.model_copy(update={"observations": {**result.observations, "host": host}})
         result = finish(session, result, root)
         try:
-            after = inventory()
+            after = inventory(reader=reader)
             _write_json(root / "host-after.json", after)
             host["cleanup_observed"] = bool(ids) and not ids & set(after["containers"]) and volume not in after["volumes"]
             host["unrelated_resources_unchanged"] = all(set(before[k]) <= set(after[k]) for k in before)
