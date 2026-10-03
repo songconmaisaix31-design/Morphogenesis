@@ -493,3 +493,30 @@ python -m mypy --strict swarm/research/policy.py swarm/research/feedback.py
 - `research-v1` 是建议层：机会份额只建议 + 已批准容量分配；真实认领仍走原 `TaskLedger` 重查 scope/capabilities/dependencies/lease/fencing/`BudgetLedger` reserve。未知预算不视为 0，branch/run 不重置 envelope。
 - A 未接线前，`snapshot`/`research_feedback`/`accept` 是薄接口，不在 `ResearchService` 的 11 个 MCP 工具内（服务接线与 host 绑定身份传递归 A）。
 - 三个轴的 `disputed`/`inconclusive` 状态已建模，产生这些状态的独立评审入口由 A 的共同研究层（FR-08/FR-18）接入，本轨仅提供模型、建议机会与接受边界。
+
+## 2026-10-03 18:55 新授权：仅隔离原 C 全局注册
+
+依据主控 `3e44f9440a57d88e9094b38ea2098d73b8463099` 的 `docs/R1_PLAN.md`
+18:55 决策，用户新明确授权仅执行上述固定11文件的保守清理。旧自动审批
+`blocked by policy`、首 RED 和当时未执行事实全部保留；本次不是旧拒绝后的绕过。
+源码 SOURCE `e82cae36038c386aec999642289ac1d78c82a9ed` 与已验收 REPORT
+`52b8d26da04aec41ceb7e008445ef2f1dc088d53` 不变，本次只追加文档记录。
+
+原 Temp 两份 JSON 已不存在；从本 C 原会话 `01a0fdc7-d2a5-7d00-adb3-311434a97eb9`
+的命令 stdout 第172行恢复完整原快照，第1061行保留原最终11项未变输出，未拿当前状态
+重建旧基线。再次验证原 `direct_url` editable C URL、固定 RECORD SHA256、11项
+大小/SHA256/mtime_ns 全部一致，8个 dist-info 成员无新增，源和目标祖先无 reparse。
+只读预检的 `Split-Path` 参数错误保留于 `preflight-stdout.txt`，修正后预检 exit0。
+
+`registration-cleanup.ps1 -Move` **仅执行一次，exit0**：逐项 `Move-Item -LiteralPath`
+移到全新 owned quarantine，无覆盖、递归移动或删除。验证11条移动、11原路径均已消失、
+11备份字节/大小/mtime_ns 均与原快照匹配；移动前后进程检查潜在使用者均0
+（分别观测388/389个 Win32_Process，仅名称及可见路径/命令引用检查，未留原命令凭据），
+未杀任何进程。两个全局入口、pth 与8个注册文件已隔离，空 dist-info 目录保留。
+
+私有 raw 前后证据、`moves.jsonl`、`owned-files-list.json`、原快照来源和未执行的
+`rollback.md` 均在 `C:/research-private/c-registration-cleanup-1855/`；不提交本地产物。
+`opensandbox==1.1.0`、`opensandbox-code-interpreter==1.1.0`、`poetry-core==2.5.0`
+仍在，未知旧依赖未动，**安装前全局状态 UNKNOWN，不能声称完全恢复**。
+未执行 pip/安装/卸载、旧141测试重跑、Python/native科研、Docker/WSL/service 操作或
+全局 HOME/auth/provider 更改；本记录不构成 MVP 或 R1 完成验收。
