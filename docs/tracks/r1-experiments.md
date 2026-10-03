@@ -1,4 +1,86 @@
-# R1 B · 2026-10-03 AT-07 准备与原子导出边界
+# R1 B · 2026-10-03 后继：受信 Docker 冻结导出
+
+仍是 Task `task_a8533b909675` / Dispatch `ctx_bd976e22265e`，原 B Owner/worktree/branch。
+后继 SOURCE **`5769005b09f1b756c94fdad0649a6b74690c0ca9`** 普通 commit/push，远端精确核对一致。
+父 REPORT `7a6c5094c7235b1a992e0eaa8d688b08fa0fd64b`、其 SOURCE
+`296ec298a23eea54f76e8c874aed551487a2999a` 及下方全部首失败保留；没有重写历史。
+本段和授权包/来源调查/新增原始输出为单独 docs-only REPORT。
+
+当前 **PREPARED_UNVERIFIED；真实 AT07 / L2 NOT_RUN**。已交付
+[具体授权包](../experiments/at07-authorization.md) 与
+[固定来源、实现契约和限制](../experiments/at07-export-feasibility.md)。
+官方 SDK 原 pause/resume 生命周期与官方 Docker SDK7.2.0 npipe/Unix transport 读取宿主
+Engine HEAD/GET archive；导出期间 main/egress 都冻结，逐层拒绝 symlink/特殊类型，
+只接受有界单个普通 tar 成员，不在宿主提取、不执行容器 helper。
+原 `OpenSandboxSession` / executor / result / TaskLedger / finalization 继续复用，没有新证明或调度设施。
+
+新 `DockerExportConfiguration` 进入原 `IsolationConfiguration`：mode固定
+`docker-paused-archive-v1`；endpoint仅固定npipe/Unix；真实daemon ID；Engine固定29.5.3/API1.52；
+request_timeout固定10秒。SDK create前核对实际daemon/server完整ID/image/loopback端点，执行前绑定同次owned pair。
+未配置默认None、旧probe、变更任何绑定或控制面未知都拒绝；实现支持不等于真实probe verified。
+AT07的 `unverified_record` 始终False，mock/partial/unknown不能由工具升级为隔离或科研权威。
+
+明确纠正早期只读runtime假设：固定上游挂载 `/opt/opensandbox:rw`。仅接受根外的原服务管理local volume、
+恰好本次main/egress两个使用者、两者冻结；拒绝额外挂载/第三使用者。文件判断来自受信Engine，
+不信任候选可能修改的runtime/execd。PathStat没有nlink事实，不声称inode别名完全排除；
+每次成功导出均原SDK pause→Docker只读HEAD/GET→原SDK resume；finally仅在只读inspect确认两者确实暂停时恢复。
+最终导出也恢复，不保持暂停到销毁；pause异常可在确认已暂停后尝试一次resume，原unknown仍保留。
+不声称多文件同一快照；一次待完成底层读取可能多占一个transport timeout，不声称硬实时。
+pause/resume/stream未知保留unknown并停止，不重POST、不降级为missing_artifact或退回宿主执行。
+当前保存small成功的frozen-export观测及result分项/异常/cleanup，没有逐次pause/resume响应转录；
+报告不把缺失的运行数据写成PASS，具体各分支/记录范围已在授权包明确。
+
+## 后继离线证据
+
+主控串行窗口内，B自有COPY `.venv` / CPython3.13.13；进程局部BLAS线程数1。
+唯一新runtime依赖 `docker==7.2.0`，原锁其他包版本不变；官方Apache-2.0与pywin32许可已记NOTICE。
+当前 `poetry.lock` SHA256 **`8558e9e065da381466d9c188bc87a88fcaf09a3b367455eb8267c0bb4c9fcc98`**。
+Poetry2.3.2仅在B `.runtime/uv-lock-tools` 私有工具环境解析锁；没有系统pip、他人环境或全局配置修改。
+
+| 原始输出（追加于at07-evidence） | 命令 / 结果 |
+| --- | --- |
+| `frozen-install-first.txt` | `uv pip install --python .venv/Scripts/python.exe --no-deps docker==7.2.0`，安装唯一runtime新包；UV_LINK_MODE=copy |
+| `frozen-lock-first.txt` | `uv tool run --from poetry==2.3.2 poetry lock`，B私有UV工具/缓存路径，43个临时工具依赖；原锁其他版本不变 |
+| `frozen-targeted-first.txt` | frozen_export、at07、at07_export、generated_configuration：**110 PASS / 3.76s** |
+| `frozen-experiments-first.txt` | 全部 `tests/experiments`：**210 PASS / 27.50s** |
+| `frozen-strict-first.txt` | **1 error / 140 source files**，Returning Any from bool；首RED保留 |
+| `frozen-strict-fixed.txt` | **PASS / 140 source files**；已校验bool后增加类型cast，没有运行行为改动 |
+| `frozen-environment-check.txt` | `uv pip check --python .venv/Scripts/python.exe`：**104 packages compatible** |
+
+原断言命令：
+
+```powershell
+.venv/Scripts/python.exe -m pytest tests/experiments/test_frozen_export.py tests/experiments/test_at07.py tests/experiments/test_at07_export.py tests/experiments/test_generated_configuration.py -q --tb=short
+.venv/Scripts/python.exe -m pytest tests/experiments -q --tb=short
+.venv/Scripts/python.exe tools/typecheck.py
+uv pip check --python .venv/Scripts/python.exe
+```
+
+冻结测试的Daemon/SDK均为inert fixture，阻断真实process/network；positive有真实adapter构造及SDK参数capture，
+并非只测拒绝。覆盖暂停期间替换、祖先/leaf symlink、恶意tar/特殊文件/溢出/期限、额外volume使用者、
+Engine身份错配、暂停/恢复未知与不重放、错误恢复ID不得kill、附着session拒绝、旧配置不得admit/direct-create。
+只在宿主解析固定探针源码；没有实际Engine/socket请求、候选、科学、模型、probe或sandbox生命周期操作。
+strict最后修改仅类型cast，适用运行测试此前通过；未为这项类型修复重复重回归。
+
+## 接线、验收与真实剩余限制
+
+已向A原Owner `ctx_4c6085d9f9d8` 及主控交SOURCE/API：只在 `GeneratedHostSettings` 增
+同型 `docker_export=None`，继续由 `HostConfig.generated_experiments` 原受信嵌套承载，
+原factory透传 `LocalCpuSandboxBackend(docker_export=self.settings.docker_export)`。
+不新增HostConfig顶层重复权威，不让候选/MCP请求选择daemon；真实Engine/ID未知时维持None。
+B未修改A/C/P/Q文件，A已ACK此最小契约。
+
+Q在上一阶段的3项旧fixture失败仍保留（详见下方首RED）；本SOURCE没有宣称Q新全绿。
+新精确配置须由Q独立正负复核，最终固定组合完整离线回归/installed输入由主控串行排队。
+本轮没有fullsuite/build/installed产品验证；测试窗口已释放，不把owner210项替代组合验收。
+本机只读CLI版本为29.5.3；实际Engine/daemon仍UNKNOWN，未启动Docker/WSL/service、未pull/build镜像。
+sidecar/cache资源限额不受支持、总峰值UNKNOWN、动态0.0.0.0端口和既有DNS健康流量的后续范围决定保留。
+真实无害AT07需后续单独明确授权且同档全部通过，再讨论一次L2；没有L3/规模化/跨宿主授权。
+旧C系统误装automatic approval blocked-by-policy边界保留，没有环境清理。
+
+---
+
+# R1 B · 2026-10-03 AT-07 准备与原子导出边界（历史阶段）
 
 Task `task_a8533b909675` / Dispatch `ctx_bd976e22265e`，原 B Owner、worktree 与分支。
 普通精确合并核心 REPORT `08b31b39c075571ffd247e2b591d657ce09b6b34`（SOURCE
