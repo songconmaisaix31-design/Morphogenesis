@@ -380,3 +380,84 @@ C:/r1i/final-product-1855/venv/Scripts/python.exe -I -X utf8 -u -c "import sys,p
 本阶段最终组合离线工程验收完成；whole原十项类型债仍RED身份，不称全包strict通过。核心Windows1745/15skip、Linux1744/16skip、strict140/build/SDK/wheel证据仅沿用已接纳的第9节原CI，没有复跑。P15正式AOCI Entry/维护、真实human receipt仍NOT_VERIFIED；撤回可选auto并恢复legacy是原P/主控事实，不把聊天全权限或preview变receipt。本轮不维护跨路径AOCI、不复制receipt/reinit/手改baseline/安装业务源码；A核心十源仍A-path-bound，I跨checkout认知freshness NOT_VERIFIED。C11单次隔离与三个全局依赖保留仅沿用原Owner/主控证据，I不改全局环境或清理其他进程。
 
 本轮运行与观察属 contract_local/mock及真实本机installed接口工程证据；**task_live NOT_RUN，实际用量/费用/Token节省UNKNOWN**。未创建真实native science claim、科研候选沙箱或执行模型/科学请求；没有Docker/WSL、外部服务启动、AT07/L2、main/tag/deploy或外发。本机正式serve只用于用户已授权产品离线观察。AT07仍须本阶段后单独授权的实际无害隔离，真实隔离通过后再谈一次L2；人工理解与性能最优不由本轮自动验收产生。
+
+## 11. 原唯一 I 的 B 实际代码后继累计工程与产品离线收口（2026-10-03）
+
+本轮仍为原树、原分支、原 Owner，Task `task_33b99bbe70e8` / Dispatch `ctx_154fc9202fc1`；起点为已接纳且干净的 I REPORT `a67c0af1e27bea08a8e2ce426337f0608e62f216`。先 raw Git 读取主控 `381d955ea62ec99505263ecf7ed20adbc1b74e95` 的20:18决定、AGENTS与现行Spec。没有第二集成者、I领域/原测试/锁修改、cherry-pick、force push或人工治理改写。
+
+### 11.1 普通精确来源与唯一实际运行组合
+
+| 身份 | 完整 SHA |
+| --- | --- |
+| 原已通过核心 baseline | `b480fca1b10a0b6a9c93f0d1801d38f267662461` |
+| B实际 SOURCE / REPORT | `fc866465aa52a3f09773bc79a0fab95bceedc3d9` / `f008e281e15d25c8950d7ddd05450fbe398653f1` |
+| Q原测试 SOURCE / REPORT | `f2b81cd9c0e0623c224b0501580a19e3fc1d37da` / `f261c78a8181a4ce82a74bb41395cb35ee1e7b21` |
+| A本轮仅docs REPORT，actual代码仍b480 | `1c40129e81362686fcba968e57809582c22dabfc` |
+| 第一累计核心 SOURCE，首RED保留 | `e635b8ab3e79529403b527892e75ffb29674af0a` |
+| Q两行平台fixture修复 SOURCE / docs REPORT | `3aa95d94828449fd92e6bb4fe6385178f3dac971` / `c4de24734f3f8d85446265d39ed6365a92e0d3ee` |
+| **最终实际核心 SOURCE** | **`15de4959646df264530b978dfde9152552b9a76b`** |
+| **实际产品运行 SOURCE** / 固定pin docs REPORT | **`c84e49bd8e926f50d2c057793e8789cf137b310a`** / `2a35b9aaa6769d8334017d5526c32ae52952a2ec` |
+| 产品仅客户端测试后继 TESTSOURCE / docs REPORT | `756d5069e7739089f0e5ba1c33eebfb2657b03f0` / `eca3fd48c33fc602f1ddb3f45d91bd88e17b941b` |
+
+普通merge B f008、Q f261、A 1c、root381形成e635；首RED退原Q后普通merge Q3aa95、root `fec6f1e29a2c07f1375d481f8cbf7e71cc482b77` 形成15de。两次实际代码集成SOURCE均普通push、远端exact/clean、最终commit无skip-ci，及时fullSHA Handoff原P；没有重跑失败原run。相对b480的全部非docs差异精确仅 `orchestration/experiments/at07_live.py`、`tests/experiments/test_at07.py` 与 `tests/boundary_review/test_at07_route_boundary.py`，分别等于B/Q原blob；全部指定业务来源祖先核对。e635→15de生产/依赖/锁零delta，只有Q平台夹具两行和主控治理。
+
+最终 `poetry.lock` 原Git字节与b480相同，SHA256 **`87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb`**；不是从B旧锁或本机行尾hash填。15de的正式 `deploy/opensandbox/at07.config.toml` 原Git归档 **1013字节 / SHA256 `438fe04be51d07188b6bc4b26fbd85c2e7ce28dc02e31ed3af2a4cf27f3c0b79`**，I精准installed测试用它，不用CRLF工作树副本。workflow与baseline原字节相同。原命令/merge/祖先/remote事实见 `C:/r1i/successor-2018/logs/source-freeze-first.json` 与 `r2/logs/source-freeze-first.json`、`source-push-first.json`、两阶段merge原日志。
+
+原P接纳15de后仅三pin普通更新c84；CORE_SHA、pyproject VCS、uv.lock及installed commit_id/requested_revision均完整15de。c84相对原2b的生产变化仅该coreSHA，原F SOURCE `7bf17d195859a18960ee1ef933a920a286f73e61` / REPORT `c08566edc492e92adfc4e24a9e8de1c18b859e02`、P API SOURCE `67721aaa815e706c51e0f80a1d15ab71e34b6880`、developer SOURCE `c7711f807e50ea4101ec6af231351e5c1037add6` / REPORT `94c7fc779770e8847f6366bac1a0a3dcaa134332`均为原普通祖先。六个developer文件实际原字节保持；不再次guard/reinit/复制receipt或手写baseline。
+
+### 11.2 原双平台工程门及首RED
+
+e635原自动Run **37122569886 / attempt1**：Linux **1823 PASS / 1 FAIL / 16 SKIP / 425.33s，pytest exit1**；Windows **CANCELLED**，后续type/build/SDK/wheel未完成。唯一失败为Q `test_untrusted_private_config_directory_cannot_reach_cli[junction]`，Linux模拟win32时缺 `stat.IO_REPARSE_TAG_MOUNT_POINT`。原Q仅补fixture常量和注释，未改no_links、拒绝tuple、CLI零调用或任何生产代码；原失败raw和Owner定向修复身份保留。I没有修领域、改原assertion、cancel或rerun该run。
+
+15de原自动Run **37123370202 / attempt1**，head精确15de，两个job和全部原steps **SUCCESS**：
+
+| 平台 | 原完整pytest | 原其他完整工程门 |
+| --- | --- | --- |
+| Windows，job111203705329 | **1825 PASS / 15 SKIP / 75 warnings / 1820.43s** | strict140、sdist/wheel、SDK schema1.14.0、wheel13packages/resources、installed_verifier与node_dependency_check全部通过 |
+| Linux，job111203705442 | **1824 PASS / 16 SKIP / 75 warnings / 399.47s** | 同一原workflow的上述各门全部通过 |
+
+原命令是 `uv tool run poetry run python -m pytest -q`、`python tools/typecheck.py`、`python -m build`、`npm run check:sdk`、`uv pip install --no-deps --target tools/.wheel-site ...whl` 与 `python -I tools/check_distribution.py --check-node`。原workflow未改，I没有本机复制完整核心门或绿CI重跑。第一run fullraw在 `logs/ci-full-first.log`，最终run fullraw在 `r2/logs/ci-full-first.log`；各自finalrun/jobs与capture argv/exit/time同时保存。SDK/wheel验证范围仍contract_local，published=false。
+
+### 11.3 全新私有 COPY、实际字节与受影响installed验证
+
+首次 `C:/r1i/successor-2018` 新e635/8c私有安装自然完成，尚未开启产品whole门就遇CI首RED；其env/cache/raw原样保留。最终组合使用全新独立 **`C:/r1i/successor-2018/r2`** COPY/env/cache/npm私有config；未复用旧 `i1003-2239`、F或1855环境。子进程BLAS/OMP/MKL1；typed argv/shell=False、process-local Git autocrlf=false、rawGit cat-file batch比较，不改global pip/auth/HOME/PATH/provider/hostconfig。
+
+安装前两个原SOURCE `git archive` / 原生tarfile后逐blob比较：**core722文件、product165文件，全部字节相等/nlink1**。原锁98记录，`uv export --frozen --no-emit-project`，核心精确GitVCS noneditable COPY；产品独立wheel再 `uv pip install --no-deps --link-mode copy`。原locked兼容检查 **97 packages**；另加mypy1.20.2四工具包后 **101 compatible**。独立wheelSHA256 **`bc7f6a69a3268072b96ba463be52eb18a60103b2d11f16ce2a54575dd34379e0`**；product direct_url是真实本轮wheelURL/archive_info{}，不补metadata hash。
+
+安装审计首次通过：**136 core Python**、原**13 packages**实际从新site-packages导入、**64 core原非Python资源**；产品 **53总生产文件 = 36 Python + 17非Python资源**，不是另有53个非Python文件。全部源归档与actual installed字节相同/nlink1、单core distribution、无editable；三pin与VCS commit_id/requested_revision全15de。原setup-assets/doctor均exit0：SDK1.14.0、ready_local/local_only、models_experiments_hub_called=false。
+
+I仅从实际installed模块对两个受影响原testfiles执行一次，importlib模式、开始/结束均核对生产模块路径属于新venv：**106 PASS / 1 warning / 0.84s，exit0，外层7.022s**。Q_AT07_SERVER_CONFIG指向最终15de rawGit档案。原tests保留拦截process/probe/network边界，非真实AT07/Engine隔离。
+
+仅为原冻结parser断言在r2私有npm安装官方Codex0.159.0，ignore-scripts、version验证；pytest仅子进程PATH指定vendor binary，原secret-free临时CODEX_HOME只version/mcp-get解析，不调用模型。证据 `r2/logs/archive-raw-git.json`、`installed-identity-first.json`、`installed-core-boundaries-first.log`、`commands.jsonl`及原各install/doctor日志。
+
+### 11.4 一次完整产品首RED与原Owner测试窗口修正
+
+原完整命令从r2原产品归档cwd、生产模块用installed：
+
+```text
+C:/r1i/successor-2018/r2/venv/Scripts/python.exe -I -X utf8 -u -c "import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))" -q -rA --tb=short --basetemp C:/r1i/successor-2018/r2/full-product-first-tmp
+```
+
+**首次完整结果：255 PASS / 1 FAIL / 539.16s，实际child exit1，外层542.527s**。唯一四phase/三页事实节点经原 `tests/test_web.py` urlopen(timeout15) 得到TimeoutError；未中断或再开whole，不用旧256代替。原short fixture实际在sys.prefix.parent/fixtures随机12位目录，原pytest tmp_path重定向后为空不表示未有后台效果。原P正式时间核对失败为**replication**：原client15s超时；晚到mock记录不使原HTTP/三页断言通过。server request→response-marker25.0316s不是完整HTTP客户端响应测量；native mock wall0.01245s不是真实科学性能。
+
+原P新私有同原15s/原asserts复现 **1 FAIL / 53.43s**，instrumented真实inert child13.684s/run_from_ui14.191s后还有DTO投影。主控批准最小**测试工具**后继756：request helper仅加可选timeout默认15，只有四phase首POST显式900s，等待既有角色900s操作预算；业务、runner预算、409、secret、mock/task_live、全部事实断言未改，全部GET/其余255仍默认15。不是用户新增15s性能承诺的达标证明，也不吞真实timeout。P首RED及P修后单node1PASS72.29s保留为原Owner身份，不代I。
+
+I以756做新私有rawGit165文件archive，生产53文件与已安装c84逐字节相同/nlink1，三pin不变，两文件所有原assert AST相同。**同15de+c84现装**仅该节点独立一次：**1 PASS / 75.32s，exit0，外层77.785s**，四phase及原三页/authority/secret/mock断言完整执行。原命令与raw在 `r2/test-repair/logs/independent-target-command-first.json` / `independent-target-first.log`；源差异/生产字节与原断言在 `test-source-diff-first.patch`、`test-source-identity-first.json`、`original-assertions-first.json`。没有重装、whole255/type/UI/浏览器/绿核心CI复跑；**不写whole256green**。原完整255/1与新测试SOURCE单node green分开列出。
+
+原mypy1.20.2 flags `--follow-imports skip --ignore-missing-imports --check-untyped-defs`：**适用30源 PASS/exit0**；whole36仍 **10原错误/6文件/exit1**。逐文件/当前与原行映射/类别/消息/a25与9e原Git表达式identity相同，新增0；不称全包strict green。原whole/applicable stdout、actual argv/exit、比较在 `r2/logs/product-mypy-*-first.log` / `product-type-identities-first.json`。这些是当前组合的实测，后续test-only来源生产零delta才保持适用范围。
+
+### 11.5 UI范围沿用、有界预览及私有工具首误判
+
+c84/756对原2b frontend、UI tests及生产static原Git零delta；新安装资源额外实际逐字节相同。**只沿用前组合b480+2b/a67范围**：build14.91s、UI126PASS/8SKIP与原installed input/session/support/refute8PASS/两视窗/原截图raw；本轮没有新build/browser或新session/context验收，旧PASS不伪作本轮全产品结果。未知native事实和当前output窗口complete不转成进程EOF/科学完成。
+
+按主控只读预览澄清，本轮用原observe_installed input配置方式提供**新installed**空私有断开页面 `http://127.0.0.1:51702/`，20:47:17–20:57:19 CST；allow_native_choicefalse、research_connections0、双auth/paidpending、sandbox127.0.0.1:1/keynull，child仅移除sandboxkey环境，不造科学记录/历史prompt/新权限。I只GET根HTML、不POST/浏览器重测；root另GET200/title事实已回报，**human understanding NOT_VERIFIED**。ownedPID54784/CreationFileTime134355052374425360，原截止后核对原handle身份只清理该Popen树，cleanup exit0，serve被有意关闭exit1如实记；wrapperexit0/604.739s。无延续/重开。原config/PID/source/argv/HTML/cleanup见 `r2/logs/preview-ready-first.json`、`preview-close-first.json`及raw。
+
+私有工具/分析首误判原样保留并单独更正，未变领域失败或重跑whole：source检查首次误把684新增ownreport也算三pin，原assertion exit1/preimage/output副本保留，后按业务范围只三pin原字节核验；一次handoff误写product档案168，已按原archive记录纠正165；I先从旧inheritance缺launch推断失败阶段，原P时序证明该目录属于先前别案，已明确更正replication，原 `product-first-red-actual-fixtures.json` 不覆写，追加phase-correction与timing-qualification。原首whole/raw和真实exit1始终不变，晚到mock outcome不修饰原测试客户观察。
+
+### 11.6 文档闭合与真实限制
+
+结果齐备后普通精确合入Q docs REPORT `c4de24734f3f8d85446265d39ed6365a92e0d3ee`（merge `1249c63ed3e0ac93d836f6e6fa7ec79605420d98`）、主控治理 `bbd37668b38f8860c9b00d6909d74dcaf588a152`（merge `60115631219a7e5d26bda53eb92324872d195c78`）与B最终两docs REPORT `e40f7879f9598405486587dad936e9884ead15bc`（merge `09627694869d7e74a57a06a5268b5c1fe40cb053`），均无冲突/[skip ci]。Q/B原blob、根PLAN/STATUS/ACCEPTANCE三个blob与上述精确Owner/主控提交相同，I未独立改治理。最终B包准备真实AT07路线与同ID retained_stopped批准选项，实际Engine/target/probe/资源清理仍NOT_RUN；它不改变冻结业务源码或当前科学运行权限。全部SOURCE15de→REPORT非docs差异0；原merge argv/exit/commit/delta保存在 `r2/logs/merge-final-{Q,root,B}-first.log` / JSON。随后仅追加本节，普通commit/push [skip ci]。
+
+本轮完成原SOURCE累计普通集成、原双平台全部工程门、新COPY/installed来源、一次完整离线首RED与原Owner测试工具修复后独立精准复验；结果按上述层级保留，不将255/1合写成whole256green。I最终docs-only REPORT完整SHA/remoteexact/clean/core/product/TESTSOURCE在push后保存 `C:/r1i/successor-2018/FINAL_REPORT.md` 并交原Dispatch，不在提交内自嵌本提交SHA。
+
+A本轮只有docs/条件与成本覆盖限制，无新A源码修复或全FR13覆盖承诺；P六developer配置字节沿用不等于15语义Entry维护完成，P/A human receipt、I跨checkoutAOCI freshness/cognition仍NOT_VERIFIED。不复制receipt/reinit/reset/手写baseline或假Token节省。本轮仅contract_local/mock与实际本机installed离线工程证据，**task_live/真实AT07/native科学/候选实际执行/L2 NOT_RUN；实际费用/用量/Token节省UNKNOWN**。时长仅原实测样本，不证明性能最优。B包是待单独授权的可审查路线，未启动Engine/Docker/WSL/服务key/SDK真实create、候选/模型/科学调用、外发、main/tag/deploy；实际无害隔离全部通过之后才可能一次另授权L2。人工理解未回不PASS，不由本轮机器门补出新认知或运行权限。
