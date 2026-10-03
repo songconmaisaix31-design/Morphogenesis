@@ -168,7 +168,7 @@ def test_dynamic_service_accepts_only_independent_original_chain_and_changes_opp
     result_id = completed["result_id"]
     opportunity = next(x for x in advice["opportunities"]["opportunities"] if x["branch_id"] == plan.branch_id)
     assert opportunity["refuted_by" if refuted else "supported_by"] == [result_id]
-    assert opportunity["share"] < .5 if refuted else opportunity["share"] == .5
+    assert opportunity["share"] < .5 if refuted else opportunity["share"] > .5
     follow = reviewer.propose_work(plan.project_id, "question", "follow up", "j", "e", branch_id=plan.branch_id)
     discovered = reviewer.discover()
     assert next(x for x in discovered if x["signal"]["task_id"] == follow["task_id"])["research_opportunity"] == opportunity

@@ -1,11 +1,12 @@
 """Trusted host configuration, never populated from MCP tool arguments."""
 from pathlib import Path
 from typing import Literal
+from uuid import UUID
 
 from pydantic import Field, JsonValue, model_validator
 from contracts.base import Contract
 from contracts.identity import AgentId
-from swarm.models import BudgetPolicy, ExecutionBound, Locality, RunLimits
+from swarm.models import BudgetPolicy, ExecutionBound, Locality, Reservation, RunLimits
 
 
 class ResearchEnvelope(Contract):
@@ -17,6 +18,14 @@ class ResearchEnvelope(Contract):
     actions: tuple[Literal["read", "note", "branch", "propose", "choose", "claim", "review", "experiment", "apply"], ...] = (
         "read", "note", "branch", "propose", "choose", "claim", "review")
     limits: RunLimits = Field(default_factory=RunLimits)
+
+
+class NativeInvocationBinding(Contract):
+    """A host-issued reference to one original budget hold, not another session ledger."""
+
+    invocation_id: UUID
+    reservation: Reservation
+    expires_at: float = Field(gt=0)
 
 
 class HostConfig(Contract):
@@ -43,6 +52,9 @@ class HostConfig(Contract):
     research_budget_path: str | None = None
     research_budget_policy: BudgetPolicy | None = None
     research_execution_bound: ExecutionBound | None = None
+    # Transient host configuration for this invocation only. Never persisted in
+    # the project envelope or accepted in MCP tool arguments.
+    native_invocation: NativeInvocationBinding | None = None
     # Validated by the closed GeneratedHostSettings contract on service creation.
     # Keeping the import lazy preserves SDK-free non-execution member tools.
     generated_experiments: dict[str, JsonValue] = Field(default_factory=dict)
@@ -63,6 +75,16 @@ class HostConfig(Contract):
                 raise ValueError("research_budget_and_ledger_limits_must_match")
         if self.generated_experiments and (self.research_envelope is None or self.research_budget_policy is None):
             raise ValueError("generated_experiments_require_host_envelope_and_budget")
+        if self.native_invocation is not None and self.research_budget_policy is None:
+            raise ValueError("native_invocation_requires_host_budget")
+        if self.native_invocation is not None:
+            binding = self.native_invocation
+            record = binding.reservation
+            if (record.swarm_id != self.project_id or record.worker_id != self.worker_id or
+                    record.task_id != "native-member:" + self.worker_id or
+                    record.request_id != "native:" + str(binding.invocation_id) or
+                    record.bound != self.research_execution_bound):
+                raise ValueError("native_invocation_host_binding_mismatch")
         return self
 
     def knowledge_path(self) -> Path:

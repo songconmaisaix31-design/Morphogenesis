@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Literal, Protocol
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from pydantic import JsonValue, TypeAdapter
 
@@ -17,14 +17,14 @@ from local_assets.research import known_effect, require_inheritance
 from local_assets.research_models import ResearchObservation
 from local_assets.snapshot import snapshot_revision
 from local_assets.validate import inspect_candidate
-from swarm.models import Lease, Signal, TaskRecord
+from swarm.models import ExecutionBound, Lease, Reservation, Signal, TaskRecord
 from swarm.budget import BudgetBlocked, BudgetLedger
 from swarm.feedback import trusted_facts
 from swarm.pheromone import PheromoneField
 from swarm.router import Router
 from swarm.research.feedback import ResearchFeedbackStore
 from swarm.research.knowledge import ResearchKnowledge
-from swarm.research.models import HostConfig
+from swarm.research.models import HostConfig, NativeInvocationBinding
 from swarm.research.policy import Branch, CorrectionEvent, CorrectionKind, SupersessionEvent, ThreeAxisResult
 from swarm.research.records import (
     Hypothesis,
@@ -57,6 +57,9 @@ class ResearchService:
     def __init__(self, config: HostConfig, *, ledger: TaskLedger | None = None,
                  store: LocalAssetStore | None = None, backend: ExperimentBackend | None = None,
                  generated_executor: GeneratedExperimentExecutor | None = None) -> None:
+        # model_copy can bypass validators; reject a mismatched invocation before
+        # opening any ledger/store under a different host identity.
+        config = HostConfig.model_validate(config.model_dump())
         self.config = config
         for value in (config.ledger_path, config.workspace, config.assets_root, config.evidence_root):
             if not Path(value).is_absolute():
@@ -104,6 +107,7 @@ class ResearchService:
             no_links(Path(config.research_budget_path))
             self.budget = BudgetLedger(config.research_budget_path, config.project_id,
                                        config.research_budget_policy, clock=self.ledger.clock)
+        self._native_reservation()
         self.generated: GeneratedResearch | None = None
         if config.generated_experiments:
             from swarm.research.dynamic import GeneratedResearch
@@ -159,6 +163,7 @@ class ResearchService:
         return responses
 
     def _task(self, task_id: str, *, require_capability: bool = False) -> TaskRecord:
+        self._native_reservation()
         # Query uses authoritative locality and capability filters, including held tasks.
         query, args = self.ledger._local_filter(self.locality)
         with connection(self.ledger.path) as db:
@@ -180,14 +185,14 @@ class ResearchService:
             return False
         return True
 
-    def context(self, task_id: str) -> dict[str, JsonValue]:
+    def context(self, task_id: str, *, limit: int = 100) -> dict[str, JsonValue]:
         task = self._task(task_id)
         return {"task": _OBJECT.validate_json(task.model_dump_json()),
                 "project_context": self.config.project_context,
                 "dependency_results": [{"task_id": d, "status": self._task(d).status,
                                         "result": self._task(d).result} for d in task.dependencies],
                 "worker_id": self.config.worker_id, "agent": _OBJECT.validate_json(self.config.agent.model_dump_json()),
-                "research": self._task_research(task_id)}
+                "research": self._task_research(task_id, limit=limit)}
 
     def claim(self, task_id: str, ttl_seconds: float = 60) -> dict[str, JsonValue] | None:
         task = self._task(task_id, require_capability=True)
@@ -657,6 +662,7 @@ class ResearchService:
 
     def _authorize_project(self, project_id: str) -> ResearchProject:
         """Enforce the host's project binding and existence (FR-05/10.2)."""
+        self._native_reservation()
         if self.config.project_id and project_id != self.config.project_id:
             raise PermissionError("project_outside_host_authorization")
         project = self.knowledge.project(project_id)
@@ -681,9 +687,73 @@ class ResearchService:
                 "max_experiments_per_task": self.config.max_experiments_per_task}
 
     def _research_action(self, action: str) -> None:
+        self._native_reservation()
         envelope = self.config.research_envelope
         if envelope is not None and action not in envelope.actions:
             raise PermissionError("action_outside_research_envelope")
+
+    def admit_native_invocation(self, invocation_id: str, bound: ExecutionBound, *,
+                                ttl_seconds: float) -> NativeInvocationBinding:
+        """Host-only admission; the MCP tool surface cannot issue its own exception.
+
+        The protected product launcher installs the returned binding in only this
+        invocation's HostConfig and settles/marks uncertain the same reservation
+        on exit. Original BudgetLedger limits and cumulative holds remain intact.
+        """
+        if self.config.native_invocation is not None:
+            raise PermissionError("native_invocation_cannot_admit_another_invocation")
+        invocation = UUID(invocation_id)
+        self.ledger._ttl(ttl_seconds)
+        self._research_action("read")
+        self._authorize_project(self._project_id())
+        if bound != self.config.research_execution_bound:
+            raise PermissionError("native_execution_bound_outside_host_approval")
+        self._budget_ready(required=True)
+        assert self.budget is not None
+        if self.budget.snapshot().uncertain_reservations:
+            raise BudgetBlocked("project_unknown_usage_requires_reconciliation")
+        with connection(self.ledger.path) as db:
+            self.ledger._check_runtime(db)
+            ledger_started = float(db.execute("SELECT started_at FROM swarm_runs WHERE swarm_id=?",
+                                              (self.config.swarm_id,)).fetchone()[0])
+        with connection(self.budget.path) as db:
+            started = float(db.execute("SELECT started_at FROM swarm_budgets WHERE swarm_id=?",
+                                      (self.config.project_id,)).fetchone()[0])
+        deadline = min(started + self.budget.policy.limits.max_runtime_seconds,
+                       ledger_started + self.ledger.limits.max_runtime_seconds)
+        expires = min(self.ledger.now() + ttl_seconds, deadline)
+        if expires <= self.ledger.now():
+            raise BudgetBlocked("native_invocation_expired")
+        reservation = self.budget.reserve(self.config.worker_id, "native-member:" + self.config.worker_id,
+                                          bound, request_id="native:" + str(invocation))
+        return NativeInvocationBinding(invocation_id=invocation, reservation=reservation, expires_at=expires)
+
+    def _native_reservation(self) -> Reservation | None:
+        binding = self.config.native_invocation
+        if binding is None:
+            return None
+        binding = NativeInvocationBinding.model_validate(binding.model_dump())
+        reservation = binding.reservation
+        if (self.budget is None or reservation.swarm_id != self.config.project_id or
+                reservation.worker_id != self.config.worker_id or
+                reservation.task_id != "native-member:" + self.config.worker_id or
+                reservation.request_id != "native:" + str(binding.invocation_id) or
+                reservation.bound != self.config.research_execution_bound):
+            raise PermissionError("native_invocation_host_binding_mismatch")
+        now = self.ledger.now()
+        with connection(self.budget.path) as db:
+            started = float(db.execute("SELECT started_at FROM swarm_budgets WHERE swarm_id=?",
+                                      (self.config.project_id,)).fetchone()[0])
+        with connection(self.ledger.path) as db:
+            ledger_started = float(db.execute("SELECT started_at FROM swarm_runs WHERE swarm_id=?",
+                                              (self.config.swarm_id,)).fetchone()[0])
+        deadline = min(started + self.budget.policy.limits.max_runtime_seconds,
+                       ledger_started + self.ledger.limits.max_runtime_seconds)
+        if not reservation.created_at <= now < binding.expires_at <= deadline:
+            raise BudgetBlocked("native_invocation_expired")
+        if reservation not in self.budget.pending(self.config.worker_id):
+            raise BudgetBlocked("native_invocation_not_active")
+        return reservation
 
     def _budget_ready(self, *, required: bool = False) -> None:
         if self.budget is None:
@@ -693,7 +763,10 @@ class ResearchService:
         snapshot = self.budget.snapshot(self.config.worker_id)
         if snapshot.sleeping:
             raise BudgetBlocked(snapshot.reason or "project_budget_blocked")
-        if snapshot.pending_reservations:
+        own = self._native_reservation()
+        if own is not None and snapshot.uncertain_reservations:
+            raise BudgetBlocked("project_unknown_usage_requires_reconciliation")
+        if snapshot.pending_reservations > int(own is not None):
             # A process may have stopped between the two original database
             # writes. A hold without an execution anchor is not permission to
             # open another branch or replay a request.
@@ -898,41 +971,210 @@ class ResearchService:
                            payload={"proposal_id": task_id})
         return _OBJECT.validate_json(self.knowledge.proposal(task_id).model_dump_json())
 
-    def research_context(self, project_id: str | None = None, *, limit: int = 100) -> dict[str, JsonValue]:
-        """Shared research memory for a (possibly new) member (FR-04/05/10).
+    def research_context(self, project_id: str | None = None, *, limit: int = 100,
+                         task_id: str | None = None, branch_id: str | None = None,
+                         overview: bool = False) -> dict[str, JsonValue]:
+        """Read a local context, or an explicit bounded project overview.
 
-        Notes are trimmed by the host's locality (a note attached to a task
-        outside the host's authorized scope is hidden) and each collection is
-        bounded to ``limit`` with an explicit ``*_truncated`` flag.
+        Permission precedes relevance and truncation. Selection follows existing
+        branch, dependency and citation relations; it never claims or schedules.
+        Cross-branch citations include the referenced record, not its neighbours.
         """
         self._research_action("read")
-        if not 1 <= limit <= 1000:
+        if isinstance(limit, bool) or not 1 <= limit <= 1000:
             raise ValueError("limit must be in [1,1000]")
         bound = self._project_id(project_id)
         project = self._authorize_project(bound)
-        notes = [n for n in self.knowledge.notes(bound) if self._note_in_scope(n)]
-        unverified = [n for n in notes if n.review_state != "verified"]
-        verified = [n for n in notes if n.review_state == "verified"]
+        self._require_branch(bound, branch_id)
+        query, args = self.ledger._local_filter(self.locality)
+        with connection(self.ledger.path) as db:
+            tasks = {t.signal.task_id: t for t in (self.ledger._record(db, row) for row in db.execute(
+                "SELECT t.* FROM tasks t WHERE " + query +
+                " AND json_extract(t.signal,'$.payload.project_id')=? ORDER BY t.created_at,t.task_id",
+                [*args, bound]))}
+        capable = {key for key, t in tasks.items()
+                   if (t.signal.required_capability or t.signal.task_kind) in self.config.capabilities}
+        reason = "explicit_branch" if branch_id is not None else "shared_background"
+        candidate_window_truncated = False
+        if task_id is not None:
+            if task_id not in tasks:
+                raise PermissionError("context_task_outside_host_project_or_scope")
+            reason = "explicit_task"
+        elif branch_id is None and not overview:
+            held = next((key for key, t in tasks.items() if key in capable and
+                         t.owner == self.config.worker_id and t.status == "claimed" and
+                         t.expires_at is not None and t.expires_at > self.ledger.now()), None)
+            opportunities = self._opportunities(self.research_advisory(bound))
+            candidates = self.ledger.candidates(self.locality, limit=1000, capabilities=self.config.capabilities)
+            candidate_window_truncated = len(candidates) == 1000
+            eligible = next((t.signal.task_id for t in candidates
+                if t.signal.task_id in tasks and self._opportunity_allows(t, opportunities)), None)
+            task_id = held or eligible
+            reason = "held_task" if held else "eligible_task" if eligible else reason
+        if task_id is not None:
+            task_branch = tasks[task_id].signal.payload.get("branch_id")
+            if branch_id is not None and task_branch != branch_id:
+                raise ValueError("context_task_branch_mismatch")
+            branch_id = task_branch if isinstance(task_branch, str) else None
+
+        # Index only authorized records, so a hidden citation cannot act as a
+        # bridge to another branch. Hypothesis notes share their original id.
+        all_notes = self.knowledge.notes(bound)
+        notes = [n for n in all_notes if n.task_id is None or n.task_id in tasks]
+        note_tasks = {n.note_id: n.task_id for n in notes}
+        visible_note_ids = set(note_tasks)
+        hidden_hypotheses = {n.note_id for n in all_notes if n.task_id is not None and n.task_id not in tasks}
+        hypotheses = [h for h in self.knowledge.hypotheses(bound) if h.hypothesis_id not in hidden_hypotheses]
         branches = self.knowledge.branches(bound)
-        hypotheses = self.knowledge.hypotheses(bound)
         proposals = [p for p in self.knowledge.proposals(bound)
-                     if p.task_id is None or self._task_visible(p.task_id)]
-        events = [e for e in self.knowledge.events(bound, limit=min(limit + 1, 1000))
-                  if e.task_id is None or self._task_visible(e.task_id)]
-        return {"project": _OBJECT.validate_json(project.model_dump_json()), "limit": limit,
-                "branches": [b.model_dump(mode="json") for b in branches[:limit]],
-                "branches_truncated": len(branches) > limit,
-                "hypotheses": [h.model_dump(mode="json") for h in hypotheses[:limit]],
-                "hypotheses_truncated": len(hypotheses) > limit,
-                "notes_unverified": [n.model_dump(mode="json") for n in unverified[:limit]],
-                "notes_unverified_truncated": len(unverified) > limit,
-                "notes_verified": [n.model_dump(mode="json") for n in verified[:limit]],
-                "notes_verified_truncated": len(verified) > limit,
-                "proposals": [p.model_dump(mode="json") for p in proposals[:limit]],
-                "proposals_truncated": len(proposals) > limit,
-                "events": [e.model_dump(mode="json") for e in events[:limit]],
-                "events_truncated": len(events) > limit,
-                "research_v1": self.research_snapshot(bound)}
+                     if (p.task_id is None or p.task_id in tasks) and
+                     (p.task_id is not None or p.scope is None or p.scope in self.config.authorized_scopes)]
+        snapshot = self.research_snapshot(bound)
+        entries: dict[tuple[str, str], dict[str, JsonValue]] = {}
+        links: dict[tuple[str, str], tuple[str, ...]] = {}
+        references: dict[str, list[tuple[str, str]]] = {}
+        selected: dict[tuple[str, str], str] = {}
+
+        def register(kind: str, identifier: str, body: dict[str, JsonValue], *,
+                     refs: tuple[str, ...] = (), aliases: tuple[str, ...] = ()) -> None:
+            key = (kind, identifier)
+            entries[key], links[key] = body, refs
+            for ref in (identifier, *aliases):
+                references.setdefault(ref, []).append(key)
+
+        for n in notes:
+            register("notes", n.note_id, n.model_dump(mode="json"),
+                     refs=(*n.references, *((n.task_id,) if n.task_id else ()),
+                           *((n.hypothesis_id,) if n.hypothesis_id else ())),
+                     aliases=tuple(s.source_id for s in n.source_refs))
+        for h in hypotheses:
+            register("hypotheses", h.hypothesis_id, h.model_dump(mode="json"),
+                     refs=(*h.supporting, *h.opposing), aliases=tuple(s.source_id for s in h.source_refs))
+        for p in proposals:
+            register("proposals", p.proposal_id, p.model_dump(mode="json"),
+                     refs=(*p.dependencies, *((p.task_id,) if p.task_id else ())),
+                     aliases=tuple(s.source_id for s in p.source_refs))
+        for task_key, task_record in tasks.items():
+            register("tasks", task_key, {"task_id": task_key, "branch_id": task_record.signal.payload.get("branch_id"),
+                     "status": task_record.status, "result_id": task_record.result_id, "result": task_record.result,
+                     "dependencies": list(task_record.dependencies), "required_capability": task_record.signal.required_capability,
+                     "acceptance": task_record.acceptance}, refs=(*task_record.dependencies,
+                         *((task_record.derived_from,) if task_record.derived_from else ())),
+                     aliases=(task_record.result_id,) if task_record.result_id else ())
+        for key, body in entries.items():
+            b, linked_task = body.get("branch_id"), body.get("task_id")
+            if key[0] == "hypotheses":
+                linked_task = note_tasks.get(key[1])
+            shared = b is None and linked_task is None
+            same_branch = branch_id is not None and b == branch_id
+            readable_role = linked_task is None or linked_task in capable
+            if key[0] == "proposals" and body.get("required_capability") is not None:
+                readable_role = readable_role and body["required_capability"] in self.config.capabilities
+            if overview or key == ("tasks", task_id) or ((shared or same_branch) and readable_role):
+                selected[key] = "overview" if overview else "task" if key == ("tasks", task_id) else (
+                    "branch" if same_branch else "shared_background")
+        # A task's proposal sources remain reachable even when the task has no
+        # branch. Explicit dependencies/references may be read across roles.
+        unresolved = False
+        queue = list(selected)
+        for key in queue:
+            outgoing = links[key]
+            if key[0] == "tasks":
+                outgoing += tuple(p.proposal_id for p in proposals if p.task_id == key[1])
+                outgoing += tuple(n.note_id for n in notes if n.task_id == key[1])
+            for ref in outgoing:
+                targets = references.get(ref, [])
+                unresolved = unresolved or not targets
+                for target in targets:
+                    if target not in selected:
+                        selected[target] = "dependency" if key[0] == "tasks" and ref in links[key] else "reference"
+                        queue.append(target)
+        selected_tasks = {key[1] for key in selected if key[0] == "tasks"}
+        selected_notes = {key[1] for key in selected if key[0] == "notes"}
+        selected_branches = {str(entries[key]["branch_id"]) for key in selected
+                             if isinstance(entries[key].get("branch_id"), str)}
+        if branch_id is not None:
+            selected_branches.add(branch_id)
+        background = task_id is None and branch_id is None
+        if overview or background:
+            selected_branches.update(b.branch_id for b in branches)
+
+        def event_visible(event: ResearchEvent) -> bool:
+            if event.task_id is not None and event.task_id not in tasks:
+                return False
+            note_id = event.payload.get("note_id")
+            if isinstance(note_id, str) and note_id not in visible_note_ids:
+                return False
+            if overview:
+                return True
+            if isinstance(note_id, str):
+                return note_id in selected_notes
+            return (event.task_id in selected_tasks or
+                    (event.task_id is None and event.branch_id == branch_id) or
+                    (event.task_id is None and event.branch_id is None))
+
+        events = self.knowledge.events(bound, limit=limit, predicate=event_visible, include_overflow=True)
+        collections: dict[str, list[dict[str, JsonValue]]] = {
+            kind: [entries[key] for key in selected if key[0] == kind]
+            for kind in ("notes", "hypotheses", "proposals", "tasks")}
+        collections["notes_unverified"] = [n for n in collections["notes"] if n["review_state"] != "verified"]
+        collections["notes_verified"] = [n for n in collections["notes"] if n["review_state"] == "verified"]
+        collections["branches"] = [b.model_dump(mode="json") for b in branches if b.branch_id in selected_branches]
+        collections["events"] = [e.model_dump(mode="json") for e in events]
+        response: dict[str, JsonValue] = {"project": project.model_dump(mode="json"), "limit": limit,
+            "selection": {"mode": "overview" if overview else "local", "reason": "overview" if overview else reason,
+                "task_id": task_id, "branch_id": branch_id, "read_only": True, "claim_requires_recheck": True,
+                "candidate_window_truncated": candidate_window_truncated,
+                "unresolved_references": unresolved,
+                "reasons": [{"kind": key[0], "id": key[1], "via": why} for key, why in list(selected.items())[:limit]],
+                "reasons_truncated": len(selected) > limit},
+            "constraints": {"authorized_scopes": list(self.config.authorized_scopes),
+                "capabilities": list(self.config.capabilities), "data_bounds": dict(project.data_bounds),
+                "actions": list(self.config.research_envelope.actions) if self.config.research_envelope else None,
+                "context_grants_execution": False}}
+        for kind, values in collections.items():
+            response[kind] = list(values[:limit])
+            response[kind + "_truncated"] = len(values) > limit
+        response["research_v1"] = snapshot if overview else self._local_snapshot(
+            snapshot, selected_tasks, selected_branches, limit)
+        return response
+
+    @staticmethod
+    def _local_snapshot(snapshot: dict[str, JsonValue], tasks: set[str], branches: set[str],
+                        limit: int) -> dict[str, JsonValue]:
+        """Project the existing policy facts; never rescore or renormalize shares."""
+        result: dict[str, JsonValue] = {"policy_version": snapshot["policy_version"], "advisory_only": True,
+                                       "claim_requires_recheck": True, "context_subset": True}
+        ids: set[str] = set()
+        for name in ("results", "contributions", "effective_contributions", "trusted_results"):
+            raw = snapshot.get(name)
+            values = [r for r in raw if isinstance(r, dict) and r.get("task_id") in tasks] if isinstance(raw, list) else []
+            ids.update(str(r["result_id"]) for r in values)
+            result[name], result[name + "_truncated"] = list(values[:limit]), len(values) > limit
+        for name, field, allowed in (("branches", "branch_id", branches), ("corrections", "branch_id", branches),
+                                     ("supersessions", "result_id", ids)):
+            raw = snapshot.get(name)
+            values = [r for r in raw if isinstance(r, dict) and r.get(field) in allowed] if isinstance(raw, list) else []
+            result[name], result[name + "_truncated"] = list(values[:limit]), len(values) > limit
+        plan = snapshot.get("opportunities")
+        if isinstance(plan, dict):
+            raw = plan.get("opportunities")
+            values = [r for r in raw if isinstance(r, dict) and r.get("branch_id") in branches] if isinstance(raw, list) else []
+            result["opportunities"] = {**plan, "opportunities": list(values[:limit]), "context_subset": True,
+                                       "opportunities_truncated": len(values) > limit}
+        raw_results = result["results"]
+        axes: dict[str, JsonValue] = {}
+        for axis in ("execution", "hypothesis", "contribution"):
+            counts: dict[str, JsonValue] = {}
+            if isinstance(raw_results, list):
+                for item in raw_results:
+                    state = item.get(axis) if isinstance(item, dict) else None
+                    if isinstance(state, str):
+                        previous = counts.get(state, 0)
+                        counts[state] = (previous if isinstance(previous, int) else 0) + 1
+            axes[axis] = counts
+        result["three_axis"] = axes
+        return result
 
     def research_package(self, project_id: str | None = None, *, limit: int = 100) -> dict[str, JsonValue]:
         """Read original scoped records for an export; creates no execution or adoption.
@@ -945,7 +1187,7 @@ class ResearchService:
         if isinstance(limit, bool) or not 1 <= limit <= 1000:
             raise ValueError("package_limit_must_be_in_1_1000")
         bound = self._project_id(project_id)
-        context = self.research_context(bound, limit=limit)
+        context = self.research_context(bound, limit=limit, overview=True)
         query, args = self.ledger._local_filter(self.locality)
         with connection(self.ledger.path) as db:
             rows = db.execute("SELECT t.* FROM tasks t WHERE " + query +
@@ -1011,9 +1253,11 @@ class ResearchService:
                 "adoption_receipts": receipts, "export_performed_external_io": False,
                 "evidence_boundary": "per_record_provenance", "completion_claim": False}
 
-    def _task_research(self, task_id: str) -> dict[str, JsonValue]:
+    def _task_research(self, task_id: str, *, limit: int = 100) -> dict[str, JsonValue]:
         task = self._task(task_id)
         project_id = task.signal.payload.get("project_id")
+        if isinstance(project_id, str):
+            return self.research_context(project_id, task_id=task_id, limit=limit)
         notes = [n for n in self.knowledge.notes(task_id=task_id)
                  if not isinstance(project_id, str) or n.project_id == project_id]
         return {"notes": [n.model_dump(mode="json") for n in notes]}
