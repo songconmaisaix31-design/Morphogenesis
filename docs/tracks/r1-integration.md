@@ -295,3 +295,11 @@ I 先原始 Git读取 root治理 `9e1e6f78b588ecb858ea9226126773cf0f071254` 的�
 本阶段不复验未改动的AOCI：第8.3节的A绝对路径限制及 I freshness/cognition NOT_VERIFIED继续适用。P仍被冻结，最终产品COPY/HTTP/UI完整回归、AT07/native科研/L2等均NOT_RUN；HostConfig直接调用链的主控说明留待最终installed产品阶段，不能提前称产品验证完成。B后继L2审查材料仅文档准备，不改变运行授权或本次受测源码。
 
 同一 I 的**核心阶段**已完成普通精确合并、原双平台完整CI、首RED保留和docs-only报告。最终核心SOURCE为b480，最后docs-only I REPORT的完整SHA由Orca交付列出；分支仍为 `songconmaisaix31-design/morph-r1-integration-1003`。最终报告提交带 `[skip ci]`，同Q49的docs merge一起普通push；交付检查包含 `git diff --cached --check`、SOURCE→REPORT非docs零差异、全部来源祖先、远端exact与clean，原命令记录为 `final-git-delivery.log`。本次无I领域/测试修改，无新本机环境/服务/科研；适用核心门通过不提升为产品最终组合、AOCI跨checkout认知或全R1退出PASS。
+
+### 9.1 主控最后追加的 B docs-only 交接
+
+初次CI结果报告 `24d0719b4a48e0b3814058342d8032318a75fb40` 已普通push且未生成新CI；交付前最后inbox的主控 `msg_f7845b80b998` 独立接受精确b480双平台工程门，并要求追加已验收的原B docs-only REPORT **`7f05cc795d2371f6b4d74656c25e8bc92e67db83`**（父 `456e55487bda7bb9112a5678399ebe2ee7d44c68`）后结算当前核心+docs阶段。
+
+I 核对 B原REPORT5aeb→7f05只改 `docs/experiments/l2-poisson-review.md` 与 `docs/tracks/r1-experiments.md`，128行新增、无非docs差异；5aeb为7f05祖先。普通精确merge带 `[skip ci]`，无冲突，merge为 `0095ce658734c02d5cc249ddb20c3da3f2b4554a`；最终 b480→HEAD全部非docs零差异，原命令保存为 `merge-B-docs-final-first.txt`。随后仅追加本小节，再push最后 I docs-only REPORT，不新增或重跑CI。
+
+B审查稿是 `question_prepared/reviewable_draft`，保留其18:09的CI观察身份；最终双平台通过以本报告第9节及原Run日志为准，不回写B文档的历史观察。Poisson问题、材料locator、正式调用链及待批准输入只作可审查准备，不提供完整候选实现或运行授权；材料身份来自原Owner/主控，不是I重新核验或正式导入。P human receipt/AOCI/finalpin、唯一最终产品回归、AT07、native科研和L2等仍NOT_RUN；当前核心+docs结算后I闲置，后续同Owner由主控另行接续。
