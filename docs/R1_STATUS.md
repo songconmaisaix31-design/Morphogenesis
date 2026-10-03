@@ -1,3 +1,11 @@
+## 20:38 最后固定SOURCE组合（工程仍在验收）
+
+核心 SOURCE 15de4959646df264530b978dfde9152552b9a76b / 产品 SOURCE c84e49bd8e926f50d2c057793e8789cf137b310a 已由主控实际核对remote exact、clean、普通祖先与最小diff。15de对e635仅root两docs与原Qjunctionfixture两行，生产/依赖/锁零delta；c84对P REPORT684仅三个既有pin文件4增4删，98锁记录仅五处完整SOURCE SHA替换、Docker7.2.0未漂移。原Q修复 SOURCE3aa95d94828449fd92e6bb4fe6385178f3dac971 / docsREPORTc4de24734f3f8d85446265d39ed6365a92e0d3ee已接纳/done/release retained，首RED1FAIL与后1PASS+5PASS、模拟恢复true保留；真实Linux门待新CI不冒充已绿。
+
+唯一I原Task task_33b99bbe70e8/ctx_154fc9202fc1持续，原自动新CI37123370202 attempt1 exact15de in_progress；原37122569886 attempt1 e635 Linux1823PASS/1FAIL/16SKIP/425.33s、WindowsCANCELLED与type/build/SDK/wheel未完成保留且不retry。I最初e635+8c私装已有raw与COPY保留、未开whole product；root正式接纳c84后以C:/r1i/successor-2018/r2/新私有COPY只一次whole product/必要types/精准受影响installed边界，原绿UI与browser不因pin/docs重复，新identity/资源实际核验。原P后继 task_278fd6b98458/ctx_fe35bd029f08仅完成own docsREPORT，不增加研发。SOURCE不得取REPORT/主控docs/单Q SOURCE。
+
+原B task_36dcf2a5df0b/ctx_d8fb1226f9a7当前docsREPORTd7d0ff8e76d5e464d99f948c1b41b8067f619c8e已root读取/接纳，两docs零业务delta；同Task等待I实际installed/工程原日志后一次精确补授权包。typed外层官方CLI绝对路径/同endpoint/私有空config/受控子env，旧裸CLI示例保留但不可执行，本体/插件未验保持STOP；runtime_profile未来必须git:15de完整SOURCE:deploy/opensandbox/at07.config.toml，实际daemon/server/profile未知不填PASS。不会为等待数字重复docs发布或开新Owner。当前AT07/候选真实执行/L2/人工理解均NOT_RUN；工程证据齐全并可审阅后按照用户明确顺序独立授权真实无害AT07，全部实际通过才准候选，不加L3/范围外功能/性能最优目标。
+
 ## 20:31 原CI首RED退原Q修复，不重跑原run
 
 原CI37122569886 attempt1/head e635已completed：Linux1823PASS/1FAIL/16SKIP/425.33s，WindowsCANCELLED。唯一失败为Q新test_untrusted_private_config_directory_cannot_reach_cli[junction]：fixture只patch asset_paths.sys.platform=win32而Linuxstat无IO_REPARSE_TAG_MOUNT_POINT；原no_links抛AttributeError，预期拒绝种类/CLI零调用断言未完成。不是已确认生产改动缺陷，不能skip/扩大允许AttributeError/改assertion冒充通过。I保留原fullraw及不重试该run，未开始新全产品暂缓，若已开始保留真实结果不盲停重开。
