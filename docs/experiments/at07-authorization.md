@@ -3,7 +3,114 @@
 本包针对 Spec §10.1、AT-07、§14.4。**真实 AT-07：NOT_RUN；L2：NOT_RUN。**
 **当前状态：用户已专项批准；本次创建前STOP，SDKcreate=0，PREPARED_UNVERIFIED。科学L2未获授权。**
 
-## 2026-10-03 22:20 单独镜像准备：一次拉取成功，仅解除缺镜像门
+## 当前后继准备：822+d5 / API1.54 / 同两基础设施容器控制（未执行）
+
+原B `task_92e62142bbfc` / `ctx_78a8eebd6960`，只读root当前计划、ee7镜像REPORT、
+Q `1fb5f3dc6e4d9eb60a2df4be22819c97bd01d91c` REPORT与guarded脚本；当前仅两docs和新私有packet。
+**本节是唯一当前顺序；以下15de/2018/API1.52等示例全部为历史记录，不可直接执行。**
+原用户AT07专项批准已确认，不重复索要；原600s尝试结束/SDKcreate=0，不reset/replay。
+本Task没有Engine、SDK、部署、key、FW、hostlistener或科学操作，静态准备不报真实隔离PASS。
+
+| 当前受测身份与输入 | 当前事实 / 尚缺证据 |
+| --- | --- |
+| core / product SOURCE | `82201af4d3b369da827f6f22ff1d9c6b608c0108` / `d5d387a6f5c1778dffdd860986843826420edf5e`；P/I/B docs REPORT不是SOURCE |
+| 唯一I installed目标 | `C:/r1i/successor-2220/venv/Scripts/python.exe`（存在，本Task未调用）；SOURCE.txt/PRODUCT_SOURCE.txt一致。当前新完整产品首失败由原P返修，WinCI及最终组合接纳未齐全，**工程门PENDING，不执行probe** |
+| 原配置、锁 | 2220/core中profile1013bytes/SHA256 `438fe04be51d07188b6bc4b26fbd85c2e7ce28dc02e31ed3af2a4cf27f3c0b79`；compose1793bytes/SHA256 `52b34cd7eed1c1a01cb85dcdbd79550686d058941b5124aa12134aa75a7cd8ac`；锁 `87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb`。文件身份不等于服务实际加载 |
+| 实际绑定框架 | 明确API **1.54**（schema默认1.52保持）；Engine29.5.3、daemon `6cc73c96-c021-4a82-ade6-2fc9ae693fff`、`npipe:////./pipe/dockerDesktopLinuxEngine`；后继fresh复核，不从旧观测继承PASS |
+| 镜像 / 主机边界 | 四原digest已由前次实际记录核对；后继仍同route精确RepoDigest/linuxamd64。UAC未完成、Q规则未应用，内部NAT源/有效外部阻断仍UNKNOWN；不猜gateway/CIDR或放宽FW |
+
+### 最小临时控制提案与真实调用缺口
+
+按root最终 `msg_6288fd2c1714`：仅在**同一次新server+target初次部署**的私有Compose override
+追加两publication：server `0.0.0.0:47410:8090/tcp`，target `0.0.0.0:47410:9053/udp`。
+保留原 `127.0.0.1:8099:8090`、`127.0.0.1:8098:9000`、`127.0.0.1:8053:9053/udp`。
+这是待审阅配置变化，本Task未生成override/未实施；有效Q规则及范围核对前不可启动，不能悄悄转loopback或增加第三映射。
+不改原profile/compose、镜像、名字、limits、volumes、network_mode、命令或权限；不增helper。
+
+前置无害控制从**实际server完整64ID**内，经过 `host.docker.internal:47410` 的原Windows Backend服务路径：
+TCP对原server `/health` GET，预期原 `{"status":"healthy"}`；UDP对原target发原固定DNS查询
+（ID1707、canary.at07.test、原问题字节），核response ID/rcode0/一条答案；不是HTTP调用target的9000原始TCP端口。
+原host loopback `target_control()`继续使用8098/8053，原canary/假凭据只是synthetic，不是秘密。
+这些控制先结束再记录原runner基线；原DNS正负计数断言与全部probe步骤保持，不让候选承担检查。
+仅现有基础设施中的固定短HTTP/DNS控制；固定payload字节、超时/输出上限已列私有packet，
+确切容器内解释器路径仍须核实际官方镜像；实际ID/目录未绑定，不能直接执行或扩大原`docker_read` fixedexec白名单。
+外层新增控制如获准，使用同绝对CLI/endpoint/空config的typed `exec <实际server64ID> ...`，
+独立有界10s/262144bytes，禁止shell、任意exec、host执行探针和key输出；此Task未调用。
+私有`control-proposal.json`已列完整固定typed argv/payload：`exec <server64ID> /app/.venv/bin/python -I -B -c <固定HTTP+DNS>`，
+只用stdlib、HTTP禁环境proxy、2s socket/请求timeout、health最多2048bytes、DNS最多512bytes、只输出两个boolean。
+该解释器位置依据[声明固定revision Dockerfile](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/Dockerfile)
+的`/app/.venv` runtime COPY；实际镜像对应/路径未核，故仍是proposal，不能静态视为已存在或已执行，不另写执行器。
+
+完整 `/sandboxes/{真实SDK返回ID}/proxy/...` 在**唯一SDKcreate之后**由原SDK/readiness/AT07验，
+不要求不存在的sandbox预先通过，不给target补假SDK labels，不采用resolve_internal/profile变更绕门。
+当前读到的官方声明revision `b1a29cf93a823a95913f7943010febb3f29de05c`：
+[main健康入口](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/opensandbox_server/main.py)、
+[原proxy生命周期路由](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/opensandbox_server/api/proxy.py)、
+[原port allocator](https://github.com/opensandbox-group/OpenSandbox/blob/b1a29cf93a823a95913f7943010febb3f29de05c/server/opensandbox_server/services/docker/port_allocator.py)。
+固定镜像Labels/revision对应UNKNOWN，不能填造标签；当前必要输入是精确RepoDigest、实际64ID、原Git配置/实际加载字节与Engine完整身份，
+不另加“发布二进制Git revision证明”门。源码静态分析不能冒充镜像runtime行为。
+
+allocator随机选择47400..47410，在**server网络命名空间**bind候选TCP端口与进程内reservation，
+没有读取Windows已占publication，因此不能保证避开47410/TCP；UDP控制也不证明TCP分配可用。
+原DENY network_policy分支不走无policy分支的三次main发布重试；实际碰撞/sidecar创建不明即STOP/UNKNOWN，
+不第二SDK POST、不重建基础设施、不换低端range（原配置校验固定47400..47410），失败资源也计累计数。
+`FrozenExport.preflight()`使用`any()`检查8099 loopback mapping，**不要求8090只有一条映射**；首次误读已更正留证。
+两新增映射未被该检查完整覆盖，必须保存实际HostConfig/Ports并由Q审阅，不能据此声称完整隔离已绑定。
+canonical profile SHA/runtime_profile仍指原822文件；额外有效HostConfig改变原部署事实，需同实际server64ID完整记录/审核，
+不能把旧probe/旧配置binding移植为已通过，也不另造profile/hash/证明系统。
+
+### 新独立600s后继窗口与停止条件（当前不启动）
+
+先完成最终工程接纳与静态输入、本人UAC路径/原Q精确规则动作权限、上述最小override与控制payload的审核；
+缺项保留PENDING。当前方案沿用已接受专项批准，但后继实际scope/两mapping及Q规则动作须由root落实，不是旧窗口延长。
+从新窗口首个Engine/FW实际动作计600s，等待/部署/SDK/独立审核/收尾均计入；到期未知不得追加第二尝试。
+预算是停止阈值，不是完成耗时证明：前180s容纳fresh preflight、Q规则、一次基础设施部署、控制和prepare；
+仅在剩余至少420s且必要控制/身份/有效FW实际可审核时进入一次原runner（保守240s），预留独立Q审核及180s精确收尾。
+达不到该余量即SDK0/NOT_RUN收尾；不压缩原180sTTL/30s命令/1MiB一次冻结导出或削弱原断言来赶时间。
+
+1. 同官方绝对CLI `C:/Program Files/Docker/Docker/resources/bin/docker.exe`，fresh核本体/签名/Compose解析、
+   Engine实际29.5.3/API1.54/daemon、资源/disk、baseline完整ID、固定名不存在、原四digest；缺失STOP，不pull/build/upgrade/重启。
+   全新owned空config核无links/identity；所有外层version/info/inspect/inventory/logs/compose/control/收尾均
+   `--host npipe:////./pipe/dockerDesktopLinuxEngine --config <该owned空目录>`、typed argv、`shell=False`。
+   默认child env仅固定PATH/SystemRoot/WINDIR；Compose仅按原已审locator额外固定ProgramFiles及必要受保护key/canary内存。
+   不继承任何DOCKER_*/HOME/USERPROFILE/auth/TLS/context/API/customheaders/proxy，不改parent/global。
+2. Q原guarded脚本 SHA `E2C23FF1A0CE3C84F80E02A101A1DDB235595A623F87C1CAE1F3066ACA51911F`
+   的Apply在47400..47410无人占用时先行；本人UAC/SID、Backend身份、两store有效规则/关联filters/无override等原条件不变。
+   原脚本Apply的Admission仍STOP（服务源/外部测试UNKNOWN），规则readback exit0不能当整体PASS。
+3. 一次原Compose加仅两映射override创建server、target，核完整64IDs/镜像/ownership/全部有效HostConfig/实际readonly加载原配置。
+   发布后原guarded Inspect也有ports-unused前置，不能作为live检查绕过；Q使用既有精确只读有效规则/filter核对。
+   原server经Backend健康+DNS控制和Q有效外部边界证据缺失/超时/非预期即SDK0/STOP，不猜NAT源、不开FW或新listener。
+4. 原 `HostConfig.generated_experiments` → `IsolationConfiguration` → `at07.prepare`；endpoint仍127.0.0.1:8099，
+   instance_id为实际server64ID、targetIPv4实际inspect、runtime_profile `git:82201af4d3b369da827f6f22ff1d9c6b608c0108:deploy/opensandbox/at07.config.toml`，
+   完整docker_export绑定实际API1.54/daemon/npipe及原限制，唯一新probe ID与新目录，不填UNBOUND/假授权ref。
+   仅最终接纳的2220 Python `-I -B -m orchestration.experiments.at07 prepare --configuration <实际JSON> --server-config <原profile> --probe-id <唯一新ID> --target-ipv4 <实际IP> --archive-root <新根>`；
+   prepare本身不授信。原 `at07_live`的`docker`解析须受控PATH指向已核官方bin再WindowsSystem32，确认仍同CLI本体；不回默认context。
+5. 同Python `-I -B -m orchestration.experiments.at07_live --execute-separately-authorized-probe --authorization-ref <原用户决定出处+root实际后继治理引用> --accept-disclosed-infrastructure-limits --prepared-root <新probe目录> --service-key-file C:/Users/DW/AppData/Local/Temp/morph-sandbox-live-0930/service-key --canary-directory <实际synthetic目录>`。
+   key仅原保护路径由必要child内存读，不打印/复制。一次SDKcreate、并发1；create/readiness/pause/resume/stream/TTL/归属/清理不明即UNKNOWN/no-replay。
+   原SDK pause→同API1.54 Engine HEAD/GET→原SDK resume，完整正负项与原result/host-after不改；Q独立审核原 `at07 review --result <原result.json>`，B不自授verified、不注入registry。
+
+累计资源：server1 + target1 + main1 + egress1 + 冷cache helper至多1 = **最多5个新容器、1 owned volume、0新network**；
+默认bridge必须baseline已有。cache即使迅速消失仍计1，不能加独立control helper；不通过删/重建映射容器“归零”。
+同server/target64IDs保留两个控制映射至收尾，禁止compose down/prune/按name或label批删。
+sidecar/cache caps UNSUPPORTED、总峰UNKNOWN、NET_ADMIN及既有基础设施DNS健康流量原披露保持；接受限制参数不改变任何PASS判据。
+cache没有现成PASS字段，需原server安全创建日志加同route精确创建/销毁事实将完整ID与本次归属相连；
+缺ID/归属/销毁证据则UNKNOWN，不按helper名字猜owned，不把消失当清理PASS。
+
+所有首次argv/env**names**/start/end/exit/耗时/stdout-stderr及每步剩余时间、资源、完整归属ID私有分档；
+敏感stderr/Env不可公开，公开仅安全摘要，不丢首stderr，不改原durable create markers/result/host-after让cleanup变PASS。
+失败/UNKNOWN或Q未在预算内完成：在600s内仅精确已知owned IDs收尾，不自授延长或保留未知running。
+成功same64ID retained_stopped选项仅全项真实PASS+Q独立审核+main/egress/ownedvolume/cache归属及清理都明确：
+原result封存后精确target stop/rm，**同server64ID先stop并核stopped、释放两控制publication**，不得remove/recreate冒同ID；
+range无人占用后才按原Q原receipt/两store/精确ruleidentity Cleanup条件处理，不删除他人对象。
+FW规则未知/partialcreate或Cleanup不满足时保留known remaining并交原Q，不按名字清理；不留未知运行server替“保留”。
+若规则已移除，原probe隔离边界失效，不可直接L2继承；若同规则保留，须明确生命周期/归属，不因此授予L2。
+后续L2仍须真实AT07全部PASS、Q独立审核和实际有效同配置/同64ID边界，当前候选/科学/native模型/付费均NOT_RUN。
+
+私有静态packet：`C:/research-private/b-at07-pre-sdk-ctx_78a8eebd6960/`；
+官方固定源码原bytes/blob身份、Q script只读身份、首次源码抓取参数错误及更正均保留。
+原600s STOP/SDK0、旧firstRED/8558/UNSUPPORTED/UNKNOWN、Poisson review全部保留；本次仅docs REPORT，不新SOURCE/pin/CI。
+
+## 历史2026-10-03 22:20 单独镜像准备：一次拉取成功，仅解除缺镜像门
 
 原B Task `task_a61e6e755ed8` / Dispatch `ctx_8cbbdafbd94a`，依据root控制治理
 `7ef9ff73b578ce9e21cca08b297ca0db7e1bed9a`对08f packet的**单独镜像准备明确批准**。
@@ -303,7 +410,7 @@ sidecar/cache资源限额UNSUPPORTED、总峰值UNKNOWN，内存数字不构成�
 `--accept-disclosed-infrastructure-limits` 仅记录运行范围决定，不能把UNSUPPORTED/UNKNOWN/失败改成PASS。
 若授权要求基础设施DNS也绝不外发，固定栈不满足即STOP。科学L2仍须实际隔离通过后另行有界授权。
 
-## 原外层CLI审核模板（未部署；本次只读事实见21:44）
+## 历史原外层CLI审核模板（15de/2018；不可执行，当前顺序见顶部）
 
 这是e40原模板；本次少量只读诊断与必要Compose locator更正以上文21:44为准，不把旧等待结论代入新观察。
 runner受信endpoint已修，但外层deploy/inspect/info/compose也必须使用同一明确npipe、全新空私有config和受控子环境。
@@ -541,7 +648,7 @@ execd image 的旧 source tag 记录见 [upstream.md](upstream.md)；源 commit 
 缺正向控制、缺配置观测、缺原始事实均不通过；失败停止后续压力试验。
 探针源码是固定字符串，由宿主仅 parse/compile（不exec），上传至本次sandbox；没有候选代码/学科判断。
 
-## 现有离线 prepare/review 入口（本次未执行）
+## 历史离线 prepare/review 入口（15de/2018/API1.52；不可执行）
 
 下列旧 B 私有 COPY 命令仅保留历史离线审查格式：19:30文档任务未执行它们；
 19:39只执行上文定向AT07测试和改动strict，没有重跑下列旧绿全门或调用CLI --help/prepare/review：
