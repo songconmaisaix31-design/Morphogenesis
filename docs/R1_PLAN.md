@@ -50,3 +50,13 @@ Q REPORT739独立只读核：两拟规则Persistent/Active均不存在，现有B
 4. 不加L3、大规模效率、多用户、跨宿主、完整RSI、新学科/品牌/语言/评分。性能照实记录，不将未经承诺最优成绩变收口条件；人工理解可配真实页面。main/tag/deploy未执行。
 
 所有第一RED/STOP/UNKNOWN、旧完整255/1与修后single、原报告/私有raw保持；不将新的绿覆盖历史。历史完整计划见Git `09c52988390ba4eace08f2eb4e3592682c8b15a2`（core）/`8925f913f001f3e9118682fdf6648647f33e2ddc`（product），原[状态](R1_STATUS.md)和[验收](R1_ACCEPTANCE.md)保持。
+
+## 23:23 主控后继实际状态
+
+I已worker_done且root直接接纳最终REPORT `9be8bcc4fe17f3fb7a43ddd56e6a39b834552f76`，普通push remoteexact/clean、822→REPORT非docs0；SOURCE/d5/c0dd固定。P只读恢复因I安装前提已闭合而空闲，term_9199已精确close；I/Q均settled/release/实际屏幕idle及远端clean后term_cc6与term_977精确close/ptyKilledtrue。Q原exec19099仍未取得自身exit_code，关闭Codex终端不证明该旧exec已回收，不宣称全后台清理或Token/性能改善。
+
+原B同session01a10188恢复至term_0ec806ef，唯一有效Task `task_996216d89570` / Dispatch `ctx_3387a64ad618`，仅own两docs与新私有b-at07-boundary-next-2318，补既有WFP最小只读观察路线；无FW/SDK/科学执行。首次worker-start consumer_fenced无Task变动，显式root当前terminal绑定后单次start ready/turnobserved；错误原样保留。
+
+root首次 `netsh wfp show options` 因缺optionsfor输出invalidsyntax/usage，虽exit0不代表值成功。按本机help的首次有效只读 `netsh wfp show options optionsfor=NETEVENTS` 实际exit1/0.2098s，原输出 `The requested operation requires elevation (Run as administrator).`；NETEVENTS原值仍UNKNOWN，未改设置、未RunAs/UAC。三profile日志关闭不能推出WFP事件采集关闭；优先原WFP按实际Backend/端口/协议/窗口与filter关联读取，现有记录不够就是STOP，开全局采集不属于已审Q两规则packet，须先具体审阅影响与原值恢复。
+
+本次product治理2dd9a8b首push连接443失败保留；先lsremote实证仍8925旧HEAD，再普通push成功到 `2dd9a8b3c7f8f2c9e39a7cc30d5ae6e306ab5243`，无force。该后继状态不要求I已完成报告再合一次或再CI，当前治理与工程SOURCE/REPORT身份分别记录，避免文档互合循环。
