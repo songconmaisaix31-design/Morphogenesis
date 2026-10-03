@@ -1,0 +1,49 @@
+.FF.....FFFF                                                             [100%]
+================================== FAILURES ===================================
+____________ test_mock_isolation_booleans_do_not_authorize_backend ____________
+tests\integration\r1_security\test_b_generated_boundaries.py:96: in test_mock_isolation_booleans_do_not_authorize_backend
+    assert backend.create_calls == 0, "caller/mock booleans allowed execution admission"
+E   AssertionError: caller/mock booleans allowed execution admission
+E   assert 1 == 0
+E    +  where 1 = <tests.integration.r1_security.test_b_generated_boundaries.NoRunBackend object at 0x0000016FFA0F0910>.create_calls
+___ test_caller_approved_and_reviewer_boolean_cannot_grant_final_assessment ___
+tests\integration\r1_security\test_b_generated_boundaries.py:104: in test_caller_approved_and_reviewer_boolean_cannot_grant_final_assessment
+    assert assessment.mode == "diagnostic", "untrusted approval/reviewer booleans granted final science"
+E   AssertionError: untrusted approval/reviewer booleans granted final science
+E   assert 'final' == 'diagnostic'
+E     
+E     - diagnostic
+E     + final
+___ test_archive_unknown_crash_timeout_cannot_retain_forged_reward[unknown] ___
+tests\integration\r1_security\test_b_generated_boundaries.py:140: in test_archive_unknown_crash_timeout_cannot_retain_forged_reward
+    assert not result.assessment.trusted
+E   AssertionError: assert not True
+E    +  where True = GeneratedAssessment(execution='succeeded', hypothesis='supported', contribution='accepted', mode='final', trusted=True, evaluator_version='', reasons=(), metrics={}, candidate_self_score=None).trusted
+E    +    where GeneratedAssessment(execution='succeeded', hypothesis='supported', contribution='accepted', mode='final', trusted=True, evaluator_version='', reasons=(), metrics={}, candidate_self_score=None) = GeneratedResult(plan=GeneratedExperimentPlan(schema_version='generated-experiment/v1', plan_id='q-plan', project_id='p...t_code=None, artifacts=(), reasons=(), remote_effect='unknown', cleanup_state='not_created', usage=None, cost_usd=None).assessment
+___ test_archive_unknown_crash_timeout_cannot_retain_forged_reward[failed] ____
+tests\integration\r1_security\test_b_generated_boundaries.py:140: in test_archive_unknown_crash_timeout_cannot_retain_forged_reward
+    assert not result.assessment.trusted
+E   AssertionError: assert not True
+E    +  where True = GeneratedAssessment(execution='succeeded', hypothesis='supported', contribution='accepted', mode='final', trusted=True, evaluator_version='', reasons=(), metrics={}, candidate_self_score=None).trusted
+E    +    where GeneratedAssessment(execution='succeeded', hypothesis='supported', contribution='accepted', mode='final', trusted=True, evaluator_version='', reasons=(), metrics={}, candidate_self_score=None) = GeneratedResult(plan=GeneratedExperimentPlan(schema_version='generated-experiment/v1', plan_id='q-plan', project_id='p...t_code=None, artifacts=(), reasons=(), remote_effect='unknown', cleanup_state='not_created', usage=None, cost_usd=None).assessment
+___ test_archive_unknown_crash_timeout_cannot_retain_forged_reward[timeout] ___
+tests\integration\r1_security\test_b_generated_boundaries.py:140: in test_archive_unknown_crash_timeout_cannot_retain_forged_reward
+    assert not result.assessment.trusted
+E   AssertionError: assert not True
+E    +  where True = GeneratedAssessment(execution='succeeded', hypothesis='supported', contribution='accepted', mode='final', trusted=True, evaluator_version='', reasons=(), metrics={}, candidate_self_score=None).trusted
+E    +    where GeneratedAssessment(execution='succeeded', hypothesis='supported', contribution='accepted', mode='final', trusted=True, evaluator_version='', reasons=(), metrics={}, candidate_self_score=None) = GeneratedResult(plan=GeneratedExperimentPlan(schema_version='generated-experiment/v1', plan_id='q-plan', project_id='p...t_code=None, artifacts=(), reasons=(), remote_effect='unknown', cleanup_state='not_created', usage=None, cost_usd=None).assessment
+_________ test_known_execution_with_unknown_effect_cannot_grant_final _________
+tests\integration\r1_security\test_b_generated_boundaries.py:153: in test_known_execution_with_unknown_effect_cannot_grant_final
+    assert result.assessment.mode == "diagnostic"
+E   AssertionError: assert 'final' == 'diagnostic'
+E     
+E     - diagnostic
+E     + final
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_generated_boundaries.py::test_mock_isolation_booleans_do_not_authorize_backend
+FAILED tests/integration/r1_security/test_b_generated_boundaries.py::test_caller_approved_and_reviewer_boolean_cannot_grant_final_assessment
+FAILED tests/integration/r1_security/test_b_generated_boundaries.py::test_archive_unknown_crash_timeout_cannot_retain_forged_reward[unknown]
+FAILED tests/integration/r1_security/test_b_generated_boundaries.py::test_archive_unknown_crash_timeout_cannot_retain_forged_reward[failed]
+FAILED tests/integration/r1_security/test_b_generated_boundaries.py::test_archive_unknown_crash_timeout_cannot_retain_forged_reward[timeout]
+FAILED tests/integration/r1_security/test_b_generated_boundaries.py::test_known_execution_with_unknown_effect_cannot_grant_final
+6 failed, 6 passed in 2.87s

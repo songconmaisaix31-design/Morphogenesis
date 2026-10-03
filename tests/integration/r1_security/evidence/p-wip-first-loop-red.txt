@@ -1,0 +1,16 @@
+.FF                                                                      [100%]
+================================== FAILURES ===================================
+______ test_unknown_backend_result_cannot_enable_retry_or_phase_advance _______
+tests\integration\r1_security\test_p_loop_boundaries.py:58: in test_unknown_backend_result_cannot_enable_retry_or_phase_advance
+    assert not allowed["enabled"], "mock label concealed unknown/refused effect and enabled another step"
+E   AssertionError: mock label concealed unknown/refused effect and enabled another step
+E   assert not True
+________ test_known_bound_core_context_not_blocked_just_by_provenance _________
+tests\integration\r1_security\test_p_loop_boundaries.py:84: in test_known_bound_core_context_not_blocked_just_by_provenance
+    assert allowed["enabled"], "known read-only core ledger fact rejected solely for non-mock provenance"
+E   AssertionError: known read-only core ledger fact rejected solely for non-mock provenance
+E   assert False
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_loop_boundaries.py::test_unknown_backend_result_cannot_enable_retry_or_phase_advance
+FAILED tests/integration/r1_security/test_p_loop_boundaries.py::test_known_bound_core_context_not_blocked_just_by_provenance
+2 failed, 1 passed in 2.02s

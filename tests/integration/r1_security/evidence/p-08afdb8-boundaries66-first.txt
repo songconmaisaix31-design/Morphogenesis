@@ -1,0 +1,34 @@
+.........................................................sss.FFFFF       [100%]
+================================== FAILURES ===================================
+_____ test_product_envelope_is_input_and_does_not_certify_science[False] ______
+tests\integration\r1_security\test_p_loop_boundaries.py:107: in test_product_envelope_is_input_and_does_not_certify_science
+    assert package["three_axis"] == {"execution": "not_run", "hypothesis": "not_evaluated",
+           ^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'three_axis'
+______ test_product_envelope_is_input_and_does_not_certify_science[True] ______
+tests\integration\r1_security\test_p_loop_boundaries.py:107: in test_product_envelope_is_input_and_does_not_certify_science
+    assert package["three_axis"] == {"execution": "not_run", "hypothesis": "not_evaluated",
+           ^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'three_axis'
+_____ test_product_event_labels_cannot_claim_or_complete_core_task[mock] ______
+tests\integration\r1_security\test_p_loop_boundaries.py:124: in test_product_event_labels_cannot_claim_or_complete_core_task
+    assert product_store.export_package(SPACE)["three_axis"]["execution"] == "not_run"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'three_axis'
+____ test_product_event_labels_cannot_claim_or_complete_core_task[replay] _____
+tests\integration\r1_security\test_p_loop_boundaries.py:124: in test_product_event_labels_cannot_claim_or_complete_core_task
+    assert product_store.export_package(SPACE)["three_axis"]["execution"] == "not_run"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'three_axis'
+_ test_product_event_labels_cannot_claim_or_complete_core_task[contract_local] _
+tests\integration\r1_security\test_p_loop_boundaries.py:124: in test_product_event_labels_cannot_claim_or_complete_core_task
+    assert product_store.export_package(SPACE)["three_axis"]["execution"] == "not_run"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'three_axis'
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_loop_boundaries.py::test_product_envelope_is_input_and_does_not_certify_science[False]
+FAILED tests/integration/r1_security/test_p_loop_boundaries.py::test_product_envelope_is_input_and_does_not_certify_science[True]
+FAILED tests/integration/r1_security/test_p_loop_boundaries.py::test_product_event_labels_cannot_claim_or_complete_core_task[mock]
+FAILED tests/integration/r1_security/test_p_loop_boundaries.py::test_product_event_labels_cannot_claim_or_complete_core_task[replay]
+FAILED tests/integration/r1_security/test_p_loop_boundaries.py::test_product_event_labels_cannot_claim_or_complete_core_task[contract_local]
+5 failed, 58 passed, 3 skipped in 14.93s

@@ -1,0 +1,55 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+__________ test_forged_passed_report_cannot_approve_recorded_failure __________
+tests\integration\r1_security\test_b_successor_authority.py:48: in test_forged_passed_report_cannot_approve_recorded_failure
+    report = generated_validation(store, "candidate", plan(), {"candidate.py": CODE}, isolation())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\local_assets\generated_validation.py:47: in generated_validation
+    store._record_generated_report(report)
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\local_assets\store.py:200: in _record_generated_report
+    self.fetch(report.asset_id)
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\local_assets\store.py:120: in fetch
+    strategy = self.fetch_asset(asset_id).get("strategy")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\local_assets\store.py:115: in fetch_asset
+    if asset.get("asset_id") != asset_id or not self.bridge.validate_asset(asset).valid:
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\bridge_node\assets.py:109: in validate_asset
+    return AssetValidation.model_validate(self._invoke("validateAsset", asset))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\bridge_node\assets.py:73: in _invoke
+    completed = subprocess.run(
+C:\Python313\Lib\subprocess.py:554: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\conftest.py:29: in denied
+    raise AssertionError("Q forbids host process launch and external network")
+E   AssertionError: Q forbids host process launch and external network
+________ test_generated_validation_rejects_manifest_byte_substitution _________
+tests\integration\r1_security\test_b_successor_authority.py:68: in test_generated_validation_rejects_manifest_byte_substitution
+    result = generated_validation(store, "candidate", plan(), {"candidate.py": CODE + b"# changed\n"},
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\local_assets\generated_validation.py:47: in generated_validation
+    store._record_generated_report(report)
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\local_assets\store.py:200: in _record_generated_report
+    self.fetch(report.asset_id)
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\local_assets\store.py:120: in fetch
+    strategy = self.fetch_asset(asset_id).get("strategy")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\local_assets\store.py:115: in fetch_asset
+    if asset.get("asset_id") != asset_id or not self.bridge.validate_asset(asset).valid:
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\bridge_node\assets.py:109: in validate_asset
+    return AssetValidation.model_validate(self._invoke("validateAsset", asset))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\DW\AppData\Local\Temp\morph-q-r1-1003\b-a322\bridge_node\assets.py:73: in _invoke
+    completed = subprocess.run(
+C:\Python313\Lib\subprocess.py:554: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\conftest.py:29: in denied
+    raise AssertionError("Q forbids host process launch and external network")
+E   AssertionError: Q forbids host process launch and external network
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_successor_authority.py::test_forged_passed_report_cannot_approve_recorded_failure
+FAILED tests/integration/r1_security/test_b_successor_authority.py::test_generated_validation_rejects_manifest_byte_substitution
+2 failed, 2 deselected in 2.10s

@@ -1,0 +1,46 @@
+F.FFFFFF                                                                 [100%]
+================================== FAILURES ===================================
+________ test_conflicting_duplicate_probe_id_is_not_silently_replaced _________
+tests\integration\r1_security\test_b_probe_configuration.py:26: in test_conflicting_duplicate_probe_id_is_not_silently_replaced
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+_____ test_same_probe_reference_cannot_admit_changed_configuration[image] _____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+______ test_same_probe_reference_cannot_admit_changed_configuration[cpu] ______
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+____ test_same_probe_reference_cannot_admit_changed_configuration[memory] _____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+____ test_same_probe_reference_cannot_admit_changed_configuration[process] ____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+___ test_same_probe_reference_cannot_admit_changed_configuration[endpoint] ____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+____ test_same_probe_reference_cannot_admit_changed_configuration[network] ____
+tests\integration\r1_security\test_b_probe_configuration.py:67: in test_same_probe_reference_cannot_admit_changed_configuration
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_conflicting_duplicate_probe_id_is_not_silently_replaced
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[image]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[cpu]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[memory]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[process]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[endpoint]
+FAILED tests/integration/r1_security/test_b_probe_configuration.py::test_same_probe_reference_cannot_admit_changed_configuration[network]
+7 failed, 1 passed in 6.29s

@@ -1,0 +1,9 @@
+................F...............................                         [100%]
+================================== FAILURES ===================================
+_ test_completed_native_observation_settles_only_exact_event_usage[matching] __
+tests\integration\r1_security\test_p_native_boundaries.py:158: in test_completed_native_observation_settles_only_exact_event_usage
+    assert snapshot.tokens == result["budget"]["tokens"] == 5
+E   assert None == 5
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_native_boundaries.py::test_completed_native_observation_settles_only_exact_event_usage[matching]
+1 failed, 47 passed in 10.59s

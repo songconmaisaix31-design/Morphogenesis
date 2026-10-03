@@ -1,0 +1,29 @@
+FFF                                                                      [100%]
+================================== FAILURES ===================================
+_______ test_sdk_configuration_matches_frozen_image_and_network[image] ________
+tests\integration\r1_security\test_b_sdk_configuration.py:33: in test_sdk_configuration_matches_frozen_image_and_network
+    assert image == "fixture@sha256:" + "c" * 64, "SDK image omitted frozen repository/digest binding"
+E   AssertionError: SDK image omitted frozen repository/digest binding
+E   assert 'sha256:ccccc...ccccccccccccc' == 'fixture@sha2...ccccccccccccc'
+E     
+E     - fixture@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+E     ? --------
+E     + sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+______ test_sdk_configuration_matches_frozen_image_and_network[network] _______
+tests\integration\r1_security\test_b_sdk_configuration.py:36: in test_sdk_configuration_matches_frozen_image_and_network
+    assert policy is not None, "deny network declared but SDK create has no egress policy"
+E   AssertionError: deny network declared but SDK create has no egress policy
+E   assert None is not None
+___________ test_unverified_process_limit_cannot_reach_sdk_creation ___________
+tests\integration\r1_security\test_b_sdk_configuration.py:54: in test_unverified_process_limit_cannot_reach_sdk_creation
+    assert calls == [], "backend created without trusted process-limit/isolation instance verification"
+E   AssertionError: backend created without trusted process-limit/isolation instance verification
+E   assert [(('fixture:1...ds=45), ...})] == []
+E     
+E     Left contains one more item: (('fixture:1',), {'connection_config': ConnectionConfigSync(api_key=None, domain='127.0.0.1:65534', protocol='http', r... 'memory': '512Mi'}, 'timeout': datetime.timedelta(seconds=180), 'ready_timeout': datetime.timedelta(seconds=45), ...})
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_sdk_configuration.py::test_sdk_configuration_matches_frozen_image_and_network[image]
+FAILED tests/integration/r1_security/test_b_sdk_configuration.py::test_sdk_configuration_matches_frozen_image_and_network[network]
+FAILED tests/integration/r1_security/test_b_sdk_configuration.py::test_unverified_process_limit_cannot_reach_sdk_creation
+3 failed in 0.54s

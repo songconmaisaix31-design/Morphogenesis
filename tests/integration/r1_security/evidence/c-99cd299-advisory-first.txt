@@ -1,0 +1,45 @@
+FF.FFFF                                                                  [100%]
+================================== FAILURES ===================================
+____ test_invented_advisory_reference_cannot_become_evidence[supported_by] ____
+tests\integration\r1_security\test_c_advisory_binding.py:24: in test_invented_advisory_reference_cannot_become_evidence
+    assert "invented-result" not in row[axis], "unresolved caller reference presented as trusted evidence"
+E   AssertionError: unresolved caller reference presented as trusted evidence
+E   assert 'invented-result' not in ['invented-result']
+_____ test_invented_advisory_reference_cannot_become_evidence[refuted_by] _____
+tests\integration\r1_security\test_c_advisory_binding.py:24: in test_invented_advisory_reference_cannot_become_evidence
+    assert "invented-result" not in row[axis], "unresolved caller reference presented as trusted evidence"
+E   AssertionError: unresolved caller reference presented as trusted evidence
+E   assert 'invented-result' not in ['invented-result']
+_ test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession[foreign_branch] _
+tests\integration\r1_security\test_c_advisory_binding.py:71: in test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession
+    assert fact.result_id not in row[axis], "result was used outside its axis/branch/effective lifetime"
+E   AssertionError: result was used outside its axis/branch/effective lifetime
+E   assert 'fixture-result' not in ['fixture-result']
+E    +  where 'fixture-result' = ThreeAxisResult(result_id='fixture-result', report_id='fixture-report', task_id='refuted', actor='author', source_ref=...esis='refuted', contribution='proposed', asset_id='fixture-asset', branch_id=None, reviewer=None, at=100.0, reasons=()).result_id
+_ test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession[wrong_axis] _
+tests\integration\r1_security\test_c_advisory_binding.py:71: in test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession
+    assert fact.result_id not in row[axis], "result was used outside its axis/branch/effective lifetime"
+E   AssertionError: result was used outside its axis/branch/effective lifetime
+E   assert 'fixture-result' not in ['fixture-result']
+E    +  where 'fixture-result' = ThreeAxisResult(result_id='fixture-result', report_id='fixture-report', task_id='refuted', actor='author', source_ref=...esis='refuted', contribution='proposed', asset_id='fixture-asset', branch_id=None, reviewer=None, at=100.0, reasons=()).result_id
+_ test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession[duplicate] _
+tests\integration\r1_security\test_c_advisory_binding.py:68: in test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession
+    assert row["refuted_by"] == [fact.result_id]
+E   AssertionError: assert ['fixture-res...xture-result'] == ['fixture-result']
+E     
+E     Left contains one more item: 'fixture-result'
+E     Use -v to get more diff
+_ test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession[superseded] _
+tests\integration\r1_security\test_c_advisory_binding.py:71: in test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession
+    assert fact.result_id not in row[axis], "result was used outside its axis/branch/effective lifetime"
+E   AssertionError: result was used outside its axis/branch/effective lifetime
+E   assert 'fixture-result' not in ['fixture-result']
+E    +  where 'fixture-result' = ThreeAxisResult(result_id='fixture-result', report_id='fixture-report', task_id='refuted', actor='author', source_ref=...esis='refuted', contribution='proposed', asset_id='fixture-asset', branch_id=None, reviewer=None, at=100.0, reasons=()).result_id
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_c_advisory_binding.py::test_invented_advisory_reference_cannot_become_evidence[supported_by]
+FAILED tests/integration/r1_security/test_c_advisory_binding.py::test_invented_advisory_reference_cannot_become_evidence[refuted_by]
+FAILED tests/integration/r1_security/test_c_advisory_binding.py::test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession[foreign_branch]
+FAILED tests/integration/r1_security/test_c_advisory_binding.py::test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession[wrong_axis]
+FAILED tests/integration/r1_security/test_c_advisory_binding.py::test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession[duplicate]
+FAILED tests/integration/r1_security/test_c_advisory_binding.py::test_real_result_cannot_be_relabelled_recounted_or_rewarded_after_supersession[superseded]
+6 failed, 1 passed in 3.99s

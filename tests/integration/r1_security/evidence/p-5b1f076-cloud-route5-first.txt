@@ -1,0 +1,34 @@
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+_ test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses[cloud_name] _
+tests\integration\r1_security\test_p_provider_binding.py:149: in test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses[cloud_runtime_name] _
+tests\integration\r1_security\test_p_provider_binding.py:149: in test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses[cloud_aws] _
+tests\integration\r1_security\test_p_provider_binding.py:149: in test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_claude_unapproved_or_ambiguous_destination_refuses_before_effect[lower_cloud_flag] _
+tests\integration\r1_security\test_p_claude_provider.py:107: in test_claude_unapproved_or_ambiguous_destination_refuses_before_effect
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_ test_claude_unapproved_or_ambiguous_destination_refuses_before_effect[conflicting_case_destination] _
+tests\integration\r1_security\test_p_claude_provider.py:107: in test_claude_unapproved_or_ambiguous_destination_refuses_before_effect
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_provider_binding.py::test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses[cloud_name]
+FAILED tests/integration/r1_security/test_p_provider_binding.py::test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses[cloud_runtime_name]
+FAILED tests/integration/r1_security/test_p_provider_binding.py::test_native_destination_is_granted_exactly_and_ambiguous_metadata_refuses[cloud_aws]
+FAILED tests/integration/r1_security/test_p_claude_provider.py::test_claude_unapproved_or_ambiguous_destination_refuses_before_effect[lower_cloud_flag]
+FAILED tests/integration/r1_security/test_p_claude_provider.py::test_claude_unapproved_or_ambiguous_destination_refuses_before_effect[conflicting_case_destination]
+5 failed, 15 deselected in 3.48s

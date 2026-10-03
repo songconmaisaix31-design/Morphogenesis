@@ -1,0 +1,90 @@
+FFFFFFFFFF..F.F.FF                                                       [100%]
+================================== FAILURES ===================================
+________________ test_host_project_cannot_be_overridden[read] _________________
+tests\integration\r1_security\test_a_host_boundaries.py:46: in test_host_project_cannot_be_overridden
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_______________ test_host_project_cannot_be_overridden[context] _______________
+tests\integration\r1_security\test_a_host_boundaries.py:46: in test_host_project_cannot_be_overridden
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_______________ test_host_project_cannot_be_overridden[branch] ________________
+tests\integration\r1_security\test_a_host_boundaries.py:46: in test_host_project_cannot_be_overridden
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+________________ test_host_project_cannot_be_overridden[note] _________________
+tests\integration\r1_security\test_a_host_boundaries.py:46: in test_host_project_cannot_be_overridden
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+______________ test_host_project_cannot_be_overridden[proposal] _______________
+tests\integration\r1_security\test_a_host_boundaries.py:46: in test_host_project_cannot_be_overridden
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_______________ test_host_project_cannot_be_overridden[create] ________________
+tests\integration\r1_security\test_a_host_boundaries.py:46: in test_host_project_cannot_be_overridden
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+________________ test_caller_cannot_replace_host_authorization ________________
+tests\integration\r1_security\test_a_host_boundaries.py:53: in test_caller_cannot_replace_host_authorization
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_________________ test_cross_project_branch_rejected[parent] __________________
+tests\integration\r1_security\test_a_host_boundaries.py:60: in test_cross_project_branch_rejected
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+__________________ test_cross_project_branch_rejected[note] ___________________
+tests\integration\r1_security\test_a_host_boundaries.py:60: in test_cross_project_branch_rejected
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+________________ test_cross_project_branch_rejected[proposal] _________________
+tests\integration\r1_security\test_a_host_boundaries.py:60: in test_cross_project_branch_rejected
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+__________________ test_out_of_scope_derived_source_rejected __________________
+tests\integration\r1_security\test_a_host_boundaries.py:82: in test_out_of_scope_derived_source_rejected
+    with pytest.raises((PermissionError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError)
+_____ test_admission_recovery_after_each_durable_boundary[after_enqueue] ______
+tests\integration\r1_security\test_a_host_boundaries.py:107: in test_admission_recovery_after_each_durable_boundary
+    assert result["status"] == "accepted"
+E   AssertionError: assert 'blocked' == 'accepted'
+E     
+E     - accepted
+E     + blocked
+_______________ test_same_branch_id_different_payload_rejected ________________
+tests\integration\r1_security\test_a_host_boundaries.py:116: in test_same_branch_id_different_payload_rejected
+    with pytest.raises((ValueError, PermissionError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (ValueError, PermissionError)
+________________ test_same_event_id_different_payload_rejected ________________
+tests\integration\r1_security\test_a_host_boundaries.py:126: in test_same_event_id_different_payload_rejected
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_host_project_cannot_be_overridden[read]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_host_project_cannot_be_overridden[context]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_host_project_cannot_be_overridden[branch]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_host_project_cannot_be_overridden[note]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_host_project_cannot_be_overridden[proposal]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_host_project_cannot_be_overridden[create]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_caller_cannot_replace_host_authorization
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_cross_project_branch_rejected[parent]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_cross_project_branch_rejected[note]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_cross_project_branch_rejected[proposal]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_out_of_scope_derived_source_rejected
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_admission_recovery_after_each_durable_boundary[after_enqueue]
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_same_branch_id_different_payload_rejected
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_same_event_id_different_payload_rejected
+14 failed, 4 passed in 19.28s

@@ -1,0 +1,6 @@
+Using Python 3.13.13 environment at: .venv-q
+Resolved 35 packages in 4.37s
+Uninstalled 1 package in 12ms
+Installed 1 package in 72ms
+ - langgraph-checkpoint==3.0.1
+ + langgraph-checkpoint==4.2.0

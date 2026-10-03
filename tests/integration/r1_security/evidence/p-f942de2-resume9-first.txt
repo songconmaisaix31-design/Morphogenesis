@@ -1,0 +1,52 @@
+.FFFFFFFF                                                                [100%]
+================================== FAILURES ===================================
+_ test_resume_rejects_foreign_or_missing_original_record_before_planning[project] _
+tests\integration\r1_security\test_p_resume_boundaries.py:118: in test_resume_rejects_foreign_or_missing_original_record_before_planning
+    with pytest.raises((PermissionError, ValueError, FileNotFoundError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError, FileNotFoundError)
+_ test_resume_rejects_foreign_or_missing_original_record_before_planning[member] _
+tests\integration\r1_security\test_p_resume_boundaries.py:118: in test_resume_rejects_foreign_or_missing_original_record_before_planning
+    with pytest.raises((PermissionError, ValueError, FileNotFoundError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError, FileNotFoundError)
+_ test_resume_rejects_foreign_or_missing_original_record_before_planning[outcome_runtime] _
+tests\integration\r1_security\test_p_resume_boundaries.py:118: in test_resume_rejects_foreign_or_missing_original_record_before_planning
+    with pytest.raises((PermissionError, ValueError, FileNotFoundError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError, FileNotFoundError)
+_ test_resume_rejects_foreign_or_missing_original_record_before_planning[request_runtime] _
+tests\integration\r1_security\test_p_resume_boundaries.py:118: in test_resume_rejects_foreign_or_missing_original_record_before_planning
+    with pytest.raises((PermissionError, ValueError, FileNotFoundError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError, FileNotFoundError)
+_ test_resume_rejects_foreign_or_missing_original_record_before_planning[model] _
+tests\integration\r1_security\test_p_resume_boundaries.py:118: in test_resume_rejects_foreign_or_missing_original_record_before_planning
+    with pytest.raises((PermissionError, ValueError, FileNotFoundError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError, FileNotFoundError)
+_ test_resume_rejects_foreign_or_missing_original_record_before_planning[workspace] _
+tests\integration\r1_security\test_p_resume_boundaries.py:118: in test_resume_rejects_foreign_or_missing_original_record_before_planning
+    with pytest.raises((PermissionError, ValueError, FileNotFoundError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError, FileNotFoundError)
+_ test_resume_rejects_foreign_or_missing_original_record_before_planning[reservation_member] _
+tests\integration\r1_security\test_p_resume_boundaries.py:118: in test_resume_rejects_foreign_or_missing_original_record_before_planning
+    with pytest.raises((PermissionError, ValueError, FileNotFoundError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError, FileNotFoundError)
+_ test_resume_rejects_foreign_or_missing_original_record_before_planning[missing_request] _
+tests\integration\r1_security\test_p_resume_boundaries.py:118: in test_resume_rejects_foreign_or_missing_original_record_before_planning
+    with pytest.raises((PermissionError, ValueError, FileNotFoundError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (PermissionError, ValueError, FileNotFoundError)
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_resume_boundaries.py::test_resume_rejects_foreign_or_missing_original_record_before_planning[project]
+FAILED tests/integration/r1_security/test_p_resume_boundaries.py::test_resume_rejects_foreign_or_missing_original_record_before_planning[member]
+FAILED tests/integration/r1_security/test_p_resume_boundaries.py::test_resume_rejects_foreign_or_missing_original_record_before_planning[outcome_runtime]
+FAILED tests/integration/r1_security/test_p_resume_boundaries.py::test_resume_rejects_foreign_or_missing_original_record_before_planning[request_runtime]
+FAILED tests/integration/r1_security/test_p_resume_boundaries.py::test_resume_rejects_foreign_or_missing_original_record_before_planning[model]
+FAILED tests/integration/r1_security/test_p_resume_boundaries.py::test_resume_rejects_foreign_or_missing_original_record_before_planning[workspace]
+FAILED tests/integration/r1_security/test_p_resume_boundaries.py::test_resume_rejects_foreign_or_missing_original_record_before_planning[reservation_member]
+FAILED tests/integration/r1_security/test_p_resume_boundaries.py::test_resume_rejects_foreign_or_missing_original_record_before_planning[missing_request]
+8 failed, 1 passed in 4.79s

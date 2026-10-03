@@ -1,0 +1,31 @@
+{
+  "morphogenesis": {
+    "origin": {
+      "url": "https://github.com/songconmaisaix31-design/Morphogenesis.git",
+      "vcs_info": {
+        "vcs": "git",
+        "commit_id": "cc2e7227e1b423924c99113c9676ef8cc310e92b",
+        "requested_revision": "cc2e7227e1b423924c99113c9676ef8cc310e92b"
+      }
+    },
+    "module": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-r1-boundaries-1003\\.venv-q\\Lib\\site-packages\\swarm\\__init__.py",
+    "version": "0.1.0"
+  },
+  "morphogenesis-research": {
+    "origin": {
+      "url": "https://github.com/songconmaisaix31-design/Morphogenesis-Research.git",
+      "vcs_info": {
+        "vcs": "git",
+        "commit_id": "24f02a169a696afd1f4eb769a8c0dbb8ca052f95",
+        "requested_revision": "24f02a169a696afd1f4eb769a8c0dbb8ca052f95"
+      }
+    },
+    "module": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-r1-boundaries-1003\\.venv-q\\Lib\\site-packages\\morph_research\\__init__.py",
+    "version": "0.1.0"
+  },
+  "original_installed_core": {
+    "core_sha": "cc2e7227e1b423924c99113c9676ef8cc310e92b",
+    "core_version": "0.1.0",
+    "python": "C:\\Users\\DW\\orca\\workspaces\\Morphogenesis\\morph-r1-boundaries-1003\\.venv-q\\Scripts\\python.exe"
+  }
+}

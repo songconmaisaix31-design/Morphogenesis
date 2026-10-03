@@ -1,0 +1,58 @@
+.FFFFFF                                                                  [100%]
+================================== FAILURES ===================================
+_ test_response_disconnect_preserves_admission_and_same_proposal_recovery[headers-broken-pipe] _
+tests\integration\r1_security\test_p_installed_factory.py:223: in test_response_disconnect_preserves_admission_and_same_proposal_recovery
+    assert statuses == [200], "response loss was converted into a second, misleading source-failure status"
+E   AssertionError: response loss was converted into a second, misleading source-failure status
+E   assert [200, 503] == [200]
+E     
+E     Left contains one more item: 503
+E     Use -v to get more diff
+_ test_response_disconnect_preserves_admission_and_same_proposal_recovery[body-broken-pipe] _
+tests\integration\r1_security\test_p_installed_factory.py:223: in test_response_disconnect_preserves_admission_and_same_proposal_recovery
+    assert statuses == [200], "response loss was converted into a second, misleading source-failure status"
+E   AssertionError: response loss was converted into a second, misleading source-failure status
+E   assert [200, 503] == [200]
+E     
+E     Left contains one more item: 503
+E     Use -v to get more diff
+_ test_response_disconnect_preserves_admission_and_same_proposal_recovery[headers-reset] _
+tests\integration\r1_security\test_p_installed_factory.py:223: in test_response_disconnect_preserves_admission_and_same_proposal_recovery
+    assert statuses == [200], "response loss was converted into a second, misleading source-failure status"
+E   AssertionError: response loss was converted into a second, misleading source-failure status
+E   assert [200, 503] == [200]
+E     
+E     Left contains one more item: 503
+E     Use -v to get more diff
+_ test_response_disconnect_preserves_admission_and_same_proposal_recovery[body-reset] _
+tests\integration\r1_security\test_p_installed_factory.py:223: in test_response_disconnect_preserves_admission_and_same_proposal_recovery
+    assert statuses == [200], "response loss was converted into a second, misleading source-failure status"
+E   AssertionError: response loss was converted into a second, misleading source-failure status
+E   assert [200, 503] == [200]
+E     
+E     Left contains one more item: 503
+E     Use -v to get more diff
+_ test_response_disconnect_preserves_admission_and_same_proposal_recovery[headers-aborted] _
+tests\integration\r1_security\test_p_installed_factory.py:223: in test_response_disconnect_preserves_admission_and_same_proposal_recovery
+    assert statuses == [200], "response loss was converted into a second, misleading source-failure status"
+E   AssertionError: response loss was converted into a second, misleading source-failure status
+E   assert [200, 503] == [200]
+E     
+E     Left contains one more item: 503
+E     Use -v to get more diff
+_ test_response_disconnect_preserves_admission_and_same_proposal_recovery[body-aborted] _
+tests\integration\r1_security\test_p_installed_factory.py:223: in test_response_disconnect_preserves_admission_and_same_proposal_recovery
+    assert statuses == [200], "response loss was converted into a second, misleading source-failure status"
+E   AssertionError: response loss was converted into a second, misleading source-failure status
+E   assert [200, 503] == [200]
+E     
+E     Left contains one more item: 503
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_installed_factory.py::test_response_disconnect_preserves_admission_and_same_proposal_recovery[headers-broken-pipe]
+FAILED tests/integration/r1_security/test_p_installed_factory.py::test_response_disconnect_preserves_admission_and_same_proposal_recovery[body-broken-pipe]
+FAILED tests/integration/r1_security/test_p_installed_factory.py::test_response_disconnect_preserves_admission_and_same_proposal_recovery[headers-reset]
+FAILED tests/integration/r1_security/test_p_installed_factory.py::test_response_disconnect_preserves_admission_and_same_proposal_recovery[body-reset]
+FAILED tests/integration/r1_security/test_p_installed_factory.py::test_response_disconnect_preserves_admission_and_same_proposal_recovery[headers-aborted]
+FAILED tests/integration/r1_security/test_p_installed_factory.py::test_response_disconnect_preserves_admission_and_same_proposal_recovery[body-aborted]
+6 failed, 1 passed, 4 deselected in 6.16s

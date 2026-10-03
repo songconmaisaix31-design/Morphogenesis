@@ -1,0 +1,86 @@
+F...FFFFFFF.                                                             [100%]
+================================== FAILURES ===================================
+_ test_installed_fixture_actual_original_consumption_fenced_apply_and_mock_receipt _
+tests\integration\r1_security\test_b_mock_adoption.py:184: in test_installed_fixture_actual_original_consumption_fenced_apply_and_mock_receipt
+    lease, context, consumer, execution = consumption(f)
+                                          ^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:169: in consumption
+    lease = f.claim("reuse", "consumer")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:84: in claim
+    assert lease is not None
+E   assert None is not None
+___ test_failed_timeout_or_unknown_review_never_allows_inheritance[failed] ____
+tests\integration\r1_security\test_b_mock_adoption.py:237: in test_failed_timeout_or_unknown_review_never_allows_inheritance
+    consumption(f)
+tests\integration\r1_security\test_b_mock_adoption.py:169: in consumption
+    lease = f.claim("reuse", "consumer")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:84: in claim
+    assert lease is not None
+E   assert None is not None
+___ test_failed_timeout_or_unknown_review_never_allows_inheritance[timeout] ___
+tests\integration\r1_security\test_b_mock_adoption.py:237: in test_failed_timeout_or_unknown_review_never_allows_inheritance
+    consumption(f)
+tests\integration\r1_security\test_b_mock_adoption.py:169: in consumption
+    lease = f.claim("reuse", "consumer")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:84: in claim
+    assert lease is not None
+E   assert None is not None
+___ test_failed_timeout_or_unknown_review_never_allows_inheritance[unknown] ___
+tests\integration\r1_security\test_b_mock_adoption.py:235: in test_failed_timeout_or_unknown_review_never_allows_inheritance
+    f = setup(tmp_path, monkeypatch, review_outcome=outcome)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:123: in setup
+    approval_lease = claim("approval", "reviewer")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:84: in claim
+    assert lease is not None
+E   assert None is not None
+_______ test_mixed_mock_live_cached_rows_do_not_form_independent_review _______
+tests\integration\r1_security\test_b_mock_adoption.py:249: in test_mixed_mock_live_cached_rows_do_not_form_independent_review
+    consumption(f)
+tests\integration\r1_security\test_b_mock_adoption.py:169: in consumption
+    lease = f.claim("reuse", "consumer")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:84: in claim
+    assert lease is not None
+E   assert None is not None
+____ test_original_archive_integrity_rechecked_before_inheritance[output] _____
+tests\integration\r1_security\test_b_mock_adoption.py:269: in test_original_archive_integrity_rechecked_before_inheritance
+    consumption(f)
+tests\integration\r1_security\test_b_mock_adoption.py:169: in consumption
+    lease = f.claim("reuse", "consumer")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:84: in claim
+    assert lease is not None
+E   assert None is not None
+__ test_original_archive_integrity_rechecked_before_inheritance[evaluation] ___
+tests\integration\r1_security\test_b_mock_adoption.py:269: in test_original_archive_integrity_rechecked_before_inheritance
+    consumption(f)
+tests\integration\r1_security\test_b_mock_adoption.py:169: in consumption
+    lease = f.claim("reuse", "consumer")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:84: in claim
+    assert lease is not None
+E   assert None is not None
+__ test_original_archive_integrity_rechecked_before_inheritance[environment] __
+tests\integration\r1_security\test_b_mock_adoption.py:269: in test_original_archive_integrity_rechecked_before_inheritance
+    consumption(f)
+tests\integration\r1_security\test_b_mock_adoption.py:169: in consumption
+    lease = f.claim("reuse", "consumer")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\r1_security\test_b_mock_adoption.py:84: in claim
+    assert lease is not None
+E   assert None is not None
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_installed_fixture_actual_original_consumption_fenced_apply_and_mock_receipt
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_failed_timeout_or_unknown_review_never_allows_inheritance[failed]
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_failed_timeout_or_unknown_review_never_allows_inheritance[timeout]
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_failed_timeout_or_unknown_review_never_allows_inheritance[unknown]
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_mixed_mock_live_cached_rows_do_not_form_independent_review
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_original_archive_integrity_rechecked_before_inheritance[output]
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_original_archive_integrity_rechecked_before_inheritance[evaluation]
+FAILED tests/integration/r1_security/test_b_mock_adoption.py::test_original_archive_integrity_rechecked_before_inheritance[environment]
+8 failed, 4 passed in 6.27s

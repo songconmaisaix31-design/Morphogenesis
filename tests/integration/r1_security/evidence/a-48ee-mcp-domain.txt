@@ -1,0 +1,10 @@
+.F                                                                       [100%]
+================================== FAILURES ===================================
+_______________ test_official_mcp_cross_project_access_refused ________________
+tests\integration\r1_security\test_a_host_boundaries.py:214: in test_official_mcp_cross_project_access_refused
+    with pytest.raises(ToolError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ToolError
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_a_host_boundaries.py::test_official_mcp_cross_project_access_refused
+1 failed, 1 passed, 24 deselected in 2.21s

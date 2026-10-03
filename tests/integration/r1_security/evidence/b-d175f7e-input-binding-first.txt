@@ -1,0 +1,57 @@
+FFFF.FFF                                                                 [100%]
+================================== FAILURES ===================================
+_ test_data_cannot_replace_code_runner_or_escape_manifest_limits[code_overlap] _
+tests\integration\r1_security\test_b_input_binding.py:38: in test_data_cannot_replace_code_runner_or_escape_manifest_limits
+    assert not prepared.static.passed, "unsafe data passed preparation before the independent isolation gate"
+E   AssertionError: unsafe data passed preparation before the independent isolation gate
+E   assert not True
+E    +  where True = StaticSecurityReport(scope='pass', syntax='pass', dependency='pass', danger='pass', resource='pass', reasons=()).passed
+E    +    where StaticSecurityReport(scope='pass', syntax='pass', dependency='pass', danger='pass', resource='pass', reasons=()) = GeneratedPreparation(plan=GeneratedExperimentPlan(schema_version='generated-experiment/v1', plan_id='q-plan', project_...ss_limit=True, time_limit=True, self_owned_cleanup=True), verified=False, probe='not_run', proof_ref=None, reasons=())).static
+_ test_data_cannot_replace_code_runner_or_escape_manifest_limits[runner_name] _
+tests\integration\r1_security\test_b_input_binding.py:38: in test_data_cannot_replace_code_runner_or_escape_manifest_limits
+    assert not prepared.static.passed, "unsafe data passed preparation before the independent isolation gate"
+E   AssertionError: unsafe data passed preparation before the independent isolation gate
+E   assert not True
+E    +  where True = StaticSecurityReport(scope='pass', syntax='pass', dependency='pass', danger='pass', resource='pass', reasons=()).passed
+E    +    where StaticSecurityReport(scope='pass', syntax='pass', dependency='pass', danger='pass', resource='pass', reasons=()) = GeneratedPreparation(plan=GeneratedExperimentPlan(schema_version='generated-experiment/v1', plan_id='q-plan', project_...ss_limit=True, time_limit=True, self_owned_cleanup=True), verified=False, probe='not_run', proof_ref=None, reasons=())).static
+_ test_data_cannot_replace_code_runner_or_escape_manifest_limits[duplicate_data] _
+tests\integration\r1_security\test_b_input_binding.py:38: in test_data_cannot_replace_code_runner_or_escape_manifest_limits
+    assert not prepared.static.passed, "unsafe data passed preparation before the independent isolation gate"
+E   AssertionError: unsafe data passed preparation before the independent isolation gate
+E   assert not True
+E    +  where True = StaticSecurityReport(scope='pass', syntax='pass', dependency='pass', danger='pass', resource='pass', reasons=()).passed
+E    +    where StaticSecurityReport(scope='pass', syntax='pass', dependency='pass', danger='pass', resource='pass', reasons=()) = GeneratedPreparation(plan=GeneratedExperimentPlan(schema_version='generated-experiment/v1', plan_id='q-plan', project_...ss_limit=True, time_limit=True, self_owned_cleanup=True), verified=False, probe='not_run', proof_ref=None, reasons=())).static
+_ test_data_cannot_replace_code_runner_or_escape_manifest_limits[total_size] __
+tests\integration\r1_security\test_b_input_binding.py:38: in test_data_cannot_replace_code_runner_or_escape_manifest_limits
+    assert not prepared.static.passed, "unsafe data passed preparation before the independent isolation gate"
+E   AssertionError: unsafe data passed preparation before the independent isolation gate
+E   assert not True
+E    +  where True = StaticSecurityReport(scope='pass', syntax='pass', dependency='pass', danger='pass', resource='pass', reasons=()).passed
+E    +    where StaticSecurityReport(scope='pass', syntax='pass', dependency='pass', danger='pass', resource='pass', reasons=()) = GeneratedPreparation(plan=GeneratedExperimentPlan(schema_version='generated-experiment/v1', plan_id='q-plan', project_...ss_limit=True, time_limit=True, self_owned_cleanup=True), verified=False, probe='not_run', proof_ref=None, reasons=())).static
+__ test_generated_validation_binds_the_actual_persisted_candidate[asset_id] ___
+tests\integration\r1_security\test_b_input_binding.py:81: in test_generated_validation_binds_the_actual_persisted_candidate
+    assert not report.passed, "validation certified a different asset identity/revision/byte payload"
+E   AssertionError: validation certified a different asset identity/revision/byte payload
+E   assert not True
+E    +  where True = GeneratedValidationReport(report_id='29bb03785569474cb8333ab6dfe6c419', asset_id='candidate', plan_json='{"schema_vers...xture', reasons=()), created_at=1790964844.13196, expires_at=1790965144.13196, policy_version='generated-isolation-v1').passed
+__ test_generated_validation_binds_the_actual_persisted_candidate[revision] ___
+tests\integration\r1_security\test_b_input_binding.py:81: in test_generated_validation_binds_the_actual_persisted_candidate
+    assert not report.passed, "validation certified a different asset identity/revision/byte payload"
+E   AssertionError: validation certified a different asset identity/revision/byte payload
+E   assert not True
+E    +  where True = GeneratedValidationReport(report_id='cf6a7a114d2148f3a0735220a4b5af59', asset_id='candidate', plan_json='{"schema_vers...e', reasons=()), created_at=1790964844.2428484, expires_at=1790965144.2428484, policy_version='generated-isolation-v1').passed
+_ test_generated_validation_binds_the_actual_persisted_candidate[persisted_bytes] _
+tests\integration\r1_security\test_b_input_binding.py:81: in test_generated_validation_binds_the_actual_persisted_candidate
+    assert not report.passed, "validation certified a different asset identity/revision/byte payload"
+E   AssertionError: validation certified a different asset identity/revision/byte payload
+E   assert not True
+E    +  where True = GeneratedValidationReport(report_id='c6faea080237455982b1e79ff063ccaf', asset_id='candidate', plan_json='{"schema_vers...e', reasons=()), created_at=1790964844.3547647, expires_at=1790965144.3547647, policy_version='generated-isolation-v1').passed
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_input_binding.py::test_data_cannot_replace_code_runner_or_escape_manifest_limits[code_overlap]
+FAILED tests/integration/r1_security/test_b_input_binding.py::test_data_cannot_replace_code_runner_or_escape_manifest_limits[runner_name]
+FAILED tests/integration/r1_security/test_b_input_binding.py::test_data_cannot_replace_code_runner_or_escape_manifest_limits[duplicate_data]
+FAILED tests/integration/r1_security/test_b_input_binding.py::test_data_cannot_replace_code_runner_or_escape_manifest_limits[total_size]
+FAILED tests/integration/r1_security/test_b_input_binding.py::test_generated_validation_binds_the_actual_persisted_candidate[asset_id]
+FAILED tests/integration/r1_security/test_b_input_binding.py::test_generated_validation_binds_the_actual_persisted_candidate[revision]
+FAILED tests/integration/r1_security/test_b_input_binding.py::test_generated_validation_binds_the_actual_persisted_candidate[persisted_bytes]
+7 failed, 1 passed in 2.35s

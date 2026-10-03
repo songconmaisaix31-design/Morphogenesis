@@ -1,0 +1,10 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+____________ test_succeeded_archive_requires_output_digest_binding ____________
+tests\integration\r1_security\test_b_generated_boundaries.py:159: in test_succeeded_archive_requires_output_digest_binding
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_generated_boundaries.py::test_succeeded_archive_requires_output_digest_binding
+1 failed, 12 deselected in 0.60s

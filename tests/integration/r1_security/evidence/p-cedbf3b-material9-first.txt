@@ -1,0 +1,46 @@
+FFF.FFFF.                                                                [100%]
+================================== FAILURES ===================================
+____ test_source_change_preserves_prior_version_and_first_failure[version] ____
+tests\integration\r1_security\test_p_material_identity.py:36: in test_source_change_preserves_prior_version_and_first_failure
+    assert receipt["created"] and receipt["id"] == successor.id, "different source version silently discarded"
+E   AssertionError: different source version silently discarded
+E   assert (False)
+____ test_source_change_preserves_prior_version_and_first_failure[digest] _____
+tests\integration\r1_security\test_p_material_identity.py:36: in test_source_change_preserves_prior_version_and_first_failure
+    assert receipt["created"] and receipt["id"] == successor.id, "different source version silently discarded"
+E   AssertionError: different source version silently discarded
+E   assert (False)
+__ test_source_change_preserves_prior_version_and_first_failure[extraction] ___
+tests\integration\r1_security\test_p_material_identity.py:36: in test_source_change_preserves_prior_version_and_first_failure
+    assert receipt["created"] and receipt["id"] == successor.id, "different source version silently discarded"
+E   AssertionError: different source version silently discarded
+E   assert (False)
+_ test_expert_opinion_applicability_does_not_disappear_in_dedup[applies_to-branch-b] _
+tests\integration\r1_security\test_p_material_identity.py:66: in test_expert_opinion_applicability_does_not_disappear_in_dedup
+    assert receipt["created"] and receipt["id"] == successor.id, "distinct opinion applicability silently discarded"
+E   AssertionError: distinct opinion applicability silently discarded
+E   assert (False)
+_ test_expert_opinion_applicability_does_not_disappear_in_dedup[domain-different-domain] _
+tests\integration\r1_security\test_p_material_identity.py:66: in test_expert_opinion_applicability_does_not_disappear_in_dedup
+    assert receipt["created"] and receipt["id"] == successor.id, "distinct opinion applicability silently discarded"
+E   AssertionError: distinct opinion applicability silently discarded
+E   assert (False)
+_ test_expert_opinion_applicability_does_not_disappear_in_dedup[at-2026-10-03T01:00:00Z] _
+tests\integration\r1_security\test_p_material_identity.py:66: in test_expert_opinion_applicability_does_not_disappear_in_dedup
+    assert receipt["created"] and receipt["id"] == successor.id, "distinct opinion applicability silently discarded"
+E   AssertionError: distinct opinion applicability silently discarded
+E   assert (False)
+_ test_expert_opinion_applicability_does_not_disappear_in_dedup[status-dispute] _
+tests\integration\r1_security\test_p_material_identity.py:66: in test_expert_opinion_applicability_does_not_disappear_in_dedup
+    assert receipt["created"] and receipt["id"] == successor.id, "distinct opinion applicability silently discarded"
+E   AssertionError: distinct opinion applicability silently discarded
+E   assert (False)
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_p_material_identity.py::test_source_change_preserves_prior_version_and_first_failure[version]
+FAILED tests/integration/r1_security/test_p_material_identity.py::test_source_change_preserves_prior_version_and_first_failure[digest]
+FAILED tests/integration/r1_security/test_p_material_identity.py::test_source_change_preserves_prior_version_and_first_failure[extraction]
+FAILED tests/integration/r1_security/test_p_material_identity.py::test_expert_opinion_applicability_does_not_disappear_in_dedup[applies_to-branch-b]
+FAILED tests/integration/r1_security/test_p_material_identity.py::test_expert_opinion_applicability_does_not_disappear_in_dedup[domain-different-domain]
+FAILED tests/integration/r1_security/test_p_material_identity.py::test_expert_opinion_applicability_does_not_disappear_in_dedup[at-2026-10-03T01:00:00Z]
+FAILED tests/integration/r1_security/test_p_material_identity.py::test_expert_opinion_applicability_does_not_disappear_in_dedup[status-dispute]
+7 failed, 2 passed in 2.65s

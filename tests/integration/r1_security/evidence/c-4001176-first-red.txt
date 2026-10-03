@@ -1,0 +1,11 @@
+.............F                                                           [100%]
+================================== FAILURES ===================================
+______ test_review_observation_without_ledger_execution_cannot_authorize ______
+tests\integration\r1_security\test_c_feedback_boundaries.py:188: in test_review_observation_without_ledger_execution_cannot_authorize
+    assert not decision.accepted, "unbound review report granted independent acceptance"
+E   AssertionError: unbound review report granted independent acceptance
+E   assert not True
+E    +  where True = ContributionDecision(accepted=True, state='accepted', reasons=('independent_evidence_accepted',)).accepted
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_c_feedback_boundaries.py::test_review_observation_without_ledger_execution_cannot_authorize
+1 failed, 13 passed in 2.88s
