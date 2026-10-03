@@ -29,6 +29,7 @@ from orchestration.experiments.executor import DIRECTORY, _artifact, _write_json
 from orchestration.experiments.generated import IsolationConfiguration, effective_environment
 from orchestration.experiments.models import ExperimentArtifact
 from orchestration.experiments.sandbox_adapter import declared_capability
+from orchestration.experiments.frozen_export import FrozenDockerExport
 from orchestration.experiments.trusted import IsolationProbeRecord
 
 SERVER_IMAGE = "opensandbox/server:release-1.1.0@sha256:68ca0212a2749b2c73096ce2ec0264455c64442c45f81007db442f52bf84c9d1"
@@ -111,9 +112,10 @@ def prepare(configuration: IsolationConfiguration, server_toml: bytes, *, probe_
     (root / "server.toml").write_bytes(server_toml)
     _write_json(root / "result.json", At07Result(probe_id=probe_id, configuration=configuration,
         provenance="mock", reasons=("preparation_only_real_probe_NOT_RUN",)).model_dump(mode="json"))
+    supported = ATOMIC_EXPORT_SCOPE_SUPPORTED and configuration.docker_export is not None
     _write_json(root / "review.json", {"AT07": "NOT_RUN", "verified": False,
-                                      "ready_for_real_at07": False,
-                                      "unsupported_capabilities": ["atomic_bounded_export"],
+                                      "ready_for_real_at07": supported,
+                                      "unsupported_capabilities": [] if supported else ["atomic_bounded_export"],
                                       "checks": dict.fromkeys(CHECKS, "not_run")})
     return root
 
@@ -127,6 +129,8 @@ def create_probe(configuration: IsolationConfiguration, server_toml: bytes, *, p
     authorization is external to this module; a reference string is not a grant.
     """
     validate_configuration(configuration, server_toml)
+    if not ATOMIC_EXPORT_SCOPE_SUPPORTED or configuration.docker_export is None:
+        raise PermissionError("frozen_export_configuration_required")
     if not authorization_ref.strip() or not api_key.strip():
         raise PermissionError("separate_real_probe_authorization_and_service_key_required")
     if re.fullmatch(r"[a-f0-9]{64}", configuration.instance_id) is None or not configuration.runtime_profile.startswith("git:"):
@@ -148,7 +152,10 @@ def create_probe(configuration: IsolationConfiguration, server_toml: bytes, *, p
     _write_json(root / "result.json", result.model_dump(mode="json"))
     backend = OpenSandboxBackend(domain="127.0.0.1:8099", api_key=api_key)
     p = configuration.resources
+    control: FrozenDockerExport | None = None
     try:
+        control = FrozenDockerExport(configuration)
+        control.preflight()
         sandbox = SandboxSync.create(configuration.environment.image,
             connection_config=backend.connection(p.command_seconds + 15),
             timeout=timedelta(seconds=p.lifetime_seconds), ready_timeout=timedelta(seconds=45),
@@ -157,10 +164,12 @@ def create_probe(configuration: IsolationConfiguration, server_toml: bytes, *, p
             env={"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"},
             metadata={"morph-at07-probe": probe_id})
     except Exception as error:
+        if control is not None:
+            control.close()
         result = result.model_copy(update={"reasons": ("create_unknown_" + type(error).__name__,)})
         _write_json(root / "result.json", result.model_dump(mode="json"))
         raise
-    session = OpenSandboxSession(sandbox, owned=True)
+    session = OpenSandboxSession(sandbox, owned=True, export_control=control)
     result = result.model_copy(update={"sandbox_id": session.id})
     _write_json(root / "result.json", result.model_dump(mode="json"))
     return session, result
@@ -217,6 +226,10 @@ def check_exports(session: OpenSandboxSession, result: At07Result, root: Path) -
     with (root / "export-requested.json").open("x", encoding="utf-8") as f:
         json.dump({"remote_effect": "unknown"}, f)
     observations: dict[str, Any] = {"small": session.download(DIRECTORY + "/at07-small.bin", 64) == b"AT07-safe-export"}
+    control = session.export_control
+    observations["frozen_export"] = control is not None and bool(control.observations)
+    if control is not None:
+        _write_json(root / "frozen-export.json", control.observations)
     for label, name, limit in (("large", DIRECTORY + "/at07-large.bin", 1048576),
             ("absolute", "/tmp/at07-outside.txt", 64),
             ("traversal", DIRECTORY + "/../at07-outside.txt", 64),
@@ -285,7 +298,8 @@ def review(result: At07Result) -> dict[str, Status]:
     if "export" in o:
         e = o["export"]
         decide("export", e.get("small") is True and e.get("large") == "artifact_size_limit"
-               and all(e.get(n) == "artifact_path_escape" for n in ("absolute", "traversal", "symlink")))
+               and all(e.get(n) == "artifact_path_escape" for n in ("absolute", "traversal"))
+               and e.get("symlink") in {"artifact_path_escape", "artifact_path_escape_or_type"})
     n = o.get("network", {}).get("data", {})
     if n:
         controlled = host.get("target_positive_before_and_after") is True and host.get("no_denied_target_hits") is True
@@ -332,8 +346,11 @@ def review(result: At07Result) -> dict[str, Status]:
             checks[name] = "unsupported"
     if result.remote_effect != "known":
         checks["cleanup"] = "unknown"
-    if checks["export"] == "passed" and not ATOMIC_EXPORT_SCOPE_SUPPORTED:
-        checks["export"] = "unsupported"
+    if checks["export"] == "passed":
+        if not ATOMIC_EXPORT_SCOPE_SUPPORTED or result.configuration.docker_export is None:
+            checks["export"] = "unsupported"
+        elif o.get("export", {}).get("frozen_export") is not True:
+            checks["export"] = "unknown"
     return checks
 
 

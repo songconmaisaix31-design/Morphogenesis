@@ -127,6 +127,21 @@ def effective_environment(environment: ApprovedEnvironment) -> ApprovedEnvironme
     return environment.model_copy(update={"image": repository + "@" + digest, "image_digest": digest})
 
 
+class DockerExportConfiguration(Contract):
+    """Host-only local Engine binding for the original session's frozen export.
+
+    These are requested deployment settings, never probe evidence or permission.
+    Missing/changed settings cannot inherit a previous isolation record.
+    """
+
+    mode: Literal["docker-paused-archive-v1"] = "docker-paused-archive-v1"
+    endpoint: Literal["unix:///var/run/docker.sock", "npipe:////./pipe/dockerDesktopLinuxEngine"]
+    daemon_id: str = Field(min_length=8, max_length=120, pattern=r"^[A-Za-z0-9:_.-]+$")
+    engine_version: Literal["29.5.3"]
+    api_version: Literal["1.52"] = "1.52"
+    request_timeout_seconds: Literal[10] = 10
+
+
 class IsolationConfiguration(Contract):
     """Effective host settings bound to a probe, reusing the frozen plan profiles.
 
@@ -144,6 +159,7 @@ class IsolationConfiguration(Contract):
     network_deny: bool
     server_process_limit: int | None = Field(default=None, ge=1, le=1024, strict=True)
     use_server_proxy: bool = True
+    docker_export: DockerExportConfiguration | None = None
 
 
 class EvaluationSpec(Contract):

@@ -139,7 +139,7 @@ def test_live_export_unsupported_cannot_be_overridden_by_filled_probe(monkeypatc
     from tests.experiments.test_generated_configuration import configured_backend
 
     plan = make_poisson_plan()
-    backend, record = configured_backend(plan)  # Complete, matched, filled passed/verified record.
+    backend, record = configured_backend(plan, frozen_export=False)  # Old fully matched filled PASS record.
     calls = []
     monkeypatch.setattr(adapter.SandboxSync, "create", lambda *a, **k: calls.append((a, k)))
     report = backend.isolation()

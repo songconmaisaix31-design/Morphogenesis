@@ -15,7 +15,7 @@ from orchestration.experiments import at07
 from orchestration.experiments import at07_live
 from orchestration.experiments.backend import OpenSandboxSession
 from orchestration.experiments.case import PYTHON_IMAGE
-from orchestration.experiments.generated import ApprovedEnvironment, BackendProfile, IsolationConfiguration, IsolationReport, effective_environment
+from orchestration.experiments.generated import ApprovedEnvironment, BackendProfile, DockerExportConfiguration, IsolationConfiguration, IsolationReport, effective_environment
 from orchestration.experiments.trusted import TrustedProbeRegistry
 
 CONFIG = Path(__file__).resolve().parents[2] / "deploy/opensandbox/at07.config.toml"
@@ -31,17 +31,27 @@ def denied_execution(monkeypatch):
     monkeypatch.setattr(socket.socket, "connect_ex", denied)
     monkeypatch.setattr(socket.socket, "sendto", denied)
     monkeypatch.setattr(at07.SandboxSync, "create", denied)
+    monkeypatch.setattr(at07, "FrozenDockerExport", denied)
 
 
-def configuration():
+def configuration(*, frozen=False):
     return IsolationConfiguration(endpoint="http://127.0.0.1:8099", instance_id="1" * 64,
         runtime_profile="git:" + "a" * 40 + ":deploy/opensandbox/at07.config.toml",
         environment=effective_environment(ApprovedEnvironment(image=PYTHON_IMAGE, dependency_lock_sha256="0" * 64)),
-        resources=BackendProfile(process_limit=128), network_deny=True, server_process_limit=128)
+        resources=BackendProfile(process_limit=128), network_deny=True, server_process_limit=128,
+        docker_export=(DockerExportConfiguration(endpoint="npipe:////./pipe/dockerDesktopLinuxEngine",
+            daemon_id="inert-daemon-1", engine_version="29.5.3") if frozen else None))
 
 
-def prepared(tmp_path):
-    return at07.prepare(configuration(), CONFIG.read_bytes(), probe_id="fixture", target_ipv4="172.17.0.2", archive_root=tmp_path)
+def prepared(tmp_path, *, frozen=False):
+    return at07.prepare(configuration(frozen=frozen), CONFIG.read_bytes(), probe_id="fixture", target_ipv4="172.17.0.2", archive_root=tmp_path)
+
+
+@pytest.fixture
+def inert_control(monkeypatch):
+    control = SimpleNamespace(preflight=Mock(), close=Mock())
+    monkeypatch.setattr(at07, "FrozenDockerExport", lambda config: control)
+    return control
 
 
 def test_prepare_only_parses_program_and_preserves_first_directory(tmp_path):
@@ -75,16 +85,17 @@ def test_misconfiguration_refused_offline(old, new):
         at07.validate_configuration(configuration(), CONFIG.read_bytes().replace(old.encode(), new.encode()))
 
 
-def test_sdk_probe_create_is_one_official_bounded_deny_request(tmp_path, monkeypatch):
-    root = prepared(tmp_path)
+def test_sdk_probe_create_is_one_official_bounded_deny_request(tmp_path, monkeypatch, inert_control):
+    root = prepared(tmp_path, frozen=True)
     calls = []
     def capture(image, **options):
         calls.append((image, options))
         return SimpleNamespace(id="inert-sdk-id")
     monkeypatch.setattr(at07.SandboxSync, "create", capture)
-    session, result = at07.create_probe(configuration(), CONFIG.read_bytes(), probe_id="fixture",
+    session, result = at07.create_probe(configuration(frozen=True), CONFIG.read_bytes(), probe_id="fixture",
         authorization_ref="inert-test-reference-not-authorization", api_key="fake-key", root=root)
     assert session.id == result.sandbox_id == "inert-sdk-id" and len(calls) == 1
+    inert_control.preflight.assert_called_once()
     image, request = calls[0]
     assert image == configuration().environment.image
     assert request["network_policy"].default_action == "deny"
@@ -95,32 +106,32 @@ def test_sdk_probe_create_is_one_official_bounded_deny_request(tmp_path, monkeyp
     assert not {"volumes", "extensions", "credential_proxy"} & request.keys()
     assert not at07.unverified_record(result, "inert-interception").verified
     with pytest.raises(FileExistsError):
-        at07.create_probe(configuration(), CONFIG.read_bytes(), probe_id="fixture",
+        at07.create_probe(configuration(frozen=True), CONFIG.read_bytes(), probe_id="fixture",
             authorization_ref="same-reference", api_key="fake-key", root=root)
     assert len(calls) == 1
 
 
 def test_changed_probe_source_never_reaches_sdk(tmp_path):
-    root = prepared(tmp_path)
+    root = prepared(tmp_path, frozen=True)
     (root / "at07-probe.py").write_text("print('substituted candidate')")
     with pytest.raises(ValueError, match="fixed_probe_source_changed"):
-        at07.create_probe(configuration(), CONFIG.read_bytes(), probe_id="fixture",
+        at07.create_probe(configuration(frozen=True), CONFIG.read_bytes(), probe_id="fixture",
             authorization_ref="fixture", api_key="fake", root=root)
     assert not (root / "create-requested.json").exists()
 
 
-def test_create_disconnect_is_durable_unknown_and_cannot_repeat(tmp_path, monkeypatch):
-    root = prepared(tmp_path)
+def test_create_disconnect_is_durable_unknown_and_cannot_repeat(tmp_path, monkeypatch, inert_control):
+    root = prepared(tmp_path, frozen=True)
     create = Mock(side_effect=TimeoutError("transport disconnected"))
     monkeypatch.setattr(at07.SandboxSync, "create", create)
     with pytest.raises(TimeoutError):
-        at07.create_probe(configuration(), CONFIG.read_bytes(), probe_id="fixture",
+        at07.create_probe(configuration(frozen=True), CONFIG.read_bytes(), probe_id="fixture",
             authorization_ref="fixture", api_key="fake", root=root)
     result = at07.At07Result.model_validate_json((root / "result.json").read_bytes())
     assert result.remote_effect == result.cleanup_state == "unknown"
     assert result.sandbox_id is None
     with pytest.raises(FileExistsError):
-        at07.create_probe(configuration(), CONFIG.read_bytes(), probe_id="fixture",
+        at07.create_probe(configuration(frozen=True), CONFIG.read_bytes(), probe_id="fixture",
             authorization_ref="fixture", api_key="fake", root=root)
     create.assert_called_once()
 
@@ -208,11 +219,11 @@ def test_operator_never_mutates_docker_or_prints_secret_fields():
     assert "egress-auth" not in at07_live.INSPECT
 
 
-def test_operator_disconnected_create_is_not_replayed_or_overwritten(tmp_path, monkeypatch):
+def test_operator_disconnected_create_is_not_replayed_or_overwritten(tmp_path, monkeypatch, inert_control):
     # Inert future-capability fixture solely exercises the existing lifecycle.
     # No real supported atomic export or live proof is asserted by this test.
     monkeypatch.setattr(at07_live, "ATOMIC_EXPORT_SCOPE_SUPPORTED", True)
-    root = prepared(tmp_path)
+    root = prepared(tmp_path, frozen=True)
     canary = tmp_path / "canary"
     canary.mkdir()
     (canary / "credentials").write_bytes(b"AT07-SYNTHETIC-NOT-A-SECRET\n")
@@ -240,12 +251,14 @@ def test_operator_disconnected_create_is_not_replayed_or_overwritten(tmp_path, m
     create.assert_called_once()
 
 
-def test_current_operator_stops_before_any_docker_or_key_read(tmp_path):
-    with pytest.raises(ValueError, match="atomic_export_scope_unsupported"):
-        at07_live.execute(root=tmp_path / "missing", authorization_ref="fixture-not-permission",
+def test_unconfigured_operator_stops_before_any_docker_or_key_read(tmp_path):
+    root = prepared(tmp_path)
+    first = {p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}
+    with pytest.raises(ValueError, match="frozen_export_configuration_required"):
+        at07_live.execute(root=root, authorization_ref="fixture-not-permission",
                          key_file=tmp_path / "must-not-read", canary_directory=tmp_path / "missing-canary",
                          accept_infrastructure_limits=True)
-    assert not list(tmp_path.iterdir())
+    assert first == {p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}
 
 
 def test_actual_violations_still_fail_when_host_corroboration_is_missing():

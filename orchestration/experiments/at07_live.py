@@ -111,6 +111,8 @@ def execute(*, root: Path, authorization_ref: str, key_file: Path, canary_direct
     if (root / "create-requested.json").exists():
         raise FileExistsError("original_probe_is_not_replayable")
     config = IsolationConfiguration.model_validate_json((root / "configuration.json").read_bytes())
+    if config.docker_export is None:
+        raise UnsupportedCapability("frozen_export_configuration_required_AT07_NOT_READY")
     server_toml = (root / "server.toml").read_bytes()
     validate_configuration(config, server_toml)
     server, target = inspect("morph-r1-at07-server"), inspect("morph-r1-at07-target")
