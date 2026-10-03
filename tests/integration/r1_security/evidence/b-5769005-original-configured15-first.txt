@@ -1,0 +1,31 @@
+F............FF                                                          [100%]
+================================== FAILURES ===================================
+_______ test_fully_bound_host_configuration_reaches_correct_sdk_request _______
+tests\integration\r1_security\test_b_configured_sdk_boundary.py:52: in test_fully_bound_host_configuration_reaches_correct_sdk_request
+    executor.admit(prepared)
+.venv-q\Lib\site-packages\orchestration\experiments\generated_executor.py:108: in admit
+    verify_isolation(preparation.isolation, self.probe_registry, preparation.plan)
+.venv-q\Lib\site-packages\orchestration\experiments\security.py:139: in verify_isolation
+    raise SecurityRejection("isolation_capability_incomplete")
+E   orchestration.experiments.security.SecurityRejection: isolation_capability_incomplete
+____ test_preparation_mutation_is_rechecked_before_admission[input_bytes] _____
+tests\integration\r1_security\test_b_configured_sdk_boundary.py:99: in test_preparation_mutation_is_rechecked_before_admission
+    executor.admit(prepared)
+.venv-q\Lib\site-packages\orchestration\experiments\generated_executor.py:108: in admit
+    verify_isolation(preparation.isolation, self.probe_registry, preparation.plan)
+.venv-q\Lib\site-packages\orchestration\experiments\security.py:139: in verify_isolation
+    raise SecurityRejection("isolation_capability_incomplete")
+E   orchestration.experiments.security.SecurityRejection: isolation_capability_incomplete
+___ test_preparation_mutation_is_rechecked_before_admission[configuration] ____
+tests\integration\r1_security\test_b_configured_sdk_boundary.py:99: in test_preparation_mutation_is_rechecked_before_admission
+    executor.admit(prepared)
+.venv-q\Lib\site-packages\orchestration\experiments\generated_executor.py:108: in admit
+    verify_isolation(preparation.isolation, self.probe_registry, preparation.plan)
+.venv-q\Lib\site-packages\orchestration\experiments\security.py:139: in verify_isolation
+    raise SecurityRejection("isolation_capability_incomplete")
+E   orchestration.experiments.security.SecurityRejection: isolation_capability_incomplete
+=========================== short test summary info ===========================
+FAILED tests/integration/r1_security/test_b_configured_sdk_boundary.py::test_fully_bound_host_configuration_reaches_correct_sdk_request
+FAILED tests/integration/r1_security/test_b_configured_sdk_boundary.py::test_preparation_mutation_is_rechecked_before_admission[input_bytes]
+FAILED tests/integration/r1_security/test_b_configured_sdk_boundary.py::test_preparation_mutation_is_rechecked_before_admission[configuration]
+3 failed, 12 passed in 2.29s

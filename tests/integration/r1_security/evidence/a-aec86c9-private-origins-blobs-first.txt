@@ -1,0 +1,4 @@
+Core full commit/requested_revision canonical origin PASS: aec86c98ffe8fc3c3a922da5a6e281d553820d05
+Noneditable private purelib imports PASS
+Original Git Python blobs byte-equal: 136
+Official Docker SDK version: 7.2.0
