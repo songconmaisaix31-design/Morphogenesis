@@ -1,3 +1,39 @@
+## 21:15 最终离线工程验收与真实隔离下一步
+
+固定业务 SOURCE：核心 `15de4959646df264530b978dfde9152552b9a76b`，产品 `c84e49bd8e926f50d2c057793e8789cf137b310a`；测试修复 SOURCE `756d5069e7739089f0e5ba1c33eebfb2657b03f0`，P docs-only REPORT `eca3fd48c33fc602f1ddb3f45d91bd88e17b941b`。主控已核对最小两测试文件差异、原断言不变、remote exact/clean；I新165文件 raw Git COPY/nlink1、53产品文件（36 Python+17其他）与原installed逐字节一致，三个pin不变。原900秒角色预算未改，仅该四phase合法POST测试等待900秒；其余GET/重复POST/测试仍默认15秒。
+
+原核心 CI `37123370202` attempt1/head15de 最终SUCCESS：Windows1825PASS/15SKIP/75warnings/1820.43s，Linux1824PASS/16SKIP/75warnings/399.47s；两端strict140、sdist/wheel、SDK schema1.14.0、wheel13包/资源/installed verifier/node依赖通过。主控实际读取I `C:/r1i/successor-2018/r2/logs/ci-full-first.log`；未重跑旧CI或启动额外完整门。原e635 Linux1823/1FAIL/16SKIP及Windows取消、旧3a6两FAIL与所有首失败仍保留。
+
+唯一完整产品首轮仍为255PASS/1FAIL/539.16s/exit1，外层542.527s，`r2/logs/full-product-first.log`保留。P原15秒fresh同node1FAIL/53.43s保留；修后P该单node1PASS/72.29s/exit0/外层74.560787s；I独立仅同node1PASS/75.32s/exit0/外层77.785s，原四phase/三页/环境/权限/secret/mock/no-retry事实断言全部通过，见 `r2/test-repair/logs/independent-target-first.log`、command/identity/assertions文件与原运行脚本。没有再跑其余255项、整套、安装、UI、types或CI，不写whole256green。21:02段落中“原HTTP响应25.032s”口径更正：它仅是request/response文件marker间隔，客户端已超时，不能称完整HTTP响应；原目录phase推断也已更正，具体child慢步骤/资源因果UNKNOWN，实际耗时照实保留。
+
+实际私有noneditable环境 `C:/r1i/successor-2018/r2/venv` 为Python3.13.13，core VCS direct_url exact15de；product原c84 wheel SHA `bc7f6a69a3268072b96ba463be52eb18a60103b2d11f16ce2a54575dd34379e0`。core136 Python/64分发资源、product53原字节与私有导入前缀匹配；affected installed边界106PASS，适用产品mypy30PASS，整包36源10原错误/6文件仍保留。实际锁 `87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb`；profile `deploy/opensandbox/at07.config.toml` 原Git1013字节/SHA `438fe04be51d07188b6bc4b26fbd85c2e7ce28dc02e31ed3af2a4cf27f3c0b79`。旧UI126PASS/8SKIP/build/两视窗installed输入与只读会话观察仅按原b480+2b来源沿用，不伪报在新pin下重测或task_live。新组合空输入只读preview于20:57精确自有进程收尾；尚无人工回答，人工理解NOT_RUN。
+
+主控接受上述离线工程阶段，同原I只收口最终docs-only REPORT、普通合入最新治理/Q报告/B最终授权包并push，不生成新业务SOURCE/pin/CI；原P已done/release retained，原B仅两docs同Task完成精确packet，不并发新增Owner。AOCI仅官方portable配置已发布，15Entries/Challenge/retrieval/维护NOT_VERIFIED、Token节省/费用UNKNOWN；不再重试guard或扩大开发工具权限。C11误装注册已精确隔离备份，3项原依赖来源未知仍保留，不声称系统Python全恢复。OpenCode余额阻塞保留，不重试付费route。
+
+依据用户明确顺序与现行Spec§14.3：“AT-07 的真实沙箱探针须单独计入安全测试授权”，下一步在最终可审查包齐全后请求一次独立真实无害AT07授权；当前未启动Engine、未读key、未SDKcreate、未执行候选/科学。包须明确Desktop启动可能恢复他项目restart容器、动态egress端口47400..47410仅批准范围可达的实际前置、sidecar/cache无资源caps/总峰UNKNOWN、一次create/600秒窗口/精确归属收尾。为原TrustedProbeRegistry完整实例绑定，批准选项可在全PASS及独立审核、sandbox pair/volume/cache清理确认后移除target并停止但保留同64位serverID为retained_stopped；不是全资源删除，后续L2需明确授权启动同ID并重核原全profile，删除/重建/改变/未知则旧probe无效/L2停止。当前仅批准写进packet，未批准实际保留/启动。AT07真实全通过后才允许候选进入真实环境，再一次L2问题/材料切片；L3/多用户/跨宿主/大效率/完整RSI/main/tag/部署不加入。MVP/完整R1尚未宣称完成。
+
+## 21:02 HTTP客户端测试边界修正决定
+
+原P实际fresh隔离同node保留15s全部断言再次1FAIL/53.43s。原事件时序证明本次失败为replication，原8f68 inheritance是此前别案，root/I首次目录推断已更正保留。replication原HTTP响应25.032s、native mock0.01245s；fresh仪器化require_ready0.431s、真实inert driver13.681s、run_from_ui14.191s后还有DTO投影。原runner.py46为900s角色total/5s margin，原launch_cli同步等child；15s只是测试client窗口，不是Spec/用户新性能承诺。无已证业务delta，不以再跑同RED判host噪声。
+
+root明确追加原P互斥write_paths tests/test_web.py，仅现有request helper可选timeout参数(default15)；tests/test_research_api.py唯一四phase POST显式900s既有角色总预算，其所有GET/其余255测试仍15。原409/四phase/三页/authority/secret/mock/task_live等事实断言完整，真实timeout仍FAIL，不吞错误/改生产/加新HTTP模块/改原runner预算，实际耗时照实记录。只原单node修后精准验证、SOURCE/REPORT普通push [skip ci]，产品生产 SOURCEc84未变，新testSOURCE分开；唯一I按raw生产53字节等价只独立精确验证该新testcase，不重已255/完整套/UI/安装/绿coreCI，不称whole256PASS，原whole255/1及fresh1FAIL保留。
+
+## 20:53 最终产品首RED退原P定向诊断（不重全套）
+
+固定15de4959646df264530b978dfde9152552b9a76b+c84e49bd8e926f50d2c057793e8789cf137b310a唯一fullproduct自然完成255PASS/1FAIL539.16s、childexit1/外层542.527s，raw C:/r1i/successor-2018/r2/logs/full-product-first.log/commands.jsonl 保留。唯一tests/test_research_api.py::test_four_phases_real_runner_boundary_and_three_page_facts在376行POST phase，经test_web.py42 urlopen(timeout15)→socketTimeoutError。三个页面/runner断言未完成，不能写PASS或用旧256补同来源。新LinuxCI1824PASS16SKIP399.47s、strict140/build/SDK1.14/wheel门通过，Windows原run37123370202仍pytest，不改变或retry。
+
+原P同Owner/树/branch/terminal后继parent task_278fd6b98458，write_paths仅tests/test_research_api.py、docs/tracks/r1-product.md和新P私有诊断材料。先只读完整trace、失败phase原fixture/childargv-env/start-end/audit、源码调用与旧b480+2b差异，区分测试客户端15s工具timeout、真实产品超时契约与宿主子进程首次导入/环境资源；用户明确性能目标只如实记录，不把未承诺最优成绩或工具默认timeout变产品收口条件。保持原状态/phase/mock/task_live/秘密/原事实断言，不擅自拉长共享test_web.py timeout、skip/弱化断言/改生产，只原同case全新私有fixture必要定向复核，不重255绿项/整套/UI/CI/全旧type或全重安装。可只读使用I最终r2非editablevenv运行P新私有子进程，不写I树/env/global包/原首fixture、不重放原unknown请求；源修复必要先Handoff精确域路径/理由由root授权原Owner，不I自修。环境修复或fixture修复分层记录，SOURCE若不变明确无新业务SOURCE；如test-only修复，发布SOURCE/REPORT普通push [skip ci]、保持原来源与首次255/1，唯一I据实际delta安排必要定向安装而非全suite重跑。Domain变化另固定新组合并验收，禁止为绿色表演扩大模块/框架。
+
+B同Task最终授权包继续待真实工程结果补，不Engine/key/prepare/probe/SCI；工程结果可审阅齐全后方按用户要求独立授权AT07，已核生命周期成功后600s内stop并显式retain同serverID为待授权选项，不能从cleanup bool推缓存清理/删除重建探针继承。
+
+## 20:38 最后固定SOURCE组合（工程仍在验收）
+
+核心 SOURCE 15de4959646df264530b978dfde9152552b9a76b / 产品 SOURCE c84e49bd8e926f50d2c057793e8789cf137b310a 已由主控实际核对remote exact、clean、普通祖先与最小diff。15de对e635仅root两docs与原Qjunctionfixture两行，生产/依赖/锁零delta；c84对P REPORT684仅三个既有pin文件4增4删，98锁记录仅五处完整SOURCE SHA替换、Docker7.2.0未漂移。原Q修复 SOURCE3aa95d94828449fd92e6bb4fe6385178f3dac971 / docsREPORTc4de24734f3f8d85446265d39ed6365a92e0d3ee已接纳/done/release retained，首RED1FAIL与后1PASS+5PASS、模拟恢复true保留；真实Linux门待新CI不冒充已绿。
+
+唯一I原Task task_33b99bbe70e8/ctx_154fc9202fc1持续，原自动新CI37123370202 attempt1 exact15de in_progress；原37122569886 attempt1 e635 Linux1823PASS/1FAIL/16SKIP/425.33s、WindowsCANCELLED与type/build/SDK/wheel未完成保留且不retry。I最初e635+8c私装已有raw与COPY保留、未开whole product；root正式接纳c84后以C:/r1i/successor-2018/r2/新私有COPY只一次whole product/必要types/精准受影响installed边界，原绿UI与browser不因pin/docs重复，新identity/资源实际核验。原P后继 task_278fd6b98458/ctx_fe35bd029f08仅完成own docsREPORT，不增加研发。SOURCE不得取REPORT/主控docs/单Q SOURCE。
+
+原B task_36dcf2a5df0b/ctx_d8fb1226f9a7当前docsREPORTd7d0ff8e76d5e464d99f948c1b41b8067f619c8e已root读取/接纳，两docs零业务delta；同Task等待I实际installed/工程原日志后一次精确补授权包。typed外层官方CLI绝对路径/同endpoint/私有空config/受控子env，旧裸CLI示例保留但不可执行，本体/插件未验保持STOP；runtime_profile未来必须git:15de完整SOURCE:deploy/opensandbox/at07.config.toml，实际daemon/server/profile未知不填PASS。不会为等待数字重复docs发布或开新Owner。当前AT07/候选真实执行/L2/人工理解均NOT_RUN；工程证据齐全并可审阅后按照用户明确顺序独立授权真实无害AT07，全部实际通过才准候选，不加L3/范围外功能/性能最优目标。
+
 ## 20:31 原CI首RED退原Q修复，不重跑原run
 
 原CI37122569886 attempt1/head e635已completed：Linux1823PASS/1FAIL/16SKIP/425.33s，WindowsCANCELLED。唯一失败为Q新test_untrusted_private_config_directory_cannot_reach_cli[junction]：fixture只patch asset_paths.sys.platform=win32而Linuxstat无IO_REPARSE_TAG_MOUNT_POINT；原no_links抛AttributeError，预期拒绝种类/CLI零调用断言未完成。不是已确认生产改动缺陷，不能skip/扩大允许AttributeError/改assertion冒充通过。I保留原fullraw及不重试该run，未开始新全产品暂缓，若已开始保留真实结果不盲停重开。
