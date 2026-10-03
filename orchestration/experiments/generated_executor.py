@@ -180,6 +180,8 @@ class GeneratedExperimentExecutor:
             try:
                 capture(f"outputs/{GENERATED_OUTPUT}",
                         session.download(f"{DIRECTORY}/{GENERATED_OUTPUT}", preparation.plan.backend.artifact_bytes))
+            except TimeoutError:
+                raise  # Frozen export/restore uncertainty must remain unknown.
             except Exception as error:
                 capture("download-output.json", json.dumps({"error_type": type(error).__name__}).encode())
                 if state == "succeeded":

@@ -224,3 +224,163 @@ SOURCE `d85aa95e8da406d598f3658492e3d615bba8a28f` 保持不变，后继 REPORT �
 本轮没有重跑全仓1300项，也没有重跑 B 原 worker180秒用例；其本地1 FAIL/21 PASS 的根因继续 **UNKNOWN**，B 精确 SOURCE 的双平台独立 CI 通过不解释该历史超时。本组合的新增实际证据只包括本节私有 VCS 安装、原始字节门、stdio/并发6项及变动模块 strict。
 
 P/Q 可据该已安装组合继续精确 repin 和独立验收；I 仍待主控在 P/F/Q 前置完成后独立派发。本报告不代表完整 R1 或最终产品组合通过。真实科研/模型、资料外发、真实沙箱/隔离探针、云资源、Hub、发布和 L2 均 NOT_RUN；历史人工清理事项仍由主控按 C 报告处理。
+
+## 10. FR-04 局部上下文与原生预算接续（2026-10-03）
+
+本节对应新任务 `task_8f61e0bb9e35` / `ctx_c60dc35cb810`，以前各节及首次 RED/UNKNOWN/NOT_RUN 均保留。范围依据主控计划 `66e2a26` 和用户本轮指令；不扩展学科、Agent 品牌、计算语言、复杂评分或 RSI。原 A 分支不变。
+
+### 10.1 精确来源与已有调用核查
+
+普通合入最终核心 REPORT `08b31b39c075571ffd247e2b591d657ce09b6b34`（含 SOURCE `2c63bc7c9e49edff28e26f5930a22d0415fadd65`），形成基线 `be5b6fe9bad959c73b0234a5b64f3e7e577d16a4`。随后普通合入 C SOURCE `e82cae36038c386aec999642289ac1d78c82a9ed` 与 REPORT `52b8d26da04aec41ceb7e008445ef2f1dc088d53`；没有 cherry-pick、改写 C 文件或丢弃历史。
+
+只读核查私库 SOURCE `9e2718789cb67f8b829207e17dac4d95a88e59c9` / REPORT `a7f657d18fae33fc2a4df92b5fcb60dcd7839c5d`，P 也确认：`backend.py:160` 的 `ServiceBackend.research_context` 只转发核心，`:208` 的 `task_research` 读取 `service.context(task_id)["research"]`；`choice_mcp.py:45` 和 `r1_native.py:135` 没有另一套按分支/依赖/引用选择的实现。`web/facts.py` 的时间线过滤不等于 FR-04 背景选择。因此本次在原核心边界补齐，P 继续薄转发，没有新知识模块或调度器。
+
+A 初始 SOURCE `def0e6e107c7c1885f6615b945b2f6551ab9ba25` 已在 68 项聚焦及 changed4 strict 后 push，交给 P 准备精确安装。静态复核又发现 `create_project` 的幂等入口未经过其他项目动作已有的 active 检查，后继 SOURCE **`cea7923fec48c10e043c1fea40c99749e0b6a114`** 仅增加该检查及原三参数化测试中的对应动作；普通 push 与 Owner `ls-remote` 精确一致，未将前一源码测试结果冒充后继结果。主控独立远端连接曾失败的记录由主控保留，本轨成功查询不解释那次失败。
+
+### 10.2 正式局部上下文调用链
+
+原 `server.py:48 project_context` → `service.py:188 context` → `service.py:1257 _task_research` → `service.py:975 research_context`。原 `server.py:141 research_project(action="read")` 同样调用该选择入口；工具总数仍为 23。兼容的新增可选参数是：
+
+```python
+service.context(task_id, *, limit=100)
+service.research_context(project_id=None, *, limit=100,
+                         task_id=None, branch_id=None, overview=False)
+```
+
+权限先于相关性：任务从原 TaskLedger locality/project 过滤读取，任务关联的 note/hypothesis/proposal 不可通过引用绕过权限。默认种子优先当前成员持有的有效任务，其次原账本与 research-v1 允许、能力匹配的候选；这只选择读取背景，不创建/选择/认领任务。无种子时保留项目目标、共享未解决背景和有界分支目录，不广播各分支笔记。显式任务/分支锚点必须在项目与原授权范围内。
+
+局部包保留同分支相关记录，再沿原依赖、派生关系、note references、hypothesis supporting/opposing、来源 ID 与原 result ID 选择已有记录；跨分支引用只引入关联记录，不自动展开那个分支的所有邻居。权限不允许的引用不继续遍历，原引用字符串保留并标记 unresolved。能力不同的依赖/引用结果可作为只读背景到达，原 claim 仍检查能力、依赖、租约、fence、预算与未知效果。
+
+返回原来源/版本/许可/定位、适用条件、争议与未验证状态，保留 `research.notes` 旧字段。`selection` 给出锚点、理由、候选窗口/解释截断及未解引用；各集合在权限与相关性选择后截断。`knowledge.py:359 events` 在选入后计数，避免无关或不可见事件先占满分页。局部 research-v1 是已有事实的子集，份额不重新计算或归一化；discover 的原政策建议与 claim 审计语义保留。
+
+人看的项目总览使用 `overview=True`，仍受原权限与 limit 限制；`research_package` 显式使用该总览，保留项目事实与原执行/资产/采纳链的有界导出。P 已接受在自身工作台调用加 `overview=True`，没有在 A 修改私库。
+
+### 10.3 宿主原生预留连接
+
+P 首 RED 揭示：原 native 启动预留被 `_budget_ready` 当成其它 pending，从而阻塞自己的 MCP claim；另一方面直接启动未检查原 TaskLedger 未确认效果。经主控明确授权，A/P 交换并实施最小宿主接口。
+
+`models.py:23 NativeInvocationBinding` 保存本轮 UUID、完整原 `Reservation` 与过期时间；`HostConfig.native_invocation` 只由受保护宿主配置提供，不进入 MCP 参数，也不写入项目永久 `_host_binding`。`service.py:695 admit_native_invocation(invocation_id, bound, *, ttl_seconds)` 先核原项目、预算/未知效果、账本期限，再调用原 `BudgetLedger.reserve`；bound 必须严格等于宿主原 `research_execution_bound`。期限取 TTL、原预算与任务账本期限的最小值；预算额度与调用计数不重置。
+
+`service.py:731 _native_reservation` 逐次核原 pending 记录全字段、project/member/request/task/provider/model/bound/时间；关闭、过期或错配绑定拒绝。HostConfig 再验证先于打开新账本，避免 `model_copy` 绕过身份验证。项目动作、任务动作和 create_project 都检查 active；`_budget_ready` 只识别自己的那一条 pending，其它 pending/uncertain 与原 TaskLedger unknown 继续阻止准入。新 invocation 不能继承旧未知预留的例外。
+
+原动态执行的 `begin_execution → archive → budget.settle → confirm_execution` 顺序未改变：active 校验本身只检查自己的 native hold，允许合法执行完成回执继续落账；下一次准入仍检查全部未知状态。P 保持原退出 settle/mark_uncertain 和受保护配置传递，不引入第二预算账本、session/Attempt/Manifest 系统。本接口没有放行真实科研或模型调用。
+
+### 10.4 首次失败与源码聚焦验证
+
+原始基线 LF archive 在实现前保存到 `.runtime/fr04-native/baseline`，新测试叠加于此。`first-red-source.txt` 核实 service/models/server/knowledge/policy 五个归档文件逐字节等于原 `2c63bc7` Git blob，未回滚或覆盖工作树 WIP。从该目录运行私有解释器 `-I`，只把该归档放入导入路径：
+
+```powershell
+../../../.venv-r1-a/Scripts/python.exe -I -c 'import sys,pytest; from pathlib import Path; sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))' tests/research/test_local_context.py tests/research/test_native_invocation.py 'tests/research/test_dynamic_service.py::test_dynamic_service_accepts_only_independent_original_chain_and_changes_opportunities[False]' -k 'not stdio' -q --tb=short
+```
+
+实际 **19 FAIL / 1 deselected / 38.78s**，`first-red.log`：六项相关性失败，十二项缺失 native 绑定入口，以及正证据 share 仍为 0.5。A 按 C Handoff 把旧支持断言从 `== .5` 收紧到 `> .5`；C 拥有公式及正式 discover/choose/claim 接线新测试，A 未代写政策领域。
+
+首次实现组合运行加入旧 semantics/v1/service/dynamic/policy_entry，实际 **39 FAIL / 57 PASS / 1 deselected / 43.64s**，`focused-first.log`：14 项同一相对 scope 调用 absolute-only helper 的回归、1 项新 MCP 测试误读 union 的 `result` 包装、24 项原政策测试的 `sdk_process_failed`（源码工作树没有相邻官方 SDK）。修正原权限读取及测试 DTO 解包，断言目标不变；SDK 相关项留待精确 COPY 安装入口复验，不修改 SDK/门或原断言。
+
+```powershell
+.venv-r1-a/Scripts/python.exe -m mypy --strict --follow-imports=silent swarm/research/knowledge.py swarm/research/models.py swarm/research/service.py swarm/research/server.py
+.venv-r1-a/Scripts/python.exe -u -m pytest tests/research/test_local_context.py tests/research/test_native_invocation.py tests/research/test_research_semantics.py tests/research/test_research_v1.py tests/research/test_service.py tests/research/test_dynamic_service.py -k 'not stdio' -q --tb=short
+```
+
+实际 changed4 **strict PASS**（`strict-first.log`），修复后 **68 PASS / 1 deselected / 89.84s**（`focused-repaired.log`），对应 SOURCE def0e6e。测试进程使用局部 `OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=1`，不改变全局。新增行为测试覆盖同项目无关分支排除、原依赖/结果 ID/引用可达、权限先于引用遍历、能力过滤、来源条件/争议保留、可见截断、无任务成员背景、正式 FastMCP 路径，以及 native 的原 hold、关闭/过期、身份/bound 错配、未知效果、累计调用/成本与期限。
+
+### 10.5 后继精确 COPY 安装与正式入口验证
+
+按主控串行窗口，在 P 明确全部重进程退出后，仅更新 A 自有 `.runtime/acceptance-4afe462/venv`。本轮证据独立置于 `.runtime/fr04-native/acceptance-cea7923/`；旧 `direct_url.json` 备份为 `previous-direct-url.json`。`git -c core.autocrlf=false archive` 精确提取 cea7923，Python UTF-8 tar 读取归档；独立 `run/` 只放该归档的 tests 和 pytest 配置，没有生产源码。
+
+以下安装进程局部设置 `UV_LINK_MODE=copy`、独立 `UV_CACHE_DIR`、`GIT_CONFIG_COUNT=1 / GIT_CONFIG_KEY_0=core.autocrlf / GIT_CONFIG_VALUE_0=false`，以及 BLAS1；没有改变全局 Git/HOME/auth/provider，未使用系统 editable 或其他轨环境：
+
+```powershell
+uv pip install --python .runtime/acceptance-4afe462/venv/Scripts/python.exe --no-deps --reinstall-package morphogenesis 'morphogenesis @ git+https://github.com/songconmaisaix31-design/Morphogenesis.git@cea7923fec48c10e043c1fea40c99749e0b6a114'
+uv pip check --python .runtime/acceptance-4afe462/venv/Scripts/python.exe
+```
+
+VCS 实际解析、构建并安装 cea7923，exit0（`install-first.log`）；**103 packages compatible**（`pip-check.log`）。首次字节核对命令的相对解释器路径多写一级父目录，PowerShell 报路径无法识别，Python 尚未启动；改用 A 同一私有解释器的绝对路径后执行。没有改安装字节、门或预期源。
+
+`installed-origin.json` 记录绝对解释器和 service 的 site-packages 路径、非 editable `direct_url` 的 commit/requested_revision 均为 cea7923、官方 GEP SDK **1.14.0**。13 个 `swarm/research/*.py`（包括原 C policy/feedback）、原 `local_assets/store.py`、原 `bridge_node/asset_bridge.mjs` 共 **15 文件**，安装内容与 LF 归档分别逐字节等于该 SOURCE 的原 Git blob；没有做换行归一化替代比对。SDK 沿用 A 自有环境原锁定安装，不借装全局包。
+
+在 `acceptance-cea7923/run` 中，将下列 `$taskPython` 设为上述 A 私有解释器的绝对路径。父进程先核生产 service 来自 site-packages，再仅加入 tests-only 工作目录；stdio 子进程也使用同一解释器的 `-I` 正式 `swarm.research --config`：
+
+```powershell
+& $taskPython -I -u -c 'import sys,pytest; from pathlib import Path; import swarm.research.service as service; assert "site-packages" in str(service.__file__); sys.path.insert(0,str(Path.cwd())); raise SystemExit(pytest.main(sys.argv[1:]))' tests/research/test_native_invocation.py tests/research/test_local_context.py::test_official_stdio_member_local_context tests/research/test_stdio_dynamic.py tests/research/test_policy_entry_v01.py -q --tb=short
+```
+
+**43 PASS / 52.52s**（`installed-focused-first.log`）：native 13 项，包括关闭/过期配置不能重放 create_project；新 context 正式 stdio 1 项；原固定输出 generated author/independent reviewer/member loop 正式 stdio 1 项；旧 policy_entry 全部 28 项。保留 1 条 `PytestAssertRewriteWarning`：为了确认导入来源而预导入 service/anyio，pytest 未能再重写已导入的 anyio；没有修改测试断言。此前源码路径的 24 项 SDK RED 在此真实安装入口通过，旧日志不改写。
+
+从已与安装/原 blob 一致的 `acceptance-cea7923/source` 执行后继模块检查，避免把整个 site-packages 当类型源码根：
+
+```powershell
+& $taskPython -I -m mypy --strict --follow-imports=silent --cache-dir ../mypy-cache swarm/research/knowledge.py swarm/research/models.py swarm/research/service.py swarm/research/server.py
+```
+
+**Success: no issues found in 4 source files**（`strict-final.log`）。本轮没有重跑已通过的全 68 项，也没有重跑全仓或提高任何超时/阈值。测试/type 进程均结束；按本安装路径查询 Python/Node/uv 进程为 0，于 `msg_998ec8505d6a` 立即将共享重窗口释放给主控/B。
+
+### 10.6 交付与剩余限制
+
+最终 SOURCE 为 **cea7923fec48c10e043c1fea40c99749e0b6a114**；后继 REPORT 仅修改本文件，独立 commit/push，精确报告 SHA 随交付消息和远端核对记录。主控在 `msg_6c8d1363b0cc` 已独立确认后继远端，前述首次网络失败仍保留。
+
+本次完成 A 的局部上下文、宿主原生预算连接、调用测试和必要修复；C 正证据领域来自精确普通 merge，P 接续/UI 薄适配由 P 原 Owner 完成。本地原生相关测试使用 mock executor，正式 stdio 的研究执行使用固定 mock 输出，均只证明 contract_local/L1 接线；未知 usage/cost 不写成零，候选代码不在宿主执行。
+
+完整最终产品组合、一次完整离线回归与 installed 输入观察仍由独立 I 后续固定组合验收；本报告不代表整产品 R1 完成。AT-07、真实模型/科研/沙箱或隔离探针、外部科学资料抓取/上传、云资源、Hub、发布及 L2 均 **NOT_RUN**，不能据此候选直接进入真实环境。未更改全局 Python/editable 或绕过此前 C 清理的策略拒绝；私库已有 PDF 入口不属于本轨缺口。后继 AOCI 开发索引属于另外的任务，不混入本次源与证据。
+
+## 11. 受信 Docker 配置与有限核心 AOCI 收口（2026-10-03）
+
+### 11.1 精确源码和本次变更
+
+继续原 A Owner、worktree `C:/Users/DW/orca/workspaces/Morphogenesis/morph-r1-research-1003`、branch `songconmaisaix31-design/morph-r1-research-1003`。本 Dispatch `task_7943319add9b / ctx_6aadc6cb132c` 接续已完成配置，不重写领域源码。普通 exact merge 已包含 B SOURCE `5769005b09f1b756c94fdad0649a6b74690c0ca9`、B REPORT `5aebd2eb7af774b3dc496ad9620548f6e7852e09` 与治理 `11f2ff872ca815b38e33d2011208e2503bbf42b5`；后者普通 merge 为 `36134e3d26502c56c2ff2bc20a781efff707db5c`。root 后续 Q 文档治理不改变本次十源，没有为文档循环合并或重测。
+
+已完成宿主配置 SOURCE `aec86c98ffe8fc3c3a922da5a6e281d553820d05`：`GeneratedHostSettings.docker_export` 默认 None，原 live factory 精确传 `docker_export=self.settings.docker_export`；HostConfig 仍通过封闭 generated 设置验证，候选/产品工具输入不能注入控制面，未读取 DOCKER_HOST/context，也不填假 Engine/daemon ID。该 SOURCE 已验收 **9 PASS / 8 deselected / 10.18s**、changed2 strict PASS，日志 `docker-config-final.log`、`strict-first.log`；首次失败和修复日志仍在同目录。按恢复指令，本 Run 没有重跑已绿门；Q 独立非editable安装验收以其自身 SOURCE/REPORT 为事实源，A 不把它当本次新运行。
+
+本轮 AOCI SOURCE 为 **8dd85c1f88698cd8a22d72b5575e45e9431c0ce0**，已 push，`git ls-remote` 返回相同 SHA，SOURCE 后 `git status --porcelain` 为空。其九项变更仅为官方 Root/Meta/Code、`.aoci/.gitignore/config.json/baseline.json`、`.gitattributes`、`.gitignore` AOCI 区块和 `docs/development/aoci.md`。本章节是后继 docs-only REPORT，SHA 随终态交付/远端证据提供。
+
+`cea7923fec48c10e043c1fea40c99749e0b6a114`、`faf23260df7a4f530eb421680f71eb6dc7c72e40` 与 B 源码的 `git merge-base --is-ancestor ... HEAD` 均 exit0；没有 cherry-pick、force push、历史证据重写或业务源变更。十个当前源文件字节与首个官方机器候选的 source_sha256 全部相同。
+
+### 11.2 来源、权限和索引范围
+
+复用官方 [AOCI-CODE v0.1.0-rc17](https://github.com/aoci-spec/aoci-code/tree/v0.1.0-rc17)，commit `93d6ad5a87fd9624a51cae61b2134d33944501fb`、[FSL-1.1-MIT](https://github.com/aoci-spec/aoci-code/blob/v0.1.0-rc17/LICENSE)。实际二进制 `C:/Users/DW/orca/tools/aoci/v0.1.0-rc17/windows-amd64/aoci.exe` 的 `--version` 与 SHA256 `4013002f49d66e2a3998c7b852a8d28d37052af2fc3328ba7fb45246a3c75c67` 匹配 P 已校验版本；未重下载、复制 binary、安装系统包或重新审计上游签名/构建可复现性。
+
+精确业务白名单仅 `swarm/research/{models,service,server,dynamic,knowledge,records,policy,feedback}.py` 和 `swarm/{budget,task_ledger}.py` 十项；其它默认 exclude。各 Entry 从当前源码结构和行为决定点逐项理解，手工编写完整 Tag/F/R/A/S；仅用程序运输官方结果、检查已有字节绑定，不通过模板、AST、路径、符号或导入生成语义。C policy/feedback、预算和原账本只读，没有跨轨写入。
+
+三个 aoci support 文件不是业务 Entry；数据库 Volume 未启用。测试、历史文档、锁文件、产品仓库/UI、运行目录、B executor/validator/asset store 内部实现及其它核心模块未索引。R 引用未索引路径只标出重要调用契约，不能推出全仓覆盖。AOCI 不成为科研执行依赖、预算或授权来源。
+
+### 11.3 实际 CLI/MCP 与终态检查
+
+以下 CLI 均使用上面的官方绝对 binary，完整 JSON 先落 `.runtime/aoci-core/`，再按真实 schema 选取小字段观察，未把约31MB Scope/完整状态反复注入模型：
+
+```powershell
+& $taskAoci index agent guide --agent codex --json
+& $taskAoci scan --json
+& $taskAoci verify --json
+& $taskAoci check --json
+& $taskAoci index agent guide --agent codex --json
+git diff --cached --check
+git ls-remote origin refs/heads/songconmaisaix31-design/morph-r1-research-1003
+```
+
+`$taskAoci` 仅表示本机该 binary 的绝对路径，未改变全局 PATH。普通首次 scan exit0：fingerprint_count=13，业务 targets=10；不是重扫或强制覆盖 baseline。Guide 指示 no-argument MCP Maintain，实际完整批次10 candidates，保留其 code_plan.batch_id/candidate_id/source_sha256，经 `aoci_update_entry(entries=完整10项)` 一次原子应用 **10/10，aligned=true，remaining=0，finding_count=0**。
+
+按官方终态顺序 Verify → Aggregate Check → Guide 均 exit0；structure_valid/governance_aligned=true、Guide `stage=aligned,complete=true,next_action=none`。Missing/Stale/Unbaselined/Orphan、observed review 全为空，pending_transactions=0、recovery_pending=false、third_party_conflict=false。支持资产 stage 后再次 Verify 仍同 Composite 且 aligned；没有手工编辑 baseline/ledger。
+
+本 Run 实际原生调用 `mcp__aoci__aoci_rules/maintain/update_entry/overview/search`，服务返回 root 与 rc17 匹配。两次完整 Overview 各 **10 Entries / 3 sections / 2916 estimated tokens**，body_utf8_bytes=9816、无分块；每次严格 Challenge **10/10**，最终 delivery confirmed、attestation pass、governance aligned、cognition assimilation complete，v2 `current_system_cognition_reliable=true`。框架掌握90%为模型自评，只针对所选范围，不代表完整实现/runtime知识。
+
+最终 scope Index `20cc06d43efd858321a49ad6a79235c7d020332c1a0979d620553df07ef9430c`；Composite `2b20d17adec60e2e28a9f51d22502ce3cec7317d0430f972dab62b64b3596de2`；Code Volume `67d2c01f9ac5cd157049547f83d798834f33faa4636d1e73904e62118cddf5b7`。这些均为官方结果，不新增 Hash/Receipt/证明系统。
+
+两轮相同 search 命中相同 Entry：FR04 → service(1)；native → models/service(2)；positive → policy/service(2)；docker_export → dynamic/models(2)。两次完整 Overview 之间，按官方明确 `intent=cognition_optimization,object_refs=[code:swarm/research/knowledge.py]` 返回的完整单对象批次，仅把 knowledge 规模标签 PD8L 校准 PD8M（实际374行），F/R/A/S 和 source binding 保持相同；原子 replaced=1/remaining=0、无 warning。随后再完成 Verify/Check/Guide 与第二次完整 Overview。没有造源文件变化来冒充 source-drift 测试，也没有扩建优化框架。
+
+### 11.4 首失败与完整日志位置
+
+全部原始官方初始化、Scope失败/rollback/explicit observe review、恢复及本轮实际输出保存在本 worktree **`.runtime/aoci-core/`**（本机 Git ignored，不上传秘密或 runtime receipt）。旧初始化完整归档 **`.runtime/aoci-core/failed-init-preserved-20261003T051653763Z/`**；root `msg_a13825ef12b7` 仅授权一次本轨自有未跟踪0Entry初始化保留归档，恢复检查点前已完成，本 Run 未再次归档/init。`init-recovery.json`、`scope-rules-recovery.jsonl`、`scope-recovery-before-scan.json`、`recovery-policy-comparison.txt` 证明 managed_scope/cognition_budget/automation 不变。
+
+- 旧 `scope-support-activate.json` exit2 `managed_scope_source_guard_snapshot_changed`；`guide-support-failed.json` 保留 recovery_pending；`scope-support-rollback.json` 为 rolled_back，后续两次 policy-bound apply 仍保留，不能把历史失败改成绿。
+- 本 Run `mcp-maintain-resumed.json`、`mcp-apply-resumed.json` 记录首机器批次/10项apply及knowledge规模warning；`verify/check/guide-established.json` 记录首次终态。
+- `mcp-overview-established.json` → `mcp-attestation-established.json` 的首 confirmation version 不匹配：delivery incomplete，严格语义 Challenge已pass；只按[官方规范](https://github.com/aoci-spec/aoci-code/blob/v0.1.0-rc17/spec/public/aoci-overview-delivery-v1.txt)补正确 `overview-delivery-receipt/v1` confirmation（`mcp-delivery-established-corrected.json`），没有语义答案重试。
+- `mcp-maintain-optimization.json`、`mcp-apply-optimization.json`、`verify/check/guide-final.json`、`mcp-overview-final.json`、`mcp-attestation-final.json` 为最后对齐和完整认知结果；`mcp-search-first-0..3.json`、`mcp-search-repeat-0..3.json` 为重复检索。
+- `source-bindings-first.log` 保留首次本机JSON默认GBK读取的 UnicodeDecodeError，未开始候选比较；显式UTF-8后 `source-bindings-repaired.log` 才得到十源字节相同。`version-first.log` 保留误用 `aoci version` 的 unknown command，正确 `--version` 如前。命令原输出还保留在本 Dispatch工具会话；这些读取错误不改业务源码或阈值。
+
+### 11.5 本机配置、未执行项和交接限制
+
+`.codex/config.toml` 是 ignored 项目绝对 stdio 配置。旧会话仅私有官方 ClientSession initialize/list_tools/call_tool；Orca重启后的本 Run已实际加载原生MCP工具，配置/连接/热加载分别记述。AI endpoint disabled，没有改当前Agent提示、全局 HOME/auth/provider/PATH或加 hooks。AGENTS 是 root独占，其官方init行尾产物按root明确指令恢复原blob；原backup保留并忽略，不进入本次commit。没有原.gitattributes例外被移除，没有 renormalize、批量历史行尾改写。
+
+索引section与本机配置明确绑定 **A worktree绝对目录**。其它checkout直接复用、跨宿主迁移、本索引对I新组合的freshness均未验证；I必须先沿自己的官方Guide核对并执行其实际重新绑定/迁移要求，若十源有delta仍由原A Owner按官方Maintain收口。不能手动替换目录、伪造baseline/receipt、复制P human approval或以全仓clean冒充索引fresh。
+
+实际模型 token用量、成本、节省百分比均 **UNKNOWN**；estimated_tokens只表示工具估算的索引大小。没有重测已绿9PASS/strict2或Q门，没有新COPY/install/build窗口，也未启动OpenCode、Docker/WSL、真实AT07/沙箱/模型科研、L2、外部资料上传、系统清理或发布/main/tag。P受保护配置与未完成human TTY receipt不属本轨；本任务完成不代表完整MVP/R1通过。

@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "created_at": "2026-10-03T08:32:36Z",
+  "updated_at": "2026-10-03T08:38:13Z",
+  "files": {
+    "aoci.code.txt": {
+      "role": "index",
+      "sha256": "67d2c01f9ac5cd157049547f83d798834f33faa4636d1e73904e62118cddf5b7",
+      "size": 6132,
+      "normalized_sha256": "67d2c01f9ac5cd157049547f83d798834f33faa4636d1e73904e62118cddf5b7"
+    },
+    "aoci.meta.txt": {
+      "role": "index",
+      "sha256": "ebafbe54981dfb23686171bb5253ded8c2bbf9c697b73a1b1af9283d686a5cc4",
+      "size": 2307,
+      "normalized_sha256": "ebafbe54981dfb23686171bb5253ded8c2bbf9c697b73a1b1af9283d686a5cc4"
+    },
+    "aoci.txt": {
+      "role": "index",
+      "sha256": "0a54172fc6cb1a8d61b352327c1497559a3fdff60fd0a59c381742ffb78659e9",
+      "size": 311,
+      "normalized_sha256": "0a54172fc6cb1a8d61b352327c1497559a3fdff60fd0a59c381742ffb78659e9"
+    },
+    "swarm/budget.py": {
+      "role": "index",
+      "sha256": "f825b5fd29f70140c4314518403ea83b3ccdd8a62a4c604ae91669728b02e497",
+      "size": 21000,
+      "normalized_sha256": "7f9e7a2fa38d1c45b0da0ad6a74f5d940f5b94a2538d14308b98d7ba7814b710"
+    },
+    "swarm/research/dynamic.py": {
+      "role": "index",
+      "sha256": "e84d13a9aa9a675626c97a4d82545a2174401df54f8167ebf3f1c1dd10e0bc66",
+      "size": 25244,
+      "normalized_sha256": "e84d13a9aa9a675626c97a4d82545a2174401df54f8167ebf3f1c1dd10e0bc66"
+    },
+    "swarm/research/feedback.py": {
+      "role": "index",
+      "sha256": "60d5a66839548b2db3276ebb98ebba5149fcf3c45bf8d85f7b8e127b1af2f07e",
+      "size": 26985,
+      "normalized_sha256": "dc54a51726d37c8c60677907028405fe46393c179d1e691bd44a35dc6736a463"
+    },
+    "swarm/research/knowledge.py": {
+      "role": "index",
+      "sha256": "13d53a35cea7ab0670c4540657ad3e91d95129cf82059286e3a12ef4c73fc233",
+      "size": 21316,
+      "normalized_sha256": "13d53a35cea7ab0670c4540657ad3e91d95129cf82059286e3a12ef4c73fc233"
+    },
+    "swarm/research/models.py": {
+      "role": "index",
+      "sha256": "9487fc750176efc777e76b0bb152669d9c16a43fff08d387b195b19055c23897",
+      "size": 5469,
+      "normalized_sha256": "cb621ab7a220354b888a3d5451fa1c57fa170842f507e166f97008e1c15a1b74"
+    },
+    "swarm/research/policy.py": {
+      "role": "index",
+      "sha256": "fa60b707a7b75456060832e7f7027e2313051738dfb80f68e8b8e0a232e28e03",
+      "size": 16188,
+      "normalized_sha256": "38946be1ddafad207f807372b5e8c997e0db6a9acea38cef62490eaab019183d"
+    },
+    "swarm/research/records.py": {
+      "role": "index",
+      "sha256": "5aeddb37641ec085e4885d375d85cd203702ee2e3005086c93c538f9f48d782f",
+      "size": 6819,
+      "normalized_sha256": "5aeddb37641ec085e4885d375d85cd203702ee2e3005086c93c538f9f48d782f"
+    },
+    "swarm/research/server.py": {
+      "role": "index",
+      "sha256": "36dd8236b7deaf62d764a29034dec8a7858ebff48885588948cae8988f15f101",
+      "size": 13769,
+      "normalized_sha256": "9c2bfe6a19f53ff2a03de64a039ad636d0a0a569959ae1c4ff2cda896ceeda8f"
+    },
+    "swarm/research/service.py": {
+      "role": "index",
+      "sha256": "62c5c1f53a6a0c82b3ebb9e616171c5d6e7ae0c3e439ad3d6a809f0aed0e4b07",
+      "size": 98430,
+      "normalized_sha256": "012ce6627ac919d819cd44649bfd426ae83d1e821cf663304e1c6e04a2350985"
+    },
+    "swarm/task_ledger.py": {
+      "role": "index",
+      "sha256": "a9b5ea42fc2f5875f6474b8cee1e8dab037ae5ec54dc04d78cd97e05739ece1b",
+      "size": 32804,
+      "normalized_sha256": "6499b55e90917648e95dacb26626667fadd07c5d472d474a4591ed2b045b42db"
+    }
+  },
+  "managed_scope": {
+    "version": "managed-scope-baseline/v1",
+    "policy_identity": "4373538185f126655a8fa9b0c03112bf187a14121acb9ceb6d34baad88225154",
+    "observe_change_policy": "review_required",
+    "budget_policy_identity": "15e9b37a6c57e9bf03c9df3d0d049eb5b9a7f5540f9d34960408114e2538a32d",
+    "budget_policy": {
+      "version": "cognition-budget-policy/v1",
+      "mode": "enforce",
+      "whole_index": {
+        "target_tokens": 200000,
+        "warning_tokens": 300000,
+        "max_tokens": 400000
+      },
+      "r": [
+        {
+          "min_c": 1,
+          "max_c": 4,
+          "target_tokens": 25,
+          "max_tokens": 50
+        },
+        {
+          "min_c": 5,
+          "max_c": 7,
+          "target_tokens": 45,
+          "max_tokens": 90
+        },
+        {
+          "min_c": 8,
+          "max_c": 8,
+          "target_tokens": 70,
+          "max_tokens": 140
+        },
+        {
+          "min_c": 9,
+          "max_c": 9,
+          "target_tokens": 90,
+          "max_tokens": 180
+        }
+      ],
+      "s": [
+        {
+          "min_c": 1,
+          "max_c": 4,
+          "target_tokens": 20,
+          "max_tokens": 40
+        },
+        {
+          "min_c": 5,
+          "max_c": 7,
+          "target_tokens": 40,
+          "max_tokens": 80
+        },
+        {
+          "min_c": 8,
+          "max_c": 8,
+          "target_tokens": 70,
+          "max_tokens": 140
+        },
+        {
+          "min_c": 9,
+          "max_c": 9,
+          "target_tokens": 100,
+          "max_tokens": 200
+        }
+      ]
+    },
+    "apply_authorization_mode": "auto"
+  }
+}

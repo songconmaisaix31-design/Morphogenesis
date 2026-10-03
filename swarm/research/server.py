@@ -45,9 +45,9 @@ def create_server(service: ResearchService) -> FastMCP:
         return service.admit_candidate_experiment(task_id, token)
 
     @mcp.tool()
-    def project_context(task_id: str) -> dict[str, JsonValue]:
-        """Read task acceptance, paper/evidence references and project context."""
-        return service.context(task_id)
+    def project_context(task_id: str, limit: int = 100) -> dict[str, JsonValue]:
+        """Read local branch/dependency/citation context; this grants no claim permission."""
+        return service.context(task_id, limit=limit)
 
     @mcp.tool()
     def lease_task(action: Literal["claim", "renew", "release", "handoff"], task_id: str,
@@ -141,16 +141,21 @@ def create_server(service: ResearchService) -> FastMCP:
     def research_project(action: Literal["create", "read", "export"], project_id: str,
                          goal: str | None = None, allowed_domains: list[str] | None = None,
                          data_bounds: dict[str, str] | None = None,
-                         milestones: list[str] | None = None) -> dict[str, JsonValue]:
-        """Create a research space or read its full shared memory. Resource authorization is host-bound."""
+                         milestones: list[str] | None = None, task_id: str | None = None,
+                         branch_id: str | None = None, limit: int = 100,
+                         overview: bool = False) -> dict[str, JsonValue]:
+        """Read local context by default; explicit overview/export reads bounded project facts."""
+        if action != "read" and (task_id is not None or branch_id is not None or overview):
+            raise ValueError("context_focus_requires_read_action")
         if action == "create":
             if goal is None:
                 raise ValueError("create_requires_goal")
             return service.create_project(project_id, goal, allowed_domains=tuple(allowed_domains or ()),
                                           data_bounds=data_bounds or {}, milestones=tuple(milestones or ()))
         if action == "export":
-            return service.research_package(project_id)
-        return service.research_context(project_id)
+            return service.research_package(project_id, limit=limit)
+        return service.research_context(project_id, task_id=task_id, branch_id=branch_id,
+                                        limit=limit, overview=overview)
 
     @mcp.tool()
     def research_branch(project_id: str, branch_id: str, title: str, goal: str,

@@ -1,3 +1,171 @@
+# R1 B · 2026-10-03 后继：受信 Docker 冻结导出
+
+仍是 Task `task_a8533b909675` / Dispatch `ctx_bd976e22265e`，原 B Owner/worktree/branch。
+后继 SOURCE **`5769005b09f1b756c94fdad0649a6b74690c0ca9`** 普通 commit/push，远端精确核对一致。
+父 REPORT `7a6c5094c7235b1a992e0eaa8d688b08fa0fd64b`、其 SOURCE
+`296ec298a23eea54f76e8c874aed551487a2999a` 及下方全部首失败保留；没有重写历史。
+本段和授权包/来源调查/新增原始输出为单独 docs-only REPORT。
+
+当前 **PREPARED_UNVERIFIED；真实 AT07 / L2 NOT_RUN**。已交付
+[具体授权包](../experiments/at07-authorization.md) 与
+[固定来源、实现契约和限制](../experiments/at07-export-feasibility.md)。
+官方 SDK 原 pause/resume 生命周期与官方 Docker SDK7.2.0 npipe/Unix transport 读取宿主
+Engine HEAD/GET archive；导出期间 main/egress 都冻结，逐层拒绝 symlink/特殊类型，
+只接受有界单个普通 tar 成员，不在宿主提取、不执行容器 helper。
+原 `OpenSandboxSession` / executor / result / TaskLedger / finalization 继续复用，没有新证明或调度设施。
+
+新 `DockerExportConfiguration` 进入原 `IsolationConfiguration`：mode固定
+`docker-paused-archive-v1`；endpoint仅固定npipe/Unix；真实daemon ID；Engine固定29.5.3/API1.52；
+request_timeout固定10秒。SDK create前核对实际daemon/server完整ID/image/loopback端点，执行前绑定同次owned pair。
+未配置默认None、旧probe、变更任何绑定或控制面未知都拒绝；实现支持不等于真实probe verified。
+AT07的 `unverified_record` 始终False，mock/partial/unknown不能由工具升级为隔离或科研权威。
+
+明确纠正早期只读runtime假设：固定上游挂载 `/opt/opensandbox:rw`。仅接受根外的原服务管理local volume、
+恰好本次main/egress两个使用者、两者冻结；拒绝额外挂载/第三使用者。文件判断来自受信Engine，
+不信任候选可能修改的runtime/execd。PathStat没有nlink事实，不声称inode别名完全排除；
+每次成功导出均原SDK pause→Docker只读HEAD/GET→原SDK resume；finally仅在只读inspect确认两者确实暂停时恢复。
+最终导出也恢复，不保持暂停到销毁；pause异常可在确认已暂停后尝试一次resume，原unknown仍保留。
+不声称多文件同一快照；一次待完成底层读取可能多占一个transport timeout，不声称硬实时。
+pause/resume/stream未知保留unknown并停止，不重POST、不降级为missing_artifact或退回宿主执行。
+当前保存small成功的frozen-export观测及result分项/异常/cleanup，没有逐次pause/resume响应转录；
+报告不把缺失的运行数据写成PASS，具体各分支/记录范围已在授权包明确。
+
+## 后继离线证据
+
+主控串行窗口内，B自有COPY `.venv` / CPython3.13.13；进程局部BLAS线程数1。
+唯一新runtime依赖 `docker==7.2.0`，原锁其他包版本不变；官方Apache-2.0与pywin32许可已记NOTICE。
+当前 `poetry.lock` SHA256 **`8558e9e065da381466d9c188bc87a88fcaf09a3b367455eb8267c0bb4c9fcc98`**。
+Poetry2.3.2仅在B `.runtime/uv-lock-tools` 私有工具环境解析锁；没有系统pip、他人环境或全局配置修改。
+
+| 原始输出（追加于at07-evidence） | 命令 / 结果 |
+| --- | --- |
+| `frozen-install-first.txt` | `uv pip install --python .venv/Scripts/python.exe --no-deps docker==7.2.0`，安装唯一runtime新包；UV_LINK_MODE=copy |
+| `frozen-lock-first.txt` | `uv tool run --from poetry==2.3.2 poetry lock`，B私有UV工具/缓存路径，43个临时工具依赖；原锁其他版本不变 |
+| `frozen-targeted-first.txt` | frozen_export、at07、at07_export、generated_configuration：**110 PASS / 3.76s** |
+| `frozen-experiments-first.txt` | 全部 `tests/experiments`：**210 PASS / 27.50s** |
+| `frozen-strict-first.txt` | **1 error / 140 source files**，Returning Any from bool；首RED保留 |
+| `frozen-strict-fixed.txt` | **PASS / 140 source files**；已校验bool后增加类型cast，没有运行行为改动 |
+| `frozen-environment-check.txt` | `uv pip check --python .venv/Scripts/python.exe`：**104 packages compatible** |
+
+原断言命令：
+
+```powershell
+.venv/Scripts/python.exe -m pytest tests/experiments/test_frozen_export.py tests/experiments/test_at07.py tests/experiments/test_at07_export.py tests/experiments/test_generated_configuration.py -q --tb=short
+.venv/Scripts/python.exe -m pytest tests/experiments -q --tb=short
+.venv/Scripts/python.exe tools/typecheck.py
+uv pip check --python .venv/Scripts/python.exe
+```
+
+冻结测试的Daemon/SDK均为inert fixture，阻断真实process/network；positive有真实adapter构造及SDK参数capture，
+并非只测拒绝。覆盖暂停期间替换、祖先/leaf symlink、恶意tar/特殊文件/溢出/期限、额外volume使用者、
+Engine身份错配、暂停/恢复未知与不重放、错误恢复ID不得kill、附着session拒绝、旧配置不得admit/direct-create。
+只在宿主解析固定探针源码；没有实际Engine/socket请求、候选、科学、模型、probe或sandbox生命周期操作。
+strict最后修改仅类型cast，适用运行测试此前通过；未为这项类型修复重复重回归。
+
+## 接线、验收与真实剩余限制
+
+已向A原Owner `ctx_4c6085d9f9d8` 及主控交SOURCE/API：只在 `GeneratedHostSettings` 增
+同型 `docker_export=None`，继续由 `HostConfig.generated_experiments` 原受信嵌套承载，
+原factory透传 `LocalCpuSandboxBackend(docker_export=self.settings.docker_export)`。
+不新增HostConfig顶层重复权威，不让候选/MCP请求选择daemon；真实Engine/ID未知时维持None。
+B未修改A/C/P/Q文件，A已ACK此最小契约。
+
+Q在上一阶段的3项旧fixture失败仍保留（详见下方首RED）；本SOURCE没有宣称Q新全绿。
+新精确配置须由Q独立正负复核，最终固定组合完整离线回归/installed输入由主控串行排队。
+本轮没有fullsuite/build/installed产品验证；测试窗口已释放，不把owner210项替代组合验收。
+本机只读CLI版本为29.5.3；实际Engine/daemon仍UNKNOWN，未启动Docker/WSL/service、未pull/build镜像。
+sidecar/cache资源限额不受支持、总峰值UNKNOWN、动态0.0.0.0端口和既有DNS健康流量的后续范围决定保留。
+真实无害AT07需后续单独明确授权且同档全部通过，再讨论一次L2；没有L3/规模化/跨宿主授权。
+旧C系统误装automatic approval blocked-by-policy边界保留，没有环境清理。
+
+---
+
+# R1 B · 2026-10-03 AT-07 准备与原子导出边界（历史阶段）
+
+Task `task_a8533b909675` / Dispatch `ctx_bd976e22265e`，原 B Owner、worktree 与分支。
+普通精确合并核心 REPORT `08b31b39c075571ffd247e2b591d657ce09b6b34`（SOURCE
+`2c63bc7c9e49edff28e26f5930a22d0415fadd65`）为 fast-forward；没有 rebase/cherry-pick/force，
+此前 B source/report、SQLite 首 RED 与 C Windows 首 RED 均保留。
+本阶段 SOURCE **`296ec298a23eea54f76e8c874aed551487a2999a`** 已普通 commit/push，远端核对一致。
+文档单独 REPORT；这是原子导出尚不支持时的准备/拒绝阶段，不能据此宣称 R1 退出通过。
+
+## 准备交付与当前边界
+
+交付 [AT-07 授权包](../experiments/at07-authorization.md)、独立固定 server/egress Compose/TOML、
+无害 payload/受控目标，以及原官方 SDK 上的 prepare/review/operator 入口。
+明确 SDK1.1.0、server/execd/实验/egress digest、资源/时间/创建数量/清理 ID 范围与预期证据位置。
+只有 parse/compile 与 inert SDK/HTTP transport 测试；没有把 payload 在宿主执行。
+原 `IsolationConfiguration`、`IsolationProbeRecord`、`TrustedProbeRegistry`、session/finalize 生命周期继续复用，
+没有第二 Executor/调度器/Attempt/Manifest/Hash/完成证明设施。
+
+**真实 AT-07/L2 NOT_RUN；执行准备 NOT_READY。** 原 SDK 普通文件下载缺乏原子 root/no-follow 保证，
+目录类型检查后、stream open 前可以被残留进程替换。静态路径/祖先 symlink/字节限制的加固不能消除该竞争。
+AT07诊断强制 export unsupported；工具从不创建 verified/passed registry 记录；真实入口在Docker/key/SDK访问前拒绝。
+生产声明和原 generated live factory 的准入也必须拒绝旧/手填 PASS 绕过；此项本轮后续验证记录见下表。
+
+[有界官方 API 调查](../experiments/at07-export-feasibility.md) 给出精确 source/API/版本：
+原 SDK/container pause 加受信 Docker Engine archive 可作为后继适配基础，暂停后不能继续依赖已冻结的 execd。
+Windows npipe transport、全部祖先/挂载/有界 tar 与硬链接语义仍须原 Owner 实现和独立审查。
+公开 RC 的 publish_host 修复不等于原子导出修复。没有把未实现方案、旧运行或 Mock 视为 live 能力。
+
+## 本轮确定性证据
+
+以下原始输出追加保存于 [at07-evidence](../experiments/at07-evidence/)，不覆盖或删除首失败。
+
+| 阶段 | 原输出 | 真实结果 |
+| --- | --- | --- |
+| 原适配静态导出负例首测 | `export-first-red.txt` | 10 FAIL / 1 PASS，2.57s |
+| 初版准备/修复单测 | `targeted-first.txt` | 33 PASS，0.66s |
+| 当时适用 B+Q 边界 | `experiments-q-first.txt` | 227 PASS，46.96s |
+| SDK wire fixture 首次错误 | `targeted-wire.txt` | 1 FAIL / 38 PASS，0.67s；误把传入 limit 预期为 Range，首失败保留 |
+| 后续当时版本 B+Q | `experiments-q-final.txt` | 233 PASS，38.05s |
+| metadata/open 竞争首测 | `export-toctou-first-red.txt` | 1 FAIL，0.46s；inert fake 范围外 bytes 仍被读取，诊断曾错误 passed |
+| 导出 unsupported 后 | `targeted-toctou-fixed.txt` | 41 PASS，0.52s |
+| 当时 B+Q 全部适用项 | `experiments-q-export-unsupported.txt` | 235 PASS，35.82s；这是能力声明同步前的中间结果 |
+| 同时 strict | `strict-export-unsupported.txt` | PASS，139 source files |
+| 能力声明与字节范围首测 | `export-capability-range-first-red.txt` | 5 FAIL / 13 PASS，0.68s；包括原声明错误及缺少降级接口 |
+| SOURCE对应B定向单测 | `export-capability-range-fixed.txt` | 66 PASS，0.66s；两个AT07文件+generated_configuration |
+| SOURCE对应B+Q原断言 | `experiments-q-failclosed-stage.txt` | **3 FAIL / 235 PASS，39.65s** |
+| SOURCE对应strict | `strict-failclosed-stage.txt` | PASS，139 source files |
+
+进一步只读固定 execd 发现 offset/limit 是行数。最终 byte stream 使用显式
+`Range: bytes=0-<limit>`，宿主独立累计限制保留；中间 fixture 修正不能被写成最终实现的证据。
+当前能力一致拒绝与Range修复已覆盖；三项Q失败均来自原
+`test_b_configured_sdk_boundary.py`：SDK正向和两项prepare-mutation的原前置admit成功断言，
+现在被真实unsupported能力门拒绝。**未删除、改写、skip这些Q断言，也未宣称全门已绿。**
+B自己的配置绑定fixture显式模拟未来已实现的export能力，以保留非空SDK capture正向；
+另两项默认生产负例证实完整手填probe仍不能admit/direct-create，prepared支持降级也被拒绝。
+这些mock不成为当前生产可执行性或AT07证明。
+
+主控已授权同B继续实现原SDK pause+受信Engine archive的最小后继，当前阶段先留证，
+没有提前worker_done。Q等后继固定后由原Owner独立复核；实际AT07继续等待固定组合及单独授权。
+
+实际适用回归命令（私有 `.venv/Scripts/python.exe`，进程局部 BLAS线程数1）：
+
+```powershell
+.venv/Scripts/python.exe -m pytest tests/experiments tests/integration/r1_security/test_b_configured_sdk_boundary.py tests/integration/r1_security/test_b_generated_boundaries.py tests/integration/r1_security/test_b_input_binding.py tests/integration/r1_security/test_b_mock_adoption.py tests/integration/r1_security/test_b_probe_configuration.py tests/integration/r1_security/test_b_sdk_configuration.py tests/integration/r1_security/test_b_store_admission_race.py tests/integration/r1_security/test_b_successor_authority.py -q
+.venv/Scripts/python.exe tools/typecheck.py
+```
+
+测试为显式 mock/inert SDK capture；Q denyprocess/network conftest 保持开启，未修改 Q 文件。
+真实探针 payload、候选、科学、模型、服务、sandbox create/run/destroy 均未执行。
+没有本轮 fullsuite、build、install 或新依赖；固定组合 full offline/installed 仍由主控/I 排队完成。
+保留 C 既有系统误装 automatic approval blocked-by-policy 的历史边界，没有执行环境清理。
+
+## 只读调查的异常记录与限制
+
+对既有上游 partial clone 查询旧 commit 时，Git 曾自动触发 lazy-fetch 和 auto packing；
+立即中断该 owned 命令并报告主控，没有清理、回滚或覆盖 clone。
+之后固定源码读取均设置**该进程内** `GIT_NO_LAZY_FETCH=1`；缺 blob 时只读官方公开 HTTP 源。
+没有更改仓库或全局 Git 配置。此事件不能描述成 clone 字节完全未变。
+
+当前配置还有明确基础设施边界：egress/cache 容器限额 unsupported、总峰值 unknown；
+固定 server 动态端口0.0.0.0及既有 resolver 健康流量须后续范围确认。
+这些与原子导出硬停止分开；负责人风险接受开关不能解除 export unsupported。
+本包的512MiB/128pids/stdlib profile 不授权其他 image/依赖/资源档，独立真实AT07后才可能形成新 registry 事实。
+
+---
+
 # R1 B · 2026-10-03 后继：SQLite 配置并发初始化
 
 本轮为新 Task `task_eff1006355f8` / Dispatch `ctx_37f15746c078`，仍由原 B Owner 在原

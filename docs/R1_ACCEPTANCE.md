@@ -1,5 +1,38 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## MVP 只读会话阶段与隔离准备接纳（13:05）
+
+以下是领域阶段验收，不是新最终组合完整回归；原首次失败、旧类型债和下方历史组合分别保留。开发工作会话已按用户选择切为 GPT-6.1 Sol，OpenCode 后续指定 DeepSeek V4 Pro。
+
+| 交付 | SOURCE / docs-only REPORT | 主控核对与实际结果 |
+|---|---|---|
+| P 只读会话 API | 67721aaa815e706c51e0f80a1d15ab71e34b6880；AOCI整体报告待人工确认后续交 | 真实来源记录→原权限/身份→GET会话/输出/current_local_view；无输入/启动/回放。原私库转发FR04选择，不另造上下文引擎。raw归档/COPY安装28 PASS/50.06s、适用30源types PASS、whole原10错误/6文件身份不变、100依赖兼容。 |
+| F 拓扑只读终端和上下文 | 7bf17d195859a18960ee1ef933a920a286f73e61 / c08566edc492e92adfc4e24a9e8de1c18b859e02 | Codex GUI参考，成员节点右键/键盘打开精确会话，GET轮询、晚响应隔离、窄屏首屏可见。运行包07df78b/core cea7923，后继7bf只改observer。build PASS，新18/旧14/布局2 PASS；实际installed会话2 PASS/6.4s、原输入2 PASS/6.7s。主控实际看桌面/窄屏截图；原observer首2 RED保留。 |
+| B 原生命周期上的冻结导出准备 | 5769005b09f1b756c94fdad0649a6b74690c0ca9 / 5aebd2eb7af774b3dc496ad9620548f6e7852e09 | 主控读实现/锁差异/报告并核对远端、clean、原始日志。官方OpenSandbox pause→官方Docker transport HEAD/GET→原SDKresume；无新执行器。定向110 PASS、experiments210 PASS、strict140 PASS、104依赖兼容。原strict首RED与旧Q三FAIL保留，Q后继ctx_a1965382b7ea独立复核中。 |
+
+F 已结算，B 已结算且保留原Owner返修；release均为retained/no_owned_resource/processAction none，不冒充终端已关闭。A受信HostConfig配置定向9 PASS/10.18s、strict2 PASS，仍在本轨完成核心AOCI。所有科研执行事实仍为mock；HTTP页面真实观察不等于真实科研或独立人类理解。
+
+B 的固定上游runtime volume实际RW；仅允许owned main/egress两者独占并冻结，导出树不允许挂载。单文件下载后恢复原sandbox，不宣称跨文件原子快照。Engine实际版本/ID及真实隔离均未观察，配置和离线通过不授予verified/admit。只有最终固定组合离线验收后才单独请求AT07授权。
+
+产品AOCI正式15语义条目仍未应用，等待真实人类TTY确认的精确preview；主控不会代输入、伪造receipt或重置baseline。核心索引在原A继续。Token节省未测量。I新任务尚未派发；一次最终完整产品离线回归、相关最终installed观察、AT07、L2仍待完成。
+
+## 三项 Spec 行为的本轮定向验收（MVP 追加前置）
+
+本节登记新的领域证据；下方旧 core2c/product9e 的“最终固定组合”是上一阶段记录。本轮加入 AOCI 与只读节点会话 UI 后尚未冻结新最终组合，完整产品离线回归仍 NOT_RUN。
+
+| 行为 | 已接纳 SOURCE / REPORT | 实际调用及证据 |
+|---|---|---|
+| 正证据影响后续路线 | C e82cae36038c386aec999642289ac1d78c82a9ed / 52b8d26da04aec41ceb7e008445ef2f1dc088d53 | 原 research-v1 证据分值最小修正；三合法分支机会由均分变为约0.386667/0.306667/0.306667，同seed正式choose改变，原TaskLedger claim保留证据引用，授权额度不变。重复/未独立接受/不适用/越权不得增益。C70+Q45+旧v0/v0.1 26共141 PASS，policy strict1 PASS。 |
+| 成员局部上下文 | A cea7923fec48c10e043c1fea40c99749e0b6a114 / faf23260df7a4f530eb421680f71eb6dc7c72e40 | 私库仅转发，选择确在原ResearchService.research_context/context：权限先于分支、依赖、能力、引用可达，保留来源/条件/争议/截断。产品工作台/export显式overview=True，成员正式MCP保持局部。def0实现聚焦68 PASS；cea后继COPY安装native13+context stdio1+原dynamic stdio1+旧policy28=43 PASS/52.52s、changed4 strict PASS。不同SOURCE结果不混记。 |
+| 正式 envelope 跨片段接续 | P 79ca28d81dd039b24c284494d3aa5911d7b10cfc / ffe186235318cf6c6ecb79de8e5db92906575cfe，候选pin A cea | research-member run每个有界片段给新invocation；可选resume只接受同成员已观察completed session。A host-only admit_native_invocation复用原Reservation/项目BudgetLedger，P将瞬时绑定交原MCP，既有知识/累计额度/期限/unknown守卫不重置。实际raw-Git COPY安装44 PASS/44.89s，含11新增接续及原HTTP/MCP/installed门；29适用types PASS，原10债逐条不变。 |
+
+主控分别核实 A/P 的远端精确 REPORT、clean、SOURCE 后仅各自报告文件及原日志。A安装15原生产文件与Git blob相同、103依赖兼容；P完整raw归档153产品/657核心文件对Git blob相同、100依赖兼容。所有测试仍是本地契约或真实本机HTTP/MCP上的mock执行，不是模型真实科研或AT-07。
+
+首失败保留：C正支持与零适用性各1 RED；A基线19 FAIL、实现组合39 FAIL/57 PASS（含SDK安装条件缺失），P基线3 FAIL/2 PASS、Windows tar中文路径失败、换行转换后的43 PASS/1 FAIL。后继修复是追加证据，不改旧结果；A原anyio重写warning、相对解释器路径未启动的失败也记录在报告。旧完整产品222/6、原第六项原因UNKNOWN、原十项类型债与C清理被策略拒绝继续保留。
+
+下一步：B独立隔离检查包离线准备 + P真实只读会话投影/AOCI + F新UI → I唯一固定组合完整产品离线回归和installed输入/会话页面观察 → 具体AT-07单独授权 → 通过后一次L2。AOCI配置/索引对齐与MCP实际连接尚待，节省token未测量；UI成员节点不得猜测session或提供写操作；AT-07/候选真实执行/L2均未执行。
+
+
 08:28 文档身份追加：产品最终文档REPORT为 `a7f657d18fae33fc2a4df92b5fcb60dcd7839c5d`，受测SOURCE9e27187与核心SOURCE2c63bc7不变，差异只有docs；下文ad104保留为07:16时点的领域/类型验收报告。主控已核实远端、clean与普通合并历史，I仅封存现有验收报告。第三次约66分31秒工具返回空档原因UNKNOWN，未触发任何测试/科研重发，未改变原始耗时或验收结论。
 
 ## 最终固定组合的适用工程验收

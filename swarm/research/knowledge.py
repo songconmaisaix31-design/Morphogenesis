@@ -356,10 +356,19 @@ class ResearchKnowledge:
             "event_kind": row["event_kind"], "payload": _OBJECT.validate_json(row["payload"]),
             "correlation_ref": row["correlation_ref"]})
 
-    def events(self, project_id: str, *, limit: int = 100) -> list[ResearchEvent]:
+    def events(self, project_id: str, *, limit: int = 100,
+               predicate: Callable[[ResearchEvent], bool] | None = None,
+               include_overflow: bool = False) -> list[ResearchEvent]:
         if not 1 <= limit <= 1000:
             raise ValueError("limit must be in [1,1000]")
         with connection(self.path) as db:
             rows = db.execute("SELECT * FROM research_events WHERE project_id=? "
-                              "ORDER BY at DESC, event_id LIMIT ?", (project_id, limit)).fetchall()
-        return [self._event(r) for r in rows]
+                              "ORDER BY at DESC, event_id", (project_id,))
+            result = []
+            for row in rows:
+                event = self._event(row)
+                if predicate is None or predicate(event):
+                    result.append(event)
+                    if len(result) >= limit + int(include_overflow):
+                        break
+        return result

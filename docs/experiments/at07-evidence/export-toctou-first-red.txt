@@ -1,0 +1,28 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_metadata_then_stream_cannot_certify_atomic_export_scope _________
+
+    def test_metadata_then_stream_cannot_certify_atomic_export_scope():
+        from orchestration.experiments import at07
+        from tests.experiments.test_at07 import complete_observations, configuration
+    
+        session, files = session_with_files()
+        def replaced_after_inspection(*args, **kwargs):
+            assert files.list_directory.call_count == 3
+            # Only inert bytes: simulate another container process replacing the
+            # checked regular file with a link immediately before the SDK open.
+            return iter([b"fake-outside-root"])
+        files.read_bytes_stream.side_effect = replaced_after_inspection
+        assert session.download("/tmp/morph-research/result.bin", 64) == b"fake-outside-root"
+        result = at07.At07Result(probe_id="fixture", configuration=configuration(), provenance="live",
+            sandbox_id="inert", observations=complete_observations(), remote_effect="known", cleanup_state="destroyed")
+>       assert at07.review(result)["export"] == "unsupported"
+E       AssertionError: assert 'passed' == 'unsupported'
+E         
+E         - unsupported
+E         + passed
+
+tests\experiments\test_at07_export.py:129: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/experiments/test_at07_export.py::test_metadata_then_stream_cannot_certify_atomic_export_scope
+1 failed in 0.46s

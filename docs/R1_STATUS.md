@@ -1,5 +1,88 @@
 # R1 派发状态（2026-10-03）
 
+## 16:30 恢复检查点
+
+实际新输入已确认 input_accepted + turn_started：A同 Task task_7943319add9b / ctx_6aadc6cb132c / term_0ef53fcf-3f86-47dc-977b-8e2be65ca57f；Q同 Task task_f1ef0047b01a / ctx_ff36f31b0819 / term_ddb2851c-759f-491a-bb9f-51f39732d6d0。旧 worker-abandon 令 Task blocked，主控在原进程退出/旧权限已fenced/零故障计数证据下显式恢复 ready 后派新 Dispatch，不伪造完成；P 真实人类门未满足，原 Task保持 blocked。两个 tui-idle 探测超时保留，恢复实际执行证据是新TUI画面和 send 的 turn_started，不称探测通过。
+
+
+Orca 重启后四条 Q 消息已逐条处理并 ACK；本地 REPORT09a6237 的父提交88d0cc2及 docs-only/clean已核实，65 PASS/24.98s是阶段边界证据，远端尚原7936613。canonical Git只读连接已恢复，原 Q 待发布；不重复原绿色测试。A HEAD仍aec86c9及自有 AOCI WIP，13:17之后未形成正式语义条目。A/P/Q旧进程已从本机进程身份核查确认为退出，原 Dispatch fenced，原 Task继续，未创建重复业务轨。
+
+用户新要求 OpenCode 暂停到今日18:00（北京时间）；唯一现存 OpenCode 空闲终端已关闭，ptyKilled=true。恢复 A/Q 使用 GPT-6.1-Sol high、YOLO，P实际人工 receipt仍缺失且受保护输入保持冻结；没有把“继续任务”或模型偏好视为真实 TTY确认。A 的零Entry初始化有界恢复保持同一scope/budget/auto配置，P legacy→auto正式审批门不受该决定影响。实际 Token 节省未知。最终固定组合/完整产品离线回归/AT07/L2仍未完成。
+
+
+## 13:00 模型切换完成，UI 阶段接纳，核心后继继续
+
+用户最新选择已应用到原 A/B/C/P/F/Q/I Codex 会话：实际 TUI 显示 GPT-6.1-Sol max；OpenCode 指定 DeepSeek V4 Pro，当前无新 OpenCode 进程。模型菜单切换保留原上下文与 Task。A task_7943319add9b / ctx_4c6085d9f9d8 已真正 dispatch 并开始，同 Owner 受信配置/AOCI 在继续；B task_a8533b909675 / ctx_bd976e22265e 同 Task 收尾。P 仍保留原任务但闲置等人工 receipt，不循环空检索。
+
+F SOURCE `7bf17d195859a18960ee1ef933a920a286f73e61` / docs-only REPORT `c08566edc492e92adfc4e24a9e8de1c18b859e02` 已主控核对远端、clean、P677祖先、observer-only后继和原始日志/图片后接纳。实际 COPY 运行源码 `07df78b111825c789fb21f8853ece3e69941a704`，后继7bf只修观察断言，不改变运行包；core cea7923。新/适用 mock UI18+14+布局2 PASS，实际 installed会话2 PASS/6.4s + 原输入2 PASS/6.7s。原 installed observer首2 RED保留，聚合contract_local与记录mock区分明确；未冒充人工理解测试。旧 F Dispatch succeeded，release为retained/no_owned_resource/processAction none，Owner自有8784服务已退出。
+
+P API SOURCE `67721aaa815e706c51e0f80a1d15ab71e34b6880` 的全新raw归档/COPY定向安装已完成：28 PASS/50.06s、适用types30 PASS、pip100兼容；整包36文件仍同原10项/6文件类型债，identity difference=[]。首次失败与原归档/环境失误均保留。此结果是阶段定向验收，不能替代最终固定组合全套回归。
+
+B SOURCE `5769005b09f1b756c94fdad0649a6b74690c0ca9` 已主控核对远端与核心改动；官方Docker SDK7.2.0依赖/lock最小追加，受信本机Engine29.5.3/API1.52配置与原pause/resume完成有界冻结导出。Owner结果targeted110 PASS、experiments210 PASS、strict140 PASS、私有104依赖兼容；原strict首RED和旧Q3 FAIL保留，Q独立后继尚未完成，docs-only REPORT待B交付。实际daemon版本/ID未知；旧无docker_export的probe不能授权新路径，配置不等于verified或admit。
+
+A当前嵌套HostConfig/factory接线WIP：首3 FAIL/6 PASS、后继1 FAIL/8 PASS（新测试对既有拒绝文本装配错误）原样保留；strict2 PASS，模型切换后同Owner修复并继续10源文件有限核心AOCI。P官方15源索引仍等待前节列出的真实人类TTY确认，未收到 `C:/research-private/p-aoci-transition-approval.json`；正式语义Entry尚未应用。Token实际节省未知。最终组合/I完整离线回归、真实AT07授权与L2均未完成，main/tag/部署未执行。
+
+## 会话界面完成初轮，AOCI 等待一次真实终端确认
+
+P API SOURCE `67721aaa815e706c51e0f80a1d15ab71e34b6880` 已由主控独立核对远端及日志：新增与相关 HTTP 27 PASS/34.94s、适用 types30 PASS。旧安装包首 2 FAIL/4.49s、WIP 首 11 FAIL/4 PASS 和后继14 PASS/1 fixture FAIL均保留。原 core cea7923 pin 不变；本阶段独立 COPY 与整包原债对照尚在原 Owner 执行，完整产品回归仍留唯一 I。
+
+F 运行包 SOURCE `07df78b111825c789fb21f8853ece3e69941a704` 包含 P API677，首 build15.27s、新会话18 PASS/12.1s、旧适用smoke14 PASS/13.5s。首轮截图暴露窄屏输出落在初屏以外，紧凑化后新增两视窗首屏检查2 PASS/6.4s；主控已实际查看前后desktop/narrow图片。COPY包54文件字节/单链接、setup-assets/doctor、seed-only通过；installed会话首2 RED因新observer把聚合contract_local误当成会话mock，尚未页面导航，原失败保留，F仅修观察层级与响应等待。实际终端及原输入四观察待后继，不把这些记录当task_live或人工理解测试。
+
+B阶段 SOURCE `296ec298a23eea54f76e8c874aed551487a2999a` / docs-only REPORT `7a6c5094c7235b1a992e0eaa8d688b08fa0fd64b` 已主控核对远端与仅docs后继。生产export能力false、旧/手填probe不能绕过及正确字节Range修复已落地：首5 FAIL/13 PASS保留，后继定向66 PASS、strict139 PASS；原适用238项235 PASS/3 Q FAIL，三个旧成功前置与当前不支持导出冲突，Q断言原样保留。同B继续官方冻结导出后继，不提前worker_done；真实AT07和L2未运行。
+
+AOCI官方二进制、MCP连接和Header已具备；正式15个语义Entry仍未应用。P初始化先创建范围规则导致legacy基线，后续legacy→auto及aoci.txt index→observe触发官方 `managed_scope_human_approval_required`。已保留失败并生成精确preview计划 `6c41e86c1e71c4f39c2ac22d83d92c78b3e9334c1bb31a448142d7cd23cf1708`；零Entry新增/修改/删除。本机 `C:/research-private/p-aoci-transition-review.md` 和人工专用 `p-aoci-approve.ps1` 已由主控阅读，用户已收到一次真实PowerShell确认请求。Agent不得运行approve脚本、输入确认短语、伪造human receipt或重置基线；聊天选项不是TTY receipt。P受保护源码/Header/doc/config在等待期间冻结，独立COPY和私有语义草稿仍可推进。当前未收到该实际确认，Token节省仍未知。
+
+A原Owner后继 `task_7943319add9b` 已创建为ready，未dispatch；等P/F释放槽位后负责B受信导出配置接线与核心AOCI，避免增加活跃Worker。Q待B后继固定再做相关独立复核。I未重新派发，最终组合/完整离线回归/AT07单独授权/L2顺序保持。
+
+## 12:22 MVP 会话首版与 AOCI 实际连接，AT-07 导出缺口继续修正
+
+F 阶段 SOURCE `0a588e2659c3aca65e7d2d7fe3d1b926c2d513ba` 已由 Owner push，包含项目/成员侧栏、配置成员节点菜单和纯 GET 会话/上下文面板；此时只做语法检查，静态 bundle 仍为旧版，构建和双视窗测试未完成，不能作为已验收 UI。P 已实现三条只读 GET 第一版与原记录格式的双成员/多片段 fixture，等待其首 RED 和定向门；两者仍在原任务继续开发。
+
+P 复用官方 AOCI v0.1.0-rc17 Windows 二进制完成 SHA256 对照及本机版本检查，并通过独立 MCP stdio 子进程取得工具目录。项目治理已含官方 AGENTS 区块和 LF 配置归属。当前声明 15 个产品相关源文件范围，语义索引尚未完成；旧 Codex 会话未热加载新 MCP，实际 Token 节省未知。不能将安装/连接与可用索引混为一项结果。
+
+B 保留导出竞争首 FAIL：路径元数据检查之后实际读取仍可能获得 fake 范围外字节。官方固定 execd 的 path-open 与 SDK 元数据调用之间没有原子范围保证，command 返回也没有冻结候选全部残留进程。AT07 入口已在真实资源操作前 hard NOT_READY；生产声明能力及旧/手填 probe 绕过路径正在原 Owner 修正。另发现 SDK download 的 limit 是行数而非字节，将修正为实际有界流式字节处理；旧绿测试不覆盖该语义。原适用 235 PASS/strict139 只记当时版本，不倒记后续改动。官方暂停/受信控制面导出方案仍在有界可行性核查，未启动 Docker/WSL/服务/沙箱。
+
+原 Q 文件若受生产 fail-closed 改动影响，保留首失败并交 Q 原 Owner，不由 B 跨轨改断言。当前活跃 B/P/F；A 核心 AOCI 与 Q 必要返修按槽位接续。新最终组合完整离线回归、installed 输入/会话观察、真实 AT07 和 L2 均未完成，主控不提前请求运行一个已知无法过门的隔离档。
+
+## 本轮三项行为已交付，MVP 追加轨开始
+
+A SOURCE cea7923fec48c10e043c1fea40c99749e0b6a114 / REPORT faf23260df7a4f530eb421680f71eb6dc7c72e40，P SOURCE 79ca28d81dd039b24c284494d3aa5911d7b10cfc / REPORT ffe186235318cf6c6ecb79de8e5db92906575cfe 均已由原Owner交付，主控独立核对remote/clean/docs-only后继和原测试日志后接纳；详见R1_ACCEPTANCE新节。A最后COPY43 PASS/52.52s+strict4，P raw-Git COPY44 PASS/44.89s+适用types29，原首RED/原10债保留。两项旧Dispatch已worker_done succeeded；release均为retained/no_owned_resource/processAction none，未声称杀掉终端。
+
+当前 B task_a8533b909675 / ctx_bd976e22265e 获A释放后的离线测试窗口，仅准备真实AT07包。F task_239a283e16e4 / ctx_9e81c23f2e1f 在原UI工作树普通合并a7/ee22033/ffe186后实现布局与节点只读终端；原terminal send只观测input_accepted，按同requestId回放不重投；随后screen和OwnerACK确认实际已执行新任务，原警告保留。P后继 task_3150b8e27bc9 / ctx_460ac3b1abe3 已input_accepted+turn_started，负责纯GET会话投影、私库AOCI及官方固定binary接入，已收到F DTO需求。
+
+当前三个Worker为B/P/F；A在B结算后复用原Owner承担核心AOCI配置/索引，避免重建Agent或重复安装。I尚未重新派发，等新领域/UI/AOCI最终提交。新组合全套离线回归、AT07真实运行和L2均未执行。根工作树WIP及历史证据不动。
+
+
+## 11:49 用户追加 MVP/AOCI 与拓扑会话界面
+
+已核实 AOCI 官方仓库和 Windows 发布 rc17/许可；现有仓库未检出 AOCI。配置与索引工作按 R1_PLAN 追加给原 A/P，UI 仍由原 F，root 只治理。F 终端身份/原分支/clean 已检查，尚未派新任务；等待当前 A/P 一项完成释放并发槽。用户已明确只读查看对应 Agent 会话实时输出和上下文。当前研究关系图和原生调用记录可复用，成员/session 映射缺口由 P 交明确 Handoff，避免重复模块。
+
+A 新 SOURCE cea7923fec48c10e043c1fea40c99749e0b6a114 已 push 且主控独立 ls-remote 一致；包含 C 已接纳 SOURCE，继 def0e6e 加 create_project 对原 invocation binding 的生效检查。68项旧聚焦 PASS 不倒记后继全测，A 等 P 当前私有安装窗口后做最终定向安装/stdio/native/原 policy_entry。P 的候选 79ca28d81dd039b24c284494d3aa5911d7b10cfc 在实际 COPY 安装该核心后聚焦中，完整产品回归尚未执行；首次 Windows tar 中文文档名失败已保留，修正为完整 stdlib tarfile 解包后的新目录逐字节核对。B 正准备独立无害 AT07 包，真实沙箱仍 NOT_RUN。
+
+
+
+## 11:37 第一项领域交付接纳，AT-07 仅开始离线准备
+
+C 正证据修正 SOURCE **e82cae36038c386aec999642289ac1d78c82a9ed**、REPORT **52b8d26da04aec41ceb7e008445ef2f1dc088d53** 已 push；主控复核远端、clean、SOURCE 后仅单一报告及实现/测试。独立接受前后三合法分支份额从1/3变为约0.386667/0.306667/0.306667，同seed的正式choose发生变化，claim原账本保留引用；零适用性不获探索份额。首正例RED 1/27.09s与零适用性RED 1/2.91s保留；最终COPY安装原C70+原Q45+旧v0/v0.1 26=141 PASS，strict1 PASS。旧策略语义不变，仍仅离线mock链。C task_45d094d904c7 / ctx_4b4437b4b02c 已 succeeded 接纳并release，返回retained/no_owned_resource/processAction none。
+
+A 新基线测试原样留存19 FAIL/1 stdio deselected/38.78s（运行代码为原2c）；证实上下文依赖/引用/能力筛选缺口，当前修复后聚焦中。P正式CLI接续首轮3 FAIL/2 PASS/25.36s：合法调用被自身pending拒绝，新片段却可在旧TaskLedger unknown存在时启动；原费用/到期拒绝通过。A/P共同修复host-only当前invocation绑定，复用原BudgetLedger reservation，旧unknown/其他pending仍拒绝。P后续先交领域候选，I合并后同Owner做唯一最终repin，避免循环等待。
+
+C结算后B原Codex在原worktree/branch实际启动 **task_a8533b909675 / ctx_bd976e22265e**（input_accepted + turn_started），范围按R1_PLAN：只准备无害隔离检查包与必要最小配置/工具、离线验证。主控只读发现Docker daemon不可达及旧服务缺egress.image；没有启动Docker/服务/真实沙箱。AT-07仍须最终组合离线回归后单独授权；L2仍未执行。
+
+## 11:17 新收口任务已实际启动
+
+用户追加范围已记录于 R1_PLAN 最新章节（核心治理 66e2a26f043453a851f4f31ec20700802b90b5d4），下方 08:28/07:16 是上轮历史交付，不能代替本轮最终回归。当前在原 Run run_d5306f2e4993 复用三个已确认 idle 的原 Codex YOLO 终端，均获得 input_accepted + turn_started：
+
+| Owner | Task | Dispatch | 当前验收目标 |
+|---|---|---|---|
+| A | task_8f61e0bb9e35 | ctx_c60dc35cb810 | 局部上下文相关性选择的调用/测试或最小修正 |
+| C | task_45d094d904c7 | ctx_4b4437b4b02c | 正证据影响路线机会和正式后续选择的针对性测试与修正 |
+| P | task_7cf2cd840b46 | ctx_abe7449e62f9 | 正式 envelope 跨片段接续，复用私库能力，相关 installed 输入条件 |
+
+同原 worktree/branch/write_paths，无新增重复 Owner。继续采用已有低层 Dispatch 与自管终端；未声称转为 supervised resource ownership，结算后按真实 retained/no_owned_resource 处理。I 等三个领域结果及最终 pin 后再派发，独立 COPY 安装并执行完整产品离线套件与 installed 输入观察。新完整结果目前 NOT_RUN。
+
+真实 AT-07 将先准备具体无害探针、后端/镜像/资源/清理范围供用户单独授权；本阶段不执行。AT-07 通过前不将生成候选送入真实环境。L2 后置，L3/大规模对照/多用户/跨宿主/完整 RSI 排除。性能实际记录，不增加收口阈值。旧首失败、十项类型债及 C 全局误装/清理拒绝原样保留。
+
 ## 08:28 文档最终身份与第三次工具空档
 
 最终产品 SOURCE 仍为 `9e2718789cb67f8b829207e17dac4d95a88e59c9`，最新文档 REPORT 为 **`a7f657d18fae33fc2a4df92b5fcb60dcd7839c5d`**；主控已核实远端、clean、治理b20祖先及SOURCE后仅五个docs文件变动。下文07:16的ad104是该时点领域/类型报告，完整保留。原P仅做文档收尾（task_4ceeb28295b5 / ctx_187f60b538c0），未重测或修改业务、README、锁及静态产物。I以最终SOURCE2c63和产品9e的现有证据封存独立报告，不发生再次repin。
