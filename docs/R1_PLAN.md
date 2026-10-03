@@ -153,3 +153,12 @@ AT07、真实候选、L2、人工理解仍未执行；OpenCode 至 2026-10-03 18
 完成需有实际非预置后续工作、实际新候选代码且不等于注册例程、授权后真实隔离实验、另一成员的新运行独立复核、接受证据改变并被下一实际行动引用，以及新任务通过原消费链至少一次实际使用与本地再验证。允许采用经复核的有效负结论指导后续工作，但负结论不能替代缺失的代码真实使用。成果包保留原始 stdout/stderr、失败、未知效果/费用、材料页码、代码/环境版本和局限；不因一次结果不理想换题、无限换种子或回放旧请求。
 
 当前仅文档准备：question_prepared；material 原文正式导入 NOT_RUN；native scientific invocation、candidate sandbox execution、independent science review、adoption 均 NOT_RUN。实际科研题目/容差/账号/模型额度/数据范围/批准环境仍须在唯一最终组合离线通过、单独 AT07 实际通过以后落入明确运行授权。公共资料外发仅届时批准项，不访问私密数据。人工页面理解观察另列，性能只记真实样本；L3/大规模效率/多用户/跨宿主/完整 RSI 均不加入本稿。
+
+
+## 18:05 原 B 离线 L2 契约审查（OpenCode 恢复）
+
+当前已过用户暂停边界18:00。只读本机 opencode models 和配置的顶层model已确认 deepseek/deepseek-v4-pro，未读取/输出认证值、未改全局配置；18:00前没有恢复OpenCode。复用原B角色/worktree/branch的后继docs-only子Task，以该用户指定模型/auto执行，跟同I核心CI并行。仍是固定原Owner，不增加品牌或执行后端。
+
+B仅新增 docs/experiments/l2-poisson-review.md 与原 docs/tracks/r1-experiments.md短报告，排除业务源码/测试/锁/部署/AOCI/主控/P/F路径。按现行Spec§14.2/14.4和既有 generated.py/EvaluationCriteria/TrustedCriteriaRegistry/原消费采用调用链，准备问题、原论文v2的页码来源、独立网格与边界/参考检查的既有格式、合法负结论和实际使用路径、待运行授权参数。复用现有poisson_reference_v1/sin_pi_x，既有默认值只作未批准参考；不预置后续分支、不提供完整候选程序、不复制论文例程，不创建新判定/调度/证明系统。若发现真实功能缺口只Handoff，不因审查扩写领域模块。
+
+原材料私有PDF1118278字节/21页/SHAd17f9bf6...，页4–5/10方法背景已核对；正式产品导入与所有科学调用NOT_RUN。只静态阅读与可审查文档，不原生科研/候选执行，不启动Docker/WSL/services，不改变账号/全局环境，不重跑已绿专项/安装测试；提交push用[skip ci]，不影响冻结b480 SOURCE与正在运行37114395256。AT07只在最终产品离线验收后单独授权，实际通过后才讨论一次L2；P保护树和真实TTY门不变。金额/容差/模型额度/科学结果均不得填成已批准或已发生。
