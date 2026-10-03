@@ -1,5 +1,13 @@
 # R1 派发状态（2026-10-03）
 
+## 11:51 用户追加 MVP/AOCI 与拓扑会话界面
+
+已核实 AOCI 官方仓库和 Windows 发布 rc17/许可；现有仓库未检出 AOCI。配置与索引工作按 R1_PLAN 追加给原 A/P，UI 仍由原 F，root 只治理。F 终端身份/原分支/clean 已检查，尚未派新任务；等待当前 A/P 一项完成释放并发槽。用户已明确只读查看对应 Agent 会话实时输出和上下文。当前研究关系图和原生调用记录可复用，成员/session 映射缺口由 P 交明确 Handoff，避免重复模块。
+
+A 新 SOURCE cea7923fec48c10e043c1fea40c99749e0b6a114 已 push 且主控独立 ls-remote 一致；包含 C 已接纳 SOURCE，继 def0e6e 加 create_project 对原 invocation binding 的生效检查。68项旧聚焦 PASS 不倒记后继全测，A 等 P 当前私有安装窗口后做最终定向安装/stdio/native/原 policy_entry。P 的候选 79ca28d81dd039b24c284494d3aa5911d7b10cfc 在实际 COPY 安装该核心后聚焦中，完整产品回归尚未执行；首次 Windows tar 中文文档名失败已保留，修正为完整 stdlib tarfile 解包后的新目录逐字节核对。B 正准备独立无害 AT07 包，真实沙箱仍 NOT_RUN。
+
+
+
 ## 11:37 第一项领域交付接纳，AT-07 仅开始离线准备
 
 C 正证据修正 SOURCE **e82cae36038c386aec999642289ac1d78c82a9ed**、REPORT **52b8d26da04aec41ceb7e008445ef2f1dc088d53** 已 push；主控复核远端、clean、SOURCE 后仅单一报告及实现/测试。独立接受前后三合法分支份额从1/3变为约0.386667/0.306667/0.306667，同seed的正式choose发生变化，claim原账本保留引用；零适用性不获探索份额。首正例RED 1/27.09s与零适用性RED 1/2.91s保留；最终COPY安装原C70+原Q45+旧v0/v0.1 26=141 PASS，strict1 PASS。旧策略语义不变，仍仅离线mock链。C task_45d094d904c7 / ctx_4b4437b4b02c 已 succeeded 接纳并release，返回retained/no_owned_resource/processAction none。
