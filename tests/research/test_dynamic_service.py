@@ -15,7 +15,10 @@ from contracts.identity import AgentId
 from local_assets.models import AssetSafetyError
 from local_assets.snapshot import git
 from local_assets.store import LocalAssetStore
-from orchestration.experiments.trusted import TrustedCriteriaRecord, TrustedCriteriaRegistry
+from orchestration.experiments.generated import IsolationCapability
+from orchestration.experiments.trusted import (
+    IsolationProbeRecord, TrustedCriteriaRecord, TrustedCriteriaRegistry,
+)
 from swarm.budget import BudgetBlocked
 from swarm.models import BudgetPolicy, ExecutionBound, RunLimits
 from swarm.research.models import HostConfig, ResearchEnvelope
@@ -284,12 +287,24 @@ def docker_export_fixture():
             "daemon_id": "fixture-only-engine", "engine_version": "29.5.3"}
 
 
+def live_probe_fixture():
+    # A real isolation record is never verified here; this only supplies a
+    # non-empty probes tuple so the live host settings construct. Admission
+    # still fails closed because the probe is unverified and not passed.
+    return IsolationProbeRecord(probe_id="fixture-live-probe", backend="opensandbox",
+        declared=IsolationCapability(no_host_write=True, no_credentials=True, no_host_control=True,
+            no_privilege=True, export_bounded=True, network_deny=True, cpu_limit=True,
+            memory_limit=True, process_limit=True, time_limit=True, self_owned_cleanup=True),
+        verified=False, passed=False, evidence_ref="fixture-unverified", probed_at=0).model_dump(mode="json")
+
+
 @pytest.mark.parametrize("configured", [False, True])
 def test_host_docker_export_roundtrip_factory_and_no_implicit_admission(tmp_path, monkeypatch, configured):
     s, plan = setup(tmp_path)
     settings = {key: value for key, value in s.config.generated_experiments.items()
                 if not key.startswith("fixture_")}
-    settings.update(mode="live", runtime_profile="fixture-only-profile", server_process_limit=16)
+    settings.update(mode="live", runtime_profile="fixture-only-profile", server_process_limit=16,
+                    probes=[live_probe_fixture()])
     if configured:
         settings["docker_export"] = docker_export_fixture()
     # Neither an unapproved remote endpoint nor a context can supply this field.
@@ -314,6 +329,24 @@ def test_host_docker_export_roundtrip_factory_and_no_implicit_admission(tmp_path
     assert not isolation.verified and isolation.probe == "not_run"
     assert not service.generated.probes.is_verified(isolation)
     assert not [e for e in service.ledger.audit() if e["event"] == "execution_unconfirmed"]
+
+
+def test_host_live_mode_rejects_empty_probes(tmp_path):
+    s, plan = setup(tmp_path)
+    settings = {key: value for key, value in s.config.generated_experiments.items()
+                if not key.startswith("fixture_")}
+    settings.update(mode="live", runtime_profile="fixture-only-profile", server_process_limit=16)
+    with pytest.raises(ValidationError, match="live_mode_requires_verified_probes"):
+        GeneratedHostSettings.model_validate(settings)
+
+
+def test_host_generated_settings_require_non_empty_criteria(tmp_path):
+    s, plan = setup(tmp_path)
+    settings = {key: value for key, value in s.config.generated_experiments.items()
+                if not key.startswith("fixture_")}
+    settings["criteria"] = []
+    with pytest.raises(ValidationError, match="criteria"):
+        GeneratedHostSettings.model_validate(settings)
 
 
 @pytest.mark.parametrize("changed", [

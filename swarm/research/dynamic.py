@@ -72,6 +72,12 @@ class GeneratedHostSettings(Contract):
             raise ValueError("fixture_settings_require_mock_mode")
         return self
 
+    @model_validator(mode="after")
+    def live_probes(self) -> GeneratedHostSettings:
+        if self.mode == "live" and not self.probes:
+            raise ValueError("live_mode_requires_verified_probes")
+        return self
+
 
 class GeneratedResearch:
     def __init__(self, service: ResearchService, executor: GeneratedExperimentExecutor | None) -> None:

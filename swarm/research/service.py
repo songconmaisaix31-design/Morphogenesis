@@ -704,9 +704,9 @@ class ResearchService:
             raise PermissionError("native_invocation_cannot_admit_another_invocation")
         invocation = UUID(invocation_id)
         self.ledger._ttl(ttl_seconds)
-        self._research_action("read")
+        self._research_action("experiment")
         self._authorize_project(self._project_id())
-        if bound != self.config.research_execution_bound:
+        if self.config.research_execution_bound is None or bound != self.config.research_execution_bound:
             raise PermissionError("native_execution_bound_outside_host_approval")
         self._budget_ready(required=True)
         assert self.budget is not None

@@ -433,3 +433,34 @@ B 的 `generated_conditions`（local_assets/generated_validation.py:35）从原�
 SOURCE 继续为已接受 b480，先普通push；后继 REPORT 为本文件单一 docs-only commit `[skip ci]`，最终 full SHA/remote exact/clean 在终态消息给出。不从 REPORT pin。产品2b9bf73/I a67只作为事实基准，未重装重测。唯一原 I 负责后继精确组合与最终一次离线门，原 P 最终repin。
 
 真实 Engine/key/SDKcreate/native模型/候选科研/新材料导入/AT07/L2/main/tag/deploy 均 **NOT_RUN**。本轮条件定界完成不代表 FR13 全场景、FR19 task_live 或完整 MVP/R1通过；如无新 formal 反例，不要求 C 重新开发或重签旧门。
+
+## 13. L2-review 缺口接线与核心冻结身份再 pin（2026-10-03）
+
+本节接 C 轨 L2 当前调用路径复核（`docs/tracks/r1-policy.md` 2026-10-03 段）的“最小 Handoff”：
+“A 注入已批准 criteria/probes/execution_bound 并更新冻结身份为 82201af4”。四点只在
+A 自有 `swarm/research/**`（case.py/feedback*.py/policy*.py 除外）与对应 `tests/research/**`
+内接线，不改 `orchestration/experiments/**`（B）或产品（P）。
+
+- criteria：`GeneratedHostSettings.criteria` 已 `Field(min_length=1)`（dynamic.py:51），并经
+  `service` 构造时 `TrustedCriteriaRegistry` + `store.generated_criteria.approval` 与
+  `GeneratedResearch._check_plan` 进入准入；本段补测试证明空 criteria 被拒。
+- probes：原默认空 `()`。新增 `GeneratedHostSettings.live_probes` validator（dynamic.py:76-79），
+  live 模式空 probes 直接 `ValueError("live_mode_requires_verified_probes")`，不再静默默认空；
+  mock 模式仍由 fixture 提供 verified+passed 探针。verified+passed 探针门沙箱已由 B 的
+  `verify_isolation`/`TrustedProbeRegistry.is_verified` 落地，本段只在 A 侧补空 probes 构造拒绝与
+  no-implicit-admission 回归。
+- research_execution_bound：`admit_native_invocation` 现显式要求 `research_execution_bound is not None`
+  且 `bound` 严格相等（service.py:709），缺失或错配即拒。
+- operator authorization：`admit_native_invocation` 由 `_research_action("read")` 收紧为
+  `_research_action("experiment")`（service.py:707），native 执行前必须有 operator 在
+  `ResearchEnvelope.actions` 中显式授权 experiment。
+
+新增/回归测试：`test_host_live_mode_rejects_empty_probes`、`test_host_generated_settings_require_non_empty_criteria`、
+`test_native_admission_requires_operator_experiment_authorization`、`test_native_admission_requires_execution_bound`，
+并更新 `test_host_docker_export_roundtrip_factory_and_no_implicit_admission` 以提供非 verified 探针使 live 配置可构造；
+`tests/research/test_native_invocation.py`、`tests/research/test_dynamic_service.py` 合计 34 PASS。
+
+冻结身份再 pin：本段变更基于 core 冻结 SOURCE `82201af4d3b369da827f6f22ff1d9c6b608c0108`
+（integration 分支，含 `orchestration/experiments/generated.py` 的 `DockerExportConfiguration.api_version`
+`Literal["1.52","1.54"]`）。本 A 轨只接线自有源，不合并/改写 B 的 orchestration/experiments 与动态执行器；
+真实 Engine/AT07/L2/native 模型/候选科研均仍 **NOT_RUN**。

@@ -18,7 +18,8 @@ def setup(tmp_path):
     base = make_service(tmp_path).config
     clock = [time.time() + 1]
     bound = ExecutionBound(provider="fixture", model="inert", input_tokens=100, max_output_tokens=100)
-    envelope = ResearchEnvelope(goal="goal")
+    envelope = ResearchEnvelope(goal="goal",
+        actions=("read", "note", "branch", "propose", "choose", "claim", "review", "experiment", "apply"))
     cfg = base.model_copy(update={"authorization_ref": "local-test", "research_envelope": envelope,
         "research_execution_bound": bound, "research_budget_path": str(tmp_path / "budget.sqlite3"),
         "research_budget_policy": BudgetPolicy(max_cost_usd=1, unbounded_reservation_usd=.1,
@@ -127,6 +128,23 @@ def test_native_admission_keeps_bound_budget_and_request_identity(tmp_path):
     second = s.admit_native_invocation(str(uuid4()), bound, ttl_seconds=60)
     assert second.reservation.reservation_id != binding.reservation.reservation_id
     assert s.budget.snapshot().admission_charged_usd == .1
+
+
+def test_native_admission_requires_operator_experiment_authorization(tmp_path):
+    s, bound, _ = setup(tmp_path)
+    # Remove the operator's "experiment" authorization from the host envelope.
+    no_experiment = s.config.model_copy(update={"research_envelope": s.config.research_envelope.model_copy(
+        update={"actions": tuple(a for a in s.config.research_envelope.actions if a != "experiment")})})
+    unapproved = ResearchService(no_experiment, ledger=s.ledger)
+    with pytest.raises(PermissionError, match="action_outside_research_envelope"):
+        unapproved.admit_native_invocation(str(uuid4()), bound, ttl_seconds=60)
+
+
+def test_native_admission_requires_execution_bound(tmp_path):
+    s, bound, _ = setup(tmp_path)
+    no_bound = s.config.model_copy(update={"research_execution_bound": None})
+    with pytest.raises(ValueError, match="research_budget_requires_complete_host_binding"):
+        ResearchService(no_bound, ledger=s.ledger)
 
 
 def test_native_admission_cannot_reset_original_runtime_or_attempt_limits(tmp_path):
