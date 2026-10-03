@@ -1,3 +1,11 @@
+## 20:29 固定最终组合与真实隔离授权包更新
+
+主控直接核对原P最终产品 SOURCE 8c716c450bf4b5b436e915726857260cc79cb17e，普通push/remote exact/clean；对94仅pyproject.toml、uv.lock、src/morph_research/__init__.py三pin文件4增4删，只有b480→e635完整SHA，依赖/UI/API/六developer配置零其它delta。旧root误写包路径由msg_a89118cf3d5e正式纠正，原Task task_f4c3bd2e8087/ctx_0e6f2936f26a无新派发。98原锁离线检查通过，P不重安装/全测，docsREPORT后独立交付。
+
+唯一I task_33b99bbe70e8/ctx_154fc9202fc1 已收到接纳SOURCE，固定 core e635b8ab3e79529403b527892e75ffb29674af0a + product8c716c450bf4b5b436e915726857260cc79cb17e，新C:/r1i/successor-2018/环境一次全产品离线/适用类型/installed来源；原CI37122569886 attempt1继续，不重复本机全核心。前组合各绿门不改身份，原失败保留。
+
+原B同Owner/树/branch/terminal后继parent task_8e19fb680605仅 docs/experiments/at07-authorization.md、docs/tracks/r1-experiments.md 更新最终组合可审阅包，不改代码/profile/锁/候选，不重测/安装，不调用Docker Engine/key/prepare/create。绑定上述SOURCE与87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb原锁、新installed路径，I结果尚未齐全标PENDING；后来由I精确补handoff。说明官方CLI本体身份未验、所有外层部署/inspect命令也需同endpoint/空私有config/受控子env，旧裸docker示例只能历史不可执行；不可单靠runner修正宣称整个部署路由绑定。以实际宿主时点观察保留pipe=false、RAM5850MiB/C45.9GiB、三profile firewall raw值未证明动态端口可达范围。列明DockerDesktop启动/恢复他项目影响、固定镜像缺失STOP、sidecar/cache资源unsupported、动态端口范围未核实STOP、单create未知不重试；仅准备不引擎/探针/science授权。普通docs push [skip ci]，同I最后docsmerge，不因此重跑门。工程结果全部可审阅后按用户指定再单独授权真实AT07；AT07真实全通过才允许候选进入真实执行环境，L2另外有界执行，不加L3等。
+
 ## 20:22 累计SOURCE已发布，原P精确repin接续
 
 唯一I新累计core SOURCE e635b8ab3e79529403b527892e75ffb29674af0a已普通push，主控直接核对remote exact/clean/no-skip最终commit、三业务路径、B/Q原blob一致及所有指定普通祖先；实际lock仍87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb。原CI启动/完成由I跟踪该完整SOURCE的一次原run/attempt；现在不宣称新组合工程门通过。
