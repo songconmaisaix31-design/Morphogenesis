@@ -620,3 +620,42 @@ Engine可能恢复他项目容器等限制未降低。下一独立授权最小�
 私有raw `C:/research-private/b-at07-final-packet-ctx_021ad7956531/`。业务/测试/lock/部署/AOCI/root/P/F/I写入零。
 安装、测试、Engine/Docker/WSL/service、密钥、prepare/registry写入、SDKcreate、candidate/native科学均未执行；
 AT07与L2仍NOT_RUN，Poisson review不变，费用UNKNOWN，不称MVP/R1完整通过。唯一I可普通合此docs-only REPORT，不新增集成Worker或全回归。
+
+## 2026-10-03 19:39 后继：AT07 CLI 观察端点硬绑定
+
+Task `task_8e19fb680605` / Dispatch `ctx_0c9ab2aea2f0`，原B角色/terminal/树/分支，
+Codex GPT-6.1-Sol high YOLO；按root `df12d36e31d4dd7d7a5a54263eed710f283689c2` 当前计划。
+先Handoff `msg_72c78bc64bc2`，主控接受 `msg_587d2f618928`；可消费业务 SOURCE
+**`fc866465aa52a3f09773bc79a0fab95bceedc3d9`** 已普通commit/push `[skip ci]`、remote exact/clean，
+父为原docs REPORT64c5fac，仅 `at07_live.py` / `test_at07.py` 两文件变更。
+源码已先交主控 `msg_947038ddc820`；本段及授权包后继commit为单独docs-only REPORT，SHA由终端交付，不自嵌。
+
+所有原CLI前后inspect/inventory、fixedexec cat/nft、筛选域名logs绑定同完整DockerExportConfiguration；
+typed argv=`docker --host <原cfg.endpoint> --config <同次新空目录> <closed观察参数>`，shell=False/10s/原观察大小界限。
+最小env仅PATH/SYSTEMROOT/WINDIR，大小写规范/冲突拒绝，不继承DOCKER_CONTEXT/HOST/CONFIG/TLS/CERT/API/
+customheaders、代理、HOME/USERPROFILE或认证/service key；所有helper均要求明确reader，没有默认context回退。
+完整配置无/无效/绕过model校验、service/runtime身份格式或server固定profile不合均在CLI/密钥/create前拒绝。
+原credential-free FrozenDockerExport preflight先检查Engine/daemon/Linux/service，同原transport再读取/version匹配API1.52。
+私有目录只在新probe root新建 `.at07-docker-cli`，no_links、不得已有、身份核对、只rmdir空目录，未知文件保留。
+未扩大exec/秘密字段读取或访问容器范围；原单次create/UNKNOWN/no-replay/原owned SDK cleanup断言保留。
+
+官方参数来源：[Docker CLI](https://docs.docker.com/reference/cli/docker/)；未复制上游代码、增加依赖/transport/schema/registry/调度/证明系统。
+原始证据：`C:/research-private/b-at07-endpoint-ctx_0c9ab2aea2f0/`。
+
+| 验证命令 / 阶段 | 实际结果 / 原始文件 |
+| --- | --- |
+| `.venv/Scripts/python.exe -m pytest tests/experiments/test_at07.py -k 'bind_explicit_endpoint or routing_overrides or bypassed_model or engine_mismatch' -q --tb=short -p no:cacheprovider` | 首RED 18 FAIL/26 deselected/2.58s，exit1；`endpoint-first-red.txt`，主要为旧接口尚未接线，不覆盖 |
+| 同python `-m pytest tests/experiments/test_at07.py -q --tb=short -p no:cacheprovider` | 首修44 PASS/11.20s；追加未知目录/配置前置/secret-free异常边界后最终52 PASS/2.04s/exit0；`at07-first-after-fix.txt` / `at07-final.txt` |
+| 同python `-m mypy --strict --follow-imports=silent --cache-dir C:/research-private/b-at07-endpoint-ctx_0c9ab2aea2f0/mypy-cache orchestration/experiments/at07_live.py` | 首/最终均1个改动文件PASS/exit0；`strict-first.txt` / `strict-final.txt`；不是全核心strict重跑，原strict配置未改 |
+| `git diff --check` / `git ls-remote origin refs/heads/songconmaisaix31-design/morph-r1-experiments-1003` / `git status --short` | SOURCE diffcheck通过、远端精确fc86646、clean；最终REPORT同法单独核对 |
+
+测试捕获实际subprocess argv/env；两种受信endpoint和各只读/fixedexec/log形式、毒化环境、路由绕过、
+model_copy无效配置、缺配置/非空私有目录、mutation、原Engine daemon/version/API/Linux mismatch-before-key/create均覆盖。
+原disconnect用例现在通过真实reader捕获9次前后CLI调用，仍保留first bytes/UNKNOWN/不重放/唯一SDKcreate断言。
+测试autouse拒绝真实Popen/socket/SDKcreate/transport，显式inert替代不构成Engine运行或verified probe。
+
+复用本B原私有 `.venv` pytest9.1.1/mypy1.20.2/opensandbox1.1.0/docker7.2.0，未安装或写I封闭环境。
+锁/依赖/部署/backend.py/generated.py/Q/A/P/F/I/root/AOCI业务写入零；原110/210/Q65/核心CI/产品256/UI门未重跑。
+SOURCE尚未唯一I合入及P重新pin，b480+2b/a67离线通过明确为前组合，不能冒充新SOURCE installed或全R1完成。
+真实Engine/Docker/WSL/services/pull、密钥、native模型、candidate/science、AT07/L2、main/tag/部署均NOT_RUN；
+模型用量/费用UNKNOWN，OpenCode首余额阻塞和原RED保留。适用工程门后仍需用户独立AT07授权，全项实际隔离通过后才可另议L2。
