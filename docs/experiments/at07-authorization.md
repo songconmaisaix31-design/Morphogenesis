@@ -3,7 +3,94 @@
 本包针对 Spec §10.1、AT-07、§14.4。**真实 AT-07：NOT_RUN；L2：NOT_RUN。**
 **当前状态：用户已专项批准；本次创建前STOP，SDKcreate=0，PREPARED_UNVERIFIED。科学L2未获授权。**
 
-## 21:44 专项批准后的真实前置STOP与独立只读诊断
+## 2026-10-03 API闭集返修SOURCE与固定egress拉取审核包
+
+原B Task `task_8eccf7578721` / Dispatch `ctx_370b39a856a3` 接续已封存的d03报告，依据root21:57计划。
+领域SOURCE **`c3a905eaf79a869dffb5960da9c4afee1dc63c3e`** 已普通push `[skip ci]`；
+生产仅`DockerExportConfiguration.api_version`显式闭集`Literal["1.52", "1.54"]`，默认仍`1.52`。
+原`at07_live`/`frozen_export`/`TrustedProbeRegistry`零改：沿用`/v{api}`、实际API精确比较、
+固定Engine29.5.3/daemon/完整配置绑定，不自动发现后授信、不接受任意API，不用DOCKER_API_VERSION伪匹配。
+依据[Docker官方版本矩阵](https://docs.docker.com/reference/api/engine/)，29.5对应最高API1.54；
+实际宿主原只读观测为1.54，但**本新SOURCE尚未由唯一I合入/私装验收、P尚未重新pin**。
+新B SOURCE不是新的累计core SOURCE，也不是本docs REPORT；不得用旧r2/15de环境执行新SOURCE probe。
+实际profile/compose/锁不变，仍须后续I重新核实际配置来源并显式绑定1.54，不能从旧probe继承。
+
+| 本B适用离线验证（原私有`.venv`；拒绝真实进程/Engine/network/SDK） | 实际结果 / 原raw |
+| --- | --- |
+| 新定向`-k`选择，生产修复前 | 6 FAIL / 29 PASS / 97 deselected / 16.34s；`first-red.txt`保留；1.54尚不被schema接受 |
+| `pytest`三个受影响既有测试文件 | 131 PASS / 1 FAIL / 2.68s / exit1；`target-first-after-fix.txt`；新fixture漏必填provenance，不是Engine证据 |
+| 仅修新fixture为`provenance="mock"`后，同一失败node | 1 PASS / 1.69s / exit0；`fixed-one.txt`；未重复其余131绿项，不伪称一次整套132PASS |
+| 改动生产文件`mypy --strict --follow-imports=silent` | 1 source file PASS / exit0；`strict-first.txt`，非全核心strict |
+
+精确命令：本B `.venv/Scripts/python.exe -B -m pytest tests/experiments/test_at07.py tests/experiments/test_frozen_export.py tests/experiments/test_generated_configuration.py -q --tb=short -p no:cacheprovider --basetemp <本Task新私有fixtures>`；
+首RED另带`-k 'supported_but_different or bound_api_154 or paused_ancestor or supported_configuration or export_api_schema or unapproved_export_api or probe_with_154 or exact_probe_binding'`。
+修fixture后仅`tests/experiments/test_at07.py::test_bound_api_154_operator_gate_preserves_configuration`。
+strict为同Python `-B -m mypy --strict --follow-imports=silent --cache-dir <本Task私有cache> orchestration/experiments/generated.py`。
+覆盖schema默认/闭集、`/v1.54`所有GET/HEAD同endpoint及原SDK pause→HEADGET→resume契约，
+1.52/1.54双向actual/bound不匹配在CLI/key/SDK前拒绝，API变更无法沿用旧probe，
+同probe ID不同完整配置冲突拒绝；原1.20/foreign daemon/changed profile/unknown/no-replay断言保留。
+原Git到SOURCE的AST核对，三文件既有62/23/13条assert均完整保留；生产reader/export/registry及lock/profile/compose原blob一致。
+SDK正例为拦截request，operator正例只到拦截的既有`_execute`边界，不是实际探针PASS。
+原首STOP/exit125/stderr MISSING、旧RED/unsupported/unknown、原日志/Poisson review不改；SDKcreate仍0，原600s窗口不恢复。
+
+### 固定缺失egress公共metadata（只读，不代表本地已有镜像）
+
+[官方egress v1.1.7 release](https://github.com/opensandbox-group/OpenSandbox/releases/tag/docker%2Fegress%2Fv1.1.7)
+列出Docker Hub `opensandbox/egress:v1.1.7`。本次直接只读原Docker Hub registry的**原固定digest**，
+不是通过可变tag选新镜像；UTC14:02:16.549至14:02:20.124，原public响应完整私有分档：
+
+| 固定公开对象 | 原响应字节与身份 |
+| --- | --- |
+| 原`sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5` | OCI index 1609 bytes，`Docker-Content-Digest`及原bytes SHA256均等于原digest |
+| 同index唯一linux/amd64 manifest | `sha256:1361851fc54f0175da55c6e63978338d6cfc408a6cdaae6534965b9f76eaf605`；2197 bytes，header/原bytes SHA同值 |
+| linux/amd64 10个压缩layers | 合计**132,028,620 bytes**；config descriptor4165 bytes，合计132,032,785 bytes；不包含index/manifest/协议开销，不是实测下载流量 |
+| 解压后disk / 已有layers复用后的增量 | UNKNOWN；没有下载layer/config blob、没有Engine/pull/安装；public存在不能代替本地image inspect |
+
+原metadata URL是`https://registry-1.docker.io/v2/opensandbox/egress/manifests/<上述完整digest>`。
+依据[官方Distribution匿名token流程](https://distribution.github.io/distribution/spec/auth/token/)，
+只为公共repository:pull的GET获取一次匿名bearer，内存使用、不打印/落盘，不读取或更改用户Docker auth/global配置。
+无代理继承、无redirect、单响应上限1MiB/15s，仅index及amd64 manifest GET；未调用Engine或SDK。
+这验证固定公开内容身份，不宣称签名/attestation独立验证或runtime隔离。
+raw在`C:/research-private/b-api154-ctx_370b39a856a3/`的
+`public-fixed-manifest-first.json`、`public-linux-amd64-manifest-first.json`、`public-registry-metadata-first.json`。
+
+### 一次精确拉取packet（仅审核准备，当前禁止执行）
+
+原AT07专项批准已接纳，不再索同一批准；原包明确缺镜像STOP不pull，本Task也**不授权pull**。
+原root需另固定必要基础设施拉取范围/预算后，才可执行以下**唯一原digest、linux/amd64**动作；
+不是恢复原600s probe窗口或第二次SDKcreate，不换源/tag/backend、不build/upgrade。
+[官方Docker image pull格式](https://docs.docker.com/reference/cli/docker/image/pull/)支持digest和`--platform`。
+
+1. 先fresh只读资源/CLI本体/同npipe Engine身份，确认原官方绝对CLI文件身份和空owned目录。
+   所有目录须固定本B新私有根、无symlink/reparse/未知覆盖，exclusive创建、记录identity，不能共用历史config。
+2. 仅固定系统child env `PATH=C:/Windows/System32`、`SYSTEMROOT=C:/Windows`、`WINDIR=C:/Windows`；
+   绝对官方CLI无需Compose locator。DOCKER_*/HOME/USERPROFILE/TLS/auth/context/APIheaders/proxy任意大小写变体不继承，
+   不改变parent/global/daemon配置，不使用用户HOME凭据。
+3. 待root明确范围后的typed argv模板为：
+
+   ```python
+   # Review-only: task_private_config/task_owned_root must be new verified owned paths.
+   task_pull_argv = [
+       "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+       "--host", "npipe:////./pipe/dockerDesktopLinuxEngine",
+       "--config", str(task_private_config),
+       "image", "pull", "--platform", "linux/amd64",
+       "opensandbox/egress:v1.1.7@sha256:db7345d567b0970f384b8e3fa7a93a71b7f43d4b16bb2009de34096e9a87b3b5",
+   ]
+   # shell=False, controlled env, owned cwd; proposed separate pull cap 180s, NOT approved here.
+   ```
+
+4. 一次调用、建议独立180s上限须由root明确；原read-only观察仍10s/有界输出。
+   记录真实开始/结束/exit/耗时/身份和secret-free公开摘要，stderr不得原样进入公开docs。
+   Timeout/断连是daemon下载效果UNKNOWN，停child不能证明daemon取消；不第二pull/retry、不prune/删除共享layers。
+   只读调查同endpoint固定digest是否实际出现，核RepoDigests与linux/amd64；未核即UNKNOWN/STOP，不部署/create。
+5. 原新空config无凭据/内容且同identity时仅rmdir；若插件/未知文件出现则保留并报告，不递归删除。
+   即使拉取成功，也只解除缺镜像门，不解除实际API完整配置、动态端口有效范围、资源或独立审核门。
+
+原Q负责当前ActiveStore/IPv4/IPv6/NAT动态47400..47410范围的独立只读审查；本B不代改防火墙/开listener或声明PASS。
+后续真实运行仍须最终工程来源验收与明确新范围；实际AT07全项PASS+独立Q审核之前，不注入registry、不执行候选/L2/科学。
+
+## 历史21:44 专项批准后的真实前置STOP与独立只读诊断
 
 用户已提交“我现在批准AT-07，继续开发”，原C转交`msg_f469ac99f92f`（UTC13:23:20），
 root治理`a3880ffb8e83a5df8f22a3880f47483e9754ac01`已直接核原提交终端stream并接纳；不是draft或本B代批。

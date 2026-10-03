@@ -765,3 +765,37 @@ AT07 NOT_RUN/precreateSTOP，L2/候选/science/native模型NOT_RUN，registry未
 cache/端口/总峰UNKNOWN、caps UNSUPPORTED与全项实际PASS+Q独立审核条件保持，费用/用量UNKNOWN，OpenCode首阻塞不重试。
 只进行真实批准范围前置/后继只读诊断及Git diffcheck/普通docs checkpoint+push `[skip ci]`/remote exact/clean，
 未重测/安装/CI/付费/修改AOCI或全局状态，不称MVP/R1完整通过；领域协议/镜像/可达性缺口交root，不在冻结SOURCE内自修。
+
+## 2026-10-03 API1.54最小领域返修与固定镜像只读metadata
+
+原B Task `task_8eccf7578721` / Dispatch `ctx_370b39a856a3`，接续d03同Owner/树/branch，先读root21:57计划。
+SOURCE **`c3a905eaf79a869dffb5960da9c4afee1dc63c3e`** 已普通push `[skip ci]`，
+生产仅generated.py一行`api_version: Literal["1.52", "1.54"] = "1.52"`；原Engine29.5.3固定不变。
+at07_live/frozen_export/registry/锁/profile/部署/AOCI/其他Owner零改，继续原/v{api}与exact daemon/API/fullconfiguration。
+新SOURCE尚未原唯一I累计合入/私装、原P未repin，不取本docsREPORT作SOURCE，不称旧15de+c84 installed门覆盖此新来源。
+
+先增加定向正负测试并保存生产改前RED：6FAIL29PASS97deselected/16.34s，主要为Literal拒绝1.54。
+改后一轮三个适用文件131PASS1FAIL/2.68s/exit1；唯一失败是新operator fixture漏必填provenance。
+仅补`provenance="mock"`后同失败node1PASS/1.69s/exit0，不重其余131绿项、不写一次whole132PASS。
+strict仅改动generated.py：1source PASS/exit0；未改strict配置或重全核心门。
+用原私有`.venv/Scripts/python.exe -B -m pytest`，三个文件test_at07/test_frozen_export/test_generated_configuration，
+`-q --tb=short -p no:cacheprovider --basetemp <本Task新私有fixtures>`；精准复核仅operator gate失败node。
+同Python `-B -m mypy --strict --follow-imports=silent --cache-dir <本Task私有cache> orchestration/experiments/generated.py`。
+AST比原d03三文件62/23/13条既有assert无缺失；source-boundaries-and-assertions.json核原reader/export/registry/lock/profile/compose blob完全一致。
+覆盖默认1.52/闭集1.54、原transport同endpoint所有/v1.54 GET/HEAD+SDKpause/resume契约、双向API mismatch0SDK/0CLI/不读key、
+旧probe不能用于另一批准API、changed full configuration及同probeID冲突；原1.20/daemon/changedprofile/unknown/no-replay断言保留。
+全部过程/网络/SDK拒绝或intercept，原liveexecute assertion不削弱；不称真实AT07、候选或L2通过。
+
+公开官方release列原Docker Hub tag；UTC14:02:16.549至14:02:20.124只读registry原固定db7345...a87b3b5，
+OCI index1609bytes、header及原bytes SHA一致；唯一linuxamd64 manifest1361851...af605/2197bytes同样精确。
+10压缩层132028620bytes+config4165=132032785bytes；uncompressed disk/已有层复用后的增量UNKNOWN，没有取layer/config blob。
+公共匿名bearer仅内存、未打印/保存/改用户auth，未Engine/SDK/pull/build/key/Desktop重启。
+在授权包写好同官方绝对CLI/同npipe/新owned空config/三固定system childenv/typed shellFalse的一次原digest pull packet，
+独立180s只是供root审阅建议，当前未授权/未执行；timeout远端下载效果UNKNOWN，不第二pull，不换tag/source/backend/prune。
+元数据存在不等于本地镜像存在，不解除动态端口/资源/完整实际配置/工程门；跨轨Q端口只handoff。
+
+所有本轮raw/命令/exit与公开metadata分档在`C:/research-private/b-api154-ctx_370b39a856a3/`。
+历史600s STOP/SDK0/exit125/MISSING、旧8558/首RED/unsupported/unknown与Poisson review不改，原尝试不reset/replay。
+两docs独立REPORT普通push `[skip ci]`，保留SOURCE/REPORT分层；无全测/安装/CI/UI/native模型/付费/科学/候选/registry写入。
+模型保持现有Codex GPT-6.1-Sol high YOLO；用量/费用/节省UNKNOWN，OpenCode余额首阻塞不重试。
+真实AT07/L2仍NOT_RUN，待原I/P新来源工程接纳及实际隔离全项通过+Q独立审核，不称MVP或R1完整通过。
