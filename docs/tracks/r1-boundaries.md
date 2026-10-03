@@ -1244,3 +1244,101 @@ AT07 and L2 remain NOT_RUN. Independent I's final offline combination and
 separate user authorization are still required before real AT07, followed by
 L2 only after actual AT07 acceptance and its approved problem/material/resource
 scope. This publication closeout grants no MVP/R1 overall acceptance.
+
+## 2026-10-03 Q scoped Docker transport portability repair
+
+Task `task_7517d7a2997a`, dispatch `ctx_246835450dd3`, continues the original Q
+worktree/branch from clean `6ce5a23ea256affdf9fe8a71bbaabb66695f3631`.
+The failed integration subject remains SOURCE
+`3a6a7e5fecd5bbead9d234fa22ae0735bed19beb`: original CI
+`37113441786`, attempt1, Linux **2 FAIL / 1742 PASS / 16 SKIP in 540.91s**;
+Windows was cancelled by the matrix. Both original failing endpoint cases
+raise ImportError at Q test line123's unconditional NpipeHTTPAdapter import.
+Q read I's preserved `C:/r1i/i1003-core-1732/logs/ci-first-failure-excerpt.txt`;
+the original full log and first-result files remain unchanged in I's directory.
+Prior Q **65 PASS / 24.98s** remains historical evidence, not a replacement
+for this first CI failure or a result rerun during this repair.
+
+### Minimal change and official platform behavior
+
+Fixed private official `docker==7.2.0` source exports UnixHTTPAdapter
+unconditionally, but catches ImportError around npipeconn/npipesocket;
+npipesocket requires pywintypes and win32 modules. Therefore importing both
+adapters before choosing an endpoint also broke the Linux UNIX case. The Q
+test now imports the transport module and accesses only the appropriate adapter.
+On a non-Windows host the NPIPE case explicitly asserts the official adapter
+is unavailable and the actual production `_transport(endpoint)` raises
+AttributeError naming NpipeHTTPAdapter. This is rejection evidence, not NPIPE
+construction success; the UNIX case continues actual construction. There is
+no blanket or platform skip, fake adapter, platform monkeypatch or new dependency.
+
+On Windows, actual UNIX and NPIPE constructors remain required. Original
+DOCKER_HOST/DOCKER_CONTEXT/HTTP_PROXY poison, adapter type, trust_env=False,
+auth=None, close and process/socket guards remain. The earlier alternative
+base membership assertion is strengthened to the exact per-endpoint base;
+actual adapter socket_path/npipe_path must match the explicitly supplied endpoint.
+No adapter connects to an Engine. No B production failure is established by
+the original import error, and no domain/dependency/workflow/guard file changed.
+
+### Exact private installation and targeted validation
+
+Reused only Q's existing private noneditable Python3.13.13 environment after
+fresh verification of canonical direct_url commit_id/requested_revision
+`aec86c98ffe8fc3c3a922da5a6e281d553820d05`, private purelib import origins and
+all **136 installed Python files byte-equal to raw Git blobs**. Process-local
+`GIT_NO_LAZY_FETCH=1` applied; `git cat-file --batch` supplied original bytes,
+without line-ending normalization. `git diff --exit-code` confirms no
+orchestration/experiments or local_assets changes between exact B
+`5769005b09f1b756c94fdad0649a6b74690c0ca9` and that A subject. Official Docker
+7.2.0 resolves from the same private purelib. New immutable identity evidence:
+`tests/integration/r1_security/evidence/q-transport-portability-private-identity-first.txt`.
+
+Actual Windows command, with process-local R1_SECURITY_INSTALLED=1,
+PYTHONDONTWRITEBYTECODE=1 and OPENBLAS/OMP/MKL_NUM_THREADS=1:
+
+```text
+.venv-q/Scripts/python.exe -m pytest tests/integration/r1_security/test_b_frozen_export_boundary.py::test_official_local_transport_constructs_without_environment_or_engine_connection -q -rA --tb=short
+```
+
+**2 PASS, 0 SKIP, 0.45s, exit0**; both original parameterized endpoint cases
+constructed actual official adapters. Raw result:
+`tests/integration/r1_security/evidence/q-transport-portability-windows2-first.txt`.
+The original unchanged conftest denies subprocess.Popen, os.system and socket
+connect/connect_ex throughout both test calls. No Linux host was available:
+root confirmed this in `msg_746e3444b417`; actual Linux UNIX construction and
+NPIPE rejection execution await I's authorized combined successor CI. No WSL,
+Docker, new host/environment, full65/293/core/product run or reinstall was used.
+The short private verification/test processes exited and the window is released.
+
+### Frozen SOURCE, publication and remaining gates
+
+SOURCE `acb26f4af3535ff6b4136dcb5ef0f7fde526e2a3` changes only the owned test
+function and two small new evidence files. `git diff --check` passed. Ordinary
+publication and immediate remote verification both exited0:
+
+```text
+git -c http.version=HTTP/1.1 push origin acb26f4af3535ff6b4136dcb5ef0f7fde526e2a3:refs/heads/songconmaisaix31-design/morph-r1-boundaries-1003
+git -c http.version=HTTP/1.1 ls-remote origin refs/heads/songconmaisaix31-design/morph-r1-boundaries-1003
+```
+
+The remote returned full SOURCEacb and the worktree was clean. Early frozen
+Handoff `msg_632d3b82ce80` routes this exact source through root to original I
+`ctx_eceee077723b`; root owns merge and successor CI authorization. This
+docs-only REPORT follows SOURCE; its commit uses `[skip ci]` per root's guidance.
+
+The new skip-ci follow-ups were first consumed after SOURCE was already pushed,
+so its published commit message lacks `[skip ci]`. Q preserves that immutable
+published history. A read-only `gh run list --branch
+songconmaisaix31-design/morph-r1-boundaries-1003 --commit
+acb26f4af3535ff6b4136dcb5ef0f7fde526e2a3 --limit 3 --json
+databaseId,headSha,status,conclusion,event,url` observed automatic push run
+`37114202636` in_progress, with no conclusion. Q immediately escalated through
+`msg_368a6bf2b50a` and `msg_c851857bf49a` for coordinator handling of that extra
+run. Q issued no CI dispatch, rerun or cancellation; this automatic run is not
+presented as acceptance or as the unique I combined gate.
+
+Linux validation and I's final combined gate remain pending. Actual daemon/API/
+Engine/isolation are still unmeasured; AT07/L2 remain NOT_RUN and require their
+separate authorization sequence. No native/model/science execution, C cleanup,
+OpenCode, AOCI write, global Python install or auth/provider change occurred.
+This repair/report closes only the scoped Q portability phase, not MVP/R1.
