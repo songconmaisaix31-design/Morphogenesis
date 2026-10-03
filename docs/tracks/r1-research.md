@@ -384,3 +384,52 @@ git ls-remote origin refs/heads/songconmaisaix31-design/morph-r1-research-1003
 索引section与本机配置明确绑定 **A worktree绝对目录**。其它checkout直接复用、跨宿主迁移、本索引对I新组合的freshness均未验证；I必须先沿自己的官方Guide核对并执行其实际重新绑定/迁移要求，若十源有delta仍由原A Owner按官方Maintain收口。不能手动替换目录、伪造baseline/receipt、复制P human approval或以全仓clean冒充索引fresh。
 
 实际模型 token用量、成本、节省百分比均 **UNKNOWN**；estimated_tokens只表示工具估算的索引大小。没有重测已绿9PASS/strict2或Q门，没有新COPY/install/build窗口，也未启动OpenCode、Docker/WSL、真实AT07/沙箱/模型科研、L2、外部资料上传、系统清理或发布/main/tag。P受保护配置与未完成human TTY receipt不属本轨；本任务完成不代表完整MVP/R1通过。
+
+## 12. 正式条件适用性定界（2026-10-03 20:01 后继）
+
+原 A 同 worktree/branch、实际进程执行 `task_52a650c20831 / ctx_fc89f40b4357`，未委派新 Agent。先读 root `17d0ff926772d3a9fa65620b733fc2caca0c95a0` 的 R1_PLAN 顶部20:01范围、原 Spec FR13/FR19、C 私有 `c-mvp-policy-audit-1940/ACCEPTANCE.md` 与 opportunity 报告，以及精确 b480 的原 A/B/C 调用。原 A clean `d8af82791fecde1f3dadfbf9190d4cbfada80146` 普通精确 merge 已接受 b480 为 fast-forward；当前源码和本轮 **actualtestedSOURCE 均为 `b480fca1b10a0b6a9c93f0d1801d38f267662461`**，已先 push 原 branch 并由 ls-remote 核对完整 SHA。
+
+本轮没有确认需要修复的新产品首 RED，故仅交本报告和私有调用/测试证据，不新增业务条件契约或修改 C 匹配域。这里不宣称所有适用性问题均已解决，也不把 C 的静态疑点改写成已修复漏洞。
+
+### 12.1 实际入口与语义
+
+`service._research_branches:1286` 仅投影身份/status/parent/authorized；`feedback.advisory:398/422` 每次重读原 accepted 事实、空条件按同路线聚合。`_task_opportunity:1426`、choose、claim 的引用是路线建议，不能直接产生科学结果或采用回执。正式 propose_work:903 没有 hypothesis/conditions 选择器；`Hypothesis.conditions` 虽由 `knowledge.put_hypothesis:167` 持久且不可变，`submit_note:864/894` 的正式 hypothesis 入口仍保留 note.applicability、创建空 conditions 的 proposed Hypothesis。成员 note 不是可信不适用裁决，多假设可属于同一路线；不能手造 C Branch 或把调用方文本变成权威事实来构造产品首 RED。
+
+B 的 `generated_conditions`（local_assets/generated_validation.py:35）从原冻结 plan 绑定程序/数据/环境/参数/seed/评价/资源/claim/hypothesis；`read_generated_observation:224` 重读原归档。`trusted_generated_feedback` 再核对原 ledger/attempt/token/audit/asset/冻结评价，C 独立复核要求相同条件。`service.inherit:584/apply:614` 复用原 `require_inheritance`，要求源条件匹配及消费 task 的本地再验证。参数/seed不同不天然证明路线不适用，但它们改变旧资产 PASS 的精确复用条件；路线引用不能绕过此门。
+
+私有正式 service fixture 实际观察：同路线新 claim/hypothesis 在接受旧证据后仍有路线份额 `0.5571428571428573` 和原 result ref，且可准备**独立新候选**；新 task 没有执行审计、结果、可信 observation 或 adoption。该现象只证明广义路线建议，不证明旧结果支持新主张。复用旧 asset 时，分别改变 hypothesis、parameters 或 seeds，正式 prepare 都以 `generated_candidate_conditions_mismatch` 拒绝，未冻结/执行新 task，原 report 历史和路线正证据保留。即使条件相同，没有消费 task 自身 inheritance observation，inherit 仍以 `local_revalidation_required` 拒绝。
+
+另一个由正式 create_branch 创建的子路线，即使引用旧 result 且提交新 hypothesis/applicability，也不获得原路线 supported_by，证据先验仍 .5。旧正证据不会全部消失来“绿测试”。旧同条件独立复现→本地再验证→应用采用正对照仍通过，unknown 不重试与 MCP 自报审批/环境拒绝对照仍通过。
+
+**覆盖限制**：这些入口没有逐 hypothesis 的权威适用性选择或 branch-wide 不适用契约；未评估每条路线引用对所有后续问题的科学相关性，不能签完整 FR13。改变条件后的真实论证、科研再验证与实际继承仍属 L2，不能从本轮 mock 得出。若未来明确这种契约并给出 formal 首 RED，再按原 Owner Handoff 修正；本轮不创造第二条件注册表/哈希/manifest/proof/调度或新评分机制。
+
+### 12.2 验证与不可覆写首失败
+
+本轮复用原 A `.venv-r1-a`，actual import 路径为本 worktree 的 swarm/research/service.py；是精确 checkout 调用证据，**不是新 noneditable COPY installed 验收**。只对本轨 Python 子进程设置 OPENBLAS/OMP/MKL 线程数1。私有测试复用原 service 的 host-selected inert mock、原 ledger/asset/archive/独立复核，autouse fixture 禁止候选子进程和网络，仅允许受信 Git。未手造 policy Branch 或 caller trusted 事实。
+
+```powershell
+./.venv-r1-a/Scripts/python.exe -m pytest -q -s -o cache_dir=C:/research-private/a-route-conditions-1003/pytest-cache --basetemp=C:/research-private/a-route-conditions-1003/tmp-first C:/research-private/a-route-conditions-1003/test_route_conditions.py
+./.venv-r1-a/Scripts/python.exe -m pytest -q -s -o cache_dir=C:/research-private/a-route-conditions-1003/pytest-cache --basetemp=C:/research-private/a-route-conditions-1003/tmp-repaired C:/research-private/a-route-conditions-1003/test_route_conditions.py -k 'same_route or changed_frozen'
+./.venv-r1-a/Scripts/python.exe -m pytest -q -o cache_dir=C:/research-private/a-route-conditions-1003/pytest-cache --basetemp=C:/research-private/a-route-conditions-1003/tmp-controls 'tests/research/test_dynamic_service.py::test_dynamic_service_original_inheritance_apply_receipt_is_explicitly_mock' 'tests/research/test_dynamic_service.py::test_dynamic_service_failure_is_not_refutation_and_unknown_is_not_retried[unknown]' 'tests/research/test_dynamic_service.py::test_dynamic_mcp_preparation_rejects_self_declared_approval_and_environment'
+```
+
+| 证据 | 结果 |
+|---|---|
+| conditions-first.log | **2 PASS / 4 FAIL / 30.66s，exit1**。四失败均为私有测试误将 SQLite 的 unconfirmed_request_id 当 TaskRecord 属性；三个正式条件拒绝断言已先通过。不是产品首 RED。 |
+| test_route_conditions-first-preserved.py | 原首轮测试正文另存，不改首断言/日志。 |
+| conditions-repaired-four.log | **4 PASS / 2 deselected / 26.92s，exit0**。只重跑四失败；改用原 ledger SQL 读取相同字段，并检查没有 execution 审计，不削弱原断言。 |
+| controls-first.log | **3 PASS / 22.78s，exit0**。仅上述三个必要旧正/负对照。 |
+
+首轮已绿两例没有重跑，不把原结果改写为首轮6绿。全部原证据、私有新测试和完整报告在 `C:/research-private/a-route-conditions-1003/`，主报告 `ACCEPTANCE.md`；identity-first.log 保留 b480 与实际 import 身份。仓库只追加本文件，未新增仓库测试。业务 source 无 delta，适用 changed-source strict/build 为 N/A；未重跑旧43/68/141/1745、完整产品256、UI126/browser8 或 B/Q AT07 门。
+
+### 12.3 成本、AOCI 与交付限制
+
+正式 known_cost 均为 None、理由 unknown_cost；当前 service 没有可信成本源/单位投影。原 generated payload usage/cost_usd 也为 None；fixture budget 的 tokens/actual_cost_usd 实测仍为 None。授权上限、预留估计和 admission charge 不是账单或实测验证成本。成本敏感机会分配、模型实际 Token/费用/节省均 **UNKNOWN/coverage limitation**，不填0或新数字。
+
+本 Run 实际读 rc17 rules 和原 A root 的完整10Entry Overview（2916 estimated tokens），没有复用旧 receipt。Attestation 首次 object_ref 字段被 schema 拒绝，一次改成 path 的字段修正也被拒绝；两原错误保留，不再语义重试或声称当前认知 verified。check-only 报 semantic_change_count=0、governance aligned、host_delivery_incomplete、current_system_cognition_reliable=false，当前模型 receipt **NOT_VERIFIED**。
+
+消费 b480 后，原 d8af827→b480 的十项 managed 源 diff 全为空；仅本报告与私有证据变更，均不在十源 managed scope，无维护/apply必要。官方绝对 binary 的 Verify→Check→Guide 新证据全 exit0，structure/governance aligned，Guide aligned/complete=true/next_action=none（私库 aoci-verify/check/guide.json）。这只是结构/freshness事实，不补造本 Run Attestation，不改 P 受保护输入、不重置索引，不证明 I 跨checkout认知。
+
+SOURCE 继续为已接受 b480，先普通push；后继 REPORT 为本文件单一 docs-only commit `[skip ci]`，最终 full SHA/remote exact/clean 在终态消息给出。不从 REPORT pin。产品2b9bf73/I a67只作为事实基准，未重装重测。唯一原 I 负责后继精确组合与最终一次离线门，原 P 最终repin。
+
+真实 Engine/key/SDKcreate/native模型/候选科研/新材料导入/AT07/L2/main/tag/deploy 均 **NOT_RUN**。本轮条件定界完成不代表 FR13 全场景、FR19 task_live 或完整 MVP/R1通过；如无新 formal 反例，不要求 C 重新开发或重签旧门。
