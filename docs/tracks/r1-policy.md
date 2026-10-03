@@ -520,3 +520,48 @@ python -m mypy --strict swarm/research/policy.py swarm/research/feedback.py
 仍在，未知旧依赖未动，**安装前全局状态 UNKNOWN，不能声称完全恢复**。
 未执行 pip/安装/卸载、旧141测试重跑、Python/native科研、Docker/WSL/service 操作或
 全局 HOME/auth/provider 更改；本记录不构成 MVP 或 R1 完成验收。
+
+## 2026-10-03 L2 当前调用路径复核（docs-only，短差异，不替代 B 指南）
+
+本节为静态审阅，不是真实 L2 / 采用通过；未运行任何测试、模型/SDK/native/候选/材料/CI，
+L2 与 AT07 仍 **NOT_RUN**，用量/费用 **UNKNOWN**。固定对：核心 `82201af4`（本树 origin）、
+产品 `d5d387a6`（私有仓，只读 `git -C <product> show`）；产品 `pyproject.toml:16` 钉核心
+`@82201af4`。本 C 树 HEAD `1e2338a4` 入场 clean。
+
+核心相对 B 指南基座 b480 的业务源码差仅为 `orchestration/experiments/generated.py` 的
+`DockerExportConfiguration.api_version`（`Literal["1.52"]` → `["1.52","1.54"]`，`:141`）与
+`at07_live.py`；Poisson 调用链行号/契约全部仍成立，仅“唯一核心冻结 SOURCE”身份应更新为 82201af4。
+
+产品端正式入口（B 指南未覆盖）：`morph-research research-member run`
+（`cli.py:43`）→ `run_member`（`r1_native.py:228`）逐门：`native_authorized`+`native_execution_bound`
+→ `require_native_egress`（`:24`，`data_bounds.native_egress`）→ `require_provider_binding`
+（`r1_provider.py:130`）→ codex/claude auth 选择（`:233`）→ budget settled（`:239`）→
+`admit_native_invocation`（`service.py:695`，`:711` 绑定 `research_execution_bound`）→
+`probe`+`runtime_supported`（`:257`）→ `run_headless`（`-m swarm.research --config`）。
+
+结论：两端 L2 正式调用链与消费/采用链（`consume.py:28/44/96`、`apply.py:123/131`、
+`research-phase inheritance`）**均已实现、可静态走通，无实现缺口**。真正缺少的是 operator
+权威输入与授权，非代码：① 已批准的 `TrustedCriteriaRecord`（`GeneratedHostSettings.criteria`
+`min_length=1`，`dynamic.py:51`；`service.py:89` 未批准即拒）；② n=100 / 1e-6 / 1e-8 仍未批准参考；
+③ `probes` 默认空、无 verified+passed 探针不建沙箱；④ `research_execution_bound`；⑤ 产品
+native_authorized / native_execution_bound；⑥ `native_egress` 授权表；⑦ `native_provider_bindings`
+授权；⑧ 预算已结算；⑨ 材料未导入；⑩ AT07 / L2 授权 NOT_RUN。最小 Handoff：A 注入已批准
+criteria/probes/execution_bound 并更新冻结身份为 82201af4；B 无代码缺口、待真实批准输入与候选；
+P 无代码缺口、待真实 host grants 与获准材料。完整证据（不入库）：
+`C:/research-private/c-l2-current-review-ctx_6027d5a27c18/review.md`。
+
+### 本节纠错（2026-10-03，docs-only 后继提交；不改原 4072c14 代码路径证据与原失败）
+
+对上段两处事实标签更正：
+
+1. “未运行任何…模型…用量/费用 UNKNOWN”更正为：**科学 native 未运行**；本次开发审阅本身经
+   DeepSeek V4 Pro 模型与工具调用完成，CLI 末显示约 134.7K tokens / $0.21 仅为界面显示，
+   未独立核对真实 provider 计量/费用，故不写“没有模型”、不写 0 费用或费用节省；真实用量/费用仍 UNKNOWN。
+
+2. 上段“⑩ AT07 / L2 授权 NOT_RUN”及最小 Handoff“待真实批准输入”更正：用户已专项批准 AT-07
+   （“我现在批准AT-07，继续开发”）且 root 已实际接纳；原尝试创建前 STOP 封存，实际 AT07 执行未验，
+   PRE-SDK / FW / UAC / 新 offline 门仍待，这是执行未验而非用户权限缺失。L2 用户明确要求真实 AT07
+   全部 PASS 后才执行，当前不运行科学。剩余是 root 审核并固定完整配置/判据与实际 host inputs，
+   不是重复索要同一批准。
+
+provider/model 未改、未重试、未切换配置。
