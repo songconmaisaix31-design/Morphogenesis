@@ -1,5 +1,13 @@
 # Research Swarm Alpha R1 一页开发计划（2026-10-03）
 
+## 用户模型选择与当前并行顺序（13:00）
+
+用户指定 Codex 使用 GPT-6.1 Sol，OpenCode 使用 DeepSeek V4 Pro。主控已通过原终端官方模型菜单逐一确认 A/B/C/P/F/Q/I 为 `GPT-6.1-Sol max`，保留各原会话、Task、worktree、branch 和既有 max 推理档；当前无活跃 OpenCode，后续如复用则显式指定用户模型，不为此增加品牌或新开发轨。模型切换不是科研运行授权。原 Task 在安全边界暂时返回输入态，A/B 已在同 Task 接续；P 等人工 AOCI receipt 时保持闲置。
+
+F 当前阶段已验收结算。B 新 SOURCE `5769005b09f1b756c94fdad0649a6b74690c0ca9` 已固定，A 接其受信配置并完成核心 AOCI，Q 可由原 Owner 独立复核该固定导出实现及三个受影响原测试。P 的受保护索引输入冻结；无实际人类 TTY receipt 前不执行 transition apply。重安装/测试仍串行；I 等领域最终交付后再唯一集成。
+
+冻结导出的当前实现按每个文件执行原 OpenSandbox pause、Docker 只读 HEAD/GET、原 OpenSandbox resume；不能把早期“最终导出保持暂停至销毁”的提议当实现事实。固定上游 runtime volume 实际为 RW，仅允许 sandbox main/egress 这对自有容器独占且两者冻结，不能再描述为只读挂载。导出目录与其祖先/子路径不得有挂载。实际 Engine/隔离仍待单独 AT07。
+
 ## 12:24 导出工程决策（真实运行权限不变）
 
 经 B 原 Owner 的官方源码/API 有界调查，继续在原 B 轨离线实现最小修复：复用 OpenSandbox 官方整容器 pause、受信 Docker Engine stat/archive 和原 session/finalize_session；不新增 executor 或运行权威。当前 fail-closed/Range 修正先独立提交保留失败，后继实现仍由 B 负责原适配器、边界测试、必要官方 Docker SDK 依赖/锁及授权包。Windows npipe 使用成熟官方 transport，不自研协议；真实 Engine/API 版本仍未知，须以后 AT07 核对。

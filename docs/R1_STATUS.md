@@ -1,5 +1,17 @@
 # R1 派发状态（2026-10-03）
 
+## 13:00 模型切换完成，UI 阶段接纳，核心后继继续
+
+用户最新选择已应用到原 A/B/C/P/F/Q/I Codex 会话：实际 TUI 显示 GPT-6.1-Sol max；OpenCode 指定 DeepSeek V4 Pro，当前无新 OpenCode 进程。模型菜单切换保留原上下文与 Task。A task_7943319add9b / ctx_4c6085d9f9d8 已真正 dispatch 并开始，同 Owner 受信配置/AOCI 在继续；B task_a8533b909675 / ctx_bd976e22265e 同 Task 收尾。P 仍保留原任务但闲置等人工 receipt，不循环空检索。
+
+F SOURCE `7bf17d195859a18960ee1ef933a920a286f73e61` / docs-only REPORT `c08566edc492e92adfc4e24a9e8de1c18b859e02` 已主控核对远端、clean、P677祖先、observer-only后继和原始日志/图片后接纳。实际 COPY 运行源码 `07df78b111825c789fb21f8853ece3e69941a704`，后继7bf只修观察断言，不改变运行包；core cea7923。新/适用 mock UI18+14+布局2 PASS，实际 installed会话2 PASS/6.4s + 原输入2 PASS/6.7s。原 installed observer首2 RED保留，聚合contract_local与记录mock区分明确；未冒充人工理解测试。旧 F Dispatch succeeded，release为retained/no_owned_resource/processAction none，Owner自有8784服务已退出。
+
+P API SOURCE `67721aaa815e706c51e0f80a1d15ab71e34b6880` 的全新raw归档/COPY定向安装已完成：28 PASS/50.06s、适用types30 PASS、pip100兼容；整包36文件仍同原10项/6文件类型债，identity difference=[]。首次失败与原归档/环境失误均保留。此结果是阶段定向验收，不能替代最终固定组合全套回归。
+
+B SOURCE `5769005b09f1b756c94fdad0649a6b74690c0ca9` 已主控核对远端与核心改动；官方Docker SDK7.2.0依赖/lock最小追加，受信本机Engine29.5.3/API1.52配置与原pause/resume完成有界冻结导出。Owner结果targeted110 PASS、experiments210 PASS、strict140 PASS、私有104依赖兼容；原strict首RED和旧Q3 FAIL保留，Q独立后继尚未完成，docs-only REPORT待B交付。实际daemon版本/ID未知；旧无docker_export的probe不能授权新路径，配置不等于verified或admit。
+
+A当前嵌套HostConfig/factory接线WIP：首3 FAIL/6 PASS、后继1 FAIL/8 PASS（新测试对既有拒绝文本装配错误）原样保留；strict2 PASS，模型切换后同Owner修复并继续10源文件有限核心AOCI。P官方15源索引仍等待前节列出的真实人类TTY确认，未收到 `C:/research-private/p-aoci-transition-approval.json`；正式语义Entry尚未应用。Token实际节省未知。最终组合/I完整离线回归、真实AT07授权与L2均未完成，main/tag/部署未执行。
+
 ## 会话界面完成初轮，AOCI 等待一次真实终端确认
 
 P API SOURCE `67721aaa815e706c51e0f80a1d15ab71e34b6880` 已由主控独立核对远端及日志：新增与相关 HTTP 27 PASS/34.94s、适用 types30 PASS。旧安装包首 2 FAIL/4.49s、WIP 首 11 FAIL/4 PASS 和后继14 PASS/1 fixture FAIL均保留。原 core cea7923 pin 不变；本阶段独立 COPY 与整包原债对照尚在原 Owner 执行，完整产品回归仍留唯一 I。
