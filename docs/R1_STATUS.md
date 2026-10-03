@@ -1,3 +1,25 @@
+## 20:31 原CI首RED退原Q修复，不重跑原run
+
+原CI37122569886 attempt1/head e635已completed：Linux1823PASS/1FAIL/16SKIP/425.33s，WindowsCANCELLED。唯一失败为Q新test_untrusted_private_config_directory_cannot_reach_cli[junction]：fixture只patch asset_paths.sys.platform=win32而Linuxstat无IO_REPARSE_TAG_MOUNT_POINT；原no_links抛AttributeError，预期拒绝种类/CLI零调用断言未完成。不是已确认生产改动缺陷，不能skip/扩大允许AttributeError/改assertion冒充通过。I保留原fullraw及不重试该run，未开始新全产品暂缓，若已开始保留真实结果不盲停重开。
+
+原Q同Owner/树/branch/terminal后继parent task_7799a761b32c仅 tests/boundary_review/test_at07_route_boundary.py 与 docs/tracks/r1-boundaries.md 修复跨平台模拟所需原stat常量，保持真实no_links/CLI拦截/所有负断言。私有隔离子进程用缺该常量重现原junction firstRED，修后同case及五private-config状态必要检查；生产领域/B源码、依赖/profile/锁、其他测试和已绿54范围不重跑。普通SOURCE/REPORT push [skip ci]；唯一原I合精确testSOURCE后新最终core SOURCE才触发一次新的原CI，原e635失败与Windows取消保持。P仅最后SOURCE必要repin，不重测；完整产品保持一次最终组合，UI旧绿继续保留。B当前授权包必须标新工程首RED与修复待验，仍禁止Engine/probe/science。
+
+## 20:29 固定最终组合与真实隔离授权包更新
+
+主控直接核对原P最终产品 SOURCE 8c716c450bf4b5b436e915726857260cc79cb17e，普通push/remote exact/clean；对94仅pyproject.toml、uv.lock、src/morph_research/__init__.py三pin文件4增4删，只有b480→e635完整SHA，依赖/UI/API/六developer配置零其它delta。旧root误写包路径由msg_a89118cf3d5e正式纠正，原Task task_f4c3bd2e8087/ctx_0e6f2936f26a无新派发。98原锁离线检查通过，P不重安装/全测，docsREPORT后独立交付。
+
+唯一I task_33b99bbe70e8/ctx_154fc9202fc1 已收到接纳SOURCE，固定 core e635b8ab3e79529403b527892e75ffb29674af0a + product8c716c450bf4b5b436e915726857260cc79cb17e，新C:/r1i/successor-2018/环境一次全产品离线/适用类型/installed来源；原CI37122569886 attempt1继续，不重复本机全核心。前组合各绿门不改身份，原失败保留。
+
+原B同Owner/树/branch/terminal后继parent task_8e19fb680605仅 docs/experiments/at07-authorization.md、docs/tracks/r1-experiments.md 更新最终组合可审阅包，不改代码/profile/锁/候选，不重测/安装，不调用Docker Engine/key/prepare/create。绑定上述SOURCE与87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb原锁、新installed路径，I结果尚未齐全标PENDING；后来由I精确补handoff。说明官方CLI本体身份未验、所有外层部署/inspect命令也需同endpoint/空私有config/受控子env，旧裸docker示例只能历史不可执行；不可单靠runner修正宣称整个部署路由绑定。以实际宿主时点观察保留pipe=false、RAM5850MiB/C45.9GiB、三profile firewall raw值未证明动态端口可达范围。列明DockerDesktop启动/恢复他项目影响、固定镜像缺失STOP、sidecar/cache资源unsupported、动态端口范围未核实STOP、单create未知不重试；仅准备不引擎/探针/science授权。普通docs push [skip ci]，同I最后docsmerge，不因此重跑门。工程结果全部可审阅后按用户指定再单独授权真实AT07；AT07真实全通过才允许候选进入真实执行环境，L2另外有界执行，不加L3等。
+
+## 20:22 累计SOURCE已发布，原P精确repin接续
+
+唯一I新累计core SOURCE e635b8ab3e79529403b527892e75ffb29674af0a已普通push，主控直接核对remote exact/clean/no-skip最终commit、三业务路径、B/Q原blob一致及所有指定普通祖先；实际lock仍87b335297f95b7bf72514691cb990db0d6441316be90c8cb726b016b9af025eb。原CI启动/完成由I跟踪该完整SOURCE的一次原run/attempt；现在不宣称新组合工程门通过。
+
+原P同树/branch/terminal后继parent task_b8f8cbfce413只改 pyproject.toml、uv.lock、src/morph_research/__init__.py 与 docs/tracks/r1-product.md，把当前developer SOURCEc771/REPORT94的core pin精确改为e635。保持F/API与六developer配置普通祖先、runtime生产/前端零其它delta，原protectedconfig/baseline/Header不写、不重试AOCIguard。只必要原锁检查/来源/diff检查，不做新安装/完整产品/UI/已绿observer；新SOURCE先普通push [skip ci]供唯一I新COPY，docsREPORT后独立普通push。不要从未来I REPORT、单轨B/Q或rootdocs pin，不待AOCI15Entries。
+
+I继续同Task33b99/ctx154，拿到root接纳的最终产品SOURCE后一次新组合full offline/必要types/installed身份；双平台CI与本机product可并行，最终承诺等原结果齐全。真实AT07/candidate/L2仍未执行，无权限外扩大；前组合证据和第一失败完整保留。
+
 ## 20:18 唯一原I累计集成接续，A/P阶段交付接纳
 
 主控已直接核对原A docsREPORT1c40129e81362686fcba968e57809582c22dabfc：actualSOURCE b480、远端精确/clean、仅49行ownreport；私有正式链首2PASS4FAIL为读取TaskRecord字段错误，原拒绝先通过，修私有SQL读取仅四失败4PASS、必要旧positive/unknown/stdio3PASS。同路线不同主张保留建议不授PASS；旧asset变hypothesis/parameters/seeds与缺本task再验证均正式拒绝，新branch无旧support。未确认新的产品适用性首RED，A/C不新增条件注册表或评分；逐hypothesis适用与可信known_cost源/单位的覆盖限制完整保留，不说所有FR13场景已验。A已done/release retained，首次start_unknown与一次原composer Enter实际恢复、跨Run首拒绝不改；root已真实转交C。
@@ -16,7 +38,7 @@ P portable developer SOURCE c7711f807e50ea4101ec6af231351e5c1037add6 / docsREPOR
 
 用户再次要求持续去耦并行研发，当前另恢复原P/原research-r1-product树/branch：write_paths仅原developer AOCI WIP中的 .gitignore、.gitattributes、AGENTS.md、README.md、.aoci/.gitignore、.aoci/config.json、aoci.txt、docs/development/aoci.md、docs/tracks/r1-product.md；现有本机.codex/config.toml仅本轨ignored配置，不入SOURCE。交付稳定已准备的官方配置与明确partial状态，不重新初始化/改变baseline/角色/managed_scope/budget/automation，不代人TTY，不修改official工具，不重试原guard失败。原baseline、私有ledger/receipts/恢复/backup/原WIP保持；仅既有配置原字节与更新准确setup文档可审查提交，配置不得包含秘密/本机绝对身份。正式15Entry仍NOT_VERIFIED、成本节省UNKNOWN，不能将配置交付说成完成索引。
 
-P可先交developer-only SOURCE供审查（不触业务模块/锁，不触UI）；当唯一I以后交精确累计核心SOURCE时，同P后续只改pyproject.toml、uv.lock、src/morphogenesis_research/__init__.py与ownreport精确repin。未获I新SOURCE前不能pinB单轨fc866或任意docsREPORT。原P全树有无法提交的历史备份/工具runtime则如实dirty，不删除来假clean；唯一I始终从发布SOURCE新COPY安装。此可复用配置是用户AOCI需求的已授权交付，不将开发工具guard重新设为MVP业务前置。不执行新模型科研/Engine/key/SDK/AT07/L2/产品全套或已绿浏览器。
+P可先交developer-only SOURCE供审查（不触业务模块/锁，不触UI）；当唯一I以后交精确累计核心SOURCE时，同P后续只改pyproject.toml、uv.lock、src/morph_research/__init__.py与ownreport精确repin。未获I新SOURCE前不能pinB单轨fc866或任意docsREPORT。原P全树有无法提交的历史备份/工具runtime则如实dirty，不删除来假clean；唯一I始终从发布SOURCE新COPY安装。此可复用配置是用户AOCI需求的已授权交付，不将开发工具guard重新设为MVP业务前置。不执行新模型科研/Engine/key/SDK/AT07/L2/产品全套或已绿浏览器。
 
 ## 20:01 条件适用性定界，保持两条互斥开发轨
 
