@@ -1,5 +1,15 @@
 # R1 派发状态（2026-10-03）
 
+## 16:30 恢复检查点
+
+实际新输入已确认 input_accepted + turn_started：A同 Task task_7943319add9b / ctx_6aadc6cb132c / term_0ef53fcf-3f86-47dc-977b-8e2be65ca57f；Q同 Task task_f1ef0047b01a / ctx_ff36f31b0819 / term_ddb2851c-759f-491a-bb9f-51f39732d6d0。旧 worker-abandon 令 Task blocked，主控在原进程退出/旧权限已fenced/零故障计数证据下显式恢复 ready 后派新 Dispatch，不伪造完成；P 真实人类门未满足，原 Task保持 blocked。两个 tui-idle 探测超时保留，恢复实际执行证据是新TUI画面和 send 的 turn_started，不称探测通过。
+
+
+Orca 重启后四条 Q 消息已逐条处理并 ACK；本地 REPORT09a6237 的父提交88d0cc2及 docs-only/clean已核实，65 PASS/24.98s是阶段边界证据，远端尚原7936613。canonical Git只读连接已恢复，原 Q 待发布；不重复原绿色测试。A HEAD仍aec86c9及自有 AOCI WIP，13:17之后未形成正式语义条目。A/P/Q旧进程已从本机进程身份核查确认为退出，原 Dispatch fenced，原 Task继续，未创建重复业务轨。
+
+用户新要求 OpenCode 暂停到今日18:00（北京时间）；唯一现存 OpenCode 空闲终端已关闭，ptyKilled=true。恢复 A/Q 使用 GPT-6.1-Sol high、YOLO，P实际人工 receipt仍缺失且受保护输入保持冻结；没有把“继续任务”或模型偏好视为真实 TTY确认。A 的零Entry初始化有界恢复保持同一scope/budget/auto配置，P legacy→auto正式审批门不受该决定影响。实际 Token 节省未知。最终固定组合/完整产品离线回归/AT07/L2仍未完成。
+
+
 ## 13:00 模型切换完成，UI 阶段接纳，核心后继继续
 
 用户最新选择已应用到原 A/B/C/P/F/Q/I Codex 会话：实际 TUI 显示 GPT-6.1-Sol max；OpenCode 指定 DeepSeek V4 Pro，当前无新 OpenCode 进程。模型菜单切换保留原上下文与 Task。A task_7943319add9b / ctx_4c6085d9f9d8 已真正 dispatch 并开始，同 Owner 受信配置/AOCI 在继续；B task_a8533b909675 / ctx_bd976e22265e 同 Task 收尾。P 仍保留原任务但闲置等人工 receipt，不循环空检索。

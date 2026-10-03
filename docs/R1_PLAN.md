@@ -1,5 +1,18 @@
 # Research Swarm Alpha R1 一页开发计划（2026-10-03）
 
+## 16:30 中断恢复与 OpenCode 暂停
+
+用户要求 OpenCode 暂停至 2026-10-03 18:00（北京时间）；已关闭本次 runtime 中唯一 OpenCode 终端，回执 ptyKilled=true，不删除源码或会话历史。18:00 后才可按用户指定 DeepSeek V4 Pro 使用，当前工程恢复仅用 Codex GPT-6.1-Sol。新恢复进程显式采用 high 推理档，以缩减原长上下文请求的恢复成本；旧 max 会话记录保留，不把模型切换算验收。
+
+Orca 已重启为 runtime 8b19eb35-f5d8-4128-8dc9-6ab7f8527439；原 Run run_d5306f2e4993 重新绑定主控 term_a7a854ec-e5d8-45a0-84b9-d3325bd87321，consumer generation3。实际本机进程清单仅有重启后新建 Codex，原 A/P/Q 无旧进程；旧句柄 stale，主控在只读核查后 worker-abandon 原三 Dispatch，processAction none，不伪称该命令清理了进程。保留原 Task、worktree、branch、write_paths 与 WIP；仅恢复 A 的有限 AOCI 和 Q 的提交发布，P 仍等待此前一次真实人类 TTY receipt，不为等待启动空轮询。
+
+A 受信配置 SOURCEaec86c98ffe8fc3c3a922da5a6e281d553820d05 已推送，9 PASS/strict2。A 官方 Volumes 首次空初始化遇到支持资产角色残留缺陷；原官方 rollback、scopechange/observe_review apply 均有原证据。经总控一次有界决定，Owner 将自有未跟踪且零 Entry 的 .aoci/aoci.txt/aoci.meta.txt/aoci.code.txt 移至本轨 .runtime 保留，官方重新 init，并逐项证明 managed_scope/cognition_budget/automation 完全相同，未降权或缩范围；最后落盘在13:17，10业务源正式语义 Entries 尚未完成。该恢复仅针对 A，不授权重置 P 的 legacy 基线或伪造其 human approval。原超时、两次模型请求中断与未完成压缩记录保留。
+
+Q SOURCE88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0 / 本地 docs-only REPORT09a62370498e40d54d8e956ce6b2c941e16f7515 为直接父子、clean；实际 Aaec/B576 的65 PASS/24.98s、136原Git Python blob及96依赖核对通过。旧None配置首3 FAIL/12 PASS、首次脚本身份错误和网络失败保留，不重跑已通过测试。16:29 canonical Git ls-remote 已恢复并确认远端仍7936613，允许原 Q 普通发布 SOURCE 再 REPORT，实际 push 与远端核对仍待；不改变全局认证/代理/SSH配置。
+
+唯一最终集成和完整产品离线回归仍待 AOCI/原 P 最终 pin。AT07 真实隔离与 L2 未执行；main/tag/部署未执行。
+
+
 ## 用户模型选择与当前并行顺序（13:00）
 
 用户指定 Codex 使用 GPT-6.1 Sol，OpenCode 使用 DeepSeek V4 Pro。主控已通过原终端官方模型菜单逐一确认 A/B/C/P/F/Q/I 为 `GPT-6.1-Sol max`，保留各原会话、Task、worktree、branch 和既有 max 推理档；当前无活跃 OpenCode，后续如复用则显式指定用户模型，不为此增加品牌或新开发轨。模型切换不是科研运行授权。原 Task 在安全边界暂时返回输入态，A/B 已在同 Task 接续；P 等人工 AOCI receipt 时保持闲置。
