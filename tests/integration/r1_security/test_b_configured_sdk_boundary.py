@@ -13,22 +13,24 @@ from orchestration.experiments.generated import IsolationCapability, IsolationCo
 from orchestration.experiments.generated_executor import GeneratedExperimentExecutor
 from orchestration.experiments.trusted import IsolationProbeRecord, TrustedProbeRegistry
 from tests.integration.r1_security.test_b_generated_boundaries import CODE, context, plan
+from tests.integration.r1_security.docker_export_fixture import SERVER, docker_settings, install_engine
 
 
 def configured():
     p = plan()
     p = p.model_copy(update={"environment": p.environment.model_copy(update={
         "image": "fixture@sha256:" + "c" * 64, "image_digest": "sha256:" + "c" * 64})})
-    config = IsolationConfiguration(endpoint="http://127.0.0.1:65534", instance_id="q-inert-instance",
+    config = IsolationConfiguration(endpoint="http://127.0.0.1:65534", instance_id=SERVER,
         runtime_profile="q-probed-fixed-policy", environment=p.environment, resources=p.backend,
-        network_deny=True, server_process_limit=p.backend.process_limit, use_server_proxy=True)
+        network_deny=True, server_process_limit=p.backend.process_limit, use_server_proxy=True,
+        docker_export=docker_settings())
     probe = IsolationProbeRecord(probe_id="q-configured-fixture", backend="opensandbox",
         declared=IsolationCapability(**{key: True for key in IsolationCapability.model_fields}),
         configuration=config, image_digest=p.environment.image_digest,
         verified=True, passed=True, evidence_ref="q-fixture-only-not-live", probed_at=100)
     options = dict(domain="127.0.0.1:65534", protocol="http", network_deny=True,
         probe=probe, instance_id=config.instance_id, runtime_profile=config.runtime_profile,
-        server_process_limit=config.server_process_limit)
+        server_process_limit=config.server_process_limit, docker_export=config.docker_export)
     return p, probe, options
 
 
@@ -46,6 +48,7 @@ def capture_create(monkeypatch):
 def test_fully_bound_host_configuration_reaches_correct_sdk_request(monkeypatch):
     calls = capture_create(monkeypatch)
     p, probe, options = configured()
+    engine = install_engine(monkeypatch, probe.configuration)
     backend = adapter.LocalCpuSandboxBackend(**options)
     executor = GeneratedExperimentExecutor(backend, probe_registry=TrustedProbeRegistry(records=(probe,)))
     prepared = executor.prepare(p, {"candidate.py": CODE})
@@ -61,6 +64,8 @@ def test_fully_bound_host_configuration_reaches_correct_sdk_request(monkeypatch)
     assert request["timeout"].total_seconds() == p.backend.lifetime_seconds
     assert request["metadata"]["morph-task"] == p.task_id
     assert request["metadata"]["morph-fence"] == str(context().fencing_token)
+    assert [route for _, route, _ in engine.requests] == [
+        "/version", "/info", "/containers/" + SERVER + "/json"]
 
 
 @pytest.mark.parametrize("field", [
