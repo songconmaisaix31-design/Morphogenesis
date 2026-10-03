@@ -1,6 +1,16 @@
 # R1 派发状态（2026-10-03）
 
-## 当前接续入口（19:35，最终产品离线已接纳）
+## 当前接续入口（19:39，前组合离线接纳，B端点修正接续）
+
+## 19:39 原 B 真实隔离工具端点修正（尚无真实执行授权）
+
+B docs-only REPORT64c5fac87d7823beb2c15354a3f395e5a23512dc已push/remote exact/clean，原Git锁87B核对、source/report/实际installed身份清楚，scope仅两docs、不冒充probe。B静态发现与root复核at07_live.docker_read调用默认docker CLI且继承上下文/env，现有观察未硬绑定docker_export.engine_endpoint。官方Docker CLI文档说明DOCKER_CONTEXT可覆盖DOCKER_HOST，默认读取用户.docker，--config/显式选项可定向；不能仅靠一句版本相同即将所有观察视为相同受信daemon。
+
+本缺口与真实AT07相关，修正是已授权MVP研发，不需要启动引擎/真实探针。原B唯一Owner/树/分支继续后继Task，write_paths仅 orchestration/experiments/at07_live.py、tests/experiments/test_at07.py、docs/experiments/at07-authorization.md、docs/tracks/r1-experiments.md及本轨新私有证据。复用现有完整DockerExportConfiguration/官方CLI或现有受信transport，所有前后inspect/inventory/fixedexec/log观察使用同一明确endpoint；空私有配置+受控子进程env，保留closed read-only/fixedexec命令约束，禁止ambient context/认证/TLS/代理/API注入。无/无效/冲突配置必须在CLI/密钥/SDKcreate前拒绝；同实际Engine版本/API/daemon必须在唯一SDKcreate前核实，不填自报PASS，不加registry/证明/调度框架，不重写成熟SDK。
+
+同B只跑针对该变更的有意义适用测试与必要严格类型检查，保留首RED，测试实际捕获argv/env和daemon mismatch-before-create负例，不用fixture冒充真实引擎。原通过的256/UI/Owner全门不为文档或网络重跑；B代码SOURCE变化交唯一I正常exactmerge后据实际差异安排必要检查及原P精确repin，原b480+2b/a67通过结果完整保留为前组合，不提升为新组合。后继SOURCE/REPORT普通commit+push [skip ci]，不force/cherry-pick、业务锁/依赖/其他轨/核心调度零改。
+
+Q必要时只独立核对精确新SOURCE的这些负边界，原C反馈链只读未见具体未接线缺口，不因并行数量重复研发。AT07仍待所有适用工程门及之后用户指定独立授权；这不是Engine/Docker启动/镜像拉取/SDKcreate/候选/science/L2权限。下一实现完成后才请求实际检查，不拿已知缺口的工具给用户批准。
 
 后部保留原失败与决策历史；业务 SOURCE 与文档 REPORT 分开，不从脏工作树安装。
 
