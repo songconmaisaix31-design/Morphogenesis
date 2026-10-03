@@ -1,5 +1,22 @@
 # R1 派发状态（2026-10-03）
 
+## 07:16 最终组合适用工程验收已通过
+
+当前受测核心 SOURCE **`2c63bc7c9e49edff28e26f5930a22d0415fadd65`**，分支 `songconmaisaix31-design/morph-r1-integration-1003`；产品 SOURCE **`9e2718789cb67f8b829207e17dac4d95a88e59c9`** / REPORT **`ad104f7c3555d04af4753c0601729f6dfef3c855`**，分支 `songconmaisaix31-design/research-r1-product-1003`。产品依赖仍精确固定该核心。最终 I 报告为 `docs/tracks/r1-integration.md` 的后继文档提交，不能拿 REPORT 代替 SOURCE pin。
+
+P 的最终返修仍由原 Owner、原工作树与分支完成（task_5df01d3615be / ctx_108d5673e53c）。I 首次整包类型门 c9 为14错误/9文件，新4项在 materials/r1_provider/web.server；P9e仅三文件8增4删，明确stdout缺失拒绝与集合/tuple类型，不改锁、schema、测试或ignore。P同环境复现14→原10，相关3文件零错误，实际COPY安装30 passed/13.48s；独立I覆盖全部29个无旧债文件通过，整包仍10错误/6文件/35源，与旧a25在相同工具环境的诊断身份逐条一致。原十项债仍RED，非整包strict通过。P最终报告/远端/clean已核实，worker_done接纳；release retained/no_owned_resource/processAction none。
+
+I 在全新短路径私有环境核对653核心归档文件、152产品归档文件的原Git blob、非editable实际来源、全部安装Python/静态字节与COPY单链接，正式setup-assets/doctor及依赖检查通过。核心本机兼容/stdio/init首65 passed/2 failed（缺原demo夹具），仅补原样fixture后原2项通过；未改测试。核心精确SOURCE CI37073582354：Linux1565 passed/16 skipped/563.89s，strict136/build/SDK/wheel通过；Windows1566 passed/15 skipped/1974.60s，strict136/build/SDK/wheel也全部通过；两平台同一首次运行，无重跑。
+
+产品精确9e/core2c完整首轮 **222 passed/6 failed/249.42s** 保留。五项是I私有npm的.bin不符合原注册器前缀布局；第六项原preflight拒绝具体异常未保存，仍UNKNOWN/native_started=false。只把后继测试子进程PATH指向同一官方0.159实际exe，在新fixture复测原6项 **6 passed/25.33s**，原请求未重发，未改产品/测试/flags；不写成单轮228全绿。实际本机Codex0.160另做原适配和本地parser **2 passed/2.32s**，无模型/认证调用。最终Q原installed_core、process/socket保护均保持，**293 passed/3 historical skipped/80.79s**；三个已撤回旧loop用例单列，不能当PASS。
+
+I前端独立锁安装与build15.69s通过；完整fixture页面 **108 passed/6 installed-origin skipped/1.1m**。同一最终正式安装serve，支持桌面/窄屏 **2 passed/28.0s**，反证桌面/窄屏 **2 passed/8.1s**，原30秒阈值、DTO/原值/键盘/0POST不变。主控已读日志并查看本轮窄屏三轴与桌面反证截图。完整真实HTTP导出支持292723字节（3评价、1原mock采用、12原始artifact），反证202614字节（2评价、0采用、8原始artifact），无截断且保持mock。原14个seed SQLite表计数映射前后相等，只证明所测计数，不等同文件字节/mtime不变。I自有serve、浏览器、测试进程与端口已退出。
+
+本轮实现包含资料/PDF/代码快照与来源版本、共享上下文、成员权限与预算、动态提议/候选/冻结评价、独立接受与贡献/路线分离、原消费采用链、正式HTTP/MCP/native入口、三页与成果包；科研执行在本轮验证中为明确inert mock。AT07真实沙箱探针、L2研究实例、L3、独立人工观察、公开科学资料实际获取/外发、新云GPU/Hub/部署仍NOT_RUN，全R1退出条件尚未达到。Codex当前只接受已验证的显式custom provider/base_url条件，profile/managed/builtin含糊路由拒绝；未知效果/用量/费用保持unknown。
+
+性能只记实际样本：最终generated apply8.458808s（SDK67次7.345742s）、inherit2.393205s（17次1.875994s），不作整体p95/传播达标声明。原15秒/180秒失败、两次工具长返回空档、Q原4314.57s、所有首RED均保留。C全局editable清理在自动审批处被拒绝（blocked by policy），没有清理且没有绕过；11项只读清单和人工恢复见C报告。旧四项Orca release_unknown保持UNKNOWN。本轮没有覆盖原根工作树WIP，没有推main/tag或部署。
+
+
 ## 06:43 更新：唯一 I 已启动，最终核心和产品 SOURCE 已推送
 
 原 P 领域 SOURCE `0da6273f54281f5e86231e31234f682598f68ba2` / REPORT `e1a327c940c1987e903972b39b040deb3fc9cf0a` 已接纳阶段交付。合法旧项目的 HostConfig.project_id 是空字符串，旧适配已保留该语义；非空 R1 项目不能进入旧11工具入口，原 build_launch 的绝对路径、workspace 和 HostBinding 校验仍执行。P 精确安装原3失败加绑定/stdio/字节门9 passed/14.86s；Q 真正安装0da/d85，164个原Python blob、VCS origin、95依赖核对通过，相关87 passed/21.74s。原 fbe 完整221/3、0d相关88/3以及Q各首次失败全部保留，不将定向结果冒充完整新包通过。
