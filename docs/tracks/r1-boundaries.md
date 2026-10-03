@@ -1342,3 +1342,17 @@ Engine/isolation are still unmeasured; AT07/L2 remain NOT_RUN and require their
 separate authorization sequence. No native/model/science execution, C cleanup,
 OpenCode, AOCI write, global Python install or auth/provider change occurred.
 This repair/report closes only the scoped Q portability phase, not MVP/R1.
+
+Publication closeout: docs-only REPORT
+`76af665511cb4b31662df0f698fcf631bb96419e`, direct child of SOURCEacb, was
+ordinarily pushed and independently read back with the full matching remote
+SHA; the worktree was clean and the SOURCE-to-REPORT difference is exclusively
+this report. Both the push and remote read exited0. Root's
+`msg_b0939dec24b7` accepts the minimal platform repair for I integration and
+reports a single cancellation request for the extra Q run, with its initial
+unconfirmed state retained. A subsequent Q read-only command
+`gh run view 37114202636 --json databaseId,headSha,status,conclusion,url`
+returned exact SOURCEacb, status `completed`, conclusion `cancelled`.
+This confirms cancellation only, not a passing Linux run. This final docs-only
+successor records that confirmed result, also uses `[skip ci]`, and preserves
+SOURCEacb and REPORT76 without amendment or forced history changes.
