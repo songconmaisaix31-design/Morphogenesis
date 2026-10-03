@@ -1,5 +1,7 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+08:28 文档身份追加：产品最终文档REPORT为 `a7f657d18fae33fc2a4df92b5fcb60dcd7839c5d`，受测SOURCE9e27187与核心SOURCE2c63bc7不变，差异只有docs；下文ad104保留为07:16时点的领域/类型验收报告。主控已核实远端、clean与普通合并历史，I仅封存现有验收报告。第三次约66分31秒工具返回空档原因UNKNOWN，未触发任何测试/科研重发，未改变原始耗时或验收结论。
+
 ## 最终固定组合的适用工程验收
 
 核心 SOURCE `2c63bc7c9e49edff28e26f5930a22d0415fadd65`；产品 SOURCE `9e2718789cb67f8b829207e17dac4d95a88e59c9`，最终产品REPORT `ad104f7c3555d04af4753c0601729f6dfef3c855`。以下仅登记本次实际受测层级，完整命令、原日志、first RED和来源见I报告及R1_STATUS。Windows精确核心CI1566 passed/15 skipped/1974.60s，Linux1565 passed/16 skipped/563.89s；同一CI37073582354两平台strict136/build/SDK/wheel均通过。
