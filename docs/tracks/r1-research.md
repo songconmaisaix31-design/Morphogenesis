@@ -322,3 +322,65 @@ VCS 实际解析、构建并安装 cea7923，exit0（`install-first.log`）；**
 本次完成 A 的局部上下文、宿主原生预算连接、调用测试和必要修复；C 正证据领域来自精确普通 merge，P 接续/UI 薄适配由 P 原 Owner 完成。本地原生相关测试使用 mock executor，正式 stdio 的研究执行使用固定 mock 输出，均只证明 contract_local/L1 接线；未知 usage/cost 不写成零，候选代码不在宿主执行。
 
 完整最终产品组合、一次完整离线回归与 installed 输入观察仍由独立 I 后续固定组合验收；本报告不代表整产品 R1 完成。AT-07、真实模型/科研/沙箱或隔离探针、外部科学资料抓取/上传、云资源、Hub、发布及 L2 均 **NOT_RUN**，不能据此候选直接进入真实环境。未更改全局 Python/editable 或绕过此前 C 清理的策略拒绝；私库已有 PDF 入口不属于本轨缺口。后继 AOCI 开发索引属于另外的任务，不混入本次源与证据。
+
+## 11. 受信 Docker 配置与有限核心 AOCI 收口（2026-10-03）
+
+### 11.1 精确源码和本次变更
+
+继续原 A Owner、worktree `C:/Users/DW/orca/workspaces/Morphogenesis/morph-r1-research-1003`、branch `songconmaisaix31-design/morph-r1-research-1003`。本 Dispatch `task_7943319add9b / ctx_6aadc6cb132c` 接续已完成配置，不重写领域源码。普通 exact merge 已包含 B SOURCE `5769005b09f1b756c94fdad0649a6b74690c0ca9`、B REPORT `5aebd2eb7af774b3dc496ad9620548f6e7852e09` 与治理 `11f2ff872ca815b38e33d2011208e2503bbf42b5`；后者普通 merge 为 `36134e3d26502c56c2ff2bc20a781efff707db5c`。root 后续 Q 文档治理不改变本次十源，没有为文档循环合并或重测。
+
+已完成宿主配置 SOURCE `aec86c98ffe8fc3c3a922da5a6e281d553820d05`：`GeneratedHostSettings.docker_export` 默认 None，原 live factory 精确传 `docker_export=self.settings.docker_export`；HostConfig 仍通过封闭 generated 设置验证，候选/产品工具输入不能注入控制面，未读取 DOCKER_HOST/context，也不填假 Engine/daemon ID。该 SOURCE 已验收 **9 PASS / 8 deselected / 10.18s**、changed2 strict PASS，日志 `docker-config-final.log`、`strict-first.log`；首次失败和修复日志仍在同目录。按恢复指令，本 Run 没有重跑已绿门；Q 独立非editable安装验收以其自身 SOURCE/REPORT 为事实源，A 不把它当本次新运行。
+
+本轮 AOCI SOURCE 为 **8dd85c1f88698cd8a22d72b5575e45e9431c0ce0**，已 push，`git ls-remote` 返回相同 SHA，SOURCE 后 `git status --porcelain` 为空。其九项变更仅为官方 Root/Meta/Code、`.aoci/.gitignore/config.json/baseline.json`、`.gitattributes`、`.gitignore` AOCI 区块和 `docs/development/aoci.md`。本章节是后继 docs-only REPORT，SHA 随终态交付/远端证据提供。
+
+`cea7923fec48c10e043c1fea40c99749e0b6a114`、`faf23260df7a4f530eb421680f71eb6dc7c72e40` 与 B 源码的 `git merge-base --is-ancestor ... HEAD` 均 exit0；没有 cherry-pick、force push、历史证据重写或业务源变更。十个当前源文件字节与首个官方机器候选的 source_sha256 全部相同。
+
+### 11.2 来源、权限和索引范围
+
+复用官方 [AOCI-CODE v0.1.0-rc17](https://github.com/aoci-spec/aoci-code/tree/v0.1.0-rc17)，commit `93d6ad5a87fd9624a51cae61b2134d33944501fb`、[FSL-1.1-MIT](https://github.com/aoci-spec/aoci-code/blob/v0.1.0-rc17/LICENSE)。实际二进制 `C:/Users/DW/orca/tools/aoci/v0.1.0-rc17/windows-amd64/aoci.exe` 的 `--version` 与 SHA256 `4013002f49d66e2a3998c7b852a8d28d37052af2fc3328ba7fb45246a3c75c67` 匹配 P 已校验版本；未重下载、复制 binary、安装系统包或重新审计上游签名/构建可复现性。
+
+精确业务白名单仅 `swarm/research/{models,service,server,dynamic,knowledge,records,policy,feedback}.py` 和 `swarm/{budget,task_ledger}.py` 十项；其它默认 exclude。各 Entry 从当前源码结构和行为决定点逐项理解，手工编写完整 Tag/F/R/A/S；仅用程序运输官方结果、检查已有字节绑定，不通过模板、AST、路径、符号或导入生成语义。C policy/feedback、预算和原账本只读，没有跨轨写入。
+
+三个 aoci support 文件不是业务 Entry；数据库 Volume 未启用。测试、历史文档、锁文件、产品仓库/UI、运行目录、B executor/validator/asset store 内部实现及其它核心模块未索引。R 引用未索引路径只标出重要调用契约，不能推出全仓覆盖。AOCI 不成为科研执行依赖、预算或授权来源。
+
+### 11.3 实际 CLI/MCP 与终态检查
+
+以下 CLI 均使用上面的官方绝对 binary，完整 JSON 先落 `.runtime/aoci-core/`，再按真实 schema 选取小字段观察，未把约31MB Scope/完整状态反复注入模型：
+
+```powershell
+& $taskAoci index agent guide --agent codex --json
+& $taskAoci scan --json
+& $taskAoci verify --json
+& $taskAoci check --json
+& $taskAoci index agent guide --agent codex --json
+git diff --cached --check
+git ls-remote origin refs/heads/songconmaisaix31-design/morph-r1-research-1003
+```
+
+`$taskAoci` 仅表示本机该 binary 的绝对路径，未改变全局 PATH。普通首次 scan exit0：fingerprint_count=13，业务 targets=10；不是重扫或强制覆盖 baseline。Guide 指示 no-argument MCP Maintain，实际完整批次10 candidates，保留其 code_plan.batch_id/candidate_id/source_sha256，经 `aoci_update_entry(entries=完整10项)` 一次原子应用 **10/10，aligned=true，remaining=0，finding_count=0**。
+
+按官方终态顺序 Verify → Aggregate Check → Guide 均 exit0；structure_valid/governance_aligned=true、Guide `stage=aligned,complete=true,next_action=none`。Missing/Stale/Unbaselined/Orphan、observed review 全为空，pending_transactions=0、recovery_pending=false、third_party_conflict=false。支持资产 stage 后再次 Verify 仍同 Composite 且 aligned；没有手工编辑 baseline/ledger。
+
+本 Run 实际原生调用 `mcp__aoci__aoci_rules/maintain/update_entry/overview/search`，服务返回 root 与 rc17 匹配。两次完整 Overview 各 **10 Entries / 3 sections / 2916 estimated tokens**，body_utf8_bytes=9816、无分块；每次严格 Challenge **10/10**，最终 delivery confirmed、attestation pass、governance aligned、cognition assimilation complete，v2 `current_system_cognition_reliable=true`。框架掌握90%为模型自评，只针对所选范围，不代表完整实现/runtime知识。
+
+最终 scope Index `20cc06d43efd858321a49ad6a79235c7d020332c1a0979d620553df07ef9430c`；Composite `2b20d17adec60e2e28a9f51d22502ce3cec7317d0430f972dab62b64b3596de2`；Code Volume `67d2c01f9ac5cd157049547f83d798834f33faa4636d1e73904e62118cddf5b7`。这些均为官方结果，不新增 Hash/Receipt/证明系统。
+
+两轮相同 search 命中相同 Entry：FR04 → service(1)；native → models/service(2)；positive → policy/service(2)；docker_export → dynamic/models(2)。两次完整 Overview 之间，按官方明确 `intent=cognition_optimization,object_refs=[code:swarm/research/knowledge.py]` 返回的完整单对象批次，仅把 knowledge 规模标签 PD8L 校准 PD8M（实际374行），F/R/A/S 和 source binding 保持相同；原子 replaced=1/remaining=0、无 warning。随后再完成 Verify/Check/Guide 与第二次完整 Overview。没有造源文件变化来冒充 source-drift 测试，也没有扩建优化框架。
+
+### 11.4 首失败与完整日志位置
+
+全部原始官方初始化、Scope失败/rollback/explicit observe review、恢复及本轮实际输出保存在本 worktree **`.runtime/aoci-core/`**（本机 Git ignored，不上传秘密或 runtime receipt）。旧初始化完整归档 **`.runtime/aoci-core/failed-init-preserved-20261003T051653763Z/`**；root `msg_a13825ef12b7` 仅授权一次本轨自有未跟踪0Entry初始化保留归档，恢复检查点前已完成，本 Run 未再次归档/init。`init-recovery.json`、`scope-rules-recovery.jsonl`、`scope-recovery-before-scan.json`、`recovery-policy-comparison.txt` 证明 managed_scope/cognition_budget/automation 不变。
+
+- 旧 `scope-support-activate.json` exit2 `managed_scope_source_guard_snapshot_changed`；`guide-support-failed.json` 保留 recovery_pending；`scope-support-rollback.json` 为 rolled_back，后续两次 policy-bound apply 仍保留，不能把历史失败改成绿。
+- 本 Run `mcp-maintain-resumed.json`、`mcp-apply-resumed.json` 记录首机器批次/10项apply及knowledge规模warning；`verify/check/guide-established.json` 记录首次终态。
+- `mcp-overview-established.json` → `mcp-attestation-established.json` 的首 confirmation version 不匹配：delivery incomplete，严格语义 Challenge已pass；只按[官方规范](https://github.com/aoci-spec/aoci-code/blob/v0.1.0-rc17/spec/public/aoci-overview-delivery-v1.txt)补正确 `overview-delivery-receipt/v1` confirmation（`mcp-delivery-established-corrected.json`），没有语义答案重试。
+- `mcp-maintain-optimization.json`、`mcp-apply-optimization.json`、`verify/check/guide-final.json`、`mcp-overview-final.json`、`mcp-attestation-final.json` 为最后对齐和完整认知结果；`mcp-search-first-0..3.json`、`mcp-search-repeat-0..3.json` 为重复检索。
+- `source-bindings-first.log` 保留首次本机JSON默认GBK读取的 UnicodeDecodeError，未开始候选比较；显式UTF-8后 `source-bindings-repaired.log` 才得到十源字节相同。`version-first.log` 保留误用 `aoci version` 的 unknown command，正确 `--version` 如前。命令原输出还保留在本 Dispatch工具会话；这些读取错误不改业务源码或阈值。
+
+### 11.5 本机配置、未执行项和交接限制
+
+`.codex/config.toml` 是 ignored 项目绝对 stdio 配置。旧会话仅私有官方 ClientSession initialize/list_tools/call_tool；Orca重启后的本 Run已实际加载原生MCP工具，配置/连接/热加载分别记述。AI endpoint disabled，没有改当前Agent提示、全局 HOME/auth/provider/PATH或加 hooks。AGENTS 是 root独占，其官方init行尾产物按root明确指令恢复原blob；原backup保留并忽略，不进入本次commit。没有原.gitattributes例外被移除，没有 renormalize、批量历史行尾改写。
+
+索引section与本机配置明确绑定 **A worktree绝对目录**。其它checkout直接复用、跨宿主迁移、本索引对I新组合的freshness均未验证；I必须先沿自己的官方Guide核对并执行其实际重新绑定/迁移要求，若十源有delta仍由原A Owner按官方Maintain收口。不能手动替换目录、伪造baseline/receipt、复制P human approval或以全仓clean冒充索引fresh。
+
+实际模型 token用量、成本、节省百分比均 **UNKNOWN**；estimated_tokens只表示工具估算的索引大小。没有重测已绿9PASS/strict2或Q门，没有新COPY/install/build窗口，也未启动OpenCode、Docker/WSL、真实AT07/沙箱/模型科研、L2、外部资料上传、系统清理或发布/main/tag。P受保护配置与未完成human TTY receipt不属本轨；本任务完成不代表完整MVP/R1通过。
