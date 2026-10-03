@@ -1,5 +1,10 @@
 # R1 派发状态（2026-10-03）
 
+## 16:35 Q 交付已接纳
+
+Q SOURCE88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0 / REPORT6ce5a23ea256affdf9fe8a71bbaabb66695f3631 现已普通推送且主控独立核对 remote/clean/docs-only 父子历史。65 PASS/24.98s、136blob/96依赖为原Aaec/B576受影响边界，未重跑；所有首RED/网络失败保留。新Dispatch ctx_ff36f31b0819 worker_done succeeded已接纳，release retained/no_owned_resource/processAction none。A ctx_6aadc6cb132c 正在官方MCP/scan/手工业务语义收口；root AGENTS仅字节/行尾恢复及stat刷新，原Git blob身份相同且status空，backup保留。P人工receipt仍未收到；新唯一I/full offline、AT07/L2未运行。OpenCode18:00前保持停止。
+
+
 ## 16:30 恢复检查点
 
 实际新输入已确认 input_accepted + turn_started：A同 Task task_7943319add9b / ctx_6aadc6cb132c / term_0ef53fcf-3f86-47dc-977b-8e2be65ca57f；Q同 Task task_f1ef0047b01a / ctx_ff36f31b0819 / term_ddb2851c-759f-491a-bb9f-51f39732d6d0。旧 worker-abandon 令 Task blocked，主控在原进程退出/旧权限已fenced/零故障计数证据下显式恢复 ready 后派新 Dispatch，不伪造完成；P 真实人类门未满足，原 Task保持 blocked。两个 tui-idle 探测超时保留，恢复实际执行证据是新TUI画面和 send 的 turn_started，不称探测通过。

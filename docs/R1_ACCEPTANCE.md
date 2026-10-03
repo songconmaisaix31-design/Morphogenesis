@@ -1,5 +1,16 @@
 # R1 验收登记（2026-10-03，开发开始）
 
+## Q 冻结导出与受信配置边界接纳（16:35）
+
+Q SOURCE `88d0cc28d1fdb3d89d62cdb1f1312078fc3c22b0` / 最终 docs-only REPORT `6ce5a23ea256affdf9fe8a71bbaabb66695f3631` 已普通发布；原本地 REPORT `09a62370498e40d54d8e956ce6b2c941e16f7515` 及其未发布历史检查点保留。16:29真实Git连接恢复后，Q顺序发布SOURCE88、REPORT09和新docs-only报告；主控独立 `git -c http.version=HTTP/1.1 ls-remote` 核实远端=本地最终完整SHA、clean、REPORT6ce父09、SOURCE88后仅r1-boundaries.md。首push/read失败没有改写，不因发布恢复重跑已绿测试。
+
+实际受测私有非editable分发为 A `aec86c98ffe8fc3c3a922da5a6e281d553820d05`，包含 B `5769005b09f1b756c94fdad0649a6b74690c0ca9`：原15受影响配置/领域调用 + 45导出/生命周期 + 5 HostConfig/MCP交接，共 **65 PASS / 24.98s**；136原Git Python blob相等、VCS full-SHA direct_url正确、96依赖兼容。原15首3 FAIL/12 PASS（默认None正确fail-closed与旧成功前置冲突）及首次身份脚本失败保留；使用明确可信配置和实际惰性HTTP/SDK fixture，未猴补生产能力或削弱原 installed_core/process/socket 守卫。
+
+独立检查覆盖本机daemon/服务/main-egress精确身份，runtime RW卷仅这对独占且冻结，导出树/祖先/leaf路径与有界tar拒绝，SDK pause/create/resume/stream效果unknown阻断后续、不重发及owned最终清理边界。PathStat无nlink，不声称所有inode别名排除；逐文件resume不承诺跨文件原子快照。测试没有访问真实Engine或执行生成候选，不证明真实隔离。原始命令/输出与SOURCE身份见 `docs/tracks/r1-boundaries.md` 及 Q `tests/integration/r1_security/evidence/a-aec86c9-installed-affected65-first.txt`。
+
+主控接纳该Task succeeded并worker-release：retained/no_owned_resource/processAction none，未宣称关闭自管终端。新最终组合、完整产品离线回归、真实AT07和L2仍待；AOCI正式语义索引尚在原A，P真实人类审批receipt仍缺，实际Token节省unknown。
+
+
 ## MVP 只读会话阶段与隔离准备接纳（13:05）
 
 以下是领域阶段验收，不是新最终组合完整回归；原首次失败、旧类型债和下方历史组合分别保留。开发工作会话已按用户选择切为 GPT-6.1 Sol，OpenCode 后续指定 DeepSeek V4 Pro。
