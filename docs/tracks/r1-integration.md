@@ -263,3 +263,35 @@ Windows 在 Linux失败后被原 matrix取消；原日志包含 cancellation期�
 本阶段只覆盖最终核心确定性 CI；产品最终组合完整 COPY 回归及 installed 输入/只读会话/支持反证 HTTP 页面仍 NOT_RUN。P human receipt 尚未出现，原十项产品类型债、原失败与未知事实保留。AT07、Docker/WSL/真实服务启动、真实候选、native 科研、L2/L3、外发、人工理解、main/tag/部署未执行；`task_live=NOT_RUN`。没有全局安装、认证、PATH、HOME/provider/hostconfig 改动；用量/费用与 token 节省 UNKNOWN。
 
 本节交付为保留首 RED 的后继 docs-only REPORT，完整 SHA 由本次 Orca 回执列出。原 CI 实际结果齐备后 commit/push，提交带 `[skip ci]`，避免文档再次触发完整源码门；失败 SOURCE 不因 REPORT 改变，核心适用门未全通过，不能宣称该阶段完成或全 R1 PASS。
+
+## 9. 同一 Task 的原 Q 返修与后继精确核心门
+
+主控通过 `msg_4b2cbf661e7a` 恢复原 Q Owner，限制为其平台测试及报告；I Task/Dispatch 不变。主控 `msg_36b8c9f882d6` 接受 Q 修复 SOURCE `acb26f4af3535ff6b4136dcb5ef0f7fde526e2a3`，授权普通合入后继核心；Linux实际执行由 I 的组合 CI 负责。原失败 SOURCE3a6、Run37113441786、REPORTab39及全部断言前失败输出留在历史，不改写为后继绿。
+
+Q 的源码差异只涉及上述平台测试22行：从官方 `docker.transport` 按平台获取真实 adapter；非 Windows 的 npipe 用例明确断言官方模块无 NpipeHTTPAdapter，并要求生产 `_transport` 实际抛出原 AttributeError，**没有 skip、假 adapter或真实 npipe可用声明**。unix/Windows npipe保持官方类身份、`trust_env=false`、`auth=None`，并精确断言受信 endpoint路径与base，原请求/进程守卫不变。生产实现、依赖/锁、CI、AOCI全未改变。
+
+Q 两项原 Windows节点在其私有非 editable Aaec86安装上 **2 PASS / 0.45s**，136原 Git Python blob相等，Docker SDK7.2.0；不是 I 最终 SOURCE完整安装或 Linux结果。原证据随 SOURCE保存于 Q own `tests/integration/r1_security/evidence/q-transport-portability-windows2-first.txt` / `q-transport-portability-private-identity-first.txt`，I 未重跑。
+
+Q 最初任务未携带 skip-ci，后继补充消息在 SOURCE push之后才被读取，造成额外原自动 CI `37114202636`。主控一次提交 cancel后，在 `msg_5dad41ad1f67` 确认该 Run completed/cancelled、两端job cancelled；没有完整套通过或重写历史。此事实由主控回执提供，不当成任何门的 PASS。
+
+I 先原始 Git读取 root治理 `9e1e6f78b588ecb858ea9226126773cf0f071254` 的计划，核对相对 root6cf只改三个治理docs，再普通精确合并 Qacb及root9e，均无冲突。**后继核心 SOURCE `b480fca1b10a0b6a9c93f0d1801d38f267662461`** 于 09:50UTC普通push，remote exact/clean；首RED SOURCE、REPORTab39、Qacb/root9e均为祖先，governance原blob等于root9e。相对首SOURCE的非docs差异只有Q测试及其两份小证据；排除Q目录后的所有非docs路径零差异，I无领域/测试编辑。
+
+新原 `foundation` push Run **`37114395256`**：<https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37114395256>，`headSha=b480fca1b10a0b6a9c93f0d1801d38f267662461`；Linux job`111178257285`、Windows job`111178257446`。这是修正源码后的一次新完整组合门，不是旧Run rerun。早期 Handoff `msg_082ca31b2fe6` 已交主控 exact SHA/Run；现总Run及两个job均 **completed/success**，原日志两端checkout均为完整b480 SHA，不以Q Windows2绿替代。
+
+| 原门 | Linux `111178257285` | Windows `111178257446` |
+| --- | --- | --- |
+| 完整 pytest | **1744 PASS / 16 SKIP / 75 warnings，521.84s** | **1745 PASS / 15 SKIP / 75 warnings，1575.82s** |
+| 原 strict | **140 source files，PASS** | **140 source files，PASS** |
+| 原 sdist/wheel build、SDK、wheel target install、distribution check | **全部 PASS** | **全部 PASS** |
+
+两端SDK原JSON均为 `scope=contract_local,schema_version=1.14.0,schema_valid=true,asset_id_verified=true,tampering_rejected=true,published=false`；两端原distribution JSON均为 `scope=contract_local,packages_from_wheel=13,resources_present=true,installed_verifier=passed,node_dependency_check=true`。这是CI wheel本地分发门，不冒充最终产品COPY安装或科研。实际pytest耗时仅单次观测，不声称性能承诺通过；Windows耗时较长的原因仍UNKNOWN。
+
+最初 `gh run view --job ... --log` 因总Run仍in_progress返回日志暂不可用，原stderr保存在 `successor-linux-original.stderr`，没有重写为测试失败；随后只读官方 job日志API实际下载已结束的Linux日志为 `successor-linux-api-original.log`，exit0。一次运行中的Windows job日志查询返回HTTP404 BlobNotFound，原 `successor-windows-api-live-attempt.log` / `.stderr` 保留，未重复查询运行中的日志或把404当pytest RED。Run结束后实际下载完整原始日志为 **`successor-ci-original.log`**，exit0；完整精确headSha、Run/job/原step结果为 **`successor-ci-final.json`**。两个job原install/pytest/strict/build/SDK/wheel/distribution步骤均success，核心双平台适用门现已齐备。Handoff `msg_8cbe42ba9811` 已交主控实际数字、原日志和首RED不变事实。
+
+主控随后验收 Q 最终 docs-only REPORT `49c0b3ad49f9fa1b5ad7b493ec05187e5b148503`（直接 docs REPORT `76af665511cb4b31662df0f698fcf631bb96419e` 为Qacb后继）。I 再核对 Qacb→49只改 `docs/tracks/r1-boundaries.md` 后，以显式 `[skip ci]` 的普通merge合入为 `8d51a7c35b01f0dc67ec75ac933803d7df6445d5`；相对冻结 b480非docs零差异，后继SOURCE身份不变。该docs merge和最终I docs REPORT在结果齐备后一起push，不触发另一完整CI。
+
+原命令及差异证据保留为 `C:/r1i/i1003-core-1732/logs/merge-Q-repair-first.txt`、`merge-root-successor-first.txt`、`successor-ancestors.txt`、`successor-nondocs-delta.txt`、`successor-production-protection.txt`、`successor-source-push-first.txt`、`successor-source-remote.txt`、`successor-ci-first-list.json`、`successor-ci-first-jobs.json`、`merge-Q-final-report-first.txt`及`Q-report-source-protection.txt`。
+
+本阶段不复验未改动的AOCI：第8.3节的A绝对路径限制及 I freshness/cognition NOT_VERIFIED继续适用。P仍被冻结，最终产品COPY/HTTP/UI完整回归、AT07/native科研/L2等均NOT_RUN；HostConfig直接调用链的主控说明留待最终installed产品阶段，不能提前称产品验证完成。B后继L2审查材料仅文档准备，不改变运行授权或本次受测源码。
+
+同一 I 的**核心阶段**已完成普通精确合并、原双平台完整CI、首RED保留和docs-only报告。最终核心SOURCE为b480，最后docs-only I REPORT的完整SHA由Orca交付列出；分支仍为 `songconmaisaix31-design/morph-r1-integration-1003`。最终报告提交带 `[skip ci]`，同Q49的docs merge一起普通push；交付检查包含 `git diff --cached --check`、SOURCE→REPORT非docs零差异、全部来源祖先、远端exact与clean，原命令记录为 `final-git-delivery.log`。本次无I领域/测试修改，无新本机环境/服务/科研；适用核心门通过不提升为产品最终组合、AOCI跨checkout认知或全R1退出PASS。
