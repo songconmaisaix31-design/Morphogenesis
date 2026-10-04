@@ -1,0 +1,243 @@
+#AOCI-CODE-VOLUME: 1
+
+===C:/Users/DW/orca/Morphogenesis/===
+.env.example[FC6T]: F:声明可选 Hub 沙箱与本地运行目录的环境变量模板 | R:- | A:- | S:令牌留空表示 Hub 未配置、状态必须显示待发布；真实值只从环境注入，绝不提交
+.gitattributes[FC8T]: F:固定仓库文本文件检出为 LF 行尾，保证跨平台字节一致 | R:- | A:- | S:AOCI 等按原始字节建基线；CRLF 重写会让整树判定 stale，二进制自动放行
+.gitignore[FC6T]: F:声明不入库的本地运行产物与秘密（.venv、node_modules、.runtime、opencode.json 等） | R:- | A:- | S:AOCI 托管资产不得加入忽略，否则 scan 静默跳过、索引建不起来
+AGENTS.md[SG9S]: F:仓库 Agent 执行约定：技术栈、精确命令、陷阱、多轨治理与 AOCI 认知规则 | R:code:docs/PLAN.md,code:docs/SWARM_SOL_PLAN.md | A:- | S:AOCI 托管区块由 init 幂等追加，手工重排或删改会破坏重装与认知入口
+LICENSE[FG9M]: F:Apache-2.0 许可证全文，声明项目代码的使用、复制与分发条件 | R:- | A:- | S:项目整体仅在该许可证不变的前提下分发；第三方依赖许可单独列于 THIRD_PARTY_NOTICES.md
+README.md[SG9T]: F:项目总览：问题、形态发生理念、两代架构、算法、验收纪律与统一命令入口 | R:code:docs/PLAN.md | A:- | S:所述“第二代去中心化”代码位于 decentralized-swarm 分支；主线不含 swarm/，入口仍为占位
+THIRD_PARTY_NOTICES.md[SQ8S]: F:第三方依赖、版本、许可证、来源与上游 NOTICE 原文归档 | R:code:poetry.lock,code:package-lock.json,code:viz/frontend/package-lock.json | A:- | S:依赖升级必须同步此表与许可文本；表是分发声明，不是安装或验收证明
+opencode.evomap.json[FC7T]: F:项目级 OpenCode 提供方配置：EvoMap OpenAI 兼容网关与七个文本模型 | R:- | A:- | S:只引用环境变量、无秘密；权限默认 ask 且拒绝 .env；enabled_providers 仅 evomap
+package-lock.json[FV7L]: F:根 npm 锁：GEP SDK/MCP、Ajv 与 ECharts 的固定版本与完整性 | R:code:package.json,code:tools/check_sdk.cjs | A:- | S:由指定轨独占；npm ci --ignore-scripts 使用；不得随意升级或改锁
+package.json[FV7T]: F:根 npm 清单：GEP SDK/MCP、Ajv 与 ECharts 依赖及 check:sdk 脚本 | R:code:package-lock.json,code:tools/check_sdk.cjs | A:- | S:Node >=22.13.0；private；根锁由指定轨维护
+poetry.lock[FV8L]: F:Poetry 锁定依赖：Python 运行时与开发工具的精确版本与哈希 | R:code:pyproject.toml | A:- | S:自动生成不手改；由指定轨独占；安装必须按锁定版本
+pyproject.toml[FV9T]: F:项目元数据与依赖声明：11 个包、Python 版本范围、pytest/mypy 配置与 morphogenesis 脚本 | R:code:poetry.lock,code:tools/typecheck.py | A:- | S:packages/include 决定打包与类型检查范围；addopts 固定 --import-mode=importlib；改依赖必须同步锁
+
+===C:/Users/DW/orca/Morphogenesis/.github/workflows/===
+check.yml[OQ8T]: F:GitHub Actions 双平台质量门：pytest、strict mypy、wheel 构建、SDK 校验与分发检查 | R:code:pyproject.toml,code:tools/check_distribution.py,code:tools/check_sdk.cjs | A:- | S:比 morphogenesis check 多跑 build/SDK/wheel 安装/分发检查；Python 3.13 + Node 24，ubuntu+windows
+
+===C:/Users/DW/orca/Morphogenesis/bootstrap/===
+__init__.py[EW2T]: F:bootstrap 包声明：固定练习与独立验证入口 | R:- | A:- | S:-
+__main__.py[EU7T]: F:python -m bootstrap 启动统一 CLI 并透传退出码 | R:code:bootstrap/cli.py | A:main | S:与控制台脚本 morphogenesis 等价
+acceptance_runner.py[TQ8T]: F:固定验收用例运行器：复核候选 clamp/mean/unique 并输出 MORPH_CHECKPOINTS | R:code:bootstrap/verify.py | A:run | S:必须在隔离目录由 verifier 以 python -I -S 运行；不得进入执行者工作区或加载候选自带 conftest/sitecustomize
+cli.py[EU8T]: F:统一 CLI：prepare/verify/acceptance/rehearsal/serve/check/swarm 子命令 | R:code:bootstrap/sample.py,code:bootstrap/verify.py | A:main,_forward,_check | S:转发类子命令必须在 argparse 之前原样透传参数，否则目标模块 --help/退出码/信号处理失真
+sample.py[EW7T]: F:从包内 fixtures 物化固定练习工作区（sample.py 与 TASK.md） | R:- | A:prepare_workspace | S:非空目录直接报错，绝不覆盖既有执行；防止污染真实运行证据
+verify.py[TQ9T]: F:独立验证边界：快照候选、隔离子进程运行固定用例并落盘可追溯证据 | R:code:bootstrap/acceptance_runner.py,code:contracts/results.py | A:SampleVerifier.verify | S:证据目录必须在工作区之外；超时或输出不完整时 passed=未知，绝不退化为通过；Windows 用 base_prefix 解释器避免 venv 子进程挂起
+
+===C:/Users/DW/orca/Morphogenesis/bridge_node/===
+.gitignore[FC3T]: F:忽略 bridge_node 本地检查与运行产物（.inspection、.runtime、__pycache__） | R:- | A:- | S:-
+__init__.py[IN6T]: F:GEP 适配包出口：资产校验、Node 桥与本地 MCP 客户端类型 | R:code:bridge_node/assets.py,code:bridge_node/mcp_client.py | A:- | S:本地资产校验只是本地证据，不等于 Hub 接受或发布成功
+asset_bridge.mjs[IN7T]: F:通过官方 gep-sdk 执行 canonicalize/资产ID计算/schema 校验的 Node 薄适配 | R:code:bridge_node/assets.py | A:main,validateAsset | S:仅四类 operation；错误只回白名单代码不回显提交值；SDK 版本必须精确 1.14.0，否则 fail closed
+assets.py[IN7S]: F:NodeAssetBridge：每次操作以无 shell 一次性子进程调用官方 SDK，无 Python 哈希回退 | R:code:bridge_node/asset_bridge.mjs,code:bridge_node/environment.py | A:NodeAssetBridge._invoke,validate_asset | S:官方 SDK 不可用必须失败关闭，绝不本地兜底；原始 stdout/stderr 不附加到异常；超时由 subprocess.run 终止并等待
+environment.py[IS8T]: F:为 Node 子进程构造最小环境：仅保留进程发现变量，清空凭据与代理 | R:code:bridge_node/assets.py,code:bridge_node/mcp_client.py | A:child_environment | S:EVOMAP_* 全置空、Hub URL 指向 127.0.0.1:9，HOME/TEMP 重定向到工作区；防止秘密外泄与用户状态污染
+mcp_client.py[IN8S]: F:官方 MCP Python 客户端：在隔离工作区启动固定 1.7.0 GEP server 的本地 stdio 会话 | R:code:bridge_node/assets.py,code:bridge_node/environment.py | A:GepMcpSession.call_tool,LocalGepMcpClient.connect | S:仅放行 LOCAL_TOOLS；超时/传输失败即终止会话且不重试；export 路径固定；不转发 stderr；版本不匹配 fail closed
+
+===C:/Users/DW/orca/Morphogenesis/contracts/===
+__init__.py[CG8T]: F:共享契约包出口：聚合身份、消息、来源、分辨率、结果与运行时模型 | R:code:contracts/base.py,code:contracts/identity.py,code:contracts/messages.py,code:contracts/provenance.py,code:contracts/resolution.py,code:contracts/results.py,code:contracts/runtime.py | A:- | S:公共出口变化影响全仓 import；不得在此扩建执行或调度基础设施
+base.py[CG9T]: F:全契约共享的 Pydantic 基类策略：extra=forbid、frozen、禁止 inf/nan | R:- | A:Contract | S:放宽该策略会静默接受未知字段或可变数据，破坏共享验证边界
+identity.py[CI9T]: F:业务身份模型：Role/AgentId/AttemptId，仅数据身份 | R:code:contracts/base.py | A:AgentId,AttemptId | S:AttemptId 不承载调度器、重试或生命周期语义；扩建基础设施违背契约定位
+messages.py[CM8T]: F:统一 Envelope：run/msg 身份、收发方、Attempt、seq、provenance 与 lineage 校验 | R:code:contracts/identity.py,code:contracts/provenance.py | A:Envelope.validate_lineage | S:task_id 必须等于 attempt.task_id；replay 必须携带 original_run_uri
+protocols.py[CG8T]: F:协作协议接口：PipeState 与拓扑/事件/结果/Gene/执行/验证/供给 Protocol 形状 | R:code:contracts/messages.py,code:contracts/resolution.py,code:contracts/results.py,code:contracts/runtime.py | A:- | S:Protocol 只约束形状；形状存在不等于运行中已有 live 实现
+provenance.py[CR9T]: F:证据维度模型：Provenance(live/replay/mock) 与 Acceptance 三态，互不替代 | R:code:contracts/base.py | A:Acceptance.validate_evidence | S:replay 必须带 original_run_uri；mock/replay 不能把 interface_live/task_live 标为 passed
+resolution.py[CG8T]: F:经验分辨率模型：GeneRef/Gene 字段与 Metabolism 协议 | R:code:contracts/identity.py,code:contracts/provenance.py | A:Gene,GeneRef | S:-
+results.py[CR9T]: F:结果契约：TaskResult/Verification/Usage 与独立复核、证据、status 联动校验 | R:code:contracts/identity.py,code:contracts/provenance.py | A:TaskResult.validate_result,Verification.validate_pass | S:succeeded 必须独立 reviewer 通过且有 artifact；Usage 的 None 是未知而非 0；执行者不能自证
+runtime.py[CR8T]: F:运行时契约：RunConfig 预算与路径安全约束、Provision 成员/配额校验 | R:code:contracts/identity.py,code:contracts/provenance.py | A:RunConfig.validate_paths,Provision.validate_members | S:writable_paths 必须相对且禁穿越/ADS/Windows 设备名；unknown_usage_policy 固定 stop，发布必须批准
+
+===C:/Users/DW/orca/Morphogenesis/demo/===
+README.md[SU7T]: F:固定彩排入口说明：安装、auto/manual 真跑、replay/mock 回放与投影清单 | R:code:demo/run-demo.ps1 | A:- | S:replay/mock 必须在页面显式标注，不得冒充真实运行；物理投影只能由现场操作员确认，未接入为 NOT_RUN
+run-demo.ps1[EU8S]: F:固定彩排启动器：mock/回放/真跑三种入口，真跑需显式 -AuthorizeLive | R:code:demo/README.md,code:orchestration/rehearsal.py | A:- | S:真跑只授权 repair 与 recovery 两项且不自动重试；必须核对页面 launcher 与 listener PID 后才关闭；端口被未知进程占用即停止
+
+===C:/Users/DW/orca/Morphogenesis/demo/data/===
+mock-run.json[TQ6T]: F:仅供视觉验证的 mock fixture：显式 mock provenance、两条 Gene、两个 Envelope 与指标 | R:code:demo/README.md | A:- | S:只能用于展示/布局验证；interface_live/task_live 必须保持 not_run
+
+===C:/Users/DW/orca/Morphogenesis/deploy/===
+Dockerfile[OV9T]: F:多阶段镜像：charts 装 ECharts、dependencies 装锁定 Python、api 非 root 只读、web 用 Nginx 提供静态 | R:code:deploy/compose.yaml,code:deploy/nginx.conf,code:poetry.lock,code:package-lock.json | A:- | S:基础镜像按 manifest digest 固定；构建工具不进最终层；UI 产物直接复制审阅 SHA，不在镜像内构建
+Dockerfile.dockerignore[OV8T]: F:Docker 构建上下文默认拒绝白名单：只放行锁文件、项目包、静态产物与部署脚本 | R:code:deploy/Dockerfile | A:- | S:即使误放静态目录也再次排除 .env/.git/pem/key/map；凭据与本地证据绝不进入镜像上下文
+README.md[OV8T]: F:北京 ECS 只读发布手册：版本目录、Compose、安全组、回滚与故障停止 | R:code:deploy/compose.yaml,code:deploy/package.py | A:- | S:只发布到独立 /opt/morphogenesis 与 7799；不触碰共治容器与 80/443；数据默认空态或显式 replay
+compose.replay.yaml[OV8T]: F:只读回放叠加配置：把单个审阅过的 rehearsal.json 只读挂载到 /data | R:code:deploy/compose.yaml | A:- | S:必须显式设置 MORPH_REPLAY_FILE；create_host_path:false 防止误建目录；绝不挂载证据根
+compose.yaml[OV9T]: F:两服务 Compose（api 仅内部 7500、web 对外 7799）与只读/资源/健康检查约束 | R:code:deploy/Dockerfile,code:deploy/healthcheck.py | A:- | S:api 无宿主端口；MORPH_RELEASE 必须为审阅过的完整 SHA；健康检查超时 15s（1 CPU 配额下共享导入超 5s）
+healthcheck.py[OO7T]: F:容器本地健康检查：只 GET 本机 /api/dashboard 并用共享契约验证 | R:code:viz/adapter.py | A:main | S:绝不查询 EvoMap 或启动任务；响应必须通过 validate_dashboard_snapshot
+nginx.conf[ON9T]: F:只读边缘代理：固定静态路径与三个 API，GET/HEAD、限流、禁目录列举与符号链接 | R:code:deploy/proxy.conf | A:- | S:非 GET/HEAD 返回 405、请求体 413；静态 20r/s、dashboard 2r/s、evomap 6r/m；访问日志只写路径不写查询串
+package.py[OV8T]: F:标准 git archive 白名单打包：按 40 位精确 SHA 导出审阅文件 | R:code:pyproject.toml | A:package,allowed | S:拒绝非完整 SHA、非普通文件与已存在输出；git archive 只读已提交 blob，脏文件/符号链接/未跟踪秘密不进包
+proxy.conf[ON8T]: F:三个只读 API location 共用的代理参数：固定上游、关闭重试与重定向、剥离凭据头 | R:code:deploy/nginx.conf | A:- | S:proxy_pass_request_body off；Authorization/Cookie 置空；proxy_next_upstream off 防止请求重放
+smoke.py[TQ8T]: F:有界 HTTP 验收：静态/字体/API/404/405/413/429 与 dashboard 契约校验 | R:code:viz/adapter.py,code:deploy/nginx.conf | A:main | S:--evomap-live 仅一次公开只读搜索且不重试；HTTP 200 不等于上游成功；direct 模式仅用于 Python viewer
+
+===C:/Users/DW/orca/Morphogenesis/docs/===
+ACCEPTANCE.md[SQ9L]: F:六层门禁验收矩阵：G0-G5 证据、三态与真实限制的现行记录 | R:code:docs/STATUS.md,code:docs/DECISIONS.md | A:- | S:回放/公网 HTTP/computer-use 不能互相替代；未执行项如实 NOT_RUN，未知费用保持 null
+DECISIONS.md[SG9T]: F:接手决策记录：环境事实、依赖许可、多轨模型分配、现场与 Hub 门禁的逐条裁定 | R:code:docs/PLAN.md,code:docs/ACCEPTANCE.md | A:- | S:决策只记录已核实事实；未确认的目的地/凭据/投影不得据此授权
+FRONTEND_REFACTOR_PLAN.md[SW7T]: F:前端重构执行页：Physarum 首页约定、共享数据契约与互斥开发轨 | R:code:docs/PLAN.md | A:- | S:只重构项目页面；参考包只作视觉观察，不复制模型/字体/脚本/文案
+PLAN.md[SW9M]: F:一页计划与文件所有权：各阶段轨道、write_paths 与验收边界 | R:code:docs/STATUS.md,code:docs/ACCEPTANCE.md,code:docs/DECISIONS.md | A:- | S:主 Agent 只维护治理文档；每轨固定 1 Agent/1 worktree/1 分支；阶段证据必须区分三态
+STATUS.md[SW9M]: F:开发状态流水：当前阶段、提交与身份、资源处置 | R:code:docs/PLAN.md,code:docs/ACCEPTANCE.md | A:- | S:状态不得把回放或只读部署写成 live；阻塞与未执行项保留
+SWARM_SOL_PLAN.md[SW8T]: F:异构模型去中心化蜂群阶段计划：V/R/B/I 轨、benchmark 与支出授权 | R:code:docs/PLAN.md | A:- | S:费用未知保持 null；未知 usage/远端效果停止；benchmark 子集不得冒充完整榜单
+
+===C:/Users/DW/orca/Morphogenesis/docs/source/===
+Morphogenesis_AI原生多Agent多轨开发说明.md[SG8M]: F:开发包作业规范：六轨与十维隔离、验收纪律、协作合流协议与分轨任务卡 | R:code:docs/source/README_包内说明.md | A:- | S:mock 不验收；绝对不变量任何轨道不得违反
+Morphogenesis_作战方案_v2.md[SG8M]: F:作战方案 v2：EvoMap 生态事实核查、生物机制迁移、耦合架构与路演策略 | R:code:docs/source/README_包内说明.md | A:- | S:证据与实现边界全篇适用；已验证与待确认分列，策略假设不作事实
+Morphogenesis_开发文档_v1.md[SG4L]: F:开发文档 v1 归档：初版复用原则、契约与分轨方案 | R:code:docs/source/README_包内说明.md | A:- | S:已归档，禁止据此开工；以统一对齐说明与 v2 为准
+Morphogenesis_开发文档_v2.md[SG8L]: F:开发文档 v2：修订后的复用原则、契约补强、跨语言边界与 mock 隔离铁律 | R:code:docs/source/README_包内说明.md | A:- | S:契约以“跑通”为冻结条件；mock 与真实验收硬隔离
+Morphogenesis_时间安排表.md[SG5M]: F:黑客松时间安排：逐小时作战、六轨时间窗、门禁与评审准备 | R:code:docs/source/README_包内说明.md | A:- | S:术语与门禁已对齐；过期时间仅作历史节奏参考
+Morphogenesis_深度思考.md[SG7M]: F:设计推理：壳与幽灵命题、生物机制迁移方法论、三层架构与公式边界 | R:code:docs/source/README_包内说明.md | A:- | S:借用思想不继承定理；四类证据不得相互替代
+Morphogenesis_统一对齐与矛盾消解.md[SG9S]: F:权威裁定：ORCA 定位、矛盾清查、全局不变量、门禁 G0-G5 与隔离十维 | R:code:docs/source/README_包内说明.md | A:- | S:冲突时以本说明为准；供给无上限不等于支出无上限
+README_包内说明.md[SG9T]: F:开发包入口：权威顺序、文件清单、关键决策与仍待确认项 | R:code:docs/source/Morphogenesis_统一对齐与矛盾消解.md | A:- | S:v1 已归档禁止据此开工；Hub/ORCA 接口未确认前用隔离 stub 与固定规模
+
+===C:/Users/DW/orca/Morphogenesis/docs/tracks/===
+beijing-deployment-integration.md[SW7T]: F:I 轨本地组合验收记录：F+D 精确合并、67 项测试与真实 replay 浏览器结果 | R:code:docs/tracks/beijing-deployment.md,code:docs/tracks/frontend-gpt-reference-integration.md | A:- | S:只记录本地集成；容器构建/启动与公网未验收，不计作完成
+beijing-deployment.md[SW8T]: F:D 部署轨交接：隔离 Compose、只读 Nginx、镜像 digest 与实测证据 | R:code:deploy/README.md,code:docs/tracks/beijing-deployment-integration.md | A:- | S:远端未写入；历史回放不是新任务；合同本地与容器 HTTP 验证分列
+finals-integration.md[SW8T]: F:决赛独立集成报告：F 提交合并、60 帧回放、几何/动效与失败返修 | R:code:docs/tracks/frontend-stack.md | A:- | S:replay 不能建立等价 live 验收；interface_live/task_live 保持 not_run
+freeze-demo.md[SW8M]: F:D 轨封板记录：公网只读部署、健康检查修复、容器转运与资源串行处置 | R:code:docs/tracks/beijing-deployment.md | A:- | S:热点/物理现场单列；付费 FETCH 与新版发布未执行，不自动重试
+freeze-evolution.md[SW8M]: F:E 轨封板夜记录：Evolver 前置、Proxy 发布与 Hub 候选/FETCH 门禁 | R:code:docs/tracks/hub.md | A:- | S:付费 FETCH 未确认即停止；拒绝后不重试不换身份；每次网络写边界前必须消费并 ack 全部协调消息
+freeze-integration.md[SW8T]: F:I 轨累计集成验收：全量测试、严格类型、构建、SDK、隔离 wheel 与双平台 CI | R:code:docs/ACCEPTANCE.md | A:- | S:累计软件通过不等于 G3/G4/G5 整体通过；本机 3.12 结果不能替代 CI 3.13
+freeze-race.md[SW7T]: F:T 轨竞态核对：锁定环境准备与 Gene 采用快照断言语义复核 | R:code:docs/tracks/rehearsal-runtime.md | A:- | S:已存在的竞态修复不重复实现、不新增等待；CI 版本以配置为准
+frontend-backend.md[SW7T]: F:B 轨产品后台布局：三栏响应式、旧 DOM ID 迁移与 EvoMap 独立面板 | R:code:docs/FRONTEND_REFACTOR_PLAN.md | A:- | S:组件不发网络请求；全部旧 DOM ID 必须保留；参考包只观察不复制
+frontend-evomap.md[SW8S]: F:E 轨 EvoMap 官方接口核对与安全只读闭环：搜索/类别/资产详情三路由 | R:code:viz/evomap_service.py,code:viz/server.py | A:- | S:公开只读搜索无鉴权即 200；单次请求不重试、进程内缓存；密钥只报告布尔值；社区数据不进入运行拓扑
+frontend-gpt-reference-integration.md[SW8T]: F:I 轨参考包前端与真实回放本地集成：72 项浏览器与事实断言 | R:code:docs/tracks/frontend-gpt-reference.md,code:docs/tracks/beijing-deployment.md | A:- | S:检查不得用 route 注入响应；公开只读成功不升级 live 三态；favicon 胶水需授权
+frontend-gpt-reference.md[SW8S]: F:F 轨用户网页包直接移植：Linear 应用结构复用与 GPT 图像审查返修 | R:code:docs/tracks/frontend-gpt-reference-integration.md | A:- | S:上一版后台视觉通过结论已撤回；直接复用包内 DOM/CSS/SVG，不带品牌与跟踪器
+frontend-growth.md[SW6T]: F:G 轨自生长概念拓扑：黑底 SVG 逐枝显现与 reduced-motion 静态降级 | R:code:docs/FRONTEND_REFACTOR_PLAN.md | A:- | S:概念动画不得请求或映射真实数据；隐藏暂停、减少动态立即完整显示
+frontend-integration.md[SW8S]: F:I 轨前端重塑集成：四轨精确合并、静态产物统一重建与 EvoMap 只读审查 | R:code:docs/tracks/frontend-shell.md,code:docs/tracks/frontend-swarm.md,code:docs/tracks/frontend-evomap.md,code:docs/tracks/frontend-physarum.md | A:- | S:普通 --no-ff 合并零胶水改动；端口与进程按身份核验后才操作
+frontend-physarum.md[SW8T]: F:P 轨 Physarum WebGL 首页：原生环境动画、黄色主色调与降级路径 | R:code:viz/frontend/src/physarum/index.js | A:- | S:当前版本无鼠标/触屏趋食、foodStrength 恒 0；上游 MIT 以文件头与 licenses 署名；WebGL 不可用必须降级
+frontend-shell.md[SW8T]: F:S 轨页面壳：视图切换、同源轮询接线、CRT/键盘/深链与 EvoMap 探索面板 | R:code:viz/static/app.js,code:viz/frontend/src/App.jsx | A:- | S:壳统一轮询 /api/dashboard；失败保留上次快照；EvoMap 数据不进入运行拓扑
+frontend-stack-integration.md[SW7T]: F:Stack 前端独立集成验收：主题版本、回放双桌面与行为检查 | R:code:docs/tracks/frontend-stack.md | A:- | S:只做 contract_local+replay+mock；按前端范围未跑全仓测试或 CI
+frontend-stack.md[SW8T]: F:F 轨决赛前端重建：TDesign 外壳复用映射与黏菌黄设计系统 | R:code:docs/tracks/finals-integration.md | A:- | S:TDesign MIT 与复用映射必须保留；emptyOutDir=false 不动 licenses/app.js/echarts
+frontend-story-integration.md[SW6T]: F:沉浸式序幕与后台独立集成：G/B/S 精确合并与三视口真实验收 | R:code:docs/tracks/frontend-story.md | A:- | S:仅本地 mock 布局与交互验收；被取代的旧检查脚本不再适用
+frontend-story.md[SW7T]: F:S 轨序幕编排：Physarum→概念拓扑→双语产品名→显式进入后台 | R:code:docs/tracks/frontend-backend.md,code:docs/tracks/frontend-growth.md | A:- | S:序幕不自动进入后台；隐藏暂停计时；减少动态直接最后一幕
+frontend-swarm.md[SW8T]: F:T 轨 AGENT SWARM 真实拓扑：成员/管道/结果与 Ghost 五态 | R:code:docs/FRONTEND_REFACTOR_PLAN.md | A:- | S:节点与边只能来自真实 members/pipes；Ghost 不得暗示失败已恢复，「任务重路由」仅 recovered 出现
+hub.md[SW9T]: F:H Hub 适配交接：httpx A2A 客户端、官方资产映射、发布批准与 fetch 语义 | R:code:hub_client/client.py,code:bridge_node/assets.py | A:- | S:每次操作一次请求不自动重试；未知效果置 unknown 且不重发；发布需应用层人/自动批准；配置只接受回环地址
+integration.md[SW8T]: F:首轮八轨集成验收：精确合并、149 项测试与 wheel/分发检查 | R:code:docs/ACCEPTANCE.md | A:- | S:普通 merge 保留历史；集成不改领域实现；wheel 验证不脱离源码 Node 依赖
+metabolism.md[SW8T]: F:T3M 本地经验缓存：注入/采用/衰减/归档与最小读 API | R:code:metabolism/service.py,code:persistence/store.py | A:- | S:注入不等于采用；tau 是时间常数不是半衰期；归档不可复活；本地一致性不宣称远端同步
+onsite-integration.md[SW7T]: F:I 现场阶段集成：V/O 精确合并、31 项 Node 与端口返修复验 | R:code:docs/tracks/onsite-observer.md,code:docs/tracks/onsite-viz.md | A:- | S:返修只复跑失败项；未声称最终 SHA 重跑完整 200 项；本轮新模型请求为 0
+onsite-observer.md[SW7T]: F:O 轨操作员 Enter 观察器：TTY 门禁、双视口校验与一次确认 | R:code:docs/tracks/onsite-viz.md | A:- | S:只接受真实 TTY 且启动前失败；输入转发只尝试一次；只记录 Enter 时间戳不记录键入正文
+onsite-viz.md[SW7T]: F:V 现场投影清单：7526 回放预检与 7527 单次真跑门槛 | R:code:demo/run-demo.ps1 | A:- | S:7526 回放与 7527 真跑不得混用；物理投影只能现场见证；失败不重试不换模型
+provision.md[SW6T]: F:P 供给轨：最小 Protocol、固定规模 fallback 与预算门禁 | R:code:orca_provision/fixed.py,code:orca_provision/service.py | A:- | S:ORCA 契约未提供前降级固定规模；不臆造远端 API；本地供给记录不代表远端已验证
+rehearsal-integration.md[SW8S]: F:I 固定完整彩排集成：三轮 live、六次调用与双视口回放观测 | R:code:docs/tracks/rehearsal-runtime.md,code:docs/tracks/rehearsal-ui.md | A:- | S:三轮共六次调用不得跨根变相重试；live 原始截图不覆盖；显示修复须以明确 replay 复验
+rehearsal-runtime.md[SW8S]: F:R 固定彩排运行链路：V 消费契约、状态推进与两次新任务授权 | R:code:orchestration/rehearsal.py,code:orchestration/rehearsal_models.py | A:- | S:固定成员在任务间下线不等于杀死在途进程；费用未知保持 null；缺授权即停止且不重试
+rehearsal-ui.md[SW6T]: F:V 固定彩排界面：四栏叙事、真实 PipeState 拓扑与 Gene 区 | R:code:docs/tracks/rehearsal-runtime.md | A:- | S:浏览器空态核查不替代真实任务验收；-Mock 绝不表示真实通过
+t0.md[SW9T]: F:T0 地基交接：契约/持久化/固定样例/锁与分发边界 | R:code:contracts/base.py,code:persistence/store.py,code:tools/typecheck.py | A:- | S:模型禁止 extra 键并冻结；外部数据用 model_validate；Usage 未知为 None 不得造零；词法路径校验不等于符号链接安全
+t1.md[SW8T]: F:T1 桥交接：官方 SDK 薄适配与本地 GEP MCP 客户端 | R:code:bridge_node/assets.py,code:bridge_node/mcp_client.py | A:- | S:桥只接受完整 JSON 资产，不做内部 Gene 映射、不发布；无 Python 哈希兜底，SDK 失败即关闭
+t2.md[SW8S]: F:T2 执行运行时：LangGraph 串接、Codex CLI 适配与独立复核 | R:code:orchestration/runtime.py,code:orchestration/events.py,code:bootstrap/verify.py | A:- | S:执行意图先持久化，重放保守阻塞不重复外部动作；独立复核是确定性验证非第二次模型推理
+t5.md[SW8T]: F:T5 展示轨：输入边界、真实 ECharts Gene/消息双视图与三态标注 | R:code:viz/static/app.js,code:viz/adapter.py | A:- | S:文档入口强制 mock；mock/replay 不得声称 live 维度；只绑定回环、拒绝任意路径与超 2 MiB
+topology.md[SW8T]: F:T3 拓扑交接：实例级权重更新规则、连接生命周期与 T2 调用顺序 | R:code:topology/engine.py | A:- | S:更新规则是启发式，不声称收敛或自动生长；引擎每 run 内存态不跨进程幂等；失败按衰减项处理非负奖励变体
+
+===C:/Users/DW/orca/Morphogenesis/hub_client/===
+__init__.py[IN6T]: F:本地 Hub 集成包出口：资产映射、A2A 客户端与本地发布模型 | R:code:hub_client/assets.py,code:hub_client/client.py,code:hub_client/models.py | A:- | S:生产端点默认不启用，出口只暴露本地优先语义
+assets.py[IN8S]: F:内部 Gene→官方 Gene/Capsule(/EvolutionEvent) 映射，schema/hash 全部委托官方桥 | R:code:bridge_node/assets.py,code:hub_client/models.py | A:build_assets,validate_bundle | S:非终态结果或 provenance 不符即拒绝；Proxy 模式要求真实效果与 node 验证命令白名单；官方校验失败即关闭无可回退
+client.py[IN9M]: F:本地优先 A2A 客户端：hello/prepare/publish/fetch/report 与内容绑定的持久发布记录 | R:code:hub_client/assets.py,code:hub_client/models.py,code:bridge_node/assets.py | A:HubClient.publish,fetch,report_use | S:每操作一次请求不自动重试；发送前先落 unknown；文件锁崩溃需人工复核；绝不把 mock/replay 发布或报告为 live
+models.py[IN8S]: F:Hub 本地发布输入与回执模型：配置、策略、证据、发布/批准/抓取/复用记录 | R:code:contracts/results.py,code:contracts/provenance.py | A:HubConfig,PublishApproval | S:只允许字面回环地址；local_stub 不得建立 live provenance；node_secret 不落盘且不进 repr
+
+===C:/Users/DW/orca/Morphogenesis/metabolism/===
+__init__.py[MC2T]: F:经验代谢包出口：LocalMetabolism 与只读 GeneView/UseRecord | R:code:metabolism/service.py,code:metabolism/models.py | A:- | S:-
+index.py[KG7T]: F:一次性 FAISS 余弦检索：sklearn 词法哈希向量 + L2 归一化内积 | R:code:metabolism/service.py | A:CosineIndex,lexical_embedding | S:词法特征有碰撞、无学习语义；索引按当前正文即时构造不持久化；非有限向量或维度变化即拒绝
+models.py[PD8T]: F:代谢持久化模型：GeneState/InjectionBatch/Adoption 表与 GeneView/UseRecord 只读视图 | R:code:contracts/resolution.py,code:contracts/identity.py | A:GeneView,UseRecord | S:仅新增命名空间内表，不改 T0 表；GeneView.remote_archive_status 固定 not_synchronized
+service.py[DD9M]: F:LocalMetabolism：run 绑定的注入/采用/衰减/归档与 SQLite 事务一致性 | R:code:metabolism/models.py,code:metabolism/index.py,code:persistence/store.py | A:LocalMetabolism.inject,mark_used,archive | S:注入不等于采用；每 AttemptId 注入固定，预算或信号改变即拒绝；tau 是时间常数不是半衰期；归档删正文且不复活
+
+===C:/Users/DW/orca/Morphogenesis/mocks/===
+__init__.py[TQ6T]: F:显式测试边界：mock Gene fixture、MockMetabolism 与未实现执行/验证器 | R:code:metabolism/service.py,code:contracts/resolution.py | A:gene_fixture,MockMetabolism | S:不伪造执行或验证结果；mock 不能 ingest live 数据；未实现组件必须显式抛 NotImplementedError
+
+===C:/Users/DW/orca/Morphogenesis/orca_provision/===
+__init__.py[IW6T]: F:供给包出口：固定 fallback、身份绑定与预算门禁 | R:code:orca_provision/fixed.py,code:orca_provision/service.py | A:- | S:不含 ORCA 传输实现；远端契约缺失时使用确定性 fallback
+fixed.py[IW7T]: F:确定性固定规模 fallback：按角色顺序分配稳定实例，越界或超配额拒绝 | R:code:contracts/runtime.py,code:orca_provision/policy.py | A:FixedProvisioner.provision | S:只产生数据记录、不启动任何 Agent 进程；source=fixed 的 provenance=live 仅指本地记录真实生成
+models.py[IW7T]: F:供给身份映射模型：Role→AgentId→AttemptId 绑定与成员覆盖校验 | R:code:contracts/identity.py,code:contracts/runtime.py | A:IdentityBinding,ProvisionedSwarm | S:绑定必须恰好覆盖 provision 成员；三层身份一致性由模型强制
+policy.py[IR8T]: F:供给预算门禁：停止状态、未知用量与超预算一律拒绝供给 | R:code:contracts/runtime.py,code:contracts/results.py | A:BudgetGate.check | S:未知 usage 视为失败关闭，绝不把 None 当作 0；存在 stop_reason 即拒绝
+protocols.py[IG6T]: F:ORCA 供给唯一最小协议：provision(run_id,count)->Provision，无传输语义 | R:code:contracts/runtime.py | A:OrcaProvisioner | S:刻意不规定 HTTP/CLI/认证/载荷；细节必须来自未来公开 ORCA 契约，不得臆造
+service.py[IW8T]: F:供给服务：显式远端适配器与本地 fallback 的选择、预算门禁与身份绑定 | R:code:orca_provision/fixed.py,code:orca_provision/models.py,code:orca_provision/policy.py | A:ProvisioningService.provision_swarm | S:只产生供给元数据、不启动或管理 Agent 进程；响应 run_id 或数量不一致即拒绝
+
+===C:/Users/DW/orca/Morphogenesis/orchestration/===
+__init__.py[EW2T]: F:orchestration 包出口：导出事件导出函数 | R:code:orchestration/events.py | A:- | S:-
+acceptance.py[EW9S]: F:单次真实模型闭环入口：一次调用、可选续跑与经验复用，不重试 | R:code:orchestration/runtime.py,code:orchestration/codex.py,code:bootstrap/verify.py | A:main,prior_experience | S:新运行要求空证据根；CLI 无调用中美元硬上限、费用保持未知；失败或未知不自动重试
+codex.py[EW8M]: F:CodexExecutor：一次有界只读 Codex 调用、结构化提案与固定 sample.py 白名单应用 | R:code:orchestration/sample_policy.py,code:contracts/results.py | A:CodexExecutor,read_usage | S:工作区必须是 OS 临时根下仅含 sample.py/TASK.md 的普通私有文件；无工具循环无重试；CLI token 不等于账单
+events.py[EW7T]: F:只读 Envelope JSONL 导出：按 (seq,msg_id) 排序且不改来源与状态 | R:code:contracts/messages.py,code:contracts/protocols.py | A:export_events | S:导出快照不改 handled/provenance/时间戳；不得生成合成事件
+gateway.py[EW8M]: F:GatewayExecutor：一次非流式 EvoMap Chat Completions 请求与严格响应校验 | R:code:orchestration/codex.py,code:contracts/results.py | A:GatewayExecutor | S:单请求无工具循环；凭据只从环境或内存读取、不进消息或异常；replay 禁止执行；自定义 transport 必须 mock
+rehearsal.py[EW9M]: F:固定彩排适配器：两个显式授权新任务、阶段快照与只读 replay 降级 | R:code:orchestration/rehearsal_models.py,code:orchestration/runtime.py,code:orchestration/gateway.py | A:read_rehearsal,RehearsalOptions | S:只允许 repair/recovery 两项授权；永不 resume 或重试付费执行；replay 不改历史时间/判定/未知费用；移除发生在任务之间
+rehearsal_models.py[EW8S]: F:彩排共享呈现模型：14 阶段、checkpoint、成员可用性、路由事实与一致性校验 | R:code:contracts/results.py,code:metabolism/models.py | A:RehearsalDocument,RehearsalSnapshot | S:3/3 必须有独立验证通过；removed 成员不得仍在 eligible；来源必须全一致；scope 固定 fixed_pool_between_tasks
+runtime.py[EW9M]: F:固定规模 LangGraph 图：select→execute→review→feedback 与恢复语义 | R:code:contracts/protocols.py,code:contracts/results.py | A:Runtime.start,resume | S:一 run 至多一次付费调用；已有意图且无可信检查点时保守阻塞不重复外部动作；审查者必须在执行成员之外
+sample_policy.py[ES7T]: F:固定三函数练习的保守语法门：仅允许 clamp/mean/unique 及白名单语法 | R:code:bootstrap/acceptance_runner.py | A:validate_sample | S:是应用层约束不是 OS 沙箱；拒绝通用 Python 与私有名；仅允许 append/add/fromkeys 属性调用
+
+===C:/Users/DW/orca/Morphogenesis/persistence/===
+__init__.py[PD2T]: F:persistence 包出口：导出 SQLiteStore | R:code:persistence/store.py | A:- | S:-
+store.py[PD9S]: F:SQLite 元数据仓储：事件/结果/Gene/供给存储与去重、不可变版本 | R:code:contracts/messages.py,code:contracts/results.py,code:contracts/resolution.py | A:SQLiteStore | S:只存元数据，图状态交给 LangGraph SqliteSaver；同 msg_id 冲突即 ValueError；Gene 版本内容不可变
+
+===C:/Users/DW/orca/Morphogenesis/tools/===
+check_distribution.py[TQ8T]: F:安装态 wheel 冒烟：11 包从 wheel 导入、资源齐全、验证器拒绝坏样例与 Node 桥 | R:code:bootstrap/sample.py,code:bridge_node/assets.py | A:main | S:只证明限定 site-dir 布局；Node 运行依赖源码 node_modules，不代表 wheel 自带
+check_sdk.cjs[TQ8T]: F:官方 GEP SDK 本地契约探针：schema 校验、资产 ID 往返与篡改拒绝 | R:code:package-lock.json | A:- | S:只用官方 computeAssetId/verifyAssetId，无本地哈希实现；published=false
+contracts_check.py[TQ7T]: F:契约语义检查入口：运行 tests/t0 的调用方到实现检查 | R:code:contracts/base.py | A:main | S:只跑 tests/t0，不是签名反射或全量测试
+typecheck.py[TQ9T]: F:统一 strict mypy 入口：对硬编码的当前存在包列表检查 | R:code:pyproject.toml | A:main | S:PACKAGES 是硬编码列表，新顶层包不加入即漏检；CI 使用同一入口
+
+===C:/Users/DW/orca/Morphogenesis/topology/===
+__init__.py[KG2T]: F:拓扑包出口：Connection/TopologyEngine/TopologyPolicy | R:code:topology/engine.py | A:- | S:-
+engine.py[KG8M]: F:实例级内存拓扑：权重选择、消息感知反馈去重与显式连接/裁剪生命周期 | R:code:contracts/protocols.py,code:contracts/messages.py | A:TopologyEngine.select,record_feedback | S:更新是启发式不声称收敛；反馈只影响既有边、不自动生边；引擎每 run 内存态，恢复需重建并重放已处理反馈
+
+===C:/Users/DW/orca/Morphogenesis/viz/===
+__init__.py[CU2T]: F:viz 包声明：只读 dashboard 适配器与本地预览服务 | R:- | A:- | S:-
+adapter.py[ID9M]: F:只读输入适配与证据校验：mock/T2/彩排快照映射为 dashboard JSON 并重验三态 | R:code:contracts/results.py,code:contracts/provenance.py,code:orchestration/rehearsal_models.py | A:load_rehearsal,validate_dashboard_snapshot | S:mock/replay 不得升级 live 维度；空 dashboard 必须保持 not_run；只接受白名单路径与 2 MiB 上限
+evomap_models.py[ID8M]: F:EvoMap 只读端点的类型化响应契约：搜索/类别/本地池/资产详情数据类 | R:code:viz/evomap_service.py | A:EvomapReport,AssetView | S:只表示实际观测字段、不伪造；远程响应文本不进入报告；固定错误码
+evomap_service.py[ID8L]: F:服务端只读 EvoMap 闭环：公开搜索/类别/资产详情/本地池，单次请求与进程内缓存 | R:code:viz/evomap_models.py,code:contracts/resolution.py,code:viz/server.py | A:EvomapService.report,asset_view | S:每次获取一次请求无重试；密钥只报告布尔值；类别计数不进入运行拓扑；资产详情仅在点击后获取
+server.py[EN9M]: F:只读 HTTP 面板：GET/HEAD、固定路由、EvoMap 与仪表盘端点及静态文件服务 | R:code:viz/adapter.py,code:viz/evomap_service.py | A:DashboardHandler,main | S:非 GET/HEAD 返回 405、请求体 413、禁目录列举与符号链接；默认绑定回环；日志不写查询串
+
+===C:/Users/DW/orca/Morphogenesis/viz/frontend/===
+package-lock.json[FV7L]: F:前端 npm 锁：React/TDesign/Vite 构建链的固定版本与完整性 | R:code:viz/frontend/package.json | A:- | S:独立于根锁；用 npm ci 安装；不随意改锁
+package.json[FV7T]: F:前端工程清单：React/TDesign 运行时与 Vite 构建依赖及 build 脚本 | R:code:viz/frontend/package-lock.json,code:viz/frontend/vite.config.js | A:- | S:运行时依赖打入 finals-shell；模板来源与 MIT 信息在 description 保留
+vite.config.js[FV8T]: F:壳构建配置：iife 库输出 finals-shell.{js,css} 到 viz/static 且 emptyOutDir=false | R:code:viz/frontend/src/shell.jsx,code:viz/frontend/package.json | A:- | S:不触碰 app.js/licenses/echarts；inlineDynamicImports 保证 P/T 轨惰性模块内联
+
+===C:/Users/DW/orca/Morphogenesis/viz/frontend/src/===
+App.jsx[EU9M]: F:页面壳：序幕编排、同源轮询接线、失败保留快照与 EvoMap 按需只读请求 | R:code:viz/frontend/src/components/hooks.js,code:viz/frontend/src/backend/Backend.jsx,code:viz/frontend/src/intro/GrowthIntro.jsx | A:App | S:轮询 1s；失败保留最后快照不清空；EvoMap 仅首次进入与显式搜索，序号守卫丢弃乱序响应
+reference.css[FU7T]: F:参考快照适配样式：Jost/Inter 字体声明、深色令牌与 Christmas 章节排版 | R:code:THIRD_PARTY_NOTICES.md,code:viz/frontend/src/theme.css | A:- | S:快照许可未知已在第三方声明记录；不声明 Jost 合成字形
+shell.jsx[EU8T]: F:壳入口：挂载 React App、设置 dark 主题并以内联 flushSync 保证静态壳先到位 | R:code:viz/frontend/src/App.jsx,code:viz/frontend/vite.config.js | A:- | S:flushSync 是数据区桥安装前首帧更新的保证；入口变更必须重建 finals-shell
+theme.css[FU8L]: F:壳主题：TDesign 深色令牌覆盖与统一调色板、数字动效与 reduced-motion | R:code:viz/frontend/src/reference.css | A:- | S:#34D399 仅保留给 checkpoint 脉冲；未知值样式不得写 0；reduced-motion 停用动效
+
+===C:/Users/DW/orca/Morphogenesis/viz/frontend/src/backend/===
+Backend.jsx[EU8S]: F:产品后台三栏：五个 tab 视图、aria 键盘导航与运行详情对话框 | R:code:viz/frontend/src/backend/LinearIcons.jsx,code:viz/frontend/src/components/EvoMapPanel.jsx | A:Backend | S:旧数据 DOM ID 必须保留；非当前面板 hidden/inert；Escape 关闭详情并返回焦点；组件不发网络请求
+LinearIcons.jsx[ZU6T]: F:11 个内联 SVG 图标：从 Linear 应用 DOM 抽取的 path/viewBox | R:code:docs/tracks/frontend-gpt-reference.md | A:LinearIcon | S:不含品牌 logo、外部 href、跟踪器或雪碧图依赖
+backend.css[FU8S]: F:后台响应式与数据适配样式：三栏比例、活动行密度、属性行与焦点可见 | R:code:viz/frontend/src/backend/linear-package.css,code:viz/frontend/src/backend/Backend.jsx | A:- | S:自定义声明叠在逐字保留的 Linear 规则之上；旧 DOM ID 的样式语义不得破坏
+linear-package.css[FU7T]: F:用户提供 Linear 快照的逐字 CSS 规则：frame/sidebar/view/panel 等源选择器 | R:code:THIRD_PARTY_NOTICES.md | A:- | S:只选根规则并保留源 selector 对应；不含营销缩放与无关场景
+
+===C:/Users/DW/orca/Morphogenesis/viz/frontend/src/components/===
+Board.jsx[ZU7T]: F:TDesign 卡片 Board：title/count/desc 结构，数字为数据所有的大号 span | R:code:docs/tracks/frontend-stack.md | A:Board | S:已删模板 trend 与演示微图；count 不得写死统计值
+CrtOverlay.jsx[ZU6T]: F:全局 CRT 扫描线遮罩：opacity 在 0.03-0.05 带内且不拦截指针 | R:- | A:- | S:reduced motion 下静止；纯装饰 aria-hidden
+Cursor.jsx[ZU7T]: F:自定义光标：点加拖尾环，仅 fine pointer 且非 reduced motion 的 swarm 视图启用 | R:- | A:- | S:首页光标归 Physarum 轨；交互元素上方环高亮；动画只走 RAF 且卸载清理
+EvoMapPanel.jsx[ZU8M]: F:EvoMap 只读探索面板：搜索表单、资产卡片、类别计数与本地池展示 | R:code:viz/frontend/src/App.jsx,code:docs/tracks/frontend-evomap.md | A:EvoMapPanel | S:null/未知值不渲染为 0；失败保留旧数据但顶层标 error；资产详情只在点击后请求；数据不进入运行拓扑
+Hero.jsx[ZU7T]: F:序幕首页：惰性挂载 PhysarumField 与「黏菌 / PHYSARUM」小字及降级提示 | R:code:viz/frontend/src/components/hooks.js | A:Hero | S:无指针/触屏输入；模块缺失或运行时报错显示静态降级说明
+hooks.js[XU7T]: F:React 工具钩子：惰性加载 P/T 轨组件与 reduced-motion 媒体查询订阅 | R:code:viz/frontend/src/App.jsx | A:useTrackComponent,useReducedMotion | S:glob 为空时壳必须保有自身降级视图；缺默认导出视为错误
+
+===C:/Users/DW/orca/Morphogenesis/viz/frontend/src/intro/===
+GrowthIntro.jsx[ZU6T]: F:概念拓扑序幕：固定节点/枝/交叉线的 SVG 生长动画与「概念动画」标注 | R:code:docs/tracks/frontend-growth.md | A:GrowthIntro | S:不读取或映射任何真实数据；active=false 暂停、reduced motion 立即静态完整画面
+growth-intro.css[FU6S]: F:序幕动画样式：黑底、黏菌黄枝线、延迟变量与静态/暂停模式 | R:code:viz/frontend/src/intro/GrowthIntro.jsx | A:- | S:reduced motion 与暂停类必须停用动画；指针事件不拦截
+
+===C:/Users/DW/orca/Morphogenesis/viz/frontend/src/physarum/===
+PhysarumFallback.jsx[ZU6T]: F:黏菌静态降级视图：确定性种子节点/连线与原因说明 | R:code:viz/frontend/src/components/Hero.jsx,code:viz/frontend/src/physarum/PhysarumField.jsx | A:PhysarumFallback | S:无 WebGL、无动画、无 RAF；布局确定性不随机重排；原因映射固定
+PhysarumField.jsx[ZU8S]: F:环境黏菌场组件：WebGL2 模拟挂载、可见性暂停、性能降级与错误回退 | R:code:viz/frontend/src/physarum/simulation.js,code:viz/frontend/src/physarum/PhysarumFallback.jsx | A:PhysarumField | S:指针与触屏不改变运动；隐藏或 active=false 暂停；持续慢帧先降质再回退；卸载清理资源
+index.js[ZU2T]: F:黏菌模块出口：默认导出 PhysarumField 并具名导出 PhysarumFallback | R:code:viz/frontend/src/physarum/PhysarumField.jsx | A:- | S:-
+physarum.css[FU6T]: F:黏菌场样式：黑色背景、画布铺满与黄色静态降级外观 | R:code:viz/frontend/src/physarum/PhysarumField.jsx | A:- | S:降级说明不拦截指针；颜色保持黏菌黄系
+shaders.js[KU8S]: F:GLSL ES 3.00 着色器源码：全屏三角、agent 更新、点渲染、扩散衰减与显示 | R:code:viz/frontend/src/physarum/simulation.js,code:viz/static/licenses/physarum/Physarum-WebGL.LICENSE.MIT.txt | A:UPDATE_AGENTS_FRAGMENT | S:移植自上游 MIT 提交并保留版权注释；无指针输入 uniform；跨物种弱斥力保持三群分支
+simulation.js[KU8L]: F:原生 WebGL2 黏菌模拟引擎：乒乓浮点纹理、四段渲染管线与确定性参数 | R:code:viz/frontend/src/physarum/shaders.js | A:PhysarumSim | S:无 Three.js 等新运行时依赖；HiDPI、可见性暂停与卸载释放；参数确定性；故障抛 PhysarumUnavailable 由组件降级
+
+===C:/Users/DW/orca/Morphogenesis/viz/frontend/src/swarm/===
+SwarmTopology.jsx[ZU8M]: F:AGENT SWARM 真实拓扑视图：SVG 泳道、键盘选点、Ghost 五态与成员详情 | R:code:viz/frontend/src/swarm/derive.js,code:viz/frontend/src/backend/Backend.jsx | A:SwarmTopology | S:事实全部来自 dashboard；「任务重路由」字面短语仅 recovered 出现；failed 用 role=alert 且不暗示已恢复
+derive.js[ZD8S]: F:纯函数派生：从 dashboard 计算节点/边/泳道布局与 Ghost 五态 | R:code:viz/frontend/src/swarm/SwarmTopology.jsx | A:deriveSwarm,layoutNodes | S:不虚构节点/边/任务/消息/恢复结果，缺失保持缺失；移除与单纯不可用严格区分
+preview.jsx[ZU4T]: F:拓扑独立预览入口：读取 window.__SWARM_PROPS__ 或 /api/dashboard 挂载组件 | R:code:viz/frontend/src/swarm/SwarmTopology.jsx,code:viz/frontend/src/swarm/vite.preview.config.mjs | A:- | S:仅供开发与浏览器验证；不进入 finals-shell 构建
+swarm.css[FU7S]: F:拓扑视图样式：冷白/青绿 HUD、泳道画框与详情面板 | R:code:viz/frontend/src/swarm/SwarmTopology.jsx | A:- | S:调色板固定 bg/ink/dim/teal；无渐变表面与 emoji
+vite.preview.config.mjs[XU4T]: F:预览专用 Vite 配置：iife 打包 preview.jsx 到临时 outDir | R:code:viz/frontend/src/swarm/preview.jsx,code:viz/frontend/vite.config.js | A:- | S:不得接入 finals shell 构建；输出必须指向临时目录，绝不写 viz/static
+
+===C:/Users/DW/orca/Morphogenesis/viz/static/===
+app.js[ZU9L]: F:数据区桥：window.MorphDashboard 写入 DOM 与 ECharts，数字 300ms 动效与降级拓扑 | R:code:viz/static/index.html,code:viz/adapter.py | A:MorphDashboard.update,fail | S:只写 textContent 不注入 HTML；失败保留上次快照；未知值不显示为 0；reduced-motion 关闭动效
+index.html[EU7T]: F:静态入口：加载 finals-shell、style.css、app.js 与本地 ECharts vendor | R:code:viz/static/assets/finals-shell.js,code:viz/static/app.js | A:- | S:空 favicon 是评审过的有意声明；不引任何远端资源
+style.css[FU8S]: F:数据区样式：调色板变量、拓扑管道、Gene 四态台账与响应式堆叠 | R:code:viz/static/app.js,code:viz/static/index.html | A:- | S:#34D399 仅 checkpoint 脉冲；Gene 四态由真实状态类驱动；无外部字体与 CDN
+
+===C:/Users/DW/orca/Morphogenesis/viz/static/assets/===
+finals-shell.css[FV8T]: F:构建产物 CSS：TDesign 组件样式与壳主题的打包结果 | R:code:viz/frontend/vite.config.js,code:viz/static/index.html | A:- | S:由构建生成不手改；与 finals-shell.js 同批产出
+finals-shell.js[FV8M]: F:构建产物 JS：React/TDesign 壳打包并保留依赖许可头 | R:code:viz/frontend/vite.config.js,code:viz/static/index.html | A:- | S:由构建生成不手改；必须与 finals-shell.css 同批；不得掺入远端脚本
+
+===C:/Users/DW/orca/Morphogenesis/viz/static/licenses/===
+LICENSE-classnames.MIT.txt[SV5T]: F:classnames 的 MIT 许可全文（Copyright Jed Watson） | R:code:THIRD_PARTY_NOTICES.md | A:- | S:分发时必须随产物保留；不得删改版权行
+LICENSE-dayjs.MIT.txt[SV5T]: F:dayjs 的 MIT 许可全文 | R:code:THIRD_PARTY_NOTICES.md | A:- | S:分发时必须随产物保留；不得删改版权行
+LICENSE-lodash-es.MIT.txt[SV5T]: F:lodash-es 的 MIT 许可全文（含内嵌第三方版权行） | R:code:THIRD_PARTY_NOTICES.md | A:- | S:分发时必须随产物保留；内嵌版权行不得删除
+LICENSE-react-dom.MIT.txt[SV6T]: F:react-dom 的 MIT 许可全文（Meta/Facebook） | R:code:THIRD_PARTY_NOTICES.md | A:- | S:分发时必须随产物保留；不得删改版权行
+LICENSE-react.MIT.txt[SV6T]: F:react 的 MIT 许可全文（Meta/Facebook） | R:code:THIRD_PARTY_NOTICES.md | A:- | S:分发时必须随产物保留；不得删改版权行
+LICENSE-scheduler.MIT.txt[SV5T]: F:scheduler 的 MIT 许可全文 | R:code:THIRD_PARTY_NOTICES.md | A:- | S:分发时必须随产物保留；不得删改版权行
+LICENSE-tdesign-icons-react.MIT.txt[SV5T]: F:TDesign 图标库的 MIT 许可声明 | R:code:THIRD_PARTY_NOTICES.md | A:- | S:分发时必须随产物保留；不得删改声明
+LICENSE-tdesign-react-starter.MIT.txt[SV5T]: F:TDesign React Starter 模板的 MIT 许可声明 | R:code:THIRD_PARTY_NOTICES.md | A:- | S:分发时必须随产物保留；不得删改声明
+LICENSE-tdesign-react.MIT.txt[SV6T]: F:tdesign-react 的 MIT 许可全文（Copyright TDesign） | R:code:THIRD_PARTY_NOTICES.md | A:- | S:分发时必须随产物保留；不得删改版权行
+NOTICE.txt[SV8T]: F:展示层第三方许可索引：模板复用映射、打包运行时 MIT 清单与构建工具边界 | R:code:THIRD_PARTY_NOTICES.md,code:docs/tracks/frontend-stack.md | A:- | S:打包模块清单必须与实际 bundle 一致；Stack 时代许可已随代码移除；构建工具不重复列许可
+
+===C:/Users/DW/orca/Morphogenesis/viz/static/licenses/physarum/===
+NOTICE.md[SV7T]: F:Physarum 组件来源声明：上游提交、复用映射、未使用部分与继承来源 | R:code:viz/static/licenses/physarum/Physarum-WebGL.LICENSE.MIT.txt,code:viz/frontend/src/physarum/shaders.js | A:- | S:改写适配需保留署名；Three.js 等未使用部分不引入依赖；nicoptere 仅作来源记录
+Physarum-WebGL.LICENSE.MIT.txt[SV6T]: F:Bewelge/Physarum-WebGL 的 MIT 许可全文（逐字节复制自上游） | R:code:viz/static/licenses/physarum/NOTICE.md | A:- | S:分发时必须随产物保留；不得删改版权行

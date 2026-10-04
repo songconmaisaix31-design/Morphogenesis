@@ -20,3 +20,9 @@ tmp/
 htmlcov/
 tools/.package-review/
 tools/.wheel-site/
+
+# AOCI agent host integration (machine-bound; do not commit)
+opencode.json
+opencode.json.backup.*
+.codex/config.toml
+.codex/config.toml.backup.*
