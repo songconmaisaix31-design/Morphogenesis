@@ -406,16 +406,93 @@ kbd {
 .suggest-line:hover { border-color: var(--gold); color: var(--fg); }
 .suggest-line .hint { color: var(--accent); }
 
-.copilot-input { display: flex; gap: 8px; }
-.copilot-input input {
-  flex: 1; height: 34px; padding: 0 12px;
-  font: 13px var(--font); color: var(--fg);
+/* ── Wayfinder 聊天输入区（Copilot 形态，自有类名） ── */
+.wf-chat { margin: 0; }
+.wf-input-shell {
+  position: relative;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  outline: none;
+  transition: border-color .15s, box-shadow .15s;
 }
-.copilot-input input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.16); }
+.wf-input-shell:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.16); }
+
+.wf-textarea {
+  display: block; width: 100%;
+  min-height: 38px; max-height: 160px;
+  padding: 9px 12px 2px;
+  font: 13px/1.55 var(--font); color: var(--fg);
+  background: transparent; border: 0; outline: none; resize: none;
+  overflow-y: auto;
+}
+.wf-textarea::placeholder { color: var(--fg-muted); }
+
+.wf-toolbar { display: flex; align-items: center; gap: 6px; padding: 2px 6px 6px; }
+.wf-toolbar-left { display: flex; align-items: center; gap: 2px; }
+.wf-toolbar-right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.wf-ico { display: block; flex: none; }
+.wf-ico-sm { opacity: .65; }
+
+.wf-chip-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 26px; padding: 0 8px;
+  font: 12.5px var(--font); color: var(--fg-muted);
+  background: transparent; border: 1px solid transparent; border-radius: 6px;
+  cursor: pointer;
+}
+.wf-chip-btn:hover { color: var(--fg); background: var(--bg-subtle); border-color: var(--border-muted); }
+.wf-chip-btn[aria-expanded="true"] { color: var(--fg); background: var(--bg-subtle); border-color: var(--border); }
+.wf-chip-btn b { font-weight: 600; color: var(--fg); }
+
+.wf-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; padding: 0;
+  color: var(--fg-muted);
+  background: transparent; border: 1px solid transparent; border-radius: 6px;
+  cursor: pointer;
+}
+.wf-icon-btn:hover { color: var(--fg); background: var(--bg-subtle); border-color: var(--border-muted); }
+
+.wf-send {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 26px; padding: 0;
+  color: var(--gold-ink);
+  background: linear-gradient(180deg, #ffd966, var(--gold-bright));
+  border: 1px solid var(--gold); border-radius: 6px;
+  cursor: pointer;
+}
+.wf-send:hover { background: linear-gradient(180deg, #f5c33b, #ecb41f); }
+.wf-send:disabled { color: var(--fg-muted); background: var(--bg-subtle); border-color: var(--border); cursor: default; }
+
+.wf-count { font-size: 11px; min-width: 34px; text-align: right; }
+.wf-count.over { color: var(--danger); font-weight: 600; }
+
+.wf-menu {
+  position: absolute; z-index: 30; top: 100%; left: 0;
+  min-width: 210px; margin-top: 4px; padding: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(31, 35, 40, .16);
+}
+.wf-menu-right { left: auto; right: 0; }
+.wf-menu-wide { min-width: 220px; }
+.wf-menu-title { margin: 4px 8px 6px; font-size: 11px; font-weight: 600; color: var(--fg-muted); }
+.wf-menu button {
+  display: block; width: 100%; padding: 6px 8px;
+  font: 13px var(--font); text-align: left; color: var(--fg);
+  background: transparent; border: 0; border-radius: 6px; cursor: pointer;
+}
+.wf-menu button:hover { background: var(--bg-subtle); }
+.wf-menu button b { display: block; font-size: 13px; font-weight: 600; }
+.wf-menu button span { display: block; font-size: 11.5px; color: var(--fg-muted); }
+.wf-menu button[aria-checked="true"] b::after { content: " ✓"; color: var(--gold-deep); }
+.wf-check {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; font-size: 13px; color: var(--fg);
+  border-radius: 6px; cursor: pointer;
+}
+.wf-check:hover { background: var(--bg-subtle); }
+.wf-check input { margin: 0; }
 
 .btn-primary {
   height: 34px; padding: 0 14px;
@@ -1196,14 +1273,60 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
             </div>
             <button class="suggest-line" id="wfHint1" type="button"></button>
             <button class="suggest-line" id="wfHint2" type="button"></button>
-            <div class="copilot-input">
-              <input id="wfAskInput" type="text" placeholder="Ask Wayfinder about routes, evidence, risk..." enterkeyhint="send" autocomplete="off">
-              <button class="btn-primary" id="wfAskBtn">Ask</button>
-            </div>
+            <form class="wf-chat" id="wfChatForm" autocomplete="off">
+              <div class="wf-input-shell" id="wfInputShell">
+                <textarea id="wfAskInput" class="wf-textarea" rows="1"
+                  placeholder="Ask Wayfinder about routes, evidence, risk..."
+                  aria-label="Ask Wayfinder" aria-multiline="true"></textarea>
+
+                <div class="wf-toolbar">
+                  <div class="wf-toolbar-left">
+                    <button class="wf-chip-btn" id="wfModeBtn" type="button" aria-haspopup="true" aria-expanded="false">
+                      <svg class="wf-ico" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0 1 13.25 12H9.06l-2.573 2.573A1.458 1.458 0 0 1 4 13.543V12H2.75A1.75 1.75 0 0 1 1 10.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h4.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                      <span id="wfModeLabel">Ask</span>
+                      <svg class="wf-ico wf-ico-sm" viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><path fill="currentColor" d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"/></svg>
+                    </button>
+                    <div class="wf-menu" id="wfModeMenu" hidden role="menu" aria-label="Wayfinder 模式">
+                      <button type="button" role="menuitem" data-mode="ask"><b>Ask</b><span>给出建议路线与份额</span></button>
+                      <button type="button" role="menuitem" data-mode="navigate"><b>Navigate</b><span>重点给路由理由与可行性</span></button>
+                      <button type="button" role="menuitem" data-mode="audit"><b>Audit</b><span>重点给证据强度与风险</span></button>
+                    </div>
+
+                    <button class="wf-icon-btn" id="wfAttachBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="附加上下文">
+                      <svg class="wf-ico" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/></svg>
+                    </button>
+                    <div class="wf-menu wf-menu-wide" id="wfCtxMenu" hidden>
+                      <p class="wf-menu-title">附加到提问</p>
+                      <label class="wf-check"><input type="checkbox" value="branches" checked> All branches</label>
+                      <label class="wf-check"><input type="checkbox" value="evidence" checked> Evidence</label>
+                      <label class="wf-check"><input type="checkbox" value="constraints"> Constraints</label>
+                      <label class="wf-check"><input type="checkbox" value="ledger"> Ledger(tasks)</label>
+                    </div>
+                  </div>
+
+                  <div class="wf-toolbar-right">
+                    <button class="wf-chip-btn" id="wfTierBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="优化目标">
+                      <span>Optimized for: <b id="wfTierLabel">Balance</b></span>
+                      <svg class="wf-ico wf-ico-sm" viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><path fill="currentColor" d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"/></svg>
+                    </button>
+                    <div class="wf-menu wf-menu-right" id="wfTierMenu" hidden role="menu" aria-label="优化目标">
+                      <button type="button" role="menuitem" data-tier="balance"><b>Balance</b><span>按机会份额排序</span></button>
+                      <button type="button" role="menuitem" data-tier="exploration"><b>Exploration</b><span>偏好未探索 / 休眠分支</span></button>
+                      <button type="button" role="menuitem" data-tier="precision"><b>Precision</b><span>偏好低风险分支</span></button>
+                    </div>
+
+                    <span class="wf-count muted" id="wfCount"></span>
+                    <button class="wf-send" id="wfAskBtn" type="submit" disabled aria-label="Send now">
+                      <svg class="wf-ico" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M.989 8 .064 2.68a1.342 1.342 0 0 1 1.85-1.462l13.402 5.744a1.13 1.13 0 0 1 0 2.076L1.913 14.782a1.343 1.343 0 0 1-1.85-1.463L.99 8Zm.603-5.288L2.38 7.25h4.87a.75.75 0 0 1 0 1.5H2.38l-.788 4.538L13.929 8Z"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
             <div class="copilot-answer" id="wfAnswer" hidden></div>
             <div class="copilot-meta muted">
-              <span>All branches</span><span class="meta-dot">·</span>
-              <span>Add evidence, and constraints</span>
+              <span id="wfCtxLabel">All branches, Evidence</span><span class="meta-dot">·</span>
+              <span>Send now(enter)</span>
               <span class="flex-spacer"></span>
               <span>Policy: <b class="mono">research-v1</b></span><span class="meta-dot">·</span>
               <span id="wfExploreLabel">Optimized for: Exploration —</span><span class="meta-dot">·</span>
@@ -2954,39 +3077,84 @@ function openWayfinder(focusId) {
 }
 
 /* Wayfinder 问答（Copilot 卡片交互） */
-function wayfinderAnswer(q) {
+var WF_TIER_ZH = { balance: 'Balance（按机会份额）', exploration: 'Exploration（偏好未探索/休眠）', precision: 'Precision（偏好低风险）' };
+
+function wayfinderAnswer(q, st) {
+  st = st || { mode: 'ask', tier: 'balance', ctx: {} };
+  var ctx = st.ctx || {};
   q = (q || '').toLowerCase();
   if (!OPP.length) return '暂无机会数据。';
-  var pick = OPP[0];
-  if (/risk|风险|radar/.test(q)) {
-    pick = OPP.slice().sort(function (a, b) { return b.factors.risk - a.factors.risk; })[0];
-  } else if (/cost|成本|cheap/.test(q)) {
-    var known = OPP.filter(function (o) { return o.known_cost != null; }).sort(function (a, b) { return a.known_cost - b.known_cost; });
-    if (known.length) pick = known[0];
-  } else if (/sleep|dormant|休眠/.test(q)) {
-    var dor = OPP.filter(function (o) { return (o.reasons || []).indexOf('dormant') >= 0; });
-    if (dor.length) pick = dor[0];
-  } else if (/fail|失败|根因|root/.test(q)) {
+
+  if (/fail|失败|根因|root/.test(q)) {
     var ev = null;
     PKG.tasks.forEach(function (t) { if (t.status === 'failed') ev = evidenceOf(t.signal.task_id); });
     return '最近失败信号：T-15 硬边界基线（v1 参数族）。<br>evidence：' + esc(ev || '—')
       + '<br>专家 Prof. K 认为更可能是时间步长问题（unverified，意见≠事实）；v2 修正任务 T-16 已由 w-03 认领。'
       + '<br><a data-open-replay="T-15">Open T-15 in replay →</a>';
   }
+
+  var pick = OPP[0];
+  var by = '默认排序（份额降序）';
+  if (/risk|风险|radar/.test(q)) {
+    pick = OPP.slice().sort(function (a, b) { return b.factors.risk - a.factors.risk; })[0];
+    by = '提问命中「风险」→ 按 risk 降序';
+  } else if (/cost|成本|cheap/.test(q)) {
+    var known = OPP.filter(function (o) { return o.known_cost != null; }).sort(function (a, b) { return a.known_cost - b.known_cost; });
+    if (known.length) { pick = known[0]; by = '提问命中「成本」→ 按 known_cost 升序'; }
+  } else if (/sleep|dormant|休眠/.test(q)) {
+    var dor = OPP.filter(function (o) { return (o.reasons || []).indexOf('dormant') >= 0; });
+    if (dor.length) { pick = dor[0]; by = '提问命中「休眠」→ 只取 dormant 分支'; }
+  } else if (st.tier === 'exploration') {
+    var nov = OPP.filter(function (o) { return !o.eligible || (o.reasons || []).indexOf('dormant') >= 0; });
+    pick = nov.length ? nov[0] : OPP[OPP.length - 1];
+    by = WF_TIER_ZH.exploration;
+  } else if (st.tier === 'precision') {
+    pick = OPP.slice().sort(function (a, b) { return (a.factors.risk || 0) - (b.factors.risk || 0); })[0];
+    by = WF_TIER_ZH.precision;
+  } else {
+    by = WF_TIER_ZH.balance;
+  }
+
   var f = pick.factors;
-  return '建议路线 <b class="mono">' + esc(pick.branch_id) + '</b> · 机会份额 <b>' + Math.round(pick.share * 100) + '%</b> · '
+  var out = '建议路线 <b class="mono">' + esc(pick.branch_id) + '</b> · 机会份额 <b>' + Math.round(pick.share * 100) + '%</b> · '
     + (pick.eligible ? 'eligible' : 'ineligible')
-    + '<br>evidence ' + f.evidence + ' · applicability ' + f.applicability + ' · goal ' + f.goal_relevance + ' · risk ' + f.risk
-    + '<br>支持 ×' + f.support_count + ' / 反驳 ×' + f.refute_count + ' · 成本 ' + (pick.known_cost == null ? '—' : pick.known_cost)
-    + ((pick.reasons || []).length ? '<br>理由：' + pick.reasons.map(function (r) { return REASON_ZH[r] || r; }).join('、') : '')
-    + '<br><a data-open-wf="' + esc(pick.branch_id) + '">在 Wayfinder 面板中查看路线 →</a>';
+    + '<br>排序口径：' + by;
+
+  if (ctx.evidence) {
+    out += '<br>evidence ' + f.evidence + ' · applicability ' + f.applicability + ' · goal ' + f.goal_relevance + ' · risk ' + f.risk
+      + '<br>支持 ×' + f.support_count + ' / 反驳 ×' + f.refute_count + ' · 成本 ' + (pick.known_cost == null ? '—' : pick.known_cost);
+  }
+
+  if (st.mode === 'navigate') {
+    out += '<br><b>路由理由</b>：' + ((pick.reasons || []).map(function (r) { return REASON_ZH[r] || r; }).join('、') || '无阻断理由')
+      + '<br><a data-open-wf="' + esc(pick.branch_id) + '">在 Wayfinder 面板中查看路线 →</a>';
+  } else if (st.mode === 'audit') {
+    var notes = (PKG.context && PKG.context.notes) ? PKG.context.notes : [];
+    var unverified = notes.filter(function (n) { return n.review_state !== 'verified'; }).length;
+    out += '<br><b>证据审计</b>：risk ' + f.risk + ' · 反驳 ×' + f.refute_count
+      + ' · 笔记 ' + notes.length + ' 条（未核实 ' + unverified + ' 条，意见 ≠ 事实）';
+  }
+
+  if (ctx.constraints) {
+    var cons = (SNAP && SNAP.constraints) ? SNAP.constraints : null;
+    out += '<br><b>约束</b>：' + (cons ? esc(JSON.stringify(cons)) : 'policy 未返回 constraints 字段');
+  }
+  if (ctx.ledger) {
+    var active = PKG.tasks.filter(function (t) { return t.status === 'claimed' || t.status === 'submitting'; }).length;
+    out += '<br><b>账本</b>：任务 ' + PKG.tasks.length + ' 个，活跃 ' + active + ' 个';
+  }
+  if (ctx.branches) {
+    out += '<br><b>分支份额</b>：' + OPP.map(function (o) { return esc(o.branch_id) + ' ' + Math.round(o.share * 100) + '%'; }).join(' · ');
+  }
+  return out;
 }
+
 function wfAsk(q) {
   var input = $('wfAskInput');
   var question = (q != null ? q : input.value).trim();
   if (!question) { input.focus(); return; }
   var ans = $('wfAnswer');
-  ans.innerHTML = wayfinderAnswer(question);
+  ans.innerHTML = wayfinderAnswer(question, wfState);
   ans.hidden = false;
 }
 
@@ -3250,9 +3418,92 @@ on('homeFilterInput', 'input', renderSignals);
 on('branchMore', 'click', function () { toast('全部 ' + SNAP.branches.length + ' 条分支已在列表中'); });
 
 on('wfAskBtn', 'click', function () { wfAsk(); });
-on('wfAskInput', 'keydown', function (e) { if (e.key === 'Enter') wfAsk(); });
-on('wfHint1', 'click', function () { $('wfAskInput').value = '帮我定位 T-15 失败的根因'; wfAsk('帮我定位 T-15 失败的根因 fail'); });
-on('wfHint2', 'click', function () { $('wfAskInput').value = '哪条分支下一步的机会份额最高？'; wfAsk('哪条分支下一步的机会份额最高？'); });
+on('wfHint1', 'click', function () { $('wfAskInput').value = '帮我定位 T-15 失败的根因'; wfRefreshInput(); wfAsk('帮我定位 T-15 失败的根因 fail'); });
+on('wfHint2', 'click', function () { $('wfAskInput').value = '哪条分支下一步的机会份额最高？'; wfRefreshInput(); wfAsk('哪条分支下一步的机会份额最高？'); });
+
+/* ---------- Wayfinder 聊天输入（Copilot 形态） ---------- */
+var WF_MAX = 2000;
+var wfState = { mode: 'ask', tier: 'balance', ctx: { branches: true, evidence: true, constraints: false, ledger: false } };
+
+var WF_PLACEHOLDER = {
+  ask: 'Ask Wayfinder about routes, evidence, risk...',
+  navigate: 'Ask Wayfinder where to go next, and why...',
+  audit: 'Ask Wayfinder to audit evidence strength and risk...'
+};
+var WF_MODE_LABEL = { ask: 'Ask', navigate: 'Navigate', audit: 'Audit' };
+var WF_TIER_LABEL = { balance: 'Balance', exploration: 'Exploration', precision: 'Precision' };
+
+function wfAutoGrow() {
+  var ta = $('wfAskInput');
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+}
+function wfRefreshInput() {
+  var ta = $('wfAskInput');
+  var n = ta.value.trim().length;
+  $('wfAskBtn').disabled = n === 0;
+  var c = $('wfCount');
+  c.textContent = n ? (n > WF_MAX ? n + ' / ' + WF_MAX : String(n)) : '';
+  c.classList.toggle('over', n > WF_MAX);
+  wfAutoGrow();
+}
+function wfCloseMenus(except) {
+  ['wfModeMenu', 'wfCtxMenu', 'wfTierMenu'].forEach(function (id) {
+    if (id !== except) $(id).hidden = true;
+  });
+  ['wfModeBtn', 'wfAttachBtn', 'wfTierBtn'].forEach(function (id) {
+    $(id).setAttribute('aria-expanded', 'false');
+  });
+}
+function wfToggleMenu(menuId, btnId) {
+  var open = $(menuId).hidden;
+  wfCloseMenus(open ? menuId : null);
+  $(menuId).hidden = !open;
+  $(btnId).setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function wfCheckMenu(menuSel, attr, onPick) {
+  Array.prototype.forEach.call($(menuSel).querySelectorAll('[' + attr + ']'), function (b) {
+    b.setAttribute('aria-checked', b.getAttribute(attr) === wfState[attr === 'data-mode' ? 'mode' : 'tier'] ? 'true' : 'false');
+    on(b, 'click', function () {
+      wfState[attr === 'data-mode' ? 'mode' : 'tier'] = b.getAttribute(attr);
+      Array.prototype.forEach.call($(menuSel).querySelectorAll('[' + attr + ']'), function (x) {
+        x.setAttribute('aria-checked', x === b ? 'true' : 'false');
+      });
+      onPick(b.getAttribute(attr));
+      wfCloseMenus(null);
+    });
+  });
+}
+
+on('wfModeBtn', 'click', function (e) { e.stopPropagation(); wfToggleMenu('wfModeMenu', 'wfModeBtn'); });
+on('wfAttachBtn', 'click', function (e) { e.stopPropagation(); wfToggleMenu('wfCtxMenu', 'wfAttachBtn'); });
+on('wfTierBtn', 'click', function (e) { e.stopPropagation(); wfToggleMenu('wfTierMenu', 'wfTierBtn'); });
+document.addEventListener('click', function () { wfCloseMenus(null); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') wfCloseMenus(null); });
+
+wfCheckMenu('wfModeMenu', 'data-mode', function (mode) {
+  $('wfModeLabel').textContent = WF_MODE_LABEL[mode];
+  $('wfAskInput').placeholder = WF_PLACEHOLDER[mode];
+});
+wfCheckMenu('wfTierMenu', 'data-tier', function (tier) {
+  $('wfTierLabel').textContent = WF_TIER_LABEL[tier];
+});
+Array.prototype.forEach.call($('wfCtxMenu').querySelectorAll('input[type=checkbox]'), function (cb) {
+  on(cb, 'change', function () {
+    wfState.ctx[cb.value] = cb.checked;
+    var parts = [];
+    ['branches', 'evidence', 'constraints', 'ledger'].forEach(function (k) {
+      if (wfState.ctx[k]) parts.push({ branches: 'All branches', evidence: 'Evidence', constraints: 'Constraints', ledger: 'Ledger' }[k]);
+    });
+    $('wfCtxLabel').textContent = parts.length ? parts.join(', ') : 'No context';
+  });
+});
+
+on('wfAskInput', 'input', wfRefreshInput);
+on('wfAskInput', 'keydown', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); wfAsk(); }
+});
+on('wfChatForm', 'submit', function (e) { e.preventDefault(); wfAsk(); });
 
 document.querySelectorAll('#wfChips button').forEach(function (b) {
   b.addEventListener('click', function () {
