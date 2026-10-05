@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard · Morphogenesis</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23c9930a'/%3E%3C/svg%3E">
+<style>
+/* ============================================================
+ * Morphogenesis Observatorium · v4
+ * GitHub Dashboard 1:1 复刻样式（Primer light tokens）
+ * + Morphogenesis 品牌（黏菌金点缀 + 黏菌拓扑背景）
+ * ============================================================ */
+
+:root {
+  /* Primer light */
+  --fg: #1f2328;
+  --fg-muted: #59636e;
+  --fg-subtle: #6a737d;
+  --bg: #ffffff;
+  --bg-subtle: #f6f8fa;
+  --bg-inset: #f6f8fa;
+  --border: #d1d9e0;
+  --border-muted: rgba(209, 217, 224, 0.75);
+  --accent: #0969da;
+  --success: #1a7f37;
+  --success-bg: #dafbe1;
+  --danger: #d1242f;
+  --danger-bg: #ffebe9;
+  --attention: #9a6700;
+  --attention-bg: #fff8c5;
+  --purple: #8250df;
+  --purple-bg: #fbefff;
+  /* Morphogenesis brand */
+  --gold: #c9930a;
+  --gold-bright: #f5c33b;
+  --gold-deep: #7a5a06;
+  --gold-ink: #3d2e00;
+  --gold-bg: #fdf3d0;
+  --radius: 6px;
+  --radius-card: 8px;
+  --shadow: 0 1px 0 rgba(31, 35, 40, 0.04);
+  --shadow-pop: 0 8px 24px rgba(66, 74, 83, 0.18);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+#bgPhysarum {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--bg); padding: 8px 16px; z-index: 400;
+}
+.skip-link:focus { left: 0; }
+
+.muted { color: var(--fg-muted); }
+.mono { font-family: var(--mono); font-size: 0.92em; }
+.fineprint { font-size: 12px; line-height: 1.55; }
+.flex-spacer { flex: 1; }
+
+kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  font: 11px/1.4 var(--mono);
+  color: var(--fg-muted);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+}
+
+.counter {
+  display: inline-block;
+  min-width: 20px;
+  padding: 0 6px;
+  font-size: 12px; font-weight: 500; line-height: 18px;
+  text-align: center;
+  background: rgba(110, 118, 129, 0.14);
+  border-radius: 2em;
+}
+
+/* ────────── 顶栏 ────────── */
+.gh-header {
+  position: sticky; top: 0; z-index: 120;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.gh-header-inner {
+  display: flex; align-items: center; gap: 8px;
+  height: 60px; padding: 0 20px;
+}
+.gh-logo { display: flex; align-items: center; border-radius: 50%; }
+.gh-logo:focus-visible { outline: 2px solid var(--accent); }
+.gh-context { font-size: 14px; color: var(--fg-muted); padding-left: 4px; }
+.gh-spacer { flex: 1; }
+
+.hbtn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 2px;
+  min-width: 32px; height: 32px; padding: 0 6px;
+  color: var(--fg-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.hbtn:hover { background: var(--bg-subtle); color: var(--fg); }
+.hbtn-sm { min-width: 28px; height: 28px; border: none; background: transparent; }
+
+.search-trigger {
+  display: flex; align-items: center; gap: 8px;
+  height: 30px; min-width: 260px; padding: 0 10px;
+  color: var(--fg-muted); font-size: 13px; font-family: var(--font);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer; text-align: left;
+}
+.search-trigger:hover { border-color: var(--fg-subtle); }
+.search-text kbd { font-size: 10px; padding: 0 4px; }
+
+.gh-actions { display: flex; align-items: center; gap: 8px; }
+
+.avatar-btn {
+  display: inline-flex; align-items: center; gap: 2px;
+  background: none; border: none; cursor: pointer; padding: 0 2px;
+  color: var(--fg-muted);
+}
+.avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+  color: #fff; font-size: 12px; font-weight: 700;
+  box-shadow: 0 0 0 1px rgba(201, 147, 10, 0.35);
+}
+.avatar:hover { box-shadow: 0 0 0 2px rgba(201, 147, 10, 0.5); }
+
+.notif-btn { position: relative; }
+.notif-dot {
+  position: absolute; top: 5px; right: 5px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* 下拉菜单（Primer ActionMenu） */
+.has-dd { position: relative; }
+.dropdown {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  min-width: 192px; padding: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-pop);
+  z-index: 200;
+}
+.dd-fixed { position: fixed; right: auto; }
+.dd-wide { min-width: 340px; max-width: 380px; }
+.dd-head {
+  padding: 6px 8px;
+  font-size: 12px; font-weight: 600; color: var(--fg-muted);
+}
+.dd-head-meta { font-weight: 400; margin-left: 6px; }
+.dd-item {
+  display: block; width: 100%;
+  padding: 6px 8px;
+  font-size: 14px; text-align: left;
+  color: var(--fg);
+  background: none; border: none; border-radius: var(--radius);
+  cursor: pointer;
+}
+.dd-item:hover { background: var(--bg-subtle); }
+.dd-sep { height: 1px; margin: 6px 4px; background: var(--border-muted); }
+
+.notif-list { list-style: none; margin: 0; padding: 0; max-height: 380px; overflow: auto; }
+.notif-item {
+  display: flex; gap: 10px;
+  padding: 8px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.notif-item:hover { background: var(--bg-subtle); }
+.notif-text { font-size: 13px; }
+.notif-meta { font-size: 12px; }
+.dot { flex: none; width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--fg-subtle); }
+.dot-gold { background: var(--gold); }
+.dot-green { background: var(--success); }
+.dot-red { background: var(--danger); }
+.dot-blue { background: var(--accent); }
+
+/* Flash 提示（1:1 session alert / Uh oh） */
+.flash {
+  position: relative; z-index: 110;
+  background: var(--attention-bg);
+  border-bottom: 1px solid rgba(154, 103, 0, 0.3);
+}
+.flash-error { background: var(--danger-bg); border-bottom-color: rgba(209, 36, 47, 0.3); }
+.flash-inner {
+  display: flex; align-items: center; gap: 10px;
+  max-width: 1280px; margin: 0 auto;
+  padding: 10px 20px;
+  font-size: 13px;
+}
+.flash-inner h3 { margin: 0; font-size: 14px; }
+.flash-dismiss {
+  margin-left: auto;
+  font-size: 13px; color: var(--accent);
+  background: none; border: none; cursor: pointer;
+}
+.flash-dismiss:hover { text-decoration: underline; }
+
+/* ────────── 布局 ────────── */
+.gh-body {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  max-width: 1440px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+/* 左侧栏 */
+.gh-sidebar {
+  position: sticky; top: 60px;
+  height: calc(100vh - 60px);
+  overflow: auto;
+  padding: 16px 0 16px 20px;
+  border-right: 1px solid var(--border-muted);
+}
+.side-nav { list-style: none; margin: 0; padding: 0 12px 0 0; }
+.side-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px;
+  font-size: 14px; color: var(--fg);
+  text-decoration: none;
+  border-radius: var(--radius);
+}
+.side-link svg { color: var(--fg-muted); }
+.side-link:hover { background: rgba(208, 215, 222, 0.32); text-decoration: none; }
+.side-link.is-active { background: rgba(208, 215, 222, 0.38); font-weight: 600; }
+.side-link .counter { margin-left: auto; }
+
+.side-box { margin-top: 18px; padding: 16px 12px 8px 0; border-top: 1px solid var(--border-muted); }
+.side-box-head h2 {
+  margin: 0 0 10px; padding: 0 10px 0 0;
+  font-size: 13px; font-weight: 600; color: var(--fg);
+}
+.side-filter {
+  display: flex; align-items: center; gap: 7px;
+  height: 30px; padding: 0 9px; margin-bottom: 8px;
+  color: var(--fg-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.side-filter input {
+  flex: 1; min-width: 0;
+  border: none; outline: none;
+  font: 13px var(--font);
+  background: transparent; color: var(--fg);
+}
+.side-filter:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.16); }
+
+.branch-list { list-style: none; margin: 0; padding: 0; }
+.branch-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  color: var(--fg); text-decoration: none;
+}
+.branch-item:hover { background: rgba(208, 215, 222, 0.32); text-decoration: none; }
+.branch-avatar {
+  flex: none; width: 17px; height: 17px;
+  border-radius: 4px;
+}
+.branch-avatar.b-soft { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); }
+.branch-avatar.b-hard { background: linear-gradient(135deg, #8c959f, #424a53); }
+.branch-avatar.b-hybrid { background: linear-gradient(135deg, #54aeff, #0969da); }
+.branch-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.branch-name b { font-weight: 600; }
+.branch-status { margin-left: auto; font-size: 11px; flex: none; }
+.loading-line { padding: 8px; font-size: 13px; }
+
+.side-more {
+  display: block; width: 100%;
+  padding: 6px 8px;
+  font-size: 13px; text-align: left;
+  color: var(--accent);
+  background: none; border: none; cursor: pointer;
+  border-radius: var(--radius);
+}
+.side-more:hover { text-decoration: underline; }
+
+/* 主区 */
+.gh-main { min-width: 0; padding: 20px 28px 0; }
+
+.view-bar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px;
+}
+.view-bar-title { margin: 0; font-size: 20px; font-weight: 600; }
+.preview-chip {
+  padding: 1px 8px;
+  font-size: 12px; font-weight: 500;
+  color: var(--purple);
+  border: 1px solid rgba(130, 80, 223, 0.5);
+  border-radius: 2em;
+}
+.view-bar-links { margin-left: auto; display: flex; gap: 14px; }
+
+.linklike {
+  padding: 0;
+  font-size: 13px; font-family: var(--font);
+  color: var(--accent);
+  background: none; border: none; cursor: pointer;
+}
+.linklike:hover { text-decoration: underline; }
+
+.view { animation: fadein 0.16s ease; }
+@keyframes fadein { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  align-items: start;
+}
+.main-col { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.right-rail { display: flex; flex-direction: column; gap: 16px; }
+.wide-col { max-width: 960px; display: flex; flex-direction: column; gap: 16px; }
+
+.greet { margin: 4px 0 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.greet-sub { margin: 2px 0 0; font-size: 13px; }
+
+.list-head { display: flex; align-items: center; gap: 16px; }
+.list-filter { width: 280px; margin: 0 0 0 auto; }
+
+/* ────────── 卡片 ────────── */
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+}
+.card-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-muted);
+}
+.card-head h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.card-head-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.rail-title { margin: 0; padding: 12px 16px 0; font-size: 14px; font-weight: 600; }
+
+.empty { padding: 18px 16px; margin: 0; font-size: 13px; color: var(--fg-muted); }
+.empty.small { padding: 10px; }
+
+/* ────────── Wayfinder（1:1 Copilot 卡） ────────── */
+.copilot-card { padding: 16px; }
+.copilot-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.copilot-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+
+.wf-orb {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 30%, #fff3c4 0%, rgba(255, 243, 196, 0) 42%),
+    radial-gradient(circle at 50% 50%, var(--gold-bright) 0%, var(--gold) 58%, var(--gold-deep) 100%);
+  box-shadow: 0 0 10px rgba(245, 195, 59, 0.55);
+  animation: orbPulse 3.2s ease-in-out infinite;
+}
+.wf-orb-lg { width: 34px; height: 34px; }
+@keyframes orbPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(245, 195, 59, 0.4); }
+  50% { box-shadow: 0 0 18px rgba(245, 195, 59, 0.75); }
+}
+
+.suggest-line {
+  display: block; width: 100%;
+  padding: 9px 12px; margin-bottom: 8px;
+  font-size: 13px; text-align: left;
+  color: var(--fg-muted);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.suggest-line:hover { border-color: var(--gold); color: var(--fg); }
+.suggest-line .hint { color: var(--accent); }
+
+.copilot-input { display: flex; gap: 8px; }
+.copilot-input input {
+  flex: 1; height: 34px; padding: 0 12px;
+  font: 13px var(--font); color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+}
+.copilot-input input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.16); }
+
+.btn-primary {
+  height: 34px; padding: 0 14px;
+  font-size: 13px; font-weight: 600;
+  color: var(--gold-ink);
+  background: linear-gradient(180deg, #ffd966, var(--gold-bright));
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.btn-primary:hover { background: linear-gradient(180deg, #f5c33b, #ecb41f); }
+.btn-primary:disabled { opacity: 0.65; cursor: default; }
+.btn-block { width: 100%; }
+.btn-secondary {
+  height: 34px; padding: 0 14px;
+  font-size: 13px; font-weight: 500;
+  color: var(--fg);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.btn-secondary:hover { background: #eef1f4; }
+
+.copilot-answer {
+  margin-top: 12px; padding: 12px 14px;
+  font-size: 13px; line-height: 1.7;
+  background: var(--gold-bg);
+  border: 1px solid rgba(201, 147, 10, 0.4);
+  border-radius: var(--radius);
+}
+.copilot-answer a { color: var(--accent); }
+
+.copilot-meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.meta-dot { color: var(--border); }
+.copilot-meta kbd { font-size: 10px; }
+
+.copilot-commands { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-muted); }
+.copilot-commands h4 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--fg-muted); }
+.cmd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.cmd-chips button {
+  padding: 4px 12px;
+  font-size: 12.5px;
+  color: var(--fg);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 2em;
+  cursor: pointer;
+}
+.cmd-chips button:hover { border-color: var(--gold); background: var(--gold-bg); }
+
+/* ────────── 列表行（1:1 PR / Issue rows） ────────── */
+.gh-list { list-style: none; margin: 0; padding: 0; }
+.gh-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-muted);
+  position: relative;
+}
+.gh-row:first-child { border-top: none; }
+.gh-row:hover { background: rgba(246, 248, 250, 0.7); }
+
+.row-ico { flex: none; margin-top: 2px; }
+.ico-green { color: var(--success); }
+.ico-red { color: var(--danger); }
+.ico-purple { color: var(--purple); }
+.ico-gold { color: var(--gold); }
+.ico-gray { color: var(--fg-subtle); }
+
+.row-main { min-width: 0; flex: 1; }
+.row-title {
+  font-size: 14px; font-weight: 600;
+  color: var(--fg);
+  text-decoration: none;
+  cursor: pointer;
+}
+.row-title:hover { color: var(--accent); text-decoration: underline; }
+.row-meta { margin-top: 2px; font-size: 12px; color: var(--fg-muted); }
+
+.row-actions {
+  display: flex; align-items: center; gap: 4px;
+  opacity: 0; transition: opacity 0.12s;
+}
+.gh-row:hover .row-actions, .gh-row:focus-within .row-actions { opacity: 1; }
+.row-action {
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 2em;
+  cursor: pointer; white-space: nowrap;
+}
+.row-action:hover { color: var(--accent); border-color: var(--accent); }
+
+.pill {
+  flex: none;
+  padding: 1px 9px;
+  font-size: 11.5px; font-weight: 500;
+  border: 1px solid;
+  border-radius: 2em;
+  white-space: nowrap;
+}
+.pill-green { color: var(--success); border-color: rgba(26, 127, 55, 0.5); background: var(--success-bg); }
+.pill-red { color: var(--danger); border-color: rgba(209, 36, 47, 0.4); background: var(--danger-bg); }
+.pill-gold { color: var(--attention); border-color: rgba(154, 103, 0, 0.4); background: var(--attention-bg); }
+.pill-gray { color: var(--fg-muted); border-color: var(--border); background: var(--bg-subtle); }
+.pill-purple { color: var(--purple); border-color: rgba(130, 80, 223, 0.4); background: var(--purple-bg); }
+.pill-blue { color: var(--accent); border-color: rgba(9, 105, 218, 0.4); background: #ddf4ff; }
+
+.tag {
+  flex: none;
+  padding: 0 8px;
+  font: 11.5px/18px var(--mono);
+  color: var(--fg-muted);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-muted);
+  border-radius: 2em;
+  white-space: nowrap;
+}
+.tag-branch { color: var(--gold-deep); border-color: rgba(201, 147, 10, 0.35); background: var(--gold-bg); }
+
+.skeleton-row {
+  height: 44px; margin: 10px 16px;
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--bg-subtle) 25%, #eef1f4 50%, var(--bg-subtle) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s infinite;
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* ────────── 横幅（1:1 Universe banner） ────────── */
+.banner-card { position: relative; overflow: hidden; padding: 0; }
+.banner-art { display: block; height: 118px; }
+.banner-art svg { display: block; width: 100%; height: 100%; }
+.banner-body { padding: 12px 16px 16px; }
+.banner-body b { font-size: 14px; }
+.banner-body p { margin: 4px 0 12px; font-size: 13px; }
+.banner-dismiss { position: absolute; top: 8px; right: 8px; background: rgba(255, 255, 255, 0.75); }
+
+/* ────────── Ledger（1:1 changelog） ────────── */
+.ledger-card { padding-bottom: 12px; }
+.ledger-day {
+  padding: 10px 16px 4px;
+  font-size: 12px; font-weight: 600; color: var(--fg-muted);
+}
+.ledger-item {
+  display: flex; gap: 9px; align-items: baseline;
+  padding: 4px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 0;
+}
+.ledger-item:hover .ledger-link { text-decoration: underline; }
+.ledger-link { color: var(--accent); }
+.ledger-item .dot { margin-top: 0; align-self: center; }
+.ledger-card > .linklike { margin: 8px 16px 0; }
+
+/* ────────── 专家意见 ────────── */
+#expertList { padding: 8px 16px 14px; display: flex; flex-direction: column; gap: 12px; }
+.expert-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.expert-avatar {
+  flex: none; width: 22px; height: 22px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+  color: #fff; font-size: 11px; font-weight: 700;
+}
+.expert-name { font-size: 13px; font-weight: 600; }
+.expert-text { font-size: 13px; margin: 2px 0 4px; }
+.expert-src { font-size: 12px; color: var(--fg-muted); }
+
+/* ────────── Feed ────────── */
+.feed-list { list-style: none; margin: 0; padding: 6px 0; }
+.feed-item {
+  display: flex; gap: 10px; align-items: baseline;
+  padding: 7px 16px;
+  cursor: pointer;
+}
+.feed-item:hover { background: rgba(246, 248, 250, 0.7); }
+.feed-item .dot { align-self: center; margin-top: 0; }
+.feed-text { font-size: 13px; }
+.feed-meta { font-size: 12px; color: var(--fg-muted); margin-left: auto; flex: none; padding-left: 12px; }
+.feed-item.is-live { animation: liveflash 2.2s ease; }
+@keyframes liveflash {
+  0% { background: var(--gold-bg); box-shadow: inset 3px 0 0 var(--gold); }
+  100% { background: transparent; box-shadow: none; }
+}
+
+/* ────────── Footer ────────── */
+.gh-footer {
+  margin-top: 40px; padding: 24px 0 32px;
+  border-top: 1px solid var(--border-muted);
+}
+.footer-links {
+  display: flex; flex-wrap: wrap; gap: 4px 18px;
+  list-style: none; margin: 0 0 10px; padding: 0;
+  font-size: 12.5px;
+}
+.gh-footer .fineprint { margin: 0; }
+
+/* ────────── Overlay / CmdK ────────── */
+.overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(31, 35, 40, 0.45);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 12vh;
+  animation: fadein 0.12s ease;
+}
+.overlay-side { padding: 0; background: rgba(31, 35, 40, 0.3); }
+
+.cmdk-box {
+  width: min(640px, 92vw);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+}
+.cmdk-input-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-muted);
+  color: var(--fg-muted);
+}
+.cmdk-input-row input {
+  flex: 1; border: none; outline: none;
+  font: 15px var(--font); color: var(--fg);
+  background: transparent;
+}
+.cmdk-list { list-style: none; margin: 0; padding: 6px; max-height: 320px; overflow: auto; }
+.cmdk-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.cmdk-item .cmdk-hint { margin-left: auto; font-size: 12px; color: var(--fg-muted); }
+.cmdk-item.is-sel { background: var(--bg-subtle); }
+
+/* ────────── 抽屉（Wayfinder / Replay） ────────── */
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 310;
+  width: min(430px, 94vw);
+  display: flex; flex-direction: column;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  box-shadow: -12px 0 32px rgba(66, 74, 83, 0.18);
+  transform: translateX(102%);
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.drawer.is-open { transform: none; }
+.drawer-wide { width: min(560px, 96vw); }
+.drawer-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-muted);
+}
+.drawer-title { flex: 1; min-width: 0; }
+.drawer-title h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.drawer-title p { margin: 1px 0 0; font-size: 12px; }
+.drawer-intro { margin: 0; padding: 12px 18px 0; font-size: 12.5px; }
+.drawer-body { flex: 1; overflow: auto; padding: 14px 18px 24px; }
+.drawer-foot { padding: 12px 18px 16px; border-top: 1px solid var(--border-muted); }
+.drawer-foot h4 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--fg-muted); }
+.wf-keys { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; margin-bottom: 10px; }
+
+.wf-readout {
+  margin: 12px 18px 0; padding: 10px 12px;
+  font-size: 12.5px; line-height: 1.6;
+  background: var(--gold-bg);
+  border: 1px solid rgba(201, 147, 10, 0.4);
+  border-radius: var(--radius);
+}
+.wf-routes { flex: 1; overflow: auto; padding: 12px 18px; display: flex; flex-direction: column; gap: 10px; }
+.wf-route {
+  display: block; width: 100%; text-align: left;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  font-family: var(--font);
+}
+.wf-route:hover { border-color: var(--gold); }
+.wf-route.is-focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(245, 195, 59, 0.25); }
+.wf-route.is-ineligible { opacity: 0.72; }
+.wf-route-top { display: flex; align-items: center; gap: 8px; }
+.wf-route-top .mono { font-size: 13px; }
+.wf-share { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--gold-deep); }
+.share-bar {
+  height: 5px; margin: 8px 0;
+  background: var(--bg-inset);
+  border-radius: 3px; overflow: hidden;
+}
+.share-bar i {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, var(--gold-bright), var(--gold));
+  border-radius: 3px;
+}
+.wf-factors { font-size: 11.5px; }
+.wf-reasons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+
+/* 回放抽屉内容 */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.drawer-body h4 {
+  margin: 18px 0 8px; padding-top: 14px;
+  font-size: 12.5px; font-weight: 600; color: var(--fg-muted);
+  border-top: 1px solid var(--border-muted);
+}
+.drawer-body h4:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.tl { list-style: none; margin: 0; padding: 0; position: relative; }
+.tl::before {
+  content: ""; position: absolute; left: 4px; top: 6px; bottom: 6px;
+  width: 1px; background: var(--border);
+}
+.tl-item { position: relative; padding: 5px 0 5px 20px; font-size: 13px; }
+.tl-item::before {
+  content: ""; position: absolute; left: 0; top: 10px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--bg); border: 2px solid var(--fg-subtle);
+}
+.tl-item.tone-gold::before { border-color: var(--gold); background: var(--gold-bright); }
+.tl-item.tone-green::before { border-color: var(--success); }
+.tl-item.tone-red::before { border-color: var(--danger); }
+.tl-item.tone-blue::before { border-color: var(--accent); }
+.tl-time { font-size: 11.5px; color: var(--fg-muted); margin-left: 8px; }
+.kv { display: flex; gap: 8px; font-size: 13px; padding: 4px 0; }
+.kv .k { flex: none; width: 110px; color: var(--fg-muted); font-size: 12px; padding-top: 1px; }
+
+/* ────────── Feedback 对话框 ────────── */
+.fb-box {
+  width: min(480px, 92vw);
+  padding: 18px 20px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-pop);
+}
+.fb-head { display: flex; align-items: center; }
+.fb-head h3 { margin: 0; font-size: 16px; font-weight: 600; flex: 1; }
+.fb-q { margin: 14px 0 8px; font-size: 13.5px; font-weight: 600; }
+.fb-radio { display: block; padding: 4px 0; font-size: 13.5px; cursor: pointer; }
+.fb-radio input { margin-right: 8px; accent-color: var(--gold); }
+#fbText {
+  width: 100%; padding: 8px 10px;
+  font: 13px var(--font); color: var(--fg);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  resize: vertical; outline: none;
+}
+#fbText:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.16); }
+.fb-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+/* ────────── Toast ────────── */
+.toast {
+  position: fixed; left: 20px; bottom: 20px; z-index: 400;
+  padding: 10px 16px;
+  font-size: 13px; color: #fff;
+  background: var(--fg);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-pop);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 0.18s, transform 0.18s;
+}
+.toast.is-on { opacity: 1; transform: none; }
+
+/* ────────── 响应式 ────────── */
+@media (max-width: 1160px) {
+  .dash-grid { grid-template-columns: minmax(0, 1fr); }
+  .right-rail { flex-direction: row; flex-wrap: wrap; }
+  .right-rail > .card { flex: 1 1 280px; }
+}
+@media (max-width: 900px) {
+  .gh-body { grid-template-columns: minmax(0, 1fr); }
+  .gh-sidebar {
+    position: fixed; left: 0; top: 60px; bottom: 0; z-index: 150;
+    width: 300px; height: auto;
+    background: var(--bg);
+    transform: translateX(-102%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-pop);
+  }
+  body.nav-open .gh-sidebar { transform: none; }
+  .search-trigger { min-width: 0; }
+  .search-text { display: none; }
+  .gh-main { padding: 16px 16px 0; }
+}
+
+/* 打印 / 减动效 */
+@media (prefers-reduced-motion: reduce) {
+  .wf-orb { animation: none; }
+  .view { animation: none; }
+}
+
+</style>
+</head>
+<body>
+<canvas id="bgPhysarum" aria-hidden="true"></canvas>
+<a class="skip-link" href="#start-of-content">Skip to content</a>
+
+<!-- ══════════ 全局顶栏 · 1:1 GitHub global header ══════════ -->
+<header class="gh-header">
+  <div class="gh-header-inner">
+    <button class="hbtn" id="globalMenuBtn" aria-label="Open global navigation menu" title="Open menu">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"/></svg>
+    </button>
+
+    <a class="gh-logo" href="#/home" title="Homepage (g then d)" aria-label="Morphogenesis Dashboard">
+      <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+        <circle cx="12" cy="12" r="11" fill="#c9930a"/>
+        <circle cx="8" cy="9" r="2.6" fill="#fff7e0"/>
+        <circle cx="15.5" cy="7.5" r="1.8" fill="#fff7e0"/>
+        <circle cx="13.5" cy="14.5" r="2.2" fill="#fff7e0"/>
+        <circle cx="7.5" cy="14.8" r="1.4" fill="#fff7e0"/>
+      </svg>
+    </a>
+    <span class="gh-context">Dashboard</span>
+
+    <div class="gh-spacer"></div>
+
+    <button class="search-trigger" id="globalSearchBtn" title="Open quick search dialog, type / to search">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg>
+      <span class="search-text">Type <kbd>/</kbd> to search</span>
+    </button>
+
+    <div class="gh-actions">
+      <button class="hbtn" id="copilotBtn" title="Chat with Wayfinder">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM3.05 5.05a2.5 2.5 0 1 1 3.54 3.54A2.5 2.5 0 0 1 3.05 5.05Zm9.9 0a2.5 2.5 0 1 0 3.54 3.54 2.5 2.5 0 0 0-3.54-3.54ZM8 10.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z" transform="translate(0 -1) scale(.94)"/></svg>
+      </button>
+
+      <div class="has-dd">
+        <button class="hbtn" id="createBtn" title="Create new..." aria-haspopup="true">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/></svg>
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"/></svg>
+        </button>
+        <div class="dropdown" id="createMenu" hidden>
+          <div class="dd-head">Create new...</div>
+          <button class="dd-item" data-create="branch">New branch</button>
+          <button class="dd-item" data-create="task">New task</button>
+          <button class="dd-item" data-create="proposal">New proposal</button>
+          <button class="dd-item" data-create="note">New evidence note</button>
+        </div>
+      </div>
+
+      <button class="hbtn" data-goto="#/signals" title="All signals (g then i)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/></svg>
+      </button>
+      <button class="hbtn" data-goto="#/feed" title="All task events (g then p)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"/></svg>
+      </button>
+      <button class="hbtn" data-goto="#/branches" title="All branches">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.249.249 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25Z"/></svg>
+      </button>
+
+      <div class="has-dd">
+        <button class="hbtn notif-btn" id="notifBtn" title="You have unread notifications (g then n)">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 16a2 2 0 0 0 1.985-1.75c.017-.137-.097-.25-.235-.25h-3.5c-.138 0-.252.113-.235.25A2 2 0 0 0 8 16ZM3 5a5 5 0 0 1 10 0v2.947c0 .05.015.098.042.139l1.703 2.555A1.519 1.519 0 0 1 13.482 13H2.518a1.516 1.516 0 0 1-1.263-2.36l1.703-2.554A.255.255 0 0 0 3 7.947Zm5-3.5A3.5 3.5 0 0 0 4.5 5v2.947c0 .346-.102.683-.294.97l-1.703 2.556a.017.017 0 0 0-.003.01l.001.006c0 .002.002.004.004.006l.006.004.007.001h10.964l.007-.001.006-.004.004-.006.001-.007a.017.017 0 0 0-.003-.01l-1.703-2.554a1.745 1.745 0 0 1-.294-.97V5A3.5 3.5 0 0 0 8 1.5Z"/></svg>
+          <span class="notif-dot" id="notifDot" hidden></span>
+        </button>
+        <div class="dropdown dd-wide" id="notifPanel" hidden>
+          <div class="dd-head">Notifications <span class="dd-head-meta muted" id="notifMeta"></span></div>
+          <ul class="notif-list" id="notifList"></ul>
+          <p class="empty small" id="notifEmpty">You're all caught up.</p>
+        </div>
+      </div>
+
+      <div class="has-dd">
+        <button class="avatar-btn" id="userMenuBtn" title="Open user navigation menu" aria-haspopup="true">
+          <span class="avatar" aria-hidden="true">sw</span>
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"/></svg>
+        </button>
+        <div class="dropdown" id="userMenu" hidden>
+          <div class="dd-head">Signed in as <b>swarm-gen-1</b></div>
+          <button class="dd-item" data-user="profile">Your profile</button>
+          <button class="dd-item" data-user="branches">Your branches</button>
+          <button class="dd-item" data-user="trusted">Your trusted results</button>
+          <div class="dd-sep"></div>
+          <button class="dd-item" data-user="signout">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 会话提示（1:1 GitHub session flash，切页签复现） -->
+<div class="flash" id="sessionAlert" hidden>
+  <div class="flash-inner">
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575ZM1.763 13.567a.25.25 0 0 0 .154.433h12.166a.25.25 0 0 0 .154-.433L8.155 2.19a.25.25 0 0 0-.31 0ZM8 5c.552 0 1 .446 1 .99v3.02a.995.995 0 0 1-1 .99.995.995 0 0 1-1-.99V5.99c0-.544.448-.99 1-.99Zm.002 6.5a1 1 0 1 1 0-.002 1 1 0 0 1 0 .002Z"/></svg>
+    <span id="sessionAlertText">You signed in with another tab or window. Reload to refresh your session.</span>
+    <button class="flash-dismiss" id="sessionAlertDismiss">Dismiss alert</button>
+  </div>
+</div>
+
+<!-- 加载失败（1:1 GitHub "Uh oh!"） -->
+<div class="flash flash-error" id="loadError" hidden>
+  <div class="flash-inner">
+    <h3>Uh oh!</h3>
+    <span>There was an error while loading. Please reload this page.</span>
+    <button class="flash-dismiss" id="loadErrorRetry">Reload</button>
+  </div>
+</div>
+
+<div class="gh-body">
+  <!-- ══════════ 左侧栏 ══════════ -->
+  <aside class="gh-sidebar" id="ghSidebar">
+    <nav aria-label="Dashboard navigation">
+      <ul class="side-nav" id="sideNav">
+        <li><a class="side-link is-active" href="#/home" data-view="home" title="Home (g then d)">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z"/></svg>
+          Home</a></li>
+        <li><a class="side-link" href="#/signals" data-view="signals" title="Signals (g then i)">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/></svg>
+          Signals <span class="counter" id="navSignalCount" hidden></span></a></li>
+        <li><a class="side-link" href="#/feed" data-view="feed" title="Feed (g then p)">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm.25-11.25v4.337l2.896 2.897a.75.75 0 1 0 1.061-1.06L9.75 8.466V4.75a.75.75 0 0 0-1.5 0Z"/></svg>
+          Feed</a></li>
+      </ul>
+    </nav>
+
+    <section class="side-box">
+      <div class="side-box-head">
+        <h2>Top branches</h2>
+      </div>
+      <div class="side-filter">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg>
+        <input id="sideFilterInput" type="text" placeholder="Find a branch..." autocomplete="off">
+      </div>
+      <ul class="branch-list" id="branchList"><li class="muted loading-line">Loading</li></ul>
+      <button class="side-more" id="branchMore" hidden>Show more</button>
+    </section>
+  </aside>
+
+  <!-- ══════════ 主区 ══════════ -->
+  <main class="gh-main" id="start-of-content">
+    <div class="view-bar">
+      <h1 class="view-bar-title">Dashboard</h1>
+      <span class="preview-chip">Preview</span>
+      <div class="view-bar-links">
+        <button class="linklike" id="switchClassic">Switch to ledger view</button>
+        <button class="linklike" id="giveFeedback">Give feedback</button>
+      </div>
+    </div>
+
+    <!-- ─── HOME ─── -->
+    <section class="view" id="view-home">
+      <div class="dash-grid">
+        <div class="main-col">
+          <h2 class="greet" id="greetTitle">Good evening, swarm-gen-1!</h2>
+          <p class="greet-sub muted" id="greetSub"></p>
+
+          <!-- Wayfinder · 1:1 Copilot 卡片 -->
+          <section class="card copilot-card" aria-labelledby="wfCardTitle">
+            <div class="copilot-head">
+              <span class="wf-orb" aria-hidden="true"></span>
+              <h3 id="wfCardTitle">Wayfinder</h3>
+            </div>
+            <button class="suggest-line" id="wfHint1" type="button"></button>
+            <button class="suggest-line" id="wfHint2" type="button"></button>
+            <div class="copilot-input">
+              <input id="wfAskInput" type="text" placeholder="Ask Wayfinder about routes, evidence, risk..." enterkeyhint="send" autocomplete="off">
+              <button class="btn-primary" id="wfAskBtn">Ask</button>
+            </div>
+            <div class="copilot-answer" id="wfAnswer" hidden></div>
+            <div class="copilot-meta muted">
+              <span>All branches</span><span class="meta-dot">·</span>
+              <span>Add evidence, and constraints</span>
+              <span class="flex-spacer"></span>
+              <span>Policy: <b class="mono">research-v1</b></span><span class="meta-dot">·</span>
+              <span id="wfExploreLabel">Optimized for: Exploration —</span><span class="meta-dot">·</span>
+              <span>Send now(enter) <kbd>enter ⏎</kbd></span>
+            </div>
+            <div class="copilot-commands">
+              <h4>Route commands</h4>
+              <div class="cmd-chips" id="wfChips">
+                <button data-cmd="top" type="button">Top opportunity</button>
+                <button data-cmd="focus" type="button">Active focus</button>
+                <button data-cmd="risk" type="button">Risk radar</button>
+                <button data-cmd="replay" type="button">Latest replay</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- In-flight tasks · 1:1 Pull requests -->
+          <section class="card" id="tasksCard">
+            <div class="card-head">
+              <h3>In-flight tasks</h3>
+              <div class="card-head-actions">
+                <button class="linklike" id="tasksViewAll">View all tasks</button>
+                <button class="hbtn hbtn-sm" id="taskSortBtn" aria-label="Task options" title="Task options">
+                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM1.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm13 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/></svg>
+                </button>
+              </div>
+            </div>
+            <ul class="gh-list" id="taskList">
+              <li class="skeleton-row"></li><li class="skeleton-row"></li><li class="skeleton-row"></li>
+            </ul>
+            <p class="empty" id="taskListEmpty" hidden>No tasks in flight, try a different scope.</p>
+          </section>
+        </div>
+
+        <div class="right-rail">
+          <!-- Swarm Assembly 横幅 · 1:1 Universe banner -->
+          <aside class="card banner-card" id="banner">
+            <div class="banner-art" aria-hidden="true">
+              <svg viewBox="0 0 296 120" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <radialGradient id="bg1" cx="30%" cy="40%" r="80%">
+                    <stop offset="0%" stop-color="#f5c33b"/><stop offset="55%" stop-color="#c9930a"/><stop offset="100%" stop-color="#7a5a06"/>
+                  </radialGradient>
+                </defs>
+                <rect width="296" height="120" fill="url(#bg1)"/>
+                <g fill="none" stroke="#fff7e0" stroke-opacity=".55">
+                  <path d="M20 90 C 60 40, 90 110, 130 60 S 210 30, 280 80"/>
+                  <path d="M10 60 C 50 90, 100 20, 160 70 S 240 100, 290 40"/>
+                  <circle cx="130" cy="60" r="5" fill="#fff7e0" stroke="none"/>
+                  <circle cx="230" cy="55" r="4" fill="#fff7e0" stroke="none"/>
+                  <circle cx="60" cy="75" r="3.5" fill="#fff7e0" stroke="none"/>
+                </g>
+                <text x="18" y="34" font-size="15" font-weight="700" fill="#fffbe8" font-family="inherit">Swarm Assembly 2026</text>
+              </svg>
+            </div>
+            <div class="banner-body">
+              <b>New routing sessions just dropped.</b>
+              <p class="muted">Exploration passes are going fast.</p>
+              <button class="btn-primary btn-block" id="bannerRegister">Register interest</button>
+            </div>
+            <button class="hbtn hbtn-sm banner-dismiss" id="bannerDismiss" aria-label="Dismiss">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/></svg>
+            </button>
+          </aside>
+
+          <!-- Latest from the ledger · 1:1 changelog -->
+          <section class="card ledger-card">
+            <h3 class="rail-title">Latest from the ledger</h3>
+            <div id="ledgerList"><p class="muted loading-line">Loading</p></div>
+            <button class="linklike" id="ledgerViewAll">View ledger →</button>
+          </section>
+
+          <!-- Expert opinions -->
+          <section class="card">
+            <h3 class="rail-title">Expert opinions <span class="counter" id="expertCount" hidden></span></h3>
+            <p class="fineprint muted">kind=expert_opinion · review_state 恒为 unverified（意见≠事实）</p>
+            <div id="expertList"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SIGNALS ─── -->
+    <section class="view" id="view-signals" hidden>
+      <div class="wide-col">
+        <div class="list-head">
+          <h2 class="greet">Signals</h2>
+          <div class="side-filter list-filter">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg>
+            <input id="homeFilterInput" type="text" placeholder="Filter signals..." autocomplete="off">
+          </div>
+        </div>
+
+        <section class="card">
+          <div class="card-head">
+            <h3>Needs attention</h3>
+            <button class="linklike" id="issuesViewAll">View all signals</button>
+          </div>
+          <ul class="gh-list" id="issueList"></ul>
+          <p class="empty" id="issueListEmpty" hidden>No signals found, try a different filter.</p>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h3>Idle pool · 待认领</h3><span class="muted" id="poolCount"></span></div>
+          <ul class="gh-list" id="poolList"></ul>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h3>Sediment · 已沉积</h3><span class="muted" id="sedimentCount"></span></div>
+          <ul class="gh-list" id="sedimentList"></ul>
+        </section>
+
+        <p class="fineprint muted">泳道口径（契约 §4）：available / partial / handoff = 待认领；claimed / submitting = 进行中；completed / failed / blocked = 已沉积。</p>
+      </div>
+    </section>
+
+    <!-- ─── FEED ─── -->
+    <section class="view" id="view-feed" hidden>
+      <div class="wide-col">
+        <h2 class="greet">Feed</h2>
+        <p class="muted">task_audit 全量回放（sequence 升序）。subscribeActivity 每 3.2s 追加一条实时事件并高亮。</p>
+        <section class="card">
+          <div class="card-head"><h3>Activity</h3><span class="muted" id="feedCount"></span></div>
+          <ul class="feed-list" id="feedList"></ul>
+        </section>
+      </div>
+    </section>
+
+    <!-- ══════════ Footer · 1:1 GitHub footer ══════════ -->
+    <footer class="gh-footer">
+      <ul class="footer-links">
+        <li class="muted">© 2026 Morphogenesis, Inc.</li>
+        <li><button class="linklike" data-foot="terms">Terms</button></li>
+        <li><button class="linklike" data-foot="privacy">Privacy</button></li>
+        <li><button class="linklike" data-foot="security">Security</button></li>
+        <li><button class="linklike" data-foot="status">Status</button></li>
+        <li><button class="linklike" data-foot="community">Community</button></li>
+        <li><button class="linklike" data-foot="docs">Docs</button></li>
+        <li><button class="linklike" data-foot="contact">Contact</button></li>
+        <li><button class="linklike" data-foot="cookies">Manage cookies</button></li>
+        <li><button class="linklike" data-foot="share">Do not share my swarm data</button></li>
+      </ul>
+      <p class="fineprint muted">契约来源：API_CONTRACT.md · schema research-package/v1 · evidence_boundary: per_record_provenance · completion_claim: false</p>
+    </footer>
+  </main>
+</div>
+
+<!-- ══════════ 快捷搜索 · 1:1 command palette ══════════ -->
+<div class="overlay" id="cmdk" hidden>
+  <div class="cmdk-box" role="dialog" aria-label="Quick search">
+    <div class="cmdk-input-row">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg>
+      <input id="cmdkInput" type="text" placeholder="Search or jump to..." autocomplete="off">
+      <kbd>esc</kbd>
+    </div>
+    <ul class="cmdk-list" id="cmdkList"></ul>
+  </div>
+</div>
+
+<!-- ══════════ 行菜单 · 1:1 Pull request actions ══════════ -->
+<div class="dropdown dd-fixed" id="taskMenu" hidden>
+  <div class="dd-head" id="taskMenuTitle">Task actions</div>
+  <button class="dd-item" id="tmReplay">Open in replay</button>
+  <button class="dd-item" id="tmAsk">Ask Wayfinder about this branch</button>
+  <button class="dd-item" id="tmCopy">Copy task ID</button>
+</div>
+
+<!-- 排序菜单 -->
+<div class="dropdown dd-fixed" id="sortMenu" hidden>
+  <div class="dd-head">Task options</div>
+  <button class="dd-item" data-sort="updated">Sort by recently updated</button>
+  <button class="dd-item" data-sort="created">Sort by recently created</button>
+  <button class="dd-item" data-sort="owner">Group by owner</button>
+</div>
+
+<!-- ══════════ Wayfinder 面板 ══════════ -->
+<div class="overlay overlay-side" id="wfOverlay" hidden></div>
+<aside class="drawer" id="wfPanel" hidden aria-label="Wayfinder 路线面板">
+  <header class="drawer-head">
+    <span class="wf-orb wf-orb-lg" aria-hidden="true"></span>
+    <div class="drawer-title">
+      <h3>Wayfinder</h3>
+      <p class="muted">引航蜂 · 机会路由导航</p>
+    </div>
+    <button class="hbtn hbtn-sm" id="wfClose" aria-label="Close Wayfinder">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/></svg>
+    </button>
+  </header>
+  <p class="drawer-intro muted">读取 <span class="mono">snapshot.opportunities</span> 的机会份额与路由理由（§9），为蜂群指出下一步方向。</p>
+  <div class="wf-readout" id="wfReadout"></div>
+  <div class="wf-routes" id="wfRoutes"></div>
+  <footer class="drawer-foot">
+    <h4>键盘导航</h4>
+    <div class="wf-keys muted">
+      <span><kbd>g</kbd> <kbd>d</kbd> Dashboard</span>
+      <span><kbd>g</kbd> <kbd>i</kbd> Signals</span>
+      <span><kbd>g</kbd> <kbd>p</kbd> Feed</span>
+      <span><kbd>g</kbd> <kbd>n</kbd> Notifications</span>
+      <span><kbd>/</kbd> Search</span>
+      <span><kbd>w</kbd> Wayfinder</span>
+      <span><kbd>Esc</kbd> Close</span>
+    </div>
+    <p class="fineprint muted">机会份额口径：share ∈ [0,1]；eligible 由 evidence / applicability / risk 等因子决定；非 eligible 路线标注理由。</p>
+  </footer>
+</aside>
+
+<!-- ══════════ 任务回放抽屉 ══════════ -->
+<div class="overlay overlay-side" id="replayOverlay" hidden></div>
+<aside class="drawer drawer-wide" id="replayPanel" hidden aria-label="任务回放">
+  <header class="drawer-head">
+    <div class="drawer-title">
+      <h3 id="replayTitle">Replay</h3>
+      <p class="muted" id="replaySub">task replay · sequence 升序</p>
+    </div>
+    <button class="hbtn hbtn-sm" id="replayClose" aria-label="Close replay">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/></svg>
+    </button>
+  </header>
+  <div class="drawer-body" id="replayBody"></div>
+</aside>
+
+<!-- ══════════ Give feedback · 1:1 GitHub 反馈对话框 ══════════ -->
+<div class="overlay" id="feedbackDlg" hidden>
+  <div class="fb-box" role="dialog" aria-label="Give dashboard feedback">
+    <div class="fb-head">
+      <h3>Give dashboard feedback</h3>
+      <button class="hbtn hbtn-sm" id="fbClose" aria-label="Close feedback">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/></svg>
+      </button>
+    </div>
+    <p class="fb-q">How satisfied are you with this dashboard?</p>
+    <label class="fb-radio"><input type="radio" name="fbSat" value="very-dissatisfied"> Very dissatisfied</label>
+    <label class="fb-radio"><input type="radio" name="fbSat" value="dissatisfied"> Dissatisfied</label>
+    <label class="fb-radio"><input type="radio" name="fbSat" value="satisfied"> Satisfied</label>
+    <label class="fb-radio"><input type="radio" name="fbSat" value="very-satisfied"> Very satisfied</label>
+    <p class="fb-q">What can we improve?</p>
+    <textarea id="fbText" rows="4" placeholder="Tell us about routes, evidence, topology..."></textarea>
+    <div class="fb-actions">
+      <button class="btn-secondary" id="fbCancel">Cancel</button>
+      <button class="btn-primary" id="fbSend">Send feedback</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="bg.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
