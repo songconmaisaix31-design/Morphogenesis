@@ -340,6 +340,7 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
     # 只要往 COMPUTE_PROVIDERS 里填实现即可，前端不用改。
 
     COMPUTE_PROVIDERS: list[dict[str, Any]] = [
+        {"id": "local", "name": "本机", "category": "本地显卡", "integrated": True},
         {"id": "aliyun", "name": "阿里云", "category": "GPU 云服务器", "integrated": True},
         {"id": "tencent", "name": "腾讯云", "category": "GPU 云服务器", "integrated": False},
         {"id": "volc", "name": "火山引擎", "category": "GPU 云服务器", "integrated": False},
@@ -352,6 +353,7 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
 
     _COMPUTE_TTL = 300.0
     _compute_cache: dict[str, Any] = {"at": 0.0, "payload": None}
+    _local_cache: dict[str, Any] = {"at": 0.0, "payload": None}
 
     def _aliyun_cli() -> str | None:
         import shutil
@@ -467,6 +469,91 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
             "api_calls": len(instances) + 1,
         }
 
+    def _as_int(value: Any) -> int | None:
+        try:
+            return int(float(str(value).strip()))
+        except (TypeError, ValueError):
+            return None
+
+    WINDOWS_GPU_QUERY = ("Get-CimInstance Win32_VideoController | "
+                         "Select-Object Name,DriverVersion,AdapterRAM | ConvertTo-Json -Compress")
+
+    def _fetch_local_gpu() -> dict[str, Any]:
+        """Real local GPU inventory: nvidia-smi first, Windows CIM as fallback."""
+        import shutil
+
+        gpus: list[dict[str, Any]] = []
+        smi = shutil.which("nvidia-smi")
+        if smi:
+            try:
+                code, out, _ = _run_cli([
+                    smi, "--query-gpu=name,memory.total,memory.used,driver_version,utilization.gpu",
+                    "--format=csv,noheader,nounits",
+                ], timeout=20)
+            except subprocess.TimeoutExpired:
+                code, out = 1, ""
+            if code == 0:
+                for line in out.strip().splitlines():
+                    parts = [p.strip() for p in line.split(",")]
+                    if len(parts) >= 5:
+                        gpus.append({
+                            "name": parts[0], "vendor": "NVIDIA",
+                            "memory_total_mib": _as_int(parts[1]),
+                            "memory_used_mib": _as_int(parts[2]),
+                            "driver": parts[3],
+                            "utilization_pct": _as_int(parts[4]),
+                            "source": "nvidia-smi",
+                        })
+        if not gpus and os.name == "nt":
+            # 无 nvidia-smi 时退到系统枚举：拿得到型号与驱动，拿不到显存用量
+            try:
+                code, out, _ = _run_cli(["powershell", "-NoProfile", "-Command",
+                                         WINDOWS_GPU_QUERY], timeout=25)
+            except subprocess.TimeoutExpired:
+                code, out = 1, ""
+            if code == 0 and out.strip():
+                try:
+                    raw = json.loads(out)
+                except ValueError:
+                    raw = []
+                if isinstance(raw, dict):
+                    raw = [raw]
+                for item in raw or []:
+                    name = str(item.get("Name") or "").strip()
+                    if not name or "Virtual Display" in name:
+                        continue
+                    vram = item.get("AdapterRAM")
+                    upper = name.upper()
+                    gpus.append({
+                        "name": name,
+                        "vendor": "NVIDIA" if "NVIDIA" in upper else
+                                  ("AMD" if "RADEON" in upper else "unknown"),
+                        "memory_total_mib": round(vram / (1024 * 1024)) if isinstance(vram, int) else None,
+                        "memory_used_mib": None,
+                        "driver": str(item.get("DriverVersion") or "") or None,
+                        "utilization_pct": None,
+                        "source": "win32_VideoController",
+                    })
+        return {"provider": "local", "gpus": gpus, "count": len(gpus), "source": "local-probe"}
+
+    @app.get("/api/compute/local")
+    def api_compute_local(refresh: int = 0) -> Response:
+        """Local GPU inventory, cached 30s (each probe spawns a child process)."""
+        import time
+
+        now = time.time()
+        cached = _local_cache["payload"]
+        if cached is not None and not refresh and now - _local_cache["at"] < 30.0:
+            return json_response(cached)
+        try:
+            payload = _fetch_local_gpu()
+        except Exception as error:  # noqa: BLE001
+            return json_response({"error": type(error).__name__, "detail": str(error)}, 503)
+        payload["measured_at"] = now
+        _local_cache["at"] = now
+        _local_cache["payload"] = payload
+        return json_response(payload)
+
     @app.get("/api/compute/providers")
     def api_compute_providers() -> Response:
         """Every provider slot with its real state — no fixture values."""
@@ -475,7 +562,12 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
         providers = []
         for p in COMPUTE_PROVIDERS:
             entry = dict(p)
-            if p["id"] == "aliyun":
+            if p["id"] == "local":
+                try:
+                    entry["status"] = "ready" if _fetch_local_gpu()["count"] else "no_gpu"
+                except Exception:  # noqa: BLE001
+                    entry["status"] = "probe_failed"
+            elif p["id"] == "aliyun":
                 cli = _aliyun_cli() is not None
                 if not cli:
                     entry["status"] = "cli_missing"
