@@ -279,6 +279,58 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
 
         return _read(call)
 
+    # ---- Agents: real local runtime probing -----------------------------
+
+    _AGENT_PROBE_TTL = 60.0
+    _agent_probe_cache: dict[str, Any] = {"at": 0.0, "payload": None}
+
+    @app.get("/api/agents/probe")
+    def api_agents_probe(refresh: int = 0) -> Response:
+        """Probe the native agent CLIs registered in orchestration.native_agents.
+
+        This really executes ``<cli> --version`` and ``<cli> auth status`` on the
+        host, so it is the first honest source for the Agents view (which used to
+        render fixture values baked into the markup). Results are cached briefly
+        because each probe spawns two child processes per runtime.
+
+        Only the resolved argv is echoed back; the auth command's stdout is never
+        published, matching the registry's own rule about not leaking credentials.
+        """
+        import time
+
+        now = time.time()
+        cached = _agent_probe_cache["payload"]
+        if cached is not None and not refresh and now - _agent_probe_cache["at"] < _AGENT_PROBE_TTL:
+            return json_response(cached)
+
+        try:
+            from orchestration.native_agents.registry import REGISTRY, probe
+
+            runtimes = []
+            for runtime_id in sorted(REGISTRY):
+                started = time.perf_counter()
+                result = probe(runtime_id)
+                elapsed = round((time.perf_counter() - started) * 1000)
+                runtimes.append({
+                    "runtime": runtime_id,
+                    "installed": result.command is not None,
+                    "version": result.version,
+                    "version_matches": result.version_matches,
+                    "authenticated": result.authenticated,
+                    "evidence": " ".join(result.command) if result.command else None,
+                    "version_exit": result.version_exit,
+                    "auth_exit": result.auth_exit,
+                    "error": result.error,
+                    "latency_ms": elapsed,
+                })
+            payload = {"runtimes": runtimes, "measured_at": now, "source": "probe"}
+        except Exception as error:  # noqa: BLE001 - a probe fault must not kill the panel
+            return json_response({"error": type(error).__name__, "detail": str(error)}, 503)
+
+        _agent_probe_cache["at"] = now
+        _agent_probe_cache["payload"] = payload
+        return json_response(payload)
+
     # ---- Wayfinder: the single POST entry (pi Wayfinder) ----------------
 
     @app.post("/api/wayfinder/ask")
