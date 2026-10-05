@@ -1091,6 +1091,88 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
   .orch-wrap { aspect-ratio: 4 / 5; min-height: 420px; }
 }
 
+
+
+/* ─── 明暗主题切换 · 平滑过渡 ─── */
+html, body, .card, .gh-header, .hbtn, .dropdown, .drawer, .modal,
+.side-link, .btn-primary, .btn-secondary, .btn-outline, .chip,
+.issue-row, .task-row, .feed-item, .agent-tile, .cloud-card, .queue-row,
+input, textarea, select, .expert-card, .replay-row {
+  transition: background-color .28s ease, color .28s ease,
+              border-color .28s ease, box-shadow .28s ease;
+}
+
+/* ─── 暗色主题（GitHub Dark Dimmed） ─── */
+html[data-theme="dark"] body { color-scheme: dark; }
+html[data-theme="dark"] {
+  --bg: #21262d;
+  --bg-subtle: #2d333b;
+  --panel: #2d333b;
+  --fg: #adbac7;
+  --fg-muted: #768390;
+  --fg-subtle: #636e7b;
+  --border: #444c56;
+  --border-subtle: #373e47;
+  --accent: #539bf5;
+  --accent-bg: rgba(65, 132, 228, 0.1);
+  --green: #57ab5a;
+  --green-bg: rgba(70, 149, 74, 0.1);
+  --amber: #c69026;
+  --amber-bg: rgba(174, 124, 20, 0.1);
+  --red: #e5534b;
+  --red-bg: rgba(229, 83, 75, 0.1);
+  --purple: #b083f0;
+  --purple-bg: rgba(152, 110, 226, 0.1);
+  --gold: #daaa3f;
+  --gold-bg: rgba(198, 144, 38, 0.1);
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+html[data-theme="dark"] body { background-color: var(--bg); }
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .dropdown,
+html[data-theme="dark"] .drawer,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .fb-box,
+html[data-theme="dark"] .cmdk-box { background: var(--panel); border-color: var(--border); }
+html[data-theme="dark"] .gh-header { background: var(--bg-subtle); border-bottom-color: var(--border); }
+html[data-theme="dark"] .hbtn { color: var(--fg); }
+html[data-theme="dark"] .hbtn:hover { background: var(--bg); color: var(--fg); }
+html[data-theme="dark"] .side-link:hover { background: var(--bg-subtle); }
+html[data-theme="dark"] .side-link.is-active { background: var(--bg-subtle); box-shadow: inset 2px 0 0 var(--accent); }
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] .btn-outline { background: var(--bg-subtle); color: var(--fg); border-color: var(--border); }
+html[data-theme="dark"] .btn-secondary:hover,
+html[data-theme="dark"] .btn-outline:hover { background: var(--bg); border-color: var(--fg-muted); }
+html[data-theme="dark"] .btn-primary { background: #347d39; border-color: rgba(240,246,252,0.1); color: #fff; }
+html[data-theme="dark"] .btn-primary:hover { background: #46954a; }
+html[data-theme="dark"] input, html[data-theme="dark"] textarea, html[data-theme="dark"] select {
+  background: var(--bg); color: var(--fg); border-color: var(--border); }
+html[data-theme="dark"] input::placeholder, html[data-theme="dark"] textarea::placeholder { color: var(--fg-subtle); }
+html[data-theme="dark"] .issue-row:hover, html[data-theme="dark"] .task-row:hover,
+html[data-theme="dark"] .feed-item:hover, html[data-theme="dark"] .agent-tile:hover,
+html[data-theme="dark"] .cloud-card:hover { background: var(--bg-subtle); }
+html[data-theme="dark"] .gh-footer { color: var(--fg-muted); }
+html[data-theme="dark"] .flash { background: var(--panel); border-color: var(--border); color: var(--fg); }
+html[data-theme="dark"] .flash-error { background: rgba(229,83,75,0.12); border-color: var(--red); color: #f2c1be; }
+html[data-theme="dark"] .toast { background: var(--bg-subtle); color: var(--fg); border-color: var(--border); }
+html[data-theme="dark"] .overlay { background: rgba(13,17,23,0.5); }
+html[data-theme="dark"] .overlay-side { background: rgba(13,17,23,0.35); }
+html[data-theme="dark"] .badge { border-color: var(--border); }
+html[data-theme="dark"] .counter { background: var(--bg-subtle); color: var(--fg); }
+html[data-theme="dark"] kbd { background: var(--bg-subtle); border-color: var(--border); color: var(--fg-muted); }
+html[data-theme="dark"] .tag { background: var(--bg-subtle); color: var(--fg-muted); }
+html[data-theme="dark"] .cap-bar { background: var(--bg-subtle); }
+html[data-theme="dark"] .cap-bar i { background: var(--gold); }
+html[data-theme="dark"] .preview-chip { background: var(--gold-bg); color: var(--gold); }
+html[data-theme="dark"] .skeleton-row { background: linear-gradient(90deg, var(--bg-subtle) 25%, var(--border-subtle) 50%, var(--bg-subtle) 75%); }
+
+/* ─── 顶栏右侧间距微调（保证换按钮后间隙均匀） ─── */
+.gh-header-right { gap: 8px; align-items: center; }
+
+/* ─── 语言切换按钮（文字型 EN/中文） ─── */
+.hbtn-lang { font-size: 12px; font-weight: 600; letter-spacing: .2px; padding: 0 8px; min-width: 34px; }
+.hbtn-lang:hover { color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -1141,12 +1223,11 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
         </div>
       </div>
 
-      <button class="hbtn" data-goto="#/signals" title="All signals (g then i)">
-        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/></svg>
+      <button class="hbtn" id="themeToggle" title="切换明暗主题 (g then t)" aria-label="切换明暗主题">
+        <svg class="icon-sun" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13Zm8-5a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 16 8ZM3 8a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 3 8Zm10.657-5.657a.75.75 0 0 1 0 1.06l-1.061 1.06a.75.75 0 0 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.061 0Zm-9.193 9.193a.75.75 0 0 1 0 1.06l-1.06 1.061a.75.75 0 1 1-1.061-1.06l1.06-1.061a.75.75 0 0 1 1.061 0Zm9.193 2.122a.75.75 0 0 1-1.06 0l-1.061-1.06a.75.75 0 1 1 1.06-1.061l1.061 1.06a.75.75 0 0 1 0 1.061ZM4.464 4.465a.75.75 0 0 1-1.06 0L2.343 3.404a.75.75 0 1 1 1.061-1.06l1.06 1.06a.75.75 0 0 1 0 1.061Z"/></svg>
+        <svg class="icon-moon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" hidden><path fill="currentColor" d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.221-7.832Z"/></svg>
       </button>
-      <button class="hbtn" data-goto="#/feed" title="All task events (g then p)">
-        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"/></svg>
-      </button>
+      <button class="hbtn hbtn-lang" id="langToggle" title="Switch language (g then l)" aria-label="Switch language">EN</button>
       <button class="hbtn" data-goto="#/branches" title="All branches">
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.249.249 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25Z"/></svg>
       </button>
@@ -1228,10 +1309,10 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
       </div>
       <div class="side-filter">
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg>
-        <input id="sideFilterInput" type="text" placeholder="Find a branch..." autocomplete="off">
+        <input id="sideFilterInput" type="text" placeholder="Find a branch..." autocomplete="off" data-i18n-ph="findBranch">
       </div>
       <ul class="branch-list" id="branchList"><li class="muted loading-line">Loading</li></ul>
-      <button class="side-more" id="branchMore" hidden>Show more</button>
+      <button class="side-more" id="branchMore" hidden data-i18n="showMore">Show more</button>
     </section>
   </aside>
 
@@ -1241,8 +1322,8 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
       <h1 class="view-bar-title">Dashboard</h1>
       <span class="preview-chip">Preview</span>
       <div class="view-bar-links">
-        <button class="linklike" id="switchClassic">Switch to ledger view</button>
-        <button class="linklike" id="giveFeedback">Give feedback</button>
+        <button class="linklike" id="switchClassic" data-i18n="switchLedger">Switch to ledger view</button>
+        <button class="linklike" id="giveFeedback" data-i18n="giveFeedback">Give feedback</button>
       </div>
     </div>
 
@@ -1332,9 +1413,9 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
           <!-- In-flight tasks · 1:1 Pull requests -->
           <section class="card" id="tasksCard">
             <div class="card-head">
-              <h3>In-flight tasks</h3>
+              <h3 data-i18n="inflightTasks">In-flight tasks</h3>
               <div class="card-head-actions">
-                <button class="linklike" id="tasksViewAll">View all tasks</button>
+                <button class="linklike" id="tasksViewAll" data-i18n="viewAllTasks">View all tasks</button>
                 <button class="hbtn hbtn-sm" id="taskSortBtn" aria-label="Task options" title="Task options">
                   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM1.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm13 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/></svg>
                 </button>
@@ -1348,12 +1429,12 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
                     <div class="mod-teaser-grid">
             <a class="mod-teaser" href="#/agents">
               <span class="agent-logo"><svg width="100%" height="100%" fill="#D97757" role="img" viewBox="0 0 24 24"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg></span>
-              <span class="mt-body"><b>Agents</b><small>检查本地可接入的 Agent 运行时</small></span>
+              <span class="mt-body"><b>Agents</b><small data-i18n="teaserAgents">检查本地可接入的 Agent 运行时</small></span>
               <span class="mt-arrow">→</span>
             </a>
             <a class="mod-teaser" href="#/compute">
               <span class="agent-logo"><svg width="100%" height="100%" fill="#FF6A00" role="img" viewBox="0 0 24 24"><path d="M3.996 4.517h5.291L8.01 6.324 4.153 7.506a1.668 1.668 0 0 0-1.165 1.601v5.786a1.668 1.668 0 0 0 1.165 1.6l3.857 1.183 1.277 1.807H3.996A3.996 3.996 0 0 1 0 15.487V8.513a3.996 3.996 0 0 1 3.996-3.996m16.008 0h-5.291l1.277 1.807 3.857 1.182c.715.227 1.17.889 1.165 1.601v5.786a1.668 1.668 0 0 1-1.165 1.6l-3.857 1.183-1.277 1.807h5.291A3.996 3.996 0 0 0 24 15.487V8.513a3.996 3.996 0 0 0-3.996-3.996m-4.007 8.345H8.002v-1.804h7.995Z"/></svg></span>
-              <span class="mt-body"><b>Compute</b><small>多云算力协同编排</small></span>
+              <span class="mt-body"><b>Compute</b><small data-i18n="teaserCompute">多云算力协同编排</small></span>
               <span class="mt-arrow">→</span>
             </a>
           </div>
@@ -1392,15 +1473,15 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
 
           <!-- Latest from the ledger · 1:1 changelog -->
           <section class="card ledger-card">
-            <h3 class="rail-title">Latest from the ledger</h3>
+            <h3 class="rail-title" data-i18n="latestLedger">Latest from the ledger</h3>
             <div id="ledgerList"><p class="muted loading-line">Loading</p></div>
-            <button class="linklike" id="ledgerViewAll">View ledger →</button>
+            <button class="linklike" id="ledgerViewAll" data-i18n="viewLedger">View ledger →</button>
           </section>
 
           <!-- Expert opinions -->
           <section class="card">
-            <h3 class="rail-title">Expert opinions <span class="counter" id="expertCount" hidden></span></h3>
-            <p class="fineprint muted">kind=expert_opinion · review_state 恒为 unverified（意见≠事实）</p>
+            <h3 class="rail-title"><span data-i18n="expertOpinions">Expert opinions</span> <span class="counter" id="expertCount" hidden></span></h3>
+            <p class="fineprint muted" data-i18n="expertFineprint">kind=expert_opinion · review_state 恒为 unverified（意见≠事实）</p>
             <div id="expertList"></div>
           </section>
         </div>
@@ -1414,30 +1495,30 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
           <h2 class="greet">Signals</h2>
           <div class="side-filter list-filter">
             <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg>
-            <input id="homeFilterInput" type="text" placeholder="Filter signals..." autocomplete="off">
+            <input id="homeFilterInput" type="text" placeholder="Filter signals..." autocomplete="off" data-i18n-ph="filterSignals">
           </div>
         </div>
 
         <section class="card">
           <div class="card-head">
-            <h3>Needs attention</h3>
-            <button class="linklike" id="issuesViewAll">View all signals</button>
+            <h3 data-i18n="needsAttention">Needs attention</h3>
+            <button class="linklike" id="issuesViewAll" data-i18n="viewAllSignals">View all signals</button>
           </div>
           <ul class="gh-list" id="issueList"></ul>
           <p class="empty" id="issueListEmpty" hidden>No signals found, try a different filter.</p>
         </section>
 
         <section class="card">
-          <div class="card-head"><h3>Idle pool · 待认领</h3><span class="muted" id="poolCount"></span></div>
+          <div class="card-head"><h3><span data-i18n="idlePoolPre">Idle pool · </span><span data-i18n="idlePool">待认领</span></h3><span class="muted" id="poolCount"></span></div>
           <ul class="gh-list" id="poolList"></ul>
         </section>
 
         <section class="card">
-          <div class="card-head"><h3>Sediment · 已沉积</h3><span class="muted" id="sedimentCount"></span></div>
+          <div class="card-head"><h3><span data-i18n="sedimentPre">Sediment · </span><span data-i18n="sediment">已沉积</span></h3><span class="muted" id="sedimentCount"></span></div>
           <ul class="gh-list" id="sedimentList"></ul>
         </section>
 
-        <p class="fineprint muted">泳道口径（契约 §4）：available / partial / handoff = 待认领；claimed / submitting = 进行中；completed / failed / blocked = 已沉积。</p>
+        <p class="fineprint muted" data-i18n="feedLaneNote">泳道口径（契约 §4）：available / partial / handoff = 待认领；claimed / submitting = 进行中；completed / failed / blocked = 已沉积。</p>
       </div>
     </section>
 
@@ -1445,7 +1526,7 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
     <section class="view" id="view-feed" hidden>
       <div class="wide-col">
         <h2 class="greet">Feed</h2>
-        <p class="muted">task_audit 全量回放（sequence 升序）。subscribeActivity 每 3.2s 追加一条实时事件并高亮。</p>
+        <p class="muted" data-i18n="feedSubtitle">task_audit 全量回放（sequence 升序）。subscribeActivity 每 3.2s 追加一条实时事件并高亮。</p>
         <section class="card">
           <div class="card-head"><h3>Activity</h3><span class="muted" id="feedCount"></span></div>
           <ul class="feed-list" id="feedList"></ul>
@@ -1460,202 +1541,202 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
           <span class="logo-stack"><span class="ls" style="z-index:3"><svg width="100%" height="100%" fill="#D97757" role="img" viewBox="0 0 24 24"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg></span><span class="ls" style="z-index:2"><svg width="100%" height="100%" role="img" viewBox="0 0 24 24"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg></span><span class="ls" style="z-index:1"><svg width="100%" height="100%" fill="#8E75B2" role="img" viewBox="0 0 24 24"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg></span></span>
           <div class="mod-hero-text">
             <h2 class="greet">Agents</h2>
-            <p class="muted">复用各厂商原品牌标志，扫描本机可接入的 Agent 运行时、IDE 插件与 API 凭证。检测为演示逻辑，不发起真实调用。</p>
+            <p class="muted" data-i18n="agentsSubtitle">复用各厂商原品牌标志，扫描本机可接入的 Agent 运行时、IDE 插件与 API 凭证。检测为演示逻辑，不发起真实调用。</p>
           </div>
         </div>
 
         <div class="stat-strip">
-          <div class="stat-cell"><div class="k">可直接接入</div><div class="v"><span id="agentStatReady">6</span><small> 个</small></div></div>
-          <div class="stat-cell"><div class="k">需配置凭证</div><div class="v"><span id="agentStatAuth">5</span><small> 个</small></div></div>
-          <div class="stat-cell"><div class="k">未检测到</div><div class="v"><span id="agentStatAbsent">1</span><small> 个</small></div></div>
-          <div class="stat-cell"><div class="k">平均探测时延</div><div class="v"><span id="agentStatLatency">—</span></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="sReady">可直接接入</div><div class="v"><span id="agentStatReady">6</span><small> 个</small></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="sAuth">需配置凭证</div><div class="v"><span id="agentStatAuth">5</span><small> 个</small></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="sAbsent">未检测到</div><div class="v"><span id="agentStatAbsent">1</span><small> 个</small></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="sLatency">平均探测时延</div><div class="v"><span id="agentStatLatency">—</span></div></div>
         </div>
 
         <section class="card">
           <div class="agents-toolbar">
-            <button class="btn-primary" id="agentScanBtn">扫描本地 Agent</button>
-            <span class="scan-status" id="agentScanStatus">尚未扫描 · 点击开始探测</span>
+            <button class="btn-primary" id="agentScanBtn" data-i18n="scanBtn">扫描本地 Agent</button>
+            <span class="scan-status" id="agentScanStatus" data-i18n="scanIdle">尚未扫描 · 点击开始探测</span>
             <span class="flex-spacer"></span>
-            <span class="agent-legend"><span class="badge is-ready"><span class="dot"></span>可接入</span><span class="badge is-auth"><span class="dot"></span>需凭证</span><span class="badge is-absent"><span class="dot"></span>未检测到</span></span>
+            <span class="agent-legend"><span class="badge is-ready"><span class="dot"></span><span data-i18n="ready">可接入</span></span><span class="badge is-auth"><span class="dot"></span><span data-i18n="auth">需凭证</span></span><span class="badge is-absent"><span class="dot"></span><span data-i18n="absent">未检测到</span></span></span>
           </div>
           <div class="agent-chips" id="agentChips">
-            <button class="chip is-on" data-filter="all">全部 <span class="chip-count">12</span></button>
-            <button class="chip" data-filter="ready">可接入 <span class="chip-count">6</span></button>
-            <button class="chip" data-filter="auth">需凭证 <span class="chip-count">5</span></button>
-            <button class="chip" data-filter="absent">未检测到 <span class="chip-count">1</span></button>
+            <button class="chip is-on" data-filter="all"><span data-i18n="fAll">全部</span> <span class="chip-count">12</span></button>
+            <button class="chip" data-filter="ready"><span data-i18n="fReady">可接入</span> <span class="chip-count">6</span></button>
+            <button class="chip" data-filter="auth"><span data-i18n="fAuth">需凭证</span> <span class="chip-count">5</span></button>
+            <button class="chip" data-filter="absent"><span data-i18n="fAbsent">未检测到</span> <span class="chip-count">1</span></button>
           </div>
           <div class="agent-grid" id="agentGrid">
               <article class="agent-tile" data-probe="ready" data-name="claude code" data-lat="30">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#D97757" role="img" viewBox="0 0 24 24"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">Claude Code</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span>可接入</span></span></div>
+                  <div class="agent-top"><span class="agent-name">Claude Code</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span><span data-i18n="ready">可接入</span></span></span></div>
                   <div class="agent-vendor muted">Anthropic · CLI</div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">2.1.4</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">~/.claude/bin/claude</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">2.1.4</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">~/.claude/bin/claude</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-primary btn-xs">连接</button></div>
+                  <div class="agent-actions"><button class="btn-primary btn-xs" data-i18n="connect">连接</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="auth" data-name="anthropic api" data-lat="0">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#191919" role="img" viewBox="0 0 24 24"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">Anthropic API</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span>需凭证</span></span></div>
+                  <div class="agent-top"><span class="agent-name">Anthropic API</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span><span data-i18n="auth">需凭证</span></span></span></div>
                   <div class="agent-vendor muted">Anthropic · SDK · HTTP</div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">—</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">$ANTHROPIC_API_KEY</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">—</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">$ANTHROPIC_API_KEY</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-outline btn-xs">配置凭证</button></div>
+                  <div class="agent-actions"><button class="btn-outline btn-xs" data-i18n="configCred">配置凭证</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="auth" data-name="openai" data-lat="0">
                 <span class="agent-logo"><svg width="100%" height="100%" role="img" viewBox="0 0 24 24"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">OpenAI</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span>需凭证</span></span></div>
+                  <div class="agent-top"><span class="agent-name">OpenAI</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span><span data-i18n="auth">需凭证</span></span></span></div>
                   <div class="agent-vendor muted">OpenAI · SDK · HTTP</div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">—</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">$OPENAI_API_KEY</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">—</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">$OPENAI_API_KEY</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-outline btn-xs">配置凭证</button></div>
+                  <div class="agent-actions"><button class="btn-outline btn-xs" data-i18n="configCred">配置凭证</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="auth" data-name="gemini" data-lat="0">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#8E75B2" role="img" viewBox="0 0 24 24"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">Gemini</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span>需凭证</span></span></div>
+                  <div class="agent-top"><span class="agent-name">Gemini</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span><span data-i18n="auth">需凭证</span></span></span></div>
                   <div class="agent-vendor muted">Google · SDK · HTTP</div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">—</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">$GEMINI_API_KEY</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">—</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">$GEMINI_API_KEY</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-outline btn-xs">配置凭证</button></div>
+                  <div class="agent-actions"><button class="btn-outline btn-xs" data-i18n="configCred">配置凭证</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="ready" data-name="cursor" data-lat="106">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#000000" role="img" viewBox="0 0 24 24"><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">Cursor</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span>可接入</span></span></div>
+                  <div class="agent-top"><span class="agent-name">Cursor</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span><span data-i18n="ready">可接入</span></span></span></div>
                   <div class="agent-vendor muted">Anysphere · IDE</div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">0.48.7</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">/Applications/Cursor.app</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">0.48.7</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">/Applications/Cursor.app</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-primary btn-xs">连接</button></div>
+                  <div class="agent-actions"><button class="btn-primary btn-xs" data-i18n="connect">连接</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="ready" data-name="github copilot" data-lat="31">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#000000" role="img" viewBox="0 0 24 24"><path d="M23.922 16.997C23.061 18.492 18.063 22.02 12 22.02 5.937 22.02.939 18.492.078 16.997A.641.641 0 0 1 0 16.741v-2.869a.883.883 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.098 10.098 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952C7.255 2.937 9.248 1.98 11.978 1.98c2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.841.841 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256Zm-11.75-5.992h-.344a4.359 4.359 0 0 1-.355.508c-.77.947-1.918 1.492-3.508 1.492-1.725 0-2.989-.359-3.782-1.259a2.137 2.137 0 0 1-.085-.104L4 11.746v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.359 4.359 0 0 1-.355-.508Zm2.328 3.25c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm-5 0c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm3.313-6.185c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">GitHub Copilot</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span>可接入</span></span></div>
-                  <div class="agent-vendor muted">GitHub · IDE 插件</div>
+                  <div class="agent-top"><span class="agent-name">GitHub Copilot</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span><span data-i18n="ready">可接入</span></span></span></div>
+                  <div class="agent-vendor muted">GitHub · <span data-i18n="vIde">IDE 插件</span></div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">1.250.0</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">github.copilot 扩展</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">1.250.0</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">github.copilot 扩展</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-primary btn-xs">连接</button></div>
+                  <div class="agent-actions"><button class="btn-primary btn-xs" data-i18n="connect">连接</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="ready" data-name="langchain" data-lat="81">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#7FC8FF" role="img" viewBox="0 0 24 24"><path d="M13.796 0a6.93 6.93 0 0 0-4.91 2.019L5.451 5.455l3.273 3.27 3.432-3.432a2.284 2.284 0 0 1 3.277 0 2.28 2.28 0 0 1 0 3.275L12 12.001l3.273 3.273 3.433-3.435c2.692-2.692 2.692-7.127 0-9.82A6.92 6.92 0 0 0 13.796 0m-5.07 8.728-3.433 3.434c-2.692 2.693-2.692 7.126 0 9.819A6.92 6.92 0 0 0 10.203 24a6.93 6.93 0 0 0 4.911-2.02l3.432-3.432-3.271-3.272-3.433 3.433a2.284 2.284 0 0 1-3.277 0 2.28 2.28 0 0 1 0-3.276L12 12z"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">LangChain</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span>可接入</span></span></div>
-                  <div class="agent-vendor muted">LangChain · 编排框架</div>
+                  <div class="agent-top"><span class="agent-name">LangChain</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span><span data-i18n="ready">可接入</span></span></span></div>
+                  <div class="agent-vendor muted">LangChain · <span data-i18n="vOrchestration">编排框架</span></div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">0.3.9</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">pip: langchain</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">0.3.9</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">pip: langchain</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-primary btn-xs">连接</button></div>
+                  <div class="agent-actions"><button class="btn-primary btn-xs" data-i18n="connect">连接</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="ready" data-name="hugging face" data-lat="117">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#FFD21E" role="img" viewBox="0 0 24 24"><path d="M12.025 1.13c-5.77 0-10.449 4.647-10.449 10.378 0 1.112.178 2.181.503 3.185.064-.222.203-.444.416-.577a.96.96 0 0 1 .524-.15c.293 0 .584.124.84.284.278.173.48.408.71.694.226.282.458.611.684.951v-.014c.017-.324.106-.622.264-.874s.403-.487.762-.543c.3-.047.596.06.787.203s.31.313.4.467c.15.257.212.468.233.542.01.026.653 1.552 1.657 2.54.616.605 1.01 1.223 1.082 1.912.055.537-.096 1.059-.38 1.572.637.121 1.294.187 1.967.187.657 0 1.298-.063 1.921-.178-.287-.517-.44-1.041-.384-1.581.07-.69.465-1.307 1.081-1.913 1.004-.987 1.647-2.513 1.657-2.539.021-.074.083-.285.233-.542.09-.154.208-.323.4-.467a1.08 1.08 0 0 1 .787-.203c.359.056.604.29.762.543s.247.55.265.874v.015c.225-.34.457-.67.683-.952.23-.286.432-.52.71-.694.257-.16.547-.284.84-.285a.97.97 0 0 1 .524.151c.228.143.373.388.43.625l.006.04a10.3 10.3 0 0 0 .534-3.273c0-5.731-4.678-10.378-10.449-10.378M8.327 6.583a1.5 1.5 0 0 1 .713.174 1.487 1.487 0 0 1 .617 2.013c-.183.343-.762-.214-1.102-.094-.38.134-.532.914-.917.71a1.487 1.487 0 0 1 .69-2.803m7.486 0a1.487 1.487 0 0 1 .689 2.803c-.385.204-.536-.576-.916-.71-.34-.12-.92.437-1.103.094a1.487 1.487 0 0 1 .617-2.013 1.5 1.5 0 0 1 .713-.174m-10.68 1.55a.96.96 0 1 1 0 1.921.96.96 0 0 1 0-1.92m13.838 0a.96.96 0 1 1 0 1.92.96.96 0 0 1 0-1.92M8.489 11.458c.588.01 1.965 1.157 3.572 1.164 1.607-.007 2.984-1.155 3.572-1.164.196-.003.305.12.305.454 0 .886-.424 2.328-1.563 3.202-.22-.756-1.396-1.366-1.63-1.32q-.011.001-.02.006l-.044.026-.01.008-.03.024q-.018.017-.035.036l-.032.04a1 1 0 0 0-.058.09l-.014.025q-.049.088-.11.19a1 1 0 0 1-.083.116 1.2 1.2 0 0 1-.173.18q-.035.029-.075.058a1.3 1.3 0 0 1-.251-.243 1 1 0 0 1-.076-.107c-.124-.193-.177-.363-.337-.444-.034-.016-.104-.008-.2.022q-.094.03-.216.087-.06.028-.125.063l-.13.074q-.067.04-.136.086a3 3 0 0 0-.135.096 3 3 0 0 0-.26.219 2 2 0 0 0-.12.121 2 2 0 0 0-.106.128l-.002.002a2 2 0 0 0-.09.132l-.001.001a1.2 1.2 0 0 0-.105.212q-.013.036-.024.073c-1.139-.875-1.563-2.317-1.563-3.203 0-.334.109-.457.305-.454m.836 10.354c.824-1.19.766-2.082-.365-3.194-1.13-1.112-1.789-2.738-1.789-2.738s-.246-.945-.806-.858-.97 1.499.202 2.362c1.173.864-.233 1.45-.685.64-.45-.812-1.683-2.896-2.322-3.295s-1.089-.175-.938.647 2.822 2.813 2.562 3.244-1.176-.506-1.176-.506-2.866-2.567-3.49-1.898.473 1.23 2.037 2.16c1.564.932 1.686 1.178 1.464 1.53s-3.675-2.511-4-1.297c-.323 1.214 3.524 1.567 3.287 2.405-.238.839-2.71-1.587-3.216-.642-.506.946 3.49 2.056 3.522 2.064 1.29.33 4.568 1.028 5.713-.624m5.349 0c-.824-1.19-.766-2.082.365-3.194 1.13-1.112 1.789-2.738 1.789-2.738s.246-.945.806-.858.97 1.499-.202 2.362c-1.173.864.233 1.45.685.64.451-.812 1.683-2.896 2.322-3.295s1.089-.175.938.647-2.822 2.813-2.562 3.244 1.176-.506 1.176-.506 2.866-2.567 3.49-1.898-.473 1.23-2.037 2.16c-1.564.932-1.686 1.178-1.464 1.53s3.675-2.511 4-1.297c.323 1.214-3.524 1.567-3.287 2.405.238.839 2.71-1.587 3.216-.642.506.946-3.49 2.056-3.522 2.064-1.29.33-4.568 1.028-5.713-.624"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">Hugging Face</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span>可接入</span></span></div>
-                  <div class="agent-vendor muted">Hugging Face · 模型 Hub</div>
+                  <div class="agent-top"><span class="agent-name">Hugging Face</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span><span data-i18n="ready">可接入</span></span></span></div>
+                  <div class="agent-vendor muted">Hugging Face · <span data-i18n="vModelHub">模型 Hub</span></div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">0.26.2</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">pip: transformers</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">0.26.2</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">pip: transformers</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-primary btn-xs">连接</button></div>
+                  <div class="agent-actions"><button class="btn-primary btn-xs" data-i18n="connect">连接</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="ready" data-name="ollama" data-lat="53">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#000000" role="img" viewBox="0 0 24 24"><path d="M16.361 10.26a.894.894 0 0 0-.558.47l-.072.148.001.207c0 .193.004.217.059.353.076.193.152.312.291.448.24.238.51.3.872.205a.86.86 0 0 0 .517-.436.752.752 0 0 0 .08-.498c-.064-.453-.33-.782-.724-.897a1.06 1.06 0 0 0-.466 0zm-9.203.005c-.305.096-.533.32-.65.639a1.187 1.187 0 0 0-.06.52c.057.309.31.59.598.667.362.095.632.033.872-.205.14-.136.215-.255.291-.448.055-.136.059-.16.059-.353l.001-.207-.072-.148a.894.894 0 0 0-.565-.472 1.02 1.02 0 0 0-.474.007Zm4.184 2c-.131.071-.223.25-.195.383.031.143.157.288.353.407.105.063.112.072.117.136.004.038-.01.146-.029.243-.02.094-.036.194-.036.222.002.074.07.195.143.253.064.052.076.054.255.059.164.005.198.001.264-.03.169-.082.212-.234.15-.525-.052-.243-.042-.28.087-.355.137-.08.281-.219.324-.314a.365.365 0 0 0-.175-.48.394.394 0 0 0-.181-.033c-.126 0-.207.03-.355.124l-.085.053-.053-.032c-.219-.13-.259-.145-.391-.143a.396.396 0 0 0-.193.032zm.39-2.195c-.373.036-.475.05-.654.086-.291.06-.68.195-.951.328-.94.46-1.589 1.226-1.787 2.114-.04.176-.045.234-.045.53 0 .294.005.357.043.524.264 1.16 1.332 2.017 2.714 2.173.3.033 1.596.033 1.896 0 1.11-.125 2.064-.727 2.493-1.571.114-.226.169-.372.22-.602.039-.167.044-.23.044-.523 0-.297-.005-.355-.045-.531-.288-1.29-1.539-2.304-3.072-2.497a6.873 6.873 0 0 0-.855-.031zm.645.937a3.283 3.283 0 0 1 1.44.514c.223.148.537.458.671.662.166.251.26.508.303.82.02.143.01.251-.043.482-.08.345-.332.705-.672.957a3.115 3.115 0 0 1-.689.348c-.382.122-.632.144-1.525.138-.582-.006-.686-.01-.853-.042-.57-.107-1.022-.334-1.35-.68-.264-.28-.385-.535-.45-.946-.03-.192.025-.509.137-.776.136-.326.488-.73.836-.963.403-.269.934-.46 1.422-.512.187-.02.586-.02.773-.002zm-5.503-11a1.653 1.653 0 0 0-.683.298C5.617.74 5.173 1.666 4.985 2.819c-.07.436-.119 1.04-.119 1.503 0 .544.064 1.24.155 1.721.02.107.031.202.023.208a8.12 8.12 0 0 1-.187.152 5.324 5.324 0 0 0-.949 1.02 5.49 5.49 0 0 0-.94 2.339 6.625 6.625 0 0 0-.023 1.357c.091.78.325 1.438.727 2.04l.13.195-.037.064c-.269.452-.498 1.105-.605 1.732-.084.496-.095.629-.095 1.294 0 .67.009.803.088 1.266.095.555.288 1.143.503 1.534.071.128.243.393.264.407.007.003-.014.067-.046.141a7.405 7.405 0 0 0-.548 1.873c-.062.417-.071.552-.071.991 0 .56.031.832.148 1.279L3.42 24h1.478l-.05-.091c-.297-.552-.325-1.575-.068-2.597.117-.472.25-.819.498-1.296l.148-.29v-.177c0-.165-.003-.184-.057-.293a.915.915 0 0 0-.194-.25 1.74 1.74 0 0 1-.385-.543c-.424-.92-.506-2.286-.208-3.451.124-.486.329-.918.544-1.154a.787.787 0 0 0 .223-.531c0-.195-.07-.355-.224-.522a3.136 3.136 0 0 1-.817-1.729c-.14-.96.114-2.005.69-2.834.563-.814 1.353-1.336 2.237-1.475.199-.033.57-.028.776.01.226.04.367.028.512-.041.179-.085.268-.19.374-.431.093-.215.165-.333.36-.576.234-.29.46-.489.822-.729.413-.27.884-.467 1.352-.561.17-.035.25-.04.569-.04.319 0 .398.005.569.04a4.07 4.07 0 0 1 1.914.997c.117.109.398.457.488.602.034.057.095.177.132.267.105.241.195.346.374.43.14.068.286.082.503.045.343-.058.607-.053.943.016 1.144.23 2.14 1.173 2.581 2.437.385 1.108.276 2.267-.296 3.153-.097.15-.193.27-.333.419-.301.322-.301.722-.001 1.053.493.539.801 1.866.708 3.036-.062.772-.26 1.463-.533 1.854a2.096 2.096 0 0 1-.224.258.916.916 0 0 0-.194.25c-.054.109-.057.128-.057.293v.178l.148.29c.248.476.38.823.498 1.295.253 1.008.231 2.01-.059 2.581a.845.845 0 0 0-.044.098c0 .006.329.009.732.009h.73l.02-.074.036-.134c.019-.076.057-.3.088-.516.029-.217.029-1.016 0-1.258-.11-.875-.295-1.57-.597-2.226-.032-.074-.053-.138-.046-.141.008-.005.057-.074.108-.152.376-.569.607-1.284.724-2.228.031-.26.031-1.378 0-1.628-.083-.645-.182-1.082-.348-1.525a6.083 6.083 0 0 0-.329-.7l-.038-.064.131-.194c.402-.604.636-1.262.727-2.04a6.625 6.625 0 0 0-.024-1.358 5.512 5.512 0 0 0-.939-2.339 5.325 5.325 0 0 0-.95-1.02 8.097 8.097 0 0 1-.186-.152.692.692 0 0 1 .023-.208c.208-1.087.201-2.443-.017-3.503-.19-.924-.535-1.658-.98-2.082-.354-.338-.716-.482-1.15-.455-.996.059-1.8 1.205-2.116 3.01a6.805 6.805 0 0 0-.097.726c0 .036-.007.066-.015.066a.96.96 0 0 1-.149-.078A4.857 4.857 0 0 0 12 3.03c-.832 0-1.687.243-2.456.698a.958.958 0 0 1-.148.078c-.008 0-.015-.03-.015-.066a6.71 6.71 0 0 0-.097-.725C8.997 1.392 8.337.319 7.46.048a2.096 2.096 0 0 0-.585-.041Zm.293 1.402c.248.197.523.759.682 1.388.03.113.06.244.069.292.007.047.026.152.041.233.067.365.098.76.102 1.24l.002.475-.12.175-.118.178h-.278c-.324 0-.646.041-.954.124l-.238.06c-.033.007-.038-.003-.057-.144a8.438 8.438 0 0 1 .016-2.323c.124-.788.413-1.501.696-1.711.067-.05.079-.049.157.013zm9.825-.012c.17.126.358.46.498.888.28.854.36 2.028.212 3.145-.019.14-.024.151-.057.144l-.238-.06a3.693 3.693 0 0 0-.954-.124h-.278l-.119-.178-.119-.175.002-.474c.004-.669.066-1.19.214-1.772.157-.623.434-1.185.68-1.382.078-.062.09-.063.159-.012z"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">Ollama</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span>可接入</span></span></div>
-                  <div class="agent-vendor muted">Ollama · 本地推理</div>
+                  <div class="agent-top"><span class="agent-name">Ollama</span><span class="agent-status"><span class="badge is-ready"><span class="dot"></span><span data-i18n="ready">可接入</span></span></span></div>
+                  <div class="agent-vendor muted">Ollama · <span data-i18n="vLocal">本地推理</span></div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">0.5.11</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">Ollama 本地守护进程 (11434)</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">0.5.11</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">Ollama 本地守护进程 (11434)</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-primary btn-xs">连接</button></div>
+                  <div class="agent-actions"><button class="btn-primary btn-xs" data-i18n="connect">连接</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="auth" data-name="mistral ai" data-lat="0">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#FA520F" role="img" viewBox="0 0 24 24"><path d="M17.143 3.429v3.428h-3.429v3.429h-3.428V6.857H6.857V3.43H3.43v13.714H0v3.428h10.286v-3.428H6.857v-3.429h3.429v3.429h3.429v-3.429h3.428v3.429h-3.428v3.428H24v-3.428h-3.43V3.429z"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">Mistral AI</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span>需凭证</span></span></div>
+                  <div class="agent-top"><span class="agent-name">Mistral AI</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span><span data-i18n="auth">需凭证</span></span></span></div>
                   <div class="agent-vendor muted">Mistral · SDK · HTTP</div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">—</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">$MISTRAL_API_KEY</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">—</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">$MISTRAL_API_KEY</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-outline btn-xs">配置凭证</button></div>
+                  <div class="agent-actions"><button class="btn-outline btn-xs" data-i18n="configCred">配置凭证</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="absent" data-name="perplexity" data-lat="0">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#1FB8CD" role="img" viewBox="0 0 24 24"><path d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">Perplexity</span><span class="agent-status"><span class="badge is-absent"><span class="dot"></span>未检测到</span></span></div>
+                  <div class="agent-top"><span class="agent-name">Perplexity</span><span class="agent-status"><span class="badge is-absent"><span class="dot"></span><span data-i18n="absent">未检测到</span></span></span></div>
                   <div class="agent-vendor muted">Perplexity · SDK · HTTP</div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">—</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">未发现运行时</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">—</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">未发现运行时</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-outline btn-xs">接入指南</button></div>
+                  <div class="agent-actions"><button class="btn-outline btn-xs" data-i18n="guide">接入指南</button></div>
                 </div>
               </article>
               <article class="agent-tile" data-probe="auth" data-name="deepseek" data-lat="0">
                 <span class="agent-logo"><svg width="100%" height="100%" fill="#5786FE" role="img" viewBox="0 0 24 24"><path d="M23.748 4.651c-.254-.124-.364.113-.512.233-.051.04-.094.09-.137.137-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.155-.708-.311-.955-.65-.172-.24-.219-.509-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.094.172.187.129.323-.082.28-.18.553-.266.833-.055.179-.137.218-.328.14a5.5 5.5 0 0 1-1.737-1.179c-.857-.828-1.631-1.743-2.597-2.46a12 12 0 0 0-.689-.47c-.985-.957.13-1.743.387-1.836.27-.098.094-.433-.778-.428-.872.003-1.67.295-2.687.685a3 3 0 0 1-.465.136 9.6 9.6 0 0 0-2.883-.101c-1.885.21-3.39 1.1-4.497 2.622C.082 8.776-.231 10.854.152 13.02c.403 2.284 1.568 4.175 3.36 5.653 1.857 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.132-.284 4.994-1.86.47.234.962.328 1.78.398.629.058 1.235-.031 1.705-.129.735-.155.684-.836.418-.961-2.155-1.004-1.682-.595-2.112-.926 1.095-1.295 2.768-3.598 3.284-6.733.05-.346.115-.834.108-1.114-.004-.171.035-.238.23-.257a4.2 4.2 0 0 0 1.545-.475c1.397-.763 1.96-2.016 2.093-3.517.02-.23-.004-.467-.247-.588M11.58 18.168c-2.088-1.642-3.101-2.183-3.52-2.16-.39.024-.32.472-.234.763.09.288.207.487.371.74.114.167.192.416-.113.603-.673.416-1.842-.14-1.897-.168-1.361-.801-2.5-1.86-3.301-3.306-.775-1.393-1.225-2.888-1.299-4.482-.02-.385.094-.522.477-.592a4.7 4.7 0 0 1 1.53-.038c2.131.311 3.946 1.264 5.467 2.774.868.86 1.525 1.887 2.202 2.89.72 1.066 1.494 2.082 2.48 2.915.348.291.626.513.892.677-.802.09-2.14.109-3.055-.615zm1.001-6.44a.306.306 0 0 1 .415-.287.3.3 0 0 1 .113.074.3.3 0 0 1 .086.214c0 .17-.136.307-.308.307a.303.303 0 0 1-.306-.307m3.11 1.596c-.2.081-.4.151-.591.16a1.25 1.25 0 0 1-.798-.254c-.274-.23-.47-.358-.551-.758a1.7 1.7 0 0 1 .015-.588c.07-.327-.007-.537-.238-.727-.188-.156-.426-.199-.689-.199a.6.6 0 0 1-.254-.078.253.253 0 0 1-.114-.358 1 1 0 0 1 .192-.21c.356-.202.767-.136 1.146.016.352.144.618.408 1.001.782.392.451.462.576.685.915.176.264.336.536.446.848.066.194-.02.353-.25.45"/></svg></span>
                 <div class="agent-meta">
-                  <div class="agent-top"><span class="agent-name">DeepSeek</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span>需凭证</span></span></div>
+                  <div class="agent-top"><span class="agent-name">DeepSeek</span><span class="agent-status"><span class="badge is-auth"><span class="dot"></span><span data-i18n="auth">需凭证</span></span></span></div>
                   <div class="agent-vendor muted">DeepSeek · SDK · HTTP</div>
                   <div class="agent-detail">
-                    <div class="row"><span class="k">版本</span><span class="v mono" data-field="version">—</span></div>
-                    <div class="row"><span class="k">探测依据</span><span class="v mono" data-field="evidence">$DEEPSEEK_API_KEY</span></div>
-                    <div class="row"><span class="k">时延</span><span class="v mono" data-field="latency">—</span></div>
-                    <div class="row"><span class="k">上次检测</span><span class="v" data-field="lastseen">—</span></div>
+                    <div class="row"><span class="k" data-i18n="version">版本</span><span class="v mono" data-field="version">—</span></div>
+                    <div class="row"><span class="k" data-i18n="evidenceLabel">探测依据</span><span class="v mono" data-field="evidence">$DEEPSEEK_API_KEY</span></div>
+                    <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono" data-field="latency">—</span></div>
+                    <div class="row"><span class="k" data-i18n="lastSeen">上次检测</span><span class="v" data-field="lastseen">—</span></div>
                   </div>
-                  <div class="agent-actions"><button class="btn-outline btn-xs">配置凭证</button></div>
+                  <div class="agent-actions"><button class="btn-outline btn-xs" data-i18n="configCred">配置凭证</button></div>
                 </div>
               </article>
           </div>
-          <p class="empty" id="agentEmpty" hidden>该状态下暂无 Agent。</p>
-          <p class="fineprint muted">探测明细（版本 / 路径 / 时延 / 上次检测）均为 mock 演示数据，未实际访问本机环境。</p>
+          <p class="empty" id="agentEmpty" hidden data-i18n="agentEmpty">该状态下暂无 Agent。</p>
+          <p class="fineprint muted" data-i18n="agentsFineprint">探测明细（版本 / 路径 / 时延 / 上次检测）均为 mock 演示数据，未实际访问本机环境。</p>
         </section>
       </div>
     </section>
@@ -1666,19 +1747,19 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
           <span class="logo-stack"><span class="ls" style="z-index:3"><svg width="100%" height="100%" fill="#FF6A00" role="img" viewBox="0 0 24 24"><path d="M3.996 4.517h5.291L8.01 6.324 4.153 7.506a1.668 1.668 0 0 0-1.165 1.601v5.786a1.668 1.668 0 0 0 1.165 1.6l3.857 1.183 1.277 1.807H3.996A3.996 3.996 0 0 1 0 15.487V8.513a3.996 3.996 0 0 1 3.996-3.996m16.008 0h-5.291l1.277 1.807 3.857 1.182c.715.227 1.17.889 1.165 1.601v5.786a1.668 1.668 0 0 1-1.165 1.6l-3.857 1.183-1.277 1.807h5.291A3.996 3.996 0 0 0 24 15.487V8.513a3.996 3.996 0 0 0-3.996-3.996m-4.007 8.345H8.002v-1.804h7.995Z"/></svg></span><span class="ls" style="z-index:2"><svg width="100%" height="100%" viewBox="4.245 3.085 25.957 25.93"><path d="M14.2 9.638l-.644 2.286h-1.043l.337-.215.874-.598c-.31-.7-.573-1.186-.813-1.427-.007-.044-.45.227-1.304.782l-.29.184a1.43 1.43 0 0 0 .107.153c.3.39.555.76.752 1.12h-.86l-.276 1.29h1.933l-.138.26-.138.26H10.61l-.26 1.29h1.442c-.616.75-1.348 1.354-2.194 1.8l1.35-6.443H7.22l-1.396 6.658-.123.506c-.325 1.288-.807 2.444-1.457 3.467.394.348.715.72.982 1.12.78-1.114 1.395-2.54 1.856-4.295h.813l-.46 2.178c-.036.298-.34.433-.9.384.115.533.164 1.067.123 1.626 1.33-.01 2-.308 2.025-.92l.752-3.56.046-.245.23.245a2.74 2.74 0 0 1 .414.629c.204-.1.445-.255.72-.49l-.49 1.595h4.464l-.077.414c-.177.862-.425 1.28-.736 1.227l.245-1.227H9.476L9.2 20.974h3.897c.223.48.318.973.276 1.488 1.243-.04 2.005-.232 2.3-.583.093-.102.2-.28.29-.583.203-.608.44-1.497.736-2.67l.17-.675h-1.657l.092-.4.123-.614c.295.258.556.458.782.614.168.115.315.203.445.26l.215-.26c.427-.518.833-.95 1.212-1.304-1-.285-1.733-.693-2.194-1.227h2.194l.26-1.29H14.4a2.29 2.29 0 0 0 .276-.522h3.252l.26-1.29h-1.166l1.365-1.227-1.365-.844a18.89 18.89 0 0 1-1.427 1.626l.828.506h-1.18l.17-.537.215-.537.43-1.012c.01-.09-.048-.134-.23-.153-.344-.054-.885-.1-1.626-.107zm8.253.107c-.416.138-1.063.4-1.964.767.283.808.488 1.614.63 2.424l2.056-.736-.72-2.454zm1.52.7l-.322 1.488h1.227l-.583 2.777H22.76l-.322 1.488h1.55l-.29 1.365-.936 4.434h1.718l.92-4.434.29-1.365h1.227l-.245 1.12-.046.245c-.314 1.645-.153 2.932.476 3.85.383.544.845.774 1.396.7.57.03 1.142-.892 1.703-2.76l-1.396-.614c-.28.857-.452 1.135-.522.828-.1-.437-.087-1.1.06-1.994l.184-.936 1.304-6.182zM8.372 11.708h.813L8.8 13.534h-.798zm18.2.215h1.29l-.583 2.777h-1.29zm-7.762 1.733l-.322 1.503h1.52l-.506 2.393-.322 1.596c-.07.334-.337.682-.798 1.058-.136.112-.22.184-.23.215.17.528.47 1.044.9 1.52.033.01.212-.15.522-.46.462-.49 1.632-1.567 3.528-3.237a20.26 20.26 0 0 0-.307-.66l-.015-.03-.276-.614-.72.614-.752.63.138-.63.813-3.897h-3.16zm-11.09 1.15h.798L8.172 16.5h-.798zm5.876.215h.476c.066.188.153.37.26.537h-1.166l.215-.276zm-1.657 1.75h1.918l-.153.782-.107.445h-1.32l.138-.445.138-.4c-.064-.037-.104-.06-.138-.06h-.798z" fill="#006cb6"/></svg></span><span class="ls" style="z-index:1"><svg width="100%" height="100%" role="img" viewBox="0 0 24 24"><path d="M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576.04.063.056.127.056.183 0 .08-.048.16-.152.24l-.503.335a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.064-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 0 1 .32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 0 1 .311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311a.51.51 0 0 1-.303.08h-.687c-.151 0-.255-.024-.32-.08-.063-.056-.119-.16-.15-.32l-1.238-5.148-1.23 5.14c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08zm10.256.215c-.415 0-.83-.048-1.229-.143-.399-.096-.71-.2-.918-.32-.128-.071-.215-.151-.247-.223a.563.563 0 0 1-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.777.777 0 0 0-.215-.559c-.144-.151-.416-.287-.807-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .359.008.535.032.183.024.35.056.518.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 0 1 .24.2.43.43 0 0 1 .071.263v.375c0 .168-.064.256-.184.256a.83.83 0 0 1-.303-.096 3.652 3.652 0 0 0-1.532-.311c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.734.167-1.142.167zM21.698 16.207c-2.626 1.94-6.442 2.969-9.722 2.969-4.598 0-8.74-1.7-11.87-4.526-.247-.223-.024-.527.272-.351 3.384 1.963 7.559 3.153 11.877 3.153 2.914 0 6.114-.607 9.06-1.852.439-.2.814.287.383.607zM22.792 14.961c-.336-.43-2.22-.207-3.074-.103-.255.032-.295-.192-.063-.36 1.5-1.053 3.967-.75 4.254-.399.287.36-.08 2.826-1.485 4.007-.215.184-.423.088-.327-.151.32-.79 1.03-2.57.695-2.994z"/></svg></span></span>
           <div class="mod-hero-text">
             <h2 class="greet">Compute</h2>
-            <p class="muted">复用云厂商真实标志，纳管多云算力并按证据、成本与时延协同编排。数据为演示 mock。</p>
+            <p class="muted" data-i18n="computeSubtitle">复用云厂商真实标志，纳管多云算力并按证据、成本与时延协同编排。数据为演示 mock。</p>
           </div>
         </div>
 
         <div class="stat-strip">
-          <div class="stat-cell"><div class="k">纳管厂商</div><div class="v"><span id="statManaged">4</span><small id="statManagedOf"> /9</small></div></div>
-          <div class="stat-cell"><div class="k">可用算力</div><div class="v"><span id="statVgpu">45</span><small> 卡</small></div></div>
-          <div class="stat-cell"><div class="k">预估时成本</div><div class="v"><span id="statCost">—</span></div></div>
-          <div class="stat-cell"><div class="k">平均时延</div><div class="v"><span id="statLatency">—</span></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="sManaged">纳管厂商</div><div class="v"><span id="statManaged">4</span><small id="statManagedOf"> /9</small></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="sCompute">可用算力</div><div class="v"><span id="statVgpu">45</span><small> 卡</small></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="sCost">预估时成本</div><div class="v"><span id="statCost">—</span></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="sAvgLat">平均时延</div><div class="v"><span id="statLatency">—</span></div></div>
         </div>
 
         <section class="card">
-          <div class="card-head"><h3>协同拓扑</h3><span class="muted fineprint">枢纽 = Morphogenesis 编排中枢 · 金色连线 = 已纳管协同</span></div>
+          <div class="card-head"><h3 data-i18n="topology">协同拓扑</h3><span class="muted fineprint" data-i18n="topoNote">枢纽 = Morphogenesis 编排中枢 · 金色连线 = 已纳管协同</span></div>
           <div class="orch-wrap">
             <svg class="orch-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <line class="orch-link is-live" data-cloud="aliyun" x1="50" y1="50" x2="50.00" y2="15.00"/>
@@ -1692,7 +1773,7 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
             <line class="orch-link" data-cloud="cf" x1="50" y1="50" x2="26.22" y2="23.19"/>
             </svg>
             <div class="orch-node is-hub" style="left:50%;top:50%">
-              <span class="orch-hub">Morphogenesis<br>编排中枢</span>
+              <span class="orch-hub">Morphogenesis<br><span data-i18n="hub">编排中枢</span></span>
             </div>
             <div class="orch-node is-on" data-cloud="aliyun" style="left:50.00%;top:15.00%">
               <span class="on-logo"><svg width="100%" height="100%" fill="#FF6A00" role="img" viewBox="0 0 24 24"><path d="M3.996 4.517h5.291L8.01 6.324 4.153 7.506a1.668 1.668 0 0 0-1.165 1.601v5.786a1.668 1.668 0 0 0 1.165 1.6l3.857 1.183 1.277 1.807H3.996A3.996 3.996 0 0 1 0 15.487V8.513a3.996 3.996 0 0 1 3.996-3.996m16.008 0h-5.291l1.277 1.807 3.857 1.182c.715.227 1.17.889 1.165 1.601v5.786a1.668 1.668 0 0 1-1.165 1.6l-3.857 1.183-1.277 1.807h5.291A3.996 3.996 0 0 0 24 15.487V8.513a3.996 3.996 0 0 0-3.996-3.996m-4.007 8.345H8.002v-1.804h7.995Z"/></svg></span>
@@ -1738,217 +1819,217 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
               <div class="cloud-head">
                 <span class="cloud-logo"><svg width="100%" height="100%" fill="#FF6A00" role="img" viewBox="0 0 24 24"><path d="M3.996 4.517h5.291L8.01 6.324 4.153 7.506a1.668 1.668 0 0 0-1.165 1.601v5.786a1.668 1.668 0 0 0 1.165 1.6l3.857 1.183 1.277 1.807H3.996A3.996 3.996 0 0 1 0 15.487V8.513a3.996 3.996 0 0 1 3.996-3.996m16.008 0h-5.291l1.277 1.807 3.857 1.182c.715.227 1.17.889 1.165 1.601v5.786a1.668 1.668 0 0 1-1.165 1.6l-3.857 1.183-1.277 1.807h5.291A3.996 3.996 0 0 0 24 15.487V8.513a3.996 3.996 0 0 0-3.996-3.996m-4.007 8.345H8.002v-1.804h7.995Z"/></svg></span>
                 <span class="cloud-title">阿里云<small>Alibaba Cloud</small></span>
-                <span class="cloud-flag badge is-ready"><span class="dot"></span>已纳管</span>
+                <span class="cloud-flag badge is-ready"><span class="dot"></span><span data-i18n="managed">已纳管</span></span>
               </div>
               <div class="cloud-specs">
-                <div class="row"><span class="k">区域</span><span class="v">华东1 · 杭州</span></div>
-                <div class="row"><span class="k">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span>正常</span></span></div>
-                <div class="row"><span class="k">加速卡</span><span class="v">A10 / GU30</span></div>
-                <div class="row"><span class="k">可用算力</span><span class="v mono">16 卡</span></div>
-                <div class="row"><span class="k">显存</span><span class="v mono">24 GB</span></div>
-                <div class="row"><span class="k">时延</span><span class="v mono">12 ms</span></div>
-                <div class="row"><span class="k">单价</span><span class="v mono">¥8.5/卡·时</span></div>
+                <div class="row"><span class="k" data-i18n="region">区域</span><span class="v">华东1 · 杭州</span></div>
+                <div class="row"><span class="k" data-i18n="health">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span><span data-i18n="healthOk">正常</span></span></span></div>
+                <div class="row"><span class="k" data-i18n="accCard">加速卡</span><span class="v">A10 / GU30</span></div>
+                <div class="row"><span class="k" data-i18n="availCompute">可用算力</span><span class="v mono">16 卡</span></div>
+                <div class="row"><span class="k" data-i18n="vram">显存</span><span class="v mono">24 GB</span></div>
+                <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono">12 ms</span></div>
+                <div class="row"><span class="k" data-i18n="unitPrice">单价</span><span class="v mono">¥8.5/卡·时</span></div>
               </div>
               <div class="cloud-trend"><span class="cap-note">利用率 72%</span><svg class="spark" viewBox="0 0 72 22" aria-hidden="true"><polyline points="0.0,13.4 6.5,15.2 13.1,15.4 19.6,16.7 26.2,14.7 32.7,14.7 39.3,15.4 45.8,15.8 52.4,18.0 58.9,16.3 65.5,16.3 72.0,16.3"/><circle class="spark-end" cx="72.0" cy="16.3" r="2"/></svg></div>
               <div class="cap-bar"><i style="width:72%"></i></div>
               <div class="cloud-foot">
-                <button class="btn-primary is-on">移出协同</button>
-                <span class="cap-note">协同价 · mock</span>
+                <button class="btn-primary is-on" data-i18n="leave">移出协同</button>
+                <span class="cap-note" data-i18n="coopPrice">协同价 · mock</span>
               </div>
             </article>
             <article class="cloud-card is-on" data-cloud="tencent" data-vgpu="12" data-latency="18" data-rate="8.20">
               <div class="cloud-head">
                 <span class="cloud-logo"><svg width="100%" height="100%" viewBox="4.245 3.085 25.957 25.93"><path d="M14.2 9.638l-.644 2.286h-1.043l.337-.215.874-.598c-.31-.7-.573-1.186-.813-1.427-.007-.044-.45.227-1.304.782l-.29.184a1.43 1.43 0 0 0 .107.153c.3.39.555.76.752 1.12h-.86l-.276 1.29h1.933l-.138.26-.138.26H10.61l-.26 1.29h1.442c-.616.75-1.348 1.354-2.194 1.8l1.35-6.443H7.22l-1.396 6.658-.123.506c-.325 1.288-.807 2.444-1.457 3.467.394.348.715.72.982 1.12.78-1.114 1.395-2.54 1.856-4.295h.813l-.46 2.178c-.036.298-.34.433-.9.384.115.533.164 1.067.123 1.626 1.33-.01 2-.308 2.025-.92l.752-3.56.046-.245.23.245a2.74 2.74 0 0 1 .414.629c.204-.1.445-.255.72-.49l-.49 1.595h4.464l-.077.414c-.177.862-.425 1.28-.736 1.227l.245-1.227H9.476L9.2 20.974h3.897c.223.48.318.973.276 1.488 1.243-.04 2.005-.232 2.3-.583.093-.102.2-.28.29-.583.203-.608.44-1.497.736-2.67l.17-.675h-1.657l.092-.4.123-.614c.295.258.556.458.782.614.168.115.315.203.445.26l.215-.26c.427-.518.833-.95 1.212-1.304-1-.285-1.733-.693-2.194-1.227h2.194l.26-1.29H14.4a2.29 2.29 0 0 0 .276-.522h3.252l.26-1.29h-1.166l1.365-1.227-1.365-.844a18.89 18.89 0 0 1-1.427 1.626l.828.506h-1.18l.17-.537.215-.537.43-1.012c.01-.09-.048-.134-.23-.153-.344-.054-.885-.1-1.626-.107zm8.253.107c-.416.138-1.063.4-1.964.767.283.808.488 1.614.63 2.424l2.056-.736-.72-2.454zm1.52.7l-.322 1.488h1.227l-.583 2.777H22.76l-.322 1.488h1.55l-.29 1.365-.936 4.434h1.718l.92-4.434.29-1.365h1.227l-.245 1.12-.046.245c-.314 1.645-.153 2.932.476 3.85.383.544.845.774 1.396.7.57.03 1.142-.892 1.703-2.76l-1.396-.614c-.28.857-.452 1.135-.522.828-.1-.437-.087-1.1.06-1.994l.184-.936 1.304-6.182zM8.372 11.708h.813L8.8 13.534h-.798zm18.2.215h1.29l-.583 2.777h-1.29zm-7.762 1.733l-.322 1.503h1.52l-.506 2.393-.322 1.596c-.07.334-.337.682-.798 1.058-.136.112-.22.184-.23.215.17.528.47 1.044.9 1.52.033.01.212-.15.522-.46.462-.49 1.632-1.567 3.528-3.237a20.26 20.26 0 0 0-.307-.66l-.015-.03-.276-.614-.72.614-.752.63.138-.63.813-3.897h-3.16zm-11.09 1.15h.798L8.172 16.5h-.798zm5.876.215h.476c.066.188.153.37.26.537h-1.166l.215-.276zm-1.657 1.75h1.918l-.153.782-.107.445h-1.32l.138-.445.138-.4c-.064-.037-.104-.06-.138-.06h-.798z" fill="#006cb6"/></svg></span>
                 <span class="cloud-title">腾讯云<small>Tencent Cloud</small></span>
-                <span class="cloud-flag badge is-ready"><span class="dot"></span>已纳管</span>
+                <span class="cloud-flag badge is-ready"><span class="dot"></span><span data-i18n="managed">已纳管</span></span>
               </div>
               <div class="cloud-specs">
-                <div class="row"><span class="k">区域</span><span class="v">华东 · 上海</span></div>
-                <div class="row"><span class="k">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span>正常</span></span></div>
-                <div class="row"><span class="k">加速卡</span><span class="v">GN7 · A10</span></div>
-                <div class="row"><span class="k">可用算力</span><span class="v mono">12 卡</span></div>
-                <div class="row"><span class="k">显存</span><span class="v mono">24 GB</span></div>
-                <div class="row"><span class="k">时延</span><span class="v mono">18 ms</span></div>
-                <div class="row"><span class="k">单价</span><span class="v mono">¥8.2/卡·时</span></div>
+                <div class="row"><span class="k" data-i18n="region">区域</span><span class="v">华东 · 上海</span></div>
+                <div class="row"><span class="k" data-i18n="health">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span><span data-i18n="healthOk">正常</span></span></span></div>
+                <div class="row"><span class="k" data-i18n="accCard">加速卡</span><span class="v">GN7 · A10</span></div>
+                <div class="row"><span class="k" data-i18n="availCompute">可用算力</span><span class="v mono">12 卡</span></div>
+                <div class="row"><span class="k" data-i18n="vram">显存</span><span class="v mono">24 GB</span></div>
+                <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono">18 ms</span></div>
+                <div class="row"><span class="k" data-i18n="unitPrice">单价</span><span class="v mono">¥8.2/卡·时</span></div>
               </div>
               <div class="cloud-trend"><span class="cap-note">利用率 57%</span><svg class="spark" viewBox="0 0 72 22" aria-hidden="true"><polyline points="0.0,13.0 6.5,11.9 13.1,12.8 19.6,12.8 26.2,10.8 32.7,10.6 39.3,12.1 45.8,13.0 52.4,11.7 58.9,13.4 65.5,15.0 72.0,13.0"/><circle class="spark-end" cx="72.0" cy="13.0" r="2"/></svg></div>
               <div class="cap-bar"><i style="width:57%"></i></div>
               <div class="cloud-foot">
-                <button class="btn-primary is-on">移出协同</button>
-                <span class="cap-note">协同价 · mock</span>
+                <button class="btn-primary is-on" data-i18n="leave">移出协同</button>
+                <span class="cap-note" data-i18n="coopPrice">协同价 · mock</span>
               </div>
             </article>
             <article class="cloud-card is-on" data-cloud="huawei" data-vgpu="8" data-latency="21" data-rate="15.00">
               <div class="cloud-head">
                 <span class="cloud-logo"><svg width="100%" height="100%" fill="#FF0000" role="img" viewBox="0 0 24 24"><path d="M3.67 6.14S1.82 7.91 1.72 9.78v.35c.08 1.51 1.22 2.4 1.22 2.4 1.83 1.79 6.26 4.04 7.3 4.55 0 0 .06.03.1-.01l.02-.04v-.04C7.52 10.8 3.67 6.14 3.67 6.14zM9.65 18.6c-.02-.08-.1-.08-.1-.08l-7.38.26c.8 1.43 2.15 2.53 3.56 2.2.96-.25 3.16-1.78 3.88-2.3.06-.05.04-.09.04-.09zm.08-.78C6.49 15.63.21 12.28.21 12.28c-.15.46-.2.9-.21 1.3v.07c0 1.07.4 1.82.4 1.82.8 1.69 2.34 2.2 2.34 2.2.7.3 1.4.31 1.4.31.12.02 4.4 0 5.54 0 .05 0 .08-.05.08-.05v-.06c0-.03-.03-.05-.03-.05zM9.06 3.19a3.42 3.42 0 00-2.57 3.15v.41c.03.6.16 1.05.16 1.05.66 2.9 3.86 7.65 4.55 8.65.05.05.1.03.1.03a.1.1 0 00.06-.1c1.06-10.6-1.11-13.42-1.11-13.42-.32.02-1.19.23-1.19.23zm8.299 2.27s-.49-1.8-2.44-2.28c0 0-.57-.14-1.17-.22 0 0-2.18 2.81-1.12 13.43.01.07.06.08.06.08.07.03.1-.03.1-.03.72-1.03 3.9-5.76 4.55-8.64 0 0 .36-1.4.02-2.34zm-2.92 13.07s-.07 0-.09.05c0 0-.01.07.03.1.7.51 2.85 2 3.88 2.3 0 0 .16.05.43.06h.14c.69-.02 1.9-.37 3-2.26l-7.4-.25zm7.83-8.41c.14-2.06-1.94-3.97-1.94-3.98 0 0-3.85 4.66-6.67 10.8 0 0-.03.08.02.13l.04.01h.06c1.06-.53 5.46-2.77 7.28-4.54 0 0 1.15-.93 1.21-2.42zm1.52 2.14s-6.28 3.37-9.52 5.55c0 0-.05.04-.03.11 0 0 .03.06.07.06 1.16 0 5.56 0 5.67-.02 0 0 .57-.02 1.27-.29 0 0 1.56-.5 2.37-2.27 0 0 .73-1.45.17-3.14z"/></svg></span>
                 <span class="cloud-title">华为云<small>Huawei Cloud</small></span>
-                <span class="cloud-flag badge is-ready"><span class="dot"></span>已纳管</span>
+                <span class="cloud-flag badge is-ready"><span class="dot"></span><span data-i18n="managed">已纳管</span></span>
               </div>
               <div class="cloud-specs">
-                <div class="row"><span class="k">区域</span><span class="v">华北-北京四</span></div>
-                <div class="row"><span class="k">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span>正常</span></span></div>
-                <div class="row"><span class="k">加速卡</span><span class="v">Ascend 910B</span></div>
-                <div class="row"><span class="k">可用算力</span><span class="v mono">8 卡</span></div>
-                <div class="row"><span class="k">显存</span><span class="v mono">64 GB</span></div>
-                <div class="row"><span class="k">时延</span><span class="v mono">21 ms</span></div>
-                <div class="row"><span class="k">单价</span><span class="v mono">¥15.0/卡·时</span></div>
+                <div class="row"><span class="k" data-i18n="region">区域</span><span class="v">华北-北京四</span></div>
+                <div class="row"><span class="k" data-i18n="health">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span><span data-i18n="healthOk">正常</span></span></span></div>
+                <div class="row"><span class="k" data-i18n="accCard">加速卡</span><span class="v">Ascend 910B</span></div>
+                <div class="row"><span class="k" data-i18n="availCompute">可用算力</span><span class="v mono">8 卡</span></div>
+                <div class="row"><span class="k" data-i18n="vram">显存</span><span class="v mono">64 GB</span></div>
+                <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono">21 ms</span></div>
+                <div class="row"><span class="k" data-i18n="unitPrice">单价</span><span class="v mono">¥15.0/卡·时</span></div>
               </div>
               <div class="cloud-trend"><span class="cap-note">利用率 44%</span><svg class="spark" viewBox="0 0 72 22" aria-hidden="true"><polyline points="0.0,10.3 6.5,8.4 13.1,8.4 19.6,9.0 26.2,9.5 32.7,7.5 39.3,9.7 45.8,10.1 52.4,11.4 58.9,9.0 65.5,9.2 72.0,11.0"/><circle class="spark-end" cx="72.0" cy="11.0" r="2"/></svg></div>
               <div class="cap-bar"><i style="width:44%"></i></div>
               <div class="cloud-foot">
-                <button class="btn-primary is-on">移出协同</button>
-                <span class="cap-note">协同价 · mock</span>
+                <button class="btn-primary is-on" data-i18n="leave">移出协同</button>
+                <span class="cap-note" data-i18n="coopPrice">协同价 · mock</span>
               </div>
             </article>
             <article class="cloud-card" data-cloud="baidu" data-vgpu="6" data-latency="26" data-rate="18.50">
               <div class="cloud-head">
                 <span class="cloud-logo"><svg width="100%" height="100%" fill="#2932E1" role="img" viewBox="0 0 24 24"><path d="M9.154 0C7.71 0 6.54 1.658 6.54 3.707c0 2.051 1.171 3.71 2.615 3.71 1.446 0 2.614-1.659 2.614-3.71C11.768 1.658 10.6 0 9.154 0zm7.025.594C14.86.58 13.347 2.589 13.2 3.927c-.187 1.745.25 3.487 2.179 3.735 1.933.25 3.175-1.806 3.422-3.364.252-1.555-.995-3.364-2.362-3.674a1.218 1.218 0 0 0-.261-.03zM3.582 5.535a2.811 2.811 0 0 0-.156.008c-2.118.19-2.428 3.24-2.428 3.24-.287 1.41.686 4.425 3.297 3.864 2.617-.561 2.262-3.68 2.183-4.362-.125-1.018-1.292-2.773-2.896-2.75zm16.534 1.753c-2.308 0-2.617 2.119-2.617 3.616 0 1.43.121 3.425 2.988 3.362 2.867-.063 2.553-3.238 2.553-3.988 0-.745-.62-2.99-2.924-2.99zm-8.264 2.478c-1.424.014-2.708.925-3.323 1.947-1.118 1.868-2.863 3.05-3.112 3.363-.25.309-3.61 2.116-2.864 5.42.746 3.301 3.365 3.237 3.365 3.237s1.93.19 4.171-.31c2.24-.495 4.17.123 4.17.123s5.233 1.748 6.665-1.616c1.43-3.364-.808-5.109-.808-5.109s-2.99-2.306-4.736-4.798c-1.072-1.665-2.348-2.268-3.528-2.257zm-2.234 3.84l1.542.024v8.197H7.758c-1.47-.291-2.055-1.292-2.13-1.462-.072-.173-.488-.976-.268-2.343.635-2.049 2.447-2.196 2.447-2.196h1.81zm3.964 2.39v3.881c.096.413.612.488.612.488h1.614v-4.343h1.689v5.782h-3.915c-1.517-.39-1.59-1.465-1.59-1.465v-4.317zm-5.458 1.147c-.66.197-.978.708-1.05.928-.076.22-.247.78-.1 1.269.294 1.095 1.248 1.144 1.248 1.144h1.37v-3.34z"/></svg></span>
                 <span class="cloud-title">百度智能云<small>Baidu AI Cloud</small></span>
-                <span class="cloud-flag badge is-absent"><span class="dot"></span>未纳管</span>
+                <span class="cloud-flag badge is-absent"><span class="dot"></span><span data-i18n="unmanaged">未纳管</span></span>
               </div>
               <div class="cloud-specs">
-                <div class="row"><span class="k">区域</span><span class="v">华北 · 北京</span></div>
-                <div class="row"><span class="k">健康度</span><span class="v"><span class="health busy"><span class="hdot"></span>繁忙</span></span></div>
-                <div class="row"><span class="k">加速卡</span><span class="v">A800 80G</span></div>
-                <div class="row"><span class="k">可用算力</span><span class="v mono">6 卡</span></div>
-                <div class="row"><span class="k">显存</span><span class="v mono">80 GB</span></div>
-                <div class="row"><span class="k">时延</span><span class="v mono">26 ms</span></div>
-                <div class="row"><span class="k">单价</span><span class="v mono">¥18.5/卡·时</span></div>
+                <div class="row"><span class="k" data-i18n="region">区域</span><span class="v">华北 · 北京</span></div>
+                <div class="row"><span class="k" data-i18n="health">健康度</span><span class="v"><span class="health busy"><span class="hdot"></span><span data-i18n="healthBusy">繁忙</span></span></span></div>
+                <div class="row"><span class="k" data-i18n="accCard">加速卡</span><span class="v">A800 80G</span></div>
+                <div class="row"><span class="k" data-i18n="availCompute">可用算力</span><span class="v mono">6 卡</span></div>
+                <div class="row"><span class="k" data-i18n="vram">显存</span><span class="v mono">80 GB</span></div>
+                <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono">26 ms</span></div>
+                <div class="row"><span class="k" data-i18n="unitPrice">单价</span><span class="v mono">¥18.5/卡·时</span></div>
               </div>
               <div class="cloud-trend"><span class="cap-note">利用率 33%</span><svg class="spark" viewBox="0 0 72 22" aria-hidden="true"><polyline points="0.0,9.0 6.5,7.9 13.1,5.7 19.6,4.8 26.2,3.5 32.7,2.4 39.3,0.9 45.8,0.9 52.4,1.8 58.9,3.7 65.5,5.7 72.0,8.1"/><circle class="spark-end" cx="72.0" cy="8.1" r="2"/></svg></div>
               <div class="cap-bar"><i style="width:33%"></i></div>
               <div class="cloud-foot">
-                <button class="btn-primary">纳入协同</button>
-                <span class="cap-note">协同价 · mock</span>
+                <button class="btn-primary" data-i18n="join">纳入协同</button>
+                <span class="cap-note" data-i18n="coopPrice">协同价 · mock</span>
               </div>
             </article>
             <article class="cloud-card" data-cloud="volc" data-vgpu="10" data-latency="23" data-rate="17.80">
               <div class="cloud-head">
                 <span class="cloud-logo"><svg width="100%" height="100%" fill="#3C8CFF" role="img" viewBox="0 0 24 24"><path d="M19.8772 1.4685L24 2.5326v18.9426l-4.1228 1.0563V1.4685zm-13.3481 9.428l4.115 1.0641v8.9786l-4.115 1.0642v-11.107zM0 2.572l4.115 1.0642v16.7354L0 21.428V2.572zm17.4553 5.6205v11.107l-4.1228-1.0642V9.2568l4.1228-1.0642z"/></svg></span>
                 <span class="cloud-title">火山引擎<small>Volcengine</small></span>
-                <span class="cloud-flag badge is-absent"><span class="dot"></span>未纳管</span>
+                <span class="cloud-flag badge is-absent"><span class="dot"></span><span data-i18n="unmanaged">未纳管</span></span>
               </div>
               <div class="cloud-specs">
-                <div class="row"><span class="k">区域</span><span class="v">华北2 · 北京</span></div>
-                <div class="row"><span class="k">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span>正常</span></span></div>
-                <div class="row"><span class="k">加速卡</span><span class="v">A800 / H20</span></div>
-                <div class="row"><span class="k">可用算力</span><span class="v mono">10 卡</span></div>
-                <div class="row"><span class="k">显存</span><span class="v mono">80 GB</span></div>
-                <div class="row"><span class="k">时延</span><span class="v mono">23 ms</span></div>
-                <div class="row"><span class="k">单价</span><span class="v mono">¥17.8/卡·时</span></div>
+                <div class="row"><span class="k" data-i18n="region">区域</span><span class="v">华北2 · 北京</span></div>
+                <div class="row"><span class="k" data-i18n="health">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span><span data-i18n="healthOk">正常</span></span></span></div>
+                <div class="row"><span class="k" data-i18n="accCard">加速卡</span><span class="v">A800 / H20</span></div>
+                <div class="row"><span class="k" data-i18n="availCompute">可用算力</span><span class="v mono">10 卡</span></div>
+                <div class="row"><span class="k" data-i18n="vram">显存</span><span class="v mono">80 GB</span></div>
+                <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono">23 ms</span></div>
+                <div class="row"><span class="k" data-i18n="unitPrice">单价</span><span class="v mono">¥17.8/卡·时</span></div>
               </div>
               <div class="cloud-trend"><span class="cap-note">利用率 50%</span><svg class="spark" viewBox="0 0 72 22" aria-hidden="true"><polyline points="0.0,10.1 6.5,9.5 13.1,10.6 19.6,11.7 26.2,10.8 32.7,10.8 39.3,13.2 45.8,11.7 52.4,13.6 58.9,14.5 65.5,15.2 72.0,16.9"/><circle class="spark-end" cx="72.0" cy="16.9" r="2"/></svg></div>
               <div class="cap-bar"><i style="width:50%"></i></div>
               <div class="cloud-foot">
-                <button class="btn-primary">纳入协同</button>
-                <span class="cap-note">协同价 · mock</span>
+                <button class="btn-primary" data-i18n="join">纳入协同</button>
+                <span class="cap-note" data-i18n="coopPrice">协同价 · mock</span>
               </div>
             </article>
             <article class="cloud-card is-on" data-cloud="gcp" data-vgpu="9" data-latency="142" data-rate="21.40">
               <div class="cloud-head">
                 <span class="cloud-logo"><svg width="100%" height="100%" fill="#4285F4" role="img" viewBox="0 0 24 24"><path d="M12.19 2.38a9.344 9.344 0 0 0-9.234 6.893c.053-.02-.055.013 0 0-3.875 2.551-3.922 8.11-.247 10.941l.006-.007-.007.03a6.717 6.717 0 0 0 4.077 1.356h5.173l.03.03h5.192c6.687.053 9.376-8.605 3.835-12.35a9.365 9.365 0 0 0-2.821-4.552l-.043.043.006-.05A9.344 9.344 0 0 0 12.19 2.38zm-.358 4.146c1.244-.04 2.518.368 3.486 1.15a5.186 5.186 0 0 1 1.862 4.078v.518c3.53-.07 3.53 5.262 0 5.193h-5.193l-.008.009v-.04H6.785a2.59 2.59 0 0 1-1.067-.23h.001a2.597 2.597 0 1 1 3.437-3.437l3.013-3.012A6.747 6.747 0 0 0 8.11 8.24c.018-.01.04-.026.054-.023a5.186 5.186 0 0 1 3.67-1.69z"/></svg></span>
                 <span class="cloud-title">Google Cloud<small>Google Cloud</small></span>
-                <span class="cloud-flag badge is-ready"><span class="dot"></span>已纳管</span>
+                <span class="cloud-flag badge is-ready"><span class="dot"></span><span data-i18n="managed">已纳管</span></span>
               </div>
               <div class="cloud-specs">
-                <div class="row"><span class="k">区域</span><span class="v">us-central1</span></div>
-                <div class="row"><span class="k">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span>正常</span></span></div>
-                <div class="row"><span class="k">加速卡</span><span class="v">A100 40G</span></div>
-                <div class="row"><span class="k">可用算力</span><span class="v mono">9 卡</span></div>
-                <div class="row"><span class="k">显存</span><span class="v mono">40 GB</span></div>
-                <div class="row"><span class="k">时延</span><span class="v mono">142 ms</span></div>
-                <div class="row"><span class="k">单价</span><span class="v mono">¥21.4/卡·时</span></div>
+                <div class="row"><span class="k" data-i18n="region">区域</span><span class="v">us-central1</span></div>
+                <div class="row"><span class="k" data-i18n="health">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span><span data-i18n="healthOk">正常</span></span></span></div>
+                <div class="row"><span class="k" data-i18n="accCard">加速卡</span><span class="v">A100 40G</span></div>
+                <div class="row"><span class="k" data-i18n="availCompute">可用算力</span><span class="v mono">9 卡</span></div>
+                <div class="row"><span class="k" data-i18n="vram">显存</span><span class="v mono">40 GB</span></div>
+                <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono">142 ms</span></div>
+                <div class="row"><span class="k" data-i18n="unitPrice">单价</span><span class="v mono">¥21.4/卡·时</span></div>
               </div>
               <div class="cloud-trend"><span class="cap-note">利用率 40%</span><svg class="spark" viewBox="0 0 72 22" aria-hidden="true"><polyline points="0.0,9.5 6.5,8.4 13.1,10.6 19.6,12.8 26.2,12.3 32.7,13.0 39.3,15.2 45.8,14.1 52.4,14.3 58.9,12.3 65.5,13.0 72.0,13.6"/><circle class="spark-end" cx="72.0" cy="13.6" r="2"/></svg></div>
               <div class="cap-bar"><i style="width:40%"></i></div>
               <div class="cloud-foot">
-                <button class="btn-primary is-on">移出协同</button>
-                <span class="cap-note">协同价 · mock</span>
+                <button class="btn-primary is-on" data-i18n="leave">移出协同</button>
+                <span class="cap-note" data-i18n="coopPrice">协同价 · mock</span>
               </div>
             </article>
             <article class="cloud-card" data-cloud="aws" data-vgpu="14" data-latency="156" data-rate="22.90">
               <div class="cloud-head">
                 <span class="cloud-logo"><svg width="100%" height="100%" role="img" viewBox="0 0 24 24"><path d="M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576.04.063.056.127.056.183 0 .08-.048.16-.152.24l-.503.335a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.064-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 0 1 .32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 0 1 .311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311a.51.51 0 0 1-.303.08h-.687c-.151 0-.255-.024-.32-.08-.063-.056-.119-.16-.15-.32l-1.238-5.148-1.23 5.14c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08zm10.256.215c-.415 0-.83-.048-1.229-.143-.399-.096-.71-.2-.918-.32-.128-.071-.215-.151-.247-.223a.563.563 0 0 1-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.777.777 0 0 0-.215-.559c-.144-.151-.416-.287-.807-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .359.008.535.032.183.024.35.056.518.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 0 1 .24.2.43.43 0 0 1 .071.263v.375c0 .168-.064.256-.184.256a.83.83 0 0 1-.303-.096 3.652 3.652 0 0 0-1.532-.311c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.734.167-1.142.167zM21.698 16.207c-2.626 1.94-6.442 2.969-9.722 2.969-4.598 0-8.74-1.7-11.87-4.526-.247-.223-.024-.527.272-.351 3.384 1.963 7.559 3.153 11.877 3.153 2.914 0 6.114-.607 9.06-1.852.439-.2.814.287.383.607zM22.792 14.961c-.336-.43-2.22-.207-3.074-.103-.255.032-.295-.192-.063-.36 1.5-1.053 3.967-.75 4.254-.399.287.36-.08 2.826-1.485 4.007-.215.184-.423.088-.327-.151.32-.79 1.03-2.57.695-2.994z"/></svg></span>
                 <span class="cloud-title">Amazon Web Services<small>AWS</small></span>
-                <span class="cloud-flag badge is-absent"><span class="dot"></span>未纳管</span>
+                <span class="cloud-flag badge is-absent"><span class="dot"></span><span data-i18n="unmanaged">未纳管</span></span>
               </div>
               <div class="cloud-specs">
-                <div class="row"><span class="k">区域</span><span class="v">us-east-1</span></div>
-                <div class="row"><span class="k">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span>正常</span></span></div>
-                <div class="row"><span class="k">加速卡</span><span class="v">p4d · A100</span></div>
-                <div class="row"><span class="k">可用算力</span><span class="v mono">14 卡</span></div>
-                <div class="row"><span class="k">显存</span><span class="v mono">40 GB</span></div>
-                <div class="row"><span class="k">时延</span><span class="v mono">156 ms</span></div>
-                <div class="row"><span class="k">单价</span><span class="v mono">¥22.9/卡·时</span></div>
+                <div class="row"><span class="k" data-i18n="region">区域</span><span class="v">us-east-1</span></div>
+                <div class="row"><span class="k" data-i18n="health">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span><span data-i18n="healthOk">正常</span></span></span></div>
+                <div class="row"><span class="k" data-i18n="accCard">加速卡</span><span class="v">p4d · A100</span></div>
+                <div class="row"><span class="k" data-i18n="availCompute">可用算力</span><span class="v mono">14 卡</span></div>
+                <div class="row"><span class="k" data-i18n="vram">显存</span><span class="v mono">40 GB</span></div>
+                <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono">156 ms</span></div>
+                <div class="row"><span class="k" data-i18n="unitPrice">单价</span><span class="v mono">¥22.9/卡·时</span></div>
               </div>
               <div class="cloud-trend"><span class="cap-note">利用率 63%</span><svg class="spark" viewBox="0 0 72 22" aria-hidden="true"><polyline points="0.0,13.0 6.5,14.1 13.1,13.0 19.6,11.4 26.2,9.9 32.7,7.9 39.3,6.4 45.8,6.2 52.4,7.9 58.9,8.8 65.5,9.5 72.0,7.3"/><circle class="spark-end" cx="72.0" cy="7.3" r="2"/></svg></div>
               <div class="cap-bar"><i style="width:63%"></i></div>
               <div class="cloud-foot">
-                <button class="btn-primary">纳入协同</button>
-                <span class="cap-note">协同价 · mock</span>
+                <button class="btn-primary" data-i18n="join">纳入协同</button>
+                <span class="cap-note" data-i18n="coopPrice">协同价 · mock</span>
               </div>
             </article>
             <article class="cloud-card" data-cloud="azure" data-vgpu="11" data-latency="163" data-rate="22.10">
               <div class="cloud-head">
                 <span class="cloud-logo"><svg width="100%" height="100%" role="img" viewBox="0 0 24 24"><path d="M22.379 23.343a1.62 1.62 0 0 0 1.536-2.14v.002L17.35 1.76A1.62 1.62 0 0 0 15.816.657H8.184A1.62 1.62 0 0 0 6.65 1.76L.086 21.204a1.62 1.62 0 0 0 1.536 2.139h4.741a1.62 1.62 0 0 0 1.535-1.103l.977-2.892 4.947 3.675c.28.208.618.32.966.32m-3.084-12.531 3.624 10.739a.54.54 0 0 1-.51.713v-.001h-.03a.54.54 0 0 1-.322-.106l-9.287-6.9h4.853m6.313 7.006c.116-.326.13-.694.007-1.058L9.79 1.76a1.722 1.722 0 0 0-.007-.02h6.034a.54.54 0 0 1 .512.366l6.562 19.445a.54.54 0 0 1-.338.684"/></svg></span>
                 <span class="cloud-title">Microsoft Azure<small>Azure</small></span>
-                <span class="cloud-flag badge is-absent"><span class="dot"></span>未纳管</span>
+                <span class="cloud-flag badge is-absent"><span class="dot"></span><span data-i18n="unmanaged">未纳管</span></span>
               </div>
               <div class="cloud-specs">
-                <div class="row"><span class="k">区域</span><span class="v">eastus</span></div>
-                <div class="row"><span class="k">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span>正常</span></span></div>
-                <div class="row"><span class="k">加速卡</span><span class="v">NDm A100 v4</span></div>
-                <div class="row"><span class="k">可用算力</span><span class="v mono">11 卡</span></div>
-                <div class="row"><span class="k">显存</span><span class="v mono">80 GB</span></div>
-                <div class="row"><span class="k">时延</span><span class="v mono">163 ms</span></div>
-                <div class="row"><span class="k">单价</span><span class="v mono">¥22.1/卡·时</span></div>
+                <div class="row"><span class="k" data-i18n="region">区域</span><span class="v">eastus</span></div>
+                <div class="row"><span class="k" data-i18n="health">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span><span data-i18n="healthOk">正常</span></span></span></div>
+                <div class="row"><span class="k" data-i18n="accCard">加速卡</span><span class="v">NDm A100 v4</span></div>
+                <div class="row"><span class="k" data-i18n="availCompute">可用算力</span><span class="v mono">11 卡</span></div>
+                <div class="row"><span class="k" data-i18n="vram">显存</span><span class="v mono">80 GB</span></div>
+                <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono">163 ms</span></div>
+                <div class="row"><span class="k" data-i18n="unitPrice">单价</span><span class="v mono">¥22.1/卡·时</span></div>
               </div>
               <div class="cloud-trend"><span class="cap-note">利用率 48%</span><svg class="spark" viewBox="0 0 72 22" aria-hidden="true"><polyline points="0.0,10.1 6.5,12.1 13.1,10.6 19.6,12.5 26.2,11.7 32.7,11.0 39.3,12.8 45.8,10.3 52.4,7.9 58.9,8.4 65.5,9.0 72.0,10.8"/><circle class="spark-end" cx="72.0" cy="10.8" r="2"/></svg></div>
               <div class="cap-bar"><i style="width:48%"></i></div>
               <div class="cloud-foot">
-                <button class="btn-primary">纳入协同</button>
-                <span class="cap-note">协同价 · mock</span>
+                <button class="btn-primary" data-i18n="join">纳入协同</button>
+                <span class="cap-note" data-i18n="coopPrice">协同价 · mock</span>
               </div>
             </article>
             <article class="cloud-card" data-cloud="cf" data-vgpu="0" data-latency="9" data-rate="0.00">
               <div class="cloud-head">
                 <span class="cloud-logo"><svg width="100%" height="100%" fill="#F38020" role="img" viewBox="0 0 24 24"><path d="M16.5088 16.8447c.1475-.5068.0908-.9707-.1553-1.3154-.2246-.3164-.6045-.499-1.0615-.5205l-8.6592-.1123a.1559.1559 0 0 1-.1333-.0713c-.0283-.042-.0351-.0986-.021-.1553.0278-.084.1123-.1484.2036-.1562l8.7359-.1123c1.0351-.0489 2.1601-.8868 2.5537-1.9136l.499-1.3013c.0215-.0561.0293-.1128.0147-.168-.5625-2.5463-2.835-4.4453-5.5499-4.4453-2.5039 0-4.6284 1.6177-5.3876 3.8614-.4927-.3658-1.1187-.5625-1.794-.499-1.2026.119-2.1665 1.083-2.2861 2.2856-.0283.31-.0069.6128.0635.894C1.5683 13.171 0 14.7754 0 16.752c0 .1748.0142.3515.0352.5273.0141.083.0844.1475.1689.1475h15.9814c.0909 0 .1758-.0645.2032-.1553l.12-.4268zm2.7568-5.5634c-.0771 0-.1611 0-.2383.0112-.0566 0-.1054.0415-.127.0976l-.3378 1.1744c-.1475.5068-.0918.9707.1543 1.3164.2256.3164.6055.498 1.0625.5195l1.8437.1133c.0557 0 .1055.0263.1329.0703.0283.043.0351.1074.0214.1562-.0283.084-.1132.1485-.204.1553l-1.921.1123c-1.041.0488-2.1582.8867-2.5527 1.914l-.1406.3585c-.0283.0713.0215.1416.0986.1416h6.5977c.0771 0 .1474-.0489.169-.126.1122-.4082.1757-.837.1757-1.2803 0-2.6025-2.125-4.727-4.7344-4.727"/></svg></span>
                 <span class="cloud-title">Cloudflare<small>Cloudflare</small></span>
-                <span class="cloud-flag badge is-absent"><span class="dot"></span>未纳管</span>
+                <span class="cloud-flag badge is-absent"><span class="dot"></span><span data-i18n="unmanaged">未纳管</span></span>
               </div>
               <div class="cloud-specs">
-                <div class="row"><span class="k">区域</span><span class="v">全球边缘</span></div>
-                <div class="row"><span class="k">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span>正常</span></span></div>
-                <div class="row"><span class="k">加速卡</span><span class="v">Workers AI</span></div>
-                <div class="row"><span class="k">可用算力</span><span class="v mono">0 卡</span></div>
-                <div class="row"><span class="k">显存</span><span class="v mono">—</span></div>
-                <div class="row"><span class="k">时延</span><span class="v mono">9 ms</span></div>
-                <div class="row"><span class="k">单价</span><span class="v mono">按用量</span></div>
+                <div class="row"><span class="k" data-i18n="region">区域</span><span class="v">全球边缘</span></div>
+                <div class="row"><span class="k" data-i18n="health">健康度</span><span class="v"><span class="health ok"><span class="hdot"></span><span data-i18n="healthOk">正常</span></span></span></div>
+                <div class="row"><span class="k" data-i18n="accCard">加速卡</span><span class="v">Workers AI</span></div>
+                <div class="row"><span class="k" data-i18n="availCompute">可用算力</span><span class="v mono">0 卡</span></div>
+                <div class="row"><span class="k" data-i18n="vram">显存</span><span class="v mono">—</span></div>
+                <div class="row"><span class="k" data-i18n="latency">时延</span><span class="v mono">9 ms</span></div>
+                <div class="row"><span class="k" data-i18n="unitPrice">单价</span><span class="v mono">按用量</span></div>
               </div>
               <div class="cloud-trend"><span class="cap-note">利用率 28%</span><svg class="spark" viewBox="0 0 72 22" aria-hidden="true"><polyline points="0.0,13.4 6.5,11.7 13.1,10.1 19.6,8.8 26.2,10.3 32.7,9.9 39.3,12.1 45.8,14.5 52.4,13.4 58.9,13.4 65.5,12.5 72.0,14.7"/><circle class="spark-end" cx="72.0" cy="14.7" r="2"/></svg></div>
               <div class="cap-bar"><i style="width:28%"></i></div>
               <div class="cloud-foot">
-                <button class="btn-primary">纳入协同</button>
-                <span class="cap-note">按用量计费</span>
+                <button class="btn-primary" data-i18n="join">纳入协同</button>
+                <span class="cap-note" data-i18n="usageBilling">按用量计费</span>
               </div>
             </article>
         </div>
 
         <section class="card">
-          <div class="card-head"><h3>协同调度队列</h3>
+          <div class="card-head"><h3 data-i18n="queue">协同调度队列</h3>
             <span class="card-head-actions">
-              <button class="btn-outline btn-xs" id="routeBtn">重新评估路由</button>
-              <span class="muted fineprint" id="routeNote">按 evidence / cost / 时延择优</span>
+              <button class="btn-outline btn-xs" id="routeBtn" data-i18n="routeBtn">重新评估路由</button>
+              <span class="muted fineprint" id="routeNote" data-i18n="routeNote">按 evidence / cost / 时延择优</span>
             </span></div>
           <ul class="queue-list" id="queueList">
-            <li class="queue-row"><span class="q-task">T-18</span><span class="q-arrow">→</span><span class="q-cloud">阿里云 · 华东1</span><span class="badge is-scan"><span class="dot"></span>调度中</span><span class="q-time">12 ms</span></li>
-            <li class="queue-row"><span class="q-task">T-17</span><span class="q-arrow">→</span><span class="q-cloud">腾讯云 · 上海</span><span class="badge is-auth"><span class="dot"></span>排队 #1</span><span class="q-time">18 ms</span></li>
-            <li class="queue-row"><span class="q-task">T-16</span><span class="q-arrow">→</span><span class="q-cloud">华为云 · 北京四</span><span class="badge is-auth"><span class="dot"></span>排队 #2</span><span class="q-time">21 ms</span></li>
-            <li class="queue-row"><span class="q-task">T-15</span><span class="q-arrow">→</span><span class="q-cloud">Google Cloud · us-central1</span><span class="badge is-ready"><span class="dot"></span>已提交</span><span class="q-time">142 ms</span></li>
+            <li class="queue-row"><span class="q-task">T-18</span><span class="q-arrow">→</span><span class="q-cloud">阿里云 · 华东1</span><span class="badge is-scan"><span class="dot"></span><span data-i18n="qDispatch">调度中</span></span><span class="q-time">12 ms</span></li>
+            <li class="queue-row"><span class="q-task">T-17</span><span class="q-arrow">→</span><span class="q-cloud">腾讯云 · 上海</span><span class="badge is-auth"><span class="dot"></span><span data-i18n="qQ1">排队 #1</span></span><span class="q-time">18 ms</span></li>
+            <li class="queue-row"><span class="q-task">T-16</span><span class="q-arrow">→</span><span class="q-cloud">华为云 · 北京四</span><span class="badge is-auth"><span class="dot"></span><span data-i18n="qQ2">排队 #2</span></span><span class="q-time">21 ms</span></li>
+            <li class="queue-row"><span class="q-task">T-15</span><span class="q-arrow">→</span><span class="q-cloud">Google Cloud · us-central1</span><span class="badge is-ready"><span class="dot"></span><span data-i18n="qDone">已提交</span></span><span class="q-time">142 ms</span></li>
           </ul>
-          <p class="fineprint muted" style="margin:10px 0 0">路由分配为 mock 演示：在已纳管云中按时延优先抽样。</p>
+          <p class="fineprint muted" style="margin:10px 0 0" data-i18n="routeAllocNote">路由分配为 mock 演示：在已纳管云中按时延优先抽样。</p>
         </section>
-        <p class="fineprint muted">协同指标为演示口径：纳管厂商 = 已启用协同的云数量；可用算力 = 已纳管云的可调度加速卡合计；时成本 = 已纳管云（卡数×单价）合计；时延取已纳管云均值。均为 mock。</p>
+        <p class="fineprint muted" data-i18n="computeFineprint">协同指标为演示口径：纳管厂商 = 已启用协同的云数量；可用算力 = 已纳管云的可调度加速卡合计；时成本 = 已纳管云（卡数×单价）合计；时延取已纳管云均值。均为 mock。</p>
       </div>
     </section>
 
@@ -2622,6 +2703,164 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
   };
 })();
 </script>
+<script>
+
+/* ─── 语言 / 主题切换 ─── */
+var I18N = {
+  zh: {
+    navHome:'Home', navSignals:'Signals', navFeed:'Feed', navAgents:'Agents', navCompute:'Compute',
+    dashboard:'Dashboard', signals:'Signals', feed:'Feed', agents:'Agents', compute:'Compute',
+    greetLate:'Working late', greetMorning:'Good morning', greetAfternoon:'Good afternoon', greetEvening:'Good evening',
+    projectPrefix:'项目 p1 · ',
+    findBranch:'Find a branch...', showMore:'Show more', filterSignals:'Filter signals...',
+    topBranches:'Top branches', needsAttention:'Needs attention', inflightTasks:'In-flight tasks',
+    expertOpinions:'Expert opinions', latestLedger:'Latest from the ledger',
+    viewAllTasks:'View all tasks', viewAllSignals:'View all signals', viewLedger:'View ledger →', switchLedger:'Switch to ledger view',
+    giveFeedback:'Give feedback',
+    teaserAgents:'检查本地可接入的 Agent 运行时', teaserCompute:'多云算力协同编排',
+    expertFineprint:'kind=expert_opinion · review_state 恒为 unverified（意见≠事实）',
+    feedSubtitle:'task_audit 全量回放（sequence 升序）。subscribeActivity 每 3.2s 追加一条实时事件并高亮。',
+    idlePoolPre:'Idle pool · ', idlePool:'待认领', sedimentPre:'Sediment · ', sediment:'已沉积',
+    feedLaneNote:'泳道口径（契约 §4）：available / partial / handoff = 待认领；claimed / submitting = 进行中；completed / failed / blocked = 已沉积。',
+    agentsSubtitle:'复用各厂商原品牌标志，扫描本机可接入的 Agent 运行时、IDE 插件与 API 凭证。检测为演示逻辑，不发起真实调用。',
+    scanBtn:'扫描本地 Agent', scanIdle:'尚未扫描 · 点击开始探测', scanning:'扫描中…',
+    scanDone:'检测完成 · 6 可接入 / 5 需凭证 / 1 未检测到',
+    fAll:'全部', fReady:'可接入', fAuth:'需凭证', fAbsent:'未检测到',
+    sReady:'可直接接入', sAuth:'需配置凭证', sAbsent:'未检测到', sLatency:'平均探测时延',
+    agentsFineprint:'探测明细（版本 / 路径 / 时延 / 上次检测）均为 mock 演示数据，未实际访问本机环境。',
+    agentEmpty:'该状态下暂无 Agent。',
+    ready:'可接入', auth:'需凭证', absent:'未检测到',
+    connect:'连接', configCred:'配置凭证', guide:'接入指南',
+    evidenceLabel:'探测依据', lastSeen:'上次检测', health:'健康度', healthOk:'正常', healthBusy:'繁忙',
+    version:'版本', latency:'时延',
+    vIde:'IDE 插件', vModelHub:'模型 Hub', vOrchestration:'编排框架', vLocal:'本地推理',
+    computeSubtitle:'复用云厂商真实标志，纳管多云算力并按证据、成本与时延协同编排。数据为演示 mock。',
+    topology:'协同拓扑', topoNote:'枢纽 = Morphogenesis 编排中枢 · 金色连线 = 已纳管协同',
+    queue:'协同调度队列', routeBtn:'重新评估路由', routeNote:'按 evidence / cost / 时延择优',
+    sManaged:'纳管厂商', sCompute:'可用算力', sCost:'预估时成本', sAvgLat:'平均时延',
+    computeFineprint:'协同指标为演示口径：纳管厂商 = 已启用协同的云数量；可用算力 = 已纳管云的可调度加速卡合计；时成本 = 已纳管云（卡数×单价）合计 · mock',
+    routeAllocNote:'路由分配为 mock 演示：在已纳管云中按时延优先抽样。',
+    hub:'编排中枢', join:'纳入协同', leave:'移出协同', managed:'已纳管', unmanaged:'未纳管',
+    accCard:'加速卡', vram:'显存', region:'区域', unitPrice:'单价', availCompute:'可用算力',
+    usageBilling:'按用量计费', coopPrice:'协同价 · mock',
+    qDispatch:'调度中', qQ1:'排队 #1', qQ2:'排队 #2', qDone:'已提交',
+    noCompute:'暂无可调度算力 · 请先纳入至少一家云厂商',
+    evaluating:'评估中…', routeEvaluating:'重估 evidence / cost / 时延…',
+    routeUpdated:'路由已更新 · mock', routeToast:'协同路由已重新评估（mock）',
+    joinToast:' 已纳入协同（mock）', leaveToast:' 已移出协同（mock）',
+    noBranches:'No branches found',
+    wfMeta:'All branches<span class="meta-dot">·</span>Optimized for: Exploration <b>20%</b><span class="meta-dot">·</span>Policy: <b class="mono">research-v1</b>',
+    wfReadonly:'↳ read_only: true · claim_requires_recheck: true',
+    branch_testing:'验证中', branch_proposed:'提议', branch_dormant:'休眠', branch_exploring:'探索',
+    branch_supported:'已支持', branch_disputed:'争议', branch_refuted:'已反驳', branch_archived:'已归档',
+    reason_eligible:'eligible', reason_insufficient_evidence:'证据不足', reason_unknown_cost:'成本未知',
+    reason_refuted_under_conditions:'条件下被反驳', reason_dormant:'休眠', reason_archived:'已归档', reason_out_of_scope:'越界',
+    cloud_aliyun:'阿里云', cloud_tencent:'腾讯云', cloud_huawei:'华为云', cloud_baidu:'百度智能云',
+    cloud_volc:'火山引擎', cloud_gcp:'Google Cloud', cloud_aws:'AWS', cloud_azure:'Azure', cloud_cf:'Cloudflare',
+    themeTip:'切换明暗主题 (g then t)', langTip:'Switch language (g then l)',
+    scanProbing:'正在探测本地运行时 / 环境变量 / 端口…', scanBadge:'检测中',
+    scanProgress:'探测进度 ', rescan:'重新扫描', justNow:'刚刚',
+    scanSummary:'扫描完成：{r} 个可直接接入，{a} 个需配置凭证，{n} 个未检测到。',
+    scanToast:'本地 Agent 扫描完成：{r} 个可接入'
+  },
+  en: {
+    navHome:'Home', navSignals:'Signals', navFeed:'Feed', navAgents:'Agents', navCompute:'Compute',
+    dashboard:'Dashboard', signals:'Signals', feed:'Feed', agents:'Agents', compute:'Compute',
+    greetLate:'Working late', greetMorning:'Good morning', greetAfternoon:'Good afternoon', greetEvening:'Good evening',
+    projectPrefix:'Project p1 · ',
+    findBranch:'Find a branch...', showMore:'Show more', filterSignals:'Filter signals...',
+    topBranches:'Top branches', needsAttention:'Needs attention', inflightTasks:'In-flight tasks',
+    expertOpinions:'Expert opinions', latestLedger:'Latest from the ledger',
+    viewAllTasks:'View all tasks', viewAllSignals:'View all signals', viewLedger:'View ledger →', switchLedger:'Switch to ledger view',
+    giveFeedback:'Give feedback',
+    teaserAgents:'Check locally connectable Agent runtimes', teaserCompute:'Multi-cloud compute orchestration',
+    expertFineprint:'kind=expert_opinion · review_state always unverified (opinion ≠ fact)',
+    feedSubtitle:'Full task_audit replay (sequence ascending). subscribeActivity appends a live event every 3.2s with highlight.',
+    idlePoolPre:'Idle pool · ', idlePool:'Unclaimed', sedimentPre:'Sediment · ', sediment:'Settled',
+    feedLaneNote:'Lane rule (contract §4): available / partial / handoff = unclaimed; claimed / submitting = in flight; completed / failed / blocked = settled.',
+    agentsSubtitle:'Reuse vendor brand marks to scan locally connectable Agent runtimes, IDE plugins and API credentials. Detection is demo logic and makes no real calls.',
+    scanBtn:'Scan local Agents', scanIdle:'Not scanned yet · click to probe', scanning:'Scanning…',
+    scanDone:'Scan complete · 6 ready / 5 need auth / 1 not detected',
+    fAll:'All', fReady:'Ready', fAuth:'Auth', fAbsent:'Absent',
+    sReady:'Ready to connect', sAuth:'Need credentials', sAbsent:'Not detected', sLatency:'Avg probe latency',
+    agentsFineprint:'Probe details (version / path / latency / last seen) are mock demo data; the local environment was not actually accessed.',
+    agentEmpty:'No agents in this state.',
+    ready:'Ready', auth:'Auth', absent:'Not detected',
+    connect:'Connect', configCred:'Configure credentials', guide:'Integration guide',
+    evidenceLabel:'Probe evidence', lastSeen:'Last seen', health:'Health', healthOk:'OK', healthBusy:'Busy',
+    version:'Version', latency:'Latency',
+    vIde:'IDE plugin', vModelHub:'Model Hub', vOrchestration:'Orchestration framework', vLocal:'Local inference',
+    computeSubtitle:'Reuse cloud vendor brand marks to manage multi-cloud compute and orchestrate by evidence, cost and latency. Data is demo mock.',
+    topology:'Orchestration topology', topoNote:'Hub = Morphogenesis orchestrator · gold links = managed collaboration',
+    queue:'Scheduling queue', routeBtn:'Re-evaluate routes', routeNote:'Optimize by evidence / cost / latency',
+    sManaged:'Managed vendors', sCompute:'Available compute', sCost:'Est. hourly cost', sAvgLat:'Avg latency',
+    computeFineprint:'Collaboration metrics are demo-scoped: managed vendors = clouds with collaboration enabled; available compute = total schedulable accelerators on managed clouds; hourly cost = sum over managed clouds (cards × unit price) · mock',
+    routeAllocNote:'Route allocation is a mock demo: latency-priority sampling among managed clouds.',
+    hub:'Orchestrator', join:'Join', leave:'Remove', managed:'Managed', unmanaged:'Unmanaged',
+    accCard:'Accelerator', vram:'VRAM', region:'Region', unitPrice:'Unit price', availCompute:'Available',
+    usageBilling:'Usage billing', coopPrice:'Co-op price · mock',
+    qDispatch:'Dispatching', qQ1:'Queued #1', qQ2:'Queued #2', qDone:'Submitted',
+    noCompute:'No schedulable compute · add at least one cloud vendor first',
+    evaluating:'Evaluating…', routeEvaluating:'Re-evaluating evidence / cost / latency…',
+    routeUpdated:'Routes updated · mock', routeToast:'Collaboration routes re-evaluated (mock)',
+    joinToast:' joined collaboration (mock)', leaveToast:' removed from collaboration (mock)',
+    noBranches:'No branches found',
+    wfMeta:'All branches<span class="meta-dot">·</span>Optimized for: Exploration <b>20%</b><span class="meta-dot">·</span>Policy: <b class="mono">research-v1</b>',
+    wfReadonly:'↳ read_only: true · claim_requires_recheck: true',
+    branch_testing:'testing', branch_proposed:'proposed', branch_dormant:'dormant', branch_exploring:'exploring',
+    branch_supported:'supported', branch_disputed:'disputed', branch_refuted:'refuted', branch_archived:'archived',
+    reason_eligible:'eligible', reason_insufficient_evidence:'insufficient evidence', reason_unknown_cost:'unknown cost',
+    reason_refuted_under_conditions:'refuted under conditions', reason_dormant:'dormant', reason_archived:'archived', reason_out_of_scope:'out of scope',
+    cloud_aliyun:'Alibaba Cloud', cloud_tencent:'Tencent Cloud', cloud_huawei:'Huawei Cloud', cloud_baidu:'Baidu AI Cloud',
+    cloud_volc:'Volcengine', cloud_gcp:'Google Cloud', cloud_aws:'AWS', cloud_azure:'Azure', cloud_cf:'Cloudflare',
+    themeTip:'Toggle light / dark theme (g then t)', langTip:'切换中英文 (g then l)',
+    scanProbing:'Probing local runtimes / env vars / ports…', scanBadge:'Probing',
+    scanProgress:'Progress ', rescan:'Rescan', justNow:'just now',
+    scanSummary:'Scan complete: {r} ready to connect, {a} need credentials, {n} not detected.',
+    scanToast:'Local Agent scan complete: {r} ready'
+  }
+};
+var LANG = (function(){ try { return localStorage.getItem('mg_lang') || 'zh'; } catch(e){ return 'zh'; } })();
+function T(k) { var d = I18N[LANG] || I18N.zh; return (k in d) ? d[k] : (I18N.zh[k] != null ? I18N.zh[k] : k); }
+function applyI18n() {
+  document.documentElement.setAttribute('lang', LANG === 'en' ? 'en' : 'zh-CN');
+  document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = T(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.setAttribute('placeholder', T(el.getAttribute('data-i18n-ph'))); });
+  var lb = document.getElementById('langToggle'); if (lb) { lb.textContent = LANG === 'en' ? '中文' : 'EN'; lb.title = T('langTip'); }
+  var tb = document.getElementById('themeToggle'); if (tb) tb.title = T('themeTip');
+}
+function rerenderLang() {
+  applyI18n();
+  try { document.dispatchEvent(new CustomEvent('mg:lang')); } catch (e) {}
+}
+function setLang(l) {
+  LANG = l;
+  try { localStorage.setItem('mg_lang', l); } catch (e) {}
+  rerenderLang();
+  try { if (window.mgNotify) window.mgNotify(l === 'en' ? 'Language switched to English' : '语言已切换为中文'); } catch (e) {}
+}
+var THEME = (function(){ try { return localStorage.getItem('mg_theme') || 'light'; } catch(e){ return 'light'; } })();
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', THEME);
+  var sun = document.querySelector('#themeToggle .icon-sun');
+  var moon = document.querySelector('#themeToggle .icon-moon');
+  if (sun) sun.hidden = (THEME === 'dark');
+  if (moon) moon.hidden = (THEME !== 'dark');
+}
+function toggleTheme() {
+  THEME = THEME === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('mg_theme', THEME); } catch (e) {}
+  applyTheme();
+  try { if (window.mgNotify) window.mgNotify(THEME === 'dark' ? 'Dark theme on' : 'Light theme on'); } catch (e) {}
+}
+(function bindLangTheme() {
+  var lb = document.getElementById('langToggle'); if (lb) lb.addEventListener('click', function () { setLang(LANG === 'en' ? 'zh' : 'en'); });
+  var tb = document.getElementById('themeToggle'); if (tb) tb.addEventListener('click', toggleTheme);
+  applyTheme(); applyI18n();
+})();
+
+</script>
+
 <script>/* ============================================================
  * 环境观测台 · 视图层 v4
  * GitHub Dashboard 1:1 复刻（Morphogenesis 版）
@@ -2654,6 +2893,22 @@ var taskSort = 'updated';
 var STATUS_ZH = { available: '待认领', partial: '部分完成', handoff: '待转交', claimed: '进行中', submitting: '提交中', completed: '已完成', failed: '失败', blocked: '阻塞' };
 var BRANCH_ZH = { proposed: '提议', exploring: '探索', testing: '验证中', supported: '已支持', disputed: '争议', dormant: '休眠', refuted: '已反驳', archived: '已归档' };
 var REASON_ZH = { eligible: 'eligible', insufficient_evidence: '证据不足', unknown_cost: '成本未知', refuted_under_conditions: '条件下被反驳', dormant: '休眠', archived: '已归档', out_of_scope: '越界' };
+
+/* 状态 / 原因标签跟随语言：优先查 window.I18N（全局词典），缺键回退内置中文表 */
+function dictLabel(prefix, key, fallbackTable) {
+  try {
+    var k = prefix + key;
+    var I = window.I18N;
+    if (I) {
+      var cur = I[window.LANG];
+      if (cur && k in cur) return cur[k];
+      if (I.zh && k in I.zh) return I.zh[k];
+    }
+  } catch (e) {}
+  return (fallbackTable && fallbackTable[key]) || key;
+}
+function branchLabel(s) { return dictLabel('branch_', s, BRANCH_ZH); }
+function reasonLabel(r) { return dictLabel('reason_', r, REASON_ZH); }
 
 /* ---------- 契约 §5：actor 提取 + 事件文案 ---------- */
 function actorOf(body) {
@@ -2790,10 +3045,10 @@ window.addEventListener('hashchange', applyView);
 /* ---------- 问候（1:1 Good evening） ---------- */
 function renderGreeting() {
   var hr = new Date().getHours();
-  var g = hr < 5 ? 'Working late' : hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+  var g = hr < 5 ? T('greetLate') : hr < 12 ? T('greetMorning') : hr < 18 ? T('greetAfternoon') : T('greetEvening');
   $('greetTitle').textContent = g + ', swarm-gen-1!';
   var goal = PKG && PKG.context && PKG.context.project ? PKG.context.project.goal : '';
-  $('greetSub').textContent = '项目 p1 · ' + goal;
+  $('greetSub').textContent = T('projectPrefix') + goal;
 }
 
 /* ---------- 侧栏分支（1:1 Top repositories） ---------- */
@@ -2818,13 +3073,13 @@ function renderBranches() {
     items = items.filter(function (b) { return b.branch_id.toLowerCase().indexOf(branchQuery) >= 0; });
   }
   if (!items.length) {
-    list.innerHTML = '<li class="muted loading-line">No branches found</li>';
+    list.innerHTML = '<li class="muted loading-line">' + T('noBranches') + '</li>';
   } else {
     items.forEach(function (b) {
       var li = h('<li><a class="branch-item" href="#/branches">'
         + '<span class="branch-avatar ' + avatarClass(b.branch_id) + '"></span>'
         + '<span class="branch-name">p1 / <b>' + esc(b.branch_id) + '</b></span>'
-        + '<span class="branch-status">' + esc(BRANCH_ZH[b.status] || b.status) + '</span>'
+        + '<span class="branch-status">' + esc(branchLabel(b.status)) + '</span>'
         + '</a></li>');
       li.querySelector('a').addEventListener('click', function (ev) {
         ev.preventDefault();
@@ -3032,7 +3287,7 @@ function renderWayfinder(focusId) {
   OPP.forEach(function (o) {
     var b = BRANCH[o.branch_id] || {};
     var f = o.factors;
-    var reasons = (o.reasons || []).map(function (r) { return '<span class="tag">' + esc(REASON_ZH[r] || r) + '</span>'; }).join('');
+    var reasons = (o.reasons || []).map(function (r) { return '<span class="tag">' + esc(reasonLabel(r)) + '</span>'; }).join('');
     var node = h('<button class="wf-route' + (o.branch_id === focusId ? ' is-focus' : '') + (o.eligible ? '' : ' is-ineligible') + '">'
       + '<div class="wf-route-top">'
       + '<span class="branch-avatar ' + avatarClass(o.branch_id) + '"></span>'
@@ -3042,7 +3297,7 @@ function renderWayfinder(focusId) {
       + '</div>'
       + '<div class="share-bar"><i style="width:' + Math.round(o.share * 100) + '%"></i></div>'
       + '<div class="wf-factors muted">evidence ' + f.evidence + ' · applicability ' + f.applicability + ' · goal ' + f.goal_relevance + ' · risk ' + f.risk + '</div>'
-      + '<div class="wf-factors muted">支持 ×' + f.support_count + ' / 反驳 ×' + f.refute_count + ' · 成本 ' + (o.known_cost == null ? '—' : o.known_cost) + ' · 状态 ' + esc(BRANCH_ZH[b.status] || b.status || '—') + '</div>'
+      + '<div class="wf-factors muted">支持 ×' + f.support_count + ' / 反驳 ×' + f.refute_count + ' · 成本 ' + (o.known_cost == null ? '—' : o.known_cost) + ' · 状态 ' + esc(branchLabel(b.status)) + '</div>'
       + (reasons ? '<div class="wf-reasons">' + reasons + '</div>' : '')
       + '</button>');
     node.addEventListener('click', function () { setReadout(o); });
@@ -3112,7 +3367,7 @@ function wayfinderAnswer(q, st) {
   }
 
   if (st.mode === 'navigate') {
-    out += '<br><b>路由理由</b>：' + ((pick.reasons || []).map(function (r) { return REASON_ZH[r] || r; }).join('、') || '无阻断理由')
+    out += '<br><b>路由理由</b>：' + ((pick.reasons || []).map(function (r) { return reasonLabel(r); }).join('、') || '无阻断理由')
       + '<br><a data-open-wf="' + esc(pick.branch_id) + '">在 Wayfinder 面板中查看路线 →</a>';
   } else if (st.mode === 'audit') {
     var notes = (PKG.context && PKG.context.notes) ? PKG.context.notes : [];
@@ -3214,7 +3469,7 @@ function cmdkItems() {
     items.push({ t: 'Open replay ' + id + ' · ' + goal, hint: 'task', run: function () { openReplay(id); } });
   });
   SNAP.branches.forEach(function (b) {
-    items.push({ t: 'View branch ' + b.branch_id + ' (' + (BRANCH_ZH[b.status] || b.status) + ')', hint: 'branch', run: function () { openWayfinder(b.branch_id); } });
+    items.push({ t: 'View branch ' + b.branch_id + ' (' + branchLabel(b.status) + ')', hint: 'branch', run: function () { openWayfinder(b.branch_id); } });
   });
   return items;
 }
@@ -3273,6 +3528,8 @@ document.addEventListener('keydown', function (e) {
     else if (k === 'p') switchView('feed');
     else if (k === 'a') switchView('agents');
     else if (k === 'c') switchView('compute');
+    else if (k === 't') toggleTheme();
+    else if (k === 'l') setLang(LANG === 'en' ? 'zh' : 'en');
     else if (k === 'n') toggleNotif();
     return;
   }
@@ -3570,6 +3827,14 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
   })
   .catch(function () {
     $('loadError').hidden = false;
+  });
+
+  document.addEventListener('mg:lang', function () {
+    try { renderGreeting(); } catch (e) {}
+    try { renderBranches(); } catch (e) {}
+    try { renderTasks(); } catch (e) {}
+    try { renderSignals(); } catch (e) {}
+    try { renderFeed(); } catch (e) {}
   });
 
 })();
@@ -3933,7 +4198,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     var latEl = tile.querySelector('[data-field="latency"]');
     var seenEl = tile.querySelector('[data-field="lastseen"]');
     if (latEl) latEl.textContent = probe === 'ready' ? (tile.getAttribute('data-lat') + ' ms') : '—';
-    if (seenEl) seenEl.textContent = probe === 'absent' ? '—' : '刚刚';
+    if (seenEl) seenEl.textContent = probe === 'absent' ? '—' : T('justNow');
   }
   function scanAgents() {
     if (scanning) return;
@@ -3941,29 +4206,29 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     if (!btn) return;
     scanning = true;
     btn.disabled = true;
-    btn.textContent = '扫描中…';
-    if (status) status.textContent = '正在探测本地运行时 / 环境变量 / 端口…';
+    btn.textContent = T('scanning');
+    if (status) status.textContent = T('scanProbing');
     var tiles = agentTiles();
     tiles.forEach(function (t) {
       t.classList.add('is-scanning');
       var box = t.querySelector('.agent-status');
-      if (box) box.innerHTML = '<span class="badge is-scan"><span class="dot"></span>检测中</span>';
+      if (box) box.innerHTML = '<span class="badge is-scan"><span class="dot"></span>' + T('scanBadge') + '</span>';
     });
     tiles.forEach(function (t, i) {
       setTimeout(function () {
         t.classList.remove('is-scanning');
         fillTileResult(t);
         var done = (i + 1);
-        if (status) status.textContent = '探测进度 ' + done + '/' + tiles.length + '…';
+        if (status) status.textContent = T('scanProgress') + done + '/' + tiles.length + '…';
         if (done === tiles.length) {
           paintAgentStats();
           paintAgentLatency();
           var c = summarizeAgents();
           btn.disabled = false;
-          btn.textContent = '重新扫描';
+          btn.textContent = T('rescan');
           scanning = false;
-          if (status) status.textContent = '扫描完成：' + c.ready + ' 个可直接接入，' + c.auth + ' 个需配置凭证，' + c.absent + ' 个未检测到。';
-          notify('本地 Agent 扫描完成：' + c.ready + ' 个可接入');
+          if (status) status.textContent = T('scanSummary').replace('{r}', c.ready).replace('{a}', c.auth).replace('{n}', c.absent);
+          notify(T('scanToast').replace('{r}', c.ready));
         }
       }, 240 + i * 130);
     });
@@ -4005,11 +4270,16 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
   }
 
   /* ---------------- Compute：多云算力协同（mock） ---------------- */
-  var CLOUD_META = {
-    aliyun: '阿里云 · 华东1', tencent: '腾讯云 · 上海', huawei: '华为云 · 北京四',
-    baidu: '百度智能云 · 北京', volc: '火山引擎 · 北京', gcp: 'Google Cloud · us-central1',
-    aws: 'AWS · us-east-1', azure: 'Azure · eastus', cf: 'Cloudflare · 全球边缘'
+  var CLOUD_REGION = {
+    aliyun: ['华东1', 'cn-hangzhou'], tencent: ['上海', 'cn-shanghai'], huawei: ['北京四', 'cn-beijing-4'],
+    baidu: ['北京', 'cn-beijing'], volc: ['北京', 'cn-beijing'], gcp: ['us-central1', 'us-central1'],
+    aws: ['us-east-1', 'us-east-1'], azure: ['eastus', 'eastus'], cf: ['全球边缘', 'Global Edge']
   };
+  function cloudMeta(cid) {
+    var r = CLOUD_REGION[cid]; if (!r) return cid;
+    var name = T('cloud_' + cid);
+    return name + ' · ' + r[LANG === 'en' ? 1 : 0];
+  }
   var QUEUE_TASKS = ['T-18', 'T-17', 'T-16', 'T-15'];
 
   function cloudCards() {
@@ -4050,7 +4320,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       return (parseFloat(a.getAttribute('data-latency') || '9999')) - (parseFloat(b.getAttribute('data-latency') || '9999'));
     });
     if (!enabled.length) {
-      list.innerHTML = '<li class="queue-row"><span class="q-cloud">暂无可调度算力 · 请先纳入至少一家云厂商</span></li>';
+      list.innerHTML = '<li class="queue-row"><span class="q-cloud">' + T('noCompute') + '</span></li>';
       return;
     }
     var html = '';
@@ -4064,7 +4334,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       else { state = '排队 #' + i; cls = 'is-auth'; }
       html += '<li class="queue-row' + (flash ? ' is-flash' : '') + '">' +
         '<span class="q-task">' + t + '</span><span class="q-arrow">→</span>' +
-        '<span class="q-cloud">' + (CLOUD_META[cid] || cid) + '</span>' +
+        '<span class="q-cloud">' + cloudMeta(cid) + '</span>' +
         '<span class="badge ' + cls + '"><span class="dot"></span>' + state + '</span>' +
         '<span class="q-time">' + lat + '</span></li>';
     });
@@ -4079,17 +4349,17 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     card.classList.toggle('is-on');
     var on = card.classList.contains('is-on');
     var btn = card.querySelector('.cloud-foot button');
-    if (btn) { btn.textContent = on ? '移出协同' : '纳入协同'; btn.classList.toggle('is-on', on); }
+    if (btn) { btn.textContent = T(on ? 'leave' : 'join'); btn.classList.toggle('is-on', on); }
     var flag = card.querySelector('.cloud-flag');
     if (flag) {
       flag.className = 'cloud-flag badge ' + (on ? 'is-ready' : 'is-absent');
-      flag.innerHTML = '<span class="dot"></span>' + (on ? '已纳管' : '未纳管');
+      flag.innerHTML = '<span class="dot"></span>' + T(on ? 'managed' : 'unmanaged');
     }
     paintTopology();
     paintComputeStats();
     renderQueue(false);
     var cid = card.getAttribute('data-cloud');
-    notify((CLOUD_META[cid] || cid) + (on ? ' 已纳入协同（mock）' : ' 已移出协同（mock）'));
+    notify(cloudMeta(cid) + T(on ? 'joinToast' : 'leaveToast'));
   }
   function bindCompute() {
     var grid = $('cloudGrid');
@@ -4106,14 +4376,14 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       routeBtn.addEventListener('click', function () {
         var note = $('routeNote');
         routeBtn.disabled = true;
-        routeBtn.textContent = '评估中…';
-        if (note) note.textContent = '重估 evidence / cost / 时延…';
+        routeBtn.textContent = T('evaluating');
+        if (note) note.textContent = T('routeEvaluating');
         setTimeout(function () {
           renderQueue(true);
           routeBtn.disabled = false;
-          routeBtn.textContent = '重新评估路由';
-          if (note) note.textContent = '路由已更新 · mock';
-          notify('协同路由已重新评估（mock）');
+          routeBtn.textContent = T('routeBtn');
+          if (note) note.textContent = T('routeUpdated');
+          notify(T('routeToast'));
         }, 900);
       });
     }
@@ -4139,6 +4409,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     paintAgentLatency();
     paintTopology();
     paintComputeStats();
+    applyI18n();
   }
   function onRoute() {
     setBar();
@@ -4152,6 +4423,15 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
   } else {
     wireModule(); onRoute();
   }
+
+  window.mgNotify = notify;
+  document.addEventListener('mg:lang', function () {
+    try { renderQueue(false); } catch (e) {}
+    try { setBar(); } catch (e) {}
+    try { paintTopology(); } catch (e) {}
+    var s = document.querySelector('.scan-status');
+    if (s && s.textContent && s.textContent.indexOf('检测完成') >= 0) s.textContent = window.T('scanDone');
+  });
 })();
 
 </script>
