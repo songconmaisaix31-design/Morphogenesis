@@ -1261,6 +1261,17 @@ html[data-theme="dark"] .agent-menu,
 html[data-theme="dark"] .task-menu {
   border-color: var(--border);
 }
+/* 上面这些选择器的特异度（0,2,1）高于本段的 .card / .gh-header，会把背景压回实底
+   var(--panel) / var(--bg-subtle)。这里用同等特异度再声明一次背景，且本段位置更靠后，
+   因此暗色下拿到的仍是玻璃变量而不是实色。 */
+html[data-theme="dark"] .card { background: var(--glass-card); }
+html[data-theme="dark"] .gh-header { background: var(--glass-chrome); }
+html[data-theme="dark"] .gh-sidebar { background: var(--glass-chrome); }
+html[data-theme="dark"] .drawer,
+html[data-theme="dark"] .cmdk-box,
+html[data-theme="dark"] .dropdown,
+html[data-theme="dark"] .agent-menu,
+html[data-theme="dark"] .task-menu { background: var(--glass-heavy); }
 html[data-theme="dark"] .drawer-head,
 html[data-theme="dark"] .drawer-foot,
 html[data-theme="dark"] .card-head { border-color: var(--border-muted); }
