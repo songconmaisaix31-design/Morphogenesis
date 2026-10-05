@@ -1173,6 +1173,127 @@ html[data-theme="dark"] .skeleton-row { background: linear-gradient(90deg, var(-
 .hbtn-lang { font-size: 12px; font-weight: 600; letter-spacing: .2px; padding: 0 8px; min-width: 34px; }
 .hbtn-lang:hover { color: var(--accent); }
 
+
+/* ════════════════════════════════════════════════════════════════════
+ * 液态玻璃（Apple Liquid Glass 风格）
+ *
+ * 只覆盖四类面：顶栏 / 侧栏 / 卡片 / 浮层（抽屉·命令面板·下拉·菜单）。
+ * 页面有常驻 WebGL 黏菌网络，backdrop-filter 是 GPU 大户，因此不做全站铺开，
+ * 也不在列表行、按钮、输入框上叠加第二层模糊。
+ *
+ * 浅色玻璃透金色网络的效果远好于深色：白玻璃把背后的金线整体提亮并保留饱和度，
+ * 深色玻璃会把金线压暗。所以默认参数按浅色调，深色主题另给一套更暗的玻璃。
+ * ════════════════════════════════════════════════════════════════════ */
+:root {
+  --radius-card: 18px;
+  --glass-card: rgba(255, 255, 255, 0.66);
+  --glass-chrome: rgba(255, 255, 255, 0.45);
+  --glass-heavy: rgba(255, 255, 255, 0.55);
+  --glass-blur-card: 16px;
+  --glass-blur-chrome: 16px;
+  --glass-blur-heavy: 20px;
+  --glass-sat: 150%;
+  --glass-hairline: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 8px 24px rgba(31, 35, 40, 0.10);
+  --gold-hi: rgba(245, 195, 59, 0.35);
+}
+
+/* 玻璃需要一个确定的合成基底：html/body 原本透明，在没有 WebGL 背景层时
+   （见背景层的已知问题）会直接透出浏览器默认底色，导致同一份玻璃参数在
+   不同环境下偏灰或偏白。这里补上基底，画布仍在其上正常绘制。 */
+html { background: var(--bg); }
+body { background: var(--bg); }
+
+/* ── 卡片：8px → 18px 圆角，纯白底 → 半透 + 模糊 + 提饱和 ── */
+.card {
+  background: var(--glass-card);
+  -webkit-backdrop-filter: blur(var(--glass-blur-card)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur-card)) saturate(var(--glass-sat));
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-hairline);
+}
+
+/* ── 顶栏 / 侧栏：更通透，让黏菌网络在导航层下若隐若现 ── */
+.gh-header {
+  background: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur-chrome)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur-chrome)) saturate(var(--glass-sat));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+.gh-sidebar {
+  background: var(--glass-chrome);
+  -webkit-backdrop-filter: blur(var(--glass-blur-chrome)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur-chrome)) saturate(var(--glass-sat));
+  border-right: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+/* ── 浮层：最重的玻璃 + 顶部 1px 金色高光边 ── */
+.drawer, .cmdk-box, .dropdown, .agent-menu, .task-menu {
+  background: var(--glass-heavy);
+  -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur-heavy)) saturate(var(--glass-sat));
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 16px 48px rgba(31, 35, 40, 0.18), inset 0 1px 0 var(--gold-hi);
+}
+.dropdown, .agent-menu, .task-menu {
+  box-shadow: var(--shadow-pop), inset 0 1px 0 var(--gold-hi);
+}
+/* 抽屉的内部分区也跟着半透，避免重玻璃上再压一块实色 */
+.drawer-head, .drawer-foot, .card-head {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── 深色主题：换成更暗的玻璃基底，避免白蒙层把画面洗白 ── */
+html[data-theme="dark"] {
+  --glass-card: rgba(45, 51, 59, 0.62);
+  --glass-chrome: rgba(33, 38, 45, 0.52);
+  --glass-heavy: rgba(45, 51, 59, 0.68);
+  --glass-hairline: rgba(255, 255, 255, 0.10);
+  --glass-shadow: 0 8px 24px rgba(1, 4, 9, 0.45);
+}
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .gh-header,
+html[data-theme="dark"] .gh-sidebar,
+html[data-theme="dark"] .drawer,
+html[data-theme="dark"] .cmdk-box,
+html[data-theme="dark"] .dropdown,
+html[data-theme="dark"] .agent-menu,
+html[data-theme="dark"] .task-menu {
+  border-color: var(--border);
+}
+html[data-theme="dark"] .drawer-head,
+html[data-theme="dark"] .drawer-foot,
+html[data-theme="dark"] .card-head { border-color: var(--border-muted); }
+
+/* ── 无障碍回退：系统要求降低透明度 / 减少动效时退回实底，不做实时模糊 ── */
+@media (prefers-reduced-transparency: reduce) {
+  .card, .gh-header, .gh-sidebar, .drawer, .cmdk-box,
+  .dropdown, .agent-menu, .task-menu {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--bg);
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+  }
+  html[data-theme="dark"] .card,
+  html[data-theme="dark"] .gh-header,
+  html[data-theme="dark"] .gh-sidebar,
+  html[data-theme="dark"] .drawer,
+  html[data-theme="dark"] .cmdk-box,
+  html[data-theme="dark"] .dropdown,
+  html[data-theme="dark"] .agent-menu,
+  html[data-theme="dark"] .task-menu {
+    background: var(--panel);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .gh-header, .gh-sidebar, .drawer, .cmdk-box,
+  .dropdown, .agent-menu, .task-menu {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    transition: none;
+  }
+}
 </style>
 </head>
 <body>
