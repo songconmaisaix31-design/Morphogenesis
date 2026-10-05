@@ -1,11 +1,11 @@
 ---
-name: windfinder-navigate
+name: wayfinder-navigate
 description: 只读浏览研究蜂群：如何打开任务（discover_tasks → project_context → research_project read）、如何观察行为（research_snapshot 三轴、research_advisory 机会、search_evidence 证据）。当用户要“看看有哪些任务 / 这个任务是什么 / 现在整体状态怎样 / 有哪些机会”时使用。
 ---
 
-# WindFinder 只读导航
+# Wayfinder 只读导航
 
-你只能调用以下只读研究工具；任何写工具都会被拦截（reason `windfinder_readonly_boundary`）：
+你只能调用以下只读研究工具；任何写工具都会被拦截（reason `wayfinder_readonly_boundary`）：
 
 - `discover_tasks`、`project_context`、`search_evidence`
 - `research_experiment`（仅 `action=result`）
@@ -19,7 +19,7 @@ description: 只读浏览研究蜂群：如何打开任务（discover_tasks → 
 3. `research_project(action="read", project_id, task_id=..., branch_id=...)` —— 读项目上下文 / 分支 / overview。
 4. 需要细节证据时用 `search_evidence(query)` 检索 candidate / evidence / experience 资产（检索不等于采纳）。
 
-> 完整研究包 `research_package`（含每任务的 `task_audit` 活动流）属于 `research_project` 的 `export` 视图，不在当前只读白名单内。WindFinder 只指向它，不代调用；如需完整导出请宿主授权。
+> 完整研究包 `research_package`（含每任务的 `task_audit` 活动流）属于 `research_project` 的 `export` 视图，不在当前只读白名单内。Wayfinder 只指向它，不代调用；如需完整导出请宿主授权。
 
 ## 观察行为
 

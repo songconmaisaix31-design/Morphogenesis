@@ -4,7 +4,7 @@ Serves the static frontend in this directory plus a small read-only research
 JSON API backed by ``swarm/research/service.py``. It never calls propose/claim/
 accept/execute/apply — only the read methods (research_package / snapshot /
 advisory / context); the single write-shaped entry is the Wayfinder ``POST``
-which shells out to the local pi agent (WindFinder extension).
+which shells out to the local pi agent (Wayfinder extension).
 
 Start with ``python src/env-observatory/server.py --port 8099`` after running
 ``seed.py``; point ``OBSERVATORY_HOST_CONFIG`` at the generated host-config.json.
@@ -115,11 +115,11 @@ def _dashscope_key() -> str | None:
 
 
 def run_wayfinder_ask(question: str, host_config: str | None) -> tuple[int, dict]:
-    """Invoke the real pi-agent (WindFinder) once and return its answer.
+    """Invoke the real pi-agent (Wayfinder) once and return its answer.
 
     pi is an npm global shim (pi.cmd/pi.ps1) on Windows, so it is run through the
     shell with the question embedded as a single quoted argument. The agent loads
-    the project ``.pi/extensions/`` (WindFinder) and the read-only swarm.research
+    the project ``.pi/extensions/`` (Wayfinder) and the read-only swarm.research
     MCP; the answer is whatever pi prints on stdout.
     """
     key = _dashscope_key()
@@ -129,7 +129,7 @@ def run_wayfinder_ask(question: str, host_config: str | None) -> tuple[int, dict
     env = _pi_env(dict(os.environ))
     env["DASHSCOPE_API_KEY"] = key
     if host_config:
-        env["WINDFINDER_HOST_CONFIG"] = host_config
+        env["WAYFINDER_HOST_CONFIG"] = host_config
     quoted = question.replace("\\", "\\\\").replace('"', '\\"')
     command = 'pi -p "' + quoted + '"'
     try:
@@ -279,7 +279,7 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
 
         return _read(call)
 
-    # ---- Wayfinder: the single POST entry (pi WindFinder) ----------------
+    # ---- Wayfinder: the single POST entry (pi Wayfinder) ----------------
 
     @app.post("/api/wayfinder/ask")
     async def api_wayfinder_ask(request: Request) -> Response:

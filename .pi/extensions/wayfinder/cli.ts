@@ -1,5 +1,5 @@
 /**
- * WindFinder CLI 入口清单工具。
+ * Wayfinder CLI 入口清单工具。
  *
  * 注册 `list_cli_entries`：返回项目 CLI 入口清单（用途 + 是否可执行）。
  * 可执行仅限安全只读命令（git status/log/diff、ls、查看日志）；
@@ -13,7 +13,7 @@ export interface CliEntry {
   entry: string;
   /** 用途。 */
   purpose: string;
-  /** 是否可由 WindFinder 执行（仅限安全只读命令）。 */
+  /** 是否可由 Wayfinder 执行（仅限安全只读命令）。 */
   executable: boolean;
   /** 补充说明（只读可执行 / 仅导航不执行原因）。 */
   note: string;
@@ -22,7 +22,7 @@ export interface CliEntry {
 const CLI_ENTRIES: readonly CliEntry[] = [
   {
     entry: "python -m swarm.research --config <ABS>",
-    purpose: "研究 MCP stdio（由 WindFinder 注册为 MCP server）",
+    purpose: "研究 MCP stdio（由 Wayfinder 注册为 MCP server）",
     executable: false,
     note: "仅导航不执行：写工具被只读边界拦截，只经 MCP 调用只读工具",
   },
@@ -46,7 +46,7 @@ const CLI_ENTRIES: readonly CliEntry[] = [
   },
   {
     entry: "pi",
-    purpose: "Pi agent 框架（WindFinder 自身宿主）",
+    purpose: "Pi agent 框架（Wayfinder 自身宿主）",
     executable: false,
     note: "仅导航不执行：自身即 Pi",
   },
@@ -88,7 +88,7 @@ function renderCliEntries(): string {
     "## 只读可执行白名单（仅限安全只读命令）",
     readonly,
     "",
-    "模型调用 / 部署 / 安装 / bootstrap / 编排类入口：WindFinder 只说明用途与用法，不代执行。",
+    "模型调用 / 部署 / 安装 / bootstrap / 编排类入口：Wayfinder 只说明用途与用法，不代执行。",
     "需要真正执行写操作时，请宿主授权对应的 Worker / 原生 Agent。",
   ].join("\n");
 }
@@ -96,7 +96,7 @@ function renderCliEntries(): string {
 export function registerCliTool(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "list_cli_entries",
-    label: "WindFinder CLI 入口清单",
+    label: "Wayfinder CLI 入口清单",
     description:
       "返回项目 CLI 入口清单（python -m swarm.research / morphogenesis / morphogenesis-swarm / bl / pi / kimi）" +
       "及其用途与是否可执行。可执行仅限安全只读命令（git status/log/diff、ls、查看日志）；" +

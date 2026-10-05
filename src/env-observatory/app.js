@@ -472,7 +472,7 @@ function wfAsk(q) {
   if (!question) { input.focus(); return; }
   var ans = $('wfAnswer');
   ans.hidden = false;
-  ans.innerHTML = '<span class="muted">正在询问 WindFinder（真实 pi-agent）…</span>';
+  ans.innerHTML = '<span class="muted">正在询问 Wayfinder（真实 pi-agent）…</span>';
   fetch('/api/wayfinder/ask', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

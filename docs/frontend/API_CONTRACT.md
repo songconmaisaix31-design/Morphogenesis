@@ -361,7 +361,7 @@
 | `/api/research/context?project_id=` | GET | §6（`research_context(overview=true)`） |
 | `/api/research/replay/{task_id}?project_id=` | GET | §10 replay 切片（等价前端本地切片语义；observations 取 `context.notes` 按 task_id 过滤，receipts 兼容 `adopting_task_id` 与 `context.task_id` 两种形状） |
 | `/api/research/activity?since_seq=&project_id=` | GET | `{ "events": [§5 条目…], "latest_seq": N }` —— sequence > since_seq 的 task_audit 增量，供 `subscribeActivity` 轮询 |
-| `/api/wayfinder/ask` | POST | `{ "question": "…" }` → `{ "answer": "…" }`（pi WindFinder，唯一写入口） |
+| `/api/wayfinder/ask` | POST | `{ "question": "…" }` → `{ "answer": "…" }`（pi Wayfinder，唯一写入口） |
 | `/` 及静态文件 | GET | `env-observatory.html`（`/`）与白名单静态文件 |
 
 `project_id` 可省略（默认 HostConfig 绑定的项目，再缺省 `p1`）。
