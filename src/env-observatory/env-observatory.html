@@ -393,18 +393,6 @@ kbd {
   50% { box-shadow: 0 0 18px rgba(245, 195, 59, 0.75); }
 }
 
-.suggest-line {
-  display: block; width: 100%;
-  padding: 9px 12px; margin-bottom: 8px;
-  font-size: 13px; text-align: left;
-  color: var(--fg-muted);
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-muted);
-  border-radius: var(--radius);
-  cursor: pointer;
-}
-.suggest-line:hover { border-color: var(--gold); color: var(--fg); }
-.suggest-line .hint { color: var(--accent); }
 
 /* ── Wayfinder 聊天输入区（Copilot 形态，自有类名） ── */
 .wf-chat { margin: 0; }
@@ -419,9 +407,9 @@ kbd {
 
 .wf-textarea {
   display: block; width: 100%;
-  min-height: 38px; max-height: 160px;
-  padding: 9px 12px 2px;
-  font: 13px/1.55 var(--font); color: var(--fg);
+  min-height: 96px; max-height: 320px;
+  padding: 12px 14px 6px;
+  font: 13px/1.6 var(--font); color: var(--fg);
   background: transparent; border: 0; outline: none; resize: none;
   overflow-y: auto;
 }
@@ -1271,8 +1259,6 @@ button.btn-primary.is-on { background: var(--gold-deep); border-color: var(--gol
               <span class="wf-orb" aria-hidden="true"></span>
               <h3 id="wfCardTitle">Wayfinder</h3>
             </div>
-            <button class="suggest-line" id="wfHint1" type="button"></button>
-            <button class="suggest-line" id="wfHint2" type="button"></button>
             <form class="wf-chat" id="wfChatForm" autocomplete="off">
               <div class="wf-input-shell" id="wfInputShell">
                 <textarea id="wfAskInput" class="wf-textarea" rows="1"
@@ -3418,8 +3404,6 @@ on('homeFilterInput', 'input', renderSignals);
 on('branchMore', 'click', function () { toast('全部 ' + SNAP.branches.length + ' 条分支已在列表中'); });
 
 on('wfAskBtn', 'click', function () { wfAsk(); });
-on('wfHint1', 'click', function () { $('wfAskInput').value = '帮我定位 T-15 失败的根因'; wfRefreshInput(); wfAsk('帮我定位 T-15 失败的根因 fail'); });
-on('wfHint2', 'click', function () { $('wfAskInput').value = '哪条分支下一步的机会份额最高？'; wfRefreshInput(); wfAsk('哪条分支下一步的机会份额最高？'); });
 
 /* ---------- Wayfinder 聊天输入（Copilot 形态） ---------- */
 var WF_MAX = 2000;
@@ -3436,7 +3420,7 @@ var WF_TIER_LABEL = { balance: 'Balance', exploration: 'Exploration', precision:
 function wfAutoGrow() {
   var ta = $('wfAskInput');
   ta.style.height = 'auto';
-  ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+  ta.style.height = Math.max(96, Math.min(ta.scrollHeight, 320)) + 'px';
 }
 function wfRefreshInput() {
   var ta = $('wfAskInput');
@@ -3569,8 +3553,6 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     applyView();
 
     $('wfExploreLabel').textContent = 'Optimized for: Exploration ' + Math.round((SNAP.exploration_fraction || 0) * 100) + '%';
-    $('wfHint1').innerHTML = '帮我定位这次失败的根因：<span class="hint">[paste evidence here]</span>';
-    $('wfHint2').textContent = '哪条分支下一步的机会份额最高？';
 
     /* 预置未读通知（最近 5 条账本事件） */
     PKG.task_audit.slice(-5).reverse().forEach(function (e) { pushNotif(e); });
