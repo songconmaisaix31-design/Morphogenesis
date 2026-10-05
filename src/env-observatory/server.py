@@ -26,6 +26,7 @@ import os
 import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -329,6 +330,194 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
 
         _agent_probe_cache["at"] = now
         _agent_probe_cache["payload"] = payload
+        return json_response(payload)
+
+    # ---- Compute: provider registry; Aliyun is the first real one --------
+    #
+    # 口径：每个 provider 只能报三种状态 —— integrated（真数据）/ not_configured
+    # （接口在，但本机没凭证）/ not_integrated（接口位保留，尚未实现）。
+    # 没有第四种：绝不用演示数据冒充。其他厂家的联调留给 Wayfinder 去做，
+    # 只要往 COMPUTE_PROVIDERS 里填实现即可，前端不用改。
+
+    COMPUTE_PROVIDERS: list[dict[str, Any]] = [
+        {"id": "aliyun", "name": "阿里云", "category": "GPU 云服务器", "integrated": True},
+        {"id": "tencent", "name": "腾讯云", "category": "GPU 云服务器", "integrated": False},
+        {"id": "volc", "name": "火山引擎", "category": "GPU 云服务器", "integrated": False},
+        {"id": "huawei", "name": "华为云", "category": "GPU 云服务器", "integrated": False},
+        {"id": "baidu", "name": "百度智能云", "category": "GPU 云服务器", "integrated": False},
+        {"id": "aws", "name": "AWS", "category": "GPU 云服务器", "integrated": False},
+        {"id": "gcp", "name": "Google Cloud", "category": "GPU 云服务器", "integrated": False},
+        {"id": "azure", "name": "Azure", "category": "GPU 云服务器", "integrated": False},
+    ]
+
+    _COMPUTE_TTL = 300.0
+    _compute_cache: dict[str, Any] = {"at": 0.0, "payload": None}
+
+    def _aliyun_cli() -> str | None:
+        import shutil
+        found = shutil.which("aliyun")
+        if found:
+            return found
+        for candidate in (Path.home() / "aliyun-cli" / "aliyun.exe",
+                          Path.home() / "aliyun-cli" / "aliyun"):
+            if candidate.is_file():
+                return str(candidate)
+        return None
+
+    def _aliyun_credentials() -> tuple[bool, str | None]:
+        """True when the CLI profile carries an AK; never returns the secret."""
+        cli = _aliyun_cli()
+        if cli is None:
+            return False, None
+        cfg = Path.home() / ".aliyun" / "config.json"
+        if cfg.is_file():
+            try:
+                data = json.loads(cfg.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                data = None
+            if isinstance(data, dict):
+                for profile in data.get("profiles") or []:
+                    if isinstance(profile, dict) and profile.get("access_key_id"):
+                        return True, str(profile.get("region_id") or "")
+        if os.environ.get("ALIBABA_CLOUD_ACCESS_KEY_ID"):
+            return True, None
+        return False, None
+
+    def _run_cli(command: list[str], timeout: int) -> tuple[int, str, str]:
+        proc = subprocess.run(command, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
+                              timeout=timeout, shell=False,
+                              env=_pi_env(dict(os.environ)))
+        return proc.returncode, proc.stdout or "", proc.stderr or ""
+
+    # 默认只列现代 GPU 规格族：不带过滤时 DescribeInstanceTypes 会先返回 ga1/gn4 等上一代，
+    # 对选型没有参考价值。数组参数在 CLI 上是 --InstanceTypeFamilies.N。
+    DEFAULT_GPU_FAMILIES = ["ecs.gn7i", "ecs.gn7e", "ecs.gn7", "ecs.gn6v", "ecs.gn6i", "ecs.gn6e"]
+
+    def _fetch_aliyun(region: str, limit: int,
+                      families: list[str] | None = None) -> dict[str, Any]:
+        """Real ECS GPU specs + real CNY/hr prices via the aliyun CLI."""
+        cli = _aliyun_cli()
+        if cli is None:
+            return {"error": "cli_missing", "detail": "aliyun CLI not found"}
+        ok, configured_region = _aliyun_credentials()
+        if not ok:
+            return {"error": "not_configured",
+                    "detail": "no aliyun profile with an access key (see ~/.aliyun/config.json)"}
+
+        fams = families if families is not None else DEFAULT_GPU_FAMILIES
+        command = [cli, "ecs", "DescribeInstanceTypes", "--RegionId", region,
+                   "--MinimumGPUAmount", "1",
+                   "--MaxResults", str(max(1, min(limit, 20)))]
+        for index, family in enumerate(fams[:10], start=1):
+            command += ["--InstanceTypeFamilies.%d" % index, family]
+        code, out, err = _run_cli(command, timeout=45)
+        if code != 0:
+            return {"error": "describe_instance_types_failed", "detail": (err or out)[:300]}
+        try:
+            types = json.loads(out).get("InstanceTypes", {}).get("InstanceType", [])
+        except ValueError:
+            return {"error": "bad_json", "detail": out[:200]}
+
+        instances = []
+        for item in types[:limit]:
+            type_id = item.get("InstanceTypeId")
+            if not type_id:
+                continue
+            gpu_amount = item.get("GPUAmount") or 0
+            gpu_spec = item.get("GPUSpec") or ""
+            # 价格要单独调一次，按量付费小时价；必须带 SystemDisk.Category，
+            # 否则 API 报 InvalidSystemDiskCategory.ValueNotSupported。
+            pcode, pout, perr = _run_cli([
+                cli, "ecs", "DescribePrice",
+                "--RegionId", region,
+                "--ResourceType", "instance",
+                "--InstanceType", type_id,
+                "--PriceUnit", "Hour",
+                "--Amount", "1",
+                "--SystemDisk.Category", "cloud_essd",
+            ], timeout=45)
+            price = None
+            if pcode == 0:
+                try:
+                    price_body = json.loads(pout).get("PriceInfo", {}).get("Price", {})
+                    price = price_body.get("TradePrice")
+                    if price is None:
+                        price = price_body.get("OriginalPrice")
+                except ValueError:
+                    price = None
+            instances.append({
+                "instance_type": type_id,
+                "family": item.get("InstanceTypeFamily"),
+                "gpu_amount": gpu_amount,
+                "gpu_spec": gpu_spec,
+                "vcpu": item.get("CpuCoreCount"),
+                "memory_gib": item.get("MemorySize"),
+                "price_cny_hour": price,
+                "price_error": None if pcode == 0 else (perr or pout)[:160],
+            })
+
+        return {
+            "provider": "aliyun",
+            "region": region,
+            "families": fams,
+            "instances": instances,
+            "count": len(instances),
+            "priced": sum(1 for i in instances if i["price_cny_hour"] is not None),
+            "api_calls": len(instances) + 1,
+        }
+
+    @app.get("/api/compute/providers")
+    def api_compute_providers() -> Response:
+        """Every provider slot with its real state — no fixture values."""
+        import time as _time
+        ok, default_region = _aliyun_credentials()
+        providers = []
+        for p in COMPUTE_PROVIDERS:
+            entry = dict(p)
+            if p["id"] == "aliyun":
+                cli = _aliyun_cli() is not None
+                if not cli:
+                    entry["status"] = "cli_missing"
+                elif not ok:
+                    entry["status"] = "not_configured"
+                else:
+                    entry["status"] = "ready"
+                entry["region"] = default_region or "cn-hangzhou"
+            else:
+                entry["status"] = "not_integrated"
+            providers.append(entry)
+        return json_response({"providers": providers, "now": _time.time()})
+
+    @app.get("/api/compute/aliyun")
+    def api_compute_aliyun(region: str | None = None, limit: int = 8,
+                           families: str | None = None, refresh: int = 0) -> Response:
+        """Real Aliyun ECS GPU specs and hourly prices (cached 300s)."""
+        import time
+
+        now = time.time()
+        reg = region or "cn-hangzhou"
+        cached = _compute_cache["payload"]
+        if (cached is not None and not refresh
+                and cached.get("region") == reg
+                and now - _compute_cache["at"] < _COMPUTE_TTL):
+            return json_response(cached)
+
+        if limit < 1 or limit > 20:
+            return json_response({"error": "invalid_limit"}, 400)
+        try:
+            fam_list = ([f.strip() for f in families.split(",") if f.strip()]
+                        if families else None)
+            payload = _fetch_aliyun(reg, limit, fam_list)
+        except subprocess.TimeoutExpired:
+            return json_response({"error": "aliyun_timeout", "detail": "CLI call timed out"}, 504)
+        except Exception as error:  # noqa: BLE001
+            return json_response({"error": type(error).__name__, "detail": str(error)}, 503)
+
+        payload["measured_at"] = now
+        payload["source"] = "aliyun-cli"
+        _compute_cache["at"] = now
+        _compute_cache["payload"] = payload
         return json_response(payload)
 
     # ---- Wayfinder: the single POST entry (pi Wayfinder) ----------------
