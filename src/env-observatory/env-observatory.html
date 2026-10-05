@@ -1305,6 +1305,107 @@ html[data-theme="dark"] .card-head { border-color: var(--border-muted); }
     transition: none;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════
+ * Apple 呼吸感（布局不变：只加留白、玻璃分层与微交互）
+ *
+ * 玻璃分两层：液态（卡片，更透、更活、饱和更高）与雾面（顶栏/侧栏，
+ * 更奶、更糊、饱和更低）。加上按压缩放、悬停上浮与一次性入场，
+ * 让页面有 Apple 式的弹性与呼吸。
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* ── 呼吸感：留白加大一档（不动网格结构） ── */
+.gh-main { padding: 26px 34px 0; }
+.gh-sidebar { padding-top: 20px; }
+.main-col { gap: 20px; }
+.card-head { padding: 14px 20px; }
+.copilot-card { padding: 20px; }
+
+/* ── 液态玻璃（卡片）：更透、饱和更高，金网在内容层下若隐若现 ── */
+.card {
+  background: rgba(255, 255, 255, 0.58);
+  -webkit-backdrop-filter: blur(14px) saturate(165%);
+  backdrop-filter: blur(14px) saturate(165%);
+}
+
+/* ── 雾面玻璃（顶栏 / 侧栏）：更奶、更糊，导航层保持阅读稳定 ── */
+.gh-header, .gh-sidebar {
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+
+/* ── 深色主题的对应分层 ── */
+html[data-theme="dark"] .card {
+  background: rgba(45, 51, 59, 0.55);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+}
+html[data-theme="dark"] .gh-header,
+html[data-theme="dark"] .gh-sidebar {
+  background: rgba(33, 38, 45, 0.62);
+  -webkit-backdrop-filter: blur(20px) saturate(135%);
+  backdrop-filter: blur(20px) saturate(135%);
+}
+
+/* ── 微交互：悬停上浮 + 弹性过渡（Apple spring） ── */
+.card {
+  transition: transform .34s cubic-bezier(.22, 1.2, .36, 1),
+              box-shadow .34s cubic-bezier(.22, 1.2, .36, 1),
+              background-color .28s ease, border-color .28s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px rgba(31, 35, 40, 0.13), inset 0 1px 0 var(--glass-hairline);
+}
+.card:active { transform: translateY(0); }
+
+/* 按压：按钮 / chip / 快捷指令都带回弹 */
+.btn-primary, .btn-secondary, .btn-outline, .hbtn, .chip,
+.wf-chip-btn, .wf-send, .cmd-chips button, .linklike, .mod-teaser {
+  transition: transform .16s cubic-bezier(.2, .9, .3, 1.4),
+              background-color .2s ease, border-color .2s ease, color .2s ease,
+              box-shadow .2s ease;
+}
+.btn-primary:active, .btn-secondary:active, .btn-outline:active, .hbtn:active,
+.chip:active, .wf-chip-btn:active, .wf-send:active, .cmd-chips button:active,
+.mod-teaser:active { transform: scale(.96); }
+
+/* ── 一次性入场：主区与右栏卡片上浮进入 ── */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.main-col > .card { animation: cardIn .55s cubic-bezier(.22, 1.2, .36, 1) both; }
+.main-col > .card:nth-of-type(2) { animation-delay: .06s; }
+.main-col > .card:nth-of-type(3) { animation-delay: .12s; }
+.right-rail > .card { animation: cardIn .55s cubic-bezier(.22, 1.2, .36, 1) both; animation-delay: .08s; }
+
+/* ── 环境呼吸：状态点与光球的轻微起伏 ── */
+@keyframes breathScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.22); } }
+.badge .dot { animation: breathScale 3.8s ease-in-out infinite; }
+
+/* ── 无障碍：减动效时关掉上面所有弹性与动画，回到静态 ── */
+@media (prefers-reduced-motion: reduce) {
+  .card, .btn-primary, .btn-secondary, .btn-outline, .hbtn, .chip,
+  .wf-chip-btn, .wf-send, .cmd-chips button, .linklike, .mod-teaser {
+    transition: none;
+  }
+  .card:hover { transform: none; }
+  .btn-primary:active, .btn-secondary:active, .btn-outline:active, .hbtn:active,
+  .chip:active, .wf-chip-btn:active, .wf-send:active, .cmd-chips button:active,
+  .mod-teaser:active { transform: none; }
+  .main-col > .card, .right-rail > .card, .badge .dot { animation: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .card, .gh-header, .gh-sidebar {
+    background: var(--bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  html[data-theme="dark"] .card, html[data-theme="dark"] .gh-header,
+  html[data-theme="dark"] .gh-sidebar { background: var(--panel); }
+}
 </style>
 </head>
 <body>
@@ -3989,11 +4090,11 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
   gl.getExtension('OES_texture_float_linear');
 
   var AGENT_TEX_W = 256, AGENT_TEX_H = 256;          /* 65,536 agents */
-  var WORKGROUP_SIZE = 8;
   var SENSOR_DISTANCE = 24, SENSOR_ANGLE = 0.45, TURN_ANGLE = 0.5;
-  var MOVE_SPEED = 13, FADE_SPEED = 0.94, BLUR_STRENGTH = 0.2;
+  var MOVE_SPEED = 13, FADE_SPEED = 0.90, BLUR_STRENGTH = 0.2;
+  var DEPOSIT_STRENGTH = 0.16, DEPOSIT_SIZE = 1.6;
 
-  /* 金色族三物种：深金 / 暗金 / 亮金 */
+  /* 金色族三物种：深金 / 暗金 / 亮金（与 sense() 读的 r/g/b 通道一一对应） */
   var SPECIES = [
     { sensorOffset: 15, color: [0.85, 0.64, 0.10] },
     { sensorOffset: 8,  color: [0.72, 0.53, 0.05] },
@@ -4002,18 +4103,19 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
 
   var VERT = '#version 300 es\nlayout(location=0) in vec2 aPos;void main(){gl_Position=vec4(aPos,0.,1.);}';
 
-  var COMPUTE = '#version 300 es\n' +
-    'layout(local_size_x=' + WORKGROUP_SIZE + ',local_size_y=' + WORKGROUP_SIZE + ') in;\n' +
-    'layout(rgba32f,binding=0) uniform highp image2D agentTex;\n' +
+  /* 方向更新：原 compute shader 改写为片元 pass（WebGL2 没有 compute shader）。
+   * 逻辑不变：同物种萌发点吸引 → 朝向取加权平均；否则哈希噪声微抖。 */
+  var DIR_FRAG = '#version 300 es\nprecision highp float;\n' +
+    'uniform sampler2D u_agentTexture;\n' +
     'uniform float uTime,uDeltaTime;\n' +
     'uniform int uSpawnCount;uniform vec4 uSpawnData[16];\n' +
+    'out vec4 fragColor;\n' +
     'float hash(uint n){n=(n<<13)^n;n=n*(n*n*15731u+789221u)+1376312589u;return float(n&0x7fffffffu)/float(0x7fffffff);}\n' +
     'void main(){\n' +
-    '  ivec2 p=ivec2(gl_GlobalInvocationID.xy);ivec2 sz=imageSize(agentTex);\n' +
-    '  if(p.x>=sz.x||p.y>=sz.y)return;\n' +
+    '  ivec2 p=ivec2(gl_FragCoord.xy);ivec2 sz=textureSize(u_agentTexture,0);\n' +
     '  int idx=p.y*sz.x+p.x;\n' +
     '  uint seed=uint(idx)*2654435761u+uint(uTime*1000.)*2246822519u;\n' +
-    '  vec4 a=imageLoad(agentTex,p);\n' +
+    '  vec4 a=texelFetch(u_agentTexture,p,0);\n' +
     '  int si=int(a.w);\n' +
     '  vec2 so=vec2(0.);float sw=0.;\n' +
     '  for(int i=0;i<uSpawnCount;i++){\n' +
@@ -4023,7 +4125,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     '  }\n' +
     '  if(sw>0.01){a.z=so.x/sw;}\n' +
     '  else{float j=(hash(seed+314159u)-.5)*.06;a.z+=j*uDeltaTime*60.;}\n' +
-    '  imageStore(agentTex,p,a);\n' +
+    '  fragColor=a;\n' +
     '}';
 
   var MOVE_FRAG = '#version 300 es\nprecision highp float;\n' +
@@ -4056,6 +4158,24 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     '  fragColor=vec4(np,angle,a.w);\n' +
     '}';
 
+  /* 沉积：把 agent 画成 POINTS 加进 trail。
+   * 原实现复用 MOVE 片元画满屏 —— 会把 agent 状态向量本身（位置/朝向/物种）直接
+   * 加进 trail，是错位的死代码；WebGL 模拟的标准做法就是 POINTS + gl_VertexID。 */
+  var DEPOSIT_VERT = '#version 300 es\nprecision highp float;\n' +
+    'uniform sampler2D u_agentTexture;uniform ivec2 u_agentTexSize;uniform vec2 u_resolution;\n' +
+    'out vec3 v_color;\n' +
+    'void main(){\n' +
+    '  ivec2 p=ivec2(gl_VertexID % u_agentTexSize.x, gl_VertexID / u_agentTexSize.x);\n' +
+    '  vec4 a=texelFetch(u_agentTexture,p,0);\n' +
+    '  gl_Position=vec4(a.xy/u_resolution*2.-1.,0.,1.);\n' +
+    '  gl_PointSize=' + DEPOSIT_SIZE + ';\n' +
+    '  int si=int(a.w);\n' +
+    '  v_color=(si==0)?vec3(0.85,0.64,0.10):(si==1)?vec3(0.72,0.53,0.05):vec3(0.94,0.76,0.24);\n' +
+    '}';
+  var DEPOSIT_FRAG = '#version 300 es\nprecision mediump float;\n' +
+    'in vec3 v_color;out vec4 fragColor;\n' +
+    'void main(){fragColor=vec4(v_color*' + DEPOSIT_STRENGTH + ',1.);}';
+
   var FADE_FRAG = '#version 300 es\nprecision mediump float;\n' +
     'uniform sampler2D u_trailTexture;uniform float u_fadeSpeed,u_blurStrength;uniform vec2 u_resolution;\n' +
     'out vec4 fragColor;\n' +
@@ -4068,9 +4188,10 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     '  fragColor=vec4(mix(orig,avg,u_blurStrength)*u_fadeSpeed,1.);\n' +
     '}';
 
-  /* 亮底混合：纸色 → 金痕（轨迹越浓越接近物种金色，整体克制） */
+  /* 亮底混合：纸色 → 金痕（轨迹越浓越接近物种金色，整体克制）。
+   * u_dark：深色主题下换深色纸底，否则金痕会被洗白。 */
   var DRAW_FRAG = '#version 300 es\nprecision mediump float;\n' +
-    'uniform sampler2D u_texture;uniform vec2 u_resolution;\n' +
+    'uniform sampler2D u_texture;uniform vec2 u_resolution;uniform int u_dark;\n' +
     'out vec4 fragColor;\n' +
     'void main(){\n' +
     '  vec2 uv=gl_FragCoord.xy/u_resolution;\n' +
@@ -4078,8 +4199,8 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     '  float t=clamp(color.r+color.g+color.b,0.,1.);\n' +
     '  float m=max(color.r,max(color.g,color.b));\n' +
     '  vec3 hue=m>1e-4?color/m:vec3(.85,.66,.10);\n' +
-    '  vec3 paper=vec3(.965,.96,.945);\n' +
-    '  vec3 c=mix(paper,hue,clamp(t*.42,0.,.58));\n' +
+    '  vec3 paper=(u_dark==1)?vec3(.129,.149,.176):vec3(.965,.96,.945);\n' +
+    '  vec3 c=mix(paper,hue,clamp(t*.30,0.,.48));\n' +
     '  fragColor=vec4(c,1.);\n' +
     '}';
 
@@ -4094,14 +4215,6 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     if (!vs || !fs) return null;
     var p = gl.createProgram();
     gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) return null;
-    return p;
-  }
-  function computeProgram(csSrc) {
-    var cs = compile(gl.COMPUTE_SHADER, csSrc);
-    if (!cs) return null;
-    var p = gl.createProgram();
-    gl.attachShader(p, cs); gl.linkProgram(p);
     if (!gl.getProgramParameter(p, gl.LINK_STATUS)) return null;
     return p;
   }
@@ -4122,11 +4235,12 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     var W = canvas.width, H = canvas.height;
     var TW = Math.max(2, Math.floor(W * 0.5)), TH = Math.max(2, Math.floor(H * 0.5));
 
-    var pCompute = computeProgram(COMPUTE);
+    var pDir = program(VERT, DIR_FRAG);
     var pMove = program(VERT, MOVE_FRAG);
+    var pDeposit = program(DEPOSIT_VERT, DEPOSIT_FRAG);
     var pFade = program(VERT, FADE_FRAG);
     var pDraw = program(VERT, DRAW_FRAG);
-    if (!pCompute || !pMove || !pFade || !pDraw) { canvas.remove(); return; }
+    if (!pDir || !pMove || !pDeposit || !pFade || !pDraw) { canvas.remove(); return; }
 
     /* agent 初始状态：随机位置 / 随机朝向 / 三物种均分 */
     var N = AGENT_TEX_W * AGENT_TEX_H;
@@ -4153,12 +4267,33 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     var fboA = fbo(agentTexA), fboB = fbo(agentTexB);
     var tfA = fbo(trailA), tfB = fbo(trailB);
 
+    /* trail 初始清零（createTexture 只分配不写入，内容未定义，否则会带上脏底） */
+    gl.bindFramebuffer(gl.FRAMEBUFFER, tfA);
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, tfB);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
     var quad = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, quad);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 
     var spawnData = new Float32Array(16 * 4);
     var startTime = performance.now(), lastTime = startTime;
+
+    /* 方向更新 pass：agentTex(src) → agentTex(dstFbo)，可带 0/1 个萌发点 */
+    function dirPass(srcTex, dstFbo, time, dt, spawnCount) {
+      gl.useProgram(pDir);
+      gl.viewport(0, 0, AGENT_TEX_W, AGENT_TEX_H);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, dstFbo);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, srcTex);
+      gl.uniform1i(gl.getUniformLocation(pDir, 'u_agentTexture'), 0);
+      gl.uniform1f(gl.getUniformLocation(pDir, 'uTime'), time);
+      gl.uniform1f(gl.getUniformLocation(pDir, 'uDeltaTime'), dt);
+      gl.uniform1i(gl.getUniformLocation(pDir, 'uSpawnCount'), spawnCount);
+      gl.uniform4fv(gl.getUniformLocation(pDir, 'uSpawnData'), spawnData);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
 
     function step(now, animate) {
       var time = (now - startTime) / 1000;
@@ -4173,21 +4308,14 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
         spawnCount = 1;
       }
 
-      /* 1 · 方向更新（compute） */
-      gl.useProgram(pCompute);
-      gl.bindImageTexture(0, agentTexA, 0, false, 0, gl.READ_WRITE, gl.RGBA32F);
-      gl.uniform1f(gl.getUniformLocation(pCompute, 'uTime'), time);
-      gl.uniform1f(gl.getUniformLocation(pCompute, 'uDeltaTime'), dt);
-      gl.uniform1i(gl.getUniformLocation(pCompute, 'uSpawnCount'), spawnCount);
-      gl.uniform4fv(gl.getUniformLocation(pCompute, 'uSpawnData'), spawnData);
-      gl.dispatchCompute(Math.ceil(AGENT_TEX_W / WORKGROUP_SIZE), Math.ceil(AGENT_TEX_H / WORKGROUP_SIZE), 1);
-      gl.memoryBarrier(gl.SHADER_IMAGE_ACCESS_BARRIER_BIT);
+      /* 1 · 方向更新 A → B */
+      dirPass(agentTexA, fboB, time, dt, spawnCount);
 
-      /* 2 · 移动 agentTexA → agentTexB，并沉淀到 trailB */
+      /* 2 · 移动 B → A（sense 读 trailA 的上一帧衰减结果） */
       gl.useProgram(pMove);
       gl.viewport(0, 0, AGENT_TEX_W, AGENT_TEX_H);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, agentTexA);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fboA);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, agentTexB);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, trailA);
       gl.uniform1i(gl.getUniformLocation(pMove, 'u_agentTexture'), 0);
       gl.uniform1i(gl.getUniformLocation(pMove, 'u_trailTexture'), 1);
@@ -4199,14 +4327,20 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       gl.uniform2f(gl.getUniformLocation(pMove, 'u_resolution'), W, H);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
+      /* 3 · 沉积：移动后的 agent 以 POINTS 加进 trailB（物种金色，R/G/B 对应 sense） */
+      gl.useProgram(pDeposit);
       gl.bindFramebuffer(gl.FRAMEBUFFER, tfB);
       gl.viewport(0, 0, TW, TH);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, agentTexA);
+      gl.uniform1i(gl.getUniformLocation(pDeposit, 'u_agentTexture'), 0);
+      gl.uniform2i(gl.getUniformLocation(pDeposit, 'u_agentTexSize'), AGENT_TEX_W, AGENT_TEX_H);
+      gl.uniform2f(gl.getUniformLocation(pDeposit, 'u_resolution'), W, H);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.ONE, gl.ONE);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.drawArrays(gl.POINTS, 0, N);
       gl.disable(gl.BLEND);
 
-      /* 3 · trail 扩散 + 衰减 */
+      /* 4 · trail 扩散 + 衰减 trailB → trailA */
       gl.useProgram(pFade);
       gl.bindFramebuffer(gl.FRAMEBUFFER, tfA);
       gl.viewport(0, 0, TW, TH);
@@ -4217,18 +4351,18 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       gl.uniform2f(gl.getUniformLocation(pFade, 'u_resolution'), TW, TH);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-      /* 4 · 亮底金痕显示 */
+      /* 5 · 亮底金痕显示（跟随主题换纸底） */
       gl.useProgram(pDraw);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, W, H);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, trailA);
       gl.uniform1i(gl.getUniformLocation(pDraw, 'u_texture'), 0);
       gl.uniform2f(gl.getUniformLocation(pDraw, 'u_resolution'), W, H);
+      gl.uniform1i(gl.getUniformLocation(pDraw, 'u_dark'),
+        document.documentElement.getAttribute('data-theme') === 'dark' ? 1 : 0);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-      /* ping-pong */
-      var t1 = agentTexA; agentTexA = agentTexB; agentTexB = t1;
-      var f1 = fboA; fboA = fboB; fboB = f1;
+      /* trail ping-pong（agent 每帧 A→B→A，无需交换） */
       var t2 = trailA; trailA = trailB; trailB = t2;
       var f2 = tfA; tfA = tfB; tfB = f2;
     }
@@ -4238,19 +4372,13 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     gl.enableVertexAttribArray(pos);
     gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
 
-    /* 初始萌发：每物种 3 个随机簇 */
+    /* 初始萌发：每物种 3 个随机簇。先 A→B 带萌发点聚向，再 B→A 回写（带噪声微抖）。 */
     for (var s = 0; s < 3; s++) {
       for (var k = 0; k < 3; k++) {
         spawnData[0] = Math.random() * W; spawnData[1] = Math.random() * H;
         spawnData[2] = 90; spawnData[3] = s;
-        gl.useProgram(pCompute);
-        gl.bindImageTexture(0, agentTexA, 0, false, 0, gl.READ_WRITE, gl.RGBA32F);
-        gl.uniform1i(gl.getUniformLocation(pCompute, 'uSpawnCount'), 1);
-        gl.uniform4fv(gl.getUniformLocation(pCompute, 'uSpawnData'), spawnData);
-        gl.uniform1f(gl.getUniformLocation(pCompute, 'uTime'), 0);
-        gl.uniform1f(gl.getUniformLocation(pCompute, 'uDeltaTime'), 0.016);
-        gl.dispatchCompute(Math.ceil(AGENT_TEX_W / WORKGROUP_SIZE), Math.ceil(AGENT_TEX_H / WORKGROUP_SIZE), 1);
-        gl.memoryBarrier(gl.SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        dirPass(agentTexA, fboB, 0, 0.016, 1);
+        dirPass(agentTexB, fboA, 0, 0.016, 0);
       }
     }
 
