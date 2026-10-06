@@ -24,6 +24,7 @@ import asyncio
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -116,31 +117,45 @@ def _dashscope_key() -> str | None:
     return None
 
 
+def _pi_executable() -> str | None:
+    """Resolve the npm global pi shim without a shell.
+
+    ``shutil.which`` honours PATHEXT, so on Windows it finds pi.cmd/pi.ps1 and on
+    POSIX it finds pi. Returning None (instead of letting a shell try) keeps the
+    "not installed" answer separate from "started and produced nothing".
+    """
+    return shutil.which("pi")
+
+
 def run_wayfinder_ask(question: str, host_config: str | None) -> tuple[int, dict]:
     """Invoke the real pi-agent (Wayfinder) once and return its answer.
 
-    pi is an npm global shim (pi.cmd/pi.ps1) on Windows, so it is run through the
-    shell with the question embedded as a single quoted argument. The agent loads
-    the project ``.pi/extensions/`` (Wayfinder) and the read-only swarm.research
-    MCP; the answer is whatever pi prints on stdout.
+    The question is passed as one argv element with ``shell=False``. It used to
+    be interpolated into a shell string, where the callers' escaping did not
+    cover the shell metacharacters (``& | ^ %`` and a newline on Windows, ``$ ` ;``
+    on POSIX), so any client allowed to reach this endpoint could append a second
+    command. The agent loads the project ``.pi/extensions/`` (Wayfinder) and the
+    read-only swarm.research MCP; the answer is whatever pi prints on stdout.
     """
     key = _dashscope_key()
     if not key:
         return 503, {"error": "no_dashscope_key",
                      "detail": "未配置 DASHSCOPE_API_KEY 或 ~/.bailian/config.json"}
+    executable = _pi_executable()
+    if not executable:
+        return 503, {"error": "pi_not_installed",
+                     "detail": "pi 未安装（npm i -g @earendil-works/pi-coding-agent）"}
     env = _pi_env(dict(os.environ))
     env["DASHSCOPE_API_KEY"] = key
     if host_config:
         env["WAYFINDER_HOST_CONFIG"] = host_config
-    quoted = question.replace("\\", "\\\\").replace('"', '\\"')
-    command = 'pi -p "' + quoted + '"'
     try:
-        proc = subprocess.run(command, shell=True, cwd=str(ROOT), env=env,
+        proc = subprocess.run([executable, "-p", question], cwd=str(ROOT), env=env,
                               capture_output=True, text=True, encoding="utf-8",
                               errors="replace", timeout=WAYFINDER_TIMEOUT)
     except subprocess.TimeoutExpired:
         return 504, {"error": "wayfinder_timeout", "detail": f"pi 超过 {WAYFINDER_TIMEOUT}s 未返回"}
-    except FileNotFoundError:
+    except OSError:
         return 503, {"error": "pi_not_installed",
                      "detail": "pi 未安装（npm i -g @earendil-works/pi-coding-agent）"}
     answer = (proc.stdout or "").strip()

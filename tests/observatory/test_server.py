@@ -144,6 +144,42 @@ def test_wayfinder_validates_without_invoking_pi(client: Any) -> None:
     assert client.post("/api/wayfinder/ask", json={"question": "x" * 2500}).json()["error"] == "question_too_long"
 
 
+def test_wayfinder_passes_the_question_as_one_argv_without_a_shell(server: Any, monkeypatch: Any) -> None:
+    """The question must never reach a shell: metacharacters stay in one argv slot."""
+    calls: list[dict] = []
+
+    class FakeCompleted:
+        stdout = "answer"
+        stderr = ""
+        returncode = 0
+
+    def fake_run(argv: Any, **kwargs: Any) -> Any:
+        calls.append({"argv": argv, "kwargs": kwargs})
+        return FakeCompleted()
+
+    monkeypatch.setattr(server, "_dashscope_key", lambda: "fixture-key")
+    monkeypatch.setattr(server.shutil, "which", lambda name: "C:/npm/pi.cmd" if name == "pi" else None)
+    monkeypatch.setattr(server.subprocess, "run", fake_run)
+    hostile = "状态如何 & echo injected"
+    status, payload = server.run_wayfinder_ask(hostile, None)
+    assert status == 200 and payload["answer"] == "answer"
+    assert len(calls) == 1
+    assert calls[0]["argv"] == ["C:/npm/pi.cmd", "-p", hostile]
+    assert calls[0]["kwargs"].get("shell") is not True
+    assert "shell" not in calls[0]["kwargs"]
+
+
+def test_wayfinder_reports_a_missing_pi_without_running_anything(server: Any, monkeypatch: Any) -> None:
+    def fail_run(argv: Any, **kwargs: Any) -> Any:  # pragma: no cover - must not be called
+        raise AssertionError("pi must not be invoked when it is not installed")
+
+    monkeypatch.setattr(server, "_dashscope_key", lambda: "fixture-key")
+    monkeypatch.setattr(server.shutil, "which", lambda name: None)
+    monkeypatch.setattr(server.subprocess, "run", fail_run)
+    status, payload = server.run_wayfinder_ask("状态如何", None)
+    assert status == 503 and payload["error"] == "pi_not_installed"
+
+
 def test_service_unavailable_degrades_to_503(server: Any) -> None:
     from starlette.testclient import TestClient
 
