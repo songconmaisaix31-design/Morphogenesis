@@ -1932,6 +1932,18 @@ html[data-theme="dark"] .env-row:hover { background: rgba(255, 255, 255, .04); }
         </section>
 
         <section class="card">
+          <div class="card-head"><h3 data-i18n="readiness">接入健全度</h3>
+            <span class="card-head-actions">
+              <button class="btn-outline btn-xs" id="readinessBtn" data-i18n="readinessRefresh">重新探测</button>
+              <span class="muted fineprint" id="readinessSummary" data-i18n="readinessLoading">正在读取接入清单…</span>
+            </span></div>
+          <div class="cloud-grid" id="readinessGrid">
+            <p class="muted" id="readinessNote" style="grid-column:1/-1" data-i18n="readinessLoading">正在读取接入清单…</p>
+          </div>
+          <p class="fineprint muted" style="margin:10px 0 0" data-i18n="readinessNote">三维健全度 = 本机（宿主事实）/ 接口（声明过的 CLI、MCP、Wayfinder）/ 账号（这些接入面需要的身份或凭据）。provider 集合来自后端清单，未声明的维度显示「未接入」，不是「默认可用」。</p>
+        </section>
+
+        <section class="card">
           <div class="card-head"><h3 data-i18n="queue">协同调度队列</h3>
             <span class="card-head-actions">
               <button class="btn-outline btn-xs" id="routeBtn" data-i18n="routeBtn">重新评估路由</button>
@@ -2700,6 +2712,14 @@ var I18N = {
     envProbeDisabled:'探测已关闭（OBSERVATORY_PROBE=0）', envEcsPartial:'{c} 个地域探测失败',
     agentEnvNote:'执行环境 = agent 真正能落地的机器：本机、Docker 容器、WSL 发行版、Kubernetes 上下文、阿里云 ECS 实例。本机与 ECS 由后端真实枚举（/api/compute/instances），容器 / WSL / K8s 显示实测状态；拿不到的字段显示 —，不编数据。',
     pendingWayfinder:'待联调', pendingWayfinderNote:'接口位已保留，交由内置 Wayfinder 接入',
+    readiness:'接入健全度', readinessRefresh:'重新探测', readinessLoading:'正在读取接入清单…',
+    readinessUnavailable:'接入清单不可用（未声明任何 provider，或后端未启动）',
+    readinessNote:'三维健全度 = 本机（宿主事实）/ 接口（声明过的 CLI、MCP、Wayfinder）/ 账号（这些接入面需要的身份或凭据）。provider 集合来自后端清单，未声明的维度显示「未接入」，不是「默认可用」；readiness 不建立任何运行验收档位。',
+    readinessEmpty:'未接入（未声明 provider）', readinessOrigin:'来源', readinessDeclaredOnly:'后端 provider 清单',
+    readinessNotRun:'未接入', readinessOk:'正常', readinessDegraded:'部分就绪', readinessBlocked:'前置缺失', readinessFailed:'探测失败',
+    dimMachine:'本机', dimMachineNote:'进程实际运行所在的宿主',
+    dimInterface:'接口', dimInterfaceNote:'声明过的 CLI / MCP / Wayfinder',
+    dimAccount:'账号', dimAccountNote:'接入面需要的凭据是否存在',
     specUnit:'个可选规格', realSpecs:'真实规格与实时价格'
   },
   en: {
@@ -2779,6 +2799,14 @@ var I18N = {
     envProbeDisabled:'probing disabled (OBSERVATORY_PROBE=0)', envEcsPartial:'{c} region(s) failed',
     agentEnvNote:'An execution environment is a machine an agent can actually run on: this host, a Docker container, a WSL distro, a Kubernetes context, an Aliyun ECS instance. Host and ECS are really enumerated by the backend (/api/compute/instances); container / WSL / K8s show their measured state. Fields with no real source read — and are never invented.',
     pendingWayfinder:'To be wired', pendingWayfinderNote:'Slot reserved; the built-in Wayfinder will integrate it',
+    readiness:'Readiness', readinessRefresh:'Re-probe', readinessLoading:'Reading the provider manifest…',
+    readinessUnavailable:'Readiness unavailable (no provider declared, or the backend is down)',
+    readinessNote:'Readiness covers three dimensions: machine (host facts), interface (declared CLI / MCP / Wayfinder surfaces) and account (the identity such a surface needs). The provider set comes from the backend manifest; an undeclared dimension reads "not wired", never "available by default". Readiness establishes no run acceptance.',
+    readinessEmpty:'Not wired (no provider declared)', readinessOrigin:'Source', readinessDeclaredOnly:'backend provider manifest',
+    readinessNotRun:'not wired', readinessOk:'healthy', readinessDegraded:'partially ready', readinessBlocked:'missing prerequisite', readinessFailed:'probe failed',
+    dimMachine:'Machine', dimMachineNote:'the host this process runs on',
+    dimInterface:'Interface', dimInterfaceNote:'declared CLI / MCP / Wayfinder',
+    dimAccount:'Account', dimAccountNote:'whether the credential a surface needs is present',
     specUnit:'offered types', realSpecs:'Real types and live prices'
   }
 };
@@ -4678,6 +4706,74 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       });
   }
 
+  /* ---------------- 接入健全度（清单驱动；未声明即未接入） ----------------
+   * 数据源：GET /api/readiness。provider 集合由后端清单（OBSERVATORY_PROVIDERS）
+   * 声明，前端不假设有哪几个：未声明的维度是 not_run，显示「未接入」，不是「可用」。
+   * 状态词表与后端契约一致：not_run / ok / degraded / blocked / failed。 */
+  var READINESS_STATE = { data: null };
+  var READINESS_DIMS = ['machine', 'interface', 'account'];
+  var READINESS_DIM_KEY = { machine: 'dimMachine', interface: 'dimInterface', account: 'dimAccount' };
+  var READINESS_DIM_NOTE = { machine: 'dimMachineNote', interface: 'dimInterfaceNote', account: 'dimAccountNote' };
+  var READINESS_FLAG = {
+    not_run: { key: 'readinessNotRun', cls: 'is-absent' },
+    ok: { key: 'readinessOk', cls: 'is-ready' },
+    degraded: { key: 'readinessDegraded', cls: 'is-auth' },
+    blocked: { key: 'readinessBlocked', cls: 'is-absent' },
+    failed: { key: 'readinessFailed', cls: 'is-auth' }
+  };
+
+  function readinessFlag(state) {
+    return READINESS_FLAG[state] || READINESS_FLAG.not_run;
+  }
+
+  function renderReadiness(data) {
+    var grid = $('readinessGrid');
+    if (!grid) return;
+    var dims = (data && data.dimensions) || {};
+    var results = (data && data.results) || [];
+    var summary = $('readinessSummary');
+    if (summary) summary.textContent = T(readinessFlag(data && data.overall).key);
+    grid.innerHTML = '';
+    READINESS_DIMS.forEach(function (dim) {
+      var flag = readinessFlag(dims[dim] || 'not_run');
+      var rows = results.filter(function (r) { return r.subject === dim; });
+      var body = '';
+      if (!rows.length) {
+        body = specRow(T('readinessOrigin'), cloudEsc(T('readinessEmpty')));
+      } else {
+        rows.forEach(function (r) {
+          body += specRow(String(r.provider_id || ''),
+                          cloudEsc(T(readinessFlag(r.state).key) + ' · ' + (r.detail || '—')));
+        });
+      }
+      grid.appendChild(cloudCardShell(
+        { title: T(READINESS_DIM_KEY[dim]), sub: T(READINESS_DIM_NOTE[dim]), logo: '' },
+        flag.cls, T(flag.key), body));
+    });
+    var note = $('readinessNote');
+    if (note && results.length) note.hidden = true;
+  }
+
+  function loadReadiness(refresh) {
+    var grid = $('readinessGrid');
+    var summary = $('readinessSummary');
+    if (!grid) return;
+    if (!isHttpDoc()) {
+      var n = $('readinessNote');
+      if (n) { n.textContent = T('scanOffline'); n.hidden = false; }
+      return;
+    }
+    if (summary) summary.textContent = T('readinessLoading');
+    fetch('/api/readiness' + (refresh ? '?refresh=1' : ''), { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || data.error) { if (summary) summary.textContent = T('readinessUnavailable'); return; }
+        READINESS_STATE.data = data;
+        renderReadiness(data);
+      })
+      .catch(function () { if (summary) summary.textContent = T('readinessUnavailable'); });
+  }
+
   /* ---------------- Agent 运行环境（真实探测） ----------------
    * 数据源：GET /api/compute/instances。后端真实枚举本机 / Docker / WSL /
    * kubectl / 阿里云 ECS。状态直接来自探测结果，拿不到就显示 —，不编。 */
@@ -4924,12 +5020,15 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     renderAgents();
     paintAgentStats();
     loadCompute(false);
+    loadReadiness(false);
+    var readinessBtn = $('readinessBtn');
+    if (readinessBtn) readinessBtn.addEventListener('click', function () { loadReadiness(true); });
   }
   function onRoute() {
     setBar();
     var h = (location.hash || '');
     if (h.indexOf('#/agents') === 0 && !firstAgent) { firstAgent = true; scanAgents(); }
-    if (h.indexOf('#/compute') === 0 && !firstCompute) { firstCompute = true; loadCompute(false); }
+    if (h.indexOf('#/compute') === 0 && !firstCompute) { firstCompute = true; loadCompute(false); loadReadiness(false); }
   }
   window.addEventListener('hashchange', onRoute);
 
@@ -4943,6 +5042,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
   document.addEventListener('mg:lang', function () {
     try { renderQueue(false); } catch (e) {}
     try { if (ENV_STATE.data) renderEnvironments(ENV_STATE.data); } catch (e) {}
+    try { if (READINESS_STATE.data) renderReadiness(READINESS_STATE.data); } catch (e) {}
     try { if (COMPUTE_STATE.providers.length) { document.getElementById('cloudGrid').innerHTML = ''; if (COMPUTE_STATE.local) renderLocalCard(COMPUTE_STATE.local); if (COMPUTE_STATE.aliyun) renderAliyunCard(COMPUTE_STATE.aliyun); COMPUTE_STATE.providers.forEach(function (p) { if (p.id !== 'aliyun') renderPendingCard(p); }); paintComputeStats(); } } catch (e) {}
     try { setBar(); } catch (e) {}
     try { paintTopology(); } catch (e) {}

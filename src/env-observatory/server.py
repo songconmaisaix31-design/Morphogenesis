@@ -38,6 +38,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, PlainTextResponse, Response
 from starlette.datastructures import MutableHeaders
 
+from swarm.observatory.registry import ProviderRegistry, build_registry
 from swarm.research.models import HostConfig
 from swarm.research.service import build_service
 
@@ -363,26 +364,40 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
         _agent_probe_cache["payload"] = payload
         return json_response(payload)
 
+    # ---- Readiness: declared providers only ------------------------------
+    #
+    # 口径：provider 集合来自清单（OBSERVATORY_PROVIDERS 指向的 JSON），不是代码
+    # 里的固定列表。未声明的维度是 not_run（未接入），不是"默认可用"；换一台机器
+    # 部署时，面板不会继承开发机上的状态。
+    #
+    # 三维：machine（宿主事实）/ interface（声明过的 CLI、MCP、Wayfinder）/
+    # account（这些接入面需要的身份或凭据）。readiness 不建立任何运行验收档位。
+
+    registry: ProviderRegistry = build_registry(probe_enabled=_probe_enabled())
+
+    @app.get("/api/readiness")
+    def api_readiness(refresh: int = 0) -> Response:
+        """Three-dimension readiness over the declared provider set."""
+        if refresh:
+            registry.invalidate()
+        return json_response(registry.report().model_dump(mode="json"))
+
     # ---- Compute: provider registry; Aliyun is the first real one --------
     #
-    # 口径：每个 provider 只能报三种状态 —— integrated（真数据）/ not_configured
-    # （接口在，但本机没凭证）/ not_integrated（接口位保留，尚未实现）。
-    # 没有第四种：绝不用演示数据冒充。其他厂家的联调留给 Wayfinder 去做，
-    # 只要往 COMPUTE_PROVIDERS 里填实现即可，前端不用改。
-
-    COMPUTE_PROVIDERS: list[dict[str, Any]] = [
-        {"id": "local", "name": "本机", "category": "本地显卡", "integrated": True},
-        {"id": "aliyun", "name": "阿里云", "category": "GPU 云服务器", "integrated": True},
-        {"id": "tencent", "name": "腾讯云", "category": "GPU 云服务器", "integrated": False},
-        {"id": "volc", "name": "火山引擎", "category": "GPU 云服务器", "integrated": False},
-        {"id": "huawei", "name": "华为云", "category": "GPU 云服务器", "integrated": False},
-        {"id": "baidu", "name": "百度智能云", "category": "GPU 云服务器", "integrated": False},
-        {"id": "aws", "name": "AWS", "category": "GPU 云服务器", "integrated": False},
-        {"id": "gcp", "name": "Google Cloud", "category": "GPU 云服务器", "integrated": False},
-        {"id": "azure", "name": "Azure", "category": "GPU 云服务器", "integrated": False},
-    ]
+    # 口径：provider 槽位现在由 readiness 注册表声明（清单驱动）。状态沿用四态
+    # 之外的两个粗粒度值，字段 readiness 给出精确契约状态：
+    #   ok -> ready / blocked -> cli_missing|not_configured / degraded|failed ->
+    #   probe_failed / not_run -> not_integrated（integrated=false）。
+    # 绝不用演示数据冒充：未接入就不出现在接入位里。
 
     _COMPUTE_TTL = 300.0
+    _COMPUTE_CATEGORY = {
+        "host": "本机算力",
+        "cli": "公开 CLI 接口",
+        "mcp": "MCP 接口",
+        "wayfinder": "Wayfinder 接入",
+        "credential": "账号与凭据",
+    }
     _compute_cache: dict[str, Any] = {"at": 0.0, "payload": None}
     _local_cache: dict[str, Any] = {"at": 0.0, "payload": None}
 
@@ -585,32 +600,48 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
         _local_cache["payload"] = payload
         return json_response(payload)
 
+    def _legacy_status(entry: dict[str, Any]) -> str:
+        """粗粒度状态（前端沿用既有词表）；精确契约状态在 readiness 字段里。"""
+        state = str(entry["state"])
+        if state == "not_run":
+            return "not_integrated"
+        if state == "ok":
+            return "ready"
+        if state == "degraded":
+            return "probe_failed"
+        code = str((entry.get("evidence") or {}).get("code", ""))
+        if state == "blocked":
+            return "cli_missing" if code == "command_missing" else "not_configured"
+        return "probe_failed"
+
     @app.get("/api/compute/providers")
     def api_compute_providers() -> Response:
-        """Every provider slot with its real state — no fixture values."""
+        """声明过的 provider 槽位与真实状态；未声明的不会出现（不是固定列表）。"""
         import time as _time
+
         ok, default_region = _aliyun_credentials()
         providers = []
-        for p in COMPUTE_PROVIDERS:
-            entry = dict(p)
-            if p["id"] == "local":
-                try:
-                    entry["status"] = "ready" if _fetch_local_gpu()["count"] else "no_gpu"
-                except Exception:  # noqa: BLE001
-                    entry["status"] = "probe_failed"
-            elif p["id"] == "aliyun":
-                cli = _aliyun_cli() is not None
-                if not cli:
-                    entry["status"] = "cli_missing"
-                elif not ok:
-                    entry["status"] = "not_configured"
-                else:
-                    entry["status"] = "ready"
-                entry["region"] = default_region or "cn-hangzhou"
-            else:
-                entry["status"] = "not_integrated"
-            providers.append(entry)
-        return json_response({"providers": providers, "now": _time.time()})
+        for entry in registry.declared():
+            payload: dict[str, Any] = {
+                "id": entry["id"],
+                "name": entry["label"] or entry["id"],
+                "category": _COMPUTE_CATEGORY.get(entry["kind"], entry["kind"]),
+                "integrated": entry["state"] != "not_run",
+                "status": _legacy_status(entry),
+                "readiness": entry["state"],
+                "detail": entry["detail"],
+                "evidence": entry["evidence"],
+                "subject": entry["subject"],
+            }
+            if "aliyun" in entry["id"]:
+                payload["region"] = default_region or "cn-hangzhou"
+                payload["credential_ready"] = ok
+            providers.append(payload)
+        return json_response({
+            "providers": providers,
+            "now": _time.time(),
+            "declared_by": "OBSERVATORY_PROVIDERS 清单（未声明即未接入）",
+        })
 
     @app.get("/api/compute/aliyun")
     def api_compute_aliyun(region: str | None = None, limit: int = 8,
