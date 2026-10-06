@@ -1,4 +1,4 @@
-"""One non-streaming EvoMap Chat Completions request, never a tool loop.
+"""One non-streaming Chat Completions request (EvoMap or DashScope), never a tool loop.
 
 httpx phase timeouts are not an absolute request deadline. A completed response
 is also checked against elapsed time and reported tokens before application;
@@ -26,9 +26,21 @@ from contracts.runtime import RunConfig
 from orchestration.codex import Proposal, task_workspace
 from orchestration.sample_policy import validate_sample
 from orchestration.gateway_transport import (
-    EVOMAP_BASE_URL as EVOMAP_BASE_URL, EVOMAP_MODEL as EVOMAP_MODEL,
-    MAX_RESPONSE_BYTES as MAX_RESPONSE_BYTES, single_request,
+    DASHSCOPE_BASE_URL as DASHSCOPE_BASE_URL, EVOMAP_BASE_URL as EVOMAP_BASE_URL,
+    EVOMAP_MODEL as EVOMAP_MODEL, MAX_RESPONSE_BYTES as MAX_RESPONSE_BYTES, single_request,
 )
+
+
+def _provider_for(base_url: str) -> str:
+    if base_url.rstrip("/") == DASHSCOPE_BASE_URL:
+        return "dashscope"
+    if base_url.rstrip("/") == EVOMAP_BASE_URL:
+        return "evomap"
+    raise ValueError("only confirmed EvoMap or DashScope HTTPS base URLs are permitted")
+
+
+def _key_env_for(provider: str) -> str:
+    return "DASHSCOPE_API_KEY" if provider == "dashscope" else "MORPH_EVOMAP_API_KEY"
 
 
 class _ReportedUsage(BaseModel):
@@ -97,11 +109,10 @@ class GatewayExecutor:
         self._endpoint()
 
     def _endpoint(self) -> str:
-        if self.base_url.rstrip("/") != EVOMAP_BASE_URL:
-            raise ValueError("only the confirmed EvoMap HTTPS base URL is permitted")
+        _provider_for(self.base_url)
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}", self.model):
             raise ValueError("invalid gateway model identifier")
-        return EVOMAP_BASE_URL + "/chat/completions"
+        return self.base_url.rstrip("/") + "/chat/completions"
 
     def _write(self, name: str, value: object, key: str) -> None:
         # Redact even a provider error/response that echoes its Authorization key.
@@ -109,6 +120,7 @@ class GatewayExecutor:
         (self.evidence_dir / name).write_text(encoded, encoding="utf-8")
 
     def execute(self, attempt: AttemptId, config: RunConfig, genes: list[Gene]) -> TaskResult:
+        provider = _provider_for(self.base_url)
         endpoint = self._endpoint()
         root = task_workspace(config)
         if self.evidence_dir == root or self.evidence_dir.is_relative_to(root):
@@ -117,9 +129,10 @@ class GatewayExecutor:
             return self._result(attempt, config, "manual stop before request")
         if any(gene.provenance != self.provenance for gene in genes):
             raise ValueError("gateway and injected Gene provenance must match")
-        key = self._api_key if self._api_key is not None else os.environ.get("MORPH_EVOMAP_API_KEY", "")
+        key_env = _key_env_for(provider)
+        key = self._api_key if self._api_key is not None else os.environ.get(key_env, "")
         if not key or not re.fullmatch(r"[A-Za-z0-9._~+/=-]{1,8192}", key):
-            raise ValueError("MORPH_EVOMAP_API_KEY is missing or invalid")
+            raise ValueError(f"{key_env} is missing or invalid")
         output_limit = min(config.max_tokens, 4096)
         phase_timeout = min(config.timeout_seconds, 180.0)
         messages: list[JsonValue] = [
@@ -144,7 +157,7 @@ class GatewayExecutor:
             raise ValueError("task plus experience exceeds gateway request size bound")
         self.evidence_dir.mkdir(parents=True, exist_ok=False)
         self._write("request.json", {
-            "executor": "evomap", "method": "POST", "url": endpoint, "provenance": self.provenance,
+            "executor": provider, "method": "POST", "url": endpoint, "provenance": self.provenance,
             "run_id": config.run_id, "attempt": attempt.model_dump(mode="json"),
             "request": payload, "phase_timeout_seconds": phase_timeout,
             "elapsed_application_limit_seconds": config.timeout_seconds,
