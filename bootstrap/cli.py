@@ -32,6 +32,7 @@ _FORWARD = {
     "rehearsal": "orchestration.rehearsal",
     "serve": "viz.server",
     "readiness": "readiness",
+    "swarm": "swarm",
 }
 
 
@@ -120,7 +121,7 @@ def main() -> int:
     check = sub.add_parser("check", help="本地质量门：全量测试 + strict mypy")
     check.set_defaults(func=_check)
 
-    swarm = sub.add_parser("swarm", help="异构去中心化蜂群（占位，尚未合入主线）")
+    swarm = sub.add_parser("swarm", help="异构去中心化蜂群（转发 python -m swarm）")
     swarm.set_defaults(func=_swarm)
 
     args = parser.parse_args()
