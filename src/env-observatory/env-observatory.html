@@ -1414,6 +1414,36 @@ html[data-theme="dark"] .gh-sidebar {
 .cloud-inst li { font-size: 11.5px; color: var(--fg-muted); display: flex; gap: 6px; align-items: baseline; }
 .cloud-inst li b { margin-left: auto; color: var(--fg); font-weight: 600; }
 html[data-theme="dark"] .cloud-inst { border-top-color: var(--border-muted); }
+
+/* ── Agent 运行环境列表 ───────────────────────────────────────────── */
+.env-list { list-style: none; margin: 6px 0 0; padding: 0; }
+.env-row {
+  display: grid; grid-template-columns: auto minmax(120px, 1fr) minmax(150px, 1.6fr) auto;
+  align-items: center; gap: 10px 14px;
+  padding: 11px 2px; border-bottom: 1px solid var(--border-muted);
+  font-size: 12.5px; transition: background .2s;
+}
+.env-row:last-child { border-bottom: none; }
+.env-row:hover { background: var(--bg-subtle); border-radius: 10px; }
+.env-kind {
+  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 6px; flex: none;
+  color: var(--fg-muted); background: var(--bg-subtle); border: 1px solid var(--border-muted);
+}
+.env-kind.k-host { color: var(--accent); border-color: var(--accent-border, var(--border)); }
+.env-kind.k-cloud-vm { color: var(--gold-ink, #9a6700); border-color: var(--gold); }
+.env-name { font-weight: 600; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.env-name small { display: block; font-weight: 400; font-size: 11px; color: var(--fg-muted); margin-top: 2px; white-space: normal; }
+.env-spec { font-family: var(--mono); font-size: 11.5px; color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; }
+.env-spec b { color: var(--fg); font-weight: 600; }
+.env-tail { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.env-addr { font-family: var(--mono); font-size: 11px; color: var(--fg-muted); }
+.env-runtime {
+  font-size: 10.5px; font-family: var(--mono); color: var(--fg-muted);
+  padding: 2px 6px; border-radius: 5px; background: var(--bg-subtle); border: 1px solid var(--border-muted);
+}
+.env-empty { padding: 14px 2px; color: var(--fg-muted); font-size: 12.5px; }
+html[data-theme="dark"] .env-row:hover { background: rgba(255, 255, 255, .04); }
 </style>
 </head>
 <body>
@@ -1893,6 +1923,13 @@ html[data-theme="dark"] .cloud-inst { border-top-color: var(--border-muted); }
           <p class="muted" id="cloudGridNote" style="grid-column:1/-1" data-i18n="computeLoading">正在读取云厂商接口…</p>          </div>
             </article>
         </div>
+
+        <section class="card">
+          <div class="card-head"><h3 data-i18n="agentEnv">Agent 运行环境</h3>
+            <span class="muted fineprint" id="envSummary" data-i18n="envLoading">正在探测本机与云端执行环境…</span></div>
+          <ul class="env-list" id="envList"></ul>
+          <p class="fineprint muted" style="margin:10px 0 0" data-i18n="agentEnvNote">执行环境 = agent 真正能落地的机器：本机、Docker 容器、WSL 发行版、Kubernetes 上下文、阿里云 ECS 实例。本机与 ECS 由后端真实枚举（/api/compute/instances），其余为实测状态（Docker 守护进程、kubectl 上下文）；拿不到的字段显示 —，不编数据。</p>
+        </section>
 
         <section class="card">
           <div class="card-head"><h3 data-i18n="queue">协同调度队列</h3>
@@ -2613,7 +2650,7 @@ var I18N = {
     evidenceLabel:'探测依据', lastSeen:'上次检测', health:'健康度', healthOk:'正常', healthBusy:'繁忙',
     version:'版本', latency:'时延',
     vIde:'IDE 插件', vModelHub:'模型 Hub', vOrchestration:'编排框架', vLocal:'本地推理',
-    computeSubtitle:'纳管多云与本地算力。本机显卡与阿里云已接真实接口（本地枚举 / ECS GPU 规格 + 实时价格），其余厂商接口位保留，等待 Wayfinder 联调。',
+    computeSubtitle:'纳管多云与本地算力，并把 agent 真正能落地的执行环境列出来。本机显卡 / 阿里云 ECS 规格与价格 / 本机·容器·WSL·K8s·ECS 执行环境均为真实枚举，其余厂商接口位保留，等待 Wayfinder 联调。',
     topology:'协同拓扑', topoNote:'枢纽 = Morphogenesis 编排中枢 · 金色连线 = 已纳管协同',
     queue:'协同调度队列', routeBtn:'重新评估路由', routeNote:'按 evidence / cost / 时延择优',
     sManaged:'纳管厂商', sCompute:'可用算力', sCost:'预估时成本', sAvgLat:'平均时延',
@@ -2652,6 +2689,16 @@ var I18N = {
     computeCliMissing:'已预留接口，但未找到 aliyun CLI',
     localHost:'本机', available:'可用', noGpu:'未检测到显卡',
     vramUsed:'显存占用', utilization:'利用率', localGpuNote:'本机显卡（真实枚举）',
+    agentEnv:'Agent 运行环境', envLoading:'正在探测本机与云端执行环境…',
+    envSummaryTpl:'共 {n} 个执行环境 · {r} 个可运行 agent', envNone:'未探测到可用的执行环境',
+    env_running:'运行中', env_stopped:'已停止', env_available:'可用', env_unknown:'未探明',
+    env_daemon_stopped:'守护进程未启动', env_daemon_unreachable:'守护进程不可达',
+    env_no_context:'无上下文', env_cli_missing:'未安装 CLI', env_cli_error:'CLI 异常',
+    env_enumeration_blocked:'枚举受阻', env_installed_no_distro:'已安装 · 无发行版',
+    envKind_host:'本机', envKind_container:'容器', envKind_wsl:'WSL',
+    envKind_k8s:'K8s', envKind_cloudvm:'云主机', envExpires:'到期', envContainers:'个容器',
+    envProbeDisabled:'探测已关闭（OBSERVATORY_PROBE=0）', envEcsPartial:'{c} 个地域探测失败',
+    agentEnvNote:'执行环境 = agent 真正能落地的机器：本机、Docker 容器、WSL 发行版、Kubernetes 上下文、阿里云 ECS 实例。本机与 ECS 由后端真实枚举（/api/compute/instances），容器 / WSL / K8s 显示实测状态；拿不到的字段显示 —，不编数据。',
     pendingWayfinder:'待联调', pendingWayfinderNote:'接口位已保留，交由内置 Wayfinder 接入',
     specUnit:'个可选规格', realSpecs:'真实规格与实时价格'
   },
@@ -2682,7 +2729,7 @@ var I18N = {
     evidenceLabel:'Probe evidence', lastSeen:'Last seen', health:'Health', healthOk:'OK', healthBusy:'Busy',
     version:'Version', latency:'Latency',
     vIde:'IDE plugin', vModelHub:'Model Hub', vOrchestration:'Orchestration framework', vLocal:'Local inference',
-    computeSubtitle:'Manages cloud and local compute. This host GPU and Aliyun are wired to real endpoints (local enumeration / ECS GPU specs + live prices); the remaining vendors keep their slot and wait for Wayfinder.',
+    computeSubtitle:'Manages cloud and local compute, and lists the environments an agent can actually run in. Host GPU, Aliyun ECS specs and prices, and the host / container / WSL / K8s / ECS execution targets are all really enumerated; the remaining vendors keep their slot and wait for Wayfinder.',
     topology:'Orchestration topology', topoNote:'Hub = Morphogenesis orchestrator · gold links = managed collaboration',
     queue:'Scheduling queue', routeBtn:'Re-evaluate routes', routeNote:'Optimize by evidence / cost / latency',
     sManaged:'Managed vendors', sCompute:'Available compute', sCost:'Est. hourly cost', sAvgLat:'Avg latency',
@@ -2721,6 +2768,16 @@ var I18N = {
     computeCliMissing:'Slot reserved, but the aliyun CLI was not found',
     localHost:'This host', available:'Available', noGpu:'No GPU detected',
     vramUsed:'VRAM used', utilization:'Utilization', localGpuNote:'Local GPUs (really enumerated)',
+    agentEnv:'Agent runtime environments', envLoading:'Probing local and cloud execution targets…',
+    envSummaryTpl:'{n} execution environments · {r} able to run an agent', envNone:'No usable execution environment found',
+    env_running:'running', env_stopped:'stopped', env_available:'available', env_unknown:'undetermined',
+    env_daemon_stopped:'daemon not running', env_daemon_unreachable:'daemon unreachable',
+    env_no_context:'no context', env_cli_missing:'CLI not installed', env_cli_error:'CLI error',
+    env_enumeration_blocked:'enumeration blocked', env_installed_no_distro:'installed, no distro',
+    envKind_host:'host', envKind_container:'container', envKind_wsl:'WSL',
+    envKind_k8s:'K8s', envKind_cloudvm:'cloud VM', envExpires:'expires', envContainers:'containers',
+    envProbeDisabled:'probing disabled (OBSERVATORY_PROBE=0)', envEcsPartial:'{c} region(s) failed',
+    agentEnvNote:'An execution environment is a machine an agent can actually run on: this host, a Docker container, a WSL distro, a Kubernetes context, an Aliyun ECS instance. Host and ECS are really enumerated by the backend (/api/compute/instances); container / WSL / K8s show their measured state. Fields with no real source read — and are never invented.',
     pendingWayfinder:'To be wired', pendingWayfinderNote:'Slot reserved; the built-in Wayfinder will integrate it',
     specUnit:'offered types', realSpecs:'Real types and live prices'
   }
@@ -4561,6 +4618,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     grid.innerHTML = '';
     var note = $('cloudGridNote');
     if (note) { note.textContent = T('computeLoading'); note.hidden = false; }
+    loadEnvironments(refresh);
 
     fetch('/api/compute/local' + (refresh ? '?refresh=1' : ''), { headers: { Accept: 'application/json' } })
       .then(function (r) { return r.json(); })
@@ -4618,6 +4676,111 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
         var n3 = $('cloudGridNote');
         if (n3) { n3.textContent = T('computeUnavailable'); n3.hidden = false; }
       });
+  }
+
+  /* ---------------- Agent 运行环境（真实探测） ----------------
+   * 数据源：GET /api/compute/instances。后端真实枚举本机 / Docker / WSL /
+   * kubectl / 阿里云 ECS。状态直接来自探测结果，拿不到就显示 —，不编。 */
+  var ENV_STATE = { data: null };
+
+  var ENV_STATUS_CLASS = {
+    running: 'is-ready', available: 'is-ready',
+    stopped: 'is-auth',
+    daemon_stopped: 'is-absent', no_context: 'is-absent', cli_missing: 'is-absent',
+    cli_error: 'is-absent', enumeration_blocked: 'is-absent', installed_no_distro: 'is-absent',
+    daemon_unreachable: 'is-absent'
+  };
+  function envStatusLabel(st) {
+    var key = 'env_' + String(st || 'unknown').replace(/[^a-z_]/g, '');
+    var label = T(key);
+    return label === key ? String(st || '—') : label;
+  }
+  function envKindLabel(kind) {
+    var key = 'envKind_' + String(kind || '').replace(/-/g, '');
+    var label = T(key);
+    return label === key ? String(kind || '—') : label;
+  }
+
+  function renderEnvironments(data) {
+    var list = $('envList');
+    var summary = $('envSummary');
+    if (!list) return;
+    var envs = ((data && data.environments) || []).slice();
+    /* 能直接跑 agent 的排前面：本机 → 云主机 → 容器 → WSL → K8s。
+       顺序只影响呈现，不改数据。 */
+    var ENV_ORDER = { host: 0, 'cloud-vm': 1, container: 2, wsl: 3, k8s: 4 };
+    envs.sort(function (x, y) {
+      var ox = ENV_ORDER[x.kind] == null ? 9 : ENV_ORDER[x.kind];
+      var oy = ENV_ORDER[y.kind] == null ? 9 : ENV_ORDER[y.kind];
+      if (ox !== oy) return ox - oy;
+      return String(x.name || '').localeCompare(String(y.name || ''));
+    });
+    if (summary) {
+      if (!data || data.error) {
+        summary.textContent = T('computeUnavailable');
+      } else if (data.source === 'probe-disabled') {
+        summary.textContent = T('envProbeDisabled');
+      } else {
+        summary.textContent = T('envSummaryTpl')
+          .replace('{n}', String(data.total != null ? data.total : envs.length))
+          .replace('{r}', String(data.runnable != null ? data.runnable : '—'));
+        /* 部分来源探测失败时说出来，不要让它看起来像"就是没有" */
+        var errs = data.ecs_errors || [];
+        if (errs.length) {
+          summary.textContent += ' · ' + T('envEcsPartial').replace('{c}', String(errs.length));
+        }
+      }
+    }
+    if (!envs.length) {
+      list.innerHTML = '<li class="env-empty">' + cloudEsc(T('envNone')) + '</li>';
+      return;
+    }
+    list.innerHTML = envs.map(function (e) {
+      var cls = ENV_STATUS_CLASS[e.status] || 'is-absent';
+      var specBits = [];
+      if (e.cpu_cores) specBits.push('<b>' + e.cpu_cores + '</b> vCPU');
+      if (e.memory_gib) specBits.push('<b>' + e.memory_gib + '</b> GiB');
+      if (e.gpu_count) specBits.push('<b>' + e.gpu_count + '×</b> ' + cloudEsc(e.gpu_model || 'GPU'));
+      if (e.platform) specBits.push(cloudEsc(e.platform));
+      var d = e.detail || {};
+      var addr = d.public_ip || d.private_ip || '';
+      var sub = [];
+      if (d.region) sub.push(cloudEsc(d.region) + (d.zone ? ' · ' + cloudEsc(d.zone) : ''));
+      if (d.instance_type) sub.push(cloudEsc(d.instance_type));
+      if (d.charge_type) sub.push(cloudEsc(d.charge_type));
+      if (d.expired_time) sub.push(T('envExpires') + ' ' + cloudEsc(String(d.expired_time).slice(0, 10)));
+      if (e.kind === 'container' && (d.containers || []).length) {
+        sub.push((d.running_containers || 0) + '/' + d.containers.length + ' ' + T('envContainers'));
+      }
+      var runtimes = (e.runtimes || []).map(function (r) {
+        return '<span class="env-runtime">' + cloudEsc(r) + '</span>';
+      }).join('');
+      return ''
+        + '<li class="env-row">'
+        +   '<span class="env-kind k-' + cloudEsc(e.kind) + '">' + cloudEsc(envKindLabel(e.kind)) + '</span>'
+        +   '<span class="env-name">' + cloudEsc(e.name || e.id)
+        +     (sub.length ? '<small>' + sub.join(' · ') + '</small>' : '') + '</span>'
+        +   '<span class="env-spec">' + (specBits.join(' · ') || '—') + '</span>'
+        +   '<span class="env-tail">'
+        +     (runtimes ? runtimes : '')
+        +     (addr ? '<span class="env-addr">' + cloudEsc(addr) + '</span>' : '')
+        +     '<span class="badge ' + cls + '"><span class="dot"></span>' + cloudEsc(envStatusLabel(e.status)) + '</span>'
+        +   '</span>'
+        + '</li>';
+    }).join('');
+  }
+
+  function loadEnvironments(refresh) {
+    if (!isHttpDoc()) return;
+    fetch('/api/compute/instances' + (refresh ? '?refresh=1' : ''),
+          { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (ed) {
+        if (!ed || ed.error) { renderEnvironments(null); return; }
+        ENV_STATE.data = ed;
+        renderEnvironments(ed);
+      })
+      .catch(function () { renderEnvironments(null); });
   }
 
   function cloudCards() {
@@ -4723,7 +4886,10 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
         routeBtn.disabled = true;
         routeBtn.textContent = T('evaluating');
         if (note) note.textContent = T('routeEvaluating');
+        /* 真的重新探测：refresh=1 绕过服务端 300s/180s 缓存，重跑 ECS 与
+           本机枚举，而不是定时器假装。 */
         setTimeout(function () {
+          loadCompute(true);
           renderQueue(true);
           routeBtn.disabled = false;
           routeBtn.textContent = T('routeBtn');
@@ -4776,6 +4942,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
   window.mgNotify = notify;
   document.addEventListener('mg:lang', function () {
     try { renderQueue(false); } catch (e) {}
+    try { if (ENV_STATE.data) renderEnvironments(ENV_STATE.data); } catch (e) {}
     try { if (COMPUTE_STATE.providers.length) { document.getElementById('cloudGrid').innerHTML = ''; if (COMPUTE_STATE.local) renderLocalCard(COMPUTE_STATE.local); if (COMPUTE_STATE.aliyun) renderAliyunCard(COMPUTE_STATE.aliyun); COMPUTE_STATE.providers.forEach(function (p) { if (p.id !== 'aliyun') renderPendingCard(p); }); paintComputeStats(); } } catch (e) {}
     try { setBar(); } catch (e) {}
     try { paintTopology(); } catch (e) {}

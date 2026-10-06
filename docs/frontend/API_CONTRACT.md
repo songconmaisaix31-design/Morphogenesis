@@ -379,3 +379,94 @@
 - file:// 打开或 fetch 失败 → 回退内联 mock（`buildPackage`/`buildSnapshot`），标 `source: 'mock'`；
 - `subscribeActivity`：live 模式轮询 `activity?since_seq=`（基线为 package 中最大 sequence，3.2s 间隔，新事件 `live: true`）；单次轮询失败静默重试，不回退 mock（避免伪 live 事件）；mock 模式保持原定时器循环播放；
 - `window.EnvData.getSource()` 返回 `'live' | 'mock'`，供调试面板/控制台确认数据来源。 |
+
+---
+
+## 12. 探测类端点（Agent / Compute，真实执行本机与云端命令）
+
+这三个端点与 §11 的区别在于：它们**真的在本机起子进程**（`nvidia-smi`、`docker`、`wsl`、
+`kubectl`、`aliyun`），因此都有 TTL 缓存与超时预算。口径同 §10：拿不到真实值就返回
+`null` / `—`，**绝不用 0 或演示数据填充**。
+
+| 端点 | 方法 | 说明 | 缓存 |
+|---|---|---|---|
+| `/api/health` | GET | 探活：`status` / `pid` / `uptime_s` / `service_ready` / `probe_enabled` / `routes`。**不起子进程、不碰 SQLite**，否则探活本身会成为故障源 | 无 |
+| `/api/agents/probe?refresh=` | GET | 遍历 `orchestration.native_agents.registry.REGISTRY`，对每个运行时真实执行 `<cli> --version` 与 `<cli> auth status`。只回显解析出的 argv，**永不回显 auth 的 stdout** | 60s |
+| `/api/compute/local?refresh=` | GET | 本机显卡：`nvidia-smi` 优先（型号/总显存/已用/驱动/利用率），Windows 下退回 `Win32_VideoController`（仅型号与驱动） | 30s |
+| `/api/compute/providers` | GET | 每个厂商槽位的真实状态：`ready` / `no_gpu` / `probe_failed` / `cli_missing` / `not_configured` / `not_integrated`。**没有"回退到演示数据"这一态** | 无 |
+| `/api/compute/aliyun?region=&limit=&families=&refresh=` | GET | 真实 ECS GPU 规格（`DescribeInstanceTypes`）+ 真实 CNY 小时价（`DescribePrice`） | 300s |
+| `/api/compute/instances?regions=&refresh=` | GET | **Agent 运行环境**清单，见下 | 180s |
+
+### 12.1 `/api/compute/instances`（Agent 运行环境）
+
+回答"agent 到底能跑在哪台机器上"，覆盖五类真实来源：
+
+| `kind` | 来源 | 探测方式 |
+|---|---|---|
+| `host` | 本机 | `os` / `platform` + ctypes 物理内存 + 复用 `/api/compute/local` + registry 存在性检查 |
+| `container` | Docker | `docker version` 判守护进程，`docker ps -a` 列容器 |
+| `wsl` | WSL 发行版 | `wsl -l -v`（输出为 **UTF-16LE**，按字节读取后解码） |
+| `k8s` | Kubernetes 上下文 | `kubectl config get-contexts -o name` |
+| `cloud-vm` | 阿里云 ECS | `DescribeInstances` 逐地域 |
+
+每个环境条目：
+
+```jsonc
+{
+  "id": "ecs:i-2ze2nztd89vevmw21wif",
+  "kind": "cloud-vm", "provider": "aliyun", "name": "iZ2ze2nztd89vevmw21wifZ",
+  "status": "running",            // running / stopped / available / daemon_stopped / no_context …
+  "platform": "Ubuntu  24.04 64位",
+  "cpu_cores": 4, "memory_gib": 8.0,          // 拿不到就是 null
+  "gpu_count": 0, "gpu_model": null, "vram_gib": null,
+  "agent_ready": null,                        // 只有本机能确定（查 registry）
+  "runtimes": [],
+  "detail": {
+    "region": "cn-beijing", "zone": "cn-beijing-l", "instance_type": "ecs.c9a.xlarge",
+    "charge_type": "PrePaid", "public_ip": "47.93.118.110", "private_ip": "172.31.185.72",
+    "expired_time": "2026-10-14T16:00Z", "source": "aliyun ecs DescribeInstances"
+  }
+}
+```
+
+信封：`{ environments[], counts{}, total, runnable, ecs_regions_checked[], ecs_errors[], notes[], source }`，
+`source` 为 `live-probe` 或 `probe-disabled`。
+
+**两个实测踩到的坑（改动时不要退回）：**
+
+1. **`DescribeInstances` 的 `TotalCount` 不可信** —— `cn-beijing` 返回 `TotalCount=0`
+   但 `Instances.Instance` 里确实有 1 台。只认数组长度。
+2. `VpcAttributes.PrivateIpAddress` 是**嵌套两层的** `{"IpAddress": {"IpAddress": [...]}}`，
+   而 `PublicIpAddress.IpAddress` 是 `{"IpAddress": [...]}`。取值必须做形状容错。
+
+地域轮询有总时长预算（`OBSERVATORY_ECS_BUDGET`，默认 45s），单地域超时
+`OBSERVATORY_ECS_TIMEOUT`（默认 20s）、地域列表 `OBSERVATORY_ECS_REGIONS`。
+`DescribePrice` **必须带** `--SystemDisk.Category`，否则报
+`InvalidSystemDiskCategory.ValueNotSupported`。
+
+---
+
+## 13. 运行与稳定性（`watchdog.py`）
+
+面板会被长时间开着，而它曾**无声消失**：子进程没有 traceback、日志只有启动横幅 ——
+这是被外部终止（机器休眠、父 shell 被回收、OOM）的样子，不是崩溃。所以用看护而不是加更多
+`try/except`：
+
+```
+python src/env-observatory/watchdog.py --port 8100 --log D:\tmp\watch-server.log
+```
+
+- 轮询 `/api/health`（故意做得很轻）；进程死了就拉起，进程活着但连续 `--unhealthy-limit`
+  次探活失败则判定卡死并重启；
+- 指数退避（`--restart-delay` → `--max-restart-delay`），坏配置不会打满 CPU；
+- **端口预检**：端口被别人占着时直接退出并说明，而不是反复 spawn 出一堆绑定失败；
+- 自动补 `OBSERVATORY_HOST_CONFIG`（指向同目录 `.state/host-config.json`）与
+  `DASHSCOPE_API_KEY`（读 `~/.bailian/config.json`，不覆盖已有值、不打印密钥）；
+- `OBSERVATORY_PROBE=0` 可整体关闭外部探测，让面板在零子进程下运行。
+
+直接 `python src/env-observatory/server.py` 仍然可用，看护只是外层包装。
+
+> Windows 上 `.venv\Scripts\python.exe` 是**转发 shim**，它会再拉起真正的 uv 解释器作为
+> 子进程。所以 `Popen` 拿到的 pid 是 shim、而真正持有 socket 的是它的子进程 ——
+> 看护日志里会同时打印两者（`shim pid X -> socket pid Y`），不要把它误读成两个实例。
+

@@ -154,3 +154,88 @@ def test_service_unavailable_degrades_to_503(server: Any) -> None:
             assert response.status_code == 503, path
             assert response.json()["error"] == "observatory_service_unavailable"
         assert client.get("/").status_code == 200  # static still served → frontend falls back to mock
+
+
+def test_agent_environments_endpoint_shape(client: Any) -> None:
+    """执行环境清单：真实探测结果的信封，字段缺失只允许是 None。"""
+    resp = client.get("/api/compute/instances")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["source"] == "live-probe"
+    assert isinstance(body["environments"], list)
+    assert body["total"] == len(body["environments"])
+    assert isinstance(body["counts"], dict)
+
+    # 本机是唯一不依赖外部工具的来源，必须始终在场
+    kinds = {env["kind"] for env in body["environments"]}
+    assert "host" in kinds
+
+    allowed = {"host", "container", "wsl", "k8s", "cloud-vm"}
+    for env in body["environments"]:
+        for key in ("id", "kind", "provider", "name", "status"):
+            assert key in env, key
+        assert env["kind"] in allowed
+        # 拿不到真实值就必须是 None —— 这里挡住"用 0 填充"的回归
+        assert env["cpu_cores"] is None or isinstance(env["cpu_cores"], int)
+        assert env["memory_gib"] is None or isinstance(env["memory_gib"], (int, float))
+        assert env["gpu_count"] is None or isinstance(env["gpu_count"], int)
+        assert isinstance(env["runtimes"], list)
+
+
+def test_agent_environments_read_only(client: Any) -> None:
+    """写方法在环境端点上同样被拒（只读契约不能漏掉新路由）。"""
+    assert client.post("/api/compute/instances").status_code == 405
+    assert client.put("/api/compute/instances").status_code == 405
+    assert client.delete("/api/compute/instances").status_code == 405
+
+
+def test_local_gpu_endpoint_shape(client: Any) -> None:
+    resp = client.get("/api/compute/local")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["provider"] == "local"
+    assert isinstance(body["gpus"], list)
+    assert body["count"] == len(body["gpus"])
+    for gpu in body["gpus"]:
+        assert gpu["name"]
+        assert gpu["memory_total_mib"] is None or isinstance(gpu["memory_total_mib"], int)
+
+
+def test_compute_providers_envelope(client: Any) -> None:
+    """provider 槽位：状态必须是四态之一，未接入的不能带数据。"""
+    body = client.get("/api/compute/providers").json()
+    assert isinstance(body["providers"], list)
+    allowed = {"ready", "no_gpu", "probe_failed", "cli_missing", "not_configured", "not_integrated"}
+    for provider in body["providers"]:
+        assert provider["status"] in allowed
+        if not provider.get("integrated"):
+            assert provider["status"] == "not_integrated"
+
+
+def test_health_is_cheap_and_honest(client: Any) -> None:
+    """探活端点必须极轻：不碰 SQLite、不起子进程，否则探活本身成为故障源。"""
+    body = client.get("/api/health").json()
+    assert body["status"] == "ok"
+    assert isinstance(body["pid"], int)
+    assert body["service_ready"] is True
+    assert body["uptime_s"] >= 0
+    routes = set(body["routes"])
+    for route in ("/api/health", "/api/compute/instances", "/api/compute/local",
+                  "/api/compute/providers", "/api/compute/aliyun",
+                  "/api/agents/probe", "/api/research/package"):
+        assert route in routes, route
+
+
+def test_probe_can_be_disabled(monkeypatch: Any, client: Any) -> None:
+    """OBSERVATORY_PROBE=0 时跳过外部探测，且如实标注而非返回空数据冒充。"""
+    monkeypatch.setenv("OBSERVATORY_PROBE", "0")
+    body = client.get("/api/compute/instances", params={"refresh": 1}).json()
+    assert body["source"] == "probe-disabled"
+    assert body["environments"] == []
+    assert body["total"] == 0
+    assert any("OBSERVATORY_PROBE" in note for note in body["notes"])
+
+
+def test_probe_disabled_hides_from_health(monkeypatch: Any, client: Any) -> None:
+    monkeypatch.setenv("OBSERVATORY_PROBE", "false")
+    assert client.get("/api/health").json()["probe_enabled"] is False

@@ -198,6 +198,12 @@ class ReadOnlyAndSecurityMiddleware:
         await self.app(routed_scope, receive, send_wrapper)
 
 
+def _probe_enabled() -> bool:
+    """External probes (nvidia-smi / docker / kubectl / wsl / aliyun) can be turned
+    off entirely with OBSERVATORY_PROBE=0 so the panel runs with zero subprocesses."""
+    return str(os.environ.get("OBSERVATORY_PROBE", "1")).strip().lower() not in {"0", "false", "no", "off"}
+
+
 # ---------------------------------------------------------------------------
 # App factory
 # ---------------------------------------------------------------------------
@@ -227,6 +233,31 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
             if bound:
                 return bound
         return "p1"
+
+    # ---- liveness --------------------------------------------------------
+    #
+    # 必须极轻：不碰 SQLite，不起子进程，不读磁盘。看护进程和前端都靠它判活，
+    # 一旦它也开始跑探测，"探活本身把服务拖死"就会成为新的故障模式。
+
+    _STARTED_AT = time.time()
+
+    @app.get("/api/health")
+    def api_health() -> Response:
+        routes = sorted({
+            getattr(r, "path", "") for r in app.routes
+            if getattr(r, "path", "").startswith("/api/")
+        })
+        return json_response({
+            "status": "ok",
+            "pid": os.getpid(),
+            "started_at": _STARTED_AT,
+            "uptime_s": round(time.time() - _STARTED_AT, 1),
+            "service_ready": service is not None,
+            "service_error": service_error,
+            "host_config": host_config,
+            "probe_enabled": _probe_enabled(),
+            "routes": routes,
+        })
 
     # ---- read-only research API -----------------------------------------
 
@@ -610,6 +641,416 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
         payload["source"] = "aliyun-cli"
         _compute_cache["at"] = now
         _compute_cache["payload"] = payload
+        return json_response(payload)
+
+    # ---- Agent 运行环境：agent 真正能落地的执行平面 ----------------------
+    #
+    # 口径：只报真实探测到的执行环境 —— 本机 / Docker 容器 / WSL 发行版 /
+    # Kubernetes 上下文 / 阿里云 ECS 实例。拿不到就报未探明或空态，绝不编。
+    #
+    # 阿里云侧的两个坑（都实测踩过）：
+    #   1. DescribeInstances 的 TotalCount **不可信** —— cn-beijing 返回
+    #      TotalCount=0 但 Instances.Instance 里确实有 1 台。只认数组长度。
+    #   2. 该接口按 RegionId 逐个查，没有跨地域版本，所以要轮询地域列表；
+    #      ResourceCenter 的 SearchResources 能跨地域，但参数是 Filter.n.*，
+    #      且需要显式 --endpoint，这里只用 DescribeInstances。
+
+    _ENV_TTL = 180.0
+    _env_cache: dict[str, Any] = {"at": 0.0, "payload": None}
+
+    # 默认轮询国内主要地域。可用 OBSERVATORY_ECS_REGIONS 覆盖（逗号分隔），
+    # 因为 DescribeInstances 没有跨地域版本，地域越多第一次探测越慢。
+    ECS_REGIONS: list[str] = [
+        r.strip() for r in os.environ.get(
+            "OBSERVATORY_ECS_REGIONS",
+            "cn-hangzhou,cn-beijing,cn-shanghai,cn-shenzhen,cn-chengdu,cn-hongkong",
+        ).split(",") if r.strip()
+    ]
+
+    # 单地域查询超时与总时长上限：地域多了也不能让一次请求挂太久。
+    ECS_REGION_TIMEOUT = int(os.environ.get("OBSERVATORY_ECS_TIMEOUT", "20"))
+    ECS_TOTAL_BUDGET = float(os.environ.get("OBSERVATORY_ECS_BUDGET", "45"))
+
+    def _host_memory_gib() -> float | None:
+        """Total physical memory. ctypes on Windows, sysconf elsewhere."""
+        try:
+            if os.name == "nt":
+                import ctypes
+
+                class _MemStatus(ctypes.Structure):
+                    _fields_ = [
+                        ("dwLength", ctypes.c_ulong),
+                        ("dwMemoryLoad", ctypes.c_ulong),
+                        ("ullTotalPhys", ctypes.c_ulonglong),
+                        ("ullAvailPhys", ctypes.c_ulonglong),
+                        ("ullTotalPageFile", ctypes.c_ulonglong),
+                        ("ullAvailPageFile", ctypes.c_ulonglong),
+                        ("ullTotalVirtual", ctypes.c_ulonglong),
+                        ("ullAvailVirtual", ctypes.c_ulonglong),
+                        ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+                    ]
+
+                stat = _MemStatus()
+                stat.dwLength = ctypes.sizeof(_MemStatus)
+                if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat)):
+                    return round(stat.ullTotalPhys / (1024 ** 3), 1)
+                return None
+            return round(
+                os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024 ** 3), 1
+            )
+        except Exception:  # noqa: BLE001
+            return None
+
+    def _run_bytes(command: list[str], timeout: int) -> tuple[int, bytes, bytes]:
+        """Like _run_cli but keeps the raw bytes (wsl.exe prints UTF-16LE)."""
+        proc = subprocess.run(command, capture_output=True, timeout=timeout,
+                              shell=False, env=_pi_env(dict(os.environ)))
+        return proc.returncode, proc.stdout or b"", proc.stderr or b""
+
+    def _exe_path(name: str) -> str | None:
+        """shutil.which, plus the Docker Desktop bin dir (often not on PATH)."""
+        import shutil
+
+        found = shutil.which(name)
+        if found:
+            return found
+        if os.name == "nt":
+            docker_bin = Path(r"C:\Program Files\Docker\Docker\resources\bin")
+            for candidate in (docker_bin / name, docker_bin / (name + ".exe")):
+                if candidate.is_file():
+                    return str(candidate)
+        return None
+
+    def _host_runtimes() -> list[str]:
+        """Which registered agent CLIs are installed here.
+
+        resolve_executable() takes a RuntimeSpec and raises when the runtime is
+        absent, so it is also the cheapest presence check (no --version spawn).
+        """
+        try:
+            from orchestration.native_agents.registry import REGISTRY, resolve_executable
+
+            found = []
+            for runtime_id, spec in REGISTRY.items():
+                try:
+                    resolve_executable(spec)
+                    found.append(runtime_id)
+                except Exception:  # noqa: BLE001 - absent runtime, not a fault
+                    continue
+            return sorted(found)
+        except Exception:  # noqa: BLE001
+            return []
+
+    def _fetch_host_env() -> dict[str, Any]:
+        import platform
+
+        gpus: list[dict[str, Any]] = []
+        try:
+            gpus = _fetch_local_gpu().get("gpus", [])
+        except Exception:  # noqa: BLE001
+            pass
+        runtimes = _host_runtimes()
+        os_name = f"{platform.system()} {platform.release()}"
+        entry: dict[str, Any] = {
+            "id": "host:local",
+            "kind": "host",
+            "provider": "local",
+            "name": os_name or "local host",
+            "status": "running",
+            "platform": platform.platform(),
+            "arch": platform.machine(),
+            "cpu_cores": os.cpu_count(),
+            "memory_gib": _host_memory_gib(),
+            "gpu_count": len(gpus),
+            "gpu_model": (gpus[0].get("name") if gpus else None),
+            "vram_gib": (round((gpus[0].get("memory_total_mib") or 0) / 1024, 1)
+                         if gpus and gpus[0].get("memory_total_mib") else None),
+            "agent_ready": bool(runtimes),
+            "runtimes": runtimes,
+            "detail": {
+                "python": sys.version.split()[0],
+                "source": "os + nvidia-smi/CIM + native_agents registry",
+            },
+        }
+        return entry
+
+    def _fetch_docker_env() -> dict[str, Any]:
+        entry: dict[str, Any] = {
+            "id": "container:docker", "kind": "container", "provider": "docker",
+            "name": "Docker", "status": "cli_missing", "platform": None,
+            "cpu_cores": None, "memory_gib": None, "gpu_count": None,
+            "agent_ready": None, "runtimes": [], "detail": {},
+        }
+        exe = _exe_path("docker")
+        if not exe:
+            return entry
+        try:
+            code, out, err = _run_cli([exe, "version", "--format", "{{.Server.Version}}"], timeout=20)
+        except subprocess.TimeoutExpired:
+            entry["status"] = "daemon_unreachable"
+            entry["detail"] = {"error": "docker version timed out"}
+            return entry
+        if code != 0:
+            entry["status"] = "daemon_stopped"
+            entry["detail"] = {"error": (err or "").strip()[:200], "exe": exe}
+            return entry
+        server_version = (out or "").strip()
+        containers: list[dict[str, Any]] = []
+        try:
+            code2, out2, _ = _run_cli(
+                [exe, "ps", "-a", "--format",
+                 "{{.Names}}|{{.Image}}|{{.Status}}|{{.State}}"], timeout=25)
+            if code2 == 0:
+                for line in (out2 or "").strip().splitlines():
+                    parts = line.split("|")
+                    if len(parts) >= 4:
+                        containers.append({"name": parts[0], "image": parts[1],
+                                           "status": parts[2], "state": parts[3]})
+        except subprocess.TimeoutExpired:
+            pass
+        running = [c for c in containers if c.get("state") == "running"]
+        entry["status"] = "running"
+        entry["platform"] = f"Docker {server_version}"
+        entry["detail"] = {"server_version": server_version, "exe": exe,
+                           "containers": containers,
+                           "running_containers": len(running)}
+        return entry
+
+    def _fetch_wsl_env() -> list[dict[str, Any]]:
+        """One entry per WSL distro. wsl.exe prints UTF-16LE."""
+        exe = _exe_path("wsl") or _exe_path("wsl.exe")
+        if not exe:
+            return []
+        try:
+            code, raw, _ = _run_bytes([exe, "-l", "-v"], timeout=25)
+        except subprocess.TimeoutExpired:
+            return [{"id": "wsl:unknown", "kind": "wsl", "provider": "wsl",
+                     "name": "WSL", "status": "enumeration_blocked", "platform": None,
+                     "cpu_cores": None, "memory_gib": None, "gpu_count": None,
+                     "agent_ready": None, "runtimes": [],
+                     "detail": {"error": "wsl -l -v timed out"}}]
+        text = raw.decode("utf-16-le", errors="replace") if b"\x00" in raw else raw.decode("utf-8", "replace")
+        out_entries: list[dict[str, Any]] = []
+        for line in text.replace("\x00", "").splitlines():
+            stripped = line.strip().lstrip("*").strip()
+            if not stripped or stripped.lower().startswith(("name", "windows subsystem", "\u9002\u7528")):
+                continue
+            cols = [c for c in stripped.split("  ") if c.strip()]
+            if len(cols) >= 3:
+                distro, state, version = cols[0].strip(), cols[1].strip(), cols[2].strip()
+                out_entries.append({
+                    "id": "wsl:" + distro, "kind": "wsl", "provider": "wsl",
+                    "name": distro,
+                    "status": "running" if state.lower().startswith("running") else "stopped",
+                    "platform": f"WSL{version}" if version else "WSL",
+                    "cpu_cores": None, "memory_gib": None, "gpu_count": None,
+                    "agent_ready": None, "runtimes": [],
+                    "detail": {"state": state, "exe": exe},
+                })
+        if not out_entries:
+            out_entries.append({"id": "wsl:none", "kind": "wsl", "provider": "wsl",
+                                "name": "WSL", "status": "installed_no_distro",
+                                "platform": None, "cpu_cores": None, "memory_gib": None,
+                                "gpu_count": None, "agent_ready": None, "runtimes": [],
+                                "detail": {"exe": exe, "output": text.strip()[:200]}})
+        return out_entries
+
+    def _fetch_k8s_env() -> list[dict[str, Any]]:
+        exe = _exe_path("kubectl")
+        if not exe:
+            return []
+        try:
+            code, out, err = _run_cli([exe, "config", "get-contexts", "-o", "name"], timeout=20)
+        except subprocess.TimeoutExpired:
+            return []
+        if code != 0:
+            return [{"id": "k8s:error", "kind": "k8s", "provider": "kubernetes",
+                     "name": "Kubernetes", "status": "cli_error", "platform": None,
+                     "cpu_cores": None, "memory_gib": None, "gpu_count": None,
+                     "agent_ready": None, "runtimes": [],
+                     "detail": {"exe": exe, "error": (err or "").strip()[:160]}}]
+        contexts = [c.strip() for c in (out or "").splitlines() if c.strip()]
+        if not contexts:
+            return [{"id": "k8s:no-context", "kind": "k8s", "provider": "kubernetes",
+                     "name": "Kubernetes", "status": "no_context", "platform": None,
+                     "cpu_cores": None, "memory_gib": None, "gpu_count": None,
+                     "agent_ready": None, "runtimes": [],
+                     "detail": {"exe": exe, "contexts": []}}]
+        entries = []
+        for ctx in contexts:
+            entries.append({"id": "k8s:" + ctx, "kind": "k8s", "provider": "kubernetes",
+                            "name": ctx, "status": "available", "platform": None,
+                            "cpu_cores": None, "memory_gib": None, "gpu_count": None,
+                            "agent_ready": None, "runtimes": [],
+                            "detail": {"exe": exe, "context": ctx}})
+        return entries
+
+    def _first_ip(container: Any) -> str | None:
+        """ECS nests IPs differently per field: PublicIpAddress is
+        {"IpAddress": [...]} while VpcAttributes.PrivateIpAddress is
+        {"IpAddress": {"IpAddress": [...]}}. Accept every shape, or a bare string.
+        """
+        seen = container
+        for _ in range(3):
+            if seen is None:
+                return None
+            if isinstance(seen, str):
+                return seen.strip() or None
+            if isinstance(seen, list):
+                return _first_ip(seen[0]) if seen else None
+            if isinstance(seen, dict):
+                if not seen:
+                    return None
+                if "IpAddress" in seen:
+                    seen = seen["IpAddress"]
+                    continue
+                first = next(iter(seen.values()))
+                seen = first
+                continue
+            return None
+        return None
+
+    def _fetch_ecs_env(regions: list[str] | None = None) -> tuple[list[dict[str, Any]], list[str], list[str]]:
+        """Real ECS instances. Returns (entries, regions_checked, errors)."""
+        cli = _aliyun_cli()
+        ok, default_region = _aliyun_credentials()
+        if not cli or not ok:
+            return [], [], ["aliyun CLI or credentials unavailable"]
+        targets = regions or ECS_REGIONS
+        if default_region and default_region not in targets:
+            targets = [default_region] + targets
+        entries: list[dict[str, Any]] = []
+        checked: list[str] = []
+        errors: list[str] = []
+        import time as _t
+
+        deadline = _t.time() + ECS_TOTAL_BUDGET
+        for region in targets[:8]:
+            if _t.time() >= deadline:
+                errors.append("budget exhausted, remaining regions skipped")
+                break
+            checked.append(region)
+            try:
+                code, out, err = _run_cli(
+                    [cli, "ecs", "DescribeInstances", "--RegionId", region,
+                     "--MaxResults", "50"], timeout=ECS_REGION_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                errors.append(f"{region}: timeout")
+                continue
+            if code != 0:
+                errors.append(f"{region}: {(err or '').strip()[:100]}")
+                continue
+            try:
+                data = json.loads(out or "{}")
+            except ValueError:
+                errors.append(f"{region}: unparseable response")
+                continue
+            # TotalCount 不可信，只认数组长度（见上方注释）
+            raw = (data.get("Instances") or {}).get("Instance") or []
+            if isinstance(raw, dict):
+                raw = [raw]
+            for inst in raw:
+                gpu_amount = inst.get("GPUAmount") or 0
+                gpu_spec = (inst.get("GPUSpec") or "").strip()
+                public_ips = _first_ip(inst.get("PublicIpAddress"))
+                private_ips = _first_ip((inst.get("VpcAttributes") or {}).get("PrivateIpAddress"))
+                status = (inst.get("Status") or "").strip()
+                entries.append({
+                    "id": "ecs:" + str(inst.get("InstanceId")),
+                    "kind": "cloud-vm",
+                    "provider": "aliyun",
+                    "name": inst.get("InstanceName") or inst.get("InstanceId"),
+                    "status": "running" if status.lower() == "running" else status.lower(),
+                    "platform": inst.get("OSName") or None,
+                    "cpu_cores": inst.get("Cpu"),
+                    "memory_gib": round((inst.get("Memory") or 0) / 1024, 1) if inst.get("Memory") else None,
+                    "gpu_count": gpu_amount,
+                    "gpu_model": gpu_spec or None,
+                    "vram_gib": None,
+                    "agent_ready": None,
+                    "runtimes": [],
+                    "detail": {
+                        "region": inst.get("RegionId") or region,
+                        "zone": inst.get("ZoneId"),
+                        "instance_type": inst.get("InstanceType"),
+                        "charge_type": inst.get("InstanceChargeType"),
+                        "public_ip": public_ips,
+                        "private_ip": private_ips,
+                        "expired_time": inst.get("ExpiredTime"),
+                        "created": inst.get("CreationTime"),
+                        "source": "aliyun ecs DescribeInstances",
+                    },
+                })
+        return entries, checked, errors
+
+    def _fetch_environments(regions: list[str] | None = None) -> dict[str, Any]:
+        if not _probe_enabled():
+            return {"environments": [], "counts": {}, "total": 0, "runnable": 0,
+                    "ecs_regions_checked": [], "ecs_errors": [],
+                    "notes": ["probing disabled by OBSERVATORY_PROBE=0"],
+                    "source": "probe-disabled"}
+        envs: list[dict[str, Any]] = []
+        notes: list[str] = []
+        try:
+            envs.extend(_fetch_wsl_env())
+        except Exception as error:  # noqa: BLE001
+            notes.append(f"wsl probe failed: {type(error).__name__}")
+        try:
+            envs.append(_fetch_docker_env())
+        except Exception as error:  # noqa: BLE001
+            notes.append(f"docker probe failed: {type(error).__name__}")
+        try:
+            envs.extend(_fetch_k8s_env())
+        except Exception as error:  # noqa: BLE001
+            notes.append(f"kubectl probe failed: {type(error).__name__}")
+        envs.append(_fetch_host_env())
+        try:
+            ecs, checked, errors = _fetch_ecs_env(regions)
+        except Exception as error:  # noqa: BLE001
+            ecs, checked, errors = [], [], [f"{type(error).__name__}: {error}"]
+        envs.extend(ecs)
+
+        # 能真正跑 agent 的环境 = 有运行时或者本身就是台可登录的 Linux 机器
+        runnable = sum(1 for e in envs if e.get("agent_ready") or (
+            e["kind"] in ("cloud-vm", "wsl") and e["status"] == "running"))
+        counts: dict[str, int] = {}
+        for e in envs:
+            counts[e["kind"]] = counts.get(e["kind"], 0) + 1
+        return {
+            "environments": envs,
+            "counts": counts,
+            "total": len(envs),
+            "runnable": runnable,
+            "ecs_regions_checked": checked,
+            "ecs_errors": errors,
+            "notes": notes,
+            "source": "live-probe",
+        }
+
+    @app.get("/api/compute/instances")
+    def api_compute_instances(regions: str | None = None, refresh: int = 0) -> Response:
+        """Real agent-execution environments, cached 180s (ECS is per-region)."""
+        import time
+
+        now = time.time()
+        reg_list = ([r.strip() for r in regions.split(",") if r.strip()] if regions else None)
+        cached = _env_cache["payload"]
+        ttl = _env_cache.get("ttl", _ENV_TTL)
+        if (cached is not None and not refresh and reg_list is None
+                and now - _env_cache["at"] < ttl):
+            return json_response(cached)
+        try:
+            payload = _fetch_environments(reg_list)
+        except Exception as error:  # noqa: BLE001
+            return json_response({"error": type(error).__name__, "detail": str(error)}, 503)
+        payload["measured_at"] = now
+        if reg_list is None:
+            # 探测整体失败（连一个地域都没查成）时不长时间缓存，20s 后允许重试，
+            # 免得一个瞬时故障被钉住 180s。
+            total_failure = bool(payload.get("ecs_errors")) and not payload.get("ecs_regions_checked")
+            _env_cache["at"] = now
+            _env_cache["ttl"] = 20.0 if total_failure else _ENV_TTL
+            _env_cache["payload"] = payload
         return json_response(payload)
 
     # ---- Wayfinder: the single POST entry (pi Wayfinder) ----------------
