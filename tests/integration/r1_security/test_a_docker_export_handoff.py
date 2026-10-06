@@ -18,13 +18,19 @@ from tests.integration.r1_security.test_b_mock_adoption import InertAssetBridge
 
 
 def configured_service(root, *, export=True):
-    p, _, _ = configured()
+    p, probe, _ = configured()
     workspace = root / "workspace"
     (workspace / "science").mkdir(parents=True)
     criterion = TrustedCriteriaRecord(spec=p.evaluation, approved_by="q-criteria-owner", approved_at=90)
     limits = RunLimits(max_tasks=10, max_attempts=10, max_runtime_seconds=600)
+    # Live mode must declare the host probe it claims (L2 follow-up invariant
+    # ``live_mode_requires_verified_probes``). The declared probe was recorded
+    # for another runtime profile ("q-probed-fixed-policy" against this host's
+    # "q-config-only"), so it cannot verify this backend: isolation stays
+    # unverified and execution stays refused, which is what these tests prove.
     settings = dict(mode="live", environment=p.environment.model_dump(mode="json"),
         resources=p.backend.model_dump(mode="json"), criteria=[criterion.model_dump(mode="json")],
+        probes=[probe.model_dump(mode="json")],
         instance_id=SERVER, runtime_profile="q-config-only", server_process_limit=p.backend.process_limit,
         domain="127.0.0.1:65534")
     if export:
@@ -44,7 +50,8 @@ def configured_service(root, *, export=True):
 
 
 @pytest.mark.parametrize("explicit", [False, True])
-def test_original_factory_preserves_closed_host_field_but_no_probe_cannot_execute(monkeypatch, tmp_path, explicit):
+def test_original_factory_preserves_closed_host_field_but_unverified_isolation_cannot_execute(
+        monkeypatch, tmp_path, explicit):
     monkeypatch.setenv("DOCKER_HOST", "tcp://unapproved.invalid:2375")
     monkeypatch.setenv("DOCKER_CONTEXT", "unapproved-context")
     p, service = configured_service(tmp_path, export=explicit)
