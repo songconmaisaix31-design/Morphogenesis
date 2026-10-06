@@ -6,6 +6,7 @@ import argparse
 from collections import Counter
 import json
 import multiprocessing
+import os
 from pathlib import Path
 import re
 import sys
@@ -15,7 +16,14 @@ from pydantic import BaseModel, ConfigDict, JsonValue, TypeAdapter, model_valida
 from typing import Self
 
 from swarm.models import BudgetPolicy
-from swarm.evomap_executor import EvoMapConfig, EvoMapTextModel
+from swarm.evomap_executor import DashScopeTextModel, EvoMapConfig, EvoMapTextModel
+
+
+def _limit_blas_threads() -> None:
+    """Bound worker BLAS/OMP threads before spawning so Windows spawn children
+    do not exhaust the pagefile and abort OpenBLAS allocation (CI 37455855201)."""
+    for name in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+        os.environ.setdefault(name, "1")
 
 
 class EvoMapRun(BaseModel):
@@ -26,7 +34,7 @@ class EvoMapRun(BaseModel):
     budget: BudgetPolicy
     workers: int = 3
     tasks: int = 6
-    worker_models: tuple[EvoMapTextModel, ...] = ()
+    worker_models: tuple[EvoMapTextModel | DashScopeTextModel, ...] = ()
     capability_names: tuple[str, ...] = ()
     continue_on_rejection: bool = False
 
@@ -47,7 +55,7 @@ class EvoMapRun(BaseModel):
                 or self.api.max_input_bytes + self.api.max_output_tokens > self.budget.max_tokens):
             raise ValueError("evomap_requires_explicit_unbounded_admission")
         effective_models = set(self.worker_models or (self.api.model,))
-        if self.budget.prices is not None and (self.budget.prices.provider != "evomap"
+        if self.budget.prices is not None and (self.budget.prices.provider != self.api.provider
                 or effective_models != {self.budget.prices.model}):
             raise ValueError("evomap_matching_prices_required")
         return self
@@ -191,6 +199,7 @@ def evomap_experiment(config: EvoMapRun, *, resume: bool = False) -> dict[str, J
         raise ValueError("credential_file_unavailable")
     directory = check_state_path(config.directory)
     _, state = (directory / "local-workspace", directory / "state") if resume else seed_evomap(config)
+    _limit_blas_threads()
     context = multiprocessing.get_context("spawn")
     workers = [context.Process(target=_evomap_process,
                args=(config.model_dump_json(), evomap_worker_config(config, i), i)) for i in range(config.workers)]
@@ -370,6 +379,7 @@ def demo(directory: Path, *, max_cost_usd: float, resume: bool = False) -> dict[
     directory = check_state_path(directory)
     target, state = ((directory / "local-workspace", directory / "state") if resume
                      else seed_demo(directory))
+    _limit_blas_threads()
     context = multiprocessing.get_context("spawn")
     processes = [context.Process(target=process_worker,
                  args=(demo_config(target, state, i, max_cost_usd),)) for i in range(3)]
@@ -419,6 +429,9 @@ def main(argv: list[str] | None = None) -> int:
     api = sub.add_parser("evomap", help="three independent EvoMap workers; explicit data-task configuration")
     api.add_argument("--config", type=Path, required=True, help="JSON configuration; credentials are file paths only")
     api.add_argument("--resume", action="store_true", help="resume the same durable run without retrying prior requests")
+    dash = sub.add_parser("dashscope", help="three independent DashScope workers; explicit data-task configuration")
+    dash.add_argument("--config", type=Path, required=True, help="JSON configuration; credentials are file paths only")
+    dash.add_argument("--resume", action="store_true", help="resume the same durable run without retrying prior requests")
     args = parser.parse_args(argv)
     try:
         result: JsonValue
@@ -430,8 +443,11 @@ def main(argv: list[str] | None = None) -> int:
             result = {"target": str(target), "state": str(state), "provenance": "mock"}
         elif args.command == "demo":
             result = demo(args.directory, max_cost_usd=args.max_cost_usd, resume=args.resume)
-        elif args.command == "evomap":
-            result = evomap_experiment(EvoMapRun.model_validate_json(args.config.read_bytes()), resume=args.resume)
+        elif args.command in {"evomap", "dashscope"}:
+            run = EvoMapRun.model_validate_json(args.config.read_bytes())
+            if args.command == "dashscope" and run.api.provider != "dashscope":
+                raise ValueError("dashscope_subcommand_requires_dashscope_provider")
+            result = evomap_experiment(run, resume=args.resume)
         else:
             from contracts.identity import AgentId
             from swarm.models import BudgetPolicy, Locality

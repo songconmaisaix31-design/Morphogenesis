@@ -1,4 +1,4 @@
-"""Data-only EvoMap executor; credentials are read exclusively by its HTTP child.
+"""Data-only gateway executor; credentials are read exclusively by its HTTP child.
 
 Reuses the existing gateway transport/parser, Pydantic identities and A assets.
 Remote content never becomes a command, module, validation policy or oracle.
@@ -17,7 +17,7 @@ from typing import Literal
 from uuid import uuid4
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, TypeAdapter
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, TypeAdapter, model_validator
 
 from contracts.identity import AttemptId
 from contracts.provenance import Provenance
@@ -25,14 +25,18 @@ from local_assets.models import AssetSafetyError, Candidate, ConsumptionExecutio
 from local_assets.paths import FROZEN_MAINLINE, no_links, safe_join
 from local_assets.validate import blast_radius
 from orchestration.gateway import _Completion, _usage
-from orchestration.gateway_transport import single_request
+from orchestration.gateway_transport import (
+    DASHSCOPE_BASE_URL, EVOMAP_BASE_URL, single_request,
+)
 from orchestration.provider_adapters.base import FailureClassification, RequestContext
+from orchestration.provider_adapters.dashscope import DashScopeAdapter
 from orchestration.provider_adapters.evomap import EvoMapAdapter
 from swarm.models import ExecutionBound, Signal
 from swarm.worker_loop import ExecutionResult, FixtureExecutor, _write_json
 
 _JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 _KEY_ENV = "MORPH_EVOMAP_API_KEY"
+_DASHSCOPE_KEY_ENV = "DASHSCOPE_API_KEY"
 EvoMapTextModel = Literal[
     "evomap-deepseek-v4-flash",
     "evomap-gemini-3.1-pro-preview",
@@ -42,16 +46,38 @@ EvoMapTextModel = Literal[
     "evomap-gpt-5.6-sol",
     "evomap-gpt-5.6-terra",
 ]
+DashScopeTextModel = Literal[
+    "qwen-max",
+    "qwen-plus",
+    "qwen3.7-max",
+    "qwen3.8-max",
+]
 SOL_MODEL: EvoMapTextModel = "evomap-gpt-5.6-sol"
+DASHSCOPE_MODEL: DashScopeTextModel = "qwen-max"
+_DASHSCOPE_MODELS = frozenset({"qwen-max", "qwen-plus", "qwen3.7-max", "qwen3.8-max"})
+ProviderName = Literal["evomap", "dashscope"]
 
 
 class EvoMapConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
-    model: EvoMapTextModel = SOL_MODEL
+    model: EvoMapTextModel | DashScopeTextModel = SOL_MODEL
     credential_file: Path
+    base_url: str = EVOMAP_BASE_URL
+    provider: ProviderName = "evomap"
     max_input_bytes: int = Field(default=12000, gt=0, le=16000)
     max_output_tokens: int = Field(default=1024, gt=0, le=4096)
     timeout_seconds: float = Field(default=60, gt=0, le=180)
+
+    @model_validator(mode="after")
+    def consistent_provider(self) -> "EvoMapConfig":
+        if self.provider == "dashscope":
+            if self.base_url != DASHSCOPE_BASE_URL:
+                raise ValueError("dashscope_requires_confirmed_base_url")
+            if self.model not in _DASHSCOPE_MODELS:
+                raise ValueError("dashscope_requires_qwen_model")
+        elif self.base_url != EVOMAP_BASE_URL:
+            raise ValueError("evomap_requires_confirmed_base_url")
+        return self
 
 
 class DataTask(BaseModel):
@@ -98,7 +124,8 @@ def _proposal_content(content: str) -> str:
 
 
 def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
-             transport: httpx.MockTransport | None = None, provenance: Provenance = "live") -> Reply:
+             transport: httpx.MockTransport | None = None, provenance: Provenance = "live",
+             base_url: str = EVOMAP_BASE_URL, provider: ProviderName = "evomap") -> Reply:
     """Called in the credential child; explicit mock transport is test-only."""
     if (transport is None) != (provenance == "live") or (transport is not None and not isinstance(transport, httpx.MockTransport)):
         raise ValueError("transport_provenance_mismatch")
@@ -106,7 +133,7 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
         return Reply(error_kind="credential_unavailable", uncertain=True)
     if key in json.dumps(payload, ensure_ascii=False):
         return Reply(error_kind="credential_in_input", uncertain=True)
-    response = single_request(payload, key=key, phase_timeout=timeout, transport=transport)
+    response = single_request(payload, key=key, phase_timeout=timeout, transport=transport, base_url=base_url)
     
     # Check for transport errors first - these take precedence over status/body
     if response.error_kind:
@@ -135,8 +162,9 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
     model_value = payload.get("model", "")
     if not isinstance(model_value, str):
         model_value = str(model_value) if model_value is not None else ""
-    request_context = RequestContext(provider="evomap", model=model_value, endpoint="/chat/completions")
-    classification_result = EvoMapAdapter.interpret(
+    request_context = RequestContext(provider=provider, model=model_value, endpoint="/chat/completions")
+    adapter = DashScopeAdapter if provider == "dashscope" else EvoMapAdapter
+    classification_result = adapter.interpret(
         raw_body_str,
         response.status or 0,
         {"Retry-After": response.retry_after} if response.retry_after else {},
@@ -255,9 +283,10 @@ def _child() -> int:
                     )
             
             transport = httpx.MockTransport(mock_handler)
-            reply = _request(payload, key, config.timeout_seconds, transport=transport, provenance="mock")
+            reply = _request(payload, key, config.timeout_seconds, transport=transport, provenance="mock",
+                             base_url=config.base_url, provider=config.provider)
         else:
-            reply = _request(payload, key, config.timeout_seconds)
+            reply = _request(payload, key, config.timeout_seconds, base_url=config.base_url, provider=config.provider)
     except Exception:
         reply = Reply(error_kind="request_child_failed", uncertain=True)
     print(reply.model_dump_json())
@@ -273,7 +302,8 @@ class EvoMapExecutor:
                  provenance: Provenance = "live") -> None:
         if (transport is None) != (provenance == "live") or (transport is not None and not isinstance(transport, httpx.MockTransport)):
             raise ValueError("transport_provenance_mismatch")
-        if _KEY_ENV in os.environ:
+        key_env = _DASHSCOPE_KEY_ENV if config.provider == "dashscope" else _KEY_ENV
+        if key_env in os.environ:
             # A file-based HTTP child is the supported secret boundary. Refuse
             # inherited keys before Git/SDK/validator processes can be launched.
             raise ValueError("credential_environment_must_be_cleared_use_file")
@@ -296,7 +326,7 @@ class EvoMapExecutor:
             if not self.config.credential_file.is_file():
                 raise AssetSafetyError("credential_file_unavailable")
         # Bytes are a conservative local input estimate, not a provider promise.
-        return ExecutionBound(provider="evomap", model=self.config.model,
+        return ExecutionBound(provider=self.config.provider, model=self.config.model,
                               input_tokens=self.config.max_input_bytes,
                               max_output_tokens=self.config.max_output_tokens,
                               provider_enforced=False, request_bound="unbounded")
@@ -324,9 +354,11 @@ class EvoMapExecutor:
     def _send(self, payload: dict[str, JsonValue]) -> Reply:
         if self._transport is not None:
             return _request(payload, "fixture-only-not-a-real-key", self.config.timeout_seconds,
-                            transport=self._transport, provenance="mock")
+                            transport=self._transport, provenance="mock",
+                            base_url=self.config.base_url, provider=self.config.provider)
         envelope = {"config": self.config.model_dump(mode="json"), "request": payload}
-        environment = {name: value for name, value in os.environ.items() if name.upper() != _KEY_ENV}
+        key_env = _DASHSCOPE_KEY_ENV if self.config.provider == "dashscope" else _KEY_ENV
+        environment = {name: value for name, value in os.environ.items() if name.upper() != key_env}
         try:
             result = subprocess.run([sys.executable, "-m", "swarm.evomap_executor", "--request-child"],
                                     input=json.dumps(envelope, ensure_ascii=False).encode("utf-8"),
@@ -356,6 +388,7 @@ class EvoMapExecutor:
         evidence.mkdir(parents=True, exist_ok=False)
         local_request_id = uuid4().hex
         _write_json(evidence / "request.json", {"request_id": local_request_id,
+                    "provider": self.config.provider, "base_url": self.config.base_url,
                     "requested_model": self.config.model, "max_output_tokens": self.config.max_output_tokens,
                     "input_bytes": len(json.dumps(payload, ensure_ascii=False).encode("utf-8")),
                     "attempt": _JSON.validate_python(attempt.model_dump(mode="json")),

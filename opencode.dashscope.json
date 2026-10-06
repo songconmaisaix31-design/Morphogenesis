@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
+  "autoupdate": false,
+  "enabled_providers": ["dashscope"],
+  "permission": {
+    "*": "ask",
+    "read": {"*": "allow", "*.env": "deny", "*.env.*": "deny"},
+    "external_directory": "deny"
+  },
+  "provider": {
+    "dashscope": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "DashScope (Qwen, OpenAI-compatible)",
+      "options": {
+        "baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "apiKey": "{env:DASHSCOPE_API_KEY}"
+      },
+      "models": {
+        "qwen-max": {"name": "Qwen Max"},
+        "qwen-plus": {"name": "Qwen Plus"},
+        "qwen3.7-max": {"name": "Qwen3.7 Max"},
+        "qwen3.8-max": {"name": "Qwen3.8 Max"}
+      }
+    }
+  }
+}

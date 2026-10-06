@@ -1,4 +1,4 @@
-"""Shared single-request EvoMap transport, extracted from gateway @605cf48.
+"""Shared single-request OpenAI-compatible transport, extracted from gateway @605cf48.
 
 Repository Apache-2.0; no retry, redirect, environment proxy or tool loop.
 The caller owns authorization, reservations, input limits and durable intent.
@@ -16,6 +16,8 @@ from pydantic import JsonValue
 
 EVOMAP_BASE_URL = "https://api.evomap.ai/v1"
 EVOMAP_MODEL = "evomap-gpt-5.6-luna"
+DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+DASHSCOPE_MODEL = "qwen-max"
 MAX_RESPONSE_BYTES = 1024 * 1024
 
 
@@ -32,10 +34,13 @@ class GatewayResponse:
 
 
 def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: float,
-                   transport: httpx.MockTransport | None = None) -> GatewayResponse:
+                   transport: httpx.MockTransport | None = None,
+                   base_url: str = EVOMAP_BASE_URL) -> GatewayResponse:
     """One POST only; phase timeouts do not constitute an in-flight cost bound."""
     if not 0 < phase_timeout <= 180:
         raise ValueError("invalid_gateway_timeout")
+    if not re.fullmatch(r"https://[A-Za-z0-9._:/-]{1,200}", base_url):
+        raise ValueError("invalid_gateway_base_url")
     status: int | None = None
     error_kind: str | None = None
     request_id: str | None = None
@@ -45,7 +50,7 @@ def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: fl
     try:
         with httpx.Client(transport=transport, trust_env=False, follow_redirects=False,
                           timeout=httpx.Timeout(phase_timeout)) as client:
-            with client.stream("POST", EVOMAP_BASE_URL + "/chat/completions", json=payload,
+            with client.stream("POST", base_url.rstrip("/") + "/chat/completions", json=payload,
                                headers={"Authorization": f"Bearer {key}"}) as response:
                 status = response.status_code
                 identifier = response.headers.get("x-request-id")

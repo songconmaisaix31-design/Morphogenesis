@@ -34,7 +34,7 @@ AOCI 只辅助开发检索与上下文复用。用户 Spec、当前范围和 doc
 - pytest `addopts = "--import-mode=importlib"`。
 - 三个锁文件：`poetry.lock`、根 `package-lock.json`（GEP SDK/echarts）、`viz/frontend/package-lock.json`（React shell）。锁文件由指定轨独占，不随意改动。
 - CI（`.github/workflows/check.yml`）比 `check` 多跑：build wheel、SDK、wheel 安装到隔离 site、`tools/check_distribution.py`；Python 3.13 + Node 24，ubuntu + windows 双平台。
-- `opencode.evomap.json` 是项目级 OpenCode 提供方配置（只引用环境变量，无秘密）。
+- `opencode.dashscope.json` 是项目级 OpenCode 提供方配置（DashScope 百炼，只引用环境变量 `DASHSCOPE_API_KEY`，无秘密）；`opencode.evomap.json` 已废弃。
 
 ## 治理约定（多轨协作）
 - 每条轨道固定 1 Agent + 1 Orca worktree + 1 分支；只改本轨 write_paths，跨轨走 Handoff。主 Agent 只维护 `docs/PLAN.md` / `STATUS.md` / `DECISIONS.md` / `ACCEPTANCE.md`；集成 Agent 只做少量导入/配置/路由胶水合并，领域问题退回原 Worker。
