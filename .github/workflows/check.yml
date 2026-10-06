@@ -22,5 +22,5 @@ jobs:
       - run: uv tool run poetry run python tools/typecheck.py
       - run: uv tool run poetry run python -m build
       - run: npm run check:sdk
-      - run: uv pip install --python python --no-deps --target tools/.wheel-site dist/morphogenesis-0.1.0-py3-none-any.whl
+      - run: uv pip install --python python --no-deps --target tools/.wheel-site dist/morphogenesis-0.2.0-py3-none-any.whl
       - run: uv tool run poetry run python -I tools/check_distribution.py --site-dir tools/.wheel-site --check-node

@@ -1,7 +1,7 @@
 {
   "name": "morph-finals-shell",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Morphogenesis finals dashboard shell; layout adapted from Tencent tdesign-react-starter (MIT) fce97863edd5d5556f766dd4e342aace31a99487",
   "scripts": {
     "build": "vite build"
