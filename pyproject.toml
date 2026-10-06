@@ -9,7 +9,7 @@ packages = [
   {include = "contracts"}, {include = "persistence"}, {include = "bootstrap"},
   {include = "bridge_node"}, {include = "hub_client"}, {include = "orca_provision"},
   {include = "orchestration"}, {include = "topology"}, {include = "metabolism"},
-  {include = "mocks"}, {include = "viz"},
+  {include = "mocks"}, {include = "readiness"}, {include = "viz"},
   {include = "swarm"}, {include = "local_assets"},
 ]
 include = [

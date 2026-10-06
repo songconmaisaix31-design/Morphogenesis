@@ -5,6 +5,7 @@ from pydantic import Field
 from contracts.base import Contract
 from contracts.identity import AgentId, AttemptId
 from contracts.messages import Envelope
+from contracts.readiness import ProbeResult, ProbeSubject
 from contracts.resolution import Gene, GeneRef
 from contracts.results import TaskResult, Verification
 from contracts.runtime import Provision, RunConfig
@@ -51,3 +52,21 @@ class Verifier(Protocol):
 
 class Provisioner(Protocol):
     def provision(self, run_id: str, count: int) -> Provision: ...
+
+
+class ReadinessProbe(Protocol):
+    """One declared way to observe readiness.
+
+    Intentionally transport-free: a probe may read the local machine, run an
+    allowlisted public CLI, or speak MCP.  Those details belong to the adapter
+    behind this boundary, and an empty probe set is a valid deployment state
+    that must report ``not_run`` rather than a default verdict.
+    """
+
+    @property
+    def probe_id(self) -> str: ...
+
+    @property
+    def subject(self) -> ProbeSubject: ...
+
+    def probe(self) -> ProbeResult: ...

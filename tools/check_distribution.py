@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 
 PACKAGES = (
     "contracts", "persistence", "bootstrap", "bridge_node", "hub_client", "orca_provision",
-    "orchestration", "topology", "metabolism", "mocks", "viz", "swarm", "local_assets",
+    "orchestration", "topology", "metabolism", "mocks", "readiness", "viz", "swarm", "local_assets",
 )
 
 

@@ -10,7 +10,7 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 PYTHON_PACKAGES = {
     "contracts", "persistence", "bootstrap", "bridge_node", "hub_client",
-    "orca_provision", "orchestration", "topology", "metabolism", "mocks", "viz",
+    "orca_provision", "orchestration", "topology", "metabolism", "mocks", "readiness", "viz",
     "swarm", "local_assets",
 }
 FILES = {

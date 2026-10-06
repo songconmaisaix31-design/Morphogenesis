@@ -7,6 +7,7 @@ import json
 import os
 import re
 import socket
+import sys
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -14,6 +15,8 @@ from socketserver import BaseServer
 from typing import Any, Callable
 from urllib.parse import parse_qs, urlsplit
 
+from readiness.catalog import ReadinessConfigError, build_service
+from readiness.service import ReadinessService
 from viz.adapter import DashboardData, DashboardInputError, empty_dashboard, load_dashboard, load_rehearsal, load_runtime_export
 from viz.evomap_models import ASSET_VIEW_SCHEMA
 from viz.evomap_service import EvomapAssetError, EvomapQueryError, EvomapService, dumps_asset_view, dumps_report
@@ -54,12 +57,16 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         echarts_asset: Path,
         evomap_service: EvomapService,
         swarm_loader: Callable[[], dict[str, Any]] | None = None,
+        readiness_service: ReadinessService | None = None,
         **kwargs: Any,
     ) -> None:
         self.dashboard_loader = dashboard_loader
         self.echarts_asset = echarts_asset
         self.evomap_service = evomap_service
         self.swarm_loader = swarm_loader
+        # An unconfigured handler declares no probes, which the contract already
+        # models as not_run. It is never replaced by an assumed verdict.
+        self.readiness_service = readiness_service if readiness_service is not None else ReadinessService()
         super().__init__(request, client_address, server, directory=directory, **kwargs)
 
     def parse_request(self) -> bool:
@@ -109,7 +116,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
     def do_HEAD(self) -> None:  # noqa: N802
         route = urlsplit(self.path).path
-        if route in {"/api/dashboard", "/api/evomap", "/api/evomap/asset", "/api/swarm", "/vendor/echarts.min.js"}:
+        if route in {"/api/dashboard", "/api/readiness", "/api/evomap", "/api/evomap/asset", "/api/swarm", "/vendor/echarts.min.js"}:
             self.do_GET()
             return
         super().do_HEAD()
@@ -152,6 +159,16 @@ class DashboardHandler(SimpleHTTPRequestHandler):
                 status = 503
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             self._json_response(status, body)
+            return
+        if route.path == "/api/readiness":
+            # Declared probes only, at most once per cache window; a failure to
+            # produce a report is reported as unavailable, never as a verdict.
+            try:
+                body = json.dumps(self.readiness_service.report().model_dump(mode="json"), ensure_ascii=False).encode("utf-8")
+            except Exception:
+                self._json_response(500, b'{"schema_version":"morph.readiness/1","error":"readiness_unavailable"}')
+                return
+            self._json_response(200, body)
             return
         if route.path == "/vendor/echarts.min.js":
             body = self.echarts_asset.read_bytes()
@@ -221,6 +238,12 @@ def main() -> None:
         parser.error("--swarm-replay requires --swarm-state")
 
     root = Path(__file__).resolve().parent.parent
+    try:
+        readiness_service = build_service()
+    except ReadinessConfigError as error:
+        # A rejected manifest runs no probe at all: report not_run, never a verdict.
+        print(f"readiness 接入清单未通过校验，未执行任何探针：{error}", file=sys.stderr)
+        readiness_service = ReadinessService(notes=[f"接入清单未通过校验，未执行任何探针：{error}"])
     load_data: Callable[[], DashboardData]
     try:
         if args.rehearsal:
@@ -246,7 +269,7 @@ def main() -> None:
         DashboardHandler, directory=str(root / "viz" / "static"),
         dashboard_loader=load_data, echarts_asset=asset,
         evomap_service=EvomapService(store_path=args.evomap_store),
-        swarm_loader=swarm_loader,
+        swarm_loader=swarm_loader, readiness_service=readiness_service,
     )
     server = ThreadingHTTPServer((args.host, args.port), handler)
     print(f"Morphogenesis T5 dashboard: http://{args.host}:{args.port}")

@@ -1,5 +1,63 @@
 # 验收矩阵
 
+## Review、Ghost in the Swarm 与 Sol 可用性验收（2026-09-24）
+
+基线 **605cf48b8b05baf86fd68e5d63f495ba3e5d7e69**，开始时工作区clean，远端同SHA。本轮只改治理/验收文档；日志、检查脚本和截图位于忽略目录 `.runtime/review-20260924/`。没有业务修复或锁文件变更。
+
+### Review 发现
+
+用户强调Ghost in the Swarm。按 `source/Morphogenesis_深度思考.md:21–36`，Ghost是在关系与历史中形成、不属于单个成员的集体策略；跨机器不是必要条件。按 `source/Morphogenesis_作战方案_v2.md:215–219`，集中度应分别看分配、权威状态、批准、配置选择。本轮初步将部署目标偏向多机的判断已修正。
+
+| 优先级 / 定位 | 发现及影响 |
+|---|---|
+| P1 概念证据不足；`orchestration/rehearsal.py:309–347`，`topology/engine.py:101` | 两任务是同一固定样例的新副本；显式移除builder#0后仅剩builder#1。成功及Gene正文采用证明经验跨成员延续，但不能区分学习带来的选路效果与“只剩唯一候选”。尚无经验/反馈对照或非同构任务，不足以宣称集体策略涌现、性能改善或最优拓扑。应保留独立复核，以可比较的反馈/经验对照补证。 |
+| P2 概念文案；`viz/frontend/src/swarm/SwarmTopology.jsx:31` | “Ghost 已离开”把Ghost等同于下线成员，与项目定义相反。建议原前端领域轨改为“成员离开，集体策略延续”，并呈现经验来源/采用者。本轮仅review，未代改领域代码。 |
+| P2 证据页缺口；`viz/adapter.py:83–116` | rehearsal loader输出 `events=[]`、`metrics=[]`。磁盘有repair/recovery Envelope JSONL，但实际证据页为空、成员详情Envelope=0。页面诚实提示未加载，但用户无法追踪完整消息链；应接入已有导出，不能补假指标。 |
+| 运行范围；`orca_provision/fixed.py:13`、`orchestration/runtime.py:69–84`、`deploy/compose.yaml` | FixedProvisioner只创建逻辑身份；分配由单个LangGraph、状态由本机SQLite、批准由独立固定测试器承担。Compose只有API/Web，提供只读展示。现状是固定规模机制原型，不是五个常驻自治模型进程，未证明在途任务接管；这与Ghost概念和多机部署分别讨论。 |
+
+### 部署与真实模型运行
+
+- **本机**：[7527 Sol工作台](http://127.0.0.1:7527/#/workspace)。源码605cf48；交付时launcher47220/listener32064，绑定127.0.0.1。复用原 `viz.server --rehearsal <Sol-root>/rehearsal.json --evomap-store <Sol-root>/metadata.db`，未加replay；显示本轮真实完成证据，两个模型任务已经结束，不代表五个Agent仍在工作。Hidden子进程未安装系统服务，不保证跨宿主退出常驻。
+- **Sol原件**：`C:/Users/DW/AppData/Local/Temp/morph-sol-20260924-e27e2dc198664413a2a8333b236bd123`；run=`rehearsal-85ff3bf872d941aa9eade0ddc92cd485`，20快照。repair/recovery各独立验证3/3，builder#0→builder#1，1条实际采用记录，2条Gene按真实时间衰减归档。三态 **live / passed,passed,passed** 限于该固定任务与模型接口。
+- 用户提供密钥后只请求 **evomap-gpt-5.6-sol**，两个HTTP200响应均返回 **gpt-5.6-sol**，usage **844+1174=2018 tokens**，cost_usd=null。密钥经隐藏终端输入，只进Python进程内存，不写文件/argv/浏览器/日志/Git，进程结束清除。没有Hub付费FETCH、新发布或未知请求重试。首个包装器runpy在Pydantic解析时失败，未创建彩排根/发送请求；改成正常模块导入后完成上述唯一Sol彩排。
+- 用户限定Sol之前完成过独立Codex Luna彩排：2调用、15018+15349=30367tokens、费用未知，证据另存于 `live-root.txt` 指向目录。没有混入Sol结果；限定后无新Luna调用。
+- **公网**：[47.93.118.110:7799](http://47.93.118.110:7799/)，原53bb52c API/Web两个容器healthy；本轮只读复核，保留历史replay数据与其他项目。`git diff 53bb52c..605cf48 -- viz deploy orchestration`为空。公网仍是 **replay / passed,not_run,not_run**，不冒充新Sol任务。
+
+### 当前验证结果
+
+Python均来自本项目 `.venv/Scripts/python.exe`，仅进程局部BLAS/OMP/MKL线程数设为1。全部原始日志保留。
+
+| 命令 / 操作 | 结果 |
+|---|---|
+| `python -m pytest -q` | **294 passed / 133.84s** |
+| `python tools/typecheck.py` | **55 files / 0 errors** |
+| `python -m build`；`npm run check:sdk` | wheel/sdist成功；官方1.14.0 schema/hash/防篡改通过，published=false |
+| `uv pip install --python .venv/Scripts/python.exe --no-deps --target .runtime/review-20260924/wheel-site dist/morphogenesis-0.1.0-py3-none-any.whl`；`python -I tools/check_distribution.py --site-dir .runtime/review-20260924/wheel-site --check-node` | 11包、资源、安装态verifier、Node依赖通过 |
+| `npm --prefix viz/frontend ci --ignore-scripts --no-audit --no-fund`；`npm --prefix viz/frontend run build -- --outDir ../../.runtime/review-20260924/frontend-build` | 锁定112包、构建通过；没有覆盖提交静态文件。产物与提交文件仅CRLF/LF不同，规范化后相同，不宣称原始字节一致。首次未安装vite的失败保留；字体构建期警告由运行时字体检查覆盖。 |
+| `python -m orchestration.rehearsal --executor evomap --model evomap-gpt-5.6-sol --root <Sol-root> --mode auto --authorize-task repair --authorize-task recovery --tau-seconds 10 --stage-delay 2 --timeout 180 --max-tokens 20000` | completed，failure=null，两个独立验证器exit0 |
+| `python tests/integration/audit_rehearsal.py <Sol-root>` | 通过；核对请求/提案/usage/采用、21衰减点、归档，29份原件字节及mtime不变 |
+| `python deploy/smoke.py http://127.0.0.1:7527 --direct --with-fonts` | 最终Sol **32项**通过、三态passed；中途smoke另存 |
+| `python deploy/smoke.py http://47.93.118.110:7799 --with-fonts` | **38项**通过，保留replay三态 |
+| `node tests/integration/check_frontend_replay.cjs http://47.93.118.110:7799 .runtime/review-20260924/public-browser replay` | **72 passed / 0 failed**；1366/1920/375三视口，0页面/控制台/HTTP异常；主控目视桌面及手机实图 |
+| `node .runtime/review-20260924/check_sol_browser.cjs` | **30 passed / 0 failed**；真实Sol API、三视口、节点/归档/弹层、断网保留/恢复、减少动画进入后台；0pageerror。断网是浏览器网络模拟，单列。 |
+| `node tests/integration/check_frontend_story.cjs http://127.0.0.1:7527 .runtime/review-20260924/sol-story` | **exit1**，第43行概念动画固定等待断言失败。该旧脚本后续硬编码mock来源，不适用本轮live全程；不报告整套序幕脚本通过。实际窗口另验证最终入口与往返，没有覆盖每个动画时序断言。 |
+
+### Computer-use 实际窗口
+
+通过安装的computer-use技能与Orca版本匹配指南，在已运行Tabbit窗口2623350进行操作，截图2562×1532/scale1。使用动作后的树和截图核验，而非仅凭tool返回ok：
+
+1. builder#0详情实际显示下线、权重1.90、succeeded/独立复核/844tokens及Gene来源。
+2. 验收详情通过屏幕坐标实际打开，三个状态passed；Escape实际关闭。一度语义click仅聚焦，失败回执保留。
+3. Gene池显示两条已归档经验、第一条采用1次、τ10秒；证据页明确提示没有Envelope/历史指标。
+4. EvoMap只读页显示公共搜索10条及 `public_read_observed_no_credentials_sent`，与Sol模型凭据分开。
+5. 返回序幕，观察最终产品标题/进入按钮，点击后真实回到workspace。
+
+原件为 `cu-12` 至 `cu-23` JSON及命名PNG。此前Chrome68142多次 `runtime_unavailable`，未重启Orca或伪称通过；改用现有Tabbit完成。shell启动独立Chrome窗口曾被自动审批以 `blocked by policy` 拒绝，命令未执行、未重放；使用已有窗口完成所需交互。
+
+### 剩余限制
+
+上述P1/P2尚未修复，不宣称Ghost已被充分实验证明。Hub继承沿用既有候选/FETCH门禁，本轮未刷新远端候选、付费或REPORT；新Sol只证明模型网关和固定任务。未做持续自治、在途接管、跨机/第二设备或现场人工见证。费用及余额未知；不将预算参数称为硬封顶，也不为消耗额度追加无任务目的请求。
+
 ## 最终累计代码复验（2026-09-23 21:26 CST）
 
 独立 I 在 `425d7e55b0cc8c3f2496a506b9f045fcb1b5fbfd` 运行标准检查；其中业务代码为 E 最终 `4938bb9230cf3acaf2cff63774f743a8a20d5bad`，两提交之间仅四份治理文档。主控已读取 `.runtime/freeze-integration/20260923-ctx3881/` 原始日志，结果如下：

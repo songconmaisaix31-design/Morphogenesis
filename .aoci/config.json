@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "locale": "en-US",
+  "locale": "zh-CN",
   "index_path": "aoci.txt",
   "exclude_dirs": [
     "node_modules",
@@ -126,160 +126,6 @@
         "created_by": "aoci-init",
         "order": 106,
         "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-default-exclude",
-        "action": "exclude",
-        "pattern": "**",
-        "pattern_kind": "glob",
-        "reason": "Bounded MVP development index; unrelated history, tests and runtime environments remain outside this first core scope.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1000,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1001",
-        "action": "index",
-        "pattern": "swarm/research/models.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1001,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1002",
-        "action": "index",
-        "pattern": "swarm/research/service.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1002,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1003",
-        "action": "index",
-        "pattern": "swarm/research/server.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1003,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1004",
-        "action": "index",
-        "pattern": "swarm/research/dynamic.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1004,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1005",
-        "action": "index",
-        "pattern": "swarm/research/knowledge.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1005,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1006",
-        "action": "index",
-        "pattern": "swarm/research/records.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1006,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1007",
-        "action": "index",
-        "pattern": "swarm/research/policy.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1007,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1008",
-        "action": "index",
-        "pattern": "swarm/research/feedback.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1008,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1009",
-        "action": "index",
-        "pattern": "swarm/budget.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1009,
-        "enabled": true
-      },
-      {
-        "rule_id": "core-mvp-1010",
-        "action": "index",
-        "pattern": "swarm/task_ledger.py",
-        "pattern_kind": "file",
-        "reason": "Explicit stable MVP local context, trusted host, original ledger/budget and accepted evidence call chain selected by A Owner.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1010,
-        "enabled": true
-      },
-      {
-        "rule_id": "aoci-root-support",
-        "action": "index",
-        "pattern": "aoci.txt",
-        "pattern_kind": "file",
-        "reason": "Official Root owns repository identity and must have an index-role Baseline fingerprint; it is never a Code Entry.",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1101,
-        "enabled": true
-      },
-      {
-        "rule_id": "aoci-meta-support",
-        "action": "index",
-        "pattern": "aoci.meta.txt",
-        "pattern_kind": "file",
-        "reason": "Official cognition support asset coverage; not a business source Entry",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1102,
-        "enabled": true
-      },
-      {
-        "rule_id": "aoci-code-support",
-        "action": "index",
-        "pattern": "aoci.code.txt",
-        "pattern_kind": "file",
-        "reason": "Official cognition support asset coverage; not a business source Entry",
-        "source": "user",
-        "created_by": "a-owner",
-        "order": 1103,
-        "enabled": true
       }
     ]
   },
@@ -345,7 +191,7 @@
     ]
   },
   "installed_agents": [
-    "codex"
+    "opencode"
   ],
   "automation": {
     "mode": "auto"

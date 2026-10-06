@@ -26,6 +26,8 @@ tools/.wheel-site/
 src/env-observatory/.state/
 
 # AOCI agent host integration (machine-bound; do not commit)
+opencode.json
+opencode.json.backup.*
 .codex/config.toml
 .codex/config.toml.backup.*
 # Preserve local official-init policy backups without committing them.
