@@ -19,6 +19,16 @@ from local_assets.models import AssetSafetyError
 
 KEY = "fixture-only-not-a-real-key"
 
+#: How long the three spawned workers may take to reach the start barrier, and
+#: how long the parent waits for them to finish. Windows spawn re-imports the
+#: swarm/local_assets stack in every child, which on a loaded CI runner exceeds
+#: the original 60s/180s window (CI 37455855201: BrokenBarrierError, the three
+#: exit codes came back [1, 1, 1]). The barrier only synchronises the start; a
+#: worker that never arrives still breaks it and still fails the exit-code
+#: assertion, so nothing about the adoption proof is relaxed here.
+BARRIER_TIMEOUT_SECONDS = 300
+JOIN_BUDGET_SECONDS = 900
+
 
 def configured(tmp_path, *, prices=True):
     key_file = tmp_path / "private-key.txt"
@@ -77,7 +87,7 @@ def _model_worker(config_json, instance, start):
     config = EvoMapRun.model_validate_json(config_json)
     executor = EvoMapExecutor(config.api, transport=httpx.MockTransport(handle), provenance="mock")
     worker = Worker(WorkerConfig.model_validate_json(evomap_worker_config(config, instance)), executor)
-    start.wait(60)
+    start.wait(BARRIER_TIMEOUT_SECONDS)
     result = worker.run()
     (config.directory / f"mock-http-{instance}.json").write_text(json.dumps({
         "pid": os.getpid(), "calls": len(calls), "state": result["state"], "provenance": "mock"}))
@@ -91,7 +101,7 @@ def test_three_process_data_requests_and_exact_cross_member_adoption(tmp_path):
     try:
         for process in processes:
             process.start()
-        deadline = time.monotonic() + 180
+        deadline = time.monotonic() + JOIN_BUDGET_SECONDS
         for process in processes:
             process.join(max(0, deadline-time.monotonic()))
         assert [process.exitcode for process in processes] == [0, 0, 0]

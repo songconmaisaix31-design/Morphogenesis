@@ -14,6 +14,12 @@ import time
 
 from swarm.cli import demo_config, seed_demo
 
+#: Same reasoning as tests/swarm/test_worker_evomap.py: Windows spawn re-imports
+#: the swarm stack per child, so the synchronisation window has to be wider than
+#: one loaded runner's import time. The barrier only starts the workers together.
+BARRIER_TIMEOUT_SECONDS = 300
+JOIN_BUDGET_SECONDS = 900
+
 
 def _offline_worker(config_json, start, mode="normal"):
     # No central dispatcher can be imported. The existing gateway usage parser
@@ -43,7 +49,7 @@ def _offline_worker(config_json, start, mode="normal"):
                                    "completion_tokens": 100000, "total_tokens": 200000}})
     config = WorkerConfig.model_validate_json(config_json)
     worker = Worker(config, HighUsage() if mode == "high" else None)
-    start.wait(timeout=60)  # Start only: no signals/tasks/results cross this barrier.
+    start.wait(timeout=BARRIER_TIMEOUT_SECONDS)  # Start only: nothing crosses this barrier.
     result = worker.run()
     (config.state / f"process-{config.agent.instance}.json").write_text(json.dumps({
         "pid": os.getpid(), "state": result["state"], "network": "blocked_python_socket",
@@ -58,7 +64,7 @@ def _three_processes(target, state, *, mode="normal", cost=1.0):
     try:
         for process in workers:
             process.start()
-        deadline = time.monotonic() + 180
+        deadline = time.monotonic() + JOIN_BUDGET_SECONDS
         for process in workers:
             process.join(timeout=max(0, deadline-time.monotonic()))
         assert [process.exitcode for process in workers] == [0, 0, 0]
