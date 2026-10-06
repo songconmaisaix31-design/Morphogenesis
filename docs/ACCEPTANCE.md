@@ -1,5 +1,23 @@
 # 验收矩阵
 
+## 可交付候选版本验收（2026-10-06）：核心提交 + 产品版本
+
+被验收对象：**核心提交 `2cf904214340680c158e3a3e5d8361340a30c4fd`（分支 `morph-candidate-1006`）× 产品版本 `morphogenesis 0.1.0`**。两个父提交为主线与科研分支末端：`31016f7`（`codex/morphogenesis-mainline`）与 `d23ff83`（`songconmaisaix31-design/morph-r1-research-1003`），均已用 `git merge-base --is-ancestor` 确认为祖先。源码与报告分列：本文件记录对该**组合**的验证，逐项核对与限制见 [候选版本报告](tracks/candidate-1006.md)。
+
+| 验证命令（同一核心提交） | 结果 |
+|---|---|
+| `uv tool run poetry run python -m pytest -q`（ubuntu / windows） | CI [37459928011](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37459928011)：ubuntu **success**（1876 passed / 16 skipped / 559.23s）、windows **success**（1877 passed / 15 skipped / 1621.53s）。前一运行 37455855201 的 windows 唯一失败项已定位并修复 |
+| `uv tool run poetry run python tools/typecheck.py` | CI 两平台通过；本机 **156 源文件 / 0 errors** |
+| `uv tool run poetry build` | wheel + sdist 成功；wheel **1023503 B**、SHA-256 `c20b3e3b…de04969c` |
+| `npm run check:sdk` | 官方 1.14.0 schema/hash/防篡改通过，published=false |
+| `uv pip install --no-deps --target <隔离 site> dist/morphogenesis-0.1.0-py3-none-any.whl`；`python -I tools/check_distribution.py --site-dir <隔离 site> --check-node` | **14 包**从安装态 wheel 导入、资源齐备、安装态 verifier passed、Node 依赖检查通过 |
+
+本机附加定向结果：`tests/readiness` 70 passed、`tests/observatory` 58 passed（含新增 2 项 wayfinder 断言）、`tests/integration/r1_security/test_a_docker_export_handoff.py` 5 passed。本机全量跑在 `tests/integration/r1_security/test_a_dynamic_mcp.py` 的 MCP/Node 子进程用例上不返回（本机已知问题：Node 子进程与 `pwsh` spawn 超时），**不作为门禁**，以双平台 CI 为准。
+
+安全修复已验：`POST /api/wayfinder/ask` 不再经 shell（单 argv、`shell=False`）；科研后继 `108935b` 的 live 模式探针不变量保留，冻结的 Docker 导出安全边界测试仍断言"未验证隔离即拒绝执行"。
+
+真实限制（不翻绿）：真实 Wayfinder/MCP 清单未部署（`interface`/`account` 默认就是 `not_run`）；AT07 真实隔离、L2/L3、公网镜像重建与发布、现场人工验收均未执行；AOCI 索引未重建（机器管理文件未手改）；未知用量/费用保持 `null`。
+
 ## Review、Ghost in the Swarm 与 Sol 可用性验收（2026-09-24）
 
 基线 **605cf48b8b05baf86fd68e5d63f495ba3e5d7e69**，开始时工作区clean，远端同SHA。本轮只改治理/验收文档；日志、检查脚本和截图位于忽略目录 `.runtime/review-20260924/`。没有业务修复或锁文件变更。

@@ -1,5 +1,18 @@
 # 开发状态
 
+## 可交付候选版本：核心提交 + 产品版本（2026-10-06）
+
+主线 `31016f7` 与科研分支 `d23ff83` 自 `605cf48` 分叉后从未合并，**任何一条单独都不构成可交付版本**：主线没有 `swarm/`、`swarm/research/`、`src/env-observatory/`；科研分支没有 `readiness/` 包与主线 09-24 之后的产品提交，且自 `108935b` 起双平台 CI 一直 RED（ubuntu 4 failed）。候选分支 `morph-candidate-1006` 把两者合到一起，是第一个同时含"主线产品 + 观测台 + 两处 readiness + 科研后继"的树。
+
+| 项 | 值 |
+|---|---|
+| 核心提交（SOURCE） | `2cf904214340680c158e3a3e5d8361340a30c4fd`（合并 `a958723` + 测试适配 `ef80619` + 安全修复 `4038c6d` + Windows 屏障窗口 `2cf9042`） |
+| 两个父提交 | `d23ff83`（科研/观测台）+ `31016f7`（主线/readiness） |
+| 产品版本 | `morphogenesis 0.1.0`，wheel SHA-256 `c20b3e3bceab9e3f9079f630181f467749d8556a3da829d0a9ba3da7de04969c` |
+| 双平台 CI | [37459928011](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37459928011)：ubuntu **success**（1876 passed / 16 skipped）与 windows **success**（1877 passed / 15 skipped），含 typecheck、build、check:sdk、wheel 安装态各步。前一运行 [37455855201](https://github.com/songconmaisaix31-design/Morphogenesis/actions/runs/37455855201) 在 `4038c6d` 上 ubuntu success、windows 仅 1 项失败（三进程屏障在 Windows spawn 下超时），已修 |
+
+本轮真正修掉的安全问题：观测台 `POST /api/wayfinder/ask` 曾把用户输入拼进 shell 字符串并以 `shell=True` 执行，转义只覆盖反斜杠与双引号，未覆盖 `& | ^ %` 与换行（Windows）/`` $ ` ;``（POSIX），而该子进程环境里带着 `DASHSCOPE_API_KEY`；现改为单 argv + `shell=False`，`pi` 用 `shutil.which` 解析。科研后继 `108935b` 的 `live_mode_requires_verified_probes` 不变量保留，受影响的冻结安全测试改为声明"无法验证本机的探针"，执行门依然拒绝。完整逐项核对、验证命令与限制见 [候选版本报告](tracks/candidate-1006.md)。
+
 ## 公开产品化：三维 readiness 与可插拔接入（2026-10-06）
 
 基线 `70d2b64`（`codex/morphogenesis-mainline`），开工工作区 clean。新增 `readiness` 包与 `contracts/readiness.py`：`machine`/`interface`/`account` 三维独立，`ProbeState` 自带 `not_run`，不变量强制"非 `not_run` 必须来自真实观测"；探针集合默认空，接入为清单数据（`cli`/`mcp`/`credential`），Wayfinder 按其已发布 CLI 与 MCP 入口接入、不臆造子命令。产品面新增只读 `GET|HEAD /api/readiness`（TTL 缓存 + 总预算 + 边缘 2r/m 限流）与 `morphogenesis readiness` 子命令。
