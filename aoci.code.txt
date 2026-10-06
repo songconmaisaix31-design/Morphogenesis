@@ -1,27 +1,28 @@
 #AOCI-CODE-VOLUME: 1
 
 ===C:/Users/DW/orca/Morphogenesis/===
-.env.example[FC6T]: F:声明可选 Hub 沙箱与本地运行目录的环境变量模板 | R:- | A:- | S:令牌留空表示 Hub 未配置、状态必须显示待发布；真实值只从环境注入，绝不提交
-.gitattributes[FC8T]: F:固定仓库文本文件检出为 LF 行尾，保证跨平台字节一致 | R:- | A:- | S:AOCI 等按原始字节建基线；CRLF 重写会让整树判定 stale，二进制自动放行
-.gitignore[FC6T]: F:声明不入库的本地运行产物与秘密（.venv、node_modules、.runtime、opencode.json 等） | R:- | A:- | S:AOCI 托管资产不得加入忽略，否则 scan 静默跳过、索引建不起来
-AGENTS.md[SG9S]: F:仓库 Agent 执行约定：技术栈、精确命令、陷阱、多轨治理与 AOCI 认知规则 | R:code:docs/PLAN.md,code:docs/SWARM_SOL_PLAN.md | A:- | S:AOCI 托管区块由 init 幂等追加，手工重排或删改会破坏重装与认知入口
+.env.example[FC6T]: F:声明可选 Hub 沙箱、本地运行目录与三维 readiness 探针的环境变量模板 | R:- | A:- | S:令牌与清单路径留空表示未配置，接口/账号维度恒为 not_run 不设默认通过
+.gitattributes[FC8T]: F:固定仓库文本文件检出为 LF 行尾，保证跨平台字节一致 | R:- | A:- | S:AOCI 按原始字节建基线，CRLF 重写会让整树判定 stale，二进制自动放行
+.gitignore[FC6T]: F:声明不入库的本地运行产物与秘密 | R:- | A:- | S:AOCI 托管资产不得加入忽略，否则 scan 静默跳过、索引建不起来
+AGENTS.md[SG9S]: F:仓库 Agent 执行约定：技术栈、精确命令、陷阱、多轨治理与 AOCI 认知规则 | R:code:docs/PLAN.md,code:docs/SWARM_SOL_PLAN.md | A:- | S:AOCI 托管区块由 init 幂等追加，手工重排或删改会破坏重装与认知入口；opencode.dashscope.json 为 DashScope 提供方配置
 LICENSE[FG9M]: F:Apache-2.0 许可证全文，声明项目代码的使用、复制与分发条件 | R:- | A:- | S:项目整体仅在该许可证不变的前提下分发；第三方依赖许可单独列于 THIRD_PARTY_NOTICES.md
-README.md[SG9T]: F:项目总览：问题、形态发生理念、两代架构、算法、验收纪律与统一命令入口 | R:code:docs/PLAN.md | A:- | S:所述“第二代去中心化”代码位于 decentralized-swarm 分支；主线不含 swarm/，入口仍为占位
-THIRD_PARTY_NOTICES.md[SQ8S]: F:第三方依赖、版本、许可证、来源与上游 NOTICE 原文归档 | R:code:poetry.lock,code:package-lock.json,code:viz/frontend/package-lock.json | A:- | S:依赖升级必须同步此表与许可文本；表是分发声明，不是安装或验收证明
-opencode.evomap.json[FC7T]: F:项目级 OpenCode 提供方配置：EvoMap OpenAI 兼容网关与七个文本模型 | R:- | A:- | S:只引用环境变量、无秘密；权限默认 ask 且拒绝 .env；enabled_providers 仅 evomap
+README.md[SG9T]: F:项目总览：问题、形态发生理念、两代架构、算法、验收纪律与统一命令入口 | R:code:docs/PLAN.md | A:- | S:主线已合入去中心化 swarm/，morphogenesis swarm 转发 python -m swarm，不再是占位
+THIRD_PARTY_NOTICES.md[SQ8S]: F:第三方依赖、版本、许可证、来源与上游 NOTICE 原文归档 | R:code:poetry.lock,code:package-lock.json,code:viz/frontend/package-lock.json | A:- | S:依赖升级必须同步此表与许可文本，表是分发声明不是安装或验收证明
 package-lock.json[FV7L]: F:根 npm 锁：GEP SDK/MCP、Ajv 与 ECharts 的固定版本与完整性 | R:code:package.json,code:tools/check_sdk.cjs | A:- | S:由指定轨独占；npm ci --ignore-scripts 使用；不得随意升级或改锁
 package.json[FV7T]: F:根 npm 清单：GEP SDK/MCP、Ajv 与 ECharts 依赖及 check:sdk 脚本 | R:code:package-lock.json,code:tools/check_sdk.cjs | A:- | S:Node >=22.13.0；private；根锁由指定轨维护
 poetry.lock[FV8L]: F:Poetry 锁定依赖：Python 运行时与开发工具的精确版本与哈希 | R:code:pyproject.toml | A:- | S:自动生成不手改；由指定轨独占；安装必须按锁定版本
 pyproject.toml[FV9T]: F:项目元数据与依赖声明：11 个包、Python 版本范围、pytest/mypy 配置与 morphogenesis 脚本 | R:code:poetry.lock,code:tools/typecheck.py | A:- | S:packages/include 决定打包与类型检查范围；addopts 固定 --import-mode=importlib；改依赖必须同步锁
+QWEN.md[SZ5L]: F:Qwen 模型工作笔记：历史任务状态、授权边界与 FC 结算记录 | R:- | A:- | S:历史状态为已冻结事实，不得据其推断或越权执行未授权动作
+TASKS.md[SW4L]: F:任务跟踪：各轨任务、commit/dispatch 与结算状态的历史台账 | R:- | A:- | S:历史状态为已冻结事实，禁止据其伪造通过或回填未执行验收
 
 ===C:/Users/DW/orca/Morphogenesis/.github/workflows/===
-check.yml[OQ8T]: F:GitHub Actions 双平台质量门：pytest、strict mypy、wheel 构建、SDK 校验与分发检查 | R:code:pyproject.toml,code:tools/check_distribution.py,code:tools/check_sdk.cjs | A:- | S:比 morphogenesis check 多跑 build/SDK/wheel 安装/分发检查；Python 3.13 + Node 24，ubuntu+windows
+check.yml[OQ8T]: F:GitHub Actions 双平台质量门：pytest、strict mypy、wheel 构建、SDK 校验与分发检查 | R:code:pyproject.toml,code:tools/check_distribution.py,code:tools/check_sdk.cjs | A:- | S:wheel 名写死 morphogenesis-0.2.0-py3-none-any.whl，升版本须同步；比 morphogenesis check 多跑 build/SDK/wheel 安装/分发
 
 ===C:/Users/DW/orca/Morphogenesis/bootstrap/===
 __init__.py[EW2T]: F:bootstrap 包声明：固定练习与独立验证入口 | R:- | A:- | S:-
 __main__.py[EU7T]: F:python -m bootstrap 启动统一 CLI 并透传退出码 | R:code:bootstrap/cli.py | A:main | S:与控制台脚本 morphogenesis 等价
 acceptance_runner.py[TQ8T]: F:固定验收用例运行器：复核候选 clamp/mean/unique 并输出 MORPH_CHECKPOINTS | R:code:bootstrap/verify.py | A:run | S:必须在隔离目录由 verifier 以 python -I -S 运行；不得进入执行者工作区或加载候选自带 conftest/sitecustomize
-cli.py[EU8T]: F:统一 CLI：prepare/verify/acceptance/rehearsal/serve/check/swarm 子命令 | R:code:bootstrap/sample.py,code:bootstrap/verify.py | A:main,_forward,_check | S:转发类子命令必须在 argparse 之前原样透传参数，否则目标模块 --help/退出码/信号处理失真
+cli.py[EU8T]: F:统一 CLI：prepare/verify/acceptance/rehearsal/serve/check/readiness/swarm 子命令 | R:code:bootstrap/sample.py,code:bootstrap/verify.py | A:main,_forward,_check | S:swarm 已入 _FORWARD 原样透传参数，转发类子命令必须在 argparse 之前透传否则 --help/退出码/信号失真
 sample.py[EW7T]: F:从包内 fixtures 物化固定练习工作区（sample.py 与 TASK.md） | R:- | A:prepare_workspace | S:非空目录直接报错，绝不覆盖既有执行；防止污染真实运行证据
 verify.py[TQ9T]: F:独立验证边界：快照候选、隔离子进程运行固定用例并落盘可追溯证据 | R:code:bootstrap/acceptance_runner.py,code:contracts/results.py | A:SampleVerifier.verify | S:证据目录必须在工作区之外；超时或输出不完整时 passed=未知，绝不退化为通过；Windows 用 base_prefix 解释器避免 venv 子进程挂起
 
@@ -34,7 +35,7 @@ environment.py[IS8T]: F:为 Node 子进程构造最小环境：仅保留进程�
 mcp_client.py[IN8S]: F:官方 MCP Python 客户端：在隔离工作区启动固定 1.7.0 GEP server 的本地 stdio 会话 | R:code:bridge_node/assets.py,code:bridge_node/environment.py | A:GepMcpSession.call_tool,LocalGepMcpClient.connect | S:仅放行 LOCAL_TOOLS；超时/传输失败即终止会话且不重试；export 路径固定；不转发 stderr；版本不匹配 fail closed
 
 ===C:/Users/DW/orca/Morphogenesis/contracts/===
-__init__.py[CG8T]: F:共享契约包出口：聚合身份、消息、来源、分辨率、结果与运行时模型 | R:code:contracts/base.py,code:contracts/identity.py,code:contracts/messages.py,code:contracts/provenance.py,code:contracts/resolution.py,code:contracts/results.py,code:contracts/runtime.py | A:- | S:公共出口变化影响全仓 import；不得在此扩建执行或调度基础设施
+__init__.py[CG8T]: F:共享契约包出口：聚合身份、消息、来源、readiness、分辨率、结果与运行时模型 | R:code:contracts/base.py,code:contracts/identity.py,code:contracts/readiness.py,code:contracts/provenance.py,code:contracts/resolution.py,code:contracts/results.py,code:contracts/runtime.py | A:- | S:公共出口变化影响全仓 import，不得在此扩建执行或调度基础设施
 base.py[CG9T]: F:全契约共享的 Pydantic 基类策略：extra=forbid、frozen、禁止 inf/nan | R:- | A:Contract | S:放宽该策略会静默接受未知字段或可变数据，破坏共享验证边界
 identity.py[CI9T]: F:业务身份模型：Role/AgentId/AttemptId，仅数据身份 | R:code:contracts/base.py | A:AgentId,AttemptId | S:AttemptId 不承载调度器、重试或生命周期语义；扩建基础设施违背契约定位
 messages.py[CM8T]: F:统一 Envelope：run/msg 身份、收发方、Attempt、seq、provenance 与 lineage 校验 | R:code:contracts/identity.py,code:contracts/provenance.py | A:Envelope.validate_lineage | S:task_id 必须等于 attempt.task_id；replay 必须携带 original_run_uri
@@ -241,3 +242,28 @@ NOTICE.txt[SV8T]: F:展示层第三方许可索引：模板复用映射、打包
 ===C:/Users/DW/orca/Morphogenesis/viz/static/licenses/physarum/===
 NOTICE.md[SV7T]: F:Physarum 组件来源声明：上游提交、复用映射、未使用部分与继承来源 | R:code:viz/static/licenses/physarum/Physarum-WebGL.LICENSE.MIT.txt,code:viz/frontend/src/physarum/shaders.js | A:- | S:改写适配需保留署名；Three.js 等未使用部分不引入依赖；nicoptere 仅作来源记录
 Physarum-WebGL.LICENSE.MIT.txt[SV6T]: F:Bewelge/Physarum-WebGL 的 MIT 许可全文（逐字节复制自上游） | R:code:viz/static/licenses/physarum/NOTICE.md | A:- | S:分发时必须随产物保留；不得删改版权行
+
+===C:/Users/DW/orca/Morphogenesis/.pi/extensions/wayfinder-cloud/===
+index.ts[XI6M]: F:Pi 扩展 cloud_compute：经 bl CLI 调 DashScope Qwen 云模型并回显文本，list_cloud_models 列模型 | R:- | A:cloudComputeTool,listCloudModelsTool | S:模型 id 经正则白名单校验，错误经 scrub 抹除 sk- 密钥并截 200 字，凭据不回显
+
+===C:/Users/DW/orca/Morphogenesis/.pi/extensions/wayfinder-native/===
+index.ts[XI5M]: F:Pi 扩展探针：probe_native_agents 只读探测 codex/claude，native_agent_launch 返回示例 argv | R:- | A:probeTool,launchTool | S:probe 只跑 --version 与 login/auth status 永不启动会话，子进程环境剔除 ORCA_ 前缀变量
+
+===C:/Users/DW/orca/Morphogenesis/.pi/extensions/wayfinder/===
+cli.ts[XE5S]: F:Pi 扩展 list_cli_entries：列出项目 CLI 清单与用途、是否可执行 | R:code:.pi/extensions/wayfinder/guard.ts | A:registerCliTool | S:模型调用/构建/安装/bootstrap 一律标不可执行，只放行 git status/log/diff、ls、看日志等只读命令
+guard.ts[XS7S]: F:Wayfinder 只读边界守卫：拦截研究 MCP 写工具，仅放行白名单只读工具 | R:code:.pi/extensions/wayfinder/research.ts | A:registerGuard | S:非研究工具、其它 MCP 与 Pi 自身工具不受影响，block 原因固定 wayfinder_readonly_boundary
+index.ts[XE7S]: F:Wayfinder 扩展入口：注入 system prompt、注册守卫与 CLI 清单、挂载研究 MCP | R:code:.pi/extensions/wayfinder/guard.ts,code:.pi/extensions/wayfinder/cli.ts,code:.pi/extensions/wayfinder/prompt.ts | A:default | S:WAYFINDER_HOST_CONFIG 未设时只告警不注册 MCP，MCP 用 python -m swarm.research --config 直连
+prompt.ts[XS6S]: F:Wayfinder system prompt：只读观察者定位、硬边界与推荐工作流 | R:- | A:WAYFINDER_PROMPT | S:写操作必须明确说明并由授权 Worker/原生 Agent 执行，不得由 Wayfinder 自行写业务状态
+research.ts[XS6S]: F:Wayfinder 研究只读工具白名单与 MCP 前缀常量 | R:code:.pi/extensions/wayfinder/guard.ts | A:READONLY_TOOLS,READONLY_TOOL_NAMES | S:仅 7 个只读工具，带 action 的工具还须 action 在白名单（result/read）内
+
+===C:/Users/DW/orca/Morphogenesis/.pi/prompts/===
+wayfinder.md[SS6S]: F:Wayfinder 扩展提示模板：只读定位、边界与观察工作流 | R:- | A:- | S:只读边界以 guard.ts 的 block reason 为准，文档不新增权限
+
+===C:/Users/DW/orca/Morphogenesis/.pi/skills/wayfinder-cli/===
+SKILL.md[SS4S]: F:Wayfinder CLI 技能：只读命令清单与各入口用途/用法/是否可执行 | R:- | A:- | S:-
+
+===C:/Users/DW/orca/Morphogenesis/.pi/skills/wayfinder-navigate/===
+SKILL.md[SZ3S]: F:Wayfinder 导航技能：只读研究工具调用顺序与观察行为 | R:- | A:- | S:-
+
+===C:/Users/DW/orca/Morphogenesis/.pi/skills/wayfinder-task-flow/===
+SKILL.md[SW3S]: F:Wayfinder 任务流程技能：propose→enqueue→claim→execute→review→adopt 只读说明 | R:- | A:- | S:全部六步均为写操作，Wayfinder 只描述不执行
