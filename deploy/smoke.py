@@ -65,10 +65,16 @@ def main() -> None:
     dashboard = json.loads(request("/api/dashboard"))
     validate_dashboard_snapshot(dashboard)
     request("/api/dashboard", method="HEAD")
+    # Readiness reports only declared probes; undeclared dimensions stay not_run.
+    readiness = json.loads(request("/api/readiness"))
+    assert readiness["schema_version"] == "morph.readiness/1"
+    assert set(readiness["dimensions"]) == {"machine", "interface", "account"}
+    assert all(check["subject"] in readiness["dimensions"] for check in readiness["results"])
+    request("/api/readiness", method="HEAD")
     # These prove both API routes reach Python validation without upstream calls.
     assert json.loads(request("/api/evomap?limit=invalid", 400))["error"] == "invalid_query"
     assert json.loads(request("/api/evomap/asset?id=invalid", 400))["error"] == "invalid_asset_id"
-    for path in ("/.env", "/.git/config", "/assets/", "/fonts/", "/licenses/", "/api/tasks", "/api/evomap/asset/extra", "/server.py", "/vendor/"):
+    for path in ("/.env", "/.git/config", "/assets/", "/fonts/", "/licenses/", "/api/tasks", "/api/evomap/asset/extra", "/api/readiness/extra", "/server.py", "/vendor/"):
         request(path, 404)
     for method in ("POST", "PUT", "DELETE", "OPTIONS", "TRACE"):
         request("/api/dashboard", 405, method)
@@ -82,7 +88,7 @@ def main() -> None:
         for _ in range(6):
             request("/api/evomap/asset?id=invalid", {400, 429})
         assert any(check["status"] == 429 for check in checks)
-    print(json.dumps({"checks": checks, "provenance": dashboard["provenance"], "acceptance": dashboard["acceptance"]}, ensure_ascii=True, indent=2))
+    print(json.dumps({"checks": checks, "provenance": dashboard["provenance"], "acceptance": dashboard["acceptance"], "readiness": readiness["overall"]}, ensure_ascii=True, indent=2))
 
 
 if __name__ == "__main__":

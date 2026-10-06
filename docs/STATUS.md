@@ -1,5 +1,11 @@
 # 开发状态
 
+## 公开产品化：三维 readiness 与可插拔接入（2026-10-06）
+
+基线 `70d2b64`（`codex/morphogenesis-mainline`），开工工作区 clean。新增 `readiness` 包与 `contracts/readiness.py`：`machine`/`interface`/`account` 三维独立，`ProbeState` 自带 `not_run`，不变量强制"非 `not_run` 必须来自真实观测"；探针集合默认空，接入为清单数据（`cli`/`mcp`/`credential`），Wayfinder 按其已发布 CLI 与 MCP 入口接入、不臆造子命令。产品面新增只读 `GET|HEAD /api/readiness`（TTL 缓存 + 总预算 + 边缘 2r/m 限流）与 `morphogenesis readiness` 子命令。
+
+验证：`tests/readiness` 70 passed；全量 `pytest -q` 361 passed / 2 failed / 1 error，三项均为 Node 子进程与 `pwsh` 超时，已在干净 HEAD 工作树原样复现，与本轮改动无关；strict mypy 38 文件通过；`uv tool run poetry build` 产出 sdist/wheel 且 wheel 含新包；`tools/check_distribution.py` 12 包安装态通过。真实 Wayfinder、公网镜像重建/发布、`npm run check:sdk` 与双平台 CI 未执行。AOCI 索引因本会话无 AOCI 工具而待维护。详见 [readiness 接入记录](tracks/readiness-integration.md)。
+
 ## Ghost in the Swarm review 与 Sol 验收（2026-09-24）
 
 基线605cf48，无业务实现改动。294测试、55文件strict、Python/前端构建、SDK/11包安装态通过。用户指定的EvoMap Sol两次新任务均成功，返回均为gpt-5.6-sol，2018tokens，费用未知；live/passed,passed,passed仅限固定样例。用户限定前的Luna结果另存。

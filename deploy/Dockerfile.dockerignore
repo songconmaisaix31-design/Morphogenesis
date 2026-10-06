@@ -27,6 +27,8 @@
 !metabolism/**/*.py
 !mocks/
 !mocks/**/*.py
+!readiness/
+!readiness/**/*.py
 !viz/
 !viz/*.py
 !viz/static/

@@ -28,6 +28,7 @@ COPY orchestration/ orchestration/
 COPY topology/ topology/
 COPY metabolism/ metabolism/
 COPY mocks/ mocks/
+COPY readiness/ readiness/
 COPY viz/*.py viz/
 COPY demo/data/mock-run.json demo/data/mock-run.json
 COPY --from=charts /build/node_modules/echarts/dist/echarts.min.js node_modules/echarts/dist/echarts.min.js

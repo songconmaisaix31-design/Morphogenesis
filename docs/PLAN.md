@@ -1,5 +1,13 @@
 # Morphogenesis 接手与核心闭环一页计划
 
+## 公开产品化：本机/接口/账号三维 readiness（2026-10-06）
+
+用户指出应用目标不只是本机电脑，而是公开产品：需要检测本机状态、接口健全与账号健全，**不能把当前状态固定死**，应先是一个空的接口，再用 Wayfinder 或公开 CLI 接口与对 Agent 友好的 MCP 接口接入。
+
+据此新增 `readiness` 包与 `contracts/readiness.py`：三维（`machine`/`interface`/`account`）独立、状态词表与运行验收语义分离；探针集合默认为空，未声明的维度恒为 `not_run`，`not_run` 只表示未探测、绝不表示通过。接入是数据不是代码：清单声明 `cli`/`mcp`/`credential` 三类探针，JSON 严格校验且失败关闭；Wayfinder 按其已发布 CLI 与 MCP 入口接入，不臆造子命令。产品面新增只读 `GET|HEAD /api/readiness`（TTL 缓存、总预算、边缘 2r/m 限流）与 `morphogenesis readiness` 子命令。同批同步 `pyproject.toml` packages、`tools/typecheck.py`、`tools/check_distribution.py`、`deploy/Dockerfile*`、`deploy/nginx.conf`、`deploy/proxy.conf`、`deploy/smoke.py`、`deploy/package.py` 与 `.env.example`。
+
+本机验证：`tests/readiness` 70 项通过、strict mypy 38 文件无问题、`python -m readiness` 正确输出 `overall=degraded machine=ok interface=not_run account=not_run`。真实 Wayfinder、公网重建与发布、build/SDK/wheel 检查未执行，如实保留；详细边界见 [readiness 接入记录](tracks/readiness-integration.md)。仓库认知索引因本会话无 AOCI 工具而待维护。
+
 ## 项目 review、部署恢复与 computer-use 验收（2026-09-24）
 
 用户要求审查当前项目、部署 swarm 并进行 computer-use 可用性验收。基线 `605cf48`，开始时工作区 clean。用户随后强调 Ghost in the Swarm：以关系与历史中的集体策略为核心，跨机器不是概念成立的必要条件；分别验收成员替换后的策略延续、反馈选路、经验采用/代谢和外部继承。不扩建调度或身份基础设施。

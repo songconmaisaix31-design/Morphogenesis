@@ -2,8 +2,8 @@
 
 One command, several subcommands: the fixed exercise (prepare/verify), the live
 execution loop (acceptance), the fixed two-task rehearsal, the read-only local
-dashboard (serve), a local quality gate (check), and a placeholder for the
-not-yet-merged decentralized swarm.
+dashboard (serve), a deployment readiness snapshot (readiness), a local quality
+gate (check), and a placeholder for the not-yet-merged decentralized swarm.
 
 Subcommands that wrap an existing ``python -m <module>`` entry forward the
 remaining arguments unchanged to that module in the same interpreter, so each
@@ -30,6 +30,7 @@ _FORWARD = {
     "acceptance": "orchestration.acceptance",
     "rehearsal": "orchestration.rehearsal",
     "serve": "viz.server",
+    "readiness": "readiness",
 }
 
 
@@ -113,6 +114,11 @@ def main() -> int:
 
     serve = sub.add_parser("serve", help="只读本地 dashboard（转发 python -m viz.server）")
     serve.set_defaults(func=lambda a: _forward("viz.server", []))
+
+    readiness = sub.add_parser(
+        "readiness", help="本机/接口/账号三维健全度快照（转发 python -m readiness）"
+    )
+    readiness.set_defaults(func=lambda a: _forward("readiness", []))
 
     check = sub.add_parser("check", help="本地质量门：全量测试 + strict mypy")
     check.set_defaults(func=_check)
