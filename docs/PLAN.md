@@ -374,3 +374,11 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 测评：动态热点和能力反转用预先固定phase及真实反馈，禁止注入成功率替代实测；租约故障按预留前/后、在途/完成前、实际owned PID与自然TTL/fencing分列；跨session必须fresh process且以consumption/validation/adoption链证明，正确、错误、无经验对照不能混；代码缺陷修复必须真实DashScope输出补丁并经固定独立测试，不能只产生标准答案或泄漏gold。真实可执行代码只在已验证受控目录/白名单与独立验证器执行，不向代码进程传凭据。旧baseline与优化策略/统一Single/Central对照由B提交可执行协议主控审核后固定；先前观测不是预注册证据。
 
 独立测试/build/type/SDK等适用门由A/F先跑，最后I对冻结合并SHA串行完成适用总门；不把mock门、接口成功或进程exit0等同task_live成功。所有首RED、INCOMPLETE、NOT_RUN与null费用保留；优化不得在看到正式成绩后调判据。最终产品服务由F/I核对本次owned PID后替换或新端口启动，不终止未知进程。
+
+## 2026-10-08 交付检查点
+
+- A 已结算：SOURCE `d5bd40cea91b09ddf669be5e063e726186191fc4`，REPORT/remote `99a7b66fb2a1c49bd9a4984e81b2a6d1027fb522`。`d5cb717` 完整核心/资产 576 PASS；后继审计 8、最终预算/执行/失败链 79 PASS，strict 11、wheel/sdist 构建通过。两批 SOURCE 证据分别保留，不把前序全套套用后继。A 新付费调用 0。
+- F 已结算：SOURCE `820488e84a666712f247cfce9b36931d88646c1e`，REPORT/remote `23be39b1b22e7442e689f3b1b7cbe4857f77f5f3`。Python 61、前端 8、安装原字节 216、HTTP 10 及 1440/1280/390 三视口真实交互通过；旧 RED 保留。8100 空态、8101 明确历史 replay；具体进程身份在 `ui/process-handoff-1008.json`，不能当作新真实测评。
+- B 独占后续重运行窗口：先对 A 最终 SOURCE 做隔离安装与代表离线子集；正式 API 批次仍须绑定最终协议/工具 SOURCE、安装证据和主控窗口消息。目前新付费调用 0。协议预算细化为最多 233 已分配 + 7 保留 = 240 槽，总成本上限仍 CNY30；新增独立 before_commit 故障槽，不覆盖 after_commit。未知远端效果不重试；已知响应/用量、原预算 settled 且无 pending/uncertain、重启 0 新请求，才可继续后续独立场景。
+- Orca 内存不足中断及首日志已保留；原会话在同 worktree/branch 恢复。重测试、安装与构建串行，线程上限为 1；不修改全局 pagefile。A/F 已释放调度资源，领域返修仍归原 Owner。
+- I 独立集成任务 `task_bfec3a09dc70` 依赖 A/B/F 全部完成，尚未启动。最终报告为 `docs/tracks/morphbench-live-final-1007.md`，同内容导出单份中文 DOCX 至下载目录；不得冒充官方榜单、一般工程仓库修复、完整科研/AT-07 或已证能力反转。
