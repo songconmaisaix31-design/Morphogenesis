@@ -3,26 +3,28 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import asdict
+from importlib import import_module
 import json
 from pathlib import Path
 import time
+from typing import Any
 
 from run_local import configure, installed_identity, measured_task, read_events, write_json
 from summarize import estimate
 
 
-def run(args) -> dict:
-    from morphbench import local_tasks, real_swarm
+def run(args: argparse.Namespace) -> dict[str, Any]:
+    local_tasks, real_swarm = (import_module("morphbench." + name) for name in ("local_tasks", "real_swarm"))
     output = args.output
     output.mkdir(parents=True, exist_ok=False)
     write_json(output / "environment.json", installed_identity())
-    report = {"SB-01": [], "SB-02": [], "SB-03": [], "SB-04": [],
+    report: dict[str, Any] = {"SB-01": [], "SB-02": [], "SB-03": [], "SB-04": [],
               "measurement_window": args.measurement_window}
     for seed in range(5):
         task = local_tasks.build("BM-05")
         root = output / f"s{seed}"
         root.mkdir()
-        def adapter(label, current_task, **kwargs):
+        def adapter(label: str, current_task: Any, **kwargs: Any) -> Any:
             log = root / f"{label}.jsonl"
             observed = measured_task(current_task, log, label)
             stats = real_swarm.run_real_swarm(observed, args.budget, seed=seed,

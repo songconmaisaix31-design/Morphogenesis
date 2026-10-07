@@ -8,21 +8,22 @@ import math
 from pathlib import Path
 import random
 import statistics
+from typing import Any
 
 
-def estimate(values: list[float]) -> dict:
+def estimate(values: list[float]) -> dict[str, Any]:
     return {"n": len(values), "mean": statistics.mean(values) if values else None,
             "se": statistics.stdev(values) / math.sqrt(len(values)) if len(values) > 1 else None}
 
 
-def paired(left: dict[int, float], right: dict[int, float], draws: int = 10000) -> dict:
+def paired(left: dict[int, float], right: dict[int, float], draws: int = 10000) -> dict[str, Any]:
     seeds = sorted(left.keys() & right.keys())
     differences = [left[s] - right[s] for s in seeds]
     if not differences:
         return {"seeds": [], **estimate([]), "ci95": None, "sign_flip_p": None}
     rng = random.Random(20261007)
     samples = sorted(statistics.mean(rng.choices(differences, k=len(differences))) for _ in range(draws))
-    def quantile(fraction):
+    def quantile(fraction: float) -> float:
         index = (len(samples) - 1) * fraction
         lo, hi = math.floor(index), math.ceil(index)
         return samples[lo] + (samples[hi] - samples[lo]) * (index - lo)
@@ -46,10 +47,10 @@ def bh_adjust(p_values: list[float]) -> list[float]:
     return adjusted
 
 
-def summarize(root: Path) -> dict:
+def summarize(root: Path) -> dict[str, Any]:
     rows = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(root.glob("BM-*/result.json"))]
     argument_file = root / "arguments.json"
-    arguments = json.loads(argument_file.read_text(encoding="utf-8")) if argument_file.exists() else {
+    arguments: dict[str, Any] = json.loads(argument_file.read_text(encoding="utf-8")) if argument_file.exists() else {
         "tasks": [f"BM-0{i}" for i in range(1, 6)], "seeds": list(range(5)),
         "systems": ["SingleAgent", "CentralScheduler", "MorphSwarm"]}
     expected = list(itertools.product(arguments["tasks"], arguments["seeds"], arguments["systems"]))
@@ -73,7 +74,7 @@ def summarize(root: Path) -> dict:
                            "setup_evaluations": sum(r["setup_evaluations"] for r in group),
                            "test_evaluations": sum(r["test_evaluations"] for r in group)})
         for baseline in ("SingleAgent", "CentralScheduler"):
-            def scores(system, complete_only=True):
+            def scores(system: str, complete_only: bool = True) -> dict[int, float]:
                 selected = [r for r in rows if r["task"] == task and r["system"] == system
                             and (not complete_only or r["status"] == "PASS_local_trial") and r["test_score"] is not None]
                 if len({r["seed"] for r in selected}) != len(selected):
@@ -100,7 +101,7 @@ def summarize(root: Path) -> dict:
             "actual_cost_usd": None}
 
 
-def markdown(report: dict) -> str:
+def markdown(report: dict[str, Any]) -> str:
     coverage = report["coverage"]
     lines = ["# Local synthetic MorphBench results", "", "Complete-budget trials only; all first failures and partial trials remain in JSON.", "",
              f"Coverage: expected {coverage['expected']}, observed {coverage['observed']}, missing {coverage['missing_count']}; complete budget {coverage['complete_budget_trials']}.", "",
