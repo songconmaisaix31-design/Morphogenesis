@@ -351,3 +351,26 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 范围：本机 CPU、固定/合成任务、真实本地 Worker 机制验证。原 Spec 中真实科研沙箱 AT-07、原生科研模型执行及云/GPU/付费外发的具体批准门仍独立；公开资料读取和已提供 CPU 评测获授权。产品源码和锁文件冻结，不为获得高分改阈值、改预算、篡改历史或建设新的调度/证明系统。报告区分 contract_local / interface_live / task_live，费用未知为 null，自造锚点不作为官方百分位。
 
 最终交付包括：可访问产品地址、逐项测评报告、精确源码与报告 SHA、命令与结果、真实限制和未执行项。不得把全部不可执行项笼统算通过。
+
+# MorphBench DashScope 真实 Swarm 后继执行页（2026-10-07）
+
+当前用户明确授权适度算法优化、DashScope 真实 Swarm 测评（动态热点/能力反转路由、租约/崩溃恢复、跨 session 正误经验复用、统一预算真实代码缺陷任务）、修复 Swarm 前端，最终一个集成报告。此授权覆盖上一轮仅合成/产品冻结的限制，仅限本页范围；不扩展为任意科研、云/GPU或无界支出。主控仅调度、治理、验收，使用 Orca CLI。
+
+基线：产品 0.2.1 SOURCE=50396909c3fbaa510e755b8e2361e05d84afdfaa；上一轮完整本地 REPORT=47f089ad92e0c459b2deeadab65109246d64ae9a（远端当时仅bc12c1d，GitHub500原失败保留）。本轮从后者普通演进，历史结果不得覆盖。
+
+| 轨道 | 固定 Agent / Worktree / Branch | 独占 write_paths | 交付与验收 |
+|---|---|---|---|
+| A 核心算法/执行边界 | 新 Codex / morphbench-live-core-1007 / Orca同名分支 | swarm/**（除swarm/observatory/**）, local_assets/**, orchestration/provider_adapters/dashscope.py, orchestration/gateway_transport.py, tests/swarm/**, tests/local_assets/**, docs/tracks/morphbench-live-core-1007.md | 复用现有Router/TaskLedger/lease/预算/资产链；有界修复与可选择后继策略；真实代码补丁执行边界；原断言/首失败/后继证据；向B交接精确SOURCE |
+| B 真实评测 | 复用原M Codex / morphbench-eval-1007 / songconmaisaix31-design/morphbench-eval-1007 | tools/morphbench/**, tests/morphbench/**, docs/tracks/morphbench-live-protocol-1007.md, docs/tracks/morphbench-live-evaluation-1007.md | 先冻结协议/任务/模型/判据/预算，再一次有界真跑；四类测评原始记录、失败与对照；不越轨改核心；与A通过Handoff协作 |
+| F Swarm前端 | 新 Codex / morphbench-live-ui-1007 / Orca同名分支 | src/env-observatory/**, swarm/observatory/**, tests/observatory/**, docs/tracks/morphbench-live-ui-1007.md | 修复Swarm DOM/布局与状态展示，展示后端真实事实；研究未连接时显式空态，不能fallback伪造任务；Orca真实浏览器三视口验证 |
+| I 独立集成 | 三轨交付后复用原I或一个新Codex / 固定集成worktree与分支 | 精确普通合并、少量导入/配置胶水、docs/tracks/morphbench-live-final-1007.md及由其导出的本地单份DOCX | 独立安装/适用工程门、原始证据复核、真实页面复验；一个报告涵盖上轮可证事实/新四类结果/优化前后/前端/费用/限制 |
+
+排除：A不写swarm/observatory与UI；B不写任何产品核心；F不写路由/账本/执行器；锁文件均冻结，确需变更先Handoff。领域返修始终退原Owner。每阶段commit+push，不force；远端失败先核对实际SHA再有界恢复。主控在独立control worktree仅维护本页/状态/决策/验收。
+
+运行私有根=C:/Users/DW/orca/mb-live-1007，A/core、B/eval、F/ui、I/integrate互斥。上一轮C:/Users/DW/orca/mb021-1007及artifacts/morphbench原件只读。新运行使用隔离安装和已核实Git字节；不能修改上一轮verify venv。API凭据只在受控请求进程读取Windows用户DASHSCOPE_API_KEY，不写命令、日志、报告或模型输入。
+
+支出：用户当前已授权DashScope真实调用；已询问费用偏好，暂按本轮总上限人民币30元、最多256个新请求的保守默认准备，收到用户调整立即落实。模型/价格按官方当前资料固定；控制输入/输出token和已有预算预留，含预检/校准/失败/经验生成/三系统全部成本；各正式对照均使用相同模型/任务和全流程预算口径。未知请求效果/usage停止该分支，未知实际账单保持null；不得通过重置session、换身份或预算实现重试。B是唯一付费调用Owner，A/F/I不发模型请求。
+
+测评：动态热点和能力反转用预先固定phase及真实反馈，禁止注入成功率替代实测；租约故障按预留前/后、在途/完成前、实际owned PID与自然TTL/fencing分列；跨session必须fresh process且以consumption/validation/adoption链证明，正确、错误、无经验对照不能混；代码缺陷修复必须真实DashScope输出补丁并经固定独立测试，不能只产生标准答案或泄漏gold。真实可执行代码只在已验证受控目录/白名单与独立验证器执行，不向代码进程传凭据。旧baseline与优化策略/统一Single/Central对照由B提交可执行协议主控审核后固定；先前观测不是预注册证据。
+
+独立测试/build/type/SDK等适用门由A/F先跑，最后I对冻结合并SHA串行完成适用总门；不把mock门、接口成功或进程exit0等同task_live成功。所有首RED、INCOMPLETE、NOT_RUN与null费用保留；优化不得在看到正式成绩后调判据。最终产品服务由F/I核对本次owned PID后替换或新端口启动，不终止未知进程。
