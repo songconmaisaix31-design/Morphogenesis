@@ -95,3 +95,37 @@ HTTP 与视觉证据分开：8100 `/api/swarm` 为 missing/空数组；8101 为 
 只读定位：旧恢复脚本未显式限制 BLAS/OMP 线程，启动时未记录继承的线程变量，不能断言其值。冻结安装源码存在 `server.py → swarm.research.service → swarm.pheromone → metabolism.decay`，后者触发 `metabolism/__init__.py → metabolism.service → metabolism.index → FAISS/NumPy` 的导入链；即使无 HostConfig 也会加载数值库。结合每进程 80 线程，这是内存来源的候选解释，未进行内存归因分析，不能宣称已证明全部 5.49 GiB 的原因。
 
 I 最终重启必须在 Python 启动前通过子进程环境显式设置 `OPENBLAS_NUM_THREADS=1`、`OMP_NUM_THREADS=1`、`MKL_NUM_THREADS=1`、`NUMEXPR_NUM_THREADS=1`；保持 Hidden/loopback，优先只启动必需的一项预览，并重新记录 launcher/listener、PrivateMemory、WorkingSet 与线程数。旧启动脚本不得原样复用；延迟 research 导入属于后续需原 Owner 测试的源码优化建议，本次没有实施。两服务保持暂停，由 I 接入 B 新 state 后最终重启；未启动新浏览器、测试、模型请求、安装或重导入实验。
+
+## I 验收后的观察范围返修（2026-10-08）
+
+任务 `task_40efe7475c91` / Dispatch `ctx_ab7ff600ec95`。I 在其安装服务读取 B formal-v1 successor 已停止的真实 state 时发现，通用“热读”文案和未区分作用域的验收徽标可能让历史局部测评被误读为实时完整科研。F 普通合并 I 精确 SOURCE `96dfbfaaa75780a57062b5d33509f63b244a899d`，merge 为 `0f72b1a5180b2b3b613e69266d0dbe4a3fd371eb`，无冲突；本次后继 **SOURCE `1aa78efd6f2681e5cd78c771cd62362e655e1e44`**，已普通 push。REPORT 为本节的独立 docs-only 后继提交，确切 SHA 在交接消息中。
+
+只读核对 I `integrate/http-8101-swarm.json`：6 个任务中 5 completed / 1 blocked，budget breaker=`unknown_usage`，未知 tokens/估算仍为 null；节点 provenance=live、evidence_class=contract_local；单任务 worker_audit 有 passed，但 aggregate acceptance 三态为 not_run。范围依据另来自 B `eval/formal-v1/arguments.json` 的 `plan.code_defects` 和该 trial，以及 `morphbench-live-evaluation-1007.md` 第 2–3 节：这是 clamp、mean、unique 三族固定纯函数缺陷的局部代码测评，不是完整科研验收。页面没有根据目录名推断这些事实。
+
+本次只修改本轨 HTML、server.py 和两个测试文件。后端 `/api/swarm` **仅增加可选 `display_context`**，来自明确启动配置，字段为 `source=operator_configuration`、`scope_label`、`scope_reference`、`run_status=ended|unknown`。未配置返回 null；引用仅原样展示、不读取路径、不请求 URL；配置不写入 ledger、audit 或预算，不生成验收结论。启动约束：
+
+- `--swarm-scope-label` 与 `--swarm-scope-reference` 必须成对且有 `--swarm-state`；空白单边配置拒绝。
+- `--swarm-run-ended` 必须同时有 `--swarm-replay` 和 state，明确是展示配置声明；单凭 replay 不推断运行已结束。
+- 页面顶部区分历史观察、运行结束声明和局部范围，标明“只读展示配置”“配置依据（非验收证据）”。无配置显示范围未声明／结束状态未知；原始 provenance 不改。
+- aggregate 三态单列“整体场景验收（后端 acceptance）”，解释 not_run/unknown；审计流明确“单任务 interface_live/task_live”。单任务 passed 不汇总为整体通过，完整科研仍未验收；unknown/null 不改零。
+
+I 可在其原服务参数上追加以下内容（由 I 对绑定 state 核对并传入；不是产品默认值）：
+
+```powershell
+--swarm-scope-label '局部固定代码缺陷测评：clamp、mean、unique 三函数；seed 0 successor cell（完整科研未验收）' `
+--swarm-scope-reference 'C:/Users/DW/orca/mb-live-1007/eval/formal-v1/arguments.json：plan.code_defects 与 code-s0-successor_claim_v01；B 报告第2–3节' `
+--swarm-run-ended
+```
+
+须保留其已有 `--swarm-state .../code-s0-successor_claim_v01/state --swarm-replay`；四个线程变量保持 1。拟接口 Handoff `msg_de457a625c25` 与 SOURCE Handoff 已发 I `ctx_68baf6827e11`。F 没有触碰 I 的 8100/8101、浏览器或运行目录，也没有启动自己的服务；paid/unknown 请求继续停止。
+
+本次运行证据仅写 `C:/Users/DW/orca/mb-live-1007/ui/scope-clarification-1008/`：
+
+| 检查 | 命令 / 结果 | 证据 |
+|---|---|---|
+| 首 RED | `node --test tests/observatory/frontend.test.cjs`，8 pass / 2 fail：缺失历史范围展示节点 | `frontend-first.log` / `.exit.txt` 原样保留 |
+| Node 后继 | 同一命令，**10 pass**，包含全部 inline JS 语法、配置文本转义、原事实不变与不按路径猜范围 | `frontend-second.log` / `.exit.txt` |
+| Python 切片 | `ui/venv/Scripts/python.exe -m pytest -q tests/observatory/test_server.py -k swarm -p no:cacheprovider --basetemp .../pytest-temp --junitxml .../pytest.xml`，**11 passed / 19 deselected**，11.41s，既有 Starlette warning 1 条 | `pytest-first.log` / `.exit.txt` / `pytest.xml` |
+| 静态检查 | `git diff --check`，通过 | SOURCE 提交前核对 |
+
+Python 测试为四项 BLAS/OMP/NUMEXPR 线程变量均 1、禁写 pyc 的串行 source-bound TestClient 检查；CLI 测试拦截 uvicorn.run，没有实际监听。覆盖显式配置及非法组合、读取失败仍区分配置/数据、原任务/预算/audit/acceptance 不变。没有重安装、全套工程门或新增浏览器验收；I 普通合并后负责精确安装与 1440/1280/390 独立复验，本节不把此前截图视为本次后继视觉通过。
