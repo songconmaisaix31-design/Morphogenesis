@@ -42,6 +42,7 @@ from starlette.datastructures import MutableHeaders
 from swarm.observatory.registry import ProviderRegistry, build_registry
 from swarm.research.models import HostConfig
 from swarm.research.service import build_service
+from viz.swarm_adapter import empty_swarm, load_swarm
 
 WAYFINDER_TIMEOUT = 180
 MAX_QUESTION_CHARS = 2000
@@ -225,8 +226,14 @@ def _probe_enabled() -> bool:
 # ---------------------------------------------------------------------------
 
 def create_app(service: object | None = None, *, service_error: str | None = None,
-               host_config: str | None = None) -> FastAPI:
-    """Build the observatory app. ``service`` may be None (503 degradation)."""
+               host_config: str | None = None, swarm_state: str | None = None,
+               swarm_replay: bool = False) -> FastAPI:
+    """Build the observatory app. ``service`` may be None (503 degradation).
+
+    ``swarm_state`` binds one real decentralized-swarm state directory (the same
+    layout ``python -m swarm`` writes: tasks/field/budget SQLite plus workers/
+    audit JSON). It is read through ``swarm.observer`` and never written to.
+    """
     app = FastAPI(title="env-observatory", docs_url=None, redoc_url=None,
                   openapi_url=None)
     app.add_middleware(ReadOnlyAndSecurityMiddleware)
@@ -396,6 +403,38 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
         if refresh:
             registry.invalidate()
         return json_response(registry.report().model_dump(mode="json"))
+
+    # ---- Decentralized swarm: read-only observer projection --------------
+    #
+    # 口径：数据全部来自 swarm.observer.observe（WAL 安全热读、无 sidecar、limit
+    # 有界），再经 viz.swarm_adapter 投影为 JSON（schema morph.swarm.readonly/1）。
+    # 严格只读：不认领任务、不推进状态、不改租约/预算/审计、不调用任何模型。
+    # 未绑定状态目录 → health=missing 的空态（不是 mock 填充）；读取失败 →
+    # health=error + 503。provenance 由被观测的状态自身携带，服务不改写。
+
+    _swarm_state_raw = swarm_state or os.environ.get("OBSERVATORY_SWARM_STATE")
+    _swarm_state_path = Path(_swarm_state_raw) if _swarm_state_raw else None
+
+    @app.get("/api/swarm")
+    def api_swarm() -> Response:
+        """Read-only snapshot of one real decentralized-swarm state directory."""
+        if _swarm_state_path is None:
+            payload = empty_swarm(
+                "未绑定蜂群状态目录（OBSERVATORY_SWARM_STATE 或 --swarm-state）；"
+                "/api/swarm 保持空态，不使用 mock 填充。"
+            )
+        else:
+            try:
+                payload = load_swarm(_swarm_state_path, replay=swarm_replay)
+            except Exception as error:  # noqa: BLE001 - a read fault must not kill the panel
+                payload = empty_swarm(f"蜂群只读观察失败：{type(error).__name__}: {error}")
+                payload["health"] = "error"
+                payload["state_directory"] = str(_swarm_state_path)
+                payload["replay"] = bool(swarm_replay)
+                return json_response(payload, 503)
+        payload["state_directory"] = str(_swarm_state_path) if _swarm_state_path else None
+        payload["replay"] = bool(swarm_replay)
+        return json_response(payload)
 
     # ---- Compute: provider registry; Aliyun is the first real one --------
     #
@@ -1163,19 +1202,34 @@ def main() -> None:
     parser.add_argument("--host", default=os.environ.get("OBSERVATORY_HOST", "127.0.0.1"),
                         help="Listen address; defaults to OBSERVATORY_HOST or loopback")
     parser.add_argument("--port", type=int, default=int(os.environ.get("OBSERVATORY_PORT", DEFAULT_PORT)))
+    parser.add_argument("--swarm-state", default=os.environ.get("OBSERVATORY_SWARM_STATE"),
+                        help="Read-only decentralized swarm state directory "
+                             "(tasks/field/budget SQLite + workers/audit JSON); "
+                             "defaults to OBSERVATORY_SWARM_STATE")
+    parser.add_argument("--swarm-replay", action="store_true",
+                        help="Mark a copied swarm state as historical replay; requires --swarm-state")
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("port must be between 1 and 65535")
+    if args.swarm_replay and not args.swarm_state:
+        parser.error("--swarm-replay requires --swarm-state")
 
     service, service_error = load_service()
     if service_error:
         print(f"[warn] {service_error} —— /api/research/* 将返回 503")
+    if not args.swarm_state:
+        print("[warn] 未绑定蜂群状态目录（--swarm-state / OBSERVATORY_SWARM_STATE）—— "
+              "/api/swarm 将返回 health=missing 空态")
 
     app = create_app(service, service_error=service_error,
-                     host_config=os.environ.get("OBSERVATORY_HOST_CONFIG"))
+                     host_config=os.environ.get("OBSERVATORY_HOST_CONFIG"),
+                     swarm_state=args.swarm_state, swarm_replay=args.swarm_replay)
 
     import uvicorn
     print(f"环境观测台只读服务: http://{args.host}:{args.port}")
+    if args.swarm_state:
+        print(f"蜂群只读观察: {args.swarm_state}"
+              + ("（replay 口径）" if args.swarm_replay else ""))
     uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
 
 

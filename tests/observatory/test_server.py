@@ -275,3 +275,65 @@ def test_probe_can_be_disabled(monkeypatch: Any, client: Any) -> None:
 def test_probe_disabled_hides_from_health(monkeypatch: Any, client: Any) -> None:
     monkeypatch.setenv("OBSERVATORY_PROBE", "false")
     assert client.get("/api/health").json()["probe_enabled"] is False
+
+# ---- /api/swarm：去中心化蜂群只读投影 ----------------------------------
+#
+# 口径：端点读的是真实蜂群状态目录（swarm.observer 热读 + viz.swarm_adapter
+# 投影），未绑定时返回 health=missing 的空态而不是 mock；读取失败返回
+# health=error + 503。这里只验证契约与降级，不构造蜂群业务语义。
+
+
+def test_swarm_without_state_directory_is_empty_not_mock(server: Any) -> None:
+    from starlette.testclient import TestClient
+
+    with TestClient(server.create_app(None, service_error="none")) as client:
+        response = client.get("/api/swarm")
+        assert response.status_code == 200
+        body = response.json()
+    assert body["schema"] == "morph.swarm.readonly/1"
+    assert body["readonly"] is True
+    assert body["health"] == "missing"
+    assert body["workers"] == [] and body["tasks"] == [] and body["audit"] == []
+    assert body["state_directory"] is None
+    assert body["acceptance"]["task_live"] == "not_run"
+    assert any("未绑定" in note for note in body["notes"])
+
+
+def test_swarm_projects_a_real_state_directory(server: Any, tmp_path: Path) -> None:
+    """一个真实存在的状态目录被读出（worker 状态文件来自 swarm 自己的写入口径）。"""
+    from starlette.testclient import TestClient
+
+    state = tmp_path / "state"
+    (state / "workers").mkdir(parents=True)
+    (state / "workers" / "w-01.json").write_text(
+        '{"worker_id": "w-01", "swarm_id": "swarm-obs", "pid": 1, "state": "active",'
+        ' "remaining_energy": 3, "completed": 0, "updated_at": 1.0,'
+        ' "provenance": "live", "evidence_class": "contract_local"}',
+        encoding="utf-8",
+    )
+    with TestClient(server.create_app(None, service_error="none", swarm_state=str(state))) as client:
+        response = client.get("/api/swarm")
+        assert response.status_code == 200
+        body = response.json()
+    assert body["state_directory"] == str(state)
+    assert [w["worker_id"] for w in body["workers"]] == ["w-01"]
+    assert body["workers"][0]["state"] == "active"
+    assert body["workers"][0]["provenance"] == "live"
+    assert body["sources"]["workers"]["state"] == "ok"
+
+
+def test_swarm_reports_a_read_failure_as_error(server: Any, tmp_path: Path, monkeypatch: Any) -> None:
+    """观察失败 → 503 + health=error，不用上一次或 mock 数据冒充成功。"""
+    from starlette.testclient import TestClient
+
+    def boom(_state: Path, **_kwargs: object) -> dict[str, object]:
+        raise RuntimeError("observer_unavailable")
+
+    monkeypatch.setattr(server, "load_swarm", boom)
+    with TestClient(server.create_app(None, service_error="none",
+                                      swarm_state=str(tmp_path))) as client:
+        response = client.get("/api/swarm")
+        assert response.status_code == 503
+        body = response.json()
+    assert body["health"] == "error"
+    assert "observer_unavailable" in " ".join(body["notes"])

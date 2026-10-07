@@ -85,7 +85,7 @@ npm ci --ignore-scripts
 | `morphogenesis serve ...` | 只读本地 dashboard（转发 `python -m viz.server`） |
 | `morphogenesis swarm ...` | 去中心化蜂群（转发 `python -m swarm`，与 `morphogenesis-swarm` 同一入口） |
 
-仓库同时包含科研轨内容：蜂群包 `swarm/`（含 `swarm/research/`）与研究应用 `src/env-observatory/`（FastAPI 只读观测台，`python src/env-observatory/server.py --port <port>`）。它们不在公网只读镜像的白名单内，部署归档见 `deploy/package.py` 的 `PYTHON_PACKAGES`。
+仓库同时包含科研轨内容：蜂群包 `swarm/`（含 `swarm/research/`）与研究应用 `src/env-observatory/`（FastAPI 只读观测台，`python src/env-observatory/server.py --port <port>`）。观测台的 Swarm 页面读真实蜂群：`--swarm-state <状态目录>`（或 `OBSERVATORY_SWARM_STATE`）绑定到 `python -m swarm` 写出的状态目录（tasks/field/budget SQLite + workers/audit JSON），经 `/api/swarm` 只读投影；未绑定时页面显示空态而非 mock，`--swarm-replay` 会把被观测状态标注为历史回放。它们不在公网只读镜像的白名单内，部署归档见 `deploy/package.py` 的 `PYTHON_PACKAGES`。
 
 转发子命令把剩余参数原样交给对应模块，其 `--help`、退出码、阻塞服务与信号处理与 `python -m ...` 完全一致；先看 `morphogenesis <subcommand> --help`。`contract_local`、`interface_live`、`task_live` 相互独立，未知 usage 为 `null`，绝不臆造为零。现场演示见 `demo/run-demo.ps1`，公网部署见 `deploy/README.md`。
 

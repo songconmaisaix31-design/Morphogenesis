@@ -1444,6 +1444,66 @@ html[data-theme="dark"] .cloud-inst { border-top-color: var(--border-muted); }
 }
 .env-empty { padding: 14px 2px; color: var(--fg-muted); font-size: 12.5px; }
 html[data-theme="dark"] .env-row:hover { background: rgba(255, 255, 255, .04); }
+
+/* ══════════ Swarm 视图（后端 /api/swarm，严格只读真实数据） ══════════
+   本块只新增 .swarm-* / .peer-* / .matrix 类，不改写其他视图任何已有样式。
+   浅色主题未定义 --panel / --green / --amber / --red / --border-subtle，
+   这里统一在 .swarm-view 上做一次 fallback 映射，避免 var() 取空值。 */
+.swarm-view {
+  --sw-panel: var(--panel, var(--bg-subtle));
+  --sw-green: var(--green, var(--success));
+  --sw-amber: var(--amber, var(--attention));
+  --sw-red: var(--red, var(--danger));
+  --sw-line: var(--border-subtle, var(--border-muted));
+}
+.sw-banner { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 12px; }
+.sw-chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px;
+  border: 1px solid var(--sw-line); background: var(--bg-subtle); color: var(--fg-muted); }
+.sw-chip b { color: var(--fg); font-weight: 600; }
+.sw-chip.is-ok b { color: var(--sw-green); }
+.sw-chip.is-warn b { color: var(--sw-amber); }
+.sw-chip.is-bad b { color: var(--sw-red); }
+.sw-empty { padding: 12px 2px; color: var(--fg-muted); font-size: 12.5px; }
+.swarm-mesh-wrap { position: relative; }
+.swarm-mesh { width: 100%; height: auto; display: block; }
+.swarm-edge { stroke: var(--sw-line); stroke-width: 1; fill: none; }
+.swarm-node .node-halo { fill: none; stroke: var(--sw-green); stroke-width: 1.5; opacity: .55; }
+.swarm-node.is-idle .node-halo { stroke: var(--sw-amber); }
+.swarm-node.is-stopped .node-halo { stroke: var(--sw-red); }
+.swarm-node.is-stopped .node-core { opacity: .35; }
+.swarm-node .node-core { fill: var(--sw-panel); stroke: var(--border); stroke-width: 1; }
+.swarm-node .node-name { fill: var(--fg-muted); font-size: 9px; }
+.swarm-empty-hint { fill: var(--fg-subtle); font-size: 11px; }
+.swarm-log { list-style: none; margin: 0; padding: 0; max-height: 360px; overflow: auto; }
+.swarm-log li { display: flex; gap: 8px; align-items: baseline; padding: 5px 10px; font-size: 12px;
+  border-bottom: 1px solid var(--border-muted); }
+.swarm-log li:last-child { border-bottom: none; }
+.swarm-log .lt { color: var(--fg-subtle); font-family: var(--mono); font-size: 11px; flex: none; }
+.swarm-log .lk { flex: none; font-size: 11px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--border); }
+.swarm-log .lk.is-ok { color: var(--sw-green); border-color: var(--sw-green); }
+.swarm-log .lk.is-warn { color: var(--sw-amber); border-color: var(--sw-amber); }
+.swarm-log .lk.is-bad { color: var(--sw-red); border-color: var(--sw-red); }
+.swarm-log .lb { color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.peer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.peer-card { border: 1px solid var(--border); border-radius: var(--radius-card); padding: 10px 12px; background: var(--bg-subtle); }
+.peer-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.peer-id { font-family: var(--mono); font-size: 12px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.peer-rows .row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; padding: 2px 0; }
+.peer-rows .k { color: var(--fg-muted); }
+.peer-rows .v { font-family: var(--mono); }
+.matrix-wrap { overflow-x: auto; }
+.matrix { border-collapse: collapse; width: 100%; font-size: 12px; }
+.matrix th, .matrix td { border: 1px solid var(--border-muted); padding: 6px 10px; text-align: center; white-space: nowrap; }
+.matrix th { background: var(--bg-subtle); font-weight: 600; }
+.matrix .rowhead { text-align: left; font-family: var(--mono); }
+.matrix .ev-live { color: var(--sw-green); font-weight: 600; }
+.matrix .ev-replay { color: var(--sw-amber); }
+.matrix .ev-mock { color: var(--fg-subtle); }
+.matrix .ev-none { color: var(--fg-subtle); }
+.counter.is-live { background: var(--success-bg); color: var(--success); border-color: transparent; }
+html[data-theme="dark"] .peer-card, html[data-theme="dark"] .matrix th { background: var(--panel); }
+html[data-theme="dark"] .sw-chip { background: var(--panel); }
 </style>
 </head>
 <body>
@@ -1571,6 +1631,9 @@ html[data-theme="dark"] .env-row:hover { background: rgba(255, 255, 255, .04); }
         <li><a class="side-link" href="#/compute" data-view="compute" title="Compute (g then c)">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.3" d="M3 2.5h10A1.5 1.5 0 0 1 14.5 4v1.5A1.5 1.5 0 0 1 13 7H3A1.5 1.5 0 0 1 1.5 5.5V4A1.5 1.5 0 0 1 3 2.5Zm0 6.5h10A1.5 1.5 0 0 1 14.5 10.5v1.5A1.5 1.5 0 0 1 13 13.5H3A1.5 1.5 0 0 1 1.5 12v-1.5A1.5 1.5 0 0 1 3 9Z"/><circle cx="4.2" cy="4.75" r=".8" fill="currentColor"/><circle cx="4.2" cy="11.25" r=".8" fill="currentColor"/></svg>
           Compute</a></li>
+        <li><a class="side-link" href="#/swarm" data-view="swarm" title="Swarm (g then s)">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.4" cy="3.4" r="1.5" fill="currentColor"/><circle cx="12.6" cy="3.4" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/><circle cx="3.4" cy="12.6" r="1.5" fill="currentColor"/><circle cx="12.6" cy="12.6" r="1.5" fill="currentColor"/><path stroke="currentColor" stroke-width="1" fill="none" d="M4.2 4.2 6.9 6.9M11.8 4.2 9.1 6.9M4.2 11.8 6.9 9.1M11.8 11.8 9.1 9.1M6.9 6.9 9.1 9.1M9.1 6.9 6.9 9.1"/></svg>
+          Swarm <span class="counter is-live" id="swarmCount" hidden></span></a></li>
       </ul>
     </nav>
 
@@ -1958,6 +2021,75 @@ html[data-theme="dark"] .env-row:hover { background: rgba(255, 255, 255, .04); }
           <p class="fineprint muted" style="margin:10px 0 0" data-i18n="routeAllocNote">路由分配：当前只对已接入的云按真实单价排序给出建议，未接入的厂商不参与。</p>
         </section>
         <p class="fineprint muted" data-i18n="computeFineprint">纳管厂商 = 已接入且可拉取真实数据的云；可用算力 = 该云返回的可选 GPU 规格数；时成本 = 已接入规格的真实小时单价区间。尚无数据的字段一律显示 —，不做填充。</p>
+      </div>
+    </section>
+
+    <!-- ══════════ Swarm · 去中心化蜂群（后端 /api/swarm · 严格只读） ══════════ -->
+    <section class="view swarm-view" id="view-swarm" hidden>
+      <div class="wide-col">
+        <div class="mod-hero">
+          <span class="logo-stack"><span class="ls" style="z-index:3"><svg width="100%" height="100%" fill="#daaa3f" role="img" viewBox="0 0 24 24"><path d="M12 1.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-9 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm18 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM12 15.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM5.6 9.1l2.6-1.6.8 1.3-2.6 1.6Zm9.4 5.8 2.6-1.6.8 1.3-2.6 1.6Zm-6.2 2.9-.8-1.4 2.6-1.6.9 1.4ZM8.2 7.5l.8-1.3 2.6 1.6-.8 1.3Z"/></svg></span></span>
+          <div class="mod-hero-text">
+            <h2 class="greet">Swarm</h2>
+            <p class="muted" data-i18n="swarmSubtitle">去中心化蜂群只读视图：节点、任务租约、信息素路由、预算与审计事件全部来自后端 /api/swarm（swarm.observer 对真实状态目录的热读）。不认领、不推进、不改租约与审计、不调用模型；没有真实来源的字段显示 —，不用 mock 填充。</p>
+          </div>
+        </div>
+
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="k" data-i18n="swAlive">在线节点</div><div class="v"><span id="swAlive">—</span></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="swTotal">已注册节点</div><div class="v"><span id="swTotal">—</span></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="swStopped">终止态节点</div><div class="v"><span id="swStopped">—</span></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="swLeased">租约持有</div><div class="v"><span id="swLeased">—</span></div></div>
+          <div class="stat-cell"><div class="k" data-i18n="swTasks">任务总数</div><div class="v"><span id="swTasks">—</span></div></div>
+        </div>
+
+        <section class="card">
+          <div class="card-head"><h3 data-i18n="swSource">数据来源与口径</h3>
+            <span class="card-head-actions">
+              <button class="btn-outline btn-xs" id="swRefreshBtn" data-i18n="swRefresh">刷新</button>
+              <span class="muted fineprint" id="swSourceNote" data-i18n="swLoading">正在读取 /api/swarm…</span>
+            </span></div>
+          <div class="sw-banner" id="swSourceBar"></div>
+          <ul class="fineprint muted" id="swBoundaries" style="margin:8px 0 0;padding-left:18px"></ul>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h3 data-i18n="swTopo">节点拓扑</h3>
+            <span class="muted fineprint" data-i18n="swTopoNote">节点 = 真实 worker · 连线 = 真实任务依赖（上游 owner → 下游 owner）</span></div>
+          <div class="swarm-mesh-wrap">
+            <svg class="swarm-mesh" id="swarmMesh" viewBox="0 0 640 340" role="img" aria-label="Swarm node topology">
+              <g id="swarmEdges"></g>
+              <g id="swarmNodes"></g>
+            </svg>
+          </div>
+          <p class="fineprint muted" style="margin:10px 0 0" data-i18n="swTopoFineprint">在线 = worker 状态文件在心跳窗口（60s）内有更新；终止态 = stopped / exhausted / needs_review。心跳与状态均来自被观测的真实状态目录，不推算、不补默认值。</p>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h3 data-i18n="swPeers">节点名册</h3>
+            <span class="flex-spacer"></span>
+            <span class="agent-legend"><span class="badge is-ready"><span class="dot"></span><span data-i18n="swStOnline">在线</span></span><span class="badge is-auth"><span class="dot"></span><span data-i18n="swStIdle">非执行态</span></span><span class="badge is-absent"><span class="dot"></span><span data-i18n="swStStopped">终止态</span></span></span>
+          </div>
+          <div class="peer-grid" id="swPeerGrid"><p class="sw-empty" data-i18n="swEmptyPeers">暂无真实节点。</p></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h3 data-i18n="swLog">审计事件流</h3>
+            <span class="flex-spacer"></span><span class="counter" id="swLogCount">0</span></div>
+          <ul class="swarm-log" id="swLog"><li><span class="lb" data-i18n="swLoading">正在读取 /api/swarm…</span></li></ul>
+          <p class="fineprint muted" style="margin:10px 0 0" data-i18n="swLogNote">事件来自 task_audit（SQL）与 worker_audit（审计记录），按 sequence / 时间倒序；只展示被观测状态里真实存在的记录。</p>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h3 data-i18n="swMatrix">Worker × Model 执行证据</h3></div>
+          <div class="matrix-wrap">
+            <table class="matrix">
+              <thead><tr id="swMatrixHead"><th data-i18n="swMatrixCorner">worker \ model</th></tr></thead>
+              <tbody id="swMatrixBody"></tbody>
+            </table>
+          </div>
+          <p class="fineprint muted" style="margin:10px 0 0" data-i18n="swMatrixNote">单元格 = 该 worker 在该 model 上的真实执行证据（来自审计记录）：live 真实执行 / replay 回放 / mock 夹具 / — 未观测。没有记录就不做兼容性推测。</p>
+        </section>
       </div>
     </section>
 
@@ -2720,7 +2852,20 @@ var I18N = {
     dimMachine:'本机', dimMachineNote:'进程实际运行所在的宿主',
     dimInterface:'接口', dimInterfaceNote:'声明过的 CLI / MCP / Wayfinder',
     dimAccount:'账号', dimAccountNote:'接入面需要的凭据是否存在',
-    specUnit:'个可选规格', realSpecs:'真实规格与实时价格'
+    specUnit:'个可选规格', realSpecs:'真实规格与实时价格',
+    navSwarm:'Swarm', swarm:'蜂群',
+    swarmSubtitle:'去中心化蜂群只读视图：节点、任务租约、信息素路由、预算与审计事件全部来自后端 /api/swarm（swarm.observer 对真实状态目录的热读）。不认领、不推进、不改租约与审计、不调用模型；没有真实来源的字段显示 —，不用 mock 填充。',
+    swAlive:'在线节点', swTotal:'已注册节点', swStopped:'终止态节点', swLeased:'租约持有', swTasks:'任务总数',
+    swSource:'数据来源与口径', swRefresh:'刷新', swLoading:'正在读取 /api/swarm…', swRefreshed:'已刷新 /api/swarm',
+    swTopo:'节点拓扑', swTopoNote:'节点 = 真实 worker · 连线 = 真实任务依赖（上游 owner → 下游 owner）',
+    swTopoFineprint:'在线 = worker 状态文件在心跳窗口（60s）内有更新；终止态 = stopped / exhausted / needs_review。心跳与状态均来自被观测的真实状态目录，不推算、不补默认值。',
+    swPeers:'节点名册', swEmptyPeers:'暂无真实节点。', swStOnline:'在线', swStIdle:'非执行态', swStStopped:'终止态',
+    swLog:'审计事件流', swEmptyLog:'暂无真实审计事件。',
+    swLogNote:'事件来自 task_audit（SQL）与 worker_audit（审计记录），按 sequence / 时间倒序；只展示被观测状态里真实存在的记录。',
+    swMatrix:'Worker × Model 执行证据', swMatrixCorner:'worker \\ model', swEmptyMatrix:'暂无真实执行证据。',
+    swMatrixNote:'单元格 = 该 worker 在该 model 上的真实执行证据（来自审计记录）：live 真实执行 / replay 回放 / mock 夹具 / — 未观测。没有记录就不做兼容性推测。',
+    swSrcHealth:'观测健康度', swSrcProvenance:'证据来源', swSrcHub:'Hub', swSrcDir:'状态目录', swSrcAt:'观测时刻',
+    swUnbound:'未绑定蜂群状态目录', swErr:'读取失败', swNoWorkers:'被观测状态目录中暂无 worker 记录'
   },
   en: {
     navHome:'Home', navSignals:'Signals', navFeed:'Feed', navAgents:'Agents', navCompute:'Compute',
@@ -2807,7 +2952,20 @@ var I18N = {
     dimMachine:'Machine', dimMachineNote:'the host this process runs on',
     dimInterface:'Interface', dimInterfaceNote:'declared CLI / MCP / Wayfinder',
     dimAccount:'Account', dimAccountNote:'whether the credential a surface needs is present',
-    specUnit:'offered types', realSpecs:'Real types and live prices'
+    specUnit:'offered types', realSpecs:'Real types and live prices',
+    navSwarm:'Swarm', swarm:'Swarm',
+    swarmSubtitle:'Read-only decentralized swarm view: peers, task leases, pheromone routes, budget and audit events all come from the backend /api/swarm (a live hot read of a real state directory by swarm.observer). Nothing is claimed, advanced or executed here; no lease, audit or budget row is written and no model is called. Fields without a real source read —, never filled with mock data.',
+    swAlive:'Live peers', swTotal:'Registered peers', swStopped:'Terminal peers', swLeased:'Leases held', swTasks:'Tasks',
+    swSource:'Source and boundaries', swRefresh:'Refresh', swLoading:'Reading /api/swarm…', swRefreshed:'/api/swarm refreshed',
+    swTopo:'Peer topology', swTopoNote:'nodes = real workers · edges = real task dependencies (upstream owner → downstream owner)',
+    swTopoFineprint:'Live means the worker status file was updated inside the heartbeat window (60s); terminal means stopped / exhausted / needs_review. Both come from the observed real state directory — never inferred, never defaulted.',
+    swPeers:'Peer roster', swEmptyPeers:'No real peer yet.', swStOnline:'live', swStIdle:'non-executing', swStStopped:'terminal',
+    swLog:'Audit stream', swEmptyLog:'No real audit event yet.',
+    swLogNote:'Events come from task_audit (SQL) and worker_audit (audit records), newest first. Only records that really exist in the observed state are shown.',
+    swMatrix:'Worker × model execution evidence', swMatrixCorner:'worker \\ model', swEmptyMatrix:'No real execution evidence yet.',
+    swMatrixNote:'A cell is the real execution evidence of that worker on that model (from audit records): live real run / replay / mock fixture / — not observed. No record means no compatibility guess.',
+    swSrcHealth:'Observation health', swSrcProvenance:'Provenance', swSrcHub:'Hub', swSrcDir:'State directory', swSrcAt:'Observed at',
+    swUnbound:'No swarm state directory bound', swErr:'read failed', swNoWorkers:'No worker record in the observed state directory'
   }
 };
 var LANG = (function(){ try { return localStorage.getItem('mg_lang') || 'zh'; } catch(e){ return 'zh'; } })();
@@ -3012,7 +3170,7 @@ function toast(msg) {
 }
 
 /* ---------- 视图路由 ---------- */
-var VIEWS = ['home', 'signals', 'feed', 'agents', 'compute'];
+var VIEWS = ['home', 'signals', 'feed', 'agents', 'compute', 'swarm'];
 function currentView() {
   var m = (location.hash || '').match(/^#\/(\w+)/);
   return m && VIEWS.indexOf(m[1]) >= 0 ? m[1] : 'home';
@@ -3450,6 +3608,7 @@ function cmdkItems() {
   var items = [
     { t: 'Go to Dashboard', hint: 'g d', run: function () { switchView('home'); } },
     { t: 'Go to Signals', hint: 'g i', run: function () { switchView('signals'); } },
+    { t: 'Go to Swarm', hint: 'g s', run: function () { switchView('swarm'); } },
     { t: 'Go to Feed', hint: 'g p', run: function () { switchView('feed'); } },
     { t: 'Open Wayfinder', hint: 'w', run: function () { openWayfinder(); } },
     { t: 'Toggle notifications', hint: 'g n', run: function () { toggleNotif(); } }
@@ -3518,6 +3677,7 @@ document.addEventListener('keydown', function (e) {
     else if (k === 'p') switchView('feed');
     else if (k === 'a') switchView('agents');
     else if (k === 'c') switchView('compute');
+    else if (k === 's') switchView('swarm');
     else if (k === 't') toggleTheme();
     else if (k === 'l') setLang(LANG === 'en' ? 'zh' : 'en');
     else if (k === 'n') toggleNotif();
@@ -4996,8 +5156,296 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     }
   }
 
+  /* ---------------- Swarm：去中心化蜂群（只读真实后端 /api/swarm） --------
+   *
+   * 口径：页面自身不产生任何节点、事件或时间戳。所有内容来自后端 /api/swarm，
+   * 即 swarm.observer 对真实状态目录的热读（WAL 安全、无 sidecar、limit 有界）
+   * 再经 viz.swarm_adapter 投影。后端未绑定状态目录 → health=missing 空态；
+   * 读取失败 → health=error；两者都明确显示，不用 mock 顶替。
+   */
+  var SWARM_HEARTBEAT_S = 60;
+  var SWARM_TERMINAL = { stopped: 1, exhausted: 1, needs_review: 1 };
+  var SWARM_STATE = { data: null, loading: false, error: '' };
+
+  function swEsc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function swClock(ts) {
+    var d = new Date(ts * 1000);
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  function swNum(v) { return (typeof v === 'number' && isFinite(v)) ? v : null; }
+  function swText(v, dash) { var d = dash == null ? '—' : dash; return (typeof v === 'string' && v) ? v : ((typeof v === 'number' && isFinite(v)) ? String(v) : d); }
+  function swPeerClass(w, now) {
+    if (SWARM_TERMINAL[w.state]) return 'is-stopped';
+    var at = swNum(w.updated_at);
+    if (at != null && now - at <= SWARM_HEARTBEAT_S) return 'is-live';
+    return 'is-idle';
+  }
+  function swPeerLabel(w, now) {
+    if (SWARM_TERMINAL[w.state]) return T('swStStopped');
+    var at = swNum(w.updated_at);
+    if (at != null && now - at <= SWARM_HEARTBEAT_S) return T('swStOnline');
+    return T('swStIdle');
+  }
+
+  function renderSwarmSource(d) {
+    var bar = $('swSourceBar');
+    var note = $('swSourceNote');
+    if (!bar) return;
+    var items = [];
+    var health = swText(d && d.health);
+    var accept = (d && d.acceptance && d.acceptance.provenance) ? d.acceptance.provenance : '—';
+    var dir = (d && d.state_directory) ? d.state_directory : T('swUnbound');
+    var at = swNum(d && d.observed_at);
+    function chip(label, value, tone) {
+      return '<span class="sw-chip' + (tone ? ' is-' + tone : '') + '">' + swEsc(label) +
+        ' <b>' + swEsc(value) + '</b></span>';
+    }
+    items.push(chip(T('swSrcHealth'), health, health === 'ok' ? 'ok' : (health === 'missing' ? 'warn' : 'bad')));
+    items.push(chip(T('swSrcProvenance'), accept, accept === 'live' ? 'ok' : (accept === 'mock' || accept === 'replay' ? 'warn' : '')));
+    items.push(chip(T('swSrcHub'), swText(d && d.hub_status)));
+    items.push(chip(T('swSrcDir'), dir));
+    items.push(chip(T('swSrcAt'), at != null ? swClock(at) : '—'));
+    if (d && d.replay) items.push(chip('replay', 'true', 'warn'));
+    bar.innerHTML = items.join('');
+    var list = $('swBoundaries');
+    if (list) {
+      var notes = (d && d.notes) || [];
+      var sources = (d && d.sources) || {};
+      var srcLine = Object.keys(sources).map(function (k) { return k + ':' + (sources[k] && sources[k].state || '—'); });
+      var html = [];
+      if (srcLine.length) html.push('<li>' + swEsc(srcLine.join(' · ')) + '</li>');
+      notes.forEach(function (n) { html.push('<li>' + swEsc(String(n)) + '</li>'); });
+      ((d && d.boundaries) || []).forEach(function (n) { html.push('<li>' + swEsc(String(n)) + '</li>'); });
+      list.innerHTML = html.join('');
+    }
+    if (note) {
+      if (SWARM_STATE.error) note.textContent = T('swErr') + '：' + SWARM_STATE.error;
+      else if (d && d.health === 'missing') note.textContent = T('swUnbound');
+      else if (d) note.textContent = 'morph.swarm.readonly/1 · readonly';
+    }
+  }
+
+  function renderSwarmMesh(d) {
+    var gE = $('swarmEdges'), gN = $('swarmNodes');
+    if (!gE || !gN) return;
+    gE.innerHTML = '';
+    gN.innerHTML = '';
+    var workers = (d && d.workers) || [];
+    if (!workers.length) {
+      gN.innerHTML = '<text class="swarm-empty-hint" x="320" y="170" text-anchor="middle">' +
+        swEsc(T('swNoWorkers')) + '</text>';
+      return;
+    }
+    var now = Date.now() / 1000;
+    var cx = 320, cy = 168, rx = 236, ry = 118;
+    var pos = {};
+    workers.forEach(function (w, i) {
+      var a = (i / workers.length) * Math.PI * 2 - Math.PI / 2;
+      pos[w.worker_id] = { x: cx + rx * Math.cos(a), y: cy + ry * Math.sin(a) };
+    });
+    // 连线 = 真实任务依赖：依赖项的 owner → 当前任务的 owner。
+    var tasks = (d && d.tasks) || [];
+    var ownerOf = {};
+    tasks.forEach(function (t) { if (t.task_id) ownerOf[t.task_id] = t.owner || null; });
+    var seen = {};
+    var edges = [];
+    tasks.forEach(function (t) {
+      (t.dependencies || []).forEach(function (dep) {
+        var from = ownerOf[dep], to = t.owner;
+        if (!from || !to || from === to) return;
+        var key = from + '>' + to;
+        if (seen[key] || !pos[from] || !pos[to]) return;
+        seen[key] = 1;
+        edges.push([from, to]);
+      });
+    });
+    gE.innerHTML = edges.map(function (e) {
+      var a = pos[e[0]], b = pos[e[1]];
+      return '<line class="swarm-edge" x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) +
+        '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>';
+    }).join('');
+    gN.innerHTML = workers.map(function (w) {
+      var p = pos[w.worker_id];
+      var cls = 'swarm-node ' + swPeerClass(w, now);
+      var name = String(w.worker_id).length > 14 ? String(w.worker_id).slice(0, 13) + '…' : String(w.worker_id);
+      return '<g class="' + cls + '" transform="translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')">' +
+        '<circle class="node-halo" r="17"/>' +
+        '<circle class="node-core" r="12"/>' +
+        '<text class="node-name" y="30" text-anchor="middle">' + swEsc(name) + '</text></g>';
+    }).join('');
+  }
+
+  function renderSwarmPeers(d) {
+    var grid = $('swPeerGrid');
+    if (!grid) return;
+    var workers = (d && d.workers) || [];
+    if (!workers.length) { grid.innerHTML = '<p class="sw-empty">' + swEsc(T('swEmptyPeers')) + '</p>'; return; }
+    var now = Date.now() / 1000;
+    grid.innerHTML = workers.map(function (w) {
+      var at = swNum(w.updated_at);
+      var age = at != null ? Math.max(0, Math.round(now - at)) : null;
+      var rows = [
+        ['state', swText(w.state)],
+        ['pid', swText(w.pid)],
+        ['completed', swText(w.completed)],
+        ['energy', swText(w.remaining_energy)],
+        ['heartbeat', age != null ? age + 's ago' : '—'],
+        ['provenance', swText(w.provenance)],
+        ['evidence', swText(w.evidence_class)]
+      ];
+      if (w.reason) rows.push(['reason', String(w.reason)]);
+      return '<div class="peer-card"><div class="peer-top">' +
+        '<span class="badge ' + (swPeerClass(w, now) === 'is-live' ? 'is-ready' : (swPeerClass(w, now) === 'is-stopped' ? 'is-absent' : 'is-auth')) +
+        '"><span class="dot"></span><span>' + swEsc(swPeerLabel(w, now)) + '</span></span>' +
+        '<span class="peer-id" title="' + swEsc(String(w.worker_id)) + '">' + swEsc(String(w.worker_id)) + '</span></div>' +
+        '<div class="peer-rows">' + rows.map(function (r) {
+          return '<div class="row"><span class="k">' + swEsc(r[0]) + '</span><span class="v">' + swEsc(r[1]) + '</span></div>';
+        }).join('') + '</div></div>';
+    }).join('');
+  }
+
+  function swEventTone(name) {
+    var n = String(name || '').toLowerCase();
+    if (/completed|settled|promoted|adopted|released|approved/.test(n)) return 'is-ok';
+    if (/fail|blocked|reject|expired|exhaust|breaker|error/.test(n)) return 'is-bad';
+    return 'is-warn';
+  }
+
+  function renderSwarmLog(d) {
+    var ul = $('swLog');
+    var count = $('swLogCount');
+    if (!ul) return;
+    var events = [];
+    ((d && d.audit) || []).forEach(function (e) {
+      events.push({
+        at: swNum(e.at), kind: e.event || 'audit',
+        text: [e.task_id, e.body && (e.body.text || e.body.detail || e.body.outcome || e.body.reason) || '']
+          .filter(Boolean).join(' · ')
+      });
+    });
+    ((d && d.worker_audit) || []).forEach(function (e) {
+      events.push({
+        at: swNum(e.created_at), kind: e.outcome || 'execution',
+        text: [e.worker_id, e.task_id, e.requested_model || e.returned_model || ''].filter(Boolean).join(' · ')
+      });
+    });
+    events.sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
+    events = events.slice(0, 60);
+    if (count) count.textContent = String(events.length);
+    if (!events.length) { ul.innerHTML = '<li><span class="lb">' + swEsc(T('swEmptyLog')) + '</span></li>'; return; }
+    ul.innerHTML = events.map(function (e) {
+      return '<li><span class="lt">' + swEsc(e.at != null ? swClock(e.at) : '—') + '</span>' +
+        '<span class="lk ' + swEventTone(e.kind) + '">' + swEsc(String(e.kind)) + '</span>' +
+        '<span class="lb">' + swEsc(e.text || '') + '</span></li>';
+    }).join('');
+  }
+
+  function renderSwarmMatrix(d) {
+    var head = $('swMatrixHead'), body = $('swMatrixBody');
+    if (!head || !body) return;
+    // 只要 worker_id 存在的审计记录都参与；没有 model 字段的记录归入
+    // 「未记录 model」列，而不是被丢掉（有证据但无模型名是真实状态，必须可见）。
+    var records = ((d && d.worker_audit) || []).filter(function (r) { return !!r.worker_id; });
+    if (!records.length) {
+      head.innerHTML = '<th>' + swEsc(T('swMatrixCorner')) + '</th>';
+      body.innerHTML = '<tr><td class="ev-none" colspan="2">' + swEsc(T('swEmptyMatrix')) + '</td></tr>';
+      return;
+    }
+    var NO_MODEL = '（未记录 model）';
+    var models = [];
+    var cells = {};
+    records.forEach(function (r) {
+      var model = r.returned_model || r.requested_model || NO_MODEL;
+      if (models.indexOf(model) < 0) models.push(model);
+      var key = JSON.stringify([r.worker_id, model]);
+      var rank = { live: 3, replay: 2, mock: 1 };
+      var prov = r.provenance || 'unknown';
+      var cur = cells[key];
+      if (!cur || (rank[prov] || 0) > (rank[cur] || 0)) cells[key] = prov;
+    });
+    models.sort();
+    var workers = [];
+    records.forEach(function (r) { if (workers.indexOf(r.worker_id) < 0) workers.push(r.worker_id); });
+    workers.sort();
+    head.innerHTML = '<th>' + swEsc(T('swMatrixCorner')) + '</th>' +
+      models.map(function (m) { return '<th>' + swEsc(m) + '</th>'; }).join('');
+    body.innerHTML = workers.map(function (w) {
+      return '<tr><td class="rowhead">' + swEsc(w) + '</td>' + models.map(function (m) {
+        var prov = cells[JSON.stringify([w, m])];
+        if (!prov) return '<td class="ev-none">—</td>';
+        if (prov === 'live') return '<td class="ev-live">live</td>';
+        if (prov === 'replay') return '<td class="ev-replay">replay</td>';
+        if (prov === 'mock') return '<td class="ev-mock">mock</td>';
+        return '<td class="ev-none">' + swEsc(prov) + '</td>';
+      }).join('') + '</tr>';
+    }).join('');
+  }
+
+  function renderSwarmStats(d) {
+    var now = Date.now() / 1000;
+    var workers = (d && d.workers) || [];
+    var tasks = (d && d.tasks) || [];
+    var alive = workers.filter(function (w) {
+      var at = swNum(w.updated_at);
+      return at != null && now - at <= SWARM_HEARTBEAT_S && !SWARM_TERMINAL[w.state];
+    }).length;
+    var stopped = workers.filter(function (w) { return !!SWARM_TERMINAL[w.state]; }).length;
+    var leased = tasks.filter(function (t) { return t.lease_state === 'leased'; }).length;
+    var set = function (id, v) { var el = $(id); if (el) el.textContent = String(v); };
+    set('swAlive', alive);
+    set('swTotal', workers.length);
+    set('swStopped', stopped);
+    set('swLeased', leased);
+    set('swTasks', tasks.length);
+    var c = $('swarmCount');
+    if (c) { c.hidden = workers.length === 0; c.textContent = String(alive); }
+  }
+
+  function renderSwarm() {
+    renderSwarmStats(SWARM_STATE.data);
+    renderSwarmSource(SWARM_STATE.data);
+    renderSwarmMesh(SWARM_STATE.data);
+    renderSwarmPeers(SWARM_STATE.data);
+    renderSwarmLog(SWARM_STATE.data);
+    renderSwarmMatrix(SWARM_STATE.data);
+  }
+
+  function loadSwarm(announce) {
+    if (SWARM_STATE.loading) return;
+    SWARM_STATE.loading = true;
+    var btn = $('swRefreshBtn');
+    if (btn) btn.disabled = true;
+    fetch('/api/swarm', { headers: { Accept: 'application/json' } })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        SWARM_STATE.data = data;
+        SWARM_STATE.error = '';
+        renderSwarm();
+        if (announce) notify(T('swRefreshed'));
+      })
+      .catch(function (err) {
+        // 读取失败只标注失败，不清空上一次的真实快照，也不回落到 mock。
+        SWARM_STATE.error = (err && err.message) || String(err);
+        renderSwarmSource(SWARM_STATE.data);
+        var note = $('swSourceNote');
+        if (note) note.textContent = T('swErr') + '：' + SWARM_STATE.error;
+      })
+      .then(function () {
+        SWARM_STATE.loading = false;
+        if (btn) btn.disabled = false;
+      });
+  }
+
   /* ---------------- 视图标题 ---------------- */
-  var TITLES = { home: 'Dashboard', signals: 'Signals', feed: 'Feed', agents: 'Agents', compute: 'Compute' };
+  var TITLES = { home: 'Dashboard', signals: 'Signals', feed: 'Feed', agents: 'Agents', compute: 'Compute', swarm: 'Swarm' };
   function setBar() {
     var v = (location.hash || '').replace(/^#\//, '').split('/')[0] || 'home';
     var el = document.querySelector('.view-bar-title');
@@ -5006,6 +5454,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
 
   /* ---------------- 装配 ---------------- */
   var firstAgent = false;
+  var firstSwarm = false;
   function wireModule() {
     var btn = $('agentScanBtn');
     if (btn) btn.addEventListener('click', scanAgents);
@@ -5023,12 +5472,15 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     loadReadiness(false);
     var readinessBtn = $('readinessBtn');
     if (readinessBtn) readinessBtn.addEventListener('click', function () { loadReadiness(true); });
+    var swarmBtn = $('swRefreshBtn');
+    if (swarmBtn) swarmBtn.addEventListener('click', function () { loadSwarm(true); });
   }
   function onRoute() {
     setBar();
     var h = (location.hash || '');
     if (h.indexOf('#/agents') === 0 && !firstAgent) { firstAgent = true; scanAgents(); }
     if (h.indexOf('#/compute') === 0 && !firstCompute) { firstCompute = true; loadCompute(false); loadReadiness(false); }
+    if (h.indexOf('#/swarm') === 0 && !firstSwarm) { firstSwarm = true; loadSwarm(false); }
   }
   window.addEventListener('hashchange', onRoute);
 
@@ -5046,6 +5498,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     try { if (COMPUTE_STATE.providers.length) { document.getElementById('cloudGrid').innerHTML = ''; if (COMPUTE_STATE.local) renderLocalCard(COMPUTE_STATE.local); if (COMPUTE_STATE.aliyun) renderAliyunCard(COMPUTE_STATE.aliyun); COMPUTE_STATE.providers.forEach(function (p) { if (p.id !== 'aliyun') renderPendingCard(p); }); paintComputeStats(); } } catch (e) {}
     try { setBar(); } catch (e) {}
     try { paintTopology(); } catch (e) {}
+    try { if (SWARM_STATE.data) renderSwarm(); } catch (e) {}
     var s = document.querySelector('.scan-status');
     if (s && s.textContent && s.textContent.indexOf('检测完成') >= 0) s.textContent = window.T('scanDone');
   });
