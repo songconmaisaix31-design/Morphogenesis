@@ -101,6 +101,7 @@ class Reply(BaseModel):
     request_id: str | None = None
     returned_model: str | None = None
     usage: dict[str, int] | None = None
+    cached_input_tokens: int | None = None
     content: str | None = None
     elapsed_seconds: float = 0
     error_kind: str | None = None
@@ -177,6 +178,10 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
     body = response.body
     measured = _usage(body)
     usage = measured.model_dump() if measured is not None else None
+    raw_usage = body.get("usage") if isinstance(body, dict) else None
+    details = raw_usage.get("prompt_tokens_details") if isinstance(raw_usage, dict) else None
+    cached = details.get("cached_tokens") if isinstance(details, dict) else None
+    cached = cached if type(cached) is int and cached >= 0 else None
     returned = body.get("model") if isinstance(body, dict) else None
     returned = returned if isinstance(returned, str) and len(returned) <= 128 and key not in returned else None
     
@@ -188,6 +193,7 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
         request_id=response.request_id,
         elapsed_seconds=response.elapsed_seconds,
         usage=usage,
+        cached_input_tokens=cached,
         returned_model=returned,
         interface_live="blocked" if provenance == "live" else "not_run",
         classification=classification_value,
