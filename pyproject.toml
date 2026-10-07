@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "morphogenesis"
-version = "0.2.0"
+version = "0.2.1"
 description = "An independently verifiable, fixed-size agent swarm prototype"
 authors = ["Morphogenesis contributors"]
 license = "Apache-2.0"
