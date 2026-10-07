@@ -1507,6 +1507,7 @@ html[data-theme="dark"] .sw-chip { background: var(--panel); }
 /* Keep bounded backend facts inside the existing dashboard at every viewport. */
 .gh-main, .wide-col, .swarm-view .card { min-width: 0; }
 .swarm-view .card { padding: 16px; }
+.swarm-view .stat-strip { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .swarm-view .card-head { padding: 0 0 12px; flex-wrap: wrap; gap: 8px; }
 .sw-chip, #swBoundaries, .peer-rows .v { overflow-wrap: anywhere; min-width: 0; }
 .peer-rows .v { text-align: right; }
@@ -1529,7 +1530,7 @@ html[data-theme="dark"] .sw-chip { background: var(--panel); }
 @media (max-width: 600px) {
   .gh-header { padding: 10px 12px; gap: 8px; }
   .gh-actions { gap: 4px; }
-  .gh-actions > .dd-wrap, .gh-actions > [data-goto], #copilotBtn { display: none; }
+  .gh-actions > .has-dd, .gh-actions > [data-goto], #copilotBtn { display: none; }
   .view-bar { flex-wrap: wrap; gap: 8px; }
   .view-bar-links { width: 100%; margin-left: 0; }
   .mod-hero { gap: 12px; align-items: start; }
