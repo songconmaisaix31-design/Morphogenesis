@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from live_plan import SEEDS, SYSTEMS, plan
+from live_run import unknown_effect
 from summarize import estimate, paired
 
 
@@ -14,13 +15,28 @@ def accounting(root: Path) -> dict[str, Any]:
     requests = sorted(root.rglob("request.json"))
     rows = []
     for path in requests:
-        request = json.loads(path.read_text(encoding="utf-8"))
+        parse_errors = []
+        try:
+            request = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            request = {}
+            parse_errors.append("request_json_incomplete")
         response_path = path.with_name("response.json")
-        response = json.loads(response_path.read_text(encoding="utf-8")) if response_path.exists() else {}
+        try:
+            response = json.loads(response_path.read_text(encoding="utf-8")) if response_path.exists() else {}
+        except json.JSONDecodeError:
+            response = {}
+            parse_errors.append("response_json_incomplete")
         usage = response.get("usage")
         trace = path.with_name("http-trace.jsonl")
-        trace_rows = [json.loads(line) for line in trace.read_text().splitlines()] if trace.exists() else []
+        trace_rows = []
+        for line in trace.read_text().splitlines() if trace.exists() else []:
+            try:
+                trace_rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                parse_errors.append("trace_line_incomplete")
         rows.append({"request_evidence": str(path), "local_request_id": request.get("request_id"),
+            "parse_errors": parse_errors,
             "provider_request_id": response.get("request_id"), "returned_model": response.get("returned_model"),
             "task_id": request.get("attempt", {}).get("task_id"),
             "requested_model": request.get("request", {}).get("model"),
@@ -28,7 +44,8 @@ def accounting(root: Path) -> dict[str, Any]:
             "cached_input_tokens": response.get("cached_input_tokens"),
             "elapsed_seconds": response.get("elapsed_seconds"), "http_status": response.get("http_status"),
             "classification": response.get("classification"), "error_kind": response.get("error_kind"),
-            "unknown_effect": not response or response.get("uncertain", False),
+            "unknown_effect": unknown_effect(response), "unknown_usage": usage is None,
+            "credential_unavailable": response.get("error_kind") == "credential_unavailable",
             "http_send_entry_observed": any(t.get("stage") == "http_send_entered" for t in trace_rows),
             "estimated_cost_cny": None if usage is None else
                 (usage["prompt_tokens"] * 0.8 + usage["completion_tokens"] * 2) / 1000000,
@@ -50,6 +67,24 @@ def dynamic_metrics(result: dict[str, Any], folder: Path) -> dict[str, Any]:
     arrivals = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
     by_id = {r["signal"]["task_id"]: r for r in result.get("ledger", [])}
     audit = result.get("ledger_audit", [])
+    arrived: set[str] = set()
+    claimed: set[str] = set()
+    terminal: set[str] = set()
+    max_waiting, waiting_area, previous_at = 0, 0.0, result.get("started", 0.0)
+    for event in sorted(audit, key=lambda a: (a["at"], a["sequence"])):
+        waiting_area += len(arrived - claimed - terminal) * max(0, event["at"] - previous_at)
+        previous_at = event["at"]
+        tid = event.get("task_id")
+        if not isinstance(tid, str):
+            continue
+        if event["event"] == "created":
+            arrived.add(tid)
+        elif event["event"] == "claimed":
+            claimed.add(tid)
+        elif event["event"] in ("completed", "failed", "blocked"):
+            terminal.add(tid)
+        max_waiting = max(max_waiting, len(arrived - claimed - terminal))
+    waiting_area += len(arrived - claimed - terminal) * max(0, result.get("finished", previous_at) - previous_at)
     phase_rows = []
     for phase in range(3):
         tasks = [a for a in arrivals if a["phase"] == phase]
@@ -65,7 +100,14 @@ def dynamic_metrics(result: dict[str, Any], folder: Path) -> dict[str, Any]:
                            "worker_outcomes": [{"task_id": r["signal"]["task_id"], "worker": r["owner"],
                                "family": r["signal"]["module"],
                                "success": r["status"] == "completed" and r["effect_applied"]} for r in records]})
-    return {"phases": phase_rows, "adaptation_delay": None,
+    responses = result.get("responses", [])
+    failed_requests = sum(by_id.get(r.get("task_id"), {}).get("status") != "completed" for r in responses)
+    return {"phases": phase_rows, "maximum_waiting_queue": max_waiting,
+            "waiting_queue_task_seconds": waiting_area, "unclaimed_at_end": len(arrived - claimed - terminal),
+            "response_requests_without_completed_task": failed_requests,
+            "unresolved_request_intents": result.get("local_request_intents", 0) - len(responses),
+            "sensing_cycles": sum(w.get("senses", 0) for w in result.get("worker_status_snapshots", [])),
+            "adaptation_delay": None,
             "adaptation_status": "NOT_IDENTIFIED_no_preregistered_evidence_of_reversed_best_worker",
             "capability_reversal_is_config_intervention_only": True}
 

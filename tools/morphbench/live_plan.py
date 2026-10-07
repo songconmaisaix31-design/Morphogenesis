@@ -40,13 +40,13 @@ def plan() -> dict[str, Any]:
     unit_estimate = (Decimal(input_bound) * Decimal("0.8") +
                      Decimal(output_bound) * Decimal("2")) / Decimal(1000000)
     return {
-        "protocol": "morphbench-live-1007-draft-v2", "status": "PENDING_SOURCE_AND_WINDOW_REVIEW",
+        "protocol": "morphbench-live-1007-v2", "status": "FROZEN_PROTOCOL_REQUIRES_EXPLICIT_WINDOW",
         "model": MODEL, "base_url": BASE_URL, "enable_thinking": False,
         "temperature": 0.2, "provider_seed": 1234, "allocation_seeds": list(SEEDS),
         "max_input_bytes": 12000, "max_output_tokens": 1536,
         "reserve_input_tokens": input_bound, "reserve_output_tokens": output_bound,
         "prices": {"currency": "CNY", "input_per_million": "0.8", "output_per_million": "2",
-                   "checked_date": "2026-10-07",
+                   "checked_date": "2026-10-08",
                    "source": "https://help.aliyun.com/zh/model-studio/qwen-plus"},
         "request_cap": cap, "unallocated_request_slots": 7, "absolute_request_cap": 240,
         "user_request_ceiling": 256, "user_currency_ceiling": "30",

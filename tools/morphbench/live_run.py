@@ -32,7 +32,48 @@ def append(path: Path, value: Any) -> None:
         stream.write(json.dumps(value, ensure_ascii=False, allow_nan=False) + "\n")
 
 
+def provider_stop(state: Path) -> bool:
+    for path in state.rglob("response.json"):
+        try:
+            response = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return True
+        status = response.get("http_status")
+        if response.get("uncertain") or isinstance(status, int) and status >= 400:
+            return True
+    return False
+
+
+def unknown_effect(response: dict[str, Any]) -> bool:
+    if response.get("error_kind") == "credential_unavailable":
+        return False
+    if response.get("classification") == "confirmed_rejection":
+        return False
+    return not response or bool(response.get("uncertain"))
+
+
+def workers_quiescent(processes: list[tuple[subprocess.Popen[bytes], dict[str, Any]]], state: Path) -> bool:
+    for process, fact in processes:
+        if process.poll() is not None:
+            continue
+        spec = json.loads(Path(fact["spec"]).read_text(encoding="utf-8"))
+        agent = spec["worker"]["agent"]
+        status_path = state / "workers" / f"{agent['role']}-{agent['instance']}.json"
+        try:
+            status = json.loads(status_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return False
+        if (status.get("pid") != process.pid or status.get("state") not in ("idle", "exhausted", "stopped", "sleeping")
+                or status.get("active_reservation") is not None or status.get("pending_finalization") is not None):
+            return False
+    return True
+
+
 def identity() -> dict[str, Any]:
+    # A restarted terminal may inherit the user's variable. Remove it from this
+    # process without reading/logging its value; HTTP child reads User scope.
+    if "DASHSCOPE_API_KEY" in os.environ:
+        del os.environ["DASHSCOPE_API_KEY"]
     import swarm.worker_loop
     import swarm.code_executor
     import local_assets.validate
@@ -103,7 +144,7 @@ def creation_time(process: subprocess.Popen[bytes]) -> float | None:
 
 
 def start(spec_path: Path) -> tuple[subprocess.Popen[bytes], dict[str, Any]]:
-    env = {k: v for k, v in os.environ.items() if k.upper() != "DASHSCOPE_API_KEY"}
+    env = {k: v for k, v in os.environ.items() if k.upper() not in ("DASHSCOPE_API_KEY", "PYTHONPATH", "PYTHONHOME")}
     env.update({"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1",
                 "PYTHONDONTWRITEBYTECODE": "1"})
     executable = sys.executable
@@ -198,26 +239,29 @@ def observe(root: Path, cell: dict[str, Any], worker: Any,
         response = json.loads(path.read_text(encoding="utf-8"))
         request = json.loads(path.with_name("request.json").read_text(encoding="utf-8"))
         responses.append({"path": str(path), "task_id": request.get("attempt", {}).get("task_id"), **response})
-    uncertain = any(r.get("uncertain") for r in responses)
+    uncertain = any(unknown_effect(r) for r in responses)
     snapshot = worker.budget.snapshot().model_dump(mode="json")
-    uncertain = uncertain or snapshot["uncertain_reservations"] > 0 or snapshot["pending_reservations"] > 0
+    unreconciled = snapshot["uncertain_reservations"] > 0 or snapshot["pending_reservations"] > 0
+    uncertain = uncertain or snapshot["pending_reservations"] > 0
     statuses = []
     for process, fact in processes:
         fact["exit_code"] = process.poll()
         path = Path(fact["spec"]).with_suffix(".result.json")
         statuses.append(json.loads(path.read_text()) if path.exists() else {"missing": str(path)})
-    result = {"cell": cell, "mode": mode, "layer": "task_live_local_code" if mode == "live" else "contract_mock_http",
+    result = {"cell": cell, "mode": mode, "layer": "live_worker_trial_not_a_pass" if mode == "live" else "contract_mock_http",
               "started": started, "finished": time.time(), "elapsed_seconds": time.time() - started,
               "processes": [fact for _, fact in processes], "worker_results": statuses,
+              "worker_status_snapshots": [json.loads(p.read_text(encoding="utf-8"))
+                  for p in sorted((worker.state / "workers").glob("*.json"))],
               "ledger": [r.model_dump(mode="json") for r in records], "budget": snapshot,
               "ledger_audit": worker.ledger.audit(limit=10000),
               "status_counts": dict(Counter(r.status for r in records)),
               "solved": sum(r.status == "completed" and r.effect_applied for r in records),
               "expected_tasks": cell["request_cap"], "responses": responses,
               "local_request_intents": len(list(worker.state.rglob("request.json"))),
-              "stop_paid": uncertain or any(isinstance(r.get("http_status"), int) and r["http_status"] >= 400 for r in responses)
+              "stop_paid": uncertain or unreconciled or any(isinstance(r.get("http_status"), int) and r["http_status"] >= 400 for r in responses)
               or any(fact.get("killed_at_deadline") for _, fact in processes),
-              "unknown_effect": uncertain, "actual_bill_cny": None,
+              "unknown_effect": uncertain, "unreconciled_budget": unreconciled, "actual_bill_cny": None,
               "estimated_cost_cny": None if snapshot["estimated_cost_usd"] is None else snapshot["estimated_cost_usd"] * 6,
               "accounting_cny_per_usd": 6, "identity": identity()}
     write(root / "result.json", result)
@@ -234,12 +278,14 @@ def run_cell(root: Path, cell: dict[str, Any], mode: str) -> dict[str, Any]:
     started = time.time()
     target, state, observer = setup(root, cell, names, workers, mode)
     write(root / "cell.json", cell)
+    arrival_epoch = time.time()
+    write(root / "arrival-clock.json", {"epoch": arrival_epoch, "wall_started": started})
     phases = [names[i:i + 4] for i in range(0, len(names), 4)] if dynamic else [names]
     processes = []
     offset = 0
     for phase, group in enumerate(phases):
         if phase:
-            deadline = started + [0, 45, 90][phase]
+            deadline = arrival_epoch + [0, 45, 90][phase]
             while time.time() < deadline:
                 time.sleep(min(0.2, deadline - time.time()))
         for name in group:
@@ -260,6 +306,7 @@ def run_cell(root: Path, cell: dict[str, Any], mode: str) -> dict[str, Any]:
         # All arrivals are now visible. This is a quiescent benchmark stop, not
         # a crash-recovery result: no lease/HTTP request may still be active.
         if (len(records) == len(names) and pending == 0 and not observer.ledger.leases()
+                and workers_quiescent(processes, state)
                 and all(r.status in ("completed", "failed", "blocked") or r.attempts >= 1 for r in records)):
             for process, fact in processes:
                 if process.poll() is None:
@@ -289,19 +336,22 @@ def run_single(root: Path, cell: dict[str, Any], mode: str) -> dict[str, Any]:
     started = time.time()
     target, state, observer = setup(root, cell, names, 1, mode)
     write(root / "cell.json", cell)
+    arrival_epoch = time.time()
+    write(root / "arrival-clock.json", {"epoch": arrival_epoch, "wall_started": started})
     processes: list[tuple[subprocess.Popen[bytes], dict[str, Any]]] = []
     phase, offset = 0, 0
     groups = [list(p) for p in PHASES] if dynamic else [names]
     current: subprocess.Popen[bytes] | None = None
     while time.time() - started < 600:
-        if phase < len(groups) and time.time() >= started + (45 * phase if dynamic else 0):
+        if phase < len(groups) and time.time() >= arrival_epoch + (45 * phase if dynamic else 0):
             for name in groups[phase]:
                 enqueue(observer, name, offset, phase, root / "events.jsonl")
                 offset += 1
             phase += 1
         if current is not None and current.poll() is not None:
             state_budget = observer.budget.snapshot()
-            if current.returncode or state_budget.pending_reservations or state_budget.uncertain_reservations:
+            if (current.returncode or state_budget.pending_reservations or state_budget.uncertain_reservations
+                    or provider_stop(state)):
                 break
             current = None
         records = observer.ledger.snapshot(limit=1000)

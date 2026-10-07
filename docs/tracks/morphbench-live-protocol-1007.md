@@ -1,6 +1,6 @@
 # MorphBench 有界真实调用协议（B，2026-10-07）
 
-状态：**DRAFT / 正式运行未授权窗口**。本页与 `tools/morphbench/live_plan.py` 一同提交给主控审阅；实际调用必须再绑定 A 的精确产品 SOURCE、B 的协议/工具 SOURCE、安装字节检查与主控运行窗口回执。当前尚无正式分数，不能据后续分数调整题目、策略、预算或判据。旧产品 `50396909c3fbaa510e755b8e2361e05d84afdfaa`、报告 `47f089ad92e0c459b2deeadab65109246d64ae9a` 与 `mb021-1007` 全部保持原件。
+状态：**FROZEN / 正式运行窗口待主控明确放行**。协议与工具所在提交即 B 冻结 SOURCE；正式命令必须绑定该精确SHA、A产品 SOURCE `d5bd40cea91b09ddf669be5e063e726186191fc4` 和主控窗口消息ID，写入原始 `arguments.json`。安装字节核对与代表离线门已完成，付费请求仍0；不能据后续分数调整题目、策略、预算或判据。旧产品 `50396909c3fbaa510e755b8e2361e05d84afdfaa`、报告 `47f089ad92e0c459b2deeadab65109246d64ae9a` 与 `mb021-1007` 全部保持原件。
 
 ## 1. 范围与事实层级
 
@@ -14,7 +14,7 @@
 
 - 精确候选模型 `qwen-plus-2025-12-01`，北京 `https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions`。固定 `enable_thinking=false`、`temperature=0.2`、provider seed=1234、非流式；allocation seeds 为 0、1、2。provider seed 仅尽力复现，不保证远端确定性。
 - 模型 request JSON 最多 12,000 UTF-8 bytes，输出 `max_tokens=1536`。规划上额外按输入16,384、输出2,048 tokens 估算；这仍是本地估计，不冒充供应商计费硬承诺。采用现有 unbounded request admission，未核实真实 usage 时保持 unknown 并停止付费分支。
-- 2026-10-07 只读核对 [官方模型页](https://help.aliyun.com/zh/model-studio/qwen-plus)、[价格页](https://help.aliyun.com/zh/model-studio/model-pricing)：北京、输入≤128K、非思考输入 CNY0.8 / 输出 CNY2 每百万 token。快照页未声明可用缓存折扣，成本上界不给缓存折扣；保留返回 cache usage，缺失为 null。实际账单 `null`，估计不能等同扣费。
+- 2026-10-08 只读复核 [官方模型页](https://help.aliyun.com/zh/model-studio/qwen-plus)、[价格页](https://help.aliyun.com/zh/model-studio/model-pricing)：北京、输入≤128K、非思考输入 CNY0.8 / 输出 CNY2 每百万 token。模型页列出输入缓存命中 CNY0.16，但本测评保守估计不给缓存折扣；保留实际返回 cache usage，缺失为 null。实际账单 `null`，估计不能等同扣费。
 - [官方 Chat Completions 参数](https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions)核对 seed、max_tokens、enable_thinking；本机 `bailian-docs-llm-wiki/wiki/api/qwen-api-reference.md` 和 `raw/model-api-reference/qwen-api-reference.md` 提供接口索引。知识库更新时间与在线核对日期分开。
 - 默认授权总上限 CNY30 / 256新请求；本协议更窄：240请求槽，预分配233，7槽保留且不能自行用于校准或追分。每请求保守 admission=CNY0.1，全槽CNY24；按上述 token 余量233次估计CNY4.0083456。重试、预检、失败、经验生成全计入，禁止只计成功任务。初稿232+8原件保留；主控消息 `msg_7b0684d34186` 在正式前批准从保留槽划1槽给before_commit。
 - USD schema 保持 USD 语义：声明 **6 CNY/USD 的固定会计换算参数，非实时市场汇率**；CNY单价除6写入 ModelPrices，CNY0.1除6作为 unbounded_reservation_usd。汇总将估计USD乘6还原CNY，并同时展示转换参数。不得把人民币单价直接塞进USD字段。
@@ -46,7 +46,7 @@
 
 预定每cell相对启动时刻0、45、90秒各注入4任务；使用真实ledger注入，模型输入只含该任务代码/公开规格。三phase的题目顺序固定在 `live_cases.PHASES`：clamp占多数 → unique占多数 → unique占多数。热点改变由真实到达分布产生，不设置任何成功率。
 
-Workers初始分别使用 boundaries/arithmetic/order 的真实提示配置，第三phase交换第0与第2个Worker的提示配置，其他输入限制一致。所有提示都是合理帮助，不故意要求出错；capability名与可接题范围一致，不靠伪造capability权重指定赢家。配置变化只能称“能力反转干预”，**若独立测试没有测出能力差异/反转，报告条件未形成或不可辨识**，不换难题重跑。
+Workers初始分别使用 boundaries/arithmetic/order 的真实提示配置，第三phase交换第0与第2个Worker的提示配置，其他输入限制一致。提示由任务的到达phase选择，积压的旧phase任务仍用旧配置；这不是全局墙钟时刻改变所有在途Worker。所有提示都是合理帮助，不故意要求出错；capability名与可接题范围一致，不靠伪造capability权重指定赢家。配置变化只能称“能力反转干预”，**若独立测试没有测出能力差异/反转，报告条件未形成或不可辨识**，不换难题重跑。
 
 保留每task到达/claim/响应/验证/完成时间、真实Worker/phase/profile、积压、已用请求、争抢失败和未完成项。报告各phase成功率、等待时长、浪费请求、最大/结束积压。适应延迟仅在观察到前后最佳worker发生反转且有足够重复时定义；否则null并给原因。首次碰到新热点的时间只称服务延迟，不能偷换成适应成功。
 
@@ -54,7 +54,7 @@ Workers初始分别使用 boundaries/arithmetic/order 的真实提示配置，�
 
 2026-10-08 冻结前运行机制澄清（尚无付费数据）：统一代码场景两swarm每Worker energy=2、共享6请求；动态两swarm每Worker energy=64、max_senses=128、max_idle=64、idle_seconds=15、stop_when_local_terminal=false，共享12请求。实际 `_backoff` 被产品截为每次2.5–5秒，64次空闲下界160秒可覆盖90秒到达；sleep_seconds=0.1只用于预算停止。Single/central 的动态额度也是12请求，single每个新身份energy=1，central energy=64。lease=180秒，独立验证timeout=20秒，cell硬界600秒；硬界kill只作用于owned handle并停后续付费。
 
-全部phase到达且全部任务完成/已耗唯一attempt、没有任何pending reservation或有效lease后，harness可停止仍在等待新任务的owned进程，并明确标 `stopped_after_all_attempts_quiescent`；这种正常测量窗口收尾不计为故障恢复成功。三阶段离线实跑仍为冻结门。
+全部phase到达且全部任务完成/已耗唯一attempt、没有任何pending reservation或有效lease、每个存活Worker的PID匹配且idle/terminal、active_reservation与pending_finalization均null后，harness可停止仍在等待新任务的owned进程，并明确标 `stopped_after_all_attempts_quiescent`；这种正常测量窗口收尾不计为故障恢复成功。三阶段离线实跑仍为冻结门。
 
 统一代码四组都用默认提示 `Check boundary cases carefully.`。动态single/central也固定这条通用提示；仅两swarm使用相同预定异质提示pool并互相作策略配对。跨single/central的动态比较同时包含进程机制/提示pool差异，不能据它单独声称路由收益。适应指标若缺独立能力分离，只报告观察到的到达→claim服务延迟和配置干预，不给虚假的适应秒数。
 
@@ -77,7 +77,7 @@ Workers初始分别使用 boundaries/arithmetic/order 的真实提示配置，�
 
 正确经验必须由真实生成、验证、推广出的源资产，经现有 AssetConsumer 注入fresh Worker/session/workspace，模型明确声明使用，后继candidate独立验证，通过fenced应用后才记录adoption。输出 `consumed_asset_ids → validation → application → adoption` 的原始引用，不能copy数据库后称跨session采用；资产仓库可共享只读approved source，任务/session/workspace必须新建。
 
-错误经验为安全但可由相同测试判错的纯函数补丁，走相同审核门；被拒则测“拒绝”，不绕过审核让其成为approved资产，不伪造consumption。此时wrong arm的模型调用可以是未注入经验的任务，但必须标 `wrong_asset_rejected_before_injection`，不能声称测到了模型抵抗错误注入。none无经验；三arm相同transfer题、固定provider参数和总额度。
+错误经验为安全但可由相同测试判错的纯函数补丁，走相同审核门；被拒则测“拒绝”，不绕过审核让其成为approved资产，不伪造consumption。此时wrong arm的模型调用可以是未注入经验的任务，但必须标 `wrong_asset_rejected_before_injection`，不能声称测到了模型抵抗错误注入。none无经验；三arm相同transfer题、固定provider参数，transfer各1请求额度。correct链另外完整计入该seed的1次经验生成，不能只扣transfer调用来声称降本。
 
 模型declared-use与真实注入/派生采用链是程序证据，不等于经验带来的因果性能收益。三个seed样本过少；如全通过不得声称跨session增益。
 
@@ -89,21 +89,24 @@ Workers初始分别使用 boundaries/arithmetic/order 的真实提示配置，�
 
 遇已发送unknown，停止后续付费启动并保留未执行矩阵；明确401/余额/额度拒绝同样停止，不换模型；超输入、schema拒绝、验证失败均保留首次结果，不自动补跑。修改工具后使用新证据目录，不覆盖原件；冻结正式批次不能边看分数边修工具继续伪装同一批。
 
-## 8. 可复现命令与待冻结项
+## 8. 冻结门与可复现命令
 
 新私有根仅 `C:/Users/DW/orca/mb-live-1007/eval`。现有锁版本从上一轮已核验清单只读复制，剔除旧产品路径后装入本轮venv；Node依赖按冻结package-lock准备。本轮不改上一轮环境。非editable产品安装及原始Git blob逐字节核对是正式前置条件；运行cwd在私有eval，导入应来自site-packages。
 
 ```powershell
 $py = 'C:/Users/DW/orca/mb-live-1007/eval/venv/Scripts/python.exe'
 $tools = 'C:/Users/DW/orca/workspaces/Morphogenesis/morphbench-eval-1007/tools/morphbench'
-& $py "$tools/live_plan.py" --out 'C:/Users/DW/orca/mb-live-1007/eval/plan-v1.json'
-# 在eval cwd执行；输出目录必须全新
-& $py "$tools/live_offline.py" --out 'C:/Users/DW/orca/mb-live-1007/eval/offline-v1'
-& $py -m pytest -q tests/morphbench/test_live_plan.py
+# 下列为已执行原始目录；复现时必须改用全新输出路径，不覆盖
+& $py "$tools/verify_live_install.py" --archive 'C:/Users/DW/orca/mb-live-1007/eval/source-d5bd40c.zip' --source d5bd40cea91b09ddf669be5e063e726186191fc4 --out 'C:/Users/DW/orca/mb-live-1007/eval/installed-d5bd40c.json'
+& $py "$tools/live_checks.py" --out 'C:/Users/DW/orca/mb-live-1007/eval/offline-v2'
+& $py "$tools/live_checks.py" --out 'C:/Users/DW/orca/mb-live-1007/eval/offline-v3' --only experience-s0 fault-before_reserve fault-before_commit fault-after_commit fault-inflight
+# 以下两项在源码cwd，其余在eval cwd；运行环境线程限制均为1
+& $py -m pytest -q tests/morphbench
+& $py -m mypy --strict --follow-imports=silent tools/morphbench
 ```
 
-**待冻结而非既成结果**：A SOURCE与精确API、正式harness命令、每组Worker energy/max_senses/idle边界、phase提示切换、正确经验导入路径、三个fault checkpoint、安装字节/Node依赖、主控批准窗口。全部具备且主控审核后才将此协议状态改为FROZEN；不能以文档代替真跑。最终领域结果写 `morphbench-live-evaluation-1007.md`，I再汇总为单一最终报告。
+代表离线门在 `offline-v2` 通过7负控、四静态组、两动态组（真实0/45/90到达，每动态12/12 mock完成）；经验读SQLite tuple为dict首RED保留。修正B报告读取后 `offline-v3` 的经验及4故障全部PASS：4 fresh进程/target、1真实程序adoption、错误资产拒绝；预留前自然TTL/fencing接管；提交前needs_review且0重发；提交后仅finalization恢复；离线在途只是contract hold，不伪称HTTP真发。两个目录合计覆盖12个代表检查，其他seed和真实HTTP子进程仍待正式批次。最终领域结果写 `morphbench-live-evaluation-1007.md`，I再汇总为单一最终报告。
 
-已接入候选 A SOURCE `d5cb717f734eb34cb17855d3075c4f37c43667ca`（普通merge），已有阶段 B SOURCE `254989b07541f5b504dcf3815d70543a8d541ae4`（已push）。A源码中的transport trace仅证明本地HTTP send-entry/headers/return，不证明封包或供应商收到请求。原安装9482523失败 `0xc000012d` 的日志保留在 `eval/install-9482523.log`；主控因宿主内存压力划分串行窗口，A重测试期间B不做安装/批量pytest/90秒动态运行。
+最终 A SOURCE `d5bd40cea91b09ddf669be5e063e726186191fc4` 已普通merge并非editable安装，154个.py/.mjs原字节一致、0依赖lock漂移、pip check101兼容。直接安装源为本机git archive的COPY路径，direct_url没有VCS commit字段；SHA绑定由归档命令及原字节核对提供，不能声称direct_url自带commit。Node24.16/npm11.13、冻结npm ci99包已就绪。初稿 B SOURCE `254989b07541f5b504dcf3815d70543a8d541ae4`、安装9482523首失败 `0xc000012d` 原件保留。离线独占窗口为主控 `msg_317ac7d83dda`；它没有授权付费。A源码transport trace仅证明本地HTTP send-entry/headers/return，不证明封包或供应商收到请求。
 
 正式入口拟为 `live_batch.py --mode live --out <全新目录> --product-source <A SHA> --protocol-source <B SHA> --window-message <主控消息ID>`；未使用单独preflight，预留槽保持空置，正式首个cell中的请求照常计费。24个代码/动态cell每个≤600秒、3经验组每个≤720秒、4故障组每个≤510秒，主循环保守总界18,600秒（5小时10分，另有有限本地启动/写证据开销）；正常预计45–90分钟，不能以此替代真实elapsed。在途fault永远最后，unknown停止即为协议停止，不继续其他付费分支。

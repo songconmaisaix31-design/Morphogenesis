@@ -172,12 +172,20 @@ def run(root: Path, stage: str, mode: str) -> dict[str, Any]:
         except subprocess.TimeoutExpired:
             pass
     if victim.poll() is None:
+        owned["kill_called_at"] = time.time()
         victim.kill()
         victim.wait(timeout=15)
         owned["killed_at"] = time.time()
         owned["killed_at_requested_stage"] = reached
     if http_handle is not None and http_fact is not None:
         finish_http(http_handle, http_fact)
+    observed_stage_reached = reached
+    final_trace = traces(state)
+    if stage == "inflight" and mode == "live":
+        confirmed_kill = owned.get("killed_at")
+        reached = bool(reached and confirmed_kill is not None and not any(
+            row["stage"] in ("http_response_headers", "http_transport_returned")
+            and row["at"] <= confirmed_kill for row in final_trace))
     requests_before_restart = len(list(state.rglob("request.json")))
     response_rows = [json.loads(path.read_text(encoding="utf-8")) for path in state.rglob("response.json")]
     with sqlite3.connect(f"file:{(state / 'budget.sqlite3').as_posix()}?mode=ro", uri=True) as database:
@@ -214,13 +222,15 @@ def run(root: Path, stage: str, mode: str) -> dict[str, Any]:
             process.wait(timeout=15)
             fact["deadline_kill"] = True
     final = observe(root, cell, worker, processes, started, mode)
-    final.update({"stage": stage, "stage_reached": reached,
+    final.update({"stage": stage, "stage_reached": reached, "stage_observed_before_kill": observed_stage_reached,
+        "stage_status": "reached" if reached else "stage_missed_or_race_INCOMPLETE",
         "stale_submit_effects": stale_effects, "stale_errors": stale_errors,
-        "trace_at_kill": selected_trace, "trace_after_kill": traces(state),
+        "trace_at_kill": selected_trace, "trace_after_kill": final_trace,
         "http_child": http_fact,
         "settlements_before_restart": settlements, "requests_before_restart": requests_before_restart,
         "before_commit_response_usage_known": before_commit_known if stage == "before_commit" else None,
-        "request_replayed": False,
+        "new_request_intents_after_restart": final["local_request_intents"] - requests_before_restart,
+        "request_replayed": stage != "before_reserve" and final["local_request_intents"] > requests_before_restart,
         "fault_layer": "contract_control" if stage != "inflight" or mode == "offline" else "real_http_send_entry_observed",
         "limitation": "HTTP send-entry is local transport entry, not proof of packet delivery/server receipt; all unknown effects stop."})
     if stage == "before_commit":
@@ -233,7 +243,7 @@ def run(root: Path, stage: str, mode: str) -> dict[str, Any]:
         final["stop_paid"] = final["stop_paid"] or not final["safe_to_continue"]
     if stage == "inflight":
         final["stop_paid"] = True
-        final["unknown_effect"] = reached
+        final["unknown_effect"] = final["unknown_effect"] or reached
     write(root / "result.json", final)
     return final
 

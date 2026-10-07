@@ -19,6 +19,7 @@ def _load(name):
 _load("live_cases")
 _load("live_plan")
 _load("summarize")
+_load("live_run")
 summary = _load("live_summary")
 
 
@@ -51,3 +52,24 @@ def test_known_usage_is_only_an_estimate_without_a_bill(tmp_path):
     assert result["estimated_cost_cny"] == 0.0018
     assert result["rows"][0]["cached_input_tokens"] is None
     assert result["actual_bill_cny"] is None
+
+
+def test_confirmed_401_is_not_unknown_effect_but_usage_remains_unknown(tmp_path):
+    (tmp_path / "request.json").write_text(json.dumps({"request_id": "rejected", "request": {}}))
+    (tmp_path / "response.json").write_text(json.dumps({"http_status": 401, "uncertain": True,
+        "classification": "confirmed_rejection", "error_kind": "http_rejected", "usage": None}))
+    result = summary.accounting(tmp_path)
+    assert result["rows"][0]["unknown_effect"] is False
+    assert result["rows"][0]["unknown_usage"] is True
+    assert result["estimated_cost_cny"] is result["actual_bill_cny"] is None
+
+
+def test_crash_truncated_evidence_is_counted_as_unknown_not_dropped(tmp_path):
+    (tmp_path / "request.json").write_text('{"request_id": "partial"')
+    (tmp_path / "response.json").write_text('{"usage":')
+    (tmp_path / "http-trace.jsonl").write_text('{"stage":"http_send_entered"}\n{"stage":')
+    result = summary.accounting(tmp_path)
+    assert result["local_request_intents"] == result["live_http_send_entries"] == 1
+    assert result["rows"][0]["unknown_effect"] and result["rows"][0]["unknown_usage"]
+    assert len(result["rows"][0]["parse_errors"]) == 3
+    assert result["estimated_cost_cny"] is None

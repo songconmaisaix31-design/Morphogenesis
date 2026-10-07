@@ -28,7 +28,7 @@ def main() -> int:
           "installed": identity(), "started": time.time(),
           "preflight": "NOT_RUN_no_separate_preflight_or_calibration", "unallocated_slots_used": 0})
     # Full-loop wall bound is finite: 24 cells * 600s, 3 reuse groups * 720s,
-    # 3 fault cells * 510s. Actual elapsed is reported, never budget as usage.
+    # 4 fault cells * 510s. Actual elapsed is reported, never budget as usage.
     try:
         for cell in frozen["trials"]:
             if cell["category"] not in ("code", "dynamic"):

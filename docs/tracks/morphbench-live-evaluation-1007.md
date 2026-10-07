@@ -9,7 +9,7 @@
 - 本轨分支 `songconmaisaix31-design/morphbench-eval-1007`。
 - 治理 `445aad4e3066e7cbfc0123adc1779d24d0c74cd4` 已普通合并。
 - 协议阶段 SOURCE `254989b07541f5b504dcf3815d70543a8d541ae4` 已push；主控认可设计，未授权正式运行窗口。
-- A代码候选 `948252311018a433cb4b4c905d8c5364a11d678f`、HTTP trace后继 `d5cb717f734eb34cb17855d3075c4f37c43667ca` 均普通合并；最终安装及门验证待计算窗口。
+- A代码候选 `948252311018a433cb4b4c905d8c5364a11d678f`、HTTP trace后继 `d5cb717f734eb34cb17855d3075c4f37c43667ca`、最终产品 SOURCE `d5bd40cea91b09ddf669be5e063e726186191fc4` 均普通合并；最终SOURCE已在本轮新venv非editable安装。A报告 `99a7b66fb2a1c49bd9a4984e81b2a6d1027fb522` 为文档后继，不作为安装pin。
 - 基准是三函数、六缺陷的 local code-defect benchmark；统一新executor上的old/new策略及Single/Central机制消融。不是纯0.2.1端到端横比、SWE-bench或科研排行榜。
 
 完整预注册判据、预算、模型、四类矩阵见 [协议](morphbench-live-protocol-1007.md)。主控消息 `msg_7b0684d34186` 在正式前批准before_commit独立1槽：233已分配+7保留=240≤256，每请求hold CNY0.1，全流程hold CNY24≤30。单独preflight计划不执行。
@@ -27,14 +27,18 @@
 | 初次本轨mypy调用 | **RED No module named mypy** | `eval/type-tools-first.log` |
 | 安装锁内mypy工具 | mypy1.20.2、extensions1.1.0、pathspec1.1.1、librt0.15.0 | `eval/dev-type-install.log` |
 | 旧3文件strict类型债 | 已修37项；原首RED由A保留，另1项frozen_export越轨交I | `core/type-full-first.log`；`eval/type-tools-second.log` |
-| 新工具strict检查后继 | 12 files PASS | `eval/type-all-tools-fifth.log`；中间RED日志逐次保留 |
-| 新四类完整离线Worker验证 | **NOT_RUN**，等A释放独占计算窗口 | 尚无正式或离线分数 |
+| 新工具strict检查后继 | 13 files PASS | `eval/type-b-frozen.log`；中间RED日志逐次保留 |
+| 最终A SOURCE非editable安装 | PASS，154个产品.py/.mjs与原Git归档字节相同；0 lock drift | `eval/install-d5bd40c.log`、`installed-d5bd40c.json`、`source-d5bd40c.zip` |
+| 安装依赖相容性 | 101 packages PASS | `eval/pip-check-d5bd40c.log` |
+| 本轨适用测试 | 15 PASS，含kill截断证据不漏计unknown | `eval/pytest-b-frozen.log`；初次14PASS保留 |
+| offline-v2代表通路 | 7负控、四静态组、两动态组PASS；经验统计**首RED**：SQLite普通tuple不能直接dict | `eval/offline-v2.log`、`offline-v2/commands.json`、`experience-s0.stderr.log`；正式付费仍NOT_RUN |
+| 经验统计与剩余故障后继 | 5/5 PASS；修正B报告读取row_factory，在全新目录只重跑经验及尚未执行的4故障 | `eval/offline-v3/result.json`；主控 `msg_317ac7d83dda` 批准的独占离线窗口 |
 
 宿主Orca重启后已换新dispatch；原 `ctx_d497608881ae` 被围栏，续接 `ctx_d4bfb6a05b88`。安装首OOM没有重写成成功。主控将A重回归、B安装/实跑、F浏览器及I最终门串行安排，不改全局pagefile，不杀未知进程。
 
 ## 真实剩余限制
 
-正式预算、请求id/返回model、input/output/cache usage、原始费用总账与逐cell结果均尚未产生，保持NOT_RUN/null。离线Mock HTTP仅验证工程通路，不能转为task_live分数。拟用独立固定测试作为裁决；提示配置反转如果没有实测能力分离，要报告不可辨识。
+正式请求id/返回model、input/output/cache usage、原始费用总账与逐cell结果均尚未产生，保持NOT_RUN/null。协议与工具已冻结，代表离线门12项由v2的前7项和v3的后5项覆盖，尚待主控付费窗口。离线Mock HTTP仅验证工程通路，不能转为task_live分数。独立固定测试作为裁决；提示配置反转如果没有实测能力分离，要报告不可辨识。
 
 原始固定测试只对本次模型输入隐藏，公开仓库可能进入训练数据；`-I -S`加纯函数AST白名单不是操作系统沙箱，也不支持一般工程仓库任意代码。正确经验必须真实生成、验证并沿合法链采用；错误经验若被审核拒绝，只能证明拒绝，不能声称模型在上下文中战胜错误经验。
 

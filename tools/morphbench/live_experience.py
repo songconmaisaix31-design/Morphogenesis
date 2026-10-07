@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import subprocess
 from pathlib import Path
 import time
 from typing import Any
 
 from live_cases import BY_NAME, PUBLIC_SPEC
-from live_run import budget, config_for, enqueue, identity, mock_executor, observe, setup, start, write
+from live_run import budget, config_for, enqueue, identity, mock_executor, observe, provider_stop, setup, start, write
 
 
 def new_target(root: Path, defect: str) -> Path:
@@ -112,11 +113,12 @@ def run(root: Path, seed: int, mode: str) -> dict[str, Any]:
         rows.append(row)
         write(folder / "observation.json", row)
         snapshot = worker.budget.snapshot()
-        if snapshot.pending_reservations or snapshot.uncertain_reservations:
+        if snapshot.pending_reservations or snapshot.uncertain_reservations or provider_stop(state):
             break
     final = observe(root, cell, source, processes, started, mode)
     # Read actual program receipts. Never synthesize success/adoption from model text.
     with source.assets.connection() as database:
+        database.row_factory = sqlite3.Row
         final["adoptions"] = [dict(r) for r in database.execute("SELECT * FROM adoptions").fetchall()]
         final["consumptions"] = [dict(r) for r in database.execute("SELECT * FROM consumptions").fetchall()]
     final.update({"arms": rows, "generation_defect": "generation-composite", "transfer_defect": "mean-empty",
