@@ -7,12 +7,13 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from typing import Any
 
-from live_cases import DEFECTS, model_material
+from live_cases import DEFECTS, GENERATION_CASE, model_material
 from live_plan import plan
 
 
-def offline(root: Path) -> dict:
+def offline(root: Path) -> dict[str, Any]:
     import bootstrap.acceptance_runner as runner
     from orchestration.sample_policy import validate_sample
 
@@ -23,7 +24,7 @@ def offline(root: Path) -> dict:
     rows = []
     env = {k: v for k, v in os.environ.items()
            if not any(word in k.upper() for word in ("KEY", "TOKEN", "SECRET", "CREDENTIAL"))}
-    for case in DEFECTS:
+    for case in (*DEFECTS, GENERATION_CASE):
         validate_sample(case.source)
         target = root / case.name
         target.mkdir()
@@ -36,10 +37,11 @@ def offline(root: Path) -> dict:
         checkpoints = [line for line in completed.stdout.splitlines()
                        if line.startswith("MORPH_CHECKPOINTS=")]
         observation = json.loads(checkpoints[0].split("=", 1)[1]) if len(checkpoints) == 1 else None
+        expected_failures = ("clamp", "mean", "unique") if case.family == "composite" else (case.family,)
         rows.append({"defect": case.name, "family": case.family, "exit_code": completed.returncode,
                      "checkpoints": observation,
                      "negative_control_detected": completed.returncode == 1 and observation is not None
-                     and observation["checks"][case.family] is False,
+                     and all(observation["checks"][family] is False for family in expected_failures),
                      "model_material": model_material(case.name)})
     result = {"kind": "offline_negative_controls", "layer": "installed_contract_control",
               "provider_requests": 0, "python": sys.executable, "runner": str(runner_path),

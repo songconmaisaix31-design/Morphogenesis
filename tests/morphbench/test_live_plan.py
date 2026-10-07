@@ -24,7 +24,7 @@ def test_frozen_request_matrix_is_within_authorized_total():
     p = _plan.plan()
     ids = [t["id"] for t in p["trials"]]
     assert len(ids) == len(set(ids))
-    assert sum(t["request_cap"] for t in p["trials"]) == p["request_cap"] == 232
+    assert sum(t["request_cap"] for t in p["trials"]) == p["request_cap"] == 233
     assert p["request_cap"] + p["unallocated_request_slots"] <= p["absolute_request_cap"] <= 256
     assert Decimal(p["per_request_admission_cny"]) * p["absolute_request_cap"] == Decimal("24")
     assert Decimal(p["planned_token_estimate_upper_cny"]) < Decimal("24") < Decimal("30")

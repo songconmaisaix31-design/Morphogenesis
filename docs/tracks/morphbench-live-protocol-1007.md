@@ -16,9 +16,9 @@
 - 模型 request JSON 最多 12,000 UTF-8 bytes，输出 `max_tokens=1536`。规划上额外按输入16,384、输出2,048 tokens 估算；这仍是本地估计，不冒充供应商计费硬承诺。采用现有 unbounded request admission，未核实真实 usage 时保持 unknown 并停止付费分支。
 - 2026-10-07 只读核对 [官方模型页](https://help.aliyun.com/zh/model-studio/qwen-plus)、[价格页](https://help.aliyun.com/zh/model-studio/model-pricing)：北京、输入≤128K、非思考输入 CNY0.8 / 输出 CNY2 每百万 token。快照页未声明可用缓存折扣，成本上界不给缓存折扣；保留返回 cache usage，缺失为 null。实际账单 `null`，估计不能等同扣费。
 - [官方 Chat Completions 参数](https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions)核对 seed、max_tokens、enable_thinking；本机 `bailian-docs-llm-wiki/wiki/api/qwen-api-reference.md` 和 `raw/model-api-reference/qwen-api-reference.md` 提供接口索引。知识库更新时间与在线核对日期分开。
-- 默认授权总上限 CNY30 / 256新请求；本协议更窄：240请求槽，预分配232，8槽保留且不能自行用于校准或追分。每请求保守 admission=CNY0.1，全槽CNY24；按上述 token 余量232次估计CNY3.9911424。重试、预检、失败、经验生成全计入，禁止只计成功任务。
+- 默认授权总上限 CNY30 / 256新请求；本协议更窄：240请求槽，预分配233，7槽保留且不能自行用于校准或追分。每请求保守 admission=CNY0.1，全槽CNY24；按上述 token 余量233次估计CNY4.0083456。重试、预检、失败、经验生成全计入，禁止只计成功任务。初稿232+8原件保留；主控消息 `msg_7b0684d34186` 在正式前批准从保留槽划1槽给before_commit。
 - USD schema 保持 USD 语义：声明 **6 CNY/USD 的固定会计换算参数，非实时市场汇率**；CNY单价除6写入 ModelPrices，CNY0.1除6作为 unbounded_reservation_usd。汇总将估计USD乘6还原CNY，并同时展示转换参数。不得把人民币单价直接塞进USD字段。
-- 每个预登记 trial 有不可挪用的请求/成本/attempt 子上限；各子上限之和为总上限，Worker共用该trial现有账本。`max_attempts_per_task=1`，不自动重试失败。Single 子任务的子上限之和也必须等于该cell上限。不得通过改swarm/session/身份或重建账本重复申请槽。
+- 每个预登记 trial 有不可挪用的请求/成本/attempt 子上限；各子上限之和为总上限，Worker共用该trial现有账本。通常 `max_attempts_per_task=1`，不自动重试失败；唯独预留前kill控制允许第二次lease/attempt，两个attempt仍合计只有1次请求的成本/token上限。经验组共享4请求账本（生成1+三arm各1），不复制或重置状态。不得通过改swarm/session/身份或重建账本重复申请槽。
 - 凭据仅在受控HTTP子进程用 Windows `Environment.GetEnvironmentVariable("DASHSCOPE_API_KEY", "User")` 读取。不打印值、不保存明文、不进命令参数/模型上下文/补丁执行器。父进程和补丁验证子进程不持有key。密钥缺失、明确401、在途unknown分别留证；unknown不自动重试/换模型。
 - 最多一次预检（已预留一槽），正式批准前可不使用；不做有分数的在线选题/调参。A/F/I均不发付费请求，B为唯一Owner。
 
@@ -29,13 +29,13 @@
 | 统一代码修复 | 四组 × 3 seeds × 6缺陷 | 72 |
 | 动态热点/配置反转 | 四组 × 3 seeds × 3 phases × 4到达任务 | 144 |
 | 正误经验 | 3个独立生成任务 + 3 seeds × correct/wrong/none transfer | 12 |
-| 租约崩溃 | before_reserve / inflight / before_commit 各≤1真实请求 | 3 |
+| 租约崩溃 | before_reserve / before_commit / after_commit / inflight 各≤1真实请求 | 4 |
 | 有界预检 | ≤1 | 1 |
-| 合计已分配 / 保留 | 232 / 8 | 240 |
+| 合计已分配 / 保留 | 233 / 7 | 240 |
 
 四组同模型、任务、输入输出限制、独立验证器、资产流程和每cell总请求/token/cost上限。实际调用少于额度需明确，不按名义预算替代实际。
 
-1. **single**：每个任务 fresh Worker/session，串行，一次请求，无历史共享；总额度与其他组相同。
+1. **single**：每个任务 fresh Worker进程/身份，串行，每个Worker只获得一次lease；共享真实到达的task/预算账本，Worker自身选路历史不复用，不声明经验依赖；总额度与其他组相同。不是独立大模型对话工具。
 2. **central_serial**：单个产品 Worker 使用共享待办/路由/历史，串行处理；这是中心串行机制对照，不冒称旧suite CentralScheduler实现。
 3. **legacy_cycle_v0**：3个产品 Worker，旧cycle能量策略、router v0；共享现有任务/预算账本。
 4. **successor_claim_v01**：相同3 Workers，claim能量策略、router v0.1、独立max_senses硬界。这同时改变两因素，结果不能单独归因路由；A离线因果测试分别检验计费和选择器。
@@ -52,19 +52,28 @@ Workers初始分别使用 boundaries/arithmetic/order 的真实提示配置，�
 
 旧cycle可能把争抢/idle计入energy，因此可较早停止；如发生，按原规则保留并说明可用请求额度未用尽。不能通过补能量掩盖该差异。动态phase若没有存活worker仍注入并记录积压，不补跑它们。
 
+2026-10-08 冻结前运行机制澄清（尚无付费数据）：统一代码场景两swarm每Worker energy=2、共享6请求；动态两swarm每Worker energy=64、max_senses=128、max_idle=64、idle_seconds=15、stop_when_local_terminal=false，共享12请求。实际 `_backoff` 被产品截为每次2.5–5秒，64次空闲下界160秒可覆盖90秒到达；sleep_seconds=0.1只用于预算停止。Single/central 的动态额度也是12请求，single每个新身份energy=1，central energy=64。lease=180秒，独立验证timeout=20秒，cell硬界600秒；硬界kill只作用于owned handle并停后续付费。
+
+全部phase到达且全部任务完成/已耗唯一attempt、没有任何pending reservation或有效lease后，harness可停止仍在等待新任务的owned进程，并明确标 `stopped_after_all_attempts_quiescent`；这种正常测量窗口收尾不计为故障恢复成功。三阶段离线实跑仍为冻结门。
+
+统一代码四组都用默认提示 `Check boundary cases carefully.`。动态single/central也固定这条通用提示；仅两swarm使用相同预定异质提示pool并互相作策略配对。跨single/central的动态比较同时包含进程机制/提示pool差异，不能据它单独声称路由收益。适应指标若缺独立能力分离，只报告观察到的到达→claim服务延迟和配置干预，不给虚假的适应秒数。
+
 ## 5. 租约与崩溃
 
 复用已有真实Worker边界观察方法，仅管理本轮 `Popen` 的PID及create-time，并保留启动命令、父子归属与阶段trace。TTL按真实时钟自然经过，禁止直接改数据库时间/lease行证明恢复。
 
 - **before_reserve**：实际claim后、预算预留前kill，待自然TTL后继Worker接管，至多1个真实请求；检查新fence与唯一完成。
 - **inflight**：在真实请求已发出但尚未得到已保存响应时kill ownedWorker；保留requestintent及未知效果，不对该task或保留预算自动重试。若阶段只用contract阻塞来精确控制，分开标注，不把它升级为task_live请求。
-- **before_commit**：响应已保存、独立验证完成但最终提交前kill；必须先由现有checkpoint/预算/lease检查证明可安全恢复。无法证明就BLOCKED；不能为了得到绿灯补发请求。
+- **before_commit**：真实响应与usage持久化、预算settled、独立验证通过后，在lease.submit前hold/kill；同身份重启只允许既有 `_resume/_finalize` 核验。预期 `needs_review` 且没有apply，记BLOCKED恢复。只有同一原始响应/usage完整、settlement全部settled、pending/uncertain均0、重启后新增请求0时可继续下一个独立cell，否则全batch停止。绝不patch账本或补发此任务。
+- **after_commit**：响应已保存、独立验证和真实lease.submit已完成，进入最终提交阶段但尚未 `_finalize` 时kill；由同身份fresh进程核对已有completed effect后只恢复finalization，不重发请求。
+
+仅before_reserve使用TTL2秒；其他三个故障阶段TTL180秒，仍保留真实keeper心跳。次序为预留前→提交前→提交后→在途。在途观察后先验证HTTP子PID的CIM父链、Windows原始创建时间与保留的进程句柄；若阶段已错过，记录INCOMPLETE并让原请求结束，不伪造kill时点。确认owned子进程后最多等75秒自然退出，必要时经同一句柄精确结束，保留未知效果；不杀未知PID、不按名称清理全机Python。
 
 强制在最后运行inflight组，防止unknown后仍启动其他付费分支。阶段若无法可靠定位即INCOMPLETE，不能用随便kill任意Python或fixture全覆盖替代。
 
 ## 6. 跨session正误经验
 
-生成任务与transfer任务分离，每seed至多1次真实生成，生成只见生成题的公开规格/buggy源码；transfer使用另一缺陷种子。不把transfer独立测试或gold放进生成prompt。
+生成任务与transfer任务分离，每seed至多1次真实生成。生成使用 `generation-composite`：三个函数全有缺陷，必须真实提出并独立验证全部修复，避免把预置正确的mean当成新生成经验；transfer为另一种 `mean-empty` 缺陷。生成只见公开规格/buggy源码，不见transfer独立测试/gold。两阶段仍是相同三函数语义，不能声称跨领域或新功能泛化。
 
 正确经验必须由真实生成、验证、推广出的源资产，经现有 AssetConsumer 注入fresh Worker/session/workspace，模型明确声明使用，后继candidate独立验证，通过fenced应用后才记录adoption。输出 `consumed_asset_ids → validation → application → adoption` 的原始引用，不能copy数据库后称跨session采用；资产仓库可共享只读approved source，任务/session/workspace必须新建。
 
@@ -94,3 +103,7 @@ $tools = 'C:/Users/DW/orca/workspaces/Morphogenesis/morphbench-eval-1007/tools/m
 ```
 
 **待冻结而非既成结果**：A SOURCE与精确API、正式harness命令、每组Worker energy/max_senses/idle边界、phase提示切换、正确经验导入路径、三个fault checkpoint、安装字节/Node依赖、主控批准窗口。全部具备且主控审核后才将此协议状态改为FROZEN；不能以文档代替真跑。最终领域结果写 `morphbench-live-evaluation-1007.md`，I再汇总为单一最终报告。
+
+已接入候选 A SOURCE `d5cb717f734eb34cb17855d3075c4f37c43667ca`（普通merge），已有阶段 B SOURCE `254989b07541f5b504dcf3815d70543a8d541ae4`（已push）。A源码中的transport trace仅证明本地HTTP send-entry/headers/return，不证明封包或供应商收到请求。原安装9482523失败 `0xc000012d` 的日志保留在 `eval/install-9482523.log`；主控因宿主内存压力划分串行窗口，A重测试期间B不做安装/批量pytest/90秒动态运行。
+
+正式入口拟为 `live_batch.py --mode live --out <全新目录> --product-source <A SHA> --protocol-source <B SHA> --window-message <主控消息ID>`；未使用单独preflight，预留槽保持空置，正式首个cell中的请求照常计费。24个代码/动态cell每个≤600秒、3经验组每个≤720秒、4故障组每个≤510秒，主循环保守总界18,600秒（5小时10分，另有有限本地启动/写证据开销）；正常预计45–90分钟，不能以此替代真实elapsed。在途fault永远最后，unknown停止即为协议停止，不继续其他付费分支。

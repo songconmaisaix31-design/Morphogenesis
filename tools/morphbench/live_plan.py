@@ -5,6 +5,7 @@ import argparse
 from decimal import Decimal
 import json
 from pathlib import Path
+from typing import Any
 
 from live_cases import DEFECTS, PHASES, PROFILE_ORDER, PROFILES
 
@@ -14,8 +15,8 @@ MODEL = "qwen-plus-2025-12-01"
 BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 
-def plan() -> dict:
-    trials = []
+def plan() -> dict[str, Any]:
+    trials: list[dict[str, Any]] = []
     for category in ("code", "dynamic"):
         for seed in SEEDS:
             # Counterbalance order without consulting results.
@@ -30,7 +31,7 @@ def plan() -> dict:
         for arm in ("none", "correct", "wrong"):
             trials.append({"id": f"experience-s{seed}-{arm}", "category": "experience_transfer",
                            "seed": seed, "arm": arm, "request_cap": 1})
-    for stage in ("before_reserve", "inflight", "before_commit"):
+    for stage in ("before_reserve", "before_commit", "after_commit", "inflight"):
         trials.append({"id": f"fault-{stage}", "category": "fault", "stage": stage,
                        "request_cap": 1})
     trials.append({"id": "preflight", "category": "preflight", "request_cap": 1})
@@ -39,7 +40,7 @@ def plan() -> dict:
     unit_estimate = (Decimal(input_bound) * Decimal("0.8") +
                      Decimal(output_bound) * Decimal("2")) / Decimal(1000000)
     return {
-        "protocol": "morphbench-live-1007-draft-v1", "status": "PENDING_SOURCE_AND_WINDOW_REVIEW",
+        "protocol": "morphbench-live-1007-draft-v2", "status": "PENDING_SOURCE_AND_WINDOW_REVIEW",
         "model": MODEL, "base_url": BASE_URL, "enable_thinking": False,
         "temperature": 0.2, "provider_seed": 1234, "allocation_seeds": list(SEEDS),
         "max_input_bytes": 12000, "max_output_tokens": 1536,
@@ -47,7 +48,7 @@ def plan() -> dict:
         "prices": {"currency": "CNY", "input_per_million": "0.8", "output_per_million": "2",
                    "checked_date": "2026-10-07",
                    "source": "https://help.aliyun.com/zh/model-studio/qwen-plus"},
-        "request_cap": cap, "unallocated_request_slots": 8, "absolute_request_cap": 240,
+        "request_cap": cap, "unallocated_request_slots": 7, "absolute_request_cap": 240,
         "user_request_ceiling": 256, "user_currency_ceiling": "30",
         "per_request_admission_cny": "0.1", "total_admission_cny": "24",
         "accounting_cny_per_usd": "6", "conversion_is_market_fx": False,
