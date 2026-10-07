@@ -382,3 +382,9 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 - B 独占后续重运行窗口：先对 A 最终 SOURCE 做隔离安装与代表离线子集；正式 API 批次仍须绑定最终协议/工具 SOURCE、安装证据和主控窗口消息。目前新付费调用 0。协议预算细化为最多 233 已分配 + 7 保留 = 240 槽，总成本上限仍 CNY30；新增独立 before_commit 故障槽，不覆盖 after_commit。未知远端效果不重试；已知响应/用量、原预算 settled 且无 pending/uncertain、重启 0 新请求，才可继续后续独立场景。
 - Orca 内存不足中断及首日志已保留；原会话在同 worktree/branch 恢复。重测试、安装与构建串行，线程上限为 1；不修改全局 pagefile。A/F 已释放调度资源，领域返修仍归原 Owner。
 - I 独立集成任务 `task_bfec3a09dc70` 依赖 A/B/F 全部完成，尚未启动。最终报告为 `docs/tracks/morphbench-live-final-1007.md`，同内容导出单份中文 DOCX 至下载目录；不得冒充官方榜单、一般工程仓库修复、完整科研/AT-07 或已证能力反转。
+
+## 2026-10-08 正式运行窗口
+
+- 冻结 B SOURCE `b41de607b6a020963bd1bd4c2b03432386279c73` 已本地 commit 且 clean；三次普通 push 遇 GitHub 500，远端仍 `aefd3ef3a13ef4b07f33a3bc7b6853b572a8c080`。原错误保留，后续普通发布，不 force。
+- 主控复核冻结协议与执行矩阵、offline-v2 首次经验报告读取 RED、offline-v3 经验及四故障 PASS、最终 15 pytest/strict 13/pip 101 结果，批准消息 `msg_4e6d99d6cf88`（2026-10-07 16:59:20 UTC）。执行产品为非 editable 安装 A `d5bd40cea91b09ddf669be5e063e726186191fc4`，原字节核对 154 项一致；仅 B 获本轮付费窗口。
+- 唯一正式目录 `C:/Users/DW/orca/mb-live-1007/eval/formal-v1`，入口 `tools/morphbench/live_batch.py --mode live`，绑定上述 SOURCE 与消息 ID。最多 233 已分配槽、7 保留槽不自行使用；CNY24 保守预留、CNY30 上限，实际账单未知。预计 45–90 分钟，矩阵主循环硬界 18,600 秒及有限本地开销；inflight 最后，任何未知或拒绝停止后续付费，不重试，不修改冻结内容追分。
