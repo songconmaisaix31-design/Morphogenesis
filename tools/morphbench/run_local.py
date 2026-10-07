@@ -10,6 +10,7 @@ import argparse
 from collections import Counter
 from datetime import datetime, timezone
 import importlib.metadata
+from importlib import import_module
 import json
 import multiprocessing
 import os
@@ -17,21 +18,22 @@ from pathlib import Path
 import sys
 import time
 import traceback
+from typing import Any
 
 SOURCE = "50396909c3fbaa510e755b8e2361e05d84afdfaa"
 
 
-def write_json(path: Path, value) -> None:
+def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False), encoding="utf-8")
 
 
-def event(path: Path, value) -> None:
+def event(path: Path, value: Any) -> None:
     with path.open("a", encoding="utf-8") as stream:
         stream.write(json.dumps(value, ensure_ascii=False, allow_nan=False) + "\n")
         stream.flush()
 
 
-def read_events(path: Path) -> list[dict]:
+def read_events(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()] if path.exists() else []
 
 
@@ -44,10 +46,10 @@ def configure(suite: str) -> None:
     sys.path.insert(0, str(Path(suite).resolve()))
 
 
-def installed_identity() -> dict:
+def installed_identity() -> dict[str, Any]:
     import swarm.worker_loop
     import local_assets.validate
-    modules = {module.__name__: str(Path(module.__file__).resolve())
+    modules = {module.__name__: str(Path(module.__file__ or "").resolve())
                for module in (swarm.worker_loop, local_assets.validate)}
     installed_root = Path(sys.prefix).resolve() / "Lib" / "site-packages"
     if not all(Path(p).is_relative_to(installed_root) for p in modules.values()):
@@ -67,9 +69,9 @@ def split_energy(budget: int, workers: int) -> list[int]:
     return [budget // workers + (i < budget % workers) for i in range(workers)]
 
 
-def measured_task(task, log: Path, phase: str):
-    from morphbench.local_tasks import LocalTask
-    def evaluate(cfg):
+def measured_task(task: Any, log: Path, phase: str) -> Any:
+    LocalTask = import_module("morphbench.local_tasks").LocalTask
+    def evaluate(cfg: Any) -> float:
         index = task.config_space.index(cfg)
         event(log, {"event": "evaluation_started", "phase": phase, "index": index})
         started = time.perf_counter()
@@ -82,9 +84,10 @@ def measured_task(task, log: Path, phase: str):
 
 def worker_process(suite: str, config_json: str, state: str, log: str, result_file: str) -> None:
     configure(suite)
-    from morphbench.worker_engine import MorphBenchExecutor, EXECUTOR_SPEC
+    engine = import_module("morphbench.worker_engine")
+    MorphBenchExecutor, EXECUTOR_SPEC = engine.MorphBenchExecutor, engine.EXECUTOR_SPEC
     from swarm.worker_loop import Worker, WorkerConfig
-    from morphbench import local_tasks
+    local_tasks = import_module("morphbench.local_tasks")
     spec = json.loads((Path(state) / EXECUTOR_SPEC).read_text(encoding="utf-8"))
     executor = MorphBenchExecutor(spec["task_id"], spec["space"])
     executor._task = measured_task(local_tasks.build(spec["task_id"]), Path(log), "search")
@@ -97,8 +100,8 @@ def worker_process(suite: str, config_json: str, state: str, log: str, result_fi
         raise
 
 
-def run_workers(task_id: str, seed: int, budget: int, workers: int, root: Path, suite: str) -> dict:
-    from morphbench import worker_engine as engine
+def run_workers(task_id: str, seed: int, budget: int, workers: int, root: Path, suite: str) -> dict[str, Any]:
+    engine = import_module("morphbench.worker_engine")
     from swarm.models import RunLimits
     from swarm.task_ledger import TaskLedger
     from swarm.worker_loop import WorkerConfig
@@ -109,10 +112,11 @@ def run_workers(task_id: str, seed: int, budget: int, workers: int, root: Path, 
     setup_start = time.perf_counter()
     try:
         engine.local_tasks.build = lambda tid: measured_task(original_build(tid), root / "setup.jsonl", "acceptance_prefit")
-        engine.TaskLedger = lambda path, swarm_id: TaskLedger(path, swarm_id, limits=limits)
+        setattr(engine, "TaskLedger", lambda path, swarm_id: TaskLedger(path, swarm_id, limits=limits))
         target, state = engine.seed_workspace(root, task_id, sid)
     finally:
-        engine.local_tasks.build, engine.TaskLedger = original_build, original_ledger
+        engine.local_tasks.build = original_build
+        setattr(engine, "TaskLedger", original_ledger)
     setup_seconds = time.perf_counter() - setup_start
     task = original_build(task_id)
     capabilities = {engine._family(cfg): 1.0 for cfg in task.config_space}
@@ -164,8 +168,8 @@ def run_workers(task_id: str, seed: int, budget: int, workers: int, root: Path, 
             "layer": "installed_Worker.run_with_fixture_mock_executor_usage"}
 
 
-def run_baseline(task_id: str, system: str, seed: int, budget: int, root: Path) -> dict:
-    from morphbench import agents, local_tasks, real_swarm
+def run_baseline(task_id: str, system: str, seed: int, budget: int, root: Path) -> dict[str, Any]:
+    agents, local_tasks, real_swarm = (import_module("morphbench." + name) for name in ("agents", "local_tasks", "real_swarm"))
     task = measured_task(local_tasks.build(task_id), root / "search.jsonl", "search")
     function = agents.run_single_agent if system == "SingleAgent" else real_swarm.run_real_central
     start = time.perf_counter()
@@ -178,8 +182,8 @@ def run_baseline(task_id: str, system: str, seed: int, budget: int, root: Path) 
             "tasks_completed": len(finished), "layer": "local_serial_allocation_baseline"}
 
 
-def run_trial(args, task_id: str, seed: int, system: str, root: Path) -> dict:
-    from morphbench import local_tasks
+def run_trial(args: argparse.Namespace, task_id: str, seed: int, system: str, root: Path) -> dict[str, Any]:
+    local_tasks = import_module("morphbench.local_tasks")
     root.mkdir(parents=True, exist_ok=False)
     started = datetime.now(timezone.utc).isoformat()
     start = time.perf_counter()
