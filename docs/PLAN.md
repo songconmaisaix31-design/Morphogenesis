@@ -336,3 +336,18 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 # 2026-09-30 当前任务：异构 Agent 与科研环境集成
 
 当前一页计划、固定 Owner/write_paths、基线及三态验收见 [RESEARCH_INTEGRATION_PLAN_0930.md](RESEARCH_INTEGRATION_PLAN_0930.md)。以上历史计划保留；本轮用户指令优先。A/B/C 领域开发及必要返修已提交推送。独立 I 的冻结代码 bde3412d2257fd1581ce1d7f88b254fb0c13a269 已通过双平台完整 CI、本机完整1104项测试、strict/build/SDK/实际wheel分发及原兼容性门禁；工程集成已验证。官方 SDK interface_live 与作者唯一真实实验/中断恢复/fencing 通过；Claude 实际401认证阻塞，第三角色实际采用 NOT_RUN，原3600秒案例已到期，完整 task_live 未达成。认证身份选择未答复，不切换提供方或重置原案例。当前证据及全部原失败见 [RESEARCH_INTEGRATION_ACCEPTANCE_0930.md](RESEARCH_INTEGRATION_ACCEPTANCE_0930.md)。
+# MorphBench 0.2.1 评测执行页（2026-10-07）
+
+用户要求启动当前产品主线 0.2.1，执行 `C:/Users/DW/Downloads/MorphBench_对标评测方案.docx`；追加要求主控仅调度，使用 Orca CLI 子 Agent。被测产品固定 `50396909c3fbaa510e755b8e2361e05d84afdfaa`。本页仅覆盖本次评测新增文件，不变更 R1 领域所有权。
+
+| 轨道 | 单 Agent / Worktree / Branch | 独占 write_paths | 验收 |
+|---|---|---|---|
+| M 评测执行 | Codex / morphbench-eval-1007 / Orca 返回同名分支 | `tools/morphbench/**`, `tests/morphbench/**`, `docs/tracks/morphbench-evaluation-1007.md`; 私有运行目录 `C:/Users/DW/orca/mb021-1007/eval/**` | 原方案 5 BM / 4 SB 逐项结果；预算、种子、原始证据和测量边界；可行时至少 5 seeds；不得把轮转适配器称为 Worker 去中心化实跑 |
+| Q 独立核验 | Codex / morphbench-verify-1007 / Orca 返回同名分支 | `tests/integration/morphbench/**`, `docs/tracks/morphbench-verification-1007.md`; `C:/Users/DW/orca/mb021-1007/verify/**` | 产品 HTTP/UI、实际 Worker/lease/fencing/预算边界；审计指标是否可用；官方 Tier C 数据/执行器缺口，不用启发式判官伪造分数 |
+| I 最终集成 | 两轨交付后一个 Codex / morphbench-integrate-1007 / Orca 返回同名分支 | 普通精确合并 M/Q/主控提交；`docs/tracks/morphbench-final-1007.md` 和少量评测入口胶水 | 核对原始证据、独立复核结果表、可复现命令、限制、最终 commit/push；领域问题退原轨 |
+
+主控仅维护本页、调度、决策和验收。M/Q 自身开发、测试、文档和返修由同一 Worker 持续完成并 commit + push。原始未跟踪 `artifacts/morphbench/**` 只读保留。评测前证据/已启动进程交接位于 `C:/Users/DW/orca/mb021-1007`；不得重写已有日志。产品只读观测台已在 127.0.0.1:8099 启动，由 Q 接管验证和必要的本次进程维护。
+
+范围：本机 CPU、固定/合成任务、真实本地 Worker 机制验证。原 Spec 中真实科研沙箱 AT-07、原生科研模型执行及云/GPU/付费外发的具体批准门仍独立；公开资料读取和已提供 CPU 评测获授权。产品源码和锁文件冻结，不为获得高分改阈值、改预算、篡改历史或建设新的调度/证明系统。报告区分 contract_local / interface_live / task_live，费用未知为 null，自造锚点不作为官方百分位。
+
+最终交付包括：可访问产品地址、逐项测评报告、精确源码与报告 SHA、命令与结果、真实限制和未执行项。不得把全部不可执行项笼统算通过。
