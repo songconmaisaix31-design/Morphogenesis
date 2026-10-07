@@ -488,7 +488,12 @@ class Worker:
         if self.executor.provenance == "live" and metadata is not None:
             value["evidence_class"] = "interface_live"
             value["interface_live"] = metadata.get("interface_live", "not_run")
-            if (outcome == "promoted" and metadata.get("task_kind") == "bounded_json"
+            fixed_code_passed = (metadata.get("task_kind") == "fixed_sample_patch"
+                                 and report is not None and report.passed
+                                 and report.isolation == "fixed_pure_sample_subprocess")
+            # Only _finalize emits promoted, after the completed fenced target
+            # effect is verified. Approval or a passing report alone is not enough.
+            if (outcome == "promoted" and (metadata.get("task_kind") == "bounded_json" or fixed_code_passed)
                     and metadata.get("interface_live") == "passed"):
                 value["task_live"] = "passed"
         if outcome == "promoted":
@@ -884,7 +889,17 @@ class Worker:
                 fact_fields = self._metadata_fact_fields(result)
                 classification = fact_fields["classification"]
                 enter_phase("settle")
-                if result.uncertain and classification == CONFIRMED_REJECTION:
+                http_status = result.metadata.get("http_status")
+                provider_http_error = (result.metadata.get("task_kind") == "fixed_sample_patch"
+                                       and isinstance(http_status, int) and not isinstance(http_status, bool)
+                                       and http_status >= 400)
+                if provider_http_error:
+                    # This fixed-model protocol never retries/switches after a
+                    # provider error, even when local validation may continue.
+                    # Preserve observed usage or the unknown hold; share the stop
+                    # with peers/restarts using the existing atomic budget gate.
+                    settled = self.budget.settle(self._active, usage, stop_on_provider_error=True)
+                elif result.uncertain and classification == CONFIRMED_REJECTION:
                     # Known rejection without observed usage: faithful unknown
                     # cost hold that keeps the chain admittable under it.
                     settled = self.budget.mark_unknown_rejection(self._active)
@@ -1111,7 +1126,8 @@ class Worker:
             return self._status("needs_review", "incomplete_accepted_evidence")
         # An exhausted local energy counter cannot hide a durable unknown send.
         initial_budget = self.budget.snapshot(self.worker_id)
-        if initial_budget.sleeping and initial_budget.uncertain_reservations:
+        if initial_budget.sleeping and (initial_budget.uncertain_reservations
+                                       or initial_budget.reason == "provider_http_error"):
             return self._status("sleeping", initial_budget.reason or "unknown_usage")
         idle = 0
         started = time.monotonic()

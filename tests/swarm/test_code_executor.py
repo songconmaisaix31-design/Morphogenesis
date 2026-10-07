@@ -153,3 +153,115 @@ def test_transport_trace_marks_entry_headers_and_return_without_payload():
                             transport=httpx.MockTransport(response), observe=phases.append)
     assert result.status == 200
     assert phases == ["http_send_entered", "http_response_headers", "http_transport_returned"]
+
+
+def test_fixed_code_audit_requires_live_interface_and_fixed_validation(tmp_path, monkeypatch):
+    from contracts.identity import AttemptId
+    from local_assets.models import AssetSafetyError
+    from swarm.models import Lease
+
+    config = configured(tmp_path, monkeypatch)
+    executor = DashScopeCodeExecutor(DashScopeCodeConfig(),
+                                    transport=httpx.MockTransport(handler), provenance="mock")
+    worker = Worker(config, executor)
+    enqueue(worker, "first", "a/sample.py")
+    assert worker.run()["completed"] == 1
+    audit_root = worker.state / "audit" / worker.worker_id
+    original = json.loads(next(audit_root.glob("*.json")).read_bytes())
+    assert original["task_live"] == "not_run"  # Actual execution above is mock.
+    report = worker.assets.get_report(original["validation_report_id"])
+    assert report.passed and report.isolation == "fixed_pure_sample_subprocess"
+    signal = worker.ledger.get("first").signal
+    lease, attempt = Lease.model_validate(original["lease"]), AttemptId.model_validate(original["attempt"])
+    completed = worker.ledger.get("first")
+    assert completed.status == "completed" and completed.effect_applied
+    before = set(audit_root.glob("*.json"))
+    for invalid in ({"effect_applied": False}, {"status": "pending"}, {"token": lease.token + 1}):
+        with monkeypatch.context() as patch:
+            patch.setattr(worker.ledger, "get", lambda task_id: completed.model_copy(update=invalid))
+            worker._pending = {"lease": lease.model_dump(mode="json"), "result_id": completed.result_id}
+            with pytest.raises(AssetSafetyError, match="finalization_requires_completed_effect"):
+                worker._finalize()
+            assert set(audit_root.glob("*.json")) == before
+    worker._pending = None
+    cases = [
+        ("live", "passed", "promoted", report, "fixed_sample_patch", "passed"),
+        ("mock", "passed", "promoted", report, "fixed_sample_patch", "not_run"),
+        ("live", "failed", "promoted", report, "fixed_sample_patch", "not_run"),
+        ("live", "unknown", "promoted", report, "fixed_sample_patch", "not_run"),
+        ("live", "passed", "rejected", report, "fixed_sample_patch", "not_run"),
+        ("live", "passed", "promoted", None, "fixed_sample_patch", "not_run"),
+        ("live", "passed", "promoted", report.model_copy(update={"passed": False}),
+         "fixed_sample_patch", "not_run"),
+        ("live", "passed", "promoted", report.model_copy(update={"isolation": "non_arbitrary_literal_files"}),
+         "fixed_sample_patch", "not_run"),
+        ("live", "passed", "promoted", report, "unregistered_code", "not_run"),
+        ("live", "passed", "promoted", None, "bounded_json", "passed"),
+    ]
+    # Projection contract only: mutate the input fact for this method, never
+    # invoke a live Executor or claim these synthetic rows as live evidence.
+    for index, (provenance, interface, outcome, validation, kind, expected) in enumerate(cases):
+        monkeypatch.setattr(executor, "provenance", provenance)
+        before = set(audit_root.glob("*.json"))
+        worker._audit(signal, lease, attempt, outcome, report=validation,
+                      result_id=f"projection-contract-{index}",
+                      metadata={"task_kind": kind, "interface_live": interface})
+        created = set(audit_root.glob("*.json")) - before
+        assert len(created) == 1
+        assert json.loads(created.pop().read_bytes())["task_live"] == expected, index
+
+
+@pytest.mark.parametrize("known_usage", [False, True])
+def test_http_rejection_stops_shared_run_even_when_continue_enabled(tmp_path, monkeypatch, known_usage):
+    from swarm.budget import BudgetBlocked
+
+    config = configured(tmp_path, monkeypatch)
+    config = config.model_copy(update={"energy": 2, "continue_on_rejection": True,
+        "budget": config.budget.model_copy(update={"limits": RunLimits(
+            max_tasks=4, max_attempts=4, max_attempts_per_task=1)})})
+    calls = []
+    def rejected(request):
+        calls.append(request)
+        body = {"code": "InvalidApiKey", "message": "denied"}
+        if known_usage:
+            body["usage"] = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+        return httpx.Response(401, json=body)
+    executor = DashScopeCodeExecutor(DashScopeCodeConfig(),
+                                    transport=httpx.MockTransport(rejected), provenance="mock")
+    worker = Worker(config, executor)
+    enqueue(worker, "first", "a/sample.py")
+    enqueue(worker, "second", "b/sample.py")
+    bound = executor.bound(worker.ledger.get("first").signal)
+    inflight = worker.budget.reserve("already-admitted-peer", "inflight", bound)
+    assert worker.run()["state"] == "sleeping"
+    assert len(calls) == 1
+    assert worker.budget.snapshot().reason == "provider_http_error"
+    assert Worker(config, executor).run()["state"] == "sleeping"
+    peer = config.model_copy(update={"agent": AgentId(role="builder", instance=2)})
+    assert Worker(peer, executor).run()["state"] == "sleeping"
+    assert len(calls) == 1
+    with pytest.raises(BudgetBlocked, match="provider_http_error"):
+        worker.budget.reserve("new-peer", "later", bound)
+    # Already admitted work can report its original result, without reopening
+    # admission or inventing a zero for the rejected call's missing usage.
+    snapshot = worker.budget.settle(inflight, {"usage": {
+        "prompt_tokens": 4, "completion_tokens": 6, "total_tokens": 10}})
+    assert snapshot.sleeping and snapshot.reason == "provider_http_error"
+    assert snapshot.tokens == (12 if known_usage else None)
+    assert snapshot.uncertain_reservations == (0 if known_usage else 1)
+
+
+def test_fixed_validation_rejection_can_continue_without_provider_error(tmp_path, monkeypatch):
+    config = configured(tmp_path, monkeypatch).model_copy(update={"energy": 2, "continue_on_rejection": True})
+    calls = []
+    def response(request):
+        calls.append(request)
+        return handler(request, wrong=len(calls) == 1)
+    executor = DashScopeCodeExecutor(DashScopeCodeConfig(),
+                                    transport=httpx.MockTransport(response), provenance="mock")
+    worker = Worker(config, executor)
+    enqueue(worker, "first", "a/sample.py")
+    enqueue(worker, "second", "b/sample.py")
+    assert worker.run()["completed"] == 1
+    assert len(calls) == 2
+    assert not worker.budget.snapshot().sleeping
