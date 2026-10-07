@@ -1504,6 +1504,41 @@ html[data-theme="dark"] .env-row:hover { background: rgba(255, 255, 255, .04); }
 .counter.is-live { background: var(--success-bg); color: var(--success); border-color: transparent; }
 html[data-theme="dark"] .peer-card, html[data-theme="dark"] .matrix th { background: var(--panel); }
 html[data-theme="dark"] .sw-chip { background: var(--panel); }
+/* Keep bounded backend facts inside the existing dashboard at every viewport. */
+.gh-main, .wide-col, .swarm-view .card { min-width: 0; }
+.swarm-view .card { padding: 16px; }
+.swarm-view .card-head { padding: 0 0 12px; flex-wrap: wrap; gap: 8px; }
+.sw-chip, #swBoundaries, .peer-rows .v { overflow-wrap: anywhere; min-width: 0; }
+.peer-rows .v { text-align: right; }
+.swarm-mesh { max-height: 340px; }
+.swarm-node { cursor: pointer; }
+.swarm-node:focus .node-core { stroke: var(--accent); stroke-width: 3; }
+.peer-detail { margin-top: 10px; }
+.sw-detail { width: min(760px, calc(100vw - 24px)); max-height: 85vh; overflow: auto;
+  color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+.sw-detail::backdrop { background: rgba(31,35,40,.4); }
+.sw-detail header { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.sw-detail h3 { margin-top: 0; overflow-wrap: anywhere; }
+.sw-detail pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.6 var(--mono); }
+.research-status { padding: 10px 12px; margin: 0 0 16px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--bg-subtle); overflow-wrap: anywhere; }
+@media (max-width: 900px) {
+  .gh-main { padding: 16px 16px 0; }
+  .gh-sidebar { background: var(--bg); backdrop-filter: none; }
+}
+@media (max-width: 600px) {
+  .gh-header { padding: 10px 12px; gap: 8px; }
+  .gh-actions { gap: 4px; }
+  .gh-actions > .dd-wrap, .gh-actions > [data-goto], #copilotBtn { display: none; }
+  .view-bar { flex-wrap: wrap; gap: 8px; }
+  .view-bar-links { width: 100%; margin-left: 0; }
+  .mod-hero { gap: 12px; align-items: start; }
+  .mod-hero .logo-stack { display: none; }
+  .swarm-view .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .peer-grid { grid-template-columns: minmax(0, 1fr); }
+  .swarm-log li { flex-wrap: wrap; }
+  .swarm-log .lb { white-space: normal; overflow-wrap: anywhere; }
+}
 </style>
 </head>
 <body>
@@ -1661,11 +1696,12 @@ html[data-theme="dark"] .sw-chip { background: var(--panel); }
       </div>
     </div>
 
+    <p class="research-status muted" id="researchStatus" role="status">正在连接研究服务…</p>
     <!-- ─── HOME ─── -->
     <section class="view" id="view-home">
       <div class="dash-grid">
         <div class="main-col">
-          <h2 class="greet" id="greetTitle">Good evening, swarm-gen-1!</h2>
+          <h2 class="greet" id="greetTitle">研究工作台</h2>
           <p class="greet-sub muted" id="greetSub"></p>
 
           <!-- Wayfinder · 1:1 Copilot 卡片 -->
@@ -1983,8 +2019,7 @@ html[data-theme="dark"] .sw-chip { background: var(--panel); }
         </section>
 
         <div class="cloud-grid" id="cloudGrid">
-          <p class="muted" id="cloudGridNote" style="grid-column:1/-1" data-i18n="computeLoading">正在读取云厂商接口…</p>          </div>
-            </article>
+          <p class="muted" id="cloudGridNote" style="grid-column:1/-1" data-i18n="computeLoading">正在读取云厂商接口…</p>
         </div>
 
         <section class="card">
@@ -2073,6 +2108,16 @@ html[data-theme="dark"] .sw-chip { background: var(--panel); }
           <div class="peer-grid" id="swPeerGrid"><p class="sw-empty" data-i18n="swEmptyPeers">暂无真实节点。</p></div>
         </section>
 
+        <section class="card">
+          <div class="card-head"><h3>任务与租约</h3></div>
+          <p class="fineprint muted">当前 API 返回的有界快照；总数为已返回记录数。状态、owner 与 fencing token 直接来自后端。</p>
+          <div class="matrix-wrap"><table class="matrix"><thead><tr><th>Task</th><th>Status / Lease</th><th>Owner</th><th>Token / Expires</th></tr></thead><tbody id="swTasksBody"></tbody></table></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h3>预算与费用</h3><span class="muted fineprint" id="swBudgetNote"></span></div>
+          <div class="matrix-wrap"><table class="matrix"><thead><tr><th>Task / Worker</th><th>State</th><th>Reserved USD / Tokens</th><th>Cost</th></tr></thead><tbody id="swBudgetBody"></tbody></table></div>
+          <p class="fineprint muted">预留金额不是实际账单；未提供的费用与 usage 保持 unknown。</p>
+        </section>
         <section class="card">
           <div class="card-head"><h3 data-i18n="swLog">审计事件流</h3>
             <span class="flex-spacer"></span><span class="counter" id="swLogCount">0</span></div>
@@ -2210,559 +2255,14 @@ html[data-theme="dark"] .sw-chip { background: var(--panel); }
 </div>
 
 <div class="toast" id="toast" hidden></div>
+<dialog class="sw-detail" id="swPeerDialog" aria-labelledby="swPeerTitle">
+  <header><h3 id="swPeerTitle">节点详情</h3><button class="btn-outline" id="swPeerClose">关闭</button></header>
+  <p class="muted fineprint">只读节点快照。会话终端未接入；当前后端未提供会话接口。</p>
+  <pre id="swPeerDetail"></pre>
+</dialog>
 
-<script>/* ============================================================
- * 环境观测台 · 数据层（live 接线版）
- * 契约来源：API_CONTRACT.md —— 前端唯一数据契约，字段名照抄。
- * 数据源：HTTP 同源 /api/research/*（server.py 提供，真实后端）。
- *   fetchPackage / fetchSnapshot → package / snapshot 端点；
- *   fetchReplay → replay/{task_id} 端点（等价于按 task_id 切片）；
- *   subscribeActivity → activity?since_seq= 增量轮询（3.2s）。
- * file:// 打开或 fetch 失败时回退内联 mock（buildPackage/buildSnapshot），
- * 返回对象上标 source: 'live' | 'mock'。视图组件不感知差异。
- * ============================================================ */
-(function () {
-  'use strict';
-
-  /* ---------- 小工具 ---------- */
-  var T0 = 1730999400.0; // mock 项目基准时间（Unix 秒，float）
-  function t(sec) { return T0 + sec; }
-  function uid(w) { return w; }
-
-  /* ---------- mock: research_package（§2，字段严格对齐契约） ---------- */
-  function buildPackage() {
-    var tasks = [
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-11', task_id: 'T-11', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'research',
-          payload: { goal: '文献调研：软边界与硬边界的处理方法', project_id: 'p1', branch_id: 'b-soft' }
-        },
-        status: 'completed', dependencies: [], acceptance: { research_proposal_id: 'prop-11' },
-        attempts: 1, condition_fail_count: 0, token: 3, owner: 'w-02',
-        expires_at: null, created_at: t(0), updated_at: t(700),
-        derived_from: null, result_id: 'ref:run36', result: null, effect_applied: true
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-12', task_id: 'T-12', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'research',
-          payload: { goal: '搭建软边界实验环境：松弛系数网格', project_id: 'p1', branch_id: 'b-soft' }
-        },
-        status: 'completed', dependencies: ['T-11'], acceptance: { research_proposal_id: 'prop-12' },
-        attempts: 1, condition_fail_count: 0, token: 2, owner: 'w-04',
-        expires_at: null, created_at: t(120), updated_at: t(1500),
-        derived_from: null, result_id: 'ref:run38', result: null, effect_applied: true
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-13', task_id: 'T-13', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'research',
-          payload: { goal: '软边界方案 A：三组独立数据回归验证', project_id: 'p1', branch_id: 'b-soft' }
-        },
-        status: 'completed', dependencies: ['T-12'], acceptance: { research_proposal_id: 'prop-13' },
-        attempts: 2, condition_fail_count: 0, token: 4, owner: 'w-05',
-        expires_at: null, created_at: t(300), updated_at: t(2520),
-        derived_from: null, result_id: 'ref:run42', result: null, effect_applied: true
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-14', task_id: 'T-14', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'review',
-          payload: { goal: '交叉评审：软边界结论的可复现性', project_id: 'p1', branch_id: 'b-soft' }
-        },
-        status: 'completed', dependencies: ['T-13'], acceptance: { research_proposal_id: 'prop-14' },
-        attempts: 1, condition_fail_count: 0, token: 1, owner: 'w-05',
-        expires_at: null, created_at: t(400), updated_at: t(3100),
-        derived_from: null, result_id: 'ref:run43', result: null, effect_applied: true
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-15', task_id: 'T-15', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'research',
-          payload: { goal: '硬边界基线复现实验（v1 参数族）', project_id: 'p1', branch_id: 'b-hard' }
-        },
-        status: 'failed', dependencies: [], acceptance: { research_proposal_id: 'prop-15' },
-        attempts: 3, condition_fail_count: 2, token: 7, owner: 'w-03',
-        expires_at: null, created_at: t(500), updated_at: t(3400),
-        derived_from: null, result_id: 'ref:run39', result: null, effect_applied: true
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-16', task_id: 'T-16', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'research',
-          payload: { goal: '硬边界 v2：修正时间步长稳定性', project_id: 'p1', branch_id: 'b-hard' }
-        },
-        status: 'claimed', dependencies: ['T-15'], acceptance: { research_proposal_id: 'prop-16' },
-        attempts: 1, condition_fail_count: 0, token: 1, owner: 'w-03',
-        expires_at: t(7200), created_at: t(900), updated_at: t(4000),
-        derived_from: 'T-15', result_id: null, result: null, effect_applied: false
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-17', task_id: 'T-17', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'research',
-          payload: { goal: '软边界方案 B：谱方法对照组', project_id: 'p1', branch_id: 'b-soft' }
-        },
-        status: 'claimed', dependencies: ['T-13'], acceptance: { research_proposal_id: 'prop-17' },
-        attempts: 1, condition_fail_count: 0, token: 1, owner: 'w-01',
-        expires_at: t(7000), created_at: t(1100), updated_at: t(4200),
-        derived_from: null, result_id: null, result: null, effect_applied: false
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-18', task_id: 'T-18', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'analyst',
-          payload: { goal: '成本测绘：软/硬边界单位算力开销对比', project_id: 'p1', branch_id: null }
-        },
-        status: 'submitting', dependencies: ['T-13', 'T-15'], acceptance: { research_proposal_id: 'prop-18' },
-        attempts: 1, condition_fail_count: 0, token: 2, owner: 'w-04',
-        expires_at: t(6600), created_at: t(1300), updated_at: t(4500),
-        derived_from: null, result_id: null, result: null, effect_applied: false
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-19', task_id: 'T-19', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'research',
-          payload: { goal: '混合边界提案：软耦合 + 硬约束的可行性草稿', project_id: 'p1', branch_id: 'b-hybrid' }
-        },
-        status: 'available', dependencies: ['T-18'], acceptance: { research_proposal_id: 'prop-19' },
-        attempts: 0, condition_fail_count: 0, token: 0, owner: null,
-        expires_at: null, created_at: t(1500), updated_at: t(1500),
-        derived_from: null, result_id: null, result: null, effect_applied: false
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-20', task_id: 'T-20', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'research',
-          payload: { goal: '高维外推压力测试（分支休眠前的遗留探针）', project_id: 'p1', branch_id: 'b-hard' }
-        },
-        status: 'blocked', dependencies: ['T-16'], acceptance: { research_proposal_id: 'prop-20' },
-        attempts: 1, condition_fail_count: 3, token: 0, owner: null,
-        expires_at: null, created_at: t(1700), updated_at: t(4800),
-        derived_from: null, result_id: null, result: null, effect_applied: false
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-21', task_id: 'T-21', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'research',
-          payload: { goal: '边界条件对长期统计量的敏感性扫描', project_id: 'p1', branch_id: 'b-soft' }
-        },
-        status: 'available', dependencies: [], acceptance: { research_proposal_id: 'prop-21' },
-        attempts: 0, condition_fail_count: 0, token: 0, owner: null,
-        expires_at: null, created_at: t(1900), updated_at: t(1900),
-        derived_from: null, result_id: null, result: null, effect_applied: false
-      },
-      {
-        swarm_id: 'swarm-gen-1',
-        signal: {
-          signal_id: 'sig-22', task_id: 'T-22', workspace: '/workspace',
-          scope: 'science', kind: 'opportunity', module: 'research',
-          required_capability: 'review',
-          payload: { goal: '复审：run42 数据管线是否存在选择偏差（部分移交）', project_id: 'p1', branch_id: 'b-soft' }
-        },
-        status: 'handoff', dependencies: ['T-14'], acceptance: { research_proposal_id: 'prop-22' },
-        attempts: 1, condition_fail_count: 0, token: 0, owner: null,
-        expires_at: null, created_at: t(2100), updated_at: t(4700),
-        derived_from: 'T-14', result_id: null, result: null, effect_applied: false
-      }
-    ];
-
-    var executions = [
-      {
-        task_id: 'T-13', run_id: 'run42', audit_sequence: 14,
-        recorded_result: { execution_state: 'succeeded', scientific_verdict: 'supported', effect_state: 'known' },
-        verified_result: { execution_state: 'succeeded', scientific_verdict: 'supported', effect_state: 'known' },
-        archive_status: 'verified'
-      },
-      {
-        task_id: 'T-14', run_id: 'run43', audit_sequence: 18,
-        recorded_result: { execution_state: 'succeeded', scientific_verdict: 'supported', effect_state: 'known' },
-        verified_result: { execution_state: 'succeeded', scientific_verdict: 'supported', effect_state: 'known' },
-        archive_status: 'verified'
-      },
-      {
-        task_id: 'T-15', run_id: 'run39', audit_sequence: 7,
-        recorded_result: { execution_state: 'succeeded', scientific_verdict: 'failed', effect_state: 'known' },
-        verified_result: { execution_state: 'succeeded', scientific_verdict: 'failed', effect_state: 'known' },
-        archive_status: 'verified'
-      },
-      {
-        task_id: 'T-11', run_id: 'run36', audit_sequence: 3,
-        recorded_result: { execution_state: 'succeeded', scientific_verdict: 'supported', effect_state: 'known' },
-        verified_result: null,
-        archive_status: 'refused'
-      }
-    ];
-
-    /* 活动流事件 —— 两类事件都覆盖；at 为 Unix 秒 float；sequence 全局自增 */
-    var task_audit = [
-      { sequence: 1, task_id: 'T-11', event: 'created', at: t(0), body: { derived_from: null } },
-      { sequence: 2, task_id: 'T-11', event: 'claimed', at: t(60), body: { worker_id: 'w-02', token: 1 } },
-      { sequence: 3, task_id: 'T-11', event: 'research_execution', at: t(600), body: { run_id: 'run36', worker_id: 'w-02', token: 3, result: 'succeeded' } },
-      { sequence: 4, task_id: 'T-11', event: 'completed', at: t(700), body: { token: 3, result_id: 'ref:run36' } },
-      { sequence: 5, task_id: 'T-12', event: 'created', at: t(120), body: { derived_from: null } },
-      { sequence: 6, task_id: 'T-12', event: 'claimed', at: t(180), body: { worker_id: 'w-04', token: 1 } },
-      { sequence: 7, task_id: 'T-15', event: 'research_execution', at: t(3200), body: { run_id: 'run39', worker_id: 'w-03', token: 7, result: 'failed' } },
-      { sequence: 8, task_id: 'T-15', event: 'failed', at: t(3400), body: { token: 7, evidence: 'v1 参数族在 t>400 步发散，能量不守恒 2.3%' } },
-      { sequence: 9, task_id: 'T-13', event: 'research.choice', at: t(360), body: mkResearchEvent('ev-9', null, 'T-13', 'policy', { role: 'scout', instance: 2 }, 360, 'research_choice', { worker_id: 'w-05', selected: 'T-13', recommended_task_id: 'T-15', overridden: true }) },
-      { sequence: 10, task_id: 'T-13', event: 'claimed', at: t(380), body: { worker_id: 'w-05', token: 2 } },
-      { sequence: 11, task_id: 'T-13', event: 'research.note_submitted', at: t(460), body: mkResearchEvent('ev-11', 'b-soft', 'T-13', 'note-1', { role: 'builder', instance: 1 }, 460, 'note_submitted', { note_id: 'note-1', kind: 'observation' }) },
-      { sequence: 12, task_id: 'T-13', event: 'policy_selection', at: t(500), body: { actual_task_id: 'T-13', worker_id: 'w-05', token: 3, reason: 'evidence-weighted' } },
-      { sequence: 13, task_id: 'T-13', event: 'renewed', at: t(1200), body: { worker_id: 'w-05', token: 3, expires_at: t(4800) } },
-      { sequence: 14, task_id: 'T-13', event: 'research_execution', at: t(2400), body: { run_id: 'run42', worker_id: 'w-05', token: 4, result: 'succeeded' } },
-      { sequence: 15, task_id: 'T-13', event: 'execution_confirmed', at: t(2500), body: { request_id: 'req-42', token: 4 } },
-      { sequence: 16, task_id: 'T-13', event: 'completed', at: t(2520), body: { token: 4, result_id: 'ref:run42' } },
-      { sequence: 17, task_id: 'T-13', event: 'research.contribution_accepted', at: t(2600), body: mkResearchEvent('ev-17', 'b-soft', 'T-13', 'ref:run42', { role: 'reviewer', instance: 1 }, 2600, 'contribution_accepted', { result_id: 'ref:run42' }) },
-      { sequence: 18, task_id: 'T-14', event: 'research_execution', at: t(3000), body: { run_id: 'run43', worker_id: 'w-05', token: 1, result: 'succeeded' } },
-      { sequence: 19, task_id: 'T-14', event: 'completed', at: t(3100), body: { token: 1, result_id: 'ref:run43' } },
-      { sequence: 20, task_id: 'T-14', event: 'research.contribution_accepted', at: t(3150), body: mkResearchEvent('ev-20', 'b-soft', 'T-14', 'ref:run43', { role: 'reviewer', instance: 1 }, 3150, 'contribution_accepted', { result_id: 'ref:run43' }) },
-      { sequence: 21, task_id: 'T-15', event: 'research.branch_sleep', at: t(3500), body: mkResearchEvent('ev-21', 'b-hard', 'T-15', 'corr-1', { role: 'reviewer', instance: 1 }, 3500, 'branch_sleep', { correction_id: 'corr-1', reason: '硬边界 v1 连续 3 次尝试未复现，进入休眠观察' }) },
-      { sequence: 22, task_id: 'T-12', event: 'research.proposal_accepted', at: t(3600), body: mkResearchEvent('ev-22', 'b-soft', 'T-12', 'prop-17', { role: 'critic', instance: 0 }, 3600, 'proposal_accepted', { proposal_id: 'prop-17' }) },
-      { sequence: 23, task_id: 'T-16', event: 'created', at: t(3650), body: { derived_from: 'T-15' } },
-      { sequence: 24, task_id: 'T-16', event: 'claimed', at: t(3700), body: { worker_id: 'w-03', token: 1 } },
-      { sequence: 25, task_id: 'T-17', event: 'claimed', at: t(3900), body: { worker_id: 'w-01', token: 1 } },
-      { sequence: 26, task_id: 'T-18', event: 'research.selection', at: t(4000), body: mkResearchEvent('ev-26', null, 'T-18', 'policy', { role: 'scout', instance: 1 }, 4000, 'research_selection', { worker_id: 'w-04', actual_task_id: 'T-18', token: 1 }) },
-      { sequence: 27, task_id: 'T-18', event: 'claimed', at: t(4010), body: { worker_id: 'w-04', token: 1 } },
-      { sequence: 28, task_id: 'T-16', event: 'research.contribution_superseded', at: t(4100), body: mkResearchEvent('ev-28', 'b-hard', 'T-16', 'ref:run39', { role: 'reviewer', instance: 1 }, 4100, 'contribution_superseded', { result_id: 'ref:run39', reason: '被 v2 时间步长修正方案取代' }) },
-      { sequence: 29, task_id: 'T-22', event: 'handoff', at: t(4700), body: { from: 'w-05', to: 'w-02', token: 2 } },
-      { sequence: 30, task_id: 'T-20', event: 'blocked', at: t(4800), body: { condition_fail_count: 3 } },
-      { sequence: 31, task_id: 'T-18', event: 'research_execution', at: t(4900), body: { run_id: 'run47', worker_id: 'w-04', token: 2, result: 'succeeded' } },
-      { sequence: 32, task_id: 'T-18', event: 'execution_unconfirmed', at: t(4950), body: { request_id: 'req-47', token: 2 } }
-    ];
-
-    var context = {
-      project: {
-        project_id: 'p1',
-        goal: '判定软边界与硬边界方案在长期演化模拟中的适用条件，并产出可复现结论',
-        allowed_domains: ['arxiv.org', 'doi.org'], data_bounds: {}, authorization_ref: 'authz-2026-09',
-        milestones: [], created_at: t(-86400)
-      },
-      limit: 100,
-      selection: { mode: 'overview', reason: 'overview', task_id: null, branch_id: null, read_only: true, claim_requires_recheck: true },
-      constraints: { authorized_scopes: ['science'], capabilities: ['research', 'review', 'analyst'], data_bounds: {}, actions: [], context_grants_execution: false },
-      notes: [
-        {
-          note_id: 'note-1', project_id: 'p1', branch_id: 'b-soft', hypothesis_id: null, task_id: 'T-13',
-          kind: 'observation', actor: { role: 'builder', instance: 1 }, signer: null,
-          source_refs: [{ source_id: 'run42-log', kind: 'log', identifier: 'run42.stdout', version: 'v1', license: null, retrieval: 'present', location: 'L212', excerpt: 'residual < 1e-6 after 400 steps' }],
-          text: '方案 A 在 400 步后残差稳定进入 1e-6 区间，三组独立数据趋势一致',
-          applicability: {}, review_state: 'verified', references: [], created_at: t(460)
-        },
-        {
-          note_id: 'note-2', project_id: 'p1', branch_id: 'b-hard', hypothesis_id: null, task_id: 'T-15',
-          kind: 'opposing_evidence', actor: { role: 'builder', instance: 2 }, signer: null,
-          source_refs: [{ source_id: 'run39-log', kind: 'log', identifier: 'run39.stderr', version: 'v1', license: null, retrieval: 'present', location: 'L88', excerpt: 'energy drift +2.3%' }],
-          text: '硬边界 v1 在 t>400 步出现能量漂移 +2.3%，与文献值矛盾',
-          applicability: {}, review_state: 'verified', references: [], created_at: t(3300)
-        },
-        {
-          note_id: 'note-op-1', project_id: 'p1', branch_id: 'b-soft', hypothesis_id: null, task_id: null,
-          kind: 'expert_opinion', actor: { role: 'builder', instance: 0 }, signer: 'Dr. Y',
-          source_refs: [{ source_id: 'paper-2417', kind: 'pdf', identifier: 'arXiv:2401.02417', version: 'v3', license: 'CC-BY-4.0', retrieval: 'present', location: 'p.4', excerpt: 'soft constraints behave better under mild stiffness' }],
-          text: '倾向软边界方法 A，但未提供独立数据',
-          applicability: {}, review_state: 'unverified', references: [], created_at: t(800)
-        },
-        {
-          note_id: 'note-op-2', project_id: 'p1', branch_id: 'b-hard', hypothesis_id: null, task_id: null,
-          kind: 'expert_opinion', actor: { role: 'critic', instance: 1 }, signer: 'Prof. K',
-          source_refs: [],
-          text: '硬边界的失败更可能是时间步长问题，不宜直接判定路线错误',
-          applicability: {}, review_state: 'unverified', references: [], created_at: t(3600)
-        },
-        {
-          note_id: 'note-3', project_id: 'p1', branch_id: 'b-soft', hypothesis_id: null, task_id: 'T-13',
-          kind: 'supporting_evidence', actor: { role: 'reviewer', instance: 1 }, signer: null,
-          source_refs: [{ source_id: 'run43-report', kind: 'report', identifier: 'rep-43', version: 'v1', license: null, retrieval: 'present', location: '§3', excerpt: 'independent reproduction within tolerance' }],
-          text: '交叉评审在容差内独立复现了 run42 的核心曲线',
-          applicability: {}, review_state: 'verified', references: ['ref:run42'], created_at: t(3050)
-        }
-      ],
-      hypotheses: [], proposals: [], tasks: [], branches: [],
-      notes_unverified: ['note-op-1', 'note-op-2'], notes_verified: ['note-1', 'note-2', 'note-3'],
-      events: [],
-      notes_truncated: false, hypotheses_truncated: false, proposals_truncated: false,
-      tasks_truncated: false, branches_truncated: false, events_truncated: false,
-      research_v1: null /* 由 snapshot 填充，保持 §6 形状 */
-    };
-
-    return {
-      schema_version: 'research-package/v1',
-      project_id: 'p1',
-      limit: 100,
-      tasks_truncated: false,
-      context: context,
-      tasks: tasks,
-      assets: [],
-      persisted_observations: [],
-      generated_validation_reports: [],
-      executions: executions,
-      task_audit: task_audit,
-      audit_truncated: false,
-      adoption_receipts: [
-        { receipt_id: 'ar-1', adopted_result_id: 'ref:run42', adopting_task_id: 'T-17', actor: 'w-01', at: t(3900) },
-        { receipt_id: 'ar-2', adopted_result_id: 'ref:run42', adopting_task_id: 'T-21', actor: null, at: t(4400) },
-        { receipt_id: 'ar-3', adopted_result_id: 'ref:run43', adopting_task_id: 'T-18', actor: 'w-04', at: t(4950) }
-      ],
-      export_performed_external_io: false,
-      evidence_boundary: 'per_record_provenance',
-      completion_claim: false
-    };
-  }
-
-  function mkResearchEvent(eventId, branchId, taskId, sourceRef, actor, offsetSec, kind, payload) {
-    return {
-      event_id: eventId,
-      project_id: 'p1',
-      branch_id: branchId,
-      task_id: taskId,
-      source_ref: sourceRef,
-      actor: actor,
-      at: t(offsetSec),
-      schema_version: 'research-v1',
-      provenance: 'mock',
-      event_kind: kind,
-      payload: payload,
-      correlation_ref: null
-    };
-  }
-
-  /* ---------- mock: research_snapshot（§7） ---------- */
-  function buildSnapshot() {
-    return {
-      policy_version: 'research-v1',
-      advisory_only: true,
-      claim_requires_recheck: true,
-      project_id: 'p1',
-      exploration_fraction: 0.20,
-      three_axis: {
-        execution: { succeeded: 3, failed: 1, unknown: 1 },
-        hypothesis: { supported: 2, refuted: 1, not_evaluated: 1 },
-        contribution: { accepted: 3, proposed: 2, superseded: 1 }
-      },
-      results: [
-        mkResult('ref:run36', 'rep-36', 'T-11', 'w-02', 'arXiv survey batch-1', 'succeeded', 'supported', 'proposed', 'a-11', 'b-soft', 700, []),
-        mkResult('ref:run38', 'rep-38', 'T-12', 'w-04', 'env-grid v1', 'succeeded', 'not_evaluated', 'proposed', 'a-12', 'b-soft', 1500, []),
-        mkResult('ref:run39', 'rep-39', 'T-15', 'w-03', 'hard-baseline v1', 'succeeded', 'refuted', 'superseded', 'a-15', 'b-hard', 3400, ['能量漂移超容差', '被 v2 修正方案取代']),
-        mkResult('ref:run42', 'rep-42', 'T-13', 'w-05', 'paper v3', 'succeeded', 'supported', 'accepted', 'a-13', 'b-soft', 2520, []),
-        mkResult('ref:run43', 'rep-43', 'T-14', 'w-05', 'review batch-2', 'succeeded', 'supported', 'accepted', 'a-14', 'b-soft', 3100, []),
-        mkResult('ref:run47', 'rep-47', 'T-18', 'w-04', 'cost-probe draft', 'unknown', 'not_evaluated', 'accepted', null, null, 4950, ['执行未确认，待归档复核'])
-      ],
-      contributions: [
-        mkResult('ref:run42', 'rep-42', 'T-13', 'w-05', 'paper v3', 'succeeded', 'supported', 'accepted', 'a-13', 'b-soft', 2520, []),
-        mkResult('ref:run43', 'rep-43', 'T-14', 'w-05', 'review batch-2', 'succeeded', 'supported', 'accepted', 'a-14', 'b-soft', 3100, []),
-        mkResult('ref:run47', 'rep-47', 'T-18', 'w-04', 'cost-probe draft', 'unknown', 'not_evaluated', 'accepted', null, null, 4950, ['执行未确认，待归档复核'])
-      ],
-      effective_contributions: [
-        mkResult('ref:run42', 'rep-42', 'T-13', 'w-05', 'paper v3', 'succeeded', 'supported', 'accepted', 'a-13', 'b-soft', 2520, []),
-        mkResult('ref:run43', 'rep-43', 'T-14', 'w-05', 'review batch-2', 'succeeded', 'supported', 'accepted', 'a-14', 'b-soft', 3100, []),
-        mkResult('ref:run47', 'rep-47', 'T-18', 'w-04', 'cost-probe draft', 'unknown', 'not_evaluated', 'accepted', null, null, 4950, ['执行未确认，待归档复核']),
-        mkResult('ref:run39', 'rep-39', 'T-15', 'w-03', 'hard-baseline v1', 'succeeded', 'refuted', 'superseded', 'a-15', 'b-hard', 3400, ['superseded'])
-      ],
-      corrections: [
-        { event_id: 'e-1', branch_id: 'b-hard', kind: 'sleep', reason: '硬边界 v1 连续 3 次尝试未复现，进入休眠观察', source_ref: 'ref:run39', actor: 'reviewer-1', at: t(3500) },
-        { event_id: 'e-2', branch_id: 'b-hybrid', kind: 'reopen', reason: '混合边界提案获得准入，重开探索窗口', source_ref: 'prop-19', actor: 'critic-0', at: t(4300) }
-      ],
-      supersessions: [
-        { event_id: 'e-3', result_id: 'ref:run39', superseded_by: null, reason: '被 v2 时间步长修正方案取代', source_ref: 'corr-1', actor: 'reviewer-1', at: t(4100) }
-      ],
-      trusted_results: [
-        mkResult('ref:run42', 'rep-42', 'T-13', 'w-05', 'paper v3', 'succeeded', 'supported', 'accepted', 'a-13', 'b-soft', 2520, []),
-        mkResult('ref:run43', 'rep-43', 'T-14', 'w-05', 'review batch-2', 'succeeded', 'supported', 'accepted', 'a-14', 'b-soft', 3100, [])
-      ],
-      branches: [
-        { branch_id: 'b-soft', status: 'testing', conditions: {}, parent_id: null, authorized: true, supported_by: ['ref:run42', 'ref:run43'], refuted_by: [], applicability: 0.9, goal_relevance: 1.0, risk: 0.1, known_cost: 12.5 },
-        { branch_id: 'b-hard', status: 'dormant', conditions: {}, parent_id: null, authorized: true, supported_by: [], refuted_by: ['ref:run39'], applicability: 0.4, goal_relevance: 0.8, risk: 0.6, known_cost: null },
-        { branch_id: 'b-hybrid', status: 'proposed', conditions: {}, parent_id: 'b-soft', authorized: true, supported_by: [], refuted_by: [], applicability: 0.5, goal_relevance: 0.9, risk: 0.3, known_cost: null }
-      ],
-      opportunities: {
-        version: 'research-v1',
-        exploration_fraction: 0.20,
-        total_share: 1.0,
-        opportunities: [
-          { branch_id: 'b-soft', eligible: true, share: 0.52, factors: { evidence: 1.0, applicability: 0.9, goal_relevance: 1.0, risk: 0.1, support_count: 2, refute_count: 0, exploration_floor: 0.5 }, known_cost: 12.5, supported_by: ['ref:run42', 'ref:run43'], refuted_by: [], reasons: ['eligible'] },
-          { branch_id: 'b-hybrid', eligible: true, share: 0.28, factors: { evidence: 0.2, applicability: 0.5, goal_relevance: 0.9, risk: 0.3, support_count: 0, refute_count: 0, exploration_floor: 0.5 }, known_cost: null, supported_by: [], refuted_by: [], reasons: ['eligible'] },
-          { branch_id: 'b-hard', eligible: false, share: 0.20, factors: { evidence: 0.4, applicability: 0.4, goal_relevance: 0.8, risk: 0.6, support_count: 0, refute_count: 1, exploration_floor: 0.5 }, known_cost: null, supported_by: [], refuted_by: ['ref:run39'], reasons: ['refuted_under_conditions', 'dormant'] }
-        ],
-        reasons: []
-      }
-    };
-  }
-
-  function mkResult(resultId, reportId, taskId, actor, sourceRef, execution, hypothesis, contribution, assetId, branchId, atOffset, reasons) {
-    return {
-      result_id: resultId, report_id: reportId, task_id: taskId, actor: actor,
-      source_ref: sourceRef, provenance: 'mock',
-      execution: execution, hypothesis: hypothesis, contribution: contribution,
-      asset_id: assetId, branch_id: branchId, reviewer: 'reviewer-1',
-      at: t(atOffset), reasons: reasons
-    };
-  }
-
-  /* ---------- 数据层 API（§10，live 接线） ---------- */
-  var PKG = null;
-  var SNAP = null;
-  var SOURCE = 'mock'; /* 'live' | 'mock'，由最近一次成功的数据获取决定 */
-
-  function projectId() {
-    try {
-      return new URLSearchParams(window.location.search).get('project_id') || 'p1';
-    } catch (e) { return 'p1'; }
-  }
-
-  function apiUrl(resource, taskId, extra) {
-    var base = '/api/research/' + resource;
-    if (taskId !== undefined) base += '/' + encodeURIComponent(taskId);
-    base += '?project_id=' + encodeURIComponent(projectId());
-    if (extra) base += '&' + extra;
-    return base;
-  }
-
-  function fetchJson(url) {
-    return window.fetch(url).then(function (r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + url);
-      return r.json();
-    });
-  }
-
-  function isHttp() {
-    return window.location.protocol === 'http:' || window.location.protocol === 'https:';
-  }
-
-  function markSource(obj, source) { obj.source = source; return obj; }
-
-  function ensureData() {
-    if (!PKG) {
-      PKG = buildPackage();
-      SNAP = buildSnapshot();
-      PKG.context.research_v1 = SNAP; // §6: context.research_v1 为 snapshot 结构
-    }
-  }
-
-  function fetchPackage() {
-    if (!isHttp()) { ensureData(); SOURCE = 'mock'; return Promise.resolve(markSource(PKG, 'mock')); }
-    return fetchJson(apiUrl('package')).then(function (data) {
-      PKG = data; SOURCE = 'live';
-      return markSource(PKG, 'live');
-    }).catch(function () {
-      ensureData(); SOURCE = 'mock';
-      return markSource(PKG, 'mock');
-    });
-  }
-
-  function fetchSnapshot() {
-    if (!isHttp()) { ensureData(); SOURCE = 'mock'; return Promise.resolve(markSource(SNAP, 'mock')); }
-    return fetchJson(apiUrl('snapshot')).then(function (data) {
-      SNAP = data; SOURCE = 'live';
-      return markSource(SNAP, 'live');
-    }).catch(function () {
-      ensureData(); SOURCE = 'mock';
-      return markSource(SNAP, 'mock');
-    });
-  }
-
-  /* replaySlice(taskId)：本地按 task_id 切片（§10），mock 与 live 降级共用 */
-  function replaySlice(taskId) {
-    var task = null;
-    for (var i = 0; i < PKG.tasks.length; i++) {
-      if (PKG.tasks[i].signal.task_id === taskId) { task = PKG.tasks[i]; break; }
-    }
-    var audit = PKG.task_audit.filter(function (e) { return e.task_id === taskId; });
-    var executions = PKG.executions.filter(function (e) { return e.task_id === taskId; });
-    var observations = (PKG.context.notes || []).filter(function (n) { return n.task_id === taskId; });
-    var receipts = (PKG.adoption_receipts || []).filter(function (r) {
-      return r.adopting_task_id === taskId; /* mock 形状；live 形状由后端切片 */
-    });
-    return {
-      task_id: taskId, task: task, audit: audit,
-      executions: executions, observations: observations, adoption_receipts: receipts
-    };
-  }
-
-  /* fetchReplay(taskId)：live 走后端切片端点；失败回退本地切片 */
-  function fetchReplay(taskId) {
-    if (isHttp() && SOURCE === 'live') {
-      return fetchJson(apiUrl('replay', taskId)).then(function (data) {
-        return markSource(data, 'live');
-      }).catch(function () {
-        return Promise.resolve(markSource(replaySlice(taskId), SOURCE));
-      });
-    }
-    ensureData();
-    return Promise.resolve(markSource(replaySlice(taskId), 'mock'));
-  }
-
-  /* subscribeActivity(onEvent)：契约 §10 —— onEvent 收到 { at, event, body }。
-   * live：轮询 activity?since_seq= 增量（3.2s），新事件 live=true；
-   *   单次轮询失败静默跳过下轮重试（不回退 mock，避免伪 live 事件）。
-   * mock：按 sequence 顺序循环播放 task_audit（每 3.2s 一条），
-   *   首循环为历史回放（live=false）。返回取消函数。 */
-  function subscribeActivity(onEvent) {
-    var stopped = false;
-    var timer = null;
-
-    if (isHttp() && SOURCE === 'live' && PKG) {
-      var sinceSeq = 0;
-      (PKG.task_audit || []).forEach(function (e) {
-        if (e.sequence > sinceSeq) sinceSeq = e.sequence;
-      });
-      function poll() {
-        if (stopped) return;
-        fetchJson(apiUrl('activity', undefined, 'since_seq=' + sinceSeq)).then(function (data) {
-          var events = (data && data.events) || [];
-          events.forEach(function (e) {
-            if (e.sequence > sinceSeq) sinceSeq = e.sequence;
-            onEvent({ at: e.at, event: e.event, body: e.body, task_id: e.task_id, sequence: e.sequence, live: true });
-          });
-        }).catch(function () { /* 静默，下轮重试 */ });
-      }
-      poll();
-      timer = setInterval(poll, 3200);
-      return function unsubscribe() { stopped = true; clearInterval(timer); };
-    }
-
-    ensureData();
-    var idx = 0;
-    timer = setInterval(function () {
-      var e = PKG.task_audit[idx % PKG.task_audit.length];
-      idx++;
-      onEvent({ at: e.at, event: e.event, body: e.body, task_id: e.task_id, sequence: e.sequence, live: idx > PKG.task_audit.length });
-    }, 3200);
-    return function unsubscribe() { clearInterval(timer); };
-  }
-
-  window.EnvData = {
-    fetchPackage: fetchPackage,
-    fetchSnapshot: fetchSnapshot,
-    fetchReplay: fetchReplay,
-    subscribeActivity: subscribeActivity,
-    getSource: function () { return SOURCE; },
-    BASE_TIME: T0
-  };
-})();
-</script>
+<!-- Shared same-origin /api/research/ data layer; missing service stays empty. -->
+<script src="data.js"></script>
 <script>
 
 /* ─── 语言 / 主题切换 ─── */
@@ -3194,9 +2694,9 @@ window.addEventListener('hashchange', applyView);
 function renderGreeting() {
   var hr = new Date().getHours();
   var g = hr < 5 ? T('greetLate') : hr < 12 ? T('greetMorning') : hr < 18 ? T('greetAfternoon') : T('greetEvening');
-  $('greetTitle').textContent = g + ', swarm-gen-1!';
+  $('greetTitle').textContent = g + (PKG && PKG.project_id ? ', ' + PKG.project_id : '');
   var goal = PKG && PKG.context && PKG.context.project ? PKG.context.project.goal : '';
-  $('greetSub').textContent = T('projectPrefix') + goal;
+  $('greetSub').textContent = goal || '研究服务未连接或尚无项目数据';
 }
 
 /* ---------- 侧栏分支（1:1 Top repositories） ---------- */
@@ -3551,7 +3051,7 @@ function wfAsk(q) {
 function openReplay(taskId) {
   window.EnvData.fetchReplay(taskId).then(function (r) {
     $('replayTitle').textContent = taskId + (r.task ? ' · ' + r.task.signal.payload.goal : '');
-    var html = '';
+    var html = r.error ? '<p class="muted">回放未连接：' + esc(r.error) + '</p>' : '';
     if (r.task) {
       var t = r.task;
       html += '<div class="chips">'
@@ -3942,10 +3442,15 @@ document.addEventListener('visibilitychange', function () {
   hiddenAt = null;
 });
 
+/* Route immediately, even while research is unavailable or still loading. */
+applyView();
 /* ---------- 启动 ---------- */
 Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
   .then(function (rs) {
     PKG = rs[0]; SNAP = rs[1];
+    $('researchStatus').textContent = PKG.error || SNAP.error
+      ? '研究服务未连接 · ' + (PKG.error || SNAP.error) + ' · 无研究数据；Swarm 状态独立读取。'
+      : '研究数据来自后端 · 来源与验收以各条记录为准。';
     PKG.tasks.forEach(function (t) { TASK[t.signal.task_id] = t; });
     SNAP.branches.forEach(function (b) { BRANCH[b.branch_id] = b; });
     OPP = (SNAP.opportunities.opportunities || []).slice().sort(function (a, b) { return b.share - a.share; });
@@ -3959,7 +3464,8 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     renderExperts();
     applyView();
 
-    $('wfExploreLabel').textContent = 'Optimized for: Exploration ' + Math.round((SNAP.exploration_fraction || 0) * 100) + '%';
+    $('wfExploreLabel').textContent = typeof SNAP.exploration_fraction === 'number'
+      ? 'Exploration ' + Math.round(SNAP.exploration_fraction * 100) + '%' : 'Exploration unknown';
 
     /* 预置未读通知（最近 5 条账本事件） */
     PKG.task_audit.slice(-5).reverse().forEach(function (e) { pushNotif(e); });
@@ -5182,13 +4688,15 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
   function swPeerClass(w, now) {
     if (SWARM_TERMINAL[w.state]) return 'is-stopped';
     var at = swNum(w.updated_at);
-    if (at != null && now - at <= SWARM_HEARTBEAT_S) return 'is-live';
+    if (!w.state || w.state === 'unknown' || at == null || (SWARM_STATE.data && SWARM_STATE.data.replay)) return 'is-unknown';
+    if (now >= at && now - at <= SWARM_HEARTBEAT_S) return 'is-live';
     return 'is-idle';
   }
   function swPeerLabel(w, now) {
-    if (SWARM_TERMINAL[w.state]) return T('swStStopped');
-    var at = swNum(w.updated_at);
-    if (at != null && now - at <= SWARM_HEARTBEAT_S) return T('swStOnline');
+    var cls = swPeerClass(w, now);
+    if (cls === 'is-stopped') return T('swStStopped');
+    if (cls === 'is-unknown') return 'unknown';
+    if (cls === 'is-live') return T('swStOnline');
     return T('swStIdle');
   }
 
@@ -5210,6 +4718,9 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     items.push(chip(T('swSrcHub'), swText(d && d.hub_status)));
     items.push(chip(T('swSrcDir'), dir));
     items.push(chip(T('swSrcAt'), at != null ? swClock(at) : '—'));
+    ['contract_local', 'interface_live', 'task_live'].forEach(function (key) {
+      items.push(chip(key, swText(d && d.acceptance && d.acceptance[key], 'unknown')));
+    });
     if (d && d.replay) items.push(chip('replay', 'true', 'warn'));
     bar.innerHTML = items.join('');
     var list = $('swBoundaries');
@@ -5224,7 +4735,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       list.innerHTML = html.join('');
     }
     if (note) {
-      if (SWARM_STATE.error) note.textContent = T('swErr') + '：' + SWARM_STATE.error;
+      if (SWARM_STATE.error) note.textContent = T('swErr') + '：' + SWARM_STATE.error + (d ? ' · 历史快照，当前状态未知' : '');
       else if (d && d.health === 'missing') note.textContent = T('swUnbound');
       else if (d) note.textContent = 'morph.swarm.readonly/1 · readonly';
     }
@@ -5273,7 +4784,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       var p = pos[w.worker_id];
       var cls = 'swarm-node ' + swPeerClass(w, now);
       var name = String(w.worker_id).length > 14 ? String(w.worker_id).slice(0, 13) + '…' : String(w.worker_id);
-      return '<g class="' + cls + '" transform="translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')">' +
+      return '<g class="' + cls + '" role="button" tabindex="0" data-worker="' + swEsc(w.worker_id) + '" aria-label="节点详情 ' + swEsc(w.worker_id) + '" transform="translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')">' +
         '<circle class="node-halo" r="17"/>' +
         '<circle class="node-core" r="12"/>' +
         '<text class="node-name" y="30" text-anchor="middle">' + swEsc(name) + '</text></g>';
@@ -5305,7 +4816,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
         '<span class="peer-id" title="' + swEsc(String(w.worker_id)) + '">' + swEsc(String(w.worker_id)) + '</span></div>' +
         '<div class="peer-rows">' + rows.map(function (r) {
           return '<div class="row"><span class="k">' + swEsc(r[0]) + '</span><span class="v">' + swEsc(r[1]) + '</span></div>';
-        }).join('') + '</div></div>';
+        }).join('') + '</div><button class="btn-outline btn-xs peer-detail" data-worker="' + swEsc(w.worker_id) + '">节点详情 / 只读</button></div>';
     }).join('');
   }
 
@@ -5363,10 +4874,9 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       var model = r.returned_model || r.requested_model || NO_MODEL;
       if (models.indexOf(model) < 0) models.push(model);
       var key = JSON.stringify([r.worker_id, model]);
-      var rank = { live: 3, replay: 2, mock: 1 };
       var prov = r.provenance || 'unknown';
-      var cur = cells[key];
-      if (!cur || (rank[prov] || 0) > (rank[cur] || 0)) cells[key] = prov;
+      if (!cells[key]) cells[key] = [];
+      if (cells[key].indexOf(prov) < 0) cells[key].push(prov);
     });
     models.sort();
     var workers = [];
@@ -5376,8 +4886,9 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       models.map(function (m) { return '<th>' + swEsc(m) + '</th>'; }).join('');
     body.innerHTML = workers.map(function (w) {
       return '<tr><td class="rowhead">' + swEsc(w) + '</td>' + models.map(function (m) {
-        var prov = cells[JSON.stringify([w, m])];
-        if (!prov) return '<td class="ev-none">—</td>';
+        var provenance = cells[JSON.stringify([w, m])];
+        if (!provenance) return '<td class="ev-none">—</td>';
+        var prov = provenance.slice().sort().join(' / ');
         if (prov === 'live') return '<td class="ev-live">live</td>';
         if (prov === 'replay') return '<td class="ev-replay">replay</td>';
         if (prov === 'mock') return '<td class="ev-mock">mock</td>';
@@ -5391,19 +4902,52 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     var workers = (d && d.workers) || [];
     var tasks = (d && d.tasks) || [];
     var alive = workers.filter(function (w) {
-      var at = swNum(w.updated_at);
-      return at != null && now - at <= SWARM_HEARTBEAT_S && !SWARM_TERMINAL[w.state];
+      return swPeerClass(w, now) === 'is-live';
     }).length;
     var stopped = workers.filter(function (w) { return !!SWARM_TERMINAL[w.state]; }).length;
     var leased = tasks.filter(function (t) { return t.lease_state === 'leased'; }).length;
     var set = function (id, v) { var el = $(id); if (el) el.textContent = String(v); };
-    set('swAlive', alive);
-    set('swTotal', workers.length);
-    set('swStopped', stopped);
-    set('swLeased', leased);
-    set('swTasks', tasks.length);
+    var known = d && d.health !== 'missing' && d.health !== 'error' && !SWARM_STATE.error;
+    var ledgerKnown = known && d.sources && d.sources.ledger && d.sources.ledger.state === 'ok';
+    set('swAlive', known && !d.replay ? alive : 'unknown');
+    set('swTotal', known ? workers.length : 'unknown');
+    set('swStopped', known ? stopped : 'unknown');
+    set('swLeased', ledgerKnown ? leased : 'unknown');
+    set('swTasks', ledgerKnown ? tasks.length : 'unknown');
     var c = $('swarmCount');
-    if (c) { c.hidden = workers.length === 0; c.textContent = String(alive); }
+    if (c) { c.hidden = !known || workers.length === 0; c.textContent = d && d.replay ? 'replay' : String(alive); }
+  }
+
+  function swValue(v) { return v == null ? 'unknown' : typeof v === 'object' ? JSON.stringify(v) : String(v); }
+  function swRows(id, rows, cols) {
+    $(id).innerHTML = rows.length ? rows.map(function (r) {
+      return '<tr>' + r.map(function (v) { return '<td>' + swEsc(swValue(v)) + '</td>'; }).join('') + '</tr>';
+    }).join('') : '<tr><td colspan="' + cols + '" class="ev-none">无数据 / 未观测</td></tr>';
+  }
+  function renderSwarmTasksBudget(d) {
+    swRows('swTasksBody', ((d && d.tasks) || []).map(function (t) {
+      return [t.task_id, swValue(t.status) + ' / ' + swValue(t.lease_state), t.owner,
+        swValue(t.token) + ' / ' + (t.expires_at == null ? 'unknown' : new Date(t.expires_at * 1000).toISOString())];
+    }), 4);
+    var b = d && d.budget;
+    var known = d && d.sources && d.sources.budget && d.sources.budget.state === 'ok';
+    $('swBudgetNote').textContent = 'breaker: ' + (known ? swValue(b && b.breaker) : 'unknown');
+    swRows('swBudgetBody', ((b && b.reservations) || []).map(function (r) {
+      return [swValue(r.task_id) + ' / ' + swValue(r.worker_id), r.state,
+        swValue(r.reserved_usd) + ' / ' + swValue(r.tokens), r.cost];
+    }), 4);
+  }
+  function openSwarmPeer(workerId) {
+    var d = SWARM_STATE.data;
+    var worker = ((d && d.workers) || []).find(function (w) { return w.worker_id === workerId; });
+    if (!worker) return;
+    $('swPeerTitle').textContent = '节点详情 · ' + workerId;
+    $('swPeerDetail').textContent = JSON.stringify({ observed_at: d.observed_at, replay: d.replay,
+      snapshot_error: SWARM_STATE.error || null, worker: worker,
+      tasks: (d.tasks || []).filter(function (t) { return t.owner === workerId || (t.attempt_history || []).some(function (a) { return a.worker_id === workerId; }); }),
+      budget: ((d.budget && d.budget.reservations) || []).filter(function (r) { return r.worker_id === workerId; }),
+      audit: (d.worker_audit || []).filter(function (r) { return r.worker_id === workerId; }) }, null, 2);
+    $('swPeerDialog').showModal();
   }
 
   function renderSwarm() {
@@ -5413,6 +4957,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     renderSwarmPeers(SWARM_STATE.data);
     renderSwarmLog(SWARM_STATE.data);
     renderSwarmMatrix(SWARM_STATE.data);
+    renderSwarmTasksBudget(SWARM_STATE.data);
   }
 
   function loadSwarm(announce) {
@@ -5434,9 +4979,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       .catch(function (err) {
         // 读取失败只标注失败，不清空上一次的真实快照，也不回落到 mock。
         SWARM_STATE.error = (err && err.message) || String(err);
-        renderSwarmSource(SWARM_STATE.data);
-        var note = $('swSourceNote');
-        if (note) note.textContent = T('swErr') + '：' + SWARM_STATE.error;
+        renderSwarm();
       })
       .then(function () {
         SWARM_STATE.loading = false;
@@ -5474,6 +5017,17 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     if (readinessBtn) readinessBtn.addEventListener('click', function () { loadReadiness(true); });
     var swarmBtn = $('swRefreshBtn');
     if (swarmBtn) swarmBtn.addEventListener('click', function () { loadSwarm(true); });
+    $('swPeerClose').addEventListener('click', function () { $('swPeerDialog').close(); });
+    $('view-swarm').addEventListener('click', function (e) {
+      var target = e.target.closest('[data-worker]');
+      if (target) openSwarmPeer(target.getAttribute('data-worker'));
+    });
+    $('swarmMesh').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        var target = e.target.closest('[data-worker]');
+        if (target) { e.preventDefault(); openSwarmPeer(target.getAttribute('data-worker')); }
+      }
+    });
   }
   function onRoute() {
     setBar();

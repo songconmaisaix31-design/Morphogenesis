@@ -9,7 +9,7 @@ single-file frontend and ``swarm/research/service.py``:
 - non GET/HEAD (except the Wayfinder POST) → 405, GET/HEAD with body → 413
 - every response carries nosniff / DENY / no-referrer
 - without a bound service (no HostConfig) the API degrades to 503 while static
-  files keep serving, so the frontend falls back to its inline mock
+  files keep serving, with explicit unconnected research data
 """
 from __future__ import annotations
 
@@ -135,6 +135,8 @@ def test_static_serving_and_allowlist(client: Any) -> None:
     assert root.status_code == 200
     assert "text/html" in root.headers["content-type"]
     assert "/api/research/" in root.text  # live data-layer wiring is present
+    assert '<script src="data.js"></script>' in root.text
+    assert "/api/research/" in client.get("/data.js").text
     assert client.get("/seed.py").status_code == 404
     assert client.get("/../pyproject.toml").status_code == 404
 
@@ -189,7 +191,7 @@ def test_service_unavailable_degrades_to_503(server: Any) -> None:
             response = client.get(path)
             assert response.status_code == 503, path
             assert response.json()["error"] == "observatory_service_unavailable"
-        assert client.get("/").status_code == 200  # static still served → frontend falls back to mock
+        assert client.get("/").status_code == 200  # static served with unconnected research state
 
 
 def test_agent_environments_endpoint_shape(client: Any) -> None:
