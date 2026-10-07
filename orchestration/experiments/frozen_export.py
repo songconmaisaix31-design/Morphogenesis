@@ -243,7 +243,7 @@ class FrozenDockerExport:
         actual = main_state.get("Paused")
         if type(actual) is not bool or sidecar_state.get("Paused") is not actual or (paused is not None and actual is not paused):
             raise ExportUnknown("docker_export_pause_state_unknown")
-        return cast(bool, actual)
+        return actual
 
     @staticmethod
     def _stat(response: Any, path: PurePosixPath, *, directory: bool, limit: int) -> dict[str, Any]:
