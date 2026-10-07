@@ -2067,7 +2067,8 @@ html[data-theme="dark"] .sw-chip { background: var(--panel); }
           <span class="logo-stack"><span class="ls" style="z-index:3"><svg width="100%" height="100%" fill="#daaa3f" role="img" viewBox="0 0 24 24"><path d="M12 1.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-9 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm18 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM12 15.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM5.6 9.1l2.6-1.6.8 1.3-2.6 1.6Zm9.4 5.8 2.6-1.6.8 1.3-2.6 1.6Zm-6.2 2.9-.8-1.4 2.6-1.6.9 1.4ZM8.2 7.5l.8-1.3 2.6 1.6-.8 1.3Z"/></svg></span></span>
           <div class="mod-hero-text">
             <h2 class="greet">Swarm</h2>
-            <p class="muted" data-i18n="swarmSubtitle">去中心化蜂群只读视图：节点、任务租约、信息素路由、预算与审计事件全部来自后端 /api/swarm（swarm.observer 对真实状态目录的热读）。不认领、不推进、不改租约与审计、不调用模型；没有真实来源的字段显示 —，不用 mock 填充。</p>
+            <p class="muted" data-i18n="swarmSubtitle">蜂群状态只读观察：节点、任务、租约、预算与审计来自后端。页面不会执行或恢复任务；未知字段保持 unknown。</p>
+            <div class="fineprint muted" id="swObservation" style="overflow-wrap:anywhere">观测范围未声明；正在读取后端观察口径。</div>
           </div>
         </div>
 
@@ -2086,6 +2087,8 @@ html[data-theme="dark"] .sw-chip { background: var(--panel); }
               <span class="muted fineprint" id="swSourceNote" data-i18n="swLoading">正在读取 /api/swarm…</span>
             </span></div>
           <div class="sw-banner" id="swSourceBar"></div>
+          <div class="sw-banner" id="swAcceptanceBar" style="margin-top:10px"></div>
+          <p class="fineprint muted" style="margin:8px 0 0">整体场景验收与单任务验证作用域不同：上方三态来自后端 acceptance；单任务 audit 的 passed 只描述该任务的验证结果，不能替代整体场景验收，也不代表完整科研已验收。not_run = 未执行／未验收，unknown = 未知；页面不汇总推导通过。</p>
           <ul class="fineprint muted" id="swBoundaries" style="margin:8px 0 0;padding-left:18px"></ul>
         </section>
 
@@ -2355,7 +2358,7 @@ var I18N = {
     dimAccount:'账号', dimAccountNote:'接入面需要的凭据是否存在',
     specUnit:'个可选规格', realSpecs:'真实规格与实时价格',
     navSwarm:'Swarm', swarm:'蜂群',
-    swarmSubtitle:'去中心化蜂群只读视图：节点、任务租约、信息素路由、预算与审计事件全部来自后端 /api/swarm（swarm.observer 对真实状态目录的热读）。不认领、不推进、不改租约与审计、不调用模型；没有真实来源的字段显示 —，不用 mock 填充。',
+    swarmSubtitle:'蜂群状态只读观察：节点、任务、租约、预算与审计来自后端。页面不会执行或恢复任务；未知字段保持 unknown。',
     swAlive:'在线节点', swTotal:'已注册节点', swStopped:'终止态节点', swLeased:'租约持有', swTasks:'任务总数',
     swSource:'数据来源与口径', swRefresh:'刷新', swLoading:'正在读取 /api/swarm…', swRefreshed:'已刷新 /api/swarm',
     swTopo:'节点拓扑', swTopoNote:'节点 = 真实 worker · 连线 = 真实任务依赖（上游 owner → 下游 owner）',
@@ -2455,7 +2458,7 @@ var I18N = {
     dimAccount:'Account', dimAccountNote:'whether the credential a surface needs is present',
     specUnit:'offered types', realSpecs:'Real types and live prices',
     navSwarm:'Swarm', swarm:'Swarm',
-    swarmSubtitle:'Read-only decentralized swarm view: peers, task leases, pheromone routes, budget and audit events all come from the backend /api/swarm (a live hot read of a real state directory by swarm.observer). Nothing is claimed, advanced or executed here; no lease, audit or budget row is written and no model is called. Fields without a real source read —, never filled with mock data.',
+    swarmSubtitle:'Read-only swarm observation: peers, tasks, leases, budget and audit come from the backend. This page never executes or resumes tasks; unknown fields remain unknown.',
     swAlive:'Live peers', swTotal:'Registered peers', swStopped:'Terminal peers', swLeased:'Leases held', swTasks:'Tasks',
     swSource:'Source and boundaries', swRefresh:'Refresh', swLoading:'Reading /api/swarm…', swRefreshed:'/api/swarm refreshed',
     swTopo:'Peer topology', swTopoNote:'nodes = real workers · edges = real task dependencies (upstream owner → downstream owner)',
@@ -4714,14 +4717,29 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
       return '<span class="sw-chip' + (tone ? ' is-' + tone : '') + '">' + swEsc(label) +
         ' <b>' + swEsc(value) + '</b></span>';
     }
+    var context = d && d.display_context;
+    var configured = context && context.source === 'operator_configuration';
+    var historical = d && d.replay === true;
+    var observation = historical ? '历史观察 / replay' : '状态目录只读观察（不证明正在执行）';
+    observation += historical && configured && context.run_status === 'ended'
+      ? ' · 运行已结束（展示配置声明）；刷新只重读记录，不会恢复任务。'
+      : ' · 运行结束状态未知。';
+    var scope = configured && context.scope_label && context.scope_reference
+      ? '观测范围（只读展示配置）：' + context.scope_label
+      : '观测范围未声明；不从目录名、任务名或模型来源推断科研范围。';
+    var observationBox = $('swObservation');
+    if (observationBox) observationBox.innerHTML = '<p>' + swEsc(observation) + '</p><p>' + swEsc(scope) + '</p>' +
+      (configured && context.scope_reference ? '<p>配置依据：' + swEsc(context.scope_reference) + '（展示说明，非验收证据）</p>' : '');
     items.push(chip(T('swSrcHealth'), health, health === 'ok' ? 'ok' : (health === 'missing' ? 'warn' : 'bad')));
     items.push(chip(T('swSrcProvenance'), accept, accept === 'live' ? 'ok' : (accept === 'mock' || accept === 'replay' ? 'warn' : '')));
     items.push(chip(T('swSrcHub'), swText(d && d.hub_status)));
     items.push(chip(T('swSrcDir'), dir));
     items.push(chip(T('swSrcAt'), at != null ? swClock(at) : '—'));
-    ['contract_local', 'interface_live', 'task_live'].forEach(function (key) {
-      items.push(chip(key, swText(d && d.acceptance && d.acceptance[key], 'unknown')));
-    });
+    var acceptanceBar = $('swAcceptanceBar');
+    if (acceptanceBar) acceptanceBar.innerHTML = '<strong>整体场景验收（后端 acceptance）</strong>' +
+      ['contract_local', 'interface_live', 'task_live'].map(function (key) {
+        return chip(key, swText(d && d.acceptance && d.acceptance[key], 'unknown'));
+      }).join('');
     if (d && d.replay) items.push(chip('replay', 'true', 'warn'));
     bar.innerHTML = items.join('');
     var list = $('swBoundaries');
@@ -4738,7 +4756,7 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     if (note) {
       if (SWARM_STATE.error) note.textContent = T('swErr') + '：' + SWARM_STATE.error + (d ? ' · 历史快照，当前状态未知' : '');
       else if (d && d.health === 'missing') note.textContent = T('swUnbound');
-      else if (d) note.textContent = 'morph.swarm.readonly/1 · readonly';
+      else if (d) note.textContent = d.replay ? '历史记录读取 / replay · readonly' : 'morph.swarm.readonly/1 · readonly';
     }
   }
 
@@ -4843,7 +4861,9 @@ Promise.all([window.EnvData.fetchPackage(), window.EnvData.fetchSnapshot()])
     ((d && d.worker_audit) || []).forEach(function (e) {
       events.push({
         at: swNum(e.created_at), kind: e.outcome || 'execution',
-        text: [e.worker_id, e.task_id, e.requested_model || e.returned_model || ''].filter(Boolean).join(' · ')
+        text: [e.worker_id, e.task_id, e.requested_model || e.returned_model || '',
+          '单任务 interface_live=' + swText(e.interface_live, 'unknown'),
+          '单任务 task_live=' + swText(e.task_live, 'unknown')].filter(Boolean).join(' · ')
       });
     });
     events.sort(function (a, b) { return (b.at || 0) - (a.at || 0); });

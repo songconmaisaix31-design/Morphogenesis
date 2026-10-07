@@ -105,3 +105,34 @@ test('all inline JavaScript parses without a build transform', () => {
   const html = fs.readFileSync(path.join(root, 'env-observatory.html'), 'utf8');
   for (const [, script] of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) new vm.Script(script);
 });
+
+test('historical display context is explicit and cannot promote aggregate acceptance', () => {
+  const { context: c, elements: e } = swarmLayer();
+  const data = { replay: true, health: 'partial', acceptance: { provenance: 'replay',
+    contract_local: 'not_run', interface_live: 'not_run', task_live: 'not_run' },
+    display_context: { source: 'operator_configuration', run_status: 'ended',
+      scope_label: '局部代码缺陷 <sample>', scope_reference: 'arguments.json / code_defects' },
+    worker_audit: [{ task_id: 'one', task_live: 'passed', provenance: 'live' }] };
+  const original = JSON.stringify(data);
+  c.renderSwarmSource(data);
+  assert.match(e.swObservation.innerHTML, /历史观察/);
+  assert.match(e.swObservation.innerHTML, /运行已结束/);
+  assert.match(e.swObservation.innerHTML, /只读展示配置/);
+  assert.match(e.swObservation.innerHTML, /局部代码缺陷 &lt;sample&gt;/);
+  assert.match(e.swObservation.innerHTML, /arguments.json/);
+  assert.match(e.swAcceptanceBar.innerHTML, /整体场景/);
+  assert.match(e.swAcceptanceBar.innerHTML, /task_live.*not_run/);
+  assert.doesNotMatch(e.swAcceptanceBar.innerHTML, /passed/);
+  assert.equal(JSON.stringify(data), original);
+});
+
+test('unconfigured paths and live audit never imply scope or ended execution', () => {
+  const { context: c, elements: e } = swarmLayer();
+  c.renderSwarmSource({ replay: true, state_directory: '/formal-v1/clamp/state',
+    worker_audit: [{ provenance: 'live', task_live: 'passed' }] });
+  assert.match(e.swObservation.innerHTML, /范围未声明/);
+  assert.match(e.swObservation.innerHTML, /结束状态未知/);
+  assert.doesNotMatch(e.swObservation.innerHTML, /clamp|运行已结束/);
+  c.renderSwarmSource({ replay: false });
+  assert.doesNotMatch(e.swObservation.innerHTML, /历史观察|运行已结束/);
+});

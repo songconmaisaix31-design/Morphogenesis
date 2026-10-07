@@ -339,3 +339,73 @@ def test_swarm_reports_a_read_failure_as_error(server: Any, tmp_path: Path, monk
         body = response.json()
     assert body["health"] == "error"
     assert "observer_unavailable" in " ".join(body["notes"])
+
+
+def test_swarm_display_context_never_changes_observed_facts(server: Any, tmp_path: Path, monkeypatch: Any) -> None:
+    from copy import deepcopy
+    from starlette.testclient import TestClient
+
+    snapshot = {"health": "partial", "acceptance": {"task_live": "not_run"},
+                "tasks": [{"task_id": "one", "status": "blocked"}],
+                "budget": {"breaker": "unknown_usage", "tokens": None},
+                "worker_audit": [{"task_id": "other", "task_live": "passed", "provenance": "live"}]}
+    monkeypatch.setattr(server, "load_swarm", lambda *_args, **_kwargs: deepcopy(snapshot))
+    with TestClient(server.create_app(swarm_state=str(tmp_path), swarm_replay=True,
+                                     swarm_scope_label="局部固定函数缺陷", swarm_scope_reference="arguments.json / plan",
+                                     swarm_run_ended=True)) as client:
+        body = client.get("/api/swarm").json()
+    assert body["display_context"] == {"source": "operator_configuration", "scope_label": "局部固定函数缺陷",
+                                       "scope_reference": "arguments.json / plan", "run_status": "ended"}
+    for key, value in snapshot.items():
+        assert body[key] == value
+    with TestClient(server.create_app(swarm_state=str(tmp_path), swarm_replay=True)) as client:
+        body = client.get("/api/swarm").json()
+    assert body["display_context"] is None
+
+
+@pytest.mark.parametrize("settings", [
+    {"swarm_scope_label": "unpaired"},
+    {"swarm_scope_reference": "unpaired"},
+    {"swarm_scope_label": " ", "swarm_scope_reference": "reference"},
+    {"swarm_scope_label": "scope", "swarm_scope_reference": "reference", "swarm_state": None},
+    {"swarm_run_ended": True},
+])
+def test_swarm_display_context_rejects_unbound_or_ambiguous_configuration(server: Any, settings: dict[str, Any],
+                                                                         monkeypatch: Any) -> None:
+    monkeypatch.delenv("OBSERVATORY_SWARM_STATE", raising=False)
+    with pytest.raises(ValueError):
+        server.create_app(**{"swarm_state": "unused-state", **settings})
+
+
+def test_swarm_display_context_survives_read_error_without_claiming_data(server: Any, tmp_path: Path,
+                                                                       monkeypatch: Any) -> None:
+    from starlette.testclient import TestClient
+
+    def fail(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("read unavailable")
+
+    monkeypatch.setattr(server, "load_swarm", fail)
+    with TestClient(server.create_app(swarm_state=str(tmp_path), swarm_replay=True, swarm_run_ended=True)) as client:
+        response = client.get("/api/swarm")
+    assert response.status_code == 503
+    assert response.json()["health"] == "error"
+    assert response.json()["display_context"]["run_status"] == "ended"
+    assert response.json()["tasks"] == []
+
+
+def test_swarm_display_cli_passes_only_presentation_settings(server: Any, tmp_path: Path, monkeypatch: Any) -> None:
+    import uvicorn
+    from starlette.testclient import TestClient
+
+    served = []
+    monkeypatch.setattr(server, "load_service", lambda: (None, "not configured"))
+    monkeypatch.setattr(uvicorn, "run", lambda app, **_kwargs: served.append(app))
+    monkeypatch.setattr(sys, "argv", ["server.py", "--swarm-state", str(tmp_path), "--swarm-replay",
+                                     "--swarm-scope-label", "local scope", "--swarm-scope-reference", "explicit reference",
+                                     "--swarm-run-ended"])
+    server.main()
+    with TestClient(served[0]) as client:
+        body = client.get("/api/swarm").json()
+    assert body["display_context"]["scope_label"] == "local scope"
+    assert body["display_context"]["run_status"] == "ended"
+    assert body["acceptance"]["task_live"] == "not_run"
