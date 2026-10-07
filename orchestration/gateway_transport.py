@@ -7,6 +7,7 @@ The caller owns authorization, reservations, input limits and durable intent.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Callable
 import json
 import re
 import time
@@ -35,7 +36,8 @@ class GatewayResponse:
 
 def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: float,
                    transport: httpx.MockTransport | None = None,
-                   base_url: str = EVOMAP_BASE_URL) -> GatewayResponse:
+                   base_url: str = EVOMAP_BASE_URL,
+                   observe: Callable[[str], None] | None = None) -> GatewayResponse:
     """One POST only; phase timeouts do not constitute an in-flight cost bound."""
     if not 0 < phase_timeout <= 180:
         raise ValueError("invalid_gateway_timeout")
@@ -50,8 +52,12 @@ def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: fl
     try:
         with httpx.Client(transport=transport, trust_env=False, follow_redirects=False,
                           timeout=httpx.Timeout(phase_timeout)) as client:
+            if observe is not None:
+                observe("http_send_entered")
             with client.stream("POST", base_url.rstrip("/") + "/chat/completions", json=payload,
                                headers={"Authorization": f"Bearer {key}"}) as response:
+                if observe is not None:
+                    observe("http_response_headers")
                 status = response.status_code
                 identifier = response.headers.get("x-request-id")
                 retry_after = response.headers.get("Retry-After")
@@ -65,6 +71,8 @@ def single_request(payload: dict[str, JsonValue], *, key: str, phase_timeout: fl
                         break
     except httpx.HTTPError as exc:
         error_kind = type(exc).__name__
+    if observe is not None:
+        observe("http_transport_returned")
     elapsed = time.monotonic() - started
     try:
         body: JsonValue = json.loads(raw)
