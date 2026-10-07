@@ -1,5 +1,7 @@
 # MorphBench Swarm 前端后继修复（F，2026-10-07—08）
 
+运行状态后继：本页原服务交接是历史记录；2026-10-08 01:08（+08:00）已按主控授权关闭 8100/8101，具体身份、内存和 B 时间边界见末尾资源收尾。本轮没有修改业务源码。
+
 任务 `task_333785bd89cc`，原 Dispatch `ctx_ef1075461ad3`；Orca 内存不足重启后沿同一会话由 `ctx_2fa0e1c926dd` 恢复。依据 `445aad4e3066e7cbfc0123adc1779d24d0c74cd4` 的 `docs/PLAN.md` 末页。已先读上一轮 Q `morphbench-verification-1007.md` 与 I `morphbench-final-1007.md`；原 RED 和 `C:/Users/DW/orca/mb021-1007/verify/browser-*` 保持只读。
 
 ## 源码与范围
@@ -72,3 +74,24 @@ HTTP 与视觉证据分开：8100 `/api/swarm` 为 missing/空数组；8101 为 
 - 当前 AOCI MCP 未提供且 worktree 无 `.mcp.json`，未声称获得当前认知收据或完成索引维护；未修改 AOCI 托管文件。
 - F 未发模型请求，未改预算/租约/任务/执行器，未运行 AT-07、真实科研或 B 的付费测试。B 的新真实 state 尚待独立 I 接线后复验，不把当前旧 replay 页面当作它的结果。
 - 本入口为直接交付 HTML/JS，无前端打包步骤；已执行 JS 语法检查。全仓 pytest/typecheck/SDK/wheel 工程门由独立 I 对最终合并 SHA 完成，本轨未宣称通过这些门。
+
+## 资源收尾后继（2026-10-08 01:08 +08:00）
+
+新任务 `task_bd6351aa1cc5` / Dispatch `ctx_544754940e36` 明确授权收回本轮两项预览服务，为 B formal-v1 释放提交内存。继续原 worktree/branch/session，未改业务源码；SOURCE 仍为 `820488e84a666712f247cfce9b36931d88646c1e`，此前 REPORT 为 `23be39b1b22e7442e689f3b1b7cbe4857f77f5f3`。
+
+以原 `process-handoff-1008.json` 为依据，逐项核对四个 PID 的 CreationDate、ExecutablePath、完整 CommandLine、ParentProcessId，以及 127.0.0.1:8100=39376 / 8101=41608。停止前再次核对身份，只向 listener **39376** 和 **41608** 发出 `Stop-Process`；launcher **41624** / **38544** 随 child 退出，无需额外终止。未操作 B 或其他用户进程、8099、pagefile 或全局设置。
+
+| 动作/观察 | 精确时刻（+08:00） | 结果 |
+|---|---|---|
+| 8100 停止请求 / 返回 | 01:08:04.4807526 / 01:08:04.4881115 | 已返回 |
+| 8101 停止请求 / 返回 | 01:08:05.0190449 / 01:08:05.0208068 | 已返回 |
+| 两 launcher 最后检查 | 01:08:05.5847234 | 均已自行退出 |
+| 停止后检查 | 01:08:06.3601103 | 四 PID 均不存在，两端口无 listener |
+
+停止前（01:08:01.9084546）两 listener PrivateMemory 分别为 **5892464640 / 5894471680 bytes**，均 **80 threads**；包括 launcher 合计 **10.980 GiB 私有提交**，不是 11 GiB 常驻物理内存。主机 FreeVirtualMemory 为 **459748 → 17682672 KiB**（约 **0.438 → 16.864 GiB**），FreePhysicalMemory 为 **9872880 → 10184412 KiB**；主机整体变化包含并发活动，不能全部归因于 UI 释放。
+
+原始证据保存在 `C:/Users/DW/orca/mb-live-1007/ui/preview-stop-1008-{before,events,after}.json`；精确操作脚本 `stop-owned-preview-1008.ps1`；补充说明 `preview-stop-1008-note.md`。已于 UTC 17:08:20 向 B 当前 `ctx_d4bfb6a05b88` 发出 Handoff `msg_26400ec0c8bc`，传递 UTC **2026-10-07T17:08:04.4807526Z / 17:08:05.0190449Z** 资源变化边界，以标注 formal-v1 的竞争区间并保留原失败，不推断某次失败因果。
+
+只读定位：旧恢复脚本未显式限制 BLAS/OMP 线程，启动时未记录继承的线程变量，不能断言其值。冻结安装源码存在 `server.py → swarm.research.service → swarm.pheromone → metabolism.decay`，后者触发 `metabolism/__init__.py → metabolism.service → metabolism.index → FAISS/NumPy` 的导入链；即使无 HostConfig 也会加载数值库。结合每进程 80 线程，这是内存来源的候选解释，未进行内存归因分析，不能宣称已证明全部 5.49 GiB 的原因。
+
+I 最终重启必须在 Python 启动前通过子进程环境显式设置 `OPENBLAS_NUM_THREADS=1`、`OMP_NUM_THREADS=1`、`MKL_NUM_THREADS=1`、`NUMEXPR_NUM_THREADS=1`；保持 Hidden/loopback，优先只启动必需的一项预览，并重新记录 launcher/listener、PrivateMemory、WorkingSet 与线程数。旧启动脚本不得原样复用；延迟 research 导入属于后续需原 Owner 测试的源码优化建议，本次没有实施。两服务保持暂停，由 I 接入 B 新 state 后最终重启；未启动新浏览器、测试、模型请求、安装或重导入实验。
