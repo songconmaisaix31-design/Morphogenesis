@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 from typing import Literal
 from uuid import uuid4
 
@@ -131,7 +132,7 @@ class DashScopeCodeExecutor:
                 [sys.executable, "-I", "-m", "swarm.code_executor", "--request-child"],
                 input=json.dumps(envelope, ensure_ascii=False).encode("utf-8"), capture_output=True,
                 env=child_environment(private_root), cwd=private_root, check=False,
-                timeout=self.config.timeout_seconds + 5,
+                timeout=self.config.timeout_seconds + 15,
             )
             if result.returncode or len(result.stdout) > 200000:
                 return Reply(error_kind="request_child_failed", uncertain=True)
@@ -203,6 +204,21 @@ def _child() -> int:
         envelope = TypeAdapter(dict[str, JsonValue]).validate_json(sys.stdin.buffer.read(131073))
         config = DashScopeCodeConfig.model_validate(envelope.get("config"))
         payload = TypeAdapter(dict[str, JsonValue]).validate_python(envelope.get("request"))
+        trace_path = Path.cwd() / "http-trace.jsonl"
+        child_entered_at = time.time()
+        with trace_path.open("x", encoding="utf-8"):
+            pass
+
+        def observe(stage: str) -> None:
+            # Local observation only, not proof of server receipt or a packet.
+            with trace_path.open("a", encoding="utf-8") as trace:
+                trace.write(json.dumps({"stage": stage, "pid": os.getpid(),
+                    "child_entered_at": child_entered_at, "at": time.time(),
+                    "monotonic_ns": time.monotonic_ns()}) + "\n")
+                trace.flush()
+                os.fsync(trace.fileno())
+
+        observe("http_child_entered")
         # The bounded HTTP child alone receives this private pipe. No key is
         # placed in argv, inherited env, files, tool output, or returned Reply.
         system_root = os.environ.get("SystemRoot", r"C:\Windows")
@@ -214,7 +230,7 @@ def _child() -> int:
             raise ValueError("credential_unavailable")
         key = secret.stdout.decode("utf-8").strip()
         reply = _request(payload, key, config.timeout_seconds,
-                         base_url=DASHSCOPE_BASE_URL, provider="dashscope")
+                         base_url=DASHSCOPE_BASE_URL, provider="dashscope", observe=observe)
     except Exception:
         reply = Reply(error_kind="request_child_failed", uncertain=True)
     print(reply.model_dump_json())

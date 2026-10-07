@@ -141,3 +141,15 @@ def test_executor_rejects_parent_credential(monkeypatch):
     monkeypatch.setenv("DASHSCOPE_API_KEY", "not-real")
     with pytest.raises(ValueError, match="credential_environment_must_be_cleared"):
         DashScopeCodeExecutor(DashScopeCodeConfig())
+
+
+def test_transport_trace_marks_entry_headers_and_return_without_payload():
+    from orchestration.gateway_transport import single_request
+    phases = []
+    def response(request):
+        assert phases == ["http_send_entered"]
+        return httpx.Response(200, json={"ok": True})
+    result = single_request({"model": "fixture"}, key="not-real", phase_timeout=5,
+                            transport=httpx.MockTransport(response), observe=phases.append)
+    assert result.status == 200
+    assert phases == ["http_send_entered", "http_response_headers", "http_transport_returned"]
