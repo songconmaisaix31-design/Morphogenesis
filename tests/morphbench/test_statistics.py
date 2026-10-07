@@ -64,3 +64,20 @@ def test_partial_trial_not_silently_included_in_matched_budget(tmp_path):
     assert morph["complete_trials"] == 0
     assert morph["observed_test_score_including_partial"]["mean"] == 99.0
     assert all(row["n"] == 0 for row in report["paired_contrasts"])
+    allowance = report["fixed_allowance_paired_contrasts"][0]
+    assert allowance["n"] == 1
+    assert allowance["mean"] == pytest.approx(98.7)
+
+
+def test_expected_coverage_distinguishes_first_exception_and_not_run(tmp_path):
+    import json
+    (tmp_path / "arguments.json").write_text(json.dumps({"tasks": ["BM-01"], "seeds": [0],
+        "systems": ["SingleAgent", "MorphSwarm"]}))
+    failed = tmp_path / "BM-01-s0-SingleAgent"
+    failed.mkdir()
+    (failed / "failure.json").write_text('{"exception":"first failure"}')
+    report = stats.summarize(tmp_path)
+    coverage = report["coverage"]
+    assert (coverage["expected"], coverage["observed"], coverage["missing_count"]) == (2, 0, 2)
+    assert [r["status"] for r in coverage["missing"]] == ["FAIL_no_result", "NOT_RUN"]
+    assert "no independent test set" in stats.markdown(report)

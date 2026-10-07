@@ -50,6 +50,11 @@ uncertainty across datasets or research problems. Paired percentile bootstrap us
 adjustment of the ten task/baseline contrasts are exploratory; five pairs cannot
 yield p < 0.05 in that test. Sequential testing was not preregistered or executed.
 Incomplete trials are preserved and excluded from matched-search-budget contrasts.
+Separate fixed-allowance contrasts include observable partial endpoints, with
+explicit unequal execution counts. Complete-only comparisons can have selection
+bias. Coverage enumerates all planned task/seed/system combinations, including
+missing and failed-without-result trials. BM-05's final evaluation uses the same
+mathematical objective and has no independent held-out test set.
 
 The executor and all token/cost accounting retain `provenance=mock` and
 `usage_source=fixture_mock`. Actual cost is unknown (`null`). Real CPU fitting,

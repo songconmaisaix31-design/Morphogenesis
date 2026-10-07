@@ -48,7 +48,18 @@ def bh_adjust(p_values: list[float]) -> list[float]:
 
 def summarize(root: Path) -> dict:
     rows = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(root.glob("BM-*/result.json"))]
-    groups, contrasts = [], []
+    argument_file = root / "arguments.json"
+    arguments = json.loads(argument_file.read_text(encoding="utf-8")) if argument_file.exists() else {
+        "tasks": [f"BM-0{i}" for i in range(1, 6)], "seeds": list(range(5)),
+        "systems": ["SingleAgent", "CentralScheduler", "MorphSwarm"]}
+    expected = list(itertools.product(arguments["tasks"], arguments["seeds"], arguments["systems"]))
+    observed = {(r["task"], r["seed"], r["system"]) for r in rows}
+    if len(observed) != len(rows):
+        raise ValueError("duplicate task/seed/system result")
+    missing = [{"task": task, "seed": seed, "system": system,
+                "status": "FAIL_no_result" if (root / f"{task}-s{seed}-{system}" / "failure.json").exists() else "NOT_RUN"}
+               for task, seed, system in expected if (task, seed, system) not in observed]
+    groups, contrasts, allowance_contrasts = [], [], []
     for task in sorted({row["task"] for row in rows}):
         for system in ("SingleAgent", "CentralScheduler", "MorphSwarm"):
             group = [r for r in rows if r["task"] == task and r["system"] == system]
@@ -62,20 +73,27 @@ def summarize(root: Path) -> dict:
                            "setup_evaluations": sum(r["setup_evaluations"] for r in group),
                            "test_evaluations": sum(r["test_evaluations"] for r in group)})
         for baseline in ("SingleAgent", "CentralScheduler"):
-            def scores(system):
+            def scores(system, complete_only=True):
                 selected = [r for r in rows if r["task"] == task and r["system"] == system
-                            and r["status"] == "PASS_local_trial" and r["test_score"] is not None]
+                            and (not complete_only or r["status"] == "PASS_local_trial") and r["test_score"] is not None]
                 if len({r["seed"] for r in selected}) != len(selected):
                     raise ValueError("duplicate seed in a task/system")
                 return {r["seed"]: r["test_score"] for r in selected}
             contrasts.append({"task": task, "contrast": f"MorphSwarm minus {baseline}",
                               **paired(scores("MorphSwarm"), scores(baseline))})
+            allowance_contrasts.append({"task": task, "contrast": f"MorphSwarm minus {baseline}",
+                **paired(scores("MorphSwarm", False), scores(baseline, False)),
+                "interpretation": "fixed search allowance; includes partial trials; not equal executed evaluations"})
     tested = [row for row in contrasts if row["sign_flip_p"] is not None]
     for row, q in zip(tested, bh_adjust([r["sign_flip_p"] for r in tested])):
         row["bh_q"] = q
-    return {"groups": groups, "paired_contrasts": contrasts, "trials": rows,
+    return {"groups": groups, "paired_contrasts": contrasts,
+            "fixed_allowance_paired_contrasts": allowance_contrasts, "trials": rows,
+            "coverage": {"expected": len(expected), "observed": len(rows), "missing_count": len(missing),
+                         "missing": missing, "complete_budget_trials": sum(r["status"] == "PASS_local_trial" for r in rows)},
+            "final_evaluation": "BM-01..04 held-out synthetic test; BM-05 same mathematical objective, no independent test set",
             "bootstrap_unit": "paired allocation seed; fixed synthetic data and fixed model seeds",
-            "interpretation": "exploratory complete-budget trials only; no population/dataset uncertainty",
+            "interpretation": "exploratory; complete-only comparisons can have selection bias; fixed-allowance contrasts retain observable partial endpoints; neither measures population/dataset uncertainty",
             "sequential_testing": "NOT_RUN; no sequential stopping rule preregistered",
             "fdr_family": "10 two-sided exact sign-flip contrasts; Benjamini-Hochberg exploratory adjustment",
             "official_leaderboard": "NOT_RUN; synthetic proxies and no official calibration",
@@ -83,8 +101,11 @@ def summarize(root: Path) -> dict:
 
 
 def markdown(report: dict) -> str:
+    coverage = report["coverage"]
     lines = ["# Local synthetic MorphBench results", "", "Complete-budget trials only; all first failures and partial trials remain in JSON.", "",
-             "| Task | System | Complete / observed | Held-out mean | SE | Search evaluations | Duplicates | Prefit | Final test |",
+             f"Coverage: expected {coverage['expected']}, observed {coverage['observed']}, missing {coverage['missing_count']}; complete budget {coverage['complete_budget_trials']}.", "",
+             report["final_evaluation"], "",
+             "| Task | System | Complete / observed | Final evaluation mean | SE | Search evaluations | Duplicates | Prefit | Final evaluation calls |",
              "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
     for r in report["groups"]:
         score = r["test_score"]
@@ -93,7 +114,14 @@ def markdown(report: dict) -> str:
               "| Task | Contrast | n | Mean difference | 95% paired bootstrap CI | Exploratory BH q |", "|---|---|---:|---:|---|---:|"]
     for r in report["paired_contrasts"]:
         lines.append(f"| {r['task']} | {r['contrast']} | {r['n']} | {r['mean']} | {r['ci95']} | {r.get('bh_q')} |")
+    lines += ["", "Fixed-allowance contrasts including observable partial trials (descriptive; execution counts may differ):", "",
+              "| Task | Contrast | n | Mean difference | 95% paired bootstrap CI |", "|---|---|---:|---:|---|"]
+    for r in report["fixed_allowance_paired_contrasts"]:
+        lines.append(f"| {r['task']} | {r['contrast']} | {r['n']} | {r['mean']} | {r['ci95']} |")
     lines += ["", report["interpretation"], "", report["bootstrap_unit"], "", report["official_leaderboard"], ""]
+    if coverage["missing"]:
+        lines += ["Missing combinations:", "", "| Task | Seed | System | Status |", "|---|---:|---|---|"]
+        lines += [f"| {r['task']} | {r['seed']} | {r['system']} | {r['status']} |" for r in coverage["missing"]]
     return "\n".join(lines)
 
 
