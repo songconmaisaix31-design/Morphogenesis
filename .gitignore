@@ -32,3 +32,6 @@ opencode.json.backup.*
 .codex/config.toml.backup.*
 # Preserve local official-init policy backups without committing them.
 /AGENTS.md.backup.*
+
+# Local agent workspace state (WorkBuddy session data; machine-bound)
+.workbuddy/
