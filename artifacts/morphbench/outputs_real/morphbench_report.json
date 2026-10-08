@@ -1,0 +1,239 @@
+{
+  "budget": 24,
+  "task_metrics": [
+    {
+      "task": "BM-01",
+      "name": "Protein fitness regression",
+      "system": "SingleAgent",
+      "val_score": 0.7829,
+      "test_score": 0.8037,
+      "leaderboard_percentile": 95.15,
+      "units_used": 24,
+      "duplicate_units": 13,
+      "redundant_rate": 0.5417,
+      "accepted_improvements": 5,
+      "completed": true
+    },
+    {
+      "task": "BM-01",
+      "name": "Protein fitness regression",
+      "system": "CentralScheduler",
+      "val_score": 0.8199,
+      "test_score": 0.8178,
+      "leaderboard_percentile": 96.02,
+      "units_used": 24,
+      "duplicate_units": 11,
+      "redundant_rate": 0.4583,
+      "accepted_improvements": 6,
+      "completed": true
+    },
+    {
+      "task": "BM-01",
+      "name": "Protein fitness regression",
+      "system": "MorphSwarm",
+      "val_score": 0.8199,
+      "test_score": 0.8178,
+      "leaderboard_percentile": 96.02,
+      "units_used": 24,
+      "duplicate_units": 11,
+      "redundant_rate": 0.4583,
+      "accepted_improvements": 2,
+      "completed": true
+    },
+    {
+      "task": "BM-02",
+      "name": "Drug-discovery ADMET classification",
+      "system": "SingleAgent",
+      "val_score": 0.9866,
+      "test_score": 0.986,
+      "leaderboard_percentile": 98.0,
+      "units_used": 24,
+      "duplicate_units": 15,
+      "redundant_rate": 0.625,
+      "accepted_improvements": 3,
+      "completed": true
+    },
+    {
+      "task": "BM-02",
+      "name": "Drug-discovery ADMET classification",
+      "system": "CentralScheduler",
+      "val_score": 0.9866,
+      "test_score": 0.986,
+      "leaderboard_percentile": 98.0,
+      "units_used": 24,
+      "duplicate_units": 15,
+      "redundant_rate": 0.625,
+      "accepted_improvements": 3,
+      "completed": true
+    },
+    {
+      "task": "BM-02",
+      "name": "Drug-discovery ADMET classification",
+      "system": "MorphSwarm",
+      "val_score": 0.9866,
+      "test_score": 0.986,
+      "leaderboard_percentile": 98.0,
+      "units_used": 24,
+      "duplicate_units": 15,
+      "redundant_rate": 0.625,
+      "accepted_improvements": 3,
+      "completed": true
+    },
+    {
+      "task": "BM-03",
+      "name": "Single-cell cell-type annotation",
+      "system": "SingleAgent",
+      "val_score": 0.9345,
+      "test_score": 0.9333,
+      "leaderboard_percentile": 94.44,
+      "units_used": 24,
+      "duplicate_units": 13,
+      "redundant_rate": 0.5417,
+      "accepted_improvements": 4,
+      "completed": true
+    },
+    {
+      "task": "BM-03",
+      "name": "Single-cell cell-type annotation",
+      "system": "CentralScheduler",
+      "val_score": 0.9345,
+      "test_score": 0.9333,
+      "leaderboard_percentile": 94.44,
+      "units_used": 24,
+      "duplicate_units": 12,
+      "redundant_rate": 0.5,
+      "accepted_improvements": 4,
+      "completed": true
+    },
+    {
+      "task": "BM-03",
+      "name": "Single-cell cell-type annotation",
+      "system": "MorphSwarm",
+      "val_score": 0.9345,
+      "test_score": 0.9333,
+      "leaderboard_percentile": 94.44,
+      "units_used": 24,
+      "duplicate_units": 12,
+      "redundant_rate": 0.5,
+      "accepted_improvements": 5,
+      "completed": true
+    },
+    {
+      "task": "BM-04",
+      "name": "Biomedical image classification",
+      "system": "SingleAgent",
+      "val_score": 1.0,
+      "test_score": 0.9953,
+      "leaderboard_percentile": 98.0,
+      "units_used": 24,
+      "duplicate_units": 14,
+      "redundant_rate": 0.5833,
+      "accepted_improvements": 3,
+      "completed": true
+    },
+    {
+      "task": "BM-04",
+      "name": "Biomedical image classification",
+      "system": "CentralScheduler",
+      "val_score": 1.0,
+      "test_score": 0.9953,
+      "leaderboard_percentile": 98.0,
+      "units_used": 24,
+      "duplicate_units": 13,
+      "redundant_rate": 0.5417,
+      "accepted_improvements": 3,
+      "completed": true
+    },
+    {
+      "task": "BM-04",
+      "name": "Biomedical image classification",
+      "system": "MorphSwarm",
+      "val_score": 1.0,
+      "test_score": 0.9953,
+      "leaderboard_percentile": 98.0,
+      "units_used": 24,
+      "duplicate_units": 13,
+      "redundant_rate": 0.5417,
+      "accepted_improvements": 2,
+      "completed": true
+    },
+    {
+      "task": "BM-05",
+      "name": "GPT training hyper-parameter optimization",
+      "system": "SingleAgent",
+      "val_score": -1.0521,
+      "test_score": -1.0521,
+      "leaderboard_percentile": 50.0,
+      "units_used": 24,
+      "duplicate_units": 3,
+      "redundant_rate": 0.125,
+      "accepted_improvements": 4,
+      "completed": true
+    },
+    {
+      "task": "BM-05",
+      "name": "GPT training hyper-parameter optimization",
+      "system": "CentralScheduler",
+      "val_score": -1.0521,
+      "test_score": -1.0521,
+      "leaderboard_percentile": 50.0,
+      "units_used": 24,
+      "duplicate_units": 0,
+      "redundant_rate": 0.0,
+      "accepted_improvements": 4,
+      "completed": true
+    },
+    {
+      "task": "BM-05",
+      "name": "GPT training hyper-parameter optimization",
+      "system": "MorphSwarm",
+      "val_score": -1.0521,
+      "test_score": -1.0521,
+      "leaderboard_percentile": 50.0,
+      "units_used": 24,
+      "duplicate_units": 0,
+      "redundant_rate": 0.0,
+      "accepted_improvements": 4,
+      "completed": true
+    }
+  ],
+  "percentile_table": [
+    {
+      "system": "SingleAgent",
+      "mean_leaderboard_percentile": 87.12,
+      "completion_rate": 1.0,
+      "mean_redundant_rate": 0.4833
+    },
+    {
+      "system": "CentralScheduler",
+      "mean_leaderboard_percentile": 87.29,
+      "completion_rate": 1.0,
+      "mean_redundant_rate": 0.425
+    },
+    {
+      "system": "MorphSwarm",
+      "mean_leaderboard_percentile": 87.29,
+      "completion_rate": 1.0,
+      "mean_redundant_rate": 0.425
+    }
+  ],
+  "swarm_metrics": {
+    "SB-01_swarm_survival": 1.0,
+    "SB-01_central_survival": 0.0,
+    "SB-01_swarm_units_used": 20,
+    "SB-01_central_units_used": 10,
+    "SB-02_reuse_gain": 0.0,
+    "SB-02_cold_units_to_target": 9,
+    "SB-02_warm_units_to_target": 9,
+    "SB-03_overhead_ratio": 2.8632,
+    "SB-03_base_wall_seconds": 4.8838,
+    "SB-03_swarm_wall_seconds": 18.8669,
+    "SB-04_redundant_rate": 0.425
+  },
+  "summary": {
+    "budget_per_task": 24,
+    "n_e2e_tasks": 5,
+    "n_systems": 3,
+    "engine": "real-morphogenesis-0.2.1"
+  }
+}
