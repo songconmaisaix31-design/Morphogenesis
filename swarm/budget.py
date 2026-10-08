@@ -251,12 +251,20 @@ class BudgetLedger:
 
     def _trip(self, db: sqlite3.Connection, reason: str) -> None:
         priorities = {"swarm_cost_estimate_exhausted": 1, "unknown_cost": 2,
-                      "provider_bound_violated": 3, "request_token_limit_exceeded": 3, "unknown_usage": 4}
+                      "provider_bound_violated": 3, "request_token_limit_exceeded": 3,
+                      "unknown_usage": 4, "provider_http_error": 4}
         previous = db.execute("SELECT breaker FROM swarm_budgets WHERE swarm_id=?", (self.swarm_id,)).fetchone()[0]
         if previous is None or priorities[reason] > priorities.get(previous, 4):
             db.execute("UPDATE swarm_budgets SET breaker=? WHERE swarm_id=?", (reason, self.swarm_id))
 
-    def settle(self, reservation: Reservation, usage: JsonValue) -> BudgetSnapshot:
+    def settle(self, reservation: Reservation, usage: JsonValue, *,
+               stop_on_provider_error: bool = False) -> BudgetSnapshot:
+        """Settle observed usage; optionally close admission in the same transaction.
+
+        The fixed code protocol stops on provider HTTP errors. Existing data-only
+        chains retain their default behavior, including confirmed-rejection holds.
+        Already admitted work can still settle without clearing the durable stop.
+        """
         reservation = Reservation.model_validate(reservation.model_dump())
         reported = _usage(usage)  # Same strict nonnegative integer + consistent-total gateway parser.
         if reported is not None and reported.total_tokens > 2**63 - 1:
@@ -265,6 +273,8 @@ class BudgetLedger:
         settlement = json.dumps([reported.prompt_tokens, reported.completion_tokens, reported.total_tokens]) if reported else None
         with self._transaction() as db:
             row = self._stored(db, reservation)
+            if stop_on_provider_error:
+                self._trip(db, "provider_http_error")
             if row["status"] != "pending":
                 if row["settlement"] is not None and settlement is not None and row["settlement"] != settlement:
                     raise ValueError("conflicting usage settlement")

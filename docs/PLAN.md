@@ -336,3 +336,61 @@ Orca Run `run_b33cfa78de7a`；F `task_55ac16d01d29 / ctx_b54a4695c1b1` 复用原
 # 2026-09-30 当前任务：异构 Agent 与科研环境集成
 
 当前一页计划、固定 Owner/write_paths、基线及三态验收见 [RESEARCH_INTEGRATION_PLAN_0930.md](RESEARCH_INTEGRATION_PLAN_0930.md)。以上历史计划保留；本轮用户指令优先。A/B/C 领域开发及必要返修已提交推送。独立 I 的冻结代码 bde3412d2257fd1581ce1d7f88b254fb0c13a269 已通过双平台完整 CI、本机完整1104项测试、strict/build/SDK/实际wheel分发及原兼容性门禁；工程集成已验证。官方 SDK interface_live 与作者唯一真实实验/中断恢复/fencing 通过；Claude 实际401认证阻塞，第三角色实际采用 NOT_RUN，原3600秒案例已到期，完整 task_live 未达成。认证身份选择未答复，不切换提供方或重置原案例。当前证据及全部原失败见 [RESEARCH_INTEGRATION_ACCEPTANCE_0930.md](RESEARCH_INTEGRATION_ACCEPTANCE_0930.md)。
+# MorphBench 0.2.1 评测执行页（2026-10-07）
+
+用户要求启动当前产品主线 0.2.1，执行 `C:/Users/DW/Downloads/MorphBench_对标评测方案.docx`；追加要求主控仅调度，使用 Orca CLI 子 Agent。被测产品固定 `50396909c3fbaa510e755b8e2361e05d84afdfaa`。本页仅覆盖本次评测新增文件，不变更 R1 领域所有权。
+
+| 轨道 | 单 Agent / Worktree / Branch | 独占 write_paths | 验收 |
+|---|---|---|---|
+| M 评测执行 | Codex / morphbench-eval-1007 / Orca 返回同名分支 | `tools/morphbench/**`, `tests/morphbench/**`, `docs/tracks/morphbench-evaluation-1007.md`; 私有运行目录 `C:/Users/DW/orca/mb021-1007/eval/**` | 原方案 5 BM / 4 SB 逐项结果；预算、种子、原始证据和测量边界；可行时至少 5 seeds；不得把轮转适配器称为 Worker 去中心化实跑 |
+| Q 独立核验 | Codex / morphbench-verify-1007 / Orca 返回同名分支 | `tests/integration/morphbench/**`, `docs/tracks/morphbench-verification-1007.md`; `C:/Users/DW/orca/mb021-1007/verify/**` | 产品 HTTP/UI、实际 Worker/lease/fencing/预算边界；审计指标是否可用；官方 Tier C 数据/执行器缺口，不用启发式判官伪造分数 |
+| I 最终集成 | 两轨交付后一个 Codex / morphbench-integrate-1007 / Orca 返回同名分支 | 普通精确合并 M/Q/主控提交；`docs/tracks/morphbench-final-1007.md` 和少量评测入口胶水 | 核对原始证据、独立复核结果表、可复现命令、限制、最终 commit/push；领域问题退原轨 |
+
+主控仅维护本页、调度、决策和验收。M/Q 自身开发、测试、文档和返修由同一 Worker 持续完成并 commit + push。原始未跟踪 `artifacts/morphbench/**` 只读保留。评测前证据/已启动进程交接位于 `C:/Users/DW/orca/mb021-1007`；不得重写已有日志。产品只读观测台已在 127.0.0.1:8099 启动，由 Q 接管验证和必要的本次进程维护。
+
+范围：本机 CPU、固定/合成任务、真实本地 Worker 机制验证。原 Spec 中真实科研沙箱 AT-07、原生科研模型执行及云/GPU/付费外发的具体批准门仍独立；公开资料读取和已提供 CPU 评测获授权。产品源码和锁文件冻结，不为获得高分改阈值、改预算、篡改历史或建设新的调度/证明系统。报告区分 contract_local / interface_live / task_live，费用未知为 null，自造锚点不作为官方百分位。
+
+最终交付包括：可访问产品地址、逐项测评报告、精确源码与报告 SHA、命令与结果、真实限制和未执行项。不得把全部不可执行项笼统算通过。
+
+# MorphBench DashScope 真实 Swarm 后继执行页（2026-10-07）
+
+当前用户明确授权适度算法优化、DashScope 真实 Swarm 测评（动态热点/能力反转路由、租约/崩溃恢复、跨 session 正误经验复用、统一预算真实代码缺陷任务）、修复 Swarm 前端，最终一个集成报告。此授权覆盖上一轮仅合成/产品冻结的限制，仅限本页范围；不扩展为任意科研、云/GPU或无界支出。主控仅调度、治理、验收，使用 Orca CLI。
+
+基线：产品 0.2.1 SOURCE=50396909c3fbaa510e755b8e2361e05d84afdfaa；上一轮完整本地 REPORT=47f089ad92e0c459b2deeadab65109246d64ae9a（远端当时仅bc12c1d，GitHub500原失败保留）。本轮从后者普通演进，历史结果不得覆盖。
+
+| 轨道 | 固定 Agent / Worktree / Branch | 独占 write_paths | 交付与验收 |
+|---|---|---|---|
+| A 核心算法/执行边界 | 新 Codex / morphbench-live-core-1007 / Orca同名分支 | swarm/**（除swarm/observatory/**）, local_assets/**, orchestration/provider_adapters/dashscope.py, orchestration/gateway_transport.py, tests/swarm/**, tests/local_assets/**, docs/tracks/morphbench-live-core-1007.md | 复用现有Router/TaskLedger/lease/预算/资产链；有界修复与可选择后继策略；真实代码补丁执行边界；原断言/首失败/后继证据；向B交接精确SOURCE |
+| B 真实评测 | 复用原M Codex / morphbench-eval-1007 / songconmaisaix31-design/morphbench-eval-1007 | tools/morphbench/**, tests/morphbench/**, docs/tracks/morphbench-live-protocol-1007.md, docs/tracks/morphbench-live-evaluation-1007.md | 先冻结协议/任务/模型/判据/预算，再一次有界真跑；四类测评原始记录、失败与对照；不越轨改核心；与A通过Handoff协作 |
+| F Swarm前端 | 新 Codex / morphbench-live-ui-1007 / Orca同名分支 | src/env-observatory/**, swarm/observatory/**, tests/observatory/**, docs/tracks/morphbench-live-ui-1007.md | 修复Swarm DOM/布局与状态展示，展示后端真实事实；研究未连接时显式空态，不能fallback伪造任务；Orca真实浏览器三视口验证 |
+| I 独立集成 | 三轨交付后复用原I或一个新Codex / 固定集成worktree与分支 | 精确普通合并、少量导入/配置胶水、docs/tracks/morphbench-live-final-1007.md及由其导出的本地单份DOCX | 独立安装/适用工程门、原始证据复核、真实页面复验；一个报告涵盖上轮可证事实/新四类结果/优化前后/前端/费用/限制 |
+
+排除：A不写swarm/observatory与UI；B不写任何产品核心；F不写路由/账本/执行器；锁文件均冻结，确需变更先Handoff。领域返修始终退原Owner。每阶段commit+push，不force；远端失败先核对实际SHA再有界恢复。主控在独立control worktree仅维护本页/状态/决策/验收。
+
+运行私有根=C:/Users/DW/orca/mb-live-1007，A/core、B/eval、F/ui、I/integrate互斥。上一轮C:/Users/DW/orca/mb021-1007及artifacts/morphbench原件只读。新运行使用隔离安装和已核实Git字节；不能修改上一轮verify venv。API凭据只在受控请求进程读取Windows用户DASHSCOPE_API_KEY，不写命令、日志、报告或模型输入。
+
+支出：用户当前已授权DashScope真实调用；已询问费用偏好，暂按本轮总上限人民币30元、最多256个新请求的保守默认准备，收到用户调整立即落实。模型/价格按官方当前资料固定；控制输入/输出token和已有预算预留，含预检/校准/失败/经验生成/三系统全部成本；各正式对照均使用相同模型/任务和全流程预算口径。未知请求效果/usage停止该分支，未知实际账单保持null；不得通过重置session、换身份或预算实现重试。B是唯一付费调用Owner，A/F/I不发模型请求。
+
+测评：动态热点和能力反转用预先固定phase及真实反馈，禁止注入成功率替代实测；租约故障按预留前/后、在途/完成前、实际owned PID与自然TTL/fencing分列；跨session必须fresh process且以consumption/validation/adoption链证明，正确、错误、无经验对照不能混；代码缺陷修复必须真实DashScope输出补丁并经固定独立测试，不能只产生标准答案或泄漏gold。真实可执行代码只在已验证受控目录/白名单与独立验证器执行，不向代码进程传凭据。旧baseline与优化策略/统一Single/Central对照由B提交可执行协议主控审核后固定；先前观测不是预注册证据。
+
+独立测试/build/type/SDK等适用门由A/F先跑，最后I对冻结合并SHA串行完成适用总门；不把mock门、接口成功或进程exit0等同task_live成功。所有首RED、INCOMPLETE、NOT_RUN与null费用保留；优化不得在看到正式成绩后调判据。最终产品服务由F/I核对本次owned PID后替换或新端口启动，不终止未知进程。
+
+## 2026-10-08 交付检查点
+
+- A 已结算：SOURCE `d5bd40cea91b09ddf669be5e063e726186191fc4`，REPORT/remote `99a7b66fb2a1c49bd9a4984e81b2a6d1027fb522`。`d5cb717` 完整核心/资产 576 PASS；后继审计 8、最终预算/执行/失败链 79 PASS，strict 11、wheel/sdist 构建通过。两批 SOURCE 证据分别保留，不把前序全套套用后继。A 新付费调用 0。
+- F 已结算：SOURCE `820488e84a666712f247cfce9b36931d88646c1e`，REPORT/remote `23be39b1b22e7442e689f3b1b7cbe4857f77f5f3`。Python 61、前端 8、安装原字节 216、HTTP 10 及 1440/1280/390 三视口真实交互通过；旧 RED 保留。8100 空态、8101 明确历史 replay；具体进程身份在 `ui/process-handoff-1008.json`，不能当作新真实测评。
+- B 独占后续重运行窗口：先对 A 最终 SOURCE 做隔离安装与代表离线子集；正式 API 批次仍须绑定最终协议/工具 SOURCE、安装证据和主控窗口消息。目前新付费调用 0。协议预算细化为最多 233 已分配 + 7 保留 = 240 槽，总成本上限仍 CNY30；新增独立 before_commit 故障槽，不覆盖 after_commit。未知远端效果不重试；已知响应/用量、原预算 settled 且无 pending/uncertain、重启 0 新请求，才可继续后续独立场景。
+- Orca 内存不足中断及首日志已保留；原会话在同 worktree/branch 恢复。重测试、安装与构建串行，线程上限为 1；不修改全局 pagefile。A/F 已释放调度资源，领域返修仍归原 Owner。
+- I 独立集成任务 `task_bfec3a09dc70` 依赖 A/B/F 全部完成，尚未启动。最终报告为 `docs/tracks/morphbench-live-final-1007.md`，同内容导出单份中文 DOCX 至下载目录；不得冒充官方榜单、一般工程仓库修复、完整科研/AT-07 或已证能力反转。
+
+## 2026-10-08 正式运行窗口
+
+- 冻结 B SOURCE `b41de607b6a020963bd1bd4c2b03432386279c73` 已本地 commit 且 clean；三次普通 push 遇 GitHub 500，远端仍 `aefd3ef3a13ef4b07f33a3bc7b6853b572a8c080`。原错误保留，后续普通发布，不 force。
+- 主控复核冻结协议与执行矩阵、offline-v2 首次经验报告读取 RED、offline-v3 经验及四故障 PASS、最终 15 pytest/strict 13/pip 101 结果，批准消息 `msg_4e6d99d6cf88`（2026-10-07 16:59:20 UTC）。执行产品为非 editable 安装 A `d5bd40cea91b09ddf669be5e063e726186191fc4`，原字节核对 154 项一致；仅 B 获本轮付费窗口。
+- 唯一正式目录 `C:/Users/DW/orca/mb-live-1007/eval/formal-v1`，入口 `tools/morphbench/live_batch.py --mode live`，绑定上述 SOURCE 与消息 ID。最多 233 已分配槽、7 保留槽不自行使用；CNY24 保守预留、CNY30 上限，实际账单未知。预计 45–90 分钟，矩阵主循环硬界 18,600 秒及有限本地开销；inflight 最后，任何未知或拒绝停止后续付费，不重试，不修改冻结内容追分。
+- 正式期间主机提交内存不足；F 原 Owner 经新任务 `task_bd6351aa1cc5` 核对交接身份后，于 2026-10-07 17:08:04.4807526/17:08:05.0190449 UTC 精确停止本轮 8100/8101 listener，两个 launcher 随后退出。原 listener 各 80 线程、合计 10.980 GiB 私有提交；整机可用提交内存增量包含其他活动，不能全归因本次关闭。源码未改，F 后继 REPORT/remote `f47ed8a975bd32d305fd5653d203c0d530868204`，证据 `ui/preview-stop-1008-*`。B 已知晓，跨系统 elapsed 比较标资源干预污染，不重跑已付费任务。I 最终重启前显式设置 OPENBLAS/OMP/MKL/NUMEXPR 线程为 1，并核验实际进程内存、线程和页面。
+- 正式批次在 seed0 后继组遇 `ConnectTimeout / unknown_effect / usage=null`，按协议退出 2 并停止所有新付费。23 intent、22 HTTP200 且独立验证应用、1 unknown；未知 hold CNY0.1 保留。已知用量 12,830 tokens，已知原价估算 CNY0.0170944，完整费用/实账为 null。Single 6/6、Central 6/6、legacy 5/6（另1未尝试）、successor 5/6（另1未知）；仅 n=1，不证明算法优势。其余种子及动态/经验/故障正式均 NOT_RUN。B REPORT/remote `640aa5f2e7c85061fb4e1bd6bf7a3551910f0fc4`，SOURCE仍 `b41de607`；四类目标未达成，B Task 以 failed 结算，部分工具与报告交付完成。
+- 主控已异步询问用户是否另行授权继续未启动独立 cell；截至派发 I 时未获答复，禁止自动继续或重发未知请求。原全量集成 Task `task_bfec3a09dc70` 未启动并记录 superseded_unstarted；新的非付费独立部分结果集成 Task `task_93be71bbb754` / Dispatch `ctx_68baf6827e11`，复用 `morphbench-integrate-1007` worktree，由新的唯一 I Worker `term_29e8f2f5-1d69-43b3-a736-904ac5043ce0` 完成精确合并、安装/工程门、真实历史状态页面复验及单份 MD/DOCX。不得把集成完成写成四类真实评测完成。
+- I SOURCE `96dfbfaaa75780a57062b5d33509f63b244a899d`：普通合并、非 editable COPY 和 wheel 各 219 原字节一致，strict 172、相关 export 86 PASS；前序 `7017f7e` 的集成 171 PASS 与移除 cast 引发的首类型 RED 分列保留。I 独立核对 24 到达任务及实际目标字节，22 验证应用成功、1 未尝试、1 未知，B 全账逐字段一致。新服务线程受控、私有提交约 158/162 MiB；仍需最终页面后继复验。
+- I 发现历史范围与整体验收/单任务审计作用域说明不足，退原 F 任务 `task_40efe7475c91` / `ctx_ab7ff600ec95` 返修。F SOURCE `1aa78efd6f2681e5cd78c771cd62362e655e1e44`、REPORT/remote `d8aaed0b89249ab70db3d8ffe7912b1a8da26556` 已 push 且 clean；Node 首 RED 8/2 保留，后继 10 PASS、Swarm HTTP 切片 11 PASS。只增加成对 scope label/reference 与需 replay 的 run-ended 只读展示配置；不改账本或科学验收、不从路径猜范围。I 接收精确合并并做增量安装与三视口，F 已结算释放。
+- DOCX 渲染的 Windows 适配裁决为 `msg_fa3295eec675`：该环境技能 runtime 的 LibreOffice 为 null，在用户已授权本地文档生成验收范围内，仅本次允许 packaged renderer 调用已存在的绝对路径 native soffice，Hidden/headless、独立 profile 和 integrate 输出；不改用户应用/全局设置。保留环境差异与版本日志，Python/Node 继续技能 runtime，逐页视觉门不取消。
