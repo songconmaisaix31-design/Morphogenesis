@@ -8,7 +8,7 @@
 2. 普通 `--no-ff` 合并 `codex/branch-organization-20261008` 精确提交 `215248a`；保留原轨提交、未知效果与首次失败，不新跑模型/科研/沙箱。
 3. 在 STATUS / DECISIONS 补当前入口、分支分类和历史索引；旧记录保持原文。
 4. 在精确合并树执行 pytest、strict 类型、Python build、SDK、wheel 安装态、观测台 Node 测试及现有前端 build；验证日志留 `.runtime/mainline-cleanup-20261012/`。任何失败按实际报告，领域问题交回原 Owner。
-5. 提交 ACCEPTANCE 最终记录；验证允许后普通合并回产品主线并 push。远端默认 `main`、tag 和部署不在本轮操作范围。
+5. 提交 ACCEPTANCE 最终记录；验证允许后普通合并回产品主线并 push。旧 `main`、tag 和部署不在本轮操作范围；当前远端默认分支为 `codex/morphogenesis-mainline`。
 
 AOCI 已完整交付 192 条索引，交付已确认，但治理 dirty/stale；当前事实按源码核实。维护只按工具当前绑定结果执行，不把历史索引补全扩大为本轮业务范围。
 

@@ -1,8 +1,8 @@
 ## 主线整理交付（2026-10-12）
 
-产品主线 `codex/morphogenesis-mainline` 已通过普通合并 `6580405bc63da6e2a1d7d22524bd44cde07e1766` 纳入整理分支 `8e3826f29c61904d5a38389a8c749fef5a06d4fe`；整理分支已推送同名 origin。主线交付包括该合并与本段文档后继，普通 push 目标仍为同名产品主线；默认 `main`、tag 和部署不推进。
+产品主线 `codex/morphogenesis-mainline` 已通过普通合并 `6580405bc63da6e2a1d7d22524bd44cde07e1766` 纳入整理分支 `8e3826f29c61904d5a38389a8c749fef5a06d4fe`；整理分支已推送同名 origin。主线交付包括该合并与本段文档后继，普通 push 目标仍为同名产品主线；旧 `main`、tag 和部署不推进；GitHub 当前默认分支为 `codex/morphogenesis-mainline`。
 
-本轮新增 7 个有实际内容的提交（5 个计划/导航/入口/验收/收尾提交 + 2 个普通合并），可达历史从 887 增至 941，其中保留 47 个此前未进入产品主线的既有提交。所有旧分支、备份、工作树、原整理工作树的 STATUS WIP 和本地 `.workbuddy-ai/` 状态均保留，没有 force push、历史覆盖或删除。
+本轮新增 8 个有实际内容的提交（6 个计划/导航/入口/验收/收尾/默认分支核对提交 + 2 个普通合并），可达历史从 887 增至 942，其中保留 47 个此前未进入产品主线的既有提交。所有旧分支、备份、工作树、原整理工作树的 STATUS WIP 和本地 `.workbuddy-ai/` 状态均保留，没有 force push、历史覆盖或删除。
 
 **工程全量仍为 RED：1935 passed / 1 failed / 15 skipped。** 唯一失败为 Windows demo 的 30 秒输出管道超时；同文件、同启动器的原主线单项诊断为 1 PASS / 29.83 秒，不替代全量复验。172 文件 strict、sdist/wheel、SDK、14 包安装态、10 项观测台 Node 测试与前端 build 均通过。命令、原日志和未执行项见 [本轮验收](ACCEPTANCE.md)。
 
@@ -14,7 +14,7 @@
 
 ## 产品主线整理（2026-10-12）
 
-当前产品主线为 `codex/morphogenesis-mainline`，远端默认 `main` 是独立发布入口。本轮从 `ea41409`（887 个可达提交）创建隔离分支 `codex/mainline-cleanup-20261012`，普通合并整理分支 `215248a`，得到源码合并提交 `c75e7fede583882dfcf64cdbf076bf9a3bf1e7da`（936 个可达提交）。它保留 MorphBench 独立集成 `5f12a4c`、原轨历史及续租后继 `8a1ba20`；没有压缩或改写既有提交。
+当前产品主线及 GitHub 远端默认分支均为 `codex/morphogenesis-mainline`；旧 `main` 保留为独立历史分支。本轮从 `ea41409`（887 个可达提交）创建隔离分支 `codex/mainline-cleanup-20261012`，普通合并整理分支 `215248a`，得到源码合并提交 `c75e7fede583882dfcf64cdbf076bf9a3bf1e7da`（936 个可达提交）。它保留 MorphBench 独立集成 `5f12a4c`、原轨历史及续租后继 `8a1ba20`；没有压缩或改写既有提交。
 
 源码现同时包含 `readiness/`、`swarm/`、`swarm/research/`、`local_assets/` 与 `src/env-observatory/`；版本为 `0.2.1`。统一入口的 `swarm` 已转发 `python -m swarm`，旧计划中的占位描述仅为历史记录。
 
