@@ -1,3 +1,75 @@
+## 产品主线整理（2026-10-12）
+
+当前产品主线为 `codex/morphogenesis-mainline`，远端默认 `main` 是独立发布入口。本轮从 `ea41409`（887 个可达提交）创建隔离分支 `codex/mainline-cleanup-20261012`，普通合并整理分支 `215248a`，得到源码合并提交 `c75e7fede583882dfcf64cdbf076bf9a3bf1e7da`（936 个可达提交）。它保留 MorphBench 独立集成 `5f12a4c`、原轨历史及续租后继 `8a1ba20`；没有压缩或改写既有提交。
+
+源码现同时包含 `readiness/`、`swarm/`、`swarm/research/`、`local_assets/` 与 `src/env-observatory/`；版本为 `0.2.1`。统一入口的 `swarm` 已转发 `python -m swarm`，旧计划中的占位描述仅为历史记录。
+
+| 当前资料入口 | 用途与边界 |
+|---|---|
+| [本轮计划](PLAN.md) / [决策](DECISIONS.md) / [验收](ACCEPTANCE.md) | 本轮主线整理与验证；下方旧阶段保持原文 |
+| [现行 Spec](source/Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md) / [R1 所有权](R1_PLAN.md) | 业务范围与原领域 Owner 不变 |
+| [MorphBench 真实调用最终报告](tracks/morphbench-live-final-1007.md) | 22/24 到达任务解决、1 unknown；动态/经验/故障正式批次 NOT_RUN |
+| [MorphBench 本地测评报告](tracks/morphbench-final-1007.md) | 合成矩阵与安装/进程证据，不能替代正式科学评价 |
+| [Windows 续租后继](tracks/windows-lease-renewal-1003.md) | 原始 RED 与后继验证分开保留 |
+
+本轮合并没有发送新模型请求、重试未知效果或启动科研/沙箱/部署。完整本地工程验证结果在本轮 ACCEPTANCE 节；旧工程通过记录不替代本次合并树。AOCI 当前 dirty/stale，不宣称与合并树对齐。
+
+### 本地分支归类快照
+
+以下依据当前本地 refs 与本轮合并提交的祖先关系；保留全部分支及在用工作树。此前 `branch-organization-20261008` 工作树的 `docs/STATUS.md` 未提交改动保留在原处，本轮没有接管或提交它。远端已 fetch；这张表不代表未合并分支已获发布或运行验收。
+
+| 分支 | 精确提交前缀 | 归类 |
+|---|---|---|
+| `backup/space-cleanup-20260929/g010/wip-000` | `e2289d6bd795` | 备份 WIP；保留，不用于验收 |
+| `backup/space-cleanup-20260929/g010/wip-044` | `4ee9794231a2` | 备份 WIP；保留，不用于验收 |
+| `codex/branch-organization-20261008` | `215248a83fb0` | 已纳入本轮合并树 |
+| `codex/mainline-cleanup-20261012` | `c75e7fede583` | 已纳入本轮合并树 |
+| `codex/morphbench-021-20261007` | `89e3c49f32e3` | 已纳入本轮合并树 |
+| `codex/morphogenesis-mainline` | `ea41409a2af2` | 已纳入本轮合并树 |
+| `decentralized-swarm` | `8a1ba201c068` | 已纳入本轮合并树 |
+| `fc/breaker-state` | `8c7e2b6c695a` | 已纳入本轮合并树 |
+| `fc/failure-classify` | `4b91c24f03c1` | 已纳入本轮合并树 |
+| `fc/fault-observation` | `92e1de321ba7` | 已纳入本轮合并树 |
+| `fc/review-only` | `78c07459e14b` | 未纳入；保留独立分支 |
+| `feat/fault-drill` | `cbec0b31fc1e` | 已纳入本轮合并树 |
+| `fix/fcd-interface-alignment` | `2d9d4304cfc0` | 未纳入；保留独立分支 |
+| `main` | `c53a3c31e707` | 远端默认分支的本地跟踪；本轮不推进 |
+| `morph-algorithm-baseline-review-0929` | `cd8510dfc3f7` | 未纳入；保留独立分支 |
+| `morph-candidate-1006` | `a387dc458d87` | 已纳入本轮合并树 |
+| `morph-closeout-acceptance-0929` | `969d32746225` | 未纳入；保留独立分支 |
+| `morph-closeout-integration-0929` | `3a34ecafe5f4` | 已纳入本轮合并树 |
+| `morph-dashscope-1007` | `b5ccbb1a7748` | 已纳入本轮合并树 |
+| `morph-fc-breaker-fix-0929` | `2c6a33ae1950` | 已纳入本轮合并树 |
+| `morph-fc-candidate-0929` | `c552250c0d07` | 已纳入本轮合并树 |
+| `morph-fc-classification-fix-0929` | `e6ac45ffefc1` | 已纳入本轮合并树 |
+| `morph-fc-governance-final-0929` | `b506d7b81506` | 未纳入；保留独立分支 |
+| `morph-fc-independent-final-0929` | `9a6705c7aeae` | 未纳入；保留独立分支 |
+| `morph-fc-log-wiring-0929` | `cb0902395d4e` | 已纳入本轮合并树 |
+| `morph-fc-production-integration-0929` | `8c76af727cf8` | 已纳入本轮合并树 |
+| `morph-fc-release-preflight-0929` | `1d7753957a98` | 已纳入本轮合并树 |
+| `morph-fc-runtime-fix-0929` | `4d1098ed151d` | 已纳入本轮合并树 |
+| `morph-fc-tests-0929` | `3d8bb856efad` | 已纳入本轮合并树 |
+| `morph-finals-integration` | `c62bab718265` | 已纳入本轮合并树 |
+| `morph-frontend-stack` | `f99d13988465` | 已纳入本轮合并树 |
+| `morph-frontend-stack-integration` | `4f9fb0b6476a` | 已纳入本轮合并树 |
+| `morph-readonly-app-0929` | `621f58898889` | 未纳入；保留独立分支 |
+| `morph-release-readiness-review-0929` | `0ecf904ec9a0` | 未纳入；保留独立分支 |
+| `morph-research-integration-0930` | `7b66f0dd0a28` | 已纳入本轮合并树 |
+| `morph-schema-closeout-0929` | `092cadaf4974` | 已纳入本轮合并树 |
+| `morph-story-backend` | `00ad5ee63ff7` | 已纳入本轮合并树 |
+| `morph-story-growth` | `3573db8584d5` | 已纳入本轮合并树 |
+| `morph-story-shell` | `b4ac80e18cb8` | 已纳入本轮合并树 |
+| `songconmaisaix31-design/morph-r1-research-1003` | `d23ff83e2ef2` | 已纳入本轮合并树 |
+| `songconmaisaix31-design/morphbench-eval-1007` | `640aa5f2e7c8` | 已纳入本轮合并树 |
+| `songconmaisaix31-design/morphbench-integrate-1007` | `5f12a4c55dd9` | 已纳入本轮合并树 |
+| `songconmaisaix31-design/morphbench-live-control-1007` | `0aca0415683e` | 已纳入本轮合并树 |
+| `songconmaisaix31-design/morphbench-live-core-1007` | `99a7b66fb2a1` | 已纳入本轮合并树 |
+| `songconmaisaix31-design/morphbench-live-ui-1007` | `d8aaed0b8924` | 已纳入本轮合并树 |
+| `songconmaisaix31-design/morphbench-verify-1007` | `fbb67d10f997` | 已纳入本轮合并树 |
+| `test/failure-chain` | `d210b238d40f` | 已纳入本轮合并树 |
+
+---
+
 # 开发状态
 
 ## 可交付候选版本：核心提交 + 产品版本（2026-10-06）
