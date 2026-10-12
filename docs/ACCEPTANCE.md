@@ -1,3 +1,23 @@
+## 全分支时间整理验收（2026-10-12，后继）
+
+基线 `15044f889e867de6b379e9897aaf0858d4e4a950`，942 个可达提交；历史阶段固定 `d3bda35bdfbf845896f102b94b1de56d3470b8ac`。单 Agent 在隔离分支 `codex/branch-timeline-20261012` 归档原历史，随后普通合并/推送产品默认分支；各原分支与工作树保留。
+
+| 核对 | 命令/依据与真实结果 |
+|---|---|
+| 范围与去重 | `git for-each-ref refs/heads refs/remotes/origin`、`git log --all`、`git rev-list`：初始 155 个引用，31 个独立未合分支头，169 个原始提交；排除符号 origin/HEAD |
+| 日期与父子依赖 | 原分支头 author_date 升序安排 31 次 `git merge --no-ff -s ours <source-sha>`；保留源 DAG，已可达原提交去重，不把祖先图改成线性重放 |
+| 原历史与分支 | 155/155 快照头可达，169/169 原提交可达；0 个原 ref 被移动，0 个原作者/日期/父节点/SHA/subject 被更改 |
+| 产品文件 | 每次 merge 的 `HEAD^{tree}` 与计划提交后文件树相同；最终 `git diff <base> -- . ':!docs/PLAN.md' ':!docs/STATUS.md' ':!docs/DECISIONS.md' ':!docs/ACCEPTANCE.md'` 为空，包括业务代码、测试、静态产物、许可证和三锁 |
+| 历史秘密扫描 | `gitleaks git --redact=100 --log-opts '<31 source-shas> --not <base>'`：169 个原提交，exit 0，0 命中；日志与脱敏报告在工作树外 `C:/Users/DW/orca/branch-timeline-20261012/`，不入库 |
+| 文档与时间表 | `git diff --check`，原日期数量 10+21+2+25+16+92+3=169；精确源/合并 SHA 表与 STATUS 原提交时间表核对 |
+| GitHub 归属 | 只读 GraphQL：163 个原提交属于两类未关联 Agent 占位邮箱；其余 6 个使用已关联用户邮箱。首次采样 Morphogenesis：10-12 为 8、10-08 为 1；最终推送后的实时结果单独采样 |
+
+本次只增加 Git 历史可达关系和四份治理文档，不改变业务树，故未重跑 pytest、strict、构建、SDK 或浏览器验收。下方既有全量 **1935 passed / 1 failed / 15 skipped** 的 RED 保留；该失败没有被本轮修复或验证通过。历史归档不代表旧源码全部重新集成，不触发科研/模型/沙箱/部署，不更改默认分支设置，不推进旧 main/tag，不清理他人 WIP。
+
+AOCI 的 192 条/3 块已完整交付并确认；本轮严格 Attestation 格式未被接受，治理依然 dirty/stale，不能沿用前一轮 Challenge 通过来称本轮严格验证通过。最终稳定后只调用一次维护检查，按实际报告保留剩余索引债务，不越过原 A 轨写权。
+
+---
+
 ## 主线整理验收（2026-10-12）：工程全量 RED 保留
 
 本轮为历史整合与治理文档整理，不是新一轮功能发布或科学验收。基线为 `ea41409a2af20cf3b34ec26eb5b64092319b2eb1`（887 个可达提交）；业务合并树为 `c75e7fede583882dfcf64cdbf076bf9a3bf1e7da`，包含固定整理提交 `215248a`、MorphBench 集成 `5f12a4c` 和续租后继 `8a1ba20`。均已用 `git merge-base --is-ancestor` 验证。
