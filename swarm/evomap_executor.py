@@ -7,6 +7,7 @@ Remote content never becomes a command, module, validation policy or oracle.
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Callable
 import json
 import os
 from pathlib import Path
@@ -101,6 +102,7 @@ class Reply(BaseModel):
     request_id: str | None = None
     returned_model: str | None = None
     usage: dict[str, int] | None = None
+    cached_input_tokens: int | None = None
     content: str | None = None
     elapsed_seconds: float = 0
     error_kind: str | None = None
@@ -125,7 +127,8 @@ def _proposal_content(content: str) -> str:
 
 def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
              transport: httpx.MockTransport | None = None, provenance: Provenance = "live",
-             base_url: str = EVOMAP_BASE_URL, provider: ProviderName = "evomap") -> Reply:
+             base_url: str = EVOMAP_BASE_URL, provider: ProviderName = "evomap",
+             observe: Callable[[str], None] | None = None) -> Reply:
     """Called in the credential child; explicit mock transport is test-only."""
     if (transport is None) != (provenance == "live") or (transport is not None and not isinstance(transport, httpx.MockTransport)):
         raise ValueError("transport_provenance_mismatch")
@@ -133,7 +136,8 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
         return Reply(error_kind="credential_unavailable", uncertain=True)
     if key in json.dumps(payload, ensure_ascii=False):
         return Reply(error_kind="credential_in_input", uncertain=True)
-    response = single_request(payload, key=key, phase_timeout=timeout, transport=transport, base_url=base_url)
+    response = single_request(payload, key=key, phase_timeout=timeout, transport=transport,
+                              base_url=base_url, observe=observe)
     
     # Check for transport errors first - these take precedence over status/body
     if response.error_kind:
@@ -177,6 +181,10 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
     body = response.body
     measured = _usage(body)
     usage = measured.model_dump() if measured is not None else None
+    raw_usage = body.get("usage") if isinstance(body, dict) else None
+    details = raw_usage.get("prompt_tokens_details") if isinstance(raw_usage, dict) else None
+    cached = details.get("cached_tokens") if isinstance(details, dict) else None
+    cached = cached if type(cached) is int and cached >= 0 else None
     returned = body.get("model") if isinstance(body, dict) else None
     returned = returned if isinstance(returned, str) and len(returned) <= 128 and key not in returned else None
     
@@ -188,6 +196,7 @@ def _request(payload: dict[str, JsonValue], key: str, timeout: float, *,
         request_id=response.request_id,
         elapsed_seconds=response.elapsed_seconds,
         usage=usage,
+        cached_input_tokens=cached,
         returned_model=returned,
         interface_live="blocked" if provenance == "live" else "not_run",
         classification=classification_value,

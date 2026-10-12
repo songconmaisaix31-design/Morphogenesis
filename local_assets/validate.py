@@ -16,7 +16,8 @@ from uuid import uuid4
 
 from bridge_node.environment import child_environment
 from local_assets.models import (
-    AssetSafetyError, Candidate, CommandResult, EnvironmentFingerprint, ValidationPolicy, ValidationReport,
+    AssetSafetyError, Candidate, CommandResult, EnvironmentFingerprint, SampleValidationPolicy,
+    ValidationPolicy, ValidationPolicyType, ValidationReport,
 )
 from local_assets.paths import git, no_links, relative_path, safe_join
 from local_assets.store import LocalAssetStore
@@ -117,7 +118,7 @@ def fingerprint(workspace: Path) -> EnvironmentFingerprint:
 
 class AssetValidator:
     def __init__(self, store: LocalAssetStore, repository: Path | str, *,
-                 commands: tuple[tuple[str, ...], ...] = (), policy: ValidationPolicy | None = None,
+                 commands: tuple[tuple[str, ...], ...] = (), policy: ValidationPolicyType | None = None,
                  timeout_seconds: float = 30,
                  report_ttl_seconds: float = 300, output_limit: int = 128 * 1024) -> None:
         if (len(commands) > 16 or any(not argv or not argv[0] for argv in commands)
@@ -152,13 +153,20 @@ class AssetValidator:
                     raise AssetSafetyError("arbitrary_execution_isolation_unavailable")
                 if self.policy is None:
                     raise AssetSafetyError("fixed_validation_policy_required")
-                expected_paths = [relative_path(item.path) for item in self.policy.expectations]
+                sample_source: str | None = None
+                if isinstance(self.policy, SampleValidationPolicy):
+                    from local_assets.sample_validation import inspect_sample
+                    sample_source = inspect_sample(candidate, self.policy)
+                    expected_paths = [relative_path(self.policy.path)]
+                else:
+                    expected_paths = [relative_path(item.path) for item in self.policy.expectations]
                 if len(set(p.casefold() for p in expected_paths)) != len(expected_paths):
                     raise AssetSafetyError("duplicate_policy_paths")
                 if not {c.path for c in candidate.changes}.issubset(expected_paths):
                     raise AssetSafetyError("policy_missing_changed_file")
-                if any(item.content is not None and len(item.content.encode("utf-8")) > 256 * 1024
-                       for item in self.policy.expectations):
+                if isinstance(self.policy, ValidationPolicy) and any(
+                        item.content is not None and len(item.content.encode("utf-8")) > 256 * 1024
+                        for item in self.policy.expectations):
                     raise AssetSafetyError("policy_content_limit")
                 no_links(self.repository)
                 # Reject checkout-time links and submodules before materialization.
@@ -196,7 +204,7 @@ class AssetValidator:
                             if checked.returncode:
                                 raise AssetSafetyError("javascript_syntax")
                 before_tree = self._snapshot(worktree)
-                for expectation in self.policy.expectations:
+                for expectation in self.policy.expectations if isinstance(self.policy, ValidationPolicy) else ():
                     if time.monotonic() >= deadline:
                         raise AssetSafetyError("validation_timeout")
                     path = safe_join(worktree, expectation.path)
@@ -204,7 +212,15 @@ class AssetValidator:
                     expected = expectation.content.encode("utf-8") if expectation.content is not None else None
                     if path.is_dir() or actual != expected:
                         raise AssetSafetyError("fixed_expectation_failed")
-                results.append(CommandResult(argv=("literal-files-v1", self.policy.version), exit_code=0))
+                if isinstance(self.policy, SampleValidationPolicy):
+                    from local_assets.sample_validation import validate_fixed_sample
+                    assert sample_source is not None
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise AssetSafetyError("validation_timeout")
+                    results.append(validate_fixed_sample(sample_source, self.policy, remaining))
+                else:
+                    results.append(CommandResult(argv=("literal-files-v1", self.policy.version), exit_code=0))
                 if (worktree / ".git").read_bytes() != git_marker or self._snapshot(worktree) != before_tree:
                     raise AssetSafetyError("validation_mutated_worktree")
             except (AssetSafetyError, OSError, subprocess.SubprocessError) as error:
@@ -219,7 +235,8 @@ class AssetValidator:
             created_at=now, expires_at=now + self.report_ttl_seconds,
             policy_version=self.policy.version if self.policy else "unconfigured",
             policy_json=self.policy.model_dump_json() if self.policy else "",
-            isolation="non_arbitrary_literal_files",
+            isolation="fixed_pure_sample_subprocess" if isinstance(self.policy, SampleValidationPolicy)
+            else "non_arbitrary_literal_files",
         )
         self.store._record_validation(report)
         return report

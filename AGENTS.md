@@ -15,7 +15,7 @@ AOCI 只辅助开发检索与上下文复用。用户 Spec、当前范围和 doc
 - 后端包：`contracts` `persistence` `bootstrap` `bridge_node` `hub_client` `orca_provision` `orchestration` `topology` `metabolism` `mocks` `readiness` `viz` `swarm` `local_assets`。
 - 前端源码在 `viz/frontend/`（React shell，源自 Tencent tdesign-react-starter MIT），Vite 构建产出 `viz/static/assets/finals-shell.{js,css}`；`emptyOutDir=false`，不会动 `app.js`/`licenses/`/`echarts`。`viz/static/index.html` + `app.js` + `/vendor/echarts.min.js` 由 `viz/server.py` 提供。
 - `viz/server.py` 是**只读** HTTP 面板：仅 GET/HEAD（其余 405）、拒绝请求体(413)、禁止目录列举；端点 `/api/dashboard`、`/api/evomap`、`/api/evomap/asset`，静态目录 `viz/static/`。
-- 分支现实：`codex/morphogenesis-mainline` 与 `songconmaisaix31-design/morph-r1-research-1003` 长期并行：前者是产品主线（含 `readiness/`），后者含去中心化蜂群 `swarm/`、科研 `swarm/research/` 与研究应用 `src/env-observatory/`。候选交付分支 `morph-candidate-1006` 是二者的合并树；`morphogenesis swarm` 仍是占位，蜂群入口为 `morphogenesis-swarm` == `python -m swarm`。
+- 分支现实（2026-10-12）：产品主线 `codex/morphogenesis-mainline` 已包含 `readiness/`、去中心化蜂群 `swarm/`、科研 `swarm/research/`、本地资产 `local_assets/` 与研究应用 `src/env-observatory/`。`morph-candidate-1006` 和原科研分支保留为历史候选；当前整理与精确验收见 `docs/STATUS.md`、`docs/ACCEPTANCE.md`。`morphogenesis swarm` 原样转发 `python -m swarm`，也可用 `morphogenesis-swarm`。
 
 ## 命令（精确）
 - 安装：`$env:POETRY_VIRTUALENVS_IN_PROJECT='true'; uv tool run poetry install; npm ci --ignore-scripts`
@@ -23,7 +23,7 @@ AOCI 只辅助开发检索与上下文复用。用户 Spec、当前范围和 doc
   - `check` → 全量 pytest + strict mypy（**不含** build/SDK/wheel）
   - `prepare --workspace <dir>` / `verify --workspace <dir>`
   - `acceptance` / `rehearsal` / `serve` → 原样转发 `python -m orchestration.acceptance|rehearsal|viz.server`
-  - `swarm` → 占位，退出码 2
+  - `swarm` → 原样转发 `python -m swarm`（包括参数、`--help` 与退出码）
 - 全量测试：`uv tool run poetry run python -m pytest -q`；单测：`... -m pytest -q tests/t5/test_adapter.py::test_name`
 - 类型：`python tools/typecheck.py`；构建：`python -m build`；SDK 校验：`npm run check:sdk`
 - 前端构建：`cd viz/frontend && npm ci && npm run build`

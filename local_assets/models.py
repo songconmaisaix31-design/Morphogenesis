@@ -6,7 +6,7 @@ from collections.abc import Callable
 from contextlib import AbstractContextManager
 from typing import Any, Literal, Protocol
 
-from pydantic import Field, SerializerFunctionWrapHandler, model_serializer
+from pydantic import Field, SerializerFunctionWrapHandler, TypeAdapter, model_serializer
 
 from contracts.base import Contract
 from contracts.identity import AttemptId
@@ -55,6 +55,18 @@ class ValidationPolicy(Contract):
     executor: Literal["literal-files-v1"] = "literal-files-v1"
 
 
+class SampleValidationPolicy(Contract):
+    """Operator-selected fixed pure repair exercise; contains no gold source."""
+
+    version: str = Field(min_length=1, max_length=120)
+    executor: Literal["fixed-sample-v1"] = "fixed-sample-v1"
+    path: str = Field(min_length=1, max_length=240)
+
+
+ValidationPolicyType = ValidationPolicy | SampleValidationPolicy
+VALIDATION_POLICY: TypeAdapter[ValidationPolicyType] = TypeAdapter(ValidationPolicyType)
+
+
 class EnvironmentFingerprint(Contract):
     node_version: str
     arch: str
@@ -86,7 +98,8 @@ class ValidationReport(Contract):
     expires_at: float
     policy_version: str = "legacy-unisolated-v0"
     policy_json: str = ""
-    isolation: Literal["git_worktree_not_os_sandbox", "non_arbitrary_literal_files"] = "git_worktree_not_os_sandbox"
+    isolation: Literal["git_worktree_not_os_sandbox", "non_arbitrary_literal_files",
+                       "fixed_pure_sample_subprocess"] = "git_worktree_not_os_sandbox"
 
 
 class PromotionReceipt(Contract):
