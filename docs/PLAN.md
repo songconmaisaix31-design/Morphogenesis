@@ -1,3 +1,19 @@
+## 主线整理（2026-10-12）
+
+目标：把已交付而未进入产品主线的 MorphBench / 续租后继按普通合并纳入 `codex/morphogenesis-mainline`，补齐当前主线导航和验收状态，分阶段提交并推送。基线 `ea41409`，887 个可达提交；远端主线已核对一致。
+
+本轮为单 Agent 串行整理，在隔离工作树 `mainline-cleanup-20261012` / 分支 `codex/mainline-cleanup-20261012` 完成。写入仅治理文档；领域源码只消费既有已推送提交，不接管原 Owner。保留所有旧分支、工作树和未提交改动。
+
+1. 提交本页计划：核对当前范围、祖先关系、已有交付和历史失败。
+2. 普通 `--no-ff` 合并 `codex/branch-organization-20261008` 精确提交 `215248a`；保留原轨提交、未知效果与首次失败，不新跑模型/科研/沙箱。
+3. 在 STATUS / DECISIONS 补当前入口、分支分类和历史索引；旧记录保持原文。
+4. 在精确合并树执行 pytest、strict 类型、Python build、SDK、wheel 安装态、观测台 Node 测试及现有前端 build；验证日志留 `.runtime/mainline-cleanup-20261012/`。任何失败按实际报告，领域问题交回原 Owner。
+5. 提交 ACCEPTANCE 最终记录；验证允许后普通合并回产品主线并 push。远端默认 `main`、tag 和部署不在本轮操作范围。
+
+AOCI 已完整交付 192 条索引，交付已确认，但治理 dirty/stale；当前事实按源码核实。维护只按工具当前绑定结果执行，不把历史索引补全扩大为本轮业务范围。
+
+---
+
 # 当前执行：Research Swarm Alpha R1
 
 2026-10-03：以 [R1 一页计划](R1_PLAN.md) 和用户最新 [Spec](source/Morphogenesis_Research_Swarm_Spec_v1.0_2026-10-02.md) 为准。以下为历史阶段记录，冲突限制不适用于 R1 新候选。
