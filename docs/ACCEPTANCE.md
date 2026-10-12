@@ -1,3 +1,42 @@
+## 主线整理验收（2026-10-12）：工程全量 RED 保留
+
+本轮为历史整合与治理文档整理，不是新一轮功能发布或科学验收。基线为 `ea41409a2af20cf3b34ec26eb5b64092319b2eb1`（887 个可达提交）；业务合并树为 `c75e7fede583882dfcf64cdbf076bf9a3bf1e7da`，包含固定整理提交 `215248a`、MorphBench 集成 `5f12a4c` 和续租后继 `8a1ba20`。均已用 `git merge-base --is-ancestor` 验证。
+
+全量 pytest 启动时治理 HEAD 为 `d721d96`；随后仅上手说明与决策文档更新到 `f8e4065d4a695745bcff9d8b36749db8c8fd6372`，业务源码、测试、三锁与构建配置不变。之后的验收与收尾提交同样只改治理文档；不宣称每个文档后继 SHA 都重新跑过全量测试。
+
+### 当前验证结果
+
+环境：新隔离工作树的 Poetry 锁定安装，Python 3.12.13 / Node 24.16.0；科学库线程环境变量仅对本轮命令设置为 1。日志保存在本轮工作树 `.runtime/mainline-cleanup-20261012/`，不入库。
+
+| 验证命令 | 实际结果 / 日志 |
+|---|---|
+| `uv tool run poetry install --no-interaction`（`POETRY_VIRTUALENVS_IN_PROJECT=true`） | PASS；安装当前锁定项目 0.2.1；`install.log` |
+| `.venv/Scripts/python.exe -m pytest -q` | **RED，exit 1：1935 passed / 1 failed / 15 skipped / 3 warnings，1576.30 秒**；`pytest.log` 原件保留 |
+| `.venv/Scripts/python.exe tools/typecheck.py` | PASS；172 个源码文件；`typecheck.log` |
+| `.venv/Scripts/python.exe -m build --installer uv --outdir .runtime/mainline-cleanup-20261012/dist` | PASS；0.2.1 sdist + wheel；`build.log` |
+| `npm ci --ignore-scripts` + `npm run check:sdk` | PASS；SDK 1.14.0 schema/资产 ID/篡改拒绝，published=false；`npm-install.log`、`sdk.log` |
+| `uv pip install --python .venv/Scripts/python.exe --no-deps --target .runtime/mainline-cleanup-20261012/wheel-site <本轮 wheel>` + `.venv/Scripts/python.exe -I tools/check_distribution.py --site-dir .runtime/mainline-cleanup-20261012/wheel-site --check-node` | PASS；14 包确实从 wheel target 导入、资源、坏样例拒绝和 Node 桥；`wheel-install.log`、`distribution.log` |
+| `node --test tests/observatory/frontend.test.cjs` | PASS；10 测试；`observatory-node.log` |
+| `cd viz/frontend` 后 `npm ci --ignore-scripts` + `npm run build -- --outDir ../../.runtime/mainline-cleanup-20261012/frontend-build` | PASS；输出到忽略目录，原静态产物未改；两项字体路径运行时解析提示保留；`frontend-install.log`、`frontend-build.log` |
+| `.venv/Scripts/python.exe -m bootstrap swarm --help` | PASS；已转发正式蜂群 CLI，AGENTS 占位描述已纠正；`swarm-help.log` |
+| `git diff --check`、三锁 diff、祖先关系、当前治理导航链接存在性 | PASS；三锁不变、全部目标祖先保留，无历史重写 |
+
+### 唯一失败及基线诊断
+
+`tests/integration/test_demo_environment.py::test_demo_excludes_sentinel_from_viewer_and_passes_executor_args` 在 `subprocess.communicate` 读取线程中发生 `TimeoutExpired(30)`；当时 PowerShell 子进程已显示 returncode=0，但输出管道尚未结束。保留原失败，不改 30 秒阈值、启动器、测试断言或身份隔离边界。
+
+测试文件与 `demo/run-demo.ps1` 相对 `ea41409` 的 diff 均为空。完整回归结束后，用同一本轮锁定解释器在原主线 `ea41409` 工作树执行该单项，**1 passed in 29.83s**，日志 `baseline-demo.log`。这是原代码的单项诊断，不是本轮全量复验；它不能把本轮全量 RED 改成 PASS，也不能证明超时问题已修复。当前完整工程验收仍未通过，演示启动器输出收尾问题需原领域 Owner 后继处理。
+
+### 真实限制与未执行项
+
+本轮保留旧 live 报告中的 unknown、费用 null 和 NOT_RUN；没有发送新模型请求、重跑未知效果、启动真实科研/沙箱、改默认 main/tag 或部署。浏览器/人工使用观察、AT-07、L2 和新精确 HEAD 的远端双平台 CI 完成结果未在本轮验证；push 后自动 CI 状态另行核对，不能以本地 3.12 代替 CI 3.13。
+
+AOCI 已完成 192 条 / 3 块的交付确认及 Challenge 10/10，治理仍 dirty/stale。正式认知资产由原 A 轨独占；本轮不越轨创作全仓旧索引债务，最终稳定状态的工具检查结果按实际保留。
+
+所有旧分支、备份、在用工作树及原 `branch-organization-20261008` 的未提交 STATUS 改动保留。本轮仅执行普通合并和普通推送；主线整理交付不表示上述工程 RED 或研究验收已解决。
+
+---
+
 # 验收矩阵
 
 ## 可交付候选版本验收（2026-10-06）：核心提交 + 产品版本
