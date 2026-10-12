@@ -227,7 +227,9 @@ def _probe_enabled() -> bool:
 
 def create_app(service: object | None = None, *, service_error: str | None = None,
                host_config: str | None = None, swarm_state: str | None = None,
-               swarm_replay: bool = False) -> FastAPI:
+               swarm_replay: bool = False, swarm_scope_label: str | None = None,
+               swarm_scope_reference: str | None = None,
+               swarm_run_ended: bool = False) -> FastAPI:
     """Build the observatory app. ``service`` may be None (503 degradation).
 
     ``swarm_state`` binds one real decentralized-swarm state directory (the same
@@ -414,6 +416,21 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
 
     _swarm_state_raw = swarm_state or os.environ.get("OBSERVATORY_SWARM_STATE")
     _swarm_state_path = Path(_swarm_state_raw) if _swarm_state_raw else None
+    scope_label = (swarm_scope_label or "").strip() or None
+    scope_reference = (swarm_scope_reference or "").strip() or None
+    if bool(scope_label) != bool(scope_reference):
+        raise ValueError("--swarm-scope-label and --swarm-scope-reference must be provided together")
+    if (scope_label or swarm_run_ended) and _swarm_state_path is None:
+        raise ValueError("swarm display context requires --swarm-state")
+    if swarm_run_ended and not swarm_replay:
+        raise ValueError("--swarm-run-ended requires --swarm-replay")
+    # Operator-supplied display context, never an acceptance or ledger mutation.
+    display_context = {
+        "source": "operator_configuration",
+        "scope_label": scope_label,
+        "scope_reference": scope_reference,
+        "run_status": "ended" if swarm_run_ended else "unknown",
+    } if scope_label or swarm_run_ended else None
 
     @app.get("/api/swarm")
     def api_swarm() -> Response:
@@ -431,9 +448,11 @@ def create_app(service: object | None = None, *, service_error: str | None = Non
                 payload["health"] = "error"
                 payload["state_directory"] = str(_swarm_state_path)
                 payload["replay"] = bool(swarm_replay)
+                payload["display_context"] = display_context
                 return json_response(payload, 503)
         payload["state_directory"] = str(_swarm_state_path) if _swarm_state_path else None
         payload["replay"] = bool(swarm_replay)
+        payload["display_context"] = display_context
         return json_response(payload)
 
     # ---- Compute: provider registry; Aliyun is the first real one --------
@@ -1208,6 +1227,10 @@ def main() -> None:
                              "defaults to OBSERVATORY_SWARM_STATE")
     parser.add_argument("--swarm-replay", action="store_true",
                         help="Mark a copied swarm state as historical replay; requires --swarm-state")
+    parser.add_argument("--swarm-scope-label", help="Read-only display scope; requires --swarm-scope-reference and --swarm-state")
+    parser.add_argument("--swarm-scope-reference", help="Evidence reference for the operator-supplied display scope; never fetched")
+    parser.add_argument("--swarm-run-ended", action="store_true",
+                        help="Declare the observed run ended (display only); requires --swarm-replay")
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("port must be between 1 and 65535")
@@ -1221,9 +1244,15 @@ def main() -> None:
         print("[warn] 未绑定蜂群状态目录（--swarm-state / OBSERVATORY_SWARM_STATE）—— "
               "/api/swarm 将返回 health=missing 空态")
 
-    app = create_app(service, service_error=service_error,
-                     host_config=os.environ.get("OBSERVATORY_HOST_CONFIG"),
-                     swarm_state=args.swarm_state, swarm_replay=args.swarm_replay)
+    try:
+        app = create_app(service, service_error=service_error,
+                         host_config=os.environ.get("OBSERVATORY_HOST_CONFIG"),
+                         swarm_state=args.swarm_state, swarm_replay=args.swarm_replay,
+                         swarm_scope_label=args.swarm_scope_label,
+                         swarm_scope_reference=args.swarm_scope_reference,
+                         swarm_run_ended=args.swarm_run_ended)
+    except ValueError as error:
+        parser.error(str(error))
 
     import uvicorn
     print(f"环境观测台只读服务: http://{args.host}:{args.port}")

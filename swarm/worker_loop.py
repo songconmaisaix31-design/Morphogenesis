@@ -23,7 +23,7 @@ from local_assets.apply import AssetApplicator
 from local_assets.consume import AssetConsumer
 from local_assets.models import (
     AssetSafetyError, Candidate, ConsumptionContext, ConsumptionExecution, FileChange,
-    ValidationPolicy, ValidationReport,
+    VALIDATION_POLICY, SampleValidationPolicy, ValidationReport,
 )
 from local_assets.paths import FROZEN_MAINLINE, check_target, git, no_links, safe_join
 from local_assets.promote import AssetPromoter
@@ -40,7 +40,7 @@ from swarm.lease import LeaseManager
 from swarm.models import (BudgetPolicy, BudgetSnapshot, ExecutionBound, Lease, Locality, Reservation,
                           Signal)
 from swarm.pheromone import PheromoneField
-from swarm.router import Router
+from swarm.router import Router, StrategyVersion
 from swarm.fault_observations import FailureClass, FaultObservation, FaultObservationStore
 from swarm.task_ledger import LeaseLost, RunLimitReached, TaskLedger
 
@@ -110,6 +110,10 @@ class WorkerConfig(BaseModel):
     swarm_id: str = Field(default="local-fixture", min_length=1, max_length=120)
     capabilities: dict[str, float] = Field(default_factory=lambda: {"repair": 1.0})
     energy: int = Field(default=20, ge=1, le=10000)
+    energy_policy: Literal["cycle", "claim"] = "cycle"
+    max_senses: int = Field(default=10000, ge=1, le=100000)
+    routing_strategy: StrategyVersion = "v0"
+    stop_when_local_terminal: bool = True
     max_idle: int = Field(default=3, ge=1, le=100)
     idle_seconds: float = Field(default=0.05, gt=0, le=60)
     sleep_seconds: float = Field(default=0.05, gt=0, le=60)
@@ -376,13 +380,14 @@ class Worker:
         self.ledger = TaskLedger(self.state / "tasks.sqlite3", config.swarm_id, limits=config.budget.limits)
         self.field = PheromoneField(self.state / "field.sqlite3", ledger=self.ledger)
         self.rng = random.Random(config.seed)
-        self.router = Router(self.field, rng=self.rng)
+        self.router = Router(self.field, rng=self.rng, strategy_version=config.routing_strategy)
         self.leases = LeaseManager(self.ledger)
         self.budget = BudgetLedger(self.state / "budget.sqlite3", config.swarm_id, config.budget)
         self.assets = LocalAssetStore(self.state / "assets")
         self.consumer = AssetConsumer(self.assets)
         self.status_path = self.state / "workers" / (self.worker_id + ".json")
         self.remaining = config.energy
+        self.senses = 0
         self.completed = 0
         self._active: Reservation | None = None
         self._pending: dict[str, JsonValue] | None = None
@@ -411,6 +416,8 @@ class Worker:
             "worker_id": self.worker_id, "swarm_id": self.config.swarm_id,
             "pid": os.getpid(), "state": state, "reason": reason,
             "remaining_energy": self.remaining, "completed": self.completed,
+            "energy_policy": self.config.energy_policy, "senses": self.senses,
+            "max_senses": self.config.max_senses, "routing_strategy": self.config.routing_strategy,
             "updated_at": time.time(), "provenance": self.executor.provenance,
             "evidence_class": "contract_local", "usage_source": self.executor.usage_source,
             "active_reservation": _JSON.validate_python(self._active.model_dump(mode="json"))
@@ -438,6 +445,13 @@ class Worker:
         if not isinstance(remaining, int) or not isinstance(completed, int):
             raise ValueError("invalid_worker_counters")
         self.remaining, self.completed = min(self.remaining, remaining), completed
+        if (previous.get("energy_policy", "cycle") != self.config.energy_policy
+                or previous.get("routing_strategy", "v0") != self.config.routing_strategy):
+            raise ValueError("worker_policy_changed")
+        senses = previous.get("senses", self.config.energy - remaining)
+        if isinstance(senses, bool) or not isinstance(senses, int) or senses < 0:
+            raise ValueError("invalid_worker_counters")
+        self.senses = senses
         active = previous.get("active_reservation")
         if active is not None:
             self.budget.mark_uncertain(Reservation.model_validate(active))
@@ -474,7 +488,12 @@ class Worker:
         if self.executor.provenance == "live" and metadata is not None:
             value["evidence_class"] = "interface_live"
             value["interface_live"] = metadata.get("interface_live", "not_run")
-            if (outcome == "promoted" and metadata.get("task_kind") == "bounded_json"
+            fixed_code_passed = (metadata.get("task_kind") == "fixed_sample_patch"
+                                 and report is not None and report.passed
+                                 and report.isolation == "fixed_pure_sample_subprocess")
+            # Only _finalize emits promoted, after the completed fenced target
+            # effect is verified. Approval or a passing report alone is not enough.
+            if (outcome == "promoted" and (metadata.get("task_kind") == "bounded_json" or fixed_code_passed)
                     and metadata.get("interface_live") == "passed"):
                 value["task_live"] = "passed"
         if outcome == "promoted":
@@ -798,7 +817,7 @@ class Worker:
             keeper.start()
 
             # Acceptance comes from immutable operator-seeded task facts.
-            policy = ValidationPolicy.model_validate(self.ledger.get(signal.task_id).acceptance.get("validation_policy"))
+            policy = VALIDATION_POLICY.validate_python(self.ledger.get(signal.task_id).acceptance.get("validation_policy"))
             enter_phase("reserve")
 
             breaker = self.shared_breaker
@@ -852,6 +871,11 @@ class Worker:
                     result = candidate_executor.execute(signal, attempt, self.target, directory,
                                                         base_revision=revision, base_head=head,
                                                         experience=consumption)
+                    if (isinstance(policy, SampleValidationPolicy) and consumption is not None
+                            and result.candidate is not None
+                            and result.consumed_asset_ids == (consumption.asset_id,)
+                            and result.metadata.get("experience_use") == "model_declared_derivation"):
+                        consumption = self.consumer.derive(consumption, result.candidate)
                     if consumption is not None and (
                         result.candidate != consumption.candidate or result.consumed_asset_ids != (consumption.asset_id,)
                     ):
@@ -865,7 +889,17 @@ class Worker:
                 fact_fields = self._metadata_fact_fields(result)
                 classification = fact_fields["classification"]
                 enter_phase("settle")
-                if result.uncertain and classification == CONFIRMED_REJECTION:
+                http_status = result.metadata.get("http_status")
+                provider_http_error = (result.metadata.get("task_kind") == "fixed_sample_patch"
+                                       and isinstance(http_status, int) and not isinstance(http_status, bool)
+                                       and http_status >= 400)
+                if provider_http_error:
+                    # This fixed-model protocol never retries/switches after a
+                    # provider error, even when local validation may continue.
+                    # Preserve observed usage or the unknown hold; share the stop
+                    # with peers/restarts using the existing atomic budget gate.
+                    settled = self.budget.settle(self._active, usage, stop_on_provider_error=True)
+                elif result.uncertain and classification == CONFIRMED_REJECTION:
                     # Known rejection without observed usage: faithful unknown
                     # cost hold that keeps the chain admittable under it.
                     settled = self.budget.mark_unknown_rejection(self._active)
@@ -1012,7 +1046,7 @@ class Worker:
             result_id = uuid4().hex
             result_data: dict[str, JsonValue] = {
                 "candidate_asset_id": asset_id, "report_id": report.report_id, "applied": True,
-                "execution_id": execution_id,
+                "execution_id": consumption.context.execution_id if consumption else execution_id,
                 "consumed_asset_ids": [consumption.asset_id] if consumption else [],
                 "input_context": consumption.context.input_context if consumption else None,
                 "worker_id": self.worker_id, "fencing_token": lease.token,
@@ -1090,9 +1124,16 @@ class Worker:
             self._resume()
         except AssetSafetyError:
             return self._status("needs_review", "incomplete_accepted_evidence")
+        # An exhausted local energy counter cannot hide a durable unknown send.
+        initial_budget = self.budget.snapshot(self.worker_id)
+        if initial_budget.sleeping and (initial_budget.uncertain_reservations
+                                       or initial_budget.reason == "provider_http_error"):
+            return self._status("sleeping", initial_budget.reason or "unknown_usage")
         idle = 0
         started = time.monotonic()
         while self.remaining > 0:
+            if self.senses >= self.config.max_senses:
+                return self._status("exhausted", "sense_limit")
             if time.monotonic() - started >= self.config.budget.limits.max_runtime_seconds:
                 return self._status("exhausted", "runtime_limit")
             state = self.budget.snapshot(self.worker_id)
@@ -1100,13 +1141,16 @@ class Worker:
                 result = self._status("sleeping", state.reason or "budget")
                 time.sleep(self.config.sleep_seconds)
                 return result
-            self.remaining -= 1
+            self.senses += 1
+            if self.config.energy_policy == "cycle":
+                self.remaining -= 1
             self._status("sensing")
             signal = self.router.choose(self.worker_id, self.config.locality, self.config.capabilities)
             self.fc_log.observe_ledger(self.ledger, self.worker_id)
             if signal is None:
                 local = self.ledger.candidates(self.config.locality, include_blocked=True)
-                if local and len(local) < 100 and all(task.status in {"completed", "failed"} for task in local):
+                if (self.config.stop_when_local_terminal and local and len(local) < 100
+                        and all(task.status in {"completed", "failed"} for task in local)):
                     return self._status("idle", "local_tasks_terminal")
                 idle += 1
                 result = self._status("idle", "no_local_signal")
@@ -1138,6 +1182,11 @@ class Worker:
                 self._backoff(idle)
                 continue
             idle = 0
+            if self.config.energy_policy == "claim":
+                # All acquired leases cost energy, including rejected work.
+                # Contention never manufactures another model/budget allowance.
+                self.remaining -= 1
+                self._status("claimed")
             outcome = self._process(signal, lease)
             if outcome == "sleeping":
                 result = self._status("sleeping", "budget_or_uncertain_execution")

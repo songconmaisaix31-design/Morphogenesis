@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import time
+import json
+from uuid import uuid4
 from pathlib import Path
 from typing import Protocol
 
@@ -145,3 +147,31 @@ class AssetConsumer:
                 return old
             db.execute("INSERT INTO adoptions VALUES (?, ?)", (execution_id, receipt.model_dump_json()))
         return receipt
+
+    def derive(self, execution: ConsumptionExecution, candidate: Candidate) -> ConsumptionExecution:
+        """Append model-declared transformed use; preserve the literal source record.
+
+        This records injected provenance and output, not a causal benefit claim.
+        The new candidate still needs independent validation and fenced adoption.
+        """
+        if self.store.consumption(execution.context.execution_id) != execution:
+            raise AssetSafetyError("injected_execution_identity_mismatch")
+        self.store.fetch_approved(execution.asset_id)
+        original = execution.candidate
+        if (candidate.attempt != original.attempt or candidate.base_revision != original.base_revision
+                or candidate.base_head != original.base_head or candidate.scope != original.scope
+                or candidate.research is not None or original.research is not None
+                or {c.path: c.before for c in candidate.changes} != {c.path: c.before for c in original.changes}):
+            raise AssetSafetyError("derived_consumption_identity_mismatch")
+        inspect_candidate(candidate)
+        context = execution.context.model_copy(update={
+            "execution_id": uuid4().hex,
+            "input_context": json.dumps({"source_execution_id": execution.context.execution_id,
+                "use": "model_declared_derivation", "original_context": execution.context.input_context}),
+        })
+        context = ConsumptionContext.model_validate(context.model_dump())
+        derived = ConsumptionExecution(asset_id=execution.asset_id, context=context,
+            candidate=candidate, candidate_asset_id=self.store.publish(candidate), created_at=time.time())
+        with self.store.connection() as db:
+            db.execute("INSERT INTO consumptions VALUES (?, ?)", (context.execution_id, derived.model_dump_json()))
+        return derived

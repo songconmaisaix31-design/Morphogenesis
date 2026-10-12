@@ -7,7 +7,8 @@ from pathlib import Path
 import time
 from collections.abc import Callable
 
-from local_assets.models import AssetSafetyError, Candidate, PromotionReceipt, ValidationPolicy, ValidationReport
+from local_assets.models import (AssetSafetyError, Candidate, PromotionReceipt, SampleValidationPolicy,
+                                 VALIDATION_POLICY, ValidationReport)
 from local_assets.store import LocalAssetStore
 from local_assets.validate import fingerprint, inspect_candidate
 
@@ -26,11 +27,16 @@ def checked_report(store: LocalAssetStore, asset_id: str, report_id: str | Valid
         raise AssetSafetyError("report_candidate_mismatch")
     if report.policy_version != policy_version or not report.policy_json:
         raise AssetSafetyError("validation_policy_mismatch")
-    policy = ValidationPolicy.model_validate_json(report.policy_json)
+    policy = VALIDATION_POLICY.validate_json(report.policy_json)
     if policy.version != policy_version:
         raise AssetSafetyError("validation_policy_mismatch")
-    if report.isolation != "non_arbitrary_literal_files":
+    expected_isolation = ("fixed_pure_sample_subprocess" if isinstance(policy, SampleValidationPolicy)
+                          else "non_arbitrary_literal_files")
+    if report.isolation != expected_isolation:
         raise AssetSafetyError("unsafe_legacy_validation")
+    if isinstance(policy, SampleValidationPolicy):
+        from local_assets.sample_validation import inspect_sample
+        inspect_sample(candidate, policy)
     if (not report.passed or report.reasons or len(report.commands) != 1
             or report.commands[0].argv != (policy.executor, policy.version)
             or any(r.exit_code != 0 or r.timed_out or r.output_limited for r in report.commands)):
