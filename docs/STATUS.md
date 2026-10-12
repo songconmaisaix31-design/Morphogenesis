@@ -1,3 +1,234 @@
+## 全分支提交时间整理（2026-10-12，历史归档）
+
+在 `codex/branch-timeline-20261012`，从产品默认分支 `15044f889e867de6b379e9897aaf0858d4e4a950` 出发，按以下原分支头作者时间完成 31 次普通历史合并。初始 155 个本地/origin 引用的头全部可达，新增保留 169 个原始提交；原 SHA、作者、日期、父子关系、分支、他树 WIP 均保留。
+
+合并使用 `--no-ff -s ours`：只归档历史，当前业务文件树保持原版本。这不是重新上线旧 UI、备份 WIP 或旧科研代码。下方时间表保留原始 Git 元数据，不表示这些日期都将新增个人绿格：163 个原提交使用未关联 Agent 占位邮箱，6 个使用已关联用户邮箱。当前主线原完整工程 RED 和 AOCI dirty/stale 保留；验收见 [ACCEPTANCE](ACCEPTANCE.md)。
+
+| 原作者日期 | 去重原提交数 |
+|---|---:|
+| 2026-09-28 | 10 |
+| 2026-09-29 | 21 |
+| 2026-09-30 | 2 |
+| 2026-10-01 | 25 |
+| 2026-10-02 | 16 |
+| 2026-10-03 | 92 |
+| 2026-10-04 | 3 |
+
+### 分支历史合并顺序
+
+| 原分支头日期 | 来源分支 | 精确源 SHA | 精确归档合并 SHA | 本次新增可达原提交 |
+|---|---|---|---|---:|
+| 2026-09-28T22:04:25+08:00 | `fc/review-only` | `78c07459e14b4817c83c608c68978a07b68b5f9f` | `f40ff1cef047fd27300de8cd7f64838f5605f8b8` | 2 |
+| 2026-09-28T22:11:41+08:00 | `fix/fcd-interface-alignment` | `2d9d4304cfc0e1a3d4bfaeccb6ec5688aef60366` | `35e824e1717afd78ae903add878c196f97cbab53` | 2 |
+| 2026-09-28T23:24:04+08:00 | `songconmaisaix31-design/morph-fc-docs-0928` | `ca1a6fad4c44e4cd87b70980153cea8f7c208900` | `a896eb727aeda4dde1a934effc49109e0b6e6e55` | 6 |
+| 2026-09-29T00:15:42+08:00 | `songconmaisaix31-design/morph-fc-acceptance-0928-final` | `4409a60e278ce328fd76588d680e3c4438bdaa84` | `3646803b8ae3f3fcb80c2f3afaa9c7718afb21cc` | 2 |
+| 2026-09-29T09:27:24+08:00 | `morph-release-readiness-review-0929` | `0ecf904ec9a034bf7183fce5faef771cc7ad0f00` | `adc9e211588afa6fb327fd2badfc7014eae84c80` | 1 |
+| 2026-09-29T09:28:44+08:00 | `morph-algorithm-baseline-review-0929` | `cd8510dfc3f78325e07e30a76e2f1257a31ba820` | `fe7cf4eb55b2ab86716c3f6f253d3f41e71c37cf` | 1 |
+| 2026-09-29T10:53:54+08:00 | `morph-readonly-app-0929` | `621f588988899bdbc7c7a83e893369c4145d89b3` | `0cf55180539c51e80af8f1cae83cb568d6d4ad37` | 2 |
+| 2026-09-29T11:11:48+08:00 | `morph-closeout-acceptance-0929` | `969d3274622538a36ac8a60e09c41be86bea9c60` | `3c57c9f88c4b674c5c146e2e15f8de1ade4d599b` | 1 |
+| 2026-09-29T11:57:55+08:00 | `backup/space-cleanup-20260929/g010/wip-000` | `e2289d6bd7958b6f9b004d91c40742b732246af1` | `d57a5f7566e1a9dcf03d52e3bea07709989391c3` | 1 |
+| 2026-09-29T11:58:10+08:00 | `backup/space-cleanup-20260929/g010/wip-044` | `4ee9794231a27f588fb1482ca0201974622e7cbf` | `6fc0b6951c10ef0a1365572adda326c214da016b` | 1 |
+| 2026-09-29T13:09:35+08:00 | `codex/integrate-cleanup-20260929` | `0e7826819c6780f637ff4049adfc61e8069638d9` | `4db17d1c91e5b1294c84e27b5749c8b7f023db1a` | 2 |
+| 2026-09-29T19:16:17+08:00 | `morph-fc-independent-final-0929` | `9a6705c7aeae9c812329c015f13e440842beff17` | `d2ed3d28b3ff2573c1337174427aa19a368935a4` | 3 |
+| 2026-09-30T01:03:40+08:00 | `morph-fc-governance-final-0929` | `b506d7b81506693aa7d3aa5d711a32285186f147` | `ea93e9ac37429e22e086dabf8bcbb81f3ce76ef2` | 9 |
+| 2026-10-01T15:24:13+08:00 | `songconmaisaix31-design/morph-agent-protocols-1001` | `5788ca3ff78a75e3f4da4dda3e42f628c24ece00` | `8937bdbc3bdec2b6e703f85bec3d1b29bf1134e9` | 1 |
+| 2026-10-01T20:42:49+08:00 | `songconmaisaix31-design/morph-research-sandbox-0930` | `dcb23d993ce3562993c20f5118209bc49ccae234` | `eb385e6d27a53cf770d5c0168ecb45db9fde6c3d` | 1 |
+| 2026-10-01T21:18:49+08:00 | `songconmaisaix31-design/morph-research-space-0930` | `d228d43e9c12ca9743a362a7f1187cda4d8218ee` | `855042613749128177c9f802694f7583f382d58e` | 1 |
+| 2026-10-01T22:58:54+08:00 | `songconmaisaix31-design/morph-research-agents-0930` | `1532cdbcf549c3050b3e9617d8d44793f6f16834` | `f380e6d889bd189d0b49e84a1d5a10cc69194620` | 1 |
+| 2026-10-01T23:55:50+08:00 | `songconmaisaix31-design/morph-research-plan-1001` | `c5c2b307e4a59dae7011d992e876534c77a50faf` | `80ffccd964925d64143d474a9b389f27ed4fe89e` | 21 |
+| 2026-10-02T01:16:07+08:00 | `songconmaisaix31-design/morph-qwen-research-positioning-1002` | `d001ea2fcf6b29617bd2d90a3d26749da757f43c` | `a6e9bec625171e238d8c76484830aadc425aef67` | 2 |
+| 2026-10-02T01:34:01+08:00 | `songconmaisaix31-design/morph-qwen-research-readme-1002` | `9d1146f804c2500335e5fb94680c0960c2d632da` | `f47c063b25eac8deb5788a98218399a307120e1b` | 3 |
+| 2026-10-02T01:36:52+08:00 | `songconmaisaix31-design/morph-qwen-research-main-1002` | `c767ebf85a7dceaf94c6fc34ec78c2eee4f76d37` | `00cc862e56459765ba301e9526ac272c3ac101a6` | 2 |
+| 2026-10-02T01:59:21+08:00 | `songconmaisaix31-design/morph-readme-restoration-plan-1002` | `f26413ff847f97be80a5c3e2f41efe7a19ee7e00` | `8e50c6cd222935c6b197aa03fc1881c8e0b5e437` | 1 |
+| 2026-10-02T02:07:02+08:00 | `songconmaisaix31-design/morph-readme-style-restore-1002` | `ea8d3151d14260955501e54ce25f31876b7caa53` | `1e19b02b7dd838e4f92194ec65226e07c34fd10e` | 1 |
+| 2026-10-02T02:08:40+08:00 | `songconmaisaix31-design/morph-readme-style-main-1002` | `1cb2d9685fa67fdfc578d25674e7b61fb2819d7b` | `9016c938a2c1ed593aa3e8aa9a0e9d697e9e11a4` | 1 |
+| 2026-10-02T16:18:15+08:00 | `songconmaisaix31-design/morph-product-three-pages-plan-1002` | `eb7f8c9fdb931c16240e3c9f01283488051aba16` | `bf3fcb62548ed539f25ecc43518580beafe3ad62` | 5 |
+| 2026-10-03T22:53:47+08:00 | `songconmaisaix31-design/morph-r1-policy-1003` | `61101810cb3e2425347bb1d3e38cb34759ddaf09` | `6134e63759813c14f89c2fbe2065187c4e16626e` | 3 |
+| 2026-10-03T23:09:53+08:00 | `songconmaisaix31-design/morph-r1-boundaries-1003` | `739efdd10f538099039f2cdf335567802eac7f5a` | `e23df6d34dc529003c69092ee4e559260694722b` | 10 |
+| 2026-10-03T23:18:22+08:00 | `songconmaisaix31-design/morph-r1-integration-1003` | `9be8bcc4fe17f3fb7a43ddd56e6a39b834552f76` | `8b23f028722d0a0bd3fd777dd72cbaabc19a29a1` | 75 |
+| 2026-10-03T23:26:01+08:00 | `songconmaisaix31-design/morph-r1-experiments-1003` | `55e04cb44336f1642fe4957404604b62faf4ca78` | `dfb8ae7958369f1b071e977d808b3912f513bbc3` | 2 |
+| 2026-10-03T23:27:52+08:00 | `songconmaisaix31-design/morph-r1-control-1003` | `0c10268123178419f84d39886483613aaecd475f` | `24fe7ff9ac4ee634f5d33d159806137a76d91a9a` | 2 |
+| 2026-10-04T07:51:24+08:00 | `main` | `c53a3c31e7076587afb92ffc78f131003eaf917e` | `d3bda35bdfbf845896f102b94b1de56d3470b8ac` | 4 |
+
+<details>
+<summary>169 个原始提交，按原作者时间从早到晚排列</summary>
+
+| 原作者时间 | 精确原 SHA | 原提交说明 |
+|---|---|---|
+| 2026-09-28T09:55:17+08:00 | `cd8f6c9641a666b0c9cd8d713490b5515e8b3240` | docs(fc): record FCR hallucination case evidence |
+| 2026-09-28T10:45:44+08:00 | `def9d839778ed63461dc0e03470a5b13e9b2b023` | docs(fc): update FCR hallucination case evidence with accurate details |
+| 2026-09-28T10:49:33+08:00 | `2a4dcb403e8ac1366d0c416b4a43a953f16fcea5` | docs(fc): update FCR hallucination case evidence with accurate details |
+| 2026-09-28T10:58:15+08:00 | `a821783f4f89ae727698087f6ed5fd0a7d1fdd89` | test(fc): checkpoint incomplete boundary test repairs |
+| 2026-09-28T21:56:49+08:00 | `2180e0223fac39c5213c4a04474a8082e291bf7c` | Add qwen-code integration review report for FC-A/B/C/D |
+| 2026-09-28T22:04:25+08:00 | `78c07459e14b4817c83c608c68978a07b68b5f9f` | Revise qwen-code integration review report for FC-A/B/C/D - Address token fencing concerns |
+| 2026-09-28T22:11:41+08:00 | `2d9d4304cfc0e1a3d4bfaeccb6ec5688aef60366` | test(fc): fix boundary tests with real Worker._process validation |
+| 2026-09-28T23:09:57+08:00 | `62d813b2b1b4315aea0d41e92937657b9fdd4cc0` | docs(fc): update budget A/B analysis with corrected findings |
+| 2026-09-28T23:17:56+08:00 | `b6bf5d5884fe89b2b0a5b1e2e88449f607757d04` | docs(fc): update budget A/B analysis and hallucination case with corrected findings |
+| 2026-09-28T23:24:04+08:00 | `ca1a6fad4c44e4cd87b70980153cea8f7c208900` | docs(fc): retract budget A/B auxiliary report due to citation mismatches |
+| 2026-09-29T00:07:47+08:00 | `4bdb1483a5ca0a4807eb01c6601a40ef6bb57892` | docs(fc): record independent acceptance and blocked schema gate |
+| 2026-09-29T00:15:42+08:00 | `4409a60e278ce328fd76588d680e3c4438bdaa84` | docs: accept FC governance status correction |
+| 2026-09-29T09:27:24+08:00 | `0ecf904ec9a034bf7183fce5faef771cc7ad0f00` | docs: assess release readiness and application boundaries |
+| 2026-09-29T09:28:44+08:00 | `cd8510dfc3f78325e07e30a76e2f1257a31ba820` | docs: assess original algorithm baseline and FC freeze readiness |
+| 2026-09-29T10:52:08+08:00 | `8c57c4964fbf78b90d7232d3644975dab277d277` | feat(viz): expose readonly adoption task and attempt details |
+| 2026-09-29T10:53:54+08:00 | `621f588988899bdbc7c7a83e893369c4145d89b3` | docs: record readonly adoption replay acceptance |
+| 2026-09-29T11:11:48+08:00 | `969d3274622538a36ac8a60e09c41be86bea9c60` | docs: independently accept 0929 closeout increments with open gates |
+| 2026-09-29T11:57:55+08:00 | `e2289d6bd7958b6f9b004d91c40742b732246af1` | backup: preserve local work before disk cleanup (unverified WIP) |
+| 2026-09-29T11:58:10+08:00 | `4ee9794231a27f588fb1482ca0201974622e7cbf` | backup: preserve local work before disk cleanup (unverified WIP) |
+| 2026-09-29T13:07:17+08:00 | `54508062795adb77b7157f810117e5cf35312353` | Merge cleanup backup: g010/wip-000 |
+| 2026-09-29T13:09:35+08:00 | `0e7826819c6780f637ff4049adfc61e8069638d9` | Merge cleanup backup: g010/wip-044 |
+| 2026-09-29T18:56:33+08:00 | `bfbc0845b538661ab2a3fd3375a4713defb3c7ac` | docs(fc): prepare isolated review and unsigned human checklist |
+| 2026-09-29T18:57:23+08:00 | `60a089b2317225a7a8d210123009424f47019a0c` | test(fc): stage independent remediation review and probes |
+| 2026-09-29T19:03:33+08:00 | `8fd30f687fa9c95b204c5eaa1e0069fbe2559a6d` | docs(fc): bind unsigned review packet to immutable shared candidate |
+| 2026-09-29T19:06:36+08:00 | `f0fee3d11712851964de9608ce2fbd91f38d6aef` | docs(fc): restore complete production review input without token guesses |
+| 2026-09-29T19:10:19+08:00 | `73c068520cdf3cd7a681c77854b9470dc7cf356d` | test(fc): record independent candidate behavior and mutations |
+| 2026-09-29T19:16:17+08:00 | `9a6705c7aeae9c812329c015f13e440842beff17` | docs(fc): finalize exact-candidate independent acceptance |
+| 2026-09-29T19:25:56+08:00 | `cb102af1ac85716176ba0a3cac603c3e7be373aa` | docs(fc): seal local acceptance and rejected formal review evidence |
+| 2026-09-29T19:34:47+08:00 | `403909204c8b589d33943298e1cde0a2094bb15e` | docs: clarify C552 budget A/B code conclusions |
+| 2026-09-29T20:33:05+08:00 | `669b191bf41d3fa42e2ab34a2c1fa68d53498f49` | docs(fc): prepare native V41 review and record auth blocker |
+| 2026-09-29T20:46:07+08:00 | `40577cb841e8d89c08e1336d7254c4ca7bb3984e` | docs(fc): record release preflight and T10 auth failure |
+| 2026-09-30T00:08:19+08:00 | `e862e4ca08f1331246596db47f3abcdaa96e0ee7` | docs(fc): record production owner deliveries and integration pending |
+| 2026-09-30T01:03:40+08:00 | `b506d7b81506693aa7d3aa5d711a32285186f147` | docs(fc): archive final integration evidence and release blockers |
+| 2026-10-01T15:24:13+08:00 | `5788ca3ff78a75e3f4da4dda3e42f628c24ece00` | docs(agents): diagnose case05 warning-driven cancellation |
+| 2026-10-01T15:52:49+08:00 | `2965ece2f0ef405d457a1b1221380483de603c80` | docs: accept frozen two-brand three-role live inheritance closure |
+| 2026-10-01T17:51:33+08:00 | `698328b7fb5ef181492bb474718fa9c5db8946da` | docs: scope logging repair renewal evidence and second research case |
+| 2026-10-01T17:57:28+08:00 | `5c2e87f64fd72fdcc450d636f622c76c7b38c5b7` | docs: preserve logger worker start recovery and phase gate |
+| 2026-10-01T18:10:19+08:00 | `6f109ba430a061aac4e836f64004259775723551` | docs: record logging wait authorization and verified baseline |
+| 2026-10-01T18:26:13+08:00 | `7830ecf1f978301d73a720586c8d46a8f7bd53f0` | docs: track frozen logging source and independent dual-platform gate |
+| 2026-10-01T18:46:43+08:00 | `03c3ebde9c4b156757e0adef0110963353d9c78f` | docs: preserve cold bootstrap red and track successor source gate |
+| 2026-10-01T19:11:21+08:00 | `2f99c12f6fe8fb6dc6d21527d874a3b159b912d0` | docs: accept exact logging dual-platform gates and release renewal track |
+| 2026-10-01T19:47:12+08:00 | `a563dd84915a4bf1f82d8baa37a0d42f653f2e98` | docs: accept renewal audit source and release second case owner |
+| 2026-10-01T20:07:45+08:00 | `6f90e7a8bf1f0f7eb9075d368eb6d0dc27f215eb` | docs: bind frozen case interface and release scoped parallel consumers |
+| 2026-10-01T20:32:34+08:00 | `6c00a87889cdb8e9de7e2f3cf8cceaa766781907` | docs: preserve new fixture failures and bind prepared case sources |
+| 2026-10-01T20:42:49+08:00 | `dcb23d993ce3562993c20f5118209bc49ccae234` | Report C two-case contracts and retained cross-track RED |
+| 2026-10-01T20:59:44+08:00 | `70aa7b2d7c6b2a8a27c4cd6d7598053fa8309fe3` | docs(research): record frozen case inputs and gated integration |
+| 2026-10-01T21:18:49+08:00 | `d228d43e9c12ca9743a362a7f1187cda4d8218ee` | docs(research): report registered case bridge evidence and limits |
+| 2026-10-01T21:20:30+08:00 | `157ef56aa2b51fb85612d50a23d2e6ad83922874` | docs(research): accept case domains and freeze cumulative core |
+| 2026-10-01T21:37:36+08:00 | `6adca163b3f52461a6a8d09715fadfaf05613ab6` | docs(research): accept frozen product and preserve first parser failures |
+| 2026-10-01T22:10:14+08:00 | `c875098e6b3b86eed9cc76b36f31bd276cda75f2` | docs(research): accept final original dual-platform engineering gates |
+| 2026-10-01T22:24:51+08:00 | `deb0a72df7665d60f0c289fff8af8df414a59971` | docs: record frozen independent gates and release two-case live acceptance |
+| 2026-10-01T22:43:13+08:00 | `00db2c7ff46c5e3f2818d8db970920d9509b9981` | docs: preserve live writer conflict and assign bounded native repair |
+| 2026-10-01T22:58:45+08:00 | `31e644e9b38a1409e87fd2caaa0ed7b8f99aa80e` | docs: condense current owners and frozen native repair gates |
+| 2026-10-01T22:58:54+08:00 | `1532cdbcf549c3050b3e9617d8d44793f6f16834` | docs(native): record Windows cleanup RED and frozen platform gates |
+| 2026-10-01T23:09:30+08:00 | `2d3919045ca16bf9c48c0f50cde999bc1b8afb41` | docs: accept native and product owners on bf67 frozen candidate |
+| 2026-10-01T23:41:16+08:00 | `0f8218ce926188f44933363fb6b4dd93e694929f` | docs: record final frozen full gates and NIST live progress |
+| 2026-10-01T23:54:43+08:00 | `dc67707b758a6403a843fd296d4bc7d06e550667` | docs: accept frozen two-case live closure and effective renewal |
+| 2026-10-01T23:55:50+08:00 | `c5c2b307e4a59dae7011d992e876534c77a50faf` | docs: bind final acceptance report and retain completed owner |
+| 2026-10-02T01:11:01+08:00 | `b7d370e7ecd5610fff3174d25e73cbad975d473d` | docs: plan Qwen Aliyun research positioning on main |
+| 2026-10-02T01:16:07+08:00 | `d001ea2fcf6b29617bd2d90a3d26749da757f43c` | docs: recover positioning work with proven fixed workers |
+| 2026-10-02T01:17:33+08:00 | `6a490ad11e026cd67bb89028572f915fb4fa31cb` | Merge commit 'd001ea2fcf6b29617bd2d90a3d26749da757f43c' into songconmaisaix31-design/morph-qwen-research-readme-1002 |
+| 2026-10-02T01:23:00+08:00 | `88e900745d43b9d7efb6befd06db8bb1008da480` | docs: position Qwen and Aliyun research collaboration roadmap |
+| 2026-10-02T01:24:55+08:00 | `0758f0128fee4f2c655f76dddc43e2f20aa5dd0f` | Merge frozen Qwen research documentation into main integration |
+| 2026-10-02T01:34:01+08:00 | `9d1146f804c2500335e5fb94680c0960c2d632da` | docs: clarify private research product source access |
+| 2026-10-02T01:36:52+08:00 | `c767ebf85a7dceaf94c6fc34ec78c2eee4f76d37` | Merge frozen private product link clarification |
+| 2026-10-02T01:59:21+08:00 | `f26413ff847f97be80a5c3e2f41efe7a19ee7e00` | docs: plan focused README style restoration |
+| 2026-10-02T02:07:02+08:00 | `ea8d3151d14260955501e54ce25f31876b7caa53` | docs: restore Ghost in the Swarm README and add scoped agent adapters |
+| 2026-10-02T02:08:40+08:00 | `1cb2d9685fa67fdfc578d25674e7b61fb2819d7b` | Merge frozen README style restoration and original agent logos |
+| 2026-10-02T02:25:07+08:00 | `31d7fc9eb1fd372ea2786131f539fe2de8506b53` | Update README.md |
+| 2026-10-02T13:10:49+08:00 | `5f39d93ff4929f8e89edf9c52bc3026004e603c6` | docs: lock three-page research product integration scope [skip ci] |
+| 2026-10-02T13:14:37+08:00 | `c739b1c8abd609112fa9c6f727b03cdc00be6fba` | docs: record product owner dispatch and readiness recovery [skip ci] |
+| 2026-10-02T14:10:06+08:00 | `b944b86354299cc308df6ef937d6c966c48ff62d` | docs: accept owner deliveries and record independent product integration [skip ci] |
+| 2026-10-02T15:17:00+08:00 | `03a3d7413732a944645da32b076e408b63f7a062` | docs: record product traceability repairs and final gate boundary [skip ci] |
+| 2026-10-02T16:18:15+08:00 | `eb7f8c9fdb931c16240e3c9f01283488051aba16` | docs: close product candidate with failed native gate and released owners [skip ci] |
+| 2026-10-03T17:48:32+08:00 | `76af665511cb4b31662df0f698fcf631bb96419e` | docs(r1): record scoped transport portability repair [skip ci] |
+| 2026-10-03T17:49:13+08:00 | `49c0b3ad49f9fa1b5ad7b493ec05187e5b148503` | docs(r1): preserve confirmed extra CI cancellation [skip ci] |
+| 2026-10-03T17:52:13+08:00 | `8d51a7c35b01f0dc67ec75ac933803d7df6445d5` | docs(r1): merge original Q portability report [skip ci] |
+| 2026-10-03T17:55:35+08:00 | `0f5fff5a165686f321575771daa5345979a68eb9` | docs: accept scoped Q repair and track successor core CI [skip ci] |
+| 2026-10-03T17:58:02+08:00 | `ad2cc473aa4320b2afbae2829942c941bd034107` | docs: expose concise current continuation before historical snapshots [skip ci] |
+| 2026-10-03T18:04:12+08:00 | `26e39b483acf9e45fb3e36064cac90b7d39ffd7d` | docs: restore original B offline L2 review after OpenCode pause [skip ci] |
+| 2026-10-03T18:08:38+08:00 | `9f42dfea066648b198d78877c8bdd9a9a55c8378` | docs: preserve DeepSeek balance blocker and continue original B with Codex [skip ci] |
+| 2026-10-03T18:14:51+08:00 | `e597a1ce92525c4969b8729c2a7fb2fb7f0cda65` | docs: record observed B Codex retry and preserve readiness failure [skip ci] |
+| 2026-10-03T18:15:30+08:00 | `80ba53709a31d2c68ff6019b2d28165e6da2f051` | docs: remove trailing blank lines from continuation notes [skip ci] |
+| 2026-10-03T18:18:50+08:00 | `456e55487bda7bb9112a5678399ebe2ee7d44c68` | docs: prepare Poisson review through existing research contracts [skip ci] |
+| 2026-10-03T18:19:20+08:00 | `7f05cc795d2371f6b4d74656c25e8bc92e67db83` | docs: clarify frozen Poisson source locator paths [skip ci] |
+| 2026-10-03T18:20:50+08:00 | `24d0719b4a48e0b3814058342d8032318a75fb40` | docs(r1): record exact successor dual-platform core acceptance [skip ci] |
+| 2026-10-03T18:21:34+08:00 | `0095ce658734c02d5cc249ddb20c3da3f2b4554a` | docs(r1): merge original B bounded L2 review draft [skip ci] |
+| 2026-10-03T18:22:26+08:00 | `1bce9f9f71c9a1c5e864263076ae879fcd67e31f` | docs(r1): finalize accepted core gate and original B review handoff [skip ci] |
+| 2026-10-03T18:24:50+08:00 | `fc5b546484dbe09eec9d2f931fb12314c099d87d` | docs(r1): accept exact core gates and scoped L2 review; preserve remaining human gate [skip ci] |
+| 2026-10-03T18:52:08+08:00 | `3e44f9440a57d88e9094b38ea2098d73b8463099` | docs(r1): authorize bounded cleanup and separate developer approval from MVP assembly [skip ci] |
+| 2026-10-03T19:06:10+08:00 | `1e2338a4de6bea019b0efe983c7a69a54b22b73e` | docs: record bounded C registration quarantine [skip ci] |
+| 2026-10-03T19:10:34+08:00 | `96fbefd904826b563dc1c78a181fd424b7490701` | docs: accept bounded cleanup and freeze final product regression [skip ci] |
+| 2026-10-03T19:27:12+08:00 | `a8dcee4dc39fc79442ac25bad46d50ecd31627e4` | Merge accepted C bounded cleanup documentation [skip ci] |
+| 2026-10-03T19:27:24+08:00 | `3392d9ddfe1712c34a0f2f47b22970ba241a42b7` | Merge coordinator accepted final product governance [skip ci] |
+| 2026-10-03T19:30:08+08:00 | `1af65788c0223f874c61bc08514c785cc95575be` | docs: bind B final AT07 preparation to accepted source [skip ci] |
+| 2026-10-03T19:30:12+08:00 | `a67c0af1e27bea08a8e2ce426337f0608e62f216` | docs: record final exact product COPY acceptance and first tool failures [skip ci] |
+| 2026-10-03T19:35:43+08:00 | `3da7429144b047470852e9a465f22c8e25d537c7` | docs: accept exact final offline product and installed observers [skip ci] |
+| 2026-10-03T19:36:23+08:00 | `64c5fac87d7823beb2c15354a3f395e5a23512dc` | docs: bind AT07 packet to final tested sources [skip ci] |
+| 2026-10-03T19:39:37+08:00 | `df12d36e31d4dd7d7a5a54263eed710f283689c2` | docs: assign original B exact AT07 endpoint fix [skip ci] |
+| 2026-10-03T19:44:20+08:00 | `86199ed6f2df1413b8b2b9a81e0a65988cb1a6f0` | docs: scope Q independent AT07 route boundaries [skip ci] |
+| 2026-10-03T19:45:28+08:00 | `fc866465aa52a3f09773bc79a0fab95bceedc3d9` | fix: bind AT07 observations to trusted Docker endpoint [skip ci] |
+| 2026-10-03T19:48:11+08:00 | `f008e281e15d25c8950d7ddd05450fbe398653f1` | docs: report AT07 trusted endpoint successor and limits [skip ci] |
+| 2026-10-03T19:51:08+08:00 | `b06d058a2fdbd2aa27e6168267ea563e7d160abc` | docs: record B endpoint SOURCE and pending Q acceptance [skip ci] |
+| 2026-10-03T19:57:11+08:00 | `d9c12bde71f3a7fb8e241a620a75edf268d4419d` | docs: scope new endpoint integration checks and preserve first RED [skip ci] |
+| 2026-10-03T19:57:25+08:00 | `8b1b9d4b1da40eb3c2d544aa875ad65d7e596733` | test: add independent AT07 observer route boundaries [skip ci] |
+| 2026-10-03T20:00:47+08:00 | `17d0ff926772d3a9fa65620b733fc2caca0c95a0` | docs: assign original A formal condition triage beside Q [skip ci] |
+| 2026-10-03T20:01:08+08:00 | `f2b81cd9c0e0623c224b0501580a19e3fc1d37da` | test: complete synthetic AT07 export observation fixture [skip ci] |
+| 2026-10-03T20:05:07+08:00 | `f261c78a8181a4ce82a74bb41395cb35ee1e7b21` | docs: record independent exact AT07 route acceptance and first failures [skip ci] |
+| 2026-10-03T20:07:57+08:00 | `8f7c94cb0b58f642ba564bb385e436b04e5b2378` | docs: parallel original P reusable AOCI config delivery [skip ci] |
+| 2026-10-03T20:17:29+08:00 | `381d955ea62ec99505263ecf7ed20adbc1b74e95` | docs: accept A and P deliveries and resume sole exact integrator [skip ci] |
+| 2026-10-03T20:19:56+08:00 | `6e4a2befeb4807d9955d3d5bc59248ea8f4c5c8a` | Integrate exact B trusted endpoint SOURCE and REPORT |
+| 2026-10-03T20:20:04+08:00 | `b40b6b1af9d1aa9d8004140ab76276a664f121f1` | Integrate exact Q independent AT07 route boundary SOURCE and REPORT |
+| 2026-10-03T20:20:05+08:00 | `77942f56e0cbf70732c6718cd8630b9f84d62eb0` | Integrate accepted A route applicability documentation |
+| 2026-10-03T20:20:07+08:00 | `e635b8ab3e79529403b527892e75ffb29674af0a` | Publish cumulative trusted endpoint integration with exact coordinator governance |
+| 2026-10-03T20:22:11+08:00 | `2853220af64101be39cb3839d4b646cf72120310` | docs: accept cumulative core SOURCE and assign original P exact repin [skip ci] |
+| 2026-10-03T20:27:37+08:00 | `92e8a047a4f479ce6caae4cd869aac7f0dbc977c` | Correct existing product package pin ownership path [skip ci] |
+| 2026-10-03T20:29:06+08:00 | `954acd0371407ae45685f68a221948790feafc3a` | Freeze final source pair and assign original B authorization packet update [skip ci] |
+| 2026-10-03T20:31:17+08:00 | `fec6f1e29a2c07f1375d481f8cbf7e71cc482b77` | Preserve first Linux CI failure and return platform fixture repair to Q [skip ci] |
+| 2026-10-03T20:33:29+08:00 | `d7d0ff8e76d5e464d99f948c1b41b8067f619c8e` | docs: refresh AT07 final identity and outer CLI review [skip ci] |
+| 2026-10-03T20:33:43+08:00 | `3aa95d94828449fd92e6bb4fe6385178f3dac971` | test: complete Windows stat seam in junction fixture on Linux [skip ci] |
+| 2026-10-03T20:35:01+08:00 | `15de4959646df264530b978dfde9152552b9a76b` | Publish cumulative trusted endpoint successor with exact governance |
+| 2026-10-03T20:35:01+08:00 | `2cf8ca97d856cd49aec01482267c2c2969e9a502` | Integrate exact Q Windows junction fixture repair |
+| 2026-10-03T20:35:37+08:00 | `c4de24734f3f8d85446265d39ed6365a92e0d3ee` | docs: preserve CI junction failure and scoped fixture repair evidence [skip ci] |
+| 2026-10-03T20:38:26+08:00 | `56f76bbd5a7cdaacf3f8428e056a02ddf201a101` | Fix final source pair after accepted Q fixture repair [skip ci] |
+| 2026-10-03T20:53:49+08:00 | `17236aa7e42c106c859aab3e341832b8a2095417` | Preserve product first timeout RED and return scoped diagnosis to P [skip ci] |
+| 2026-10-03T21:03:40+08:00 | `af1948ba4028601b5e5d7cb184c6dcb35ae5a3ee` | Align scoped phase HTTP test client with original runner budget [skip ci] |
+| 2026-10-03T21:15:39+08:00 | `bbd37668b38f8860c9b00d6909d74dcaf588a152` | Accept final offline engineering evidence and separate AT07 gate [skip ci] |
+| 2026-10-03T21:17:47+08:00 | `1249c63ed3e0ac93d836f6e6fa7ec79605420d98` | Integrate exact Q final documentation [skip ci] |
+| 2026-10-03T21:17:51+08:00 | `60115631219a7e5d26bda53eb92324872d195c78` | Integrate exact root final documentation [skip ci] |
+| 2026-10-03T21:18:38+08:00 | `e40f7879f9598405486587dad936e9884ead15bc` | docs: finalize AT07 reviewed identities and lifecycle options [skip ci] |
+| 2026-10-03T21:20:06+08:00 | `09627694869d7e74a57a06a5268b5c1fe40cb053` | Integrate exact B final documentation [skip ci] |
+| 2026-10-03T21:22:19+08:00 | `c5cdfc89e5a1e43ab49f9afc33a05a53d887e8ab` | Document cumulative successor engineering and offline targeted acceptance [skip ci] |
+| 2026-10-03T21:25:21+08:00 | `a3880ffb8e83a5df8f22a3880f47483e9754ac01` | Record separately approved single AT07 check and same-owner execution [skip ci] |
+| 2026-10-03T21:45:13+08:00 | `58e2171dcaacaa8b8a9560c5c09ebf28fcdbaa4d` | Preserve AT07 precreate STOP and bound official plugin diagnosis [skip ci] |
+| 2026-10-03T21:53:01+08:00 | `d03e1557de795923894d8d89d7c089401bfdf005` | docs: record AT07 precreate STOP and constrained CLI diagnostics [skip ci] |
+| 2026-10-03T21:57:56+08:00 | `ac861af727bcf3420b3e150cac72438a6cec3aa6` | Assign bounded API compatibility repair and independent port review [skip ci] |
+| 2026-10-03T22:02:41+08:00 | `c3a905eaf79a869dffb5960da9c4afee1dc63c3e` | fix: explicitly support bound Docker export API 1.54 [skip ci] |
+| 2026-10-03T22:05:40+08:00 | `08f2315dbc6a2396c4b55dd07a6d60f6fd115dfa` | docs: report API1.54 repair and fixed-digest pull preparation [skip ci] |
+| 2026-10-03T22:10:39+08:00 | `ab663f6392c9499becea2f7c61bee6421a27fab3` | Accept closed API source and prepare original-session integration [skip ci] |
+| 2026-10-03T22:14:29+08:00 | `04ad8a2f4804a7ce04e31e306c3ef9a18a5389ae` | docs: review AT07 Windows port prerequisite and unapplied firewall packet [skip ci] |
+| 2026-10-03T22:16:46+08:00 | `7ef9ff73b578ce9e21cca08b297ca0db7e1bed9a` | Compact active controller plan and authorize exact image prerequisite [skip ci] |
+| 2026-10-03T22:19:21+08:00 | `b7a1679c179a2e2025b675325bb6ee643f2dd893` | merge: integrate original B bound API 1.54 source |
+| 2026-10-03T22:19:22+08:00 | `82201af4d3b369da827f6f22ff1d9c6b608c0108` | merge: freeze cumulative API 1.54 integration source |
+| 2026-10-03T22:19:22+08:00 | `d46a6b3f92e4822b7e4b738403e658f40a71c966` | merge: preserve original B API preparation report |
+| 2026-10-03T22:22:00+08:00 | `ee7e6cce730b9a63312f653f3d120882d9b31be2` | docs: record single fixed-egress image preparation [skip ci] |
+| 2026-10-03T22:30:56+08:00 | `1fb5f3dc6e4d9eb60a2df4be22819c97bd01d91c` | docs: prepare guarded AT07 administrator operator packet [skip ci] |
+| 2026-10-03T22:39:25+08:00 | `b8d0a73ecebb4ffd56c73f06c05d9a06aa4a54a2` | docs: accept exact installed progress and pre-SDK ownership [skip ci] |
+| 2026-10-03T22:42:24+08:00 | `68c97fb0d9e04fdd0ab516b04c8ba5f111f39304` | docs: restore exact OpenCode report ownership without duplicate modules [skip ci] |
+| 2026-10-03T22:51:05+08:00 | `4072c148aa7417f59266aac92b622faff6476e8e` | docs: record L2 current call-path review against fixed core 82201af4 + product d5d387a6 [skip ci] |
+| 2026-10-03T22:53:41+08:00 | `6ea5e5dd81bdf53e33f46beed74f7382a804efaf` | docs: prepare bounded pre-SDK AT07 control route [skip ci] |
+| 2026-10-03T22:53:47+08:00 | `61101810cb3e2425347bb1d3e38cb34759ddaf09` | docs: correct two factual labels in L2 review (science-native vs model usage; AT07 user approval already accepted) [skip ci] |
+| 2026-10-03T23:00:08+08:00 | `09c52988390ba4eace08f2eb4e3592682c8b15a2` | docs: preserve first product RED and accept bounded repair provenance [skip ci] |
+| 2026-10-03T23:09:53+08:00 | `739efdd10f538099039f2cdf335567802eac7f5a` | docs: review AT07 pre-SDK packet and preserve unresolved exec status [skip ci] |
+| 2026-10-03T23:12:11+08:00 | `1f1e97229d4893f124000c75eb5a2a5fb9db82e2` | merge: preserve final Q report and governance [skip ci] |
+| 2026-10-03T23:12:11+08:00 | `f493d4c55f33315ea1b4222d21531728bff784c2` | merge: preserve final B report and governance [skip ci] |
+| 2026-10-03T23:12:12+08:00 | `d560f2e7a989b9d54008b5bb9ace86a803c1bf62` | merge: preserve final C report and governance [skip ci] |
+| 2026-10-03T23:12:12+08:00 | `fd1f4b9a81bf78ae827ee3ad63ed06cac575f935` | merge: preserve final root report and governance [skip ci] |
+| 2026-10-03T23:15:12+08:00 | `ffc2b76558d84e6f49d30e9b3355af0e4dda0398` | docs: record API 1.54 integration and preserved offline first RED [skip ci] |
+| 2026-10-03T23:16:08+08:00 | `89df315ce7870fbc31616e2672e689f61ca1c446` | docs: accept independent offline repair and retain real isolation blockers [skip ci] |
+| 2026-10-03T23:17:31+08:00 | `d6885e8d313729c25594c85b6ce66817d6c35eb2` | merge: include late accepted Q final docs [skip ci] |
+| 2026-10-03T23:17:32+08:00 | `d418673ebd9ffb73ec51c5dd99e876baab36a473` | merge: include late accepted root final docs [skip ci] |
+| 2026-10-03T23:18:22+08:00 | `9be8bcc4fe17f3fb7a43ddd56e6a39b834552f76` | docs: include late accepted Q and root closeout [skip ci] |
+| 2026-10-03T23:23:15+08:00 | `6196fb391e12036fe5ff401656a951a710a3e7ad` | docs: record controller closeout and actual Windows elevation blocker [skip ci] |
+| 2026-10-03T23:25:04+08:00 | `be47ed8e15b4a4169b2d93448552ec64a1e235e7` | docs: prepare minimal WFP boundary observation [skip ci] |
+| 2026-10-03T23:26:01+08:00 | `55e04cb44336f1642fe4957404604b62faf4ca78` | docs: clarify existing route and address family scope [skip ci] |
+| 2026-10-03T23:27:52+08:00 | `0c10268123178419f84d39886483613aaecd475f` | docs: accept minimal isolation packet and preserve human OS boundary [skip ci] |
+| 2026-10-04T07:49:15+08:00 | `96f0ee00c656db649748b7f07896c071fa845475` | Revise README for improved clarity and organization |
+| 2026-10-04T07:50:28+08:00 | `2e3cc81c6f2ab657b52c5ed904bafe1f91365871` | Fix image upload syntax in README.md |
+| 2026-10-04T07:51:24+08:00 | `c53a3c31e7076587afb92ffc78f131003eaf917e` | Fix image tag in README.md |
+
+</details>
+
+---
+
 ## 主线整理交付（2026-10-12）
 
 产品主线 `codex/morphogenesis-mainline` 已通过普通合并 `6580405bc63da6e2a1d7d22524bd44cde07e1766` 纳入整理分支 `8e3826f29c61904d5a38389a8c749fef5a06d4fe`；整理分支已推送同名 origin。主线交付包括该合并与本段文档后继，普通 push 目标仍为同名产品主线；旧 `main`、tag 和部署不推进；GitHub 当前默认分支为 `codex/morphogenesis-mainline`。
