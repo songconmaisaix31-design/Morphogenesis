@@ -23,7 +23,7 @@
 
 实际命令及返回结构依据 `cmd/swa/run_flow.go`、`runtime/swa-orca/src/run-view.ts`、`run-settlement.ts` 和 `controller-runtime.ts`。SWA 当前 `main` 及独立 Windows PR #12 不据此获得兼容性结论；部署时选择具有本接口且实际验证通过的安装版本。
 
-当前 SWA 原生策略没有外部 MCP 传入路径，因此这里由 Morphogenesis Worker 程序决定任务，原生 LLM 完成指定任务。原有 `python -m swarm.research --config ...` 科研 MCP、实验、复现与继承能力继续保留，直接交给 SWA 托管 Agent 使用还需要受控工具桥。本适配器的 JSON 任务验收不代表科研闭环验收。
+本文的数据任务适配器由 Morphogenesis Worker 程序选择和认领任务，原生 LLM 返回待验证的 JSON；其运行协议仍以上述版本为参考。需要原生 Agent 自行发现、认领并提交科研任务时，使用 [SWA 科研 Pi 工具桥](SWA_RESEARCH_BRIDGE.md)，将现有 `python -m swarm.research --config ...` MCP 接入支持 `--morph-config` 的 SWA Pi 构建。两条入口分别验收；JSON 任务通过不代表科研闭环通过。
 
 ## 运行条件
 

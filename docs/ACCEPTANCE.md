@@ -1,3 +1,22 @@
+## Swarm CLI 科研工具桥验收（2026-10-29）
+
+运行入口见 [SWA_RESEARCH_BRIDGE.md](SWA_RESEARCH_BRIDGE.md)。配套 SWA 固定源码为 `777e538aa6e6a8f30a67aac961f2425d9253b005`（[PR #14](https://github.com/songconmaisaix31-design/swarm-anything/pull/14)）。Pi 的两个固定工具连接已有研究 MCP，各成员仍自行选择和认领任务。
+
+| 检查 | 实际结果 |
+| --- | --- |
+| 新准备脚本与真实 stdio 自检的 pytest | 两项通过；最后准备路径调整后仅复验受影响项，通过 |
+| `mypy --follow-imports=silent demo/swa_research_bridge.py` | 1 source file / 0 errors |
+| `python -m demo.swa_research_bridge selfcheck --root … --python …` | 两个官方 MCP 子进程发现 23 工具；竞争认领仅一方成功，续租和释放通过；后继 token 1→2，旧 token 被拒，最后无任务被占有 |
+| SWA 固定扩展 → 官方 TS MCP SDK → Morph Python 子进程 | 23 工具、author 认领/释放、MCP 错误保留、所属进程退出、关闭后不重连通过；Pi 会话入口为受控夹具，未调用模型 |
+| 上一提交 `cae4ffe` 的 Ubuntu CI pytest | 1966 passed / 16 skipped；CI 失败定位为 Windows ctypes 属性在 Linux 类型检查时不可见 |
+| 本轮 ctypes 平台分支修复 | `python tools/typecheck.py`：174 源文件通过；Windows 目标单文件 strict mypy 通过；Linux 不支持操作明确拒绝 |
+
+本轮新增可复用的三角色准备脚本、桥配置、SWA 输入和运行说明。spec/input 放在获准的科学项目 `swa-inputs` 中，HostConfig 与 descriptor 位于独立状态目录。准备与自检均未运行实验、批准资产或修改科学候选。
+
+验证范围为 contract_local 和实际 stdio 传输。真实 Pi 模型会话、OpenSandbox 三角色实验及本轮采用回执未执行；相应运行条件在使用说明列出。SWA 完整安装检查由其任务页单独记录。此次修复不将下方历史测试失败改写为通过。
+
+---
+
 ## Swarm CLI 执行接入验收（2026-10-29）
 
 分支 `codex/swa-execution-adapter-20261029`，Morphogenesis 基线 `ddd2849afe330bf221d405dc2b91948c2416bd47`；SWA 协议参考 `733ee08fb694fe8d8719693ca6b6e05432e005b2`（PR #10）。使用方式与两成员示例见 [SWA_RUNTIME.md](SWA_RUNTIME.md)。

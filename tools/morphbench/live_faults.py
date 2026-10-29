@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import subprocess
 import sqlite3
+import sys
 import time
 from typing import Any
 
@@ -63,7 +64,7 @@ def traces(state: Path) -> list[dict[str, Any]]:
 
 def owned_http_handle(pid: int, worker_fact: dict[str, Any]) -> tuple[int | None, dict[str, Any]]:
     """Verify ancestry then retain an OS handle, so later cleanup cannot hit PID reuse."""
-    if os.name != "nt":
+    if sys.platform != "win32":
         return None, {"status": "unsupported_platform", "pid": pid}
     from ctypes import wintypes
     script = (f"$taskProcCursor={pid}; $taskProcRows=@(); for($i=0;$i -lt 4;$i++){{ "
@@ -98,6 +99,8 @@ def owned_http_handle(pid: int, worker_fact: dict[str, Any]) -> tuple[int | None
 
 
 def finish_http(handle: int, fact: dict[str, Any]) -> None:
+    if sys.platform != "win32":
+        raise OSError("unsupported_platform")
     from ctypes import wintypes
     kernel = ctypes.windll.kernel32
     kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]

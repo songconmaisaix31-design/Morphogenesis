@@ -1,3 +1,11 @@
+## Swarm CLI 科研工具桥（2026-10-29）
+
+用户要求补工具桥、测试可用并准备 OSChina 交件。分支 `codex/swa-research-bridge-20261029` 延续执行适配器；远端前序提交 `cae4ffe055319d1cc4d677f09d035b558ea2e7c4` 与本地 `fb34636445e11e02b28c73e8edb76ba475796afa` 的文件树相同。
+
+复用现有 `python -m swarm.research --config ...`，由 SWA 的 Pi 固定扩展暴露工具。每个原生 Agent 独立发现和认领任务，配置固定其身份；桥只传递工具调用。Morph Worker 独占 `demo/swa_research_bridge.py`、`docs/SWA_RESEARCH_BRIDGE.md` 及必要配套测试，提供三角色配置和真实 stdio 自检。环境 Worker 独占 `tools/morphbench/live_faults.py` 的已确认跨平台类型修复。主控维护本页和 ACCEPTANCE，并整理参赛材料。
+
+验证先完成真实 MCP 子进程、竞争认领、续租、释放和旧 token 拒绝；有实际模型账号与 OpenSandbox 时分别验证原生工具会话和完整科研流程。修复当前 CI 失败，构建并检查可安装产物。每次修改只复验受影响行为，交件描述绑定实际代码和运行结果。
+
 ## Swarm CLI 执行接入（2026-10-29）
 
 用户目标：以 Swarm CLI 作为执行工具，复用 Morphogenesis 的去中心化多 Agent 调度。工作分支 `codex/swa-execution-adapter-20261029`，基线 `ddd2849afe330bf221d405dc2b91948c2416bd47`。SWA 默认 main 暂无 cmd/swa；本次接口依据开发分支 `733ee08fb694fe8d8719693ca6b6e05432e005b2` 的公开命令，Windows 后继按独立来源评估，不合并推定功能。
