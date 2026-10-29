@@ -1,3 +1,15 @@
+## Swarm CLI 执行接入（2026-10-29）
+
+用户目标：以 Swarm CLI 作为执行工具，复用 Morphogenesis 的去中心化多 Agent 调度。工作分支 `codex/swa-execution-adapter-20261029`，基线 `ddd2849afe330bf221d405dc2b91948c2416bd47`。SWA 默认 main 暂无 cmd/swa；本次接口依据开发分支 `733ee08fb694fe8d8719693ca6b6e05432e005b2` 的公开命令，Windows 后继按独立来源评估，不合并推定功能。
+
+每个 Worker 继续通过既有 Worker、TaskLedger、Router、PheromoneField 独立感知、认领、续租、验证和反馈；新增执行适配器仅将已认领的有界 JSON 任务交给 SWA。SWA 当前原生策略没有外部 MCP 配置入口，因此本轮不声称 LLM 可以直接调用 Morphogenesis MCP。现有科研 MCP 与实验运行路径保留。
+
+- 业务写域：`swarm/swa_executor.py`、`swarm/swa_runtime.py`、`tests/swarm/test_swa_executor.py`、`tests/swarm/test_swa_runtime.py`、`docs/SWA_RUNTIME.md`，由独立 Worker 负责实现及返修。
+- 协调写域：本页及 `docs/ACCEPTANCE.md`，记录范围与验证结果。独立 Reviewer 对照 SWA 实际命令、响应和生命周期审查。
+- 复用：DataTask/DataProposal、候选物化与独立验证、现有预算和未知效果停止机制；不新增任务账本或选择算法。
+- 验收：本地协议检查覆盖实际命令形状、精确 Dispatch 归属、完整结果、请求 ID、未知结果不重发、输出范围、未知 usage 和预算拒绝。运行新适配器的针对性检查及相关既有回归。模拟协议结果仅标记 contract_local。
+- 停止条件：不具备真实 SWA 安装、项目授权或原生 Agent 环境时保留 interface_live/task_live 未验；不以模拟测试替代真实双 Worker 验收。此次不启动付费模型、科研沙箱或部署。
+
 ## 全分支历史按时间整理（2026-10-12，后继）
 
 用户目标：将各分支提交按时间整理并推送，关注个人主页贡献日历。单 Agent 在隔离工作树 `branch-timeline-20261012` / 分支 `codex/branch-timeline-20261012` 串行操作；基线为产品默认分支 `15044f889e867de6b379e9897aaf0858d4e4a950`，942 个可达提交。

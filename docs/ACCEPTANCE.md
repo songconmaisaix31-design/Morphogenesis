@@ -1,3 +1,28 @@
+## Swarm CLI 执行接入验收（2026-10-29）
+
+分支 `codex/swa-execution-adapter-20261029`，Morphogenesis 基线 `ddd2849afe330bf221d405dc2b91948c2416bd47`；SWA 协议参考 `733ee08fb694fe8d8719693ca6b6e05432e005b2`（PR #10）。使用方式与两成员示例见 [SWA_RUNTIME.md](SWA_RUNTIME.md)。
+
+新增 `SwaExecutor` 与独立进程入口，复用既有 Worker、账本、选路、租约、预算及结果验证。每个成员自己选任务；SWA 仅执行该成员已认领的有界 JSON 任务。独立审查核对了实际 CLI 请求和返回、控制端关闭、固定工作目录、请求 ID 与 Dispatch 身份冻结；未知结果不自动重发或晋级。
+
+本次环境为 Linux、Python 3.12.14、Node 24.22.1，Python 依赖按项目声明范围安装，并非 Poetry 全锁安装；根 Node 依赖由 `npm ci --ignore-scripts --no-audit --no-fund` 安装，锁文件未改。
+
+| 验证命令 / 操作 | 实际结果 |
+| --- | --- |
+| `python -m pytest -q tests/swarm/test_swa_executor.py tests/swarm/test_swa_runtime.py` | 最终实现 **31 passed / 11.18s**；覆盖生命周期、身份漂移、未知效果、预算、配置及完成判定 |
+| `python -m pytest -q tests/swarm/test_ledger.py tests/swarm/test_lease.py tests/swarm/test_router.py tests/swarm/test_field.py tests/swarm/test_budget.py` | **61 passed / 8.05s**；保留 2 项既有 Pydantic 序列化警告 |
+| `mypy --follow-imports=silent swarm/swa_executor.py swarm/swa_runtime.py` | **2 source files / 0 errors**；使用项目 strict 配置，不代表全仓类型检查 |
+| 精确提取文档 Python 示例，仅替换新临时根目录后执行 | 成功生成 **2 个 WorkerEntry 配置、2 项 available 任务**；未启动 SWA |
+| `python -m swarm.swa_runtime --help` | exit 0，包含 `--config` |
+| `git diff --check` | PASS |
+
+本次证据为 **contract_local**。测试使用显式 mock 传输，没有真实 SWA/provider 请求；**interface_live / task_live 均未验**。未知用量与费用保留 null；运营者须明确配置准入额度和未知计量策略，本地预算不是提供商费用上限。
+
+范围为同机共享 SQLite 状态、各成员独立决策。当前 SWA 原生策略缺少外部 MCP 入口；科研 MCP、实验、复现和继承仍需后续受控工具桥，JSON 测试不代表科研闭环完成。SWA main 与独立 Windows PR #12 不继承本接口兼容结论。
+
+未执行全仓测试、构建、真实双模型、科研沙箱、部署或主线合并；下方历史全仓 RED 原样保留。当前环境未提供 AOCI 工具，未更新正式索引，也不声称其认知或治理状态通过。
+
+---
+
 ## 全分支时间整理验收（2026-10-12，后继）
 
 基线 `15044f889e867de6b379e9897aaf0858d4e4a950`，942 个可达提交；历史阶段固定 `d3bda35bdfbf845896f102b94b1de56d3470b8ac`。单 Agent 在隔离分支 `codex/branch-timeline-20261012` 归档原历史，随后普通合并/推送产品默认分支；各原分支与工作树保留。
