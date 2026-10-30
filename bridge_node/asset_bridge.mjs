@@ -6,17 +6,20 @@ import addFormats from 'ajv-formats';
 import { SCHEMA_VERSION, canonicalize, computeAssetId, verifyAssetId } from '@evomap/gep-sdk';
 
 const require = createRequire(import.meta.url);
-const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
-addFormats(ajv);
-const validators = new Map([
+const schemaNames = new Map([
   ['Gene', 'gene'], ['Capsule', 'capsule'], ['EvolutionEvent', 'evolution-event'],
-].map(([type, name]) => [type, ajv.compile(JSON.parse(readFileSync(
-  require.resolve(`@evomap/gep-sdk/schemas/${name}.schema.json`), 'utf8',
-)))]));
+]);
 
 function validateAsset(asset) {
-  const validator = validators.get(asset?.type);
-  if (!validator) throw new Error('unsupported_asset_type');
+  const schemaName = schemaNames.get(asset?.type);
+  if (!schemaName) throw new Error('unsupported_asset_type');
+  // Each child serves one operation: hashing/canonicalization need no schema,
+  // and validation needs only the requested official type, not all three.
+  const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
+  addFormats(ajv);
+  const validator = ajv.compile(JSON.parse(readFileSync(
+    require.resolve(`@evomap/gep-sdk/schemas/${schemaName}.schema.json`), 'utf8',
+  )));
   const schemaValid = validator(asset);
   const idValid = verifyAssetId(asset);
   return {
