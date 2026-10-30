@@ -1,0 +1,196 @@
+{
+  "status": "PASSED",
+  "scope": "recorded-response replay through actual native Worker pipeline; NOT new model benchmark",
+  "source_recorded_sha256": "794456ac354b59192a84caf8c65c5fec41ae6fc4e822493dbce7d41dd9433505",
+  "concurrency": 2,
+  "tasks_per_run": 8,
+  "repeats_per_variant": 3,
+  "observations": [
+    {
+      "condition": "baseline-1",
+      "wall_seconds": 9.02271884,
+      "source_revision": "eff9611f6c630f710bf47d723710c4dbe5e23ba4",
+      "bridge_sha256": "729bdb1263966bda9a814a0e8339e2fb4308d56a551cf66464d36d8a952c4bc3",
+      "runner_sha256": "f2abe34c7ece8ff6e19700948a1554c370143665809c208693f2378fdb4e1b51",
+      "result_sha256": "aeb34ab410591a5de6d95c6a64d9c57be8a8669cda4b83d24a9b4b566592f1bb",
+      "requested_tasks": 8,
+      "native_completed": 8,
+      "native_applied": 8,
+      "byte_equal_outputs": 8,
+      "audit_replay_only": true,
+      "owned_workers_exited": true,
+      "processes": [
+        {
+          "pid": 27,
+          "exit_code": 0,
+          "alive": false
+        },
+        {
+          "pid": 28,
+          "exit_code": 0,
+          "alive": false
+        }
+      ],
+      "forced_termination_pids": [],
+      "new_model_calls": 0,
+      "new_http_intervals": []
+    },
+    {
+      "condition": "candidate-1",
+      "wall_seconds": 8.405924328,
+      "source_revision": "a180172cf89c82ad802c5521e57e2ee790727f69",
+      "bridge_sha256": "6a034bb02be665a1f6c0449543323a80f1c4218195b95188c7317e8aaf931c34",
+      "runner_sha256": "f2abe34c7ece8ff6e19700948a1554c370143665809c208693f2378fdb4e1b51",
+      "result_sha256": "9ce0cdb0336233d1d25f54581b6da7a336c5f81b3c2c921146d82c0242ee8e3a",
+      "requested_tasks": 8,
+      "native_completed": 8,
+      "native_applied": 8,
+      "byte_equal_outputs": 8,
+      "audit_replay_only": true,
+      "owned_workers_exited": true,
+      "processes": [
+        {
+          "pid": 1073,
+          "exit_code": 0,
+          "alive": false
+        },
+        {
+          "pid": 1074,
+          "exit_code": 0,
+          "alive": false
+        }
+      ],
+      "forced_termination_pids": [],
+      "new_model_calls": 0,
+      "new_http_intervals": []
+    },
+    {
+      "condition": "candidate-2",
+      "wall_seconds": 7.877772938,
+      "source_revision": "a180172cf89c82ad802c5521e57e2ee790727f69",
+      "bridge_sha256": "6a034bb02be665a1f6c0449543323a80f1c4218195b95188c7317e8aaf931c34",
+      "runner_sha256": "f2abe34c7ece8ff6e19700948a1554c370143665809c208693f2378fdb4e1b51",
+      "result_sha256": "9e337d1b6d079cb8732ac479d0cd41a57ba099e9fc1f77a3299ddef9ed609392",
+      "requested_tasks": 8,
+      "native_completed": 8,
+      "native_applied": 8,
+      "byte_equal_outputs": 8,
+      "audit_replay_only": true,
+      "owned_workers_exited": true,
+      "processes": [
+        {
+          "pid": 2119,
+          "exit_code": 0,
+          "alive": false
+        },
+        {
+          "pid": 2120,
+          "exit_code": 0,
+          "alive": false
+        }
+      ],
+      "forced_termination_pids": [],
+      "new_model_calls": 0,
+      "new_http_intervals": []
+    },
+    {
+      "condition": "baseline-2",
+      "wall_seconds": 9.165186009,
+      "source_revision": "eff9611f6c630f710bf47d723710c4dbe5e23ba4",
+      "bridge_sha256": "729bdb1263966bda9a814a0e8339e2fb4308d56a551cf66464d36d8a952c4bc3",
+      "runner_sha256": "f2abe34c7ece8ff6e19700948a1554c370143665809c208693f2378fdb4e1b51",
+      "result_sha256": "a8b7515ac86e4eea6994b54e650f0992c10e064fa81d54aa2f89d1d242b0552f",
+      "requested_tasks": 8,
+      "native_completed": 8,
+      "native_applied": 8,
+      "byte_equal_outputs": 8,
+      "audit_replay_only": true,
+      "owned_workers_exited": true,
+      "processes": [
+        {
+          "pid": 3165,
+          "exit_code": 0,
+          "alive": false
+        },
+        {
+          "pid": 3166,
+          "exit_code": 0,
+          "alive": false
+        }
+      ],
+      "forced_termination_pids": [],
+      "new_model_calls": 0,
+      "new_http_intervals": []
+    },
+    {
+      "condition": "baseline-3",
+      "wall_seconds": 8.916482363,
+      "source_revision": "eff9611f6c630f710bf47d723710c4dbe5e23ba4",
+      "bridge_sha256": "729bdb1263966bda9a814a0e8339e2fb4308d56a551cf66464d36d8a952c4bc3",
+      "runner_sha256": "f2abe34c7ece8ff6e19700948a1554c370143665809c208693f2378fdb4e1b51",
+      "result_sha256": "14215e2bb217ea1f2702a0a9f1992b4d6ccfd73fe6e5deefbc2f89416234b7a5",
+      "requested_tasks": 8,
+      "native_completed": 8,
+      "native_applied": 8,
+      "byte_equal_outputs": 8,
+      "audit_replay_only": true,
+      "owned_workers_exited": true,
+      "processes": [
+        {
+          "pid": 4211,
+          "exit_code": 0,
+          "alive": false
+        },
+        {
+          "pid": 4212,
+          "exit_code": 0,
+          "alive": false
+        }
+      ],
+      "forced_termination_pids": [],
+      "new_model_calls": 0,
+      "new_http_intervals": []
+    },
+    {
+      "condition": "candidate-3",
+      "wall_seconds": 7.898802851,
+      "source_revision": "a180172cf89c82ad802c5521e57e2ee790727f69",
+      "bridge_sha256": "6a034bb02be665a1f6c0449543323a80f1c4218195b95188c7317e8aaf931c34",
+      "runner_sha256": "f2abe34c7ece8ff6e19700948a1554c370143665809c208693f2378fdb4e1b51",
+      "result_sha256": "b56f0bfe788b2f7422b98ef05a2358d875e816c71405ee0b11cf07985900db6b",
+      "requested_tasks": 8,
+      "native_completed": 8,
+      "native_applied": 8,
+      "byte_equal_outputs": 8,
+      "audit_replay_only": true,
+      "owned_workers_exited": true,
+      "processes": [
+        {
+          "pid": 5257,
+          "exit_code": 0,
+          "alive": false
+        },
+        {
+          "pid": 5258,
+          "exit_code": 0,
+          "alive": false
+        }
+      ],
+      "forced_termination_pids": [],
+      "new_model_calls": 0,
+      "new_http_intervals": []
+    }
+  ],
+  "median_seconds": {
+    "baseline": 9.02271884,
+    "candidate": 7.898802851
+  },
+  "median_speed_ratio": 1.142289408939699,
+  "median_time_reduction_fraction": 0.12456511268171133,
+  "new_model_calls": 0,
+  "limits": [
+    "Three paired local repeats only",
+    "No inference time included; not applied to prior live matrix",
+    "No full adversarial descendant inventory claimed; owned Process exits confirmed"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema": "morph.oschina-public-artifacts.v1",
+  "source_baseline_original": "eff9611f6c630f710bf47d723710c4dbe5e23ba4",
+  "source_baseline_published": "5e3dc5e912dc963fe66c22a788b9311399421ffe",
+  "source_optimized_original": "a180172cf89c82ad802c5521e57e2ee790727f69",
+  "source_optimized_published": "622c81dd1f49165c57020a775be170af257b6c0c",
+  "files": {
+    "README.md": {
+      "bytes": 4791,
+      "sha256": "726eae91bb54a1b2a172a336d42fa2133dc694f0b1d2dff066026fa6a519c39f"
+    },
+    "RESULTS.md": {
+      "bytes": 5615,
+      "sha256": "67e2861923e7a61534c65d3533448b1970886c7e162a670e5c77a2fd195f0768"
+    },
+    "demo.mp4": {
+      "bytes": 1210915,
+      "sha256": "3b1a54ce09b9dbd3f0251e5e34dc675196efae03859738d95d2d6ca41c9a9937"
+    },
+    "evidence.zip": {
+      "bytes": 3049606,
+      "sha256": "7544cec9e270dd91798644db24b6eeb37dccb0b4eb7f0a69d257549af83f74d9"
+    },
+    "optimization-replay-summary.json": {
+      "bytes": 6267,
+      "sha256": "67a5bb8568de9e43bb8991bb8da4996c0792be18d9bb492f905c0e73252f1872"
+    },
+    "protocol.json": {
+      "bytes": 44203,
+      "sha256": "b978e723f924e42f27942cd9e67de6d3659e22c77896733f8f564855cfa6933e"
+    },
+    "replay.html": {
+      "bytes": 91324,
+      "sha256": "fd2448a32f95a0941fe83d1d4d293b1ec5eb27d9ec827ac96ac8d76b1b95a2a0"
+    },
+    "results.csv": {
+      "bytes": 8350,
+      "sha256": "6d051621784d1af909d15948da85709128ef44a09c4a54d511df69e72830f7db"
+    },
+    "selection.json": {
+      "bytes": 12919,
+      "sha256": "7cd765aa78f01aa4ade792ad2694a74150fc8df832514be89f0d5fc66ac0d2da"
+    },
+    "source-history.bundle": {
+      "bytes": 51622,
+      "sha256": "92935e4397abd8270fec38bb21b52079e192eec69fe1a1d91f6ccd92e30ab90d"
+    }
+  }
+}
