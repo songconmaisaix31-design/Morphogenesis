@@ -16,7 +16,7 @@ from uuid import uuid4
 
 from bridge_node.environment import child_environment
 from local_assets.models import (
-    AssetSafetyError, Candidate, CommandResult, EnvironmentFingerprint, SampleValidationPolicy,
+    AssetSafetyError, BenchmarkOutputValidationPolicy, Candidate, CommandResult, EnvironmentFingerprint, SampleValidationPolicy,
     ValidationPolicy, ValidationPolicyType, ValidationReport,
 )
 from local_assets.paths import git, no_links, relative_path, safe_join
@@ -36,6 +36,21 @@ def blast_radius(candidate: Candidate) -> tuple[int, int]:
             if kind != "equal":
                 lines += (j - i) + (l - k)
     return count, lines
+
+
+def inspect_benchmark_output(candidate: Candidate, policy: BenchmarkOutputValidationPolicy) -> None:
+    path = relative_path(policy.path)
+    if not path.endswith(".json") or len(candidate.changes) != 1 or candidate.changes[0].path != path:
+        raise AssetSafetyError("benchmark_output_path_mismatch")
+    content = candidate.changes[0].after
+    if content is None or len(content.encode("utf-8")) > 65536:
+        raise AssetSafetyError("benchmark_output_size_limit")
+    try:
+        body = json.loads(content)
+    except ValueError:
+        raise AssetSafetyError("benchmark_output_invalid_json") from None
+    if not isinstance(body, dict) or set(body) != {"response"} or not isinstance(body["response"], str):
+        raise AssetSafetyError("benchmark_output_invalid_schema")
 
 
 def inspect_candidate(candidate: Candidate) -> tuple[int, int]:
@@ -158,6 +173,9 @@ class AssetValidator:
                     from local_assets.sample_validation import inspect_sample
                     sample_source = inspect_sample(candidate, self.policy)
                     expected_paths = [relative_path(self.policy.path)]
+                elif isinstance(self.policy, BenchmarkOutputValidationPolicy):
+                    inspect_benchmark_output(candidate, self.policy)
+                    expected_paths = [relative_path(self.policy.path)]
                 else:
                     expected_paths = [relative_path(item.path) for item in self.policy.expectations]
                 if len(set(p.casefold() for p in expected_paths)) != len(expected_paths):
@@ -220,7 +238,7 @@ class AssetValidator:
                         raise AssetSafetyError("validation_timeout")
                     results.append(validate_fixed_sample(sample_source, self.policy, remaining))
                 else:
-                    results.append(CommandResult(argv=("literal-files-v1", self.policy.version), exit_code=0))
+                    results.append(CommandResult(argv=(self.policy.executor, self.policy.version), exit_code=0))
                 if (worktree / ".git").read_bytes() != git_marker or self._snapshot(worktree) != before_tree:
                     raise AssetSafetyError("validation_mutated_worktree")
             except (AssetSafetyError, OSError, subprocess.SubprocessError) as error:

@@ -1,0 +1,2 @@
+autogen-core==0.7.5
+langgraph==1.2.18

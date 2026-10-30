@@ -63,7 +63,15 @@ class SampleValidationPolicy(Contract):
     path: str = Field(min_length=1, max_length=240)
 
 
-ValidationPolicyType = ValidationPolicy | SampleValidationPolicy
+class BenchmarkOutputValidationPolicy(Contract):
+    """仅验收数据输出；题目答案由独立评价器评分，不进入 Worker。"""
+
+    version: Literal["benchmark-output-v1"] = "benchmark-output-v1"
+    executor: Literal["bounded-json-answer-v1"] = "bounded-json-answer-v1"
+    path: str = Field(min_length=1, max_length=240)
+
+
+ValidationPolicyType = ValidationPolicy | SampleValidationPolicy | BenchmarkOutputValidationPolicy
 VALIDATION_POLICY: TypeAdapter[ValidationPolicyType] = TypeAdapter(ValidationPolicyType)
 
 

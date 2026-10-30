@@ -7,10 +7,10 @@ from pathlib import Path
 import time
 from collections.abc import Callable
 
-from local_assets.models import (AssetSafetyError, Candidate, PromotionReceipt, SampleValidationPolicy,
+from local_assets.models import (AssetSafetyError, BenchmarkOutputValidationPolicy, Candidate, PromotionReceipt, SampleValidationPolicy,
                                  VALIDATION_POLICY, ValidationReport)
 from local_assets.store import LocalAssetStore
-from local_assets.validate import fingerprint, inspect_candidate
+from local_assets.validate import fingerprint, inspect_benchmark_output, inspect_candidate
 
 
 def checked_report(store: LocalAssetStore, asset_id: str, report_id: str | ValidationReport,
@@ -37,6 +37,8 @@ def checked_report(store: LocalAssetStore, asset_id: str, report_id: str | Valid
     if isinstance(policy, SampleValidationPolicy):
         from local_assets.sample_validation import inspect_sample
         inspect_sample(candidate, policy)
+    elif isinstance(policy, BenchmarkOutputValidationPolicy):
+        inspect_benchmark_output(candidate, policy)
     if (not report.passed or report.reasons or len(report.commands) != 1
             or report.commands[0].argv != (policy.executor, policy.version)
             or any(r.exit_code != 0 or r.timed_out or r.output_limited for r in report.commands)):
